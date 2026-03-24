@@ -2698,21 +2698,28 @@ async function loadSettings() {
 }
 
 async function saveProfileSettings() {
-    const data = {
-        daily_goal_points: parseInt(document.getElementById('settDailyGoal').value) || 100,
-    };
+    if (!activeProfileId) { toast('Please select a profile first', 'error'); return; }
+    const dailyGoal = parseInt(document.getElementById('settDailyGoal').value) || 100;
     toast('Saving...', 'info');
-    const result = await brainApi('update_profile', data);
-    if (result) {
-        toast('BRAIN settings saved', 'success');
-    } else {
-        // Fallback: write directly to Supabase
-        const sbResult = await supabaseWrite('brain_user_profiles', 'PATCH', data, `user_id=eq.${activeProfileId}`);
-        if (sbResult) {
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/brain_user_profiles?user_id=eq.${activeProfileId}`, {
+            method: 'PATCH',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ daily_goal_points: dailyGoal }),
+        });
+        if (res.ok || res.status === 204) {
             toast('BRAIN settings saved', 'success');
         } else {
+            console.error('Save failed:', res.status, await res.text());
             toast('Failed to save settings', 'error');
         }
+    } catch(e) {
+        console.error('Save error:', e);
+        toast('Failed to save settings', 'error');
     }
 }
 
