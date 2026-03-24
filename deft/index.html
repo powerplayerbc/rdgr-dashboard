@@ -9,6 +9,21 @@
     <meta http-equiv="Expires" content="0">
     <title>DEFT Tracker | Carlton AI</title>
 
+    <script>
+        // Instant auth check — prevents gate flash on authenticated page loads
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent,
+        html.rdgr-authed #deftApp,
+        html.rdgr-authed #brainApp,
+        html.rdgr-authed #settingsApp { opacity: 1 !important; }
+    </style>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
