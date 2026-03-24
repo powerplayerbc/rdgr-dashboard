@@ -7,11 +7,37 @@
     <title>System Registry | Carlton AI Services</title>
 
     <script>
-        // Instant auth check — prevents gate flash on authenticated page loads
+        // Instant auth check + theme application — runs before body renders
         try {
             if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
                 document.documentElement.classList.add('rdgr-authed');
             }
+        } catch(e) {}
+        // Apply saved theme immediately to prevent flash of wrong colors
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _themes = {
+                forest:     { accent:'#A8D65B', accentWarm:'#F0A830', base:'#0F1008', surface:'#191C10', surfaceEl:'#232718', border:'#3A3F2C', txt:'#EAE8E0', txt2:'#A09B8C', txt3:'#6B6758', headingFont:'Nunito', bodyFont:'DM Sans' },
+                sunrise:    { accent:'#F0A830', accentWarm:'#E85D5D', base:'#100D08', surface:'#1C1810', surfaceEl:'#272118', border:'#3F382C', txt:'#EAE8E0', txt2:'#A09B8C', txt3:'#6B6758', headingFont:'Nunito', bodyFont:'DM Sans' },
+                ocean:      { accent:'#38BDF8', accentWarm:'#06D6A0', base:'#080D10', surface:'#10161C', surfaceEl:'#182027', border:'#2C363F', txt:'#E0E8EA', txt2:'#8C9BA0', txt3:'#586B6B', headingFont:'Nunito', bodyFont:'DM Sans' },
+                berry:      { accent:'#C084FC', accentWarm:'#FB7185', base:'#0D0810', surface:'#16101C', surfaceEl:'#201827', border:'#3A2C3F', txt:'#E8E0EA', txt2:'#A08CA0', txt3:'#6B586B', headingFont:'Nunito', bodyFont:'DM Sans' },
+                rdgr:       { accent:'#06D6A0', accentWarm:'#4CC9F0', base:'#08090D', surface:'#11131A', surfaceEl:'#1A1D28', border:'#2A2E3D', txt:'#E8ECF1', txt2:'#8A95A9', txt3:'#525E73', headingFont:'Chakra Petch', bodyFont:'IBM Plex Sans' },
+                monochrome: { accent:'#E8E8E8', accentWarm:'#A0A0A0', base:'#000000', surface:'#0A0A0A', surfaceEl:'#141414', border:'#2A2A2A', txt:'#E8E8E8', txt2:'#A0A0A0', txt3:'#666666', headingFont:'Nunito', bodyFont:'DM Sans' },
+            };
+            var _t = _tc.preset === 'custom' && _tc.custom ? _tc.custom : (_themes[_tc.preset] || _themes.rdgr);
+            var _r = document.documentElement;
+            _r.style.setProperty('--deft-accent', _t.accent);
+            _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+            _r.style.setProperty('--deft-base', _t.base);
+            _r.style.setProperty('--deft-surface', _t.surface);
+            _r.style.setProperty('--deft-surface-el', _t.surfaceEl);
+            _r.style.setProperty('--deft-border', _t.border);
+            _r.style.setProperty('--deft-txt', _t.txt);
+            _r.style.setProperty('--deft-txt-2', _t.txt2);
+            _r.style.setProperty('--deft-txt-3', _t.txt3);
+            document.documentElement.style.setProperty('--deft-heading-font', _t.headingFont);
+            document.documentElement.style.setProperty('--deft-body-font', _t.bodyFont);
         } catch(e) {}
     </script>
     <style>
@@ -20,12 +46,67 @@
         html.rdgr-authed #deftApp,
         html.rdgr-authed #brainApp,
         html.rdgr-authed #settingsApp { opacity: 1 !important; }
+
+        /* Universal theme application */
+        body {
+            background: var(--deft-base, #08090D) !important;
+            color: var(--deft-txt, #E8ECF1) !important;
+            font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important;
+        }
+        .font-heading, h1, h2, h3 {
+            font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important;
+        }
+        nav {
+            background: color-mix(in srgb, var(--deft-base, #08090D) 92%, transparent) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel, .stat-chip {
+            background: var(--deft-surface, #11131A) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel-header {
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .form-input {
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .form-input:focus {
+            border-color: var(--deft-accent, #06D6A0) !important;
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent) !important;
+        }
+        .text-accent, .text-info { color: var(--deft-accent, #06D6A0) !important; }
+        .bg-accent { background-color: var(--deft-accent, #06D6A0) !important; }
+        .task-tab.active {
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 12%, transparent) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+        .btn-primary {
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 15%, transparent) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent) !important;
+        }
+        .btn-primary:hover {
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent) !important;
+        }
+        .btn-ghost {
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+        .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+        .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+        ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D) !important; }
+        .pulse-dot { background: var(--deft-accent, #06D6A0) !important; }
+        .gate-input:focus {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent) !important;
+        }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {

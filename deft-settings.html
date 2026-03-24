@@ -1943,10 +1943,17 @@ function loadChatAppearance() {
 function renderChatThemePicker(currentTheme) {
     const container = document.getElementById('chatThemePicker');
     if (!container) return;
-    container.innerHTML = Object.entries(CHAT_THEMES).map(([name, hex]) => {
+    container.innerHTML = '';
+    Object.entries(CHAT_THEMES).forEach(([name, hex]) => {
         const isActive = name === currentTheme;
-        return `<button onclick="setChatThemeFromAppearance('${name}')" style="width:28px;height:28px;border-radius:50%;background:${hex};cursor:pointer;outline:${isActive ? '2px solid #fff' : 'none'};outline-offset:${isActive ? '2px' : '0'};transform:${isActive ? 'scale(1.15)' : 'scale(1)'};transition:transform 0.15s,outline 0.15s;" title="${name.charAt(0).toUpperCase() + name.slice(1)}" onmouseenter="this.style.transform='scale(1.15)'" onmouseleave="this.style.transform='${isActive ? 'scale(1.15)' : 'scale(1)}'"></button>`;
-    }).join('');
+        const btn = document.createElement('button');
+        btn.style.cssText = 'width:28px;height:28px;border-radius:50%;background:' + hex + ';cursor:pointer;border:none;outline:' + (isActive ? '2px solid #fff' : 'none') + ';outline-offset:' + (isActive ? '2px' : '0') + ';transform:' + (isActive ? 'scale(1.15)' : 'scale(1)') + ';transition:transform 0.15s,outline 0.15s;';
+        btn.title = name.charAt(0).toUpperCase() + name.slice(1);
+        btn.onmouseenter = function() { this.style.transform = 'scale(1.15)'; };
+        btn.onmouseleave = function() { this.style.transform = isActive ? 'scale(1.15)' : 'scale(1)'; };
+        btn.onclick = function() { setChatThemeFromAppearance(name); };
+        container.appendChild(btn);
+    });
 }
 
 function highlightChatMode(mode) {
