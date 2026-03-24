@@ -1296,6 +1296,7 @@ let currentConfig = { preset: 'forest' };
 let savedConfig = { preset: 'forest' };
 let customMode = false;
 let hasUnsavedChanges = false;
+let suppressDirty = false; // True during initial UI population to prevent false dirty state
 
 // ═══════════════════════════════════════
 // THEME ENGINE (duplicated from deft.html)
@@ -2090,6 +2091,7 @@ function updatePreview(theme, config) {
 // SAVE BAR & DIRTY TRACKING
 // ═══════════════════════════════════════
 function markDirty() {
+    if (suppressDirty) return;
     hasUnsavedChanges = true;
     document.getElementById('saveBar').classList.add('visible');
 }
@@ -2343,12 +2345,15 @@ async function initSettings() {
     // Apply
     applyTheme(currentConfig);
 
-    // Render all UI
+    // Render all UI (suppress dirty tracking during initial population)
+    suppressDirty = true;
     renderThemeGrid();
     loadSavedPresets();
     renderBgPresets();
     renderAvatarPresets();
     populateSettingsUI(currentConfig);
+    suppressDirty = false;
+    hasUnsavedChanges = false;
 
     // Load profiles from Supabase
     loadProfiles();
