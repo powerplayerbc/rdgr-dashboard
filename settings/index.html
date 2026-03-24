@@ -261,8 +261,8 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-                <!-- User Profile Settings -->
-                <a href="/brain" class="settings-card" onclick="event.preventDefault(); window.location.href='/brain'; setTimeout(()=>{ const t=document.getElementById('tab-settings'); if(t) t.click(); }, 500);" style="--card-accent: rgba(76,201,240,0.4);">
+                <!-- User Profile -->
+                <a href="/profile" class="settings-card" style="--card-accent: rgba(76,201,240,0.4);">
                     <div class="card-icon" style="background: rgba(76,201,240,0.08);">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                             <circle cx="12" cy="8" r="4" stroke="#4CC9F0" stroke-width="1.5"/>
@@ -270,13 +270,15 @@
                         </svg>
                     </div>
                     <h3 class="font-heading font-bold text-base mb-1 text-txt">User Profile</h3>
-                    <p class="text-xs text-txt-3 leading-relaxed mb-3">Timezone, Google Calendar connection, and personal preferences that apply across all RDGR pages.</p>
+                    <p class="text-xs text-txt-3 leading-relaxed mb-3">Personal details, professional background, work history, calendar, scheduling, and AI context — used across all RDGR systems.</p>
                     <div class="flex items-center gap-2 flex-wrap">
-                        <span class="text-[0.6rem] font-mono uppercase tracking-wider" style="color:#4CC9F0;">Timezone</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider" style="color:#4CC9F0;">Identity</span>
+                        <span class="text-txt-3">&middot;</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Career</span>
                         <span class="text-txt-3">&middot;</span>
                         <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Calendar</span>
                         <span class="text-txt-3">&middot;</span>
-                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Profile</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">AI Context</span>
                     </div>
                 </a>
 
