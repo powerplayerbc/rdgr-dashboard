@@ -1,0 +1,3691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Social Dashboard | Carlton AI</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        base: '#08090D',
+                        surface: '#11131A',
+                        'surface-el': '#1A1D28',
+                        'surface-hi': '#242836',
+                        border: '#2A2E3D',
+                        accent: '#06D6A0',
+                        'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B',
+                        'alert-dim': 'rgba(255,107,107,0.15)',
+                        warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)',
+                        info: '#4CC9F0',
+                        'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1',
+                        'txt-2': '#8A95A9',
+                        'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #08090D;
+            color: #E8ECF1;
+        }
+
+        /* ── Grain ── */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3A3E4D; }
+
+        /* ── Gate ── */
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: #E8ECF1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            width: 100%;
+        }
+        .gate-input:focus {
+            border-color: rgba(6,214,160,0.4);
+            box-shadow: 0 0 0 3px rgba(6,214,160,0.08);
+        }
+        .gate-input::placeholder { color: #525E73; }
+        .gate-error { color: #FF6B6B; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        /* ── Pulse ── */
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #06D6A0;
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+
+        /* ── Nav Tabs ── */
+        .task-tab {
+            flex: 1; padding: 0.4rem 0.75rem; font-size: 0.75rem; font-weight: 500;
+            text-align: center; border-radius: 0.375rem; cursor: pointer;
+            color: rgba(255,255,255,0.45); background: transparent; border: none;
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+        .task-tab:hover { color: #E8ECF1; }
+        .task-tab.active { background: rgba(6,214,160,0.12); color: #06D6A0; }
+
+        /* ── Top-Level Section Tabs ── */
+        .top-tab {
+            flex: 1;
+            padding: 0.6rem 1.25rem;
+            font-family: 'Chakra Petch', system-ui;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            color: #525E73;
+            background: transparent;
+            border: 1px solid transparent;
+            transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .top-tab:hover { color: #8A95A9; }
+        .top-tab.active {
+            background: rgba(6,214,160,0.1);
+            color: #06D6A0;
+            border-color: rgba(6,214,160,0.2);
+        }
+
+        /* ── Stat chip ── */
+        .stat-chip {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.5rem;
+            padding: 0.625rem 1rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .stat-value { font-family: 'Chakra Petch', system-ui; font-weight: 700; font-size: 1.4rem; line-height: 1; }
+        .stat-label { font-size: 0.7rem; color: #8A95A9; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+
+        /* ── Buttons ── */
+        .btn {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.03em;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+            border: none;
+            text-transform: uppercase;
+        }
+        .btn-primary { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.3); }
+        .btn-primary:hover { background: rgba(6,214,160,0.25); }
+        .btn-ghost { background: transparent; color: #8A95A9; border: 1px solid #2A2E3D; }
+        .btn-ghost:hover { background: rgba(255,255,255,0.03); color: #E8ECF1; }
+        .btn-ghost.active { background: rgba(6,214,160,0.1); color: #06D6A0; border-color: rgba(6,214,160,0.3); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .btn-approve { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.25); }
+        .btn-approve:hover { background: rgba(6,214,160,0.25); box-shadow: 0 0 12px rgba(6,214,160,0.1); }
+        .btn-deny { background: rgba(255,107,107,0.15); color: #FF6B6B; border: 1px solid rgba(255,107,107,0.25); }
+        .btn-deny:hover { background: rgba(255,107,107,0.25); box-shadow: 0 0 12px rgba(255,107,107,0.1); }
+        .btn-schedule { background: rgba(76,201,240,0.15); color: #4CC9F0; border: 1px solid rgba(76,201,240,0.25); }
+        .btn-schedule:hover { background: rgba(76,201,240,0.25); box-shadow: 0 0 12px rgba(76,201,240,0.1); }
+        .btn-regenerate { background: rgba(168,85,247,0.15); color: #A855F7; border: 1px solid rgba(168,85,247,0.25); }
+        .btn-regenerate:hover { background: rgba(168,85,247,0.25); box-shadow: 0 0 12px rgba(168,85,247,0.1); }
+        .btn-skip { background: rgba(255,217,61,0.12); color: #FFD93D; border: 1px solid rgba(255,217,61,0.2); }
+        .btn-skip:hover { background: rgba(255,217,61,0.2); }
+        .btn-copy { background: rgba(138,149,169,0.1); color: #8A95A9; border: 1px solid rgba(138,149,169,0.2); }
+        .btn-copy:hover { background: rgba(138,149,169,0.18); color: #E8ECF1; }
+
+        /* ── Filter buttons ── */
+        .view-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            background: transparent;
+            color: #8A95A9;
+            border: 1px solid transparent;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .view-btn:hover { color: #E8ECF1; background: rgba(255,255,255,0.03); }
+        .view-btn.active { color: #06D6A0; background: rgba(6,214,160,0.1); border-color: rgba(6,214,160,0.2); }
+
+        .status-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 0.3rem 0.625rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            background: transparent;
+            color: #525E73;
+            border: 1px solid transparent;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .status-btn:hover { color: #8A95A9; }
+        .status-btn.active { color: #E8ECF1; background: rgba(255,255,255,0.05); border-color: #2A2E3D; }
+
+        /* ── Search ── */
+        .search-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2A2E3D;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem 0.5rem 2rem;
+            color: #E8ECF1;
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.8rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+            max-width: 240px;
+        }
+        .search-input:focus { border-color: rgba(6,214,160,0.4); box-shadow: 0 0 0 2px rgba(6,214,160,0.08); }
+        .search-input::placeholder { color: #525E73; }
+
+        /* ── Form input ── */
+        .form-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2A2E3D;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            color: #E8ECF1;
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.8rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        .form-input:focus { border-color: rgba(6,214,160,0.4); box-shadow: 0 0 0 2px rgba(6,214,160,0.08); }
+        .form-input::placeholder { color: #525E73; }
+        textarea.form-input { resize: vertical; min-height: 100px; font-family: 'IBM Plex Sans', system-ui; }
+        select.form-input { cursor: pointer; }
+        select.form-input option { background: #1A1D28; color: #E8ECF1; }
+
+        /* ── Badges ── */
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.2rem;
+            line-height: 1.2;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        /* Platform badges */
+        .badge-linkedin { background: rgba(10,102,194,0.15); color: #3B9BF5; }
+        .badge-twitter { background: rgba(29,161,242,0.15); color: #1DA1F2; }
+        .badge-facebook { background: rgba(24,119,242,0.15); color: #5B9CF5; }
+        .badge-instagram { background: linear-gradient(135deg, rgba(225,48,108,0.15), rgba(131,58,180,0.15)); color: #E1306C; }
+        .badge-reddit { background: rgba(255,69,0,0.15); color: #FF6347; }
+
+        /* Status badges */
+        .badge-draft { background: rgba(107,114,128,0.15); color: #9CA3AF; }
+        .badge-pending_approval { background: rgba(255,217,61,0.15); color: #FFD93D; }
+        .badge-approved { background: rgba(6,214,160,0.15); color: #06D6A0; }
+        .badge-scheduled { background: rgba(76,201,240,0.15); color: #4CC9F0; }
+        .badge-posting { background: rgba(245,158,11,0.15); color: #F59E0B; }
+        .badge-posted { background: rgba(16,185,129,0.15); color: #10B981; }
+        .badge-failed { background: rgba(255,107,107,0.15); color: #FF6B6B; }
+        .badge-dm { background: rgba(168,85,247,0.15); color: #A855F7; }
+        .badge-engagement { background: rgba(76,201,240,0.15); color: #4CC9F0; }
+        .badge-wave { background: rgba(20,184,166,0.15); color: #2DD4BF; }
+        .badge-pain { background: rgba(245,158,11,0.15); color: #F59E0B; }
+        .pain-highlight { background: rgba(245,158,11,0.15); color: #F59E0B; padding: 0.1rem 0.3rem; border-radius: 0.2rem; font-weight: 500; }
+        .post-age-fresh { color: #06D6A0; }
+        .post-age-stale { color: #FF6B6B; }
+
+        /* Priority badges */
+        .badge-p1 { background: rgba(255,107,107,0.15); color: #FF6B6B; }
+        .badge-p2 { background: rgba(255,217,61,0.15); color: #FFD93D; }
+        .badge-p3 { background: rgba(107,114,128,0.15); color: #9CA3AF; }
+
+        /* ── Panels & Cards ── */
+        .panel {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .post-card {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .post-card:hover { border-color: #2A2E3D; background: #131620; }
+
+        /* ── Outreach Card ── */
+        .outreach-card {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.625rem;
+            padding: 1rem 1.25rem;
+            transition: border-color 0.2s, background 0.15s;
+        }
+        .outreach-card:hover { border-color: #2A2E3D; background: #131620; }
+        .outreach-card .msg-preview {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 0.375rem;
+            padding: 0.625rem 0.75rem;
+            font-size: 0.82rem;
+            line-height: 1.6;
+            color: #C8CDD6;
+            white-space: pre-wrap;
+        }
+        .outreach-card .reasoning-toggle {
+            cursor: pointer;
+            font-size: 0.7rem;
+            color: #525E73;
+            transition: color 0.15s;
+            user-select: none;
+        }
+        .outreach-card .reasoning-toggle:hover { color: #8A95A9; }
+        .outreach-card .reasoning-content {
+            font-size: 0.75rem;
+            color: #6B7280;
+            line-height: 1.5;
+            padding: 0.5rem 0.75rem;
+            background: rgba(255,255,255,0.015);
+            border-radius: 0.25rem;
+            border-left: 2px solid rgba(255,255,255,0.06);
+        }
+
+        /* ── Daily Counter Badges ── */
+        .daily-badge {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.375rem;
+            padding: 0.375rem 0.625rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.7rem;
+            white-space: nowrap;
+        }
+        .daily-badge.counter-green { border-color: rgba(6,214,160,0.25); }
+        .daily-badge.counter-amber { border-color: rgba(255,217,61,0.3); background: rgba(255,217,61,0.04); }
+        .daily-badge.counter-red { border-color: rgba(255,107,107,0.3); background: rgba(255,107,107,0.04); }
+
+        /* ── Conversation thread ── */
+        .convo-msg {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.8rem;
+            line-height: 1.55;
+        }
+        .convo-msg.ours {
+            background: rgba(6,214,160,0.06);
+            border-left: 2px solid rgba(6,214,160,0.3);
+        }
+        .convo-msg.theirs {
+            background: rgba(76,201,240,0.06);
+            border-left: 2px solid rgba(76,201,240,0.3);
+        }
+        .convo-msg.draft-reply {
+            background: rgba(255,217,61,0.06);
+            border-left: 2px solid rgba(255,217,61,0.3);
+            border: 1px dashed rgba(255,217,61,0.2);
+        }
+
+        /* ── Table ── */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        .data-table th {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #525E73;
+            text-align: left;
+            padding: 0.625rem 0.75rem;
+            border-bottom: 1px solid #1E2130;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .data-table th:hover { color: #8A95A9; }
+        .data-table th.sorted { color: #06D6A0; }
+        .data-table td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid rgba(30,33,48,0.5);
+            vertical-align: middle;
+        }
+        .data-table tbody tr { cursor: pointer; transition: background 0.15s; }
+        .data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+        /* ── Slide-out panel ── */
+        .detail-backdrop {
+            position: fixed; inset: 0; z-index: 80;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(3px);
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .detail-backdrop.open { opacity: 1; visibility: visible; }
+
+        .detail-panel {
+            position: fixed; top: 0; right: 0; bottom: 0; z-index: 81;
+            width: 480px; max-width: 95vw;
+            background: #0D0F16;
+            border-left: 1px solid #1E2130;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .detail-panel.open { transform: translateX(0); }
+
+        /* ── Modal ── */
+        .modal-backdrop {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.25s, visibility 0.25s;
+        }
+        .modal-backdrop.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: #11131A; border: 1px solid #2A2E3D; border-radius: 0.75rem;
+            width: 90%; max-width: 620px; max-height: 90vh; overflow-y: auto;
+            transform: translateY(20px); transition: transform 0.25s ease;
+        }
+        .modal-backdrop.active .modal-content { transform: translateY(0); }
+
+        /* ── Toast ── */
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-family: 'IBM Plex Sans', system-ui;
+            animation: toast-in 0.3s ease forwards;
+            max-width: 380px;
+        }
+        .toast-success { background: rgba(6,214,160,0.15); border: 1px solid rgba(6,214,160,0.3); color: #06D6A0; }
+        .toast-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #FF6B6B; }
+        .toast-info { background: rgba(76,201,240,0.15); border: 1px solid rgba(76,201,240,0.3); color: #4CC9F0; }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Skeleton ── */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #1A1D28 25%, #242836 50%, #1A1D28 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 0.25rem;
+        }
+
+        /* ── Dept select ── */
+        .dept-select {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2A2E3D;
+            border-radius: 0.375rem;
+            padding: 0.4rem 0.625rem;
+            color: #E8ECF1;
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.8rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .dept-select:focus { border-color: rgba(6,214,160,0.4); }
+        .dept-select option { background: #1A1D28; color: #E8ECF1; }
+
+        /* ── Pill ── */
+        .pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 9999px;
+            background: rgba(255,255,255,0.05);
+            color: #8A95A9;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center; padding: 3rem 1rem; color: #525E73;
+            font-size: 0.85rem;
+        }
+
+        /* ── Calendar ── */
+        .cal-header {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #525E73;
+            padding: 0.5rem;
+            text-align: center;
+            border-bottom: 1px solid #1E2130;
+        }
+        .cal-cell {
+            min-height: 120px;
+            border: 1px solid #1E2130;
+            padding: 0.375rem;
+            vertical-align: top;
+            transition: background 0.15s;
+        }
+        .cal-cell:hover { background: rgba(255,255,255,0.015); }
+        .cal-cell.today { background: rgba(6,214,160,0.03); border-color: rgba(6,214,160,0.15); }
+        .cal-cell.other-month { opacity: 0.3; }
+        .cal-day-num {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #8A95A9;
+            margin-bottom: 0.25rem;
+        }
+        .cal-event {
+            font-size: 0.65rem;
+            padding: 0.2rem 0.35rem;
+            border-radius: 0.2rem;
+            margin-bottom: 0.2rem;
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            transition: opacity 0.15s;
+            border-left: 2px solid;
+        }
+        .cal-event:hover { opacity: 0.8; }
+
+        /* ── Char counter ── */
+        .char-count { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: #525E73; }
+        .char-count.over { color: #FF6B6B; }
+        .char-count.near { color: #FFD93D; }
+
+        /* ── Bulk bar ── */
+        .bulk-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+            background: rgba(17,19,26,0.95); backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(6,214,160,0.2);
+            padding: 0.75rem 1.5rem;
+            display: flex; align-items: center; justify-content: center; gap: 1rem;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .bulk-bar.visible { transform: translateY(0); }
+
+        /* ── Checkbox ── */
+        .post-checkbox {
+            appearance: none;
+            width: 16px; height: 16px;
+            border: 1px solid #2A2E3D;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.03);
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            position: relative;
+        }
+        .post-checkbox:checked {
+            background: rgba(6,214,160,0.2);
+            border-color: rgba(6,214,160,0.5);
+        }
+        .post-checkbox:checked::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 5px;
+            width: 4px; height: 8px;
+            border: solid #06D6A0;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        /* ── Toggle switch ── */
+        .toggle-switch {
+            position: relative;
+            width: 36px; height: 20px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: none;
+        }
+        .toggle-switch.on { background: rgba(6,214,160,0.3); }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px;
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            background: #8A95A9;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .toggle-switch.on::after { transform: translateX(16px); background: #06D6A0; }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .stat-bar { flex-wrap: wrap; }
+            .filter-row { flex-direction: column; gap: 0.5rem; }
+            .search-input { max-width: 100%; }
+            .cal-cell { min-height: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ PASSWORD GATE ═══ -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">Social Media</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">Social Dashboard</h1>
+                <p class="text-txt-2 text-sm">Enter the access code to continue</p>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off" autofocus>
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4">Authenticate</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- ── Top Nav ── -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Dashboard</a>
+                        <a href="/chat" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Chat</a>
+                        <a href="/org-chart" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Org Map</a>
+                        <a href="/our-workflows" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Workflows</a>
+                        <span class="task-tab active" style="flex: none; padding: 0.3rem 0.75rem;">Social</span>
+                        <a href="/crm" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">CRM</a>
+                        <a href="/offer-studio" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Offers</a>
+                        <a href="/deft" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">DEFT</a>
+                        <a href="/brain" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">BRAIN</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Profile Switcher -->
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown">
+                        </div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2 relative" title="Settings" id="settingsLink">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="hidden" id="settingsBadge" style="position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:#FFD93D;border:1.5px solid #11131A;"></span>
+                    </a>
+                    <button onclick="openQuickPost()" class="btn btn-primary text-xs py-2 px-3 flex items-center gap-1.5" id="newPostBtn">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        New Post
+                    </button>
+                    <button onclick="refreshCurrentTab()" class="btn btn-ghost text-xs py-2 px-3 flex items-center gap-1.5" id="refreshBtn">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ── Top-Level Tabs: Content Posts | Outreach ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pt-4">
+            <div class="flex gap-1 p-0.5 rounded-lg" style="background: rgba(255,255,255,0.04); max-width: 400px;">
+                <button class="top-tab active" id="topTabContent" onclick="switchTopTab('content')">Content Posts</button>
+                <button class="top-tab" id="topTabOutreach" onclick="switchTopTab('outreach')">Outreach</button>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- CONTENT POSTS SECTION                   -->
+        <!-- ═══════════════════════════════════════ -->
+        <div id="contentSection">
+
+            <!-- ── Stats Bar ── -->
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
+                <div class="stat-bar flex gap-3 overflow-x-auto pb-1" id="statsBar">
+                    <div class="stat-chip flex-1 min-w-[120px]">
+                        <div>
+                            <div class="stat-value text-warn" id="statPending">—</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                    </div>
+                    <div class="stat-chip flex-1 min-w-[120px]">
+                        <div>
+                            <div class="stat-value text-info" id="statScheduled">—</div>
+                            <div class="stat-label">Scheduled</div>
+                        </div>
+                    </div>
+                    <div class="stat-chip flex-1 min-w-[120px]">
+                        <div>
+                            <div class="stat-value text-accent" id="statApproved">—</div>
+                            <div class="stat-label">Approved</div>
+                        </div>
+                    </div>
+                    <div class="stat-chip flex-1 min-w-[120px]">
+                        <div>
+                            <div class="stat-value" style="color: #10B981;" id="statPosted">—</div>
+                            <div class="stat-label">Posted</div>
+                        </div>
+                    </div>
+                    <div class="stat-chip flex-1 min-w-[120px]">
+                        <div>
+                            <div class="stat-value text-alert" id="statFailed">—</div>
+                            <div class="stat-label">Failed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Filter Bar ── -->
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
+                <div class="filter-row flex flex-wrap items-center gap-3">
+                    <!-- View Switcher -->
+                    <div class="flex items-center gap-1 bg-surface rounded-lg p-1 border border-border/50">
+                        <button class="view-btn active" data-view="approvals" onclick="switchView('approvals')">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="inline mr-1 -mt-px"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            Approvals
+                        </button>
+                        <button class="view-btn" data-view="calendar" onclick="switchView('calendar')">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="inline mr-1 -mt-px"><rect x="1" y="2" width="10" height="9" rx="1" stroke="currentColor" stroke-width="1"/><path d="M1 5h10M4 1v2M8 1v2" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                            Calendar
+                        </button>
+                        <button class="view-btn" data-view="queue" onclick="switchView('queue')">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="inline mr-1 -mt-px"><path d="M1.5 3h9M1.5 6h9M1.5 9h9" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                            Queue
+                        </button>
+                        <button class="view-btn" data-view="analytics" onclick="switchView('analytics')">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="inline mr-1 -mt-px"><path d="M2 9V5M5 9V3M8 9V6M11 9V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                            Analytics
+                        </button>
+                    </div>
+
+                    <!-- Platform Filter -->
+                    <select class="dept-select" id="platformFilter" onchange="applyFilters()">
+                        <option value="">All Platforms</option>
+                        <option value="linkedin">LinkedIn</option>
+                        <option value="twitter">Twitter / X</option>
+                        <option value="facebook">Facebook</option>
+                        <option value="instagram">Instagram</option>
+                    </select>
+
+                    <!-- Status Filter -->
+                    <div class="flex items-center gap-1 flex-wrap">
+                        <button class="status-btn active" data-status="all" onclick="setStatusFilter('all')">All</button>
+                        <button class="status-btn" data-status="pending_approval" onclick="setStatusFilter('pending_approval')">Pending</button>
+                        <button class="status-btn" data-status="scheduled" onclick="setStatusFilter('scheduled')">Scheduled</button>
+                        <button class="status-btn" data-status="approved" onclick="setStatusFilter('approved')">Approved</button>
+                        <button class="status-btn" data-status="posted" onclick="setStatusFilter('posted')">Posted</button>
+                        <button class="status-btn" data-status="failed" onclick="setStatusFilter('failed')">Failed</button>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="relative ml-auto">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-txt-3">
+                            <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/>
+                            <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                        </svg>
+                        <input type="text" class="search-input" placeholder="Search posts..." id="searchInput" onkeydown="if(event.key==='Enter')applyFilters()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── View Containers ── -->
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8">
+
+                <!-- Approval Queue View -->
+                <div id="viewApprovals" class="view-container">
+                    <div id="approvalGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                        <div class="empty-state col-span-full"><div class="skeleton w-48 h-4 mx-auto mb-3"></div><div class="skeleton w-32 h-3 mx-auto"></div></div>
+                    </div>
+                </div>
+
+                <!-- Calendar View -->
+                <div id="viewCalendar" class="view-container hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <button onclick="calNav(-1)" class="btn btn-ghost text-xs py-1.5 px-2.5">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 2L4 6l4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </button>
+                            <span id="calTitle" class="font-heading font-bold text-sm sm:text-base tracking-wide min-w-[180px] text-center"></span>
+                            <button onclick="calNav(1)" class="btn btn-ghost text-xs py-1.5 px-2.5">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </button>
+                            <button onclick="calToday()" class="btn btn-ghost text-xs py-1.5 px-2.5">Today</button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="view-btn active" data-cal="week" onclick="setCalView('week')">Week</button>
+                            <button class="view-btn" data-cal="month" onclick="setCalView('month')">Month</button>
+                        </div>
+                    </div>
+                    <div id="calendarGrid" class="panel overflow-hidden"></div>
+                </div>
+
+                <!-- Queue View -->
+                <div id="viewQueue" class="view-container hidden">
+                    <div class="panel overflow-x-auto">
+                        <table class="data-table" id="queueTable">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortTable('platform')" data-col="platform">Platform <span class="sort-arrow"></span></th>
+                                    <th onclick="sortTable('post_type')" data-col="post_type">Type <span class="sort-arrow"></span></th>
+                                    <th onclick="sortTable('status')" data-col="status">Status <span class="sort-arrow"></span></th>
+                                    <th>Content</th>
+                                    <th onclick="sortTable('scheduled_at')" data-col="scheduled_at">Scheduled <span class="sort-arrow"></span></th>
+                                    <th onclick="sortTable('posted_at')" data-col="posted_at">Posted <span class="sort-arrow"></span></th>
+                                    <th onclick="sortTable('priority')" data-col="priority">Priority <span class="sort-arrow"></span></th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="queueBody">
+                                <tr><td colspan="8" class="text-center py-8"><div class="skeleton w-48 h-4 mx-auto"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="paginationBar" class="flex items-center justify-between mt-3 px-1">
+                        <span class="text-xs text-txt-3 font-mono" id="paginationInfo">—</span>
+                        <div class="flex gap-2">
+                            <button class="btn btn-ghost text-xs py-1.5 px-3" id="prevPageBtn" onclick="changePage(-1)" disabled>Prev</button>
+                            <button class="btn btn-ghost text-xs py-1.5 px-3" id="nextPageBtn" onclick="changePage(1)">Next</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics View -->
+                <div id="viewAnalytics" class="view-container hidden">
+                    <div class="panel p-8 text-center">
+                        <div class="mb-4 opacity-20">
+                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" class="mx-auto"><path d="M8 36V20M16 36V12M24 36V24M32 36V16M40 36V8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+                        </div>
+                        <h3 class="font-heading text-xl font-bold mb-2">Analytics Coming Soon</h3>
+                        <p class="text-txt-2 text-sm max-w-md mx-auto">
+                            Post performance metrics, engagement data, and content insights
+                            will be available once engagement tracking is live.
+                        </p>
+                        <div class="mt-6 flex items-center justify-center gap-3">
+                            <span class="badge badge-scheduled">Phase 2C</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /contentSection -->
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- OUTREACH SECTION                        -->
+        <!-- ═══════════════════════════════════════ -->
+        <div id="outreachSection" style="display: none;">
+
+            <!-- ── Outreach Header: Search + Daily Counters ── -->
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4">
+                    <!-- Search -->
+                    <div class="relative flex items-center gap-2 flex-1">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-txt-3">
+                            <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/>
+                            <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                        </svg>
+                        <input type="text" class="search-input" style="max-width: 320px;" placeholder="Search by name... (Enter)" id="outreachSearchInput" onkeydown="if(event.key==='Enter')applyOutreachSearch()">
+                        <button onclick="clearOutreachSearch()" class="btn btn-ghost text-xs py-1.5 px-2" title="Clear search" id="outreachSearchClear" style="display:none;">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <span class="text-xs text-txt-3 font-mono" id="outreachResultCount"></span>
+                    </div>
+                    <!-- Run Discovery -->
+                    <div class="flex items-center gap-2">
+                        <select class="form-input text-xs py-1.5" style="max-width:140px;" id="discoveryPlatformSelect">
+                            <option value="">All Platforms</option>
+                            <option value="linkedin">LinkedIn</option>
+                            <option value="twitter">Twitter / X</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="facebook">Facebook</option>
+                        </select>
+                        <button onclick="triggerDiscovery()" class="btn btn-ghost text-xs py-1.5 px-3 flex items-center gap-1.5 whitespace-nowrap" id="runDiscoveryBtn">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M6 3.5v5M3.5 6h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            Run Discovery
+                        </button>
+                        <button onclick="triggerRedditDiscovery('wave_catcher')" class="btn btn-ghost text-xs py-1.5 px-2 whitespace-nowrap" style="border-color:rgba(20,184,166,0.3);color:#2DD4BF;" id="runWaveBtn" title="Run Reddit Wave Catcher">Wave</button>
+                        <button onclick="triggerRedditDiscovery('pain_prospector')" class="btn btn-ghost text-xs py-1.5 px-2 whitespace-nowrap" style="border-color:rgba(245,158,11,0.3);color:#F59E0B;" id="runPainBtn" title="Run Reddit Pain Prospector">Pain</button>
+                    </div>
+                </div>
+
+                <!-- Daily Counter Strip -->
+                <div class="flex gap-2 overflow-x-auto pb-1" id="dailyCounters">
+                    <div class="empty-state text-xs py-2">Loading daily counters...</div>
+                </div>
+            </div>
+
+            <!-- ── Outreach Tabs & Filters ── -->
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
+                <div class="flex flex-col gap-3">
+                    <!-- Outreach Type: DM | Engagement -->
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-1 bg-surface rounded-lg p-1 border border-border/50">
+                            <button class="view-btn active" id="outTabDm" onclick="setOutreachType('dm')">DM Queue</button>
+                            <button class="view-btn" id="outTabEng" onclick="setOutreachType('engagement')">Engagement Queue</button>
+                        </div>
+
+                        <!-- Queue Sub-tabs -->
+                        <div class="flex items-center gap-1 bg-surface rounded-lg p-1 border border-border/50 ml-2">
+                            <button class="status-btn active" id="outSubApproval" onclick="setQueueType('approval')">Needs Approval</button>
+                            <button class="status-btn" id="outSubAction" onclick="setQueueType('action')">Ready to Act</button>
+                            <button class="status-btn" id="outSubConvo" onclick="setQueueType('conversations')">Active Conversations</button>
+                        </div>
+                    </div>
+
+                    <!-- Platform Filters -->
+                    <div class="flex items-center gap-1 flex-wrap">
+                        <button class="status-btn active" data-oplatform="all" onclick="setOutPlatformFilter(null)">All</button>
+                        <button class="status-btn" data-oplatform="linkedin" onclick="setOutPlatformFilter('linkedin')">LinkedIn</button>
+                        <button class="status-btn" data-oplatform="instagram" onclick="setOutPlatformFilter('instagram')">Instagram</button>
+                        <button class="status-btn" data-oplatform="facebook" onclick="setOutPlatformFilter('facebook')">Facebook</button>
+                        <button class="status-btn" data-oplatform="twitter" onclick="setOutPlatformFilter('twitter')">X / Twitter</button>
+                        <button class="status-btn" data-oplatform="reddit" onclick="setOutPlatformFilter('reddit')">Reddit <span id="redditWaveCount" class="inline-flex items-center justify-center rounded-full text-[0.55rem] font-mono font-bold" style="width:18px;height:18px;background:rgba(20,184,166,0.2);color:#2DD4BF;margin-left:2px;display:none;">0</span><span id="redditPainCount" class="inline-flex items-center justify-center rounded-full text-[0.55rem] font-mono font-bold" style="width:18px;height:18px;background:rgba(245,158,11,0.2);color:#F59E0B;margin-left:2px;display:none;">0</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Conversion Funnel Widget ── -->
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
+                <div id="funnelWidget" style="display: none;"></div>
+            </div>
+
+            <!-- ── Historical Stats Panel ── -->
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
+                <div id="historyStatsPanel" class="panel" style="display: none;">
+                    <div class="panel-header" style="cursor:pointer;padding:0.5rem 1rem;" onclick="document.getElementById('historyStatsBody').style.display=document.getElementById('historyStatsBody').style.display==='none'?'':'none'; this.querySelector('.collapse-arrow').textContent=document.getElementById('historyStatsBody').style.display==='none'?'▸':'▾';">
+                        <div class="flex items-center gap-2">
+                            <span class="collapse-arrow text-txt-3 text-xs">▾</span>
+                            <span class="text-[0.65rem] font-mono text-txt-3 uppercase tracking-wider">Outreach History</span>
+                        </div>
+                        <div class="flex items-center gap-2" id="historyTimeToggle">
+                            <button class="status-btn active" data-hperiod="lifetime" onclick="event.stopPropagation();setHistoryPeriod('lifetime')">Lifetime</button>
+                            <button class="status-btn" data-hperiod="month" onclick="event.stopPropagation();setHistoryPeriod('month')">This Month</button>
+                            <button class="status-btn" data-hperiod="week" onclick="event.stopPropagation();setHistoryPeriod('week')">This Week</button>
+                        </div>
+                    </div>
+                    <div class="panel-body" id="historyStatsBody" style="padding:0.75rem 1rem;">
+                        <div class="text-xs text-txt-3">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Outreach Cards Container ── -->
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8">
+                <div id="outreachCards" class="space-y-3">
+                    <div class="empty-state"><div class="skeleton h-24 w-full mb-2"></div><div class="skeleton h-24 w-full mb-2"></div><div class="skeleton h-24 w-full"></div></div>
+                </div>
+            </div>
+
+        </div><!-- /outreachSection -->
+
+    </div><!-- /mainContent -->
+
+    <!-- ═══ DETAIL SLIDE-OUT PANEL ═══ -->
+    <div class="detail-backdrop" id="detailBackdrop" onclick="closeDetail()"></div>
+    <div class="detail-panel" id="detailPanel">
+        <div class="sticky top-0 z-10 flex items-center justify-between px-5 py-4 border-b border-border" style="background: rgba(13,15,22,0.95); backdrop-filter: blur(12px);">
+            <span class="font-heading font-bold text-sm tracking-wide uppercase text-txt-2">Post Detail</span>
+            <button onclick="closeDetail()" class="text-txt-3 hover:text-txt transition-colors p-1">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <div id="detailContent" class="p-5 space-y-5"></div>
+    </div>
+
+    <!-- ═══ QUICK POST MODAL ═══ -->
+    <div class="modal-backdrop" id="quickPostModal">
+        <div class="modal-content">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-border">
+                <h3 class="font-heading font-bold text-sm tracking-wide uppercase">New Post</h3>
+                <button onclick="closeQuickPost()" class="text-txt-3 hover:text-txt transition-colors p-1">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <form id="quickPostForm" onsubmit="return handleQuickPost(event)" class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs text-txt-2 font-mono uppercase tracking-wide mb-2">Platforms</label>
+                    <div class="flex flex-wrap gap-3">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="platforms" value="linkedin" class="post-checkbox">
+                            <span class="text-sm" style="color: #3B9BF5;">LinkedIn</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="platforms" value="twitter" class="post-checkbox">
+                            <span class="text-sm" style="color: #1DA1F2;">Twitter / X</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="platforms" value="facebook" class="post-checkbox">
+                            <span class="text-sm" style="color: #5B9CF5;">Facebook</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="platforms" value="instagram" class="post-checkbox">
+                            <span class="text-sm" style="color: #E1306C;">Instagram</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs text-txt-2 font-mono uppercase tracking-wide">Content</label>
+                        <span class="char-count" id="qpCharCount">0</span>
+                    </div>
+                    <textarea class="form-input" id="qpContent" name="content_text" placeholder="Write your post content..." oninput="updateCharCount()"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 font-mono uppercase tracking-wide mb-2">Hashtags</label>
+                    <input type="text" class="form-input" id="qpHashtags" name="hashtags" placeholder="#ai, #marketing, #business">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-txt-2 font-mono uppercase tracking-wide mb-2">Schedule</label>
+                        <input type="datetime-local" class="form-input" id="qpSchedule" name="scheduled_at">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-txt-2 font-mono uppercase tracking-wide mb-2">Priority</label>
+                        <select class="form-input" id="qpPriority" name="priority">
+                            <option value="3">Flexible</option>
+                            <option value="2">Preferred</option>
+                            <option value="1">Required</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-txt-2 font-mono uppercase tracking-wide mb-2">Category</label>
+                        <input type="text" class="form-input" id="qpCategory" name="content_category" placeholder="e.g., thought-leadership">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-txt-2 font-mono uppercase tracking-wide mb-2">Post Type</label>
+                        <select class="form-input" id="qpPostType" name="post_type">
+                            <option value="text">Text</option>
+                            <option value="image">Image</option>
+                            <option value="link">Link</option>
+                            <option value="carousel">Carousel</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-full py-2.5 mt-2">Create Post</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ SCHEDULE MODAL ═══ -->
+    <div class="modal-backdrop" id="scheduleModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-border">
+                <h3 class="font-heading font-bold text-sm tracking-wide uppercase">Schedule Post</h3>
+                <button onclick="closeScheduleModal()" class="text-txt-3 hover:text-txt transition-colors p-1">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs text-txt-2 font-mono uppercase tracking-wide mb-2">Date & Time</label>
+                    <input type="datetime-local" class="form-input" id="scheduleDateTime">
+                </div>
+                <button onclick="confirmSchedule()" class="btn btn-schedule w-full py-2.5">Schedule</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ LOG REPLY MODAL ═══ -->
+    <div class="modal-backdrop" id="logReplyModal">
+        <div class="modal-content" style="max-width: 520px;">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-border">
+                <h3 class="font-heading font-bold text-sm tracking-wide uppercase">Log New Reply</h3>
+                <button onclick="closeLogReplyModal()" class="text-txt-3 hover:text-txt transition-colors p-1">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs text-txt-2 font-mono uppercase tracking-wide mb-2">Reply Text</label>
+                    <textarea class="form-input" id="logReplyText" placeholder="Paste the reply text here..." rows="4"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 font-mono uppercase tracking-wide mb-2">Author Name</label>
+                    <input type="text" class="form-input" id="logReplyAuthor" placeholder="Their name (optional)">
+                </div>
+                <div class="flex items-center justify-between">
+                    <label class="text-xs text-txt-2">Auto-draft response</label>
+                    <button type="button" class="toggle-switch on" id="logReplyAutoDraft" onclick="this.classList.toggle('on')"></button>
+                </div>
+                <input type="hidden" id="logReplyDraftId">
+                <input type="hidden" id="logReplyPlatform">
+                <input type="hidden" id="logReplyContactId">
+                <button onclick="submitLogReply()" class="btn btn-primary w-full py-2.5">Submit Reply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ REDRAFT FEEDBACK MODAL ═══ -->
+    <div class="modal-backdrop" id="redraftModal">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-border">
+                <h3 class="font-heading font-bold text-sm tracking-wide uppercase">Redraft Feedback</h3>
+                <button onclick="closeRedraftModal()" class="text-txt-3 hover:text-txt transition-colors p-1">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <p class="text-xs text-txt-3">Provide feedback so the AI can generate a better draft.</p>
+                <textarea class="form-input" id="redraftFeedback" placeholder="What should be different? e.g., 'More casual tone', 'Mention their recent post about...'" rows="3"></textarea>
+                <input type="hidden" id="redraftDraftId">
+                <button onclick="submitRedraft()" class="btn btn-regenerate w-full py-2.5">Redraft</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ CONTENT BULK BAR ═══ -->
+    <div class="bulk-bar" id="bulkBar">
+        <span class="text-xs font-mono text-txt-2" id="bulkCount">0 selected</span>
+        <button onclick="bulkApprove()" class="btn btn-approve text-xs py-1.5 px-3">Approve All</button>
+        <button onclick="bulkScheduleOpen()" class="btn btn-schedule text-xs py-1.5 px-3">Schedule All</button>
+        <button onclick="bulkDeselect()" class="btn btn-ghost text-xs py-1.5 px-3">Deselect</button>
+    </div>
+
+    <!-- ═══ OUTREACH BULK BAR ═══ -->
+    <div class="bulk-bar" id="outreachBulkBar">
+        <span class="text-xs font-mono text-txt-2" id="outreachBulkCount">0 selected</span>
+        <button onclick="bulkApproveSocial()" class="btn btn-approve text-xs py-1.5 px-3">Approve All</button>
+        <button onclick="bulkSkipSocial()" class="btn btn-skip text-xs py-1.5 px-3">Skip All</button>
+        <button onclick="outreachBulkDeselect()" class="btn btn-ghost text-xs py-1.5 px-3">Deselect</button>
+    </div>
+
+    <!-- ═══ TOAST ═══ -->
+    <div class="toast-container" id="toastContainer"></div>
+
+<script>
+// Migrate old localStorage key
+if (!localStorage.getItem('rdgr-active-profile') && localStorage.getItem('rdgr-active-profile')) {
+    localStorage.setItem('rdgr-active-profile', localStorage.getItem('rdgr-active-profile'));
+    localStorage.removeItem('rdgr-active-profile');
+}
+
+let activeProfileId = null;
+
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+const headers = {
+    'apikey': ANON_KEY,
+    'Authorization': `Bearer ${ANON_KEY}`,
+    'Content-Type': 'application/json'
+};
+
+const PLATFORMS = {
+    linkedin:  { label: 'LinkedIn',    color: '#0A66C2', dimBg: 'rgba(10,102,194,0.08)',  charLimit: 3000 },
+    twitter:   { label: 'Twitter / X', color: '#1DA1F2', dimBg: 'rgba(29,161,242,0.08)',  charLimit: 280 },
+    facebook:  { label: 'Facebook',    color: '#1877F2', dimBg: 'rgba(24,119,242,0.08)',   charLimit: 63206 },
+    instagram: { label: 'Instagram',   color: '#E1306C', dimBg: 'rgba(225,48,108,0.08)',   charLimit: 2200 },
+    reddit:    { label: 'Reddit',      color: '#FF4500', dimBg: 'rgba(255,69,0,0.08)',     charLimit: 10000 },
+};
+
+const STATUS_CONFIG = {
+    draft:            { label: 'Draft',    badgeClass: 'badge-draft' },
+    pending_approval: { label: 'Pending',  badgeClass: 'badge-pending_approval' },
+    approved:         { label: 'Approved', badgeClass: 'badge-approved' },
+    scheduled:        { label: 'Scheduled',badgeClass: 'badge-scheduled' },
+    posting:          { label: 'Posting',  badgeClass: 'badge-posting' },
+    posted:           { label: 'Posted',   badgeClass: 'badge-posted' },
+    failed:           { label: 'Failed',   badgeClass: 'badge-failed' },
+};
+
+const PRIORITY_MAP = {
+    1: { label: 'Required',  badgeClass: 'badge-p1' },
+    2: { label: 'Preferred', badgeClass: 'badge-p2' },
+    3: { label: 'Flexible',  badgeClass: 'badge-p3' },
+};
+
+const N8N_BASE = 'https://n8n.carltonaiservices.com/webhook';
+
+// ═══════════════════════════════════════
+// STATE — Content Posts
+// ═══════════════════════════════════════
+let allPosts = [];
+let calendarConfig = {};
+let imageCache = new Map();
+let currentView = 'approvals';
+let currentSort = { col: 'created_at', dir: 'desc' };
+let filters = { platform: '', status: 'all', search: '' };
+let selectedPosts = new Set();
+let calendarViewMode = 'week';
+let calendarDate = new Date();
+let queuePage = 0;
+const PAGE_SIZE = 50;
+let scheduleTargetId = null;
+let editingPostId = null;
+
+// ═══════════════════════════════════════
+// STATE — Outreach
+// ═══════════════════════════════════════
+let socialDrafts = [];
+let activeConversations = [];
+let dailyCounts = [];
+let outreachType = 'dm';
+let queueType = 'approval';
+let outPlatformFilter = null;
+let outreachSearch = '';
+let selectedOutreachDrafts = new Set();
+let activeTopTab = 'content';
+
+// ═══════════════════════════════════════
+// AUTH GATE
+// ═══════════════════════════════════════
+function handleGate(e) {
+    e.preventDefault();
+    const input = document.getElementById('gateInput').value;
+    if (input === 'Advance1!') {
+        localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity = '1';
+        initDashboard();
+        return false;
+    }
+    document.getElementById('gateError').classList.add('show');
+    document.getElementById('gateInput').value = '';
+    document.getElementById('gateInput').focus();
+    setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+    return false;
+}
+
+if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('mainContent').style.opacity = '1';
+    initDashboard();
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+function initDashboard() {
+    refreshData();
+    checkPendingSnapshots();
+
+    // Handle URL params for cross-linking
+    const params = new URLSearchParams(window.location.search);
+    const autoSearch = params.get('search');
+    if (autoSearch) {
+        switchTopTab('outreach');
+        setTimeout(() => {
+            document.getElementById('outreachSearchInput').value = autoSearch;
+            applyOutreachSearch();
+        }, 800);
+    } else {
+        // Restore last active tab from session
+        const savedTab = sessionStorage.getItem('social-top-tab');
+        if (savedTab === 'outreach') {
+            switchTopTab('outreach');
+        }
+    }
+}
+
+function refreshCurrentTab() {
+    if (activeTopTab === 'content') {
+        refreshData();
+    } else {
+        refreshOutreach();
+    }
+}
+
+async function checkPendingSnapshots() {
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/voice_settings_snapshots?brand_id=eq.carlton&status=eq.pending&select=id`, { headers });
+        const data = await res.json();
+        if (data && data.length > 0) {
+            const badge = document.getElementById('settingsBadge');
+            if (badge) badge.classList.remove('hidden');
+            const link = document.getElementById('settingsLink');
+            if (link) link.title = `Voice Settings (${data.length} AI suggestion${data.length > 1 ? 's' : ''})`;
+        }
+    } catch (e) { /* silent */ }
+}
+
+// ═══════════════════════════════════════
+// TOP TAB SWITCHING
+// ═══════════════════════════════════════
+function switchTopTab(tab) {
+    activeTopTab = tab;
+    sessionStorage.setItem('social-top-tab', tab);
+    document.getElementById('topTabContent').classList.toggle('active', tab === 'content');
+    document.getElementById('topTabOutreach').classList.toggle('active', tab === 'outreach');
+    document.getElementById('contentSection').style.display = tab === 'content' ? '' : 'none';
+    document.getElementById('outreachSection').style.display = tab === 'outreach' ? '' : 'none';
+    document.getElementById('newPostBtn').style.display = tab === 'content' ? '' : 'none';
+
+    if (tab === 'outreach' && socialDrafts.length === 0 && activeConversations.length === 0) {
+        refreshOutreach();
+    }
+}
+
+// ═══════════════════════════════════════
+// DATA FETCH — Content Posts
+// ═══════════════════════════════════════
+async function refreshData() {
+    const btn = document.getElementById('refreshBtn');
+    btn.disabled = true;
+    try {
+        const [postsRes, configRes] = await Promise.all([
+            fetch(`${SUPABASE_URL}/rest/v1/social_content_queue?order=created_at.desc&select=*`, { headers }),
+            fetch(`${SUPABASE_URL}/rest/v1/social_calendar_config?brand_id=eq.carlton&select=*`, { headers }),
+        ]);
+
+        const postsData = await postsRes.json();
+        const configData = await configRes.json();
+
+        allPosts = Array.isArray(postsData) ? postsData : [];
+        calendarConfig = Array.isArray(configData) && configData.length > 0 ? configData[0] : {};
+
+        updateStats();
+        renderCurrentView();
+        showToast(`Loaded ${allPosts.length} posts`, 'success');
+    } catch (err) {
+        console.error('Fetch error:', err);
+        showToast('Failed to load data: ' + err.message, 'error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ═══════════════════════════════════════
+// WRITE API (direct Supabase, n8n-swappable)
+// ═══════════════════════════════════════
+async function writeApi(action, payload) {
+    const { id, ...data } = payload;
+
+    switch (action) {
+        case 'approve':
+            return supabasePatch(id, { status: 'approved', approved_at: new Date().toISOString(), approved_by: 'manual' });
+        case 'schedule':
+            return supabasePatch(id, { status: 'scheduled', scheduled_at: data.scheduled_at, approved_at: new Date().toISOString() });
+        case 'deny':
+            return supabasePatch(id, { status: 'failed', error_message: 'Denied by reviewer' });
+        case 'edit':
+            return supabasePatch(id, data);
+        case 'delete':
+            return supabaseDelete(id);
+        case 'reschedule':
+            return supabasePatch(id, { scheduled_at: data.scheduled_at });
+        case 'retry':
+            return supabasePatch(id, { status: 'approved', error_message: null });
+        case 'create':
+            return supabaseInsert(data);
+        default:
+            throw new Error('Unknown action: ' + action);
+    }
+}
+
+async function supabasePatch(id, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/social_content_queue?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: { ...headers, 'Prefer': 'return=representation' },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+
+async function supabaseDelete(id) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/social_content_queue?id=eq.${id}`, {
+        method: 'DELETE',
+        headers,
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return true;
+}
+
+async function supabaseInsert(data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/social_content_queue`, {
+        method: 'POST',
+        headers: { ...headers, 'Prefer': 'return=representation' },
+        body: JSON.stringify({ brand_id: 'carlton', ...data }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+
+// ═══════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════
+function updateStats() {
+    const counts = { pending_approval: 0, scheduled: 0, approved: 0, posted: 0, failed: 0 };
+    allPosts.forEach(p => {
+        if (counts.hasOwnProperty(p.status)) counts[p.status]++;
+    });
+    document.getElementById('statPending').textContent = counts.pending_approval;
+    document.getElementById('statScheduled').textContent = counts.scheduled;
+    document.getElementById('statApproved').textContent = counts.approved;
+    document.getElementById('statPosted').textContent = counts.posted;
+    document.getElementById('statFailed').textContent = counts.failed;
+}
+
+// ═══════════════════════════════════════
+// FILTERS & VIEW SWITCHING
+// ═══════════════════════════════════════
+function switchView(view) {
+    currentView = view;
+    document.querySelectorAll('.view-btn[data-view]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === view);
+    });
+    document.querySelectorAll('.view-container').forEach(el => el.classList.add('hidden'));
+    const viewMap = { approvals: 'viewApprovals', calendar: 'viewCalendar', queue: 'viewQueue', analytics: 'viewAnalytics' };
+    document.getElementById(viewMap[view]).classList.remove('hidden');
+    renderCurrentView();
+}
+
+function setStatusFilter(status) {
+    filters.status = status;
+    document.querySelectorAll('#contentSection .status-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.status === status);
+    });
+    queuePage = 0;
+    renderCurrentView();
+}
+
+function applyFilters() {
+    filters.platform = document.getElementById('platformFilter').value;
+    filters.search = document.getElementById('searchInput').value.toLowerCase();
+    queuePage = 0;
+    renderCurrentView();
+}
+
+function getFilteredPosts() {
+    return allPosts.filter(p => {
+        if (filters.platform && p.platform !== filters.platform) return false;
+        if (filters.status !== 'all' && p.status !== filters.status) return false;
+        if (filters.search) {
+            const text = `${p.content_text || ''} ${p.platform || ''} ${(p.hashtags || []).join(' ')} ${p.content_category || ''}`.toLowerCase();
+            if (!text.includes(filters.search)) return false;
+        }
+        return true;
+    });
+}
+
+function renderCurrentView() {
+    switch (currentView) {
+        case 'approvals': renderApprovalQueue(); break;
+        case 'calendar': renderCalendar(); break;
+        case 'queue': renderQueueTable(); break;
+    }
+}
+
+// ═══════════════════════════════════════
+// APPROVAL QUEUE VIEW
+// ═══════════════════════════════════════
+function renderApprovalQueue() {
+    const container = document.getElementById('approvalGrid');
+    let posts = getFilteredPosts();
+
+    if (filters.status === 'all') {
+        const pending = posts.filter(p => p.status === 'pending_approval');
+        if (pending.length > 0) posts = pending;
+    }
+
+    if (posts.length === 0) {
+        container.innerHTML = '<div class="empty-state col-span-full py-16">No posts matching your filters</div>';
+        updateBulkBar();
+        return;
+    }
+
+    container.innerHTML = posts.map(post => renderPostCard(post)).join('');
+    updateBulkBar();
+    initImageObserver();
+}
+
+function renderPostCard(post) {
+    const platform = PLATFORMS[post.platform] || { label: post.platform, color: '#8A95A9', charLimit: 5000 };
+    const statusCfg = STATUS_CONFIG[post.status] || { label: post.status, badgeClass: 'badge-draft' };
+    const priorityCfg = PRIORITY_MAP[post.priority] || PRIORITY_MAP[3];
+    const charCount = (post.content_text || '').length;
+    const hashtags = Array.isArray(post.hashtags) ? post.hashtags : [];
+    const isSelected = selectedPosts.has(post.id);
+    const imgHtml = getImageHtml(post);
+    const scheduledStr = post.scheduled_at ? formatDateTime(post.scheduled_at) : 'Not scheduled';
+
+    return `
+        <div class="post-card" style="border-left: 3px solid ${platform.color}; cursor: pointer;" id="card-${post.id}" onclick="openDetail('${post.id}')">
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="badge badge-${post.platform}">${platform.label}</span>
+                        <span class="badge ${statusCfg.badgeClass}">${statusCfg.label}</span>
+                        <span class="badge ${priorityCfg.badgeClass}">${priorityCfg.label}</span>
+                    </div>
+                    <input type="checkbox" class="post-checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelect('${post.id}')" onclick="event.stopPropagation()">
+                </div>
+                <div class="mb-3" id="content-display-${post.id}">
+                    <p class="text-sm leading-relaxed text-txt mb-1">${escapeHtml(truncate(post.content_text || '', 200))}</p>
+                    <span class="char-count ${charCount > platform.charLimit ? 'over' : charCount > platform.charLimit * 0.9 ? 'near' : ''}">${charCount}/${platform.charLimit}</span>
+                </div>
+                ${hashtags.length > 0 ? `
+                    <div class="flex flex-wrap gap-1 mb-3">
+                        ${hashtags.map(h => `<span class="pill">${escapeHtml(h)}</span>`).join('')}
+                    </div>
+                ` : ''}
+                ${imgHtml}
+                <div class="flex items-center gap-3 text-xs text-txt-3 mb-3">
+                    <span>${scheduledStr}</span>
+                    ${post.content_category ? `<span class="pill">${escapeHtml(post.content_category)}</span>` : ''}
+                </div>
+                <div class="flex items-center gap-2 flex-wrap" onclick="event.stopPropagation()">
+                    ${post.status === 'pending_approval' || post.status === 'draft' ? `
+                        <button onclick="approvePost('${post.id}')" class="btn btn-approve text-xs py-1.5 px-2.5">Approve</button>
+                        <button onclick="openScheduleModal('${post.id}')" class="btn btn-schedule text-xs py-1.5 px-2.5">Schedule</button>
+                        <button onclick="startEdit('${post.id}')" class="btn btn-ghost text-xs py-1.5 px-2.5">Edit</button>
+                        <button onclick="denyPost('${post.id}')" class="btn btn-deny text-xs py-1.5 px-2.5">Deny</button>
+                        <button onclick="deletePost('${post.id}')" class="btn btn-deny text-xs py-1.5 px-2.5" style="opacity:0.6;">Delete</button>
+                    ` : post.status === 'failed' ? `
+                        <button onclick="retryPost('${post.id}')" class="btn btn-approve text-xs py-1.5 px-2.5">Retry</button>
+                        <button onclick="deletePost('${post.id}')" class="btn btn-deny text-xs py-1.5 px-2.5">Delete</button>
+                    ` : `
+                        <button onclick="openDetail('${post.id}')" class="btn btn-ghost text-xs py-1.5 px-2.5">View</button>
+                        ${post.status === 'scheduled' || post.status === 'approved' ? `<button onclick="openScheduleModal('${post.id}')" class="btn btn-schedule text-xs py-1.5 px-2.5">Reschedule</button>` : ''}
+                    `}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function getImageHtml(post) {
+    if (post.media_urls && Array.isArray(post.media_urls) && post.media_urls.length > 0) {
+        return `<div class="mb-3 rounded overflow-hidden"><img src="${escapeHtml(post.media_urls[0])}" class="w-full h-40 object-cover" loading="eager"></div>`;
+    }
+    if (post.image_session_id) {
+        if (imageCache.has(post.image_session_id)) {
+            const cached = imageCache.get(post.image_session_id);
+            return `<div class="mb-3 rounded overflow-hidden"><img src="data:${cached.mime};base64,${cached.data}" class="w-full h-40 object-cover"></div>`;
+        }
+        return `<div class="mb-3 rounded overflow-hidden img-placeholder" data-session="${post.image_session_id}"><div class="skeleton w-full" style="height:160px;"></div></div>`;
+    }
+    return '';
+}
+
+function initImageObserver() {
+    const placeholders = document.querySelectorAll('.img-placeholder[data-session]');
+    if (placeholders.length === 0) return;
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                const sessionId = el.dataset.session;
+                loadBase64Image(sessionId, el);
+                observer.unobserve(el);
+            }
+        });
+    }, { rootMargin: '200px' });
+
+    placeholders.forEach(el => observer.observe(el));
+}
+
+async function loadBase64Image(sessionId, el) {
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/image_sessions?session_id=eq.${sessionId}&select=image_base64,mime_type&limit=1`, { headers });
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0 && data[0].image_base64) {
+            const mime = data[0].mime_type || 'image/png';
+            imageCache.set(sessionId, { data: data[0].image_base64, mime });
+            el.innerHTML = `<img src="data:${mime};base64,${data[0].image_base64}" class="w-full h-40 object-cover">`;
+        } else {
+            el.innerHTML = '<div class="w-full flex items-center justify-center text-txt-3 text-xs" style="height:160px;">No image</div>';
+        }
+    } catch (err) {
+        el.innerHTML = '<div class="w-full flex items-center justify-center text-txt-3 text-xs" style="height:160px;">Image load failed</div>';
+    }
+}
+
+// ═══════════════════════════════════════
+// POST ACTIONS
+// ═══════════════════════════════════════
+async function approvePost(id) {
+    const card = document.getElementById(`card-${id}`);
+    if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
+    try {
+        await writeApi('approve', { id });
+        allPosts = allPosts.filter(p => p.id !== id);
+        updateStats();
+        renderCurrentView();
+        showToast('Post approved', 'success');
+    } catch (err) {
+        if (card) { card.style.opacity = '1'; card.style.pointerEvents = ''; }
+        showToast('Failed to approve: ' + err.message, 'error');
+    }
+}
+
+async function denyPost(id) {
+    const card = document.getElementById(`card-${id}`);
+    if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
+    try {
+        await writeApi('deny', { id });
+        allPosts = allPosts.filter(p => p.id !== id);
+        updateStats();
+        renderCurrentView();
+        showToast('Post denied', 'success');
+    } catch (err) {
+        if (card) { card.style.opacity = '1'; card.style.pointerEvents = ''; }
+        showToast('Failed to deny: ' + err.message, 'error');
+    }
+}
+
+async function retryPost(id) {
+    try {
+        await writeApi('retry', { id });
+        const post = allPosts.find(p => p.id === id);
+        if (post) { post.status = 'approved'; post.error_message = null; }
+        updateStats();
+        renderCurrentView();
+        showToast('Post queued for retry', 'success');
+    } catch (err) {
+        showToast('Failed to retry: ' + err.message, 'error');
+    }
+}
+
+async function deletePost(id) {
+    if (!confirm('Delete this post permanently?')) return;
+    try {
+        await writeApi('delete', { id });
+        allPosts = allPosts.filter(p => p.id !== id);
+        selectedPosts.delete(id);
+        updateStats();
+        renderCurrentView();
+        showToast('Post deleted', 'success');
+    } catch (err) {
+        showToast('Failed to delete: ' + err.message, 'error');
+    }
+}
+
+// ═══════════════════════════════════════
+// INLINE EDITING
+// ═══════════════════════════════════════
+function startEdit(id) {
+    const post = allPosts.find(p => p.id === id);
+    if (!post) return;
+    editingPostId = id;
+    closeDetail();
+
+    setTimeout(() => {
+        const display = document.getElementById(`content-display-${id}`);
+        if (!display) return;
+        const hashtags = Array.isArray(post.hashtags) ? post.hashtags.join(', ') : '';
+        display.innerHTML = `
+            <textarea class="form-input mb-2" id="edit-content-${id}" rows="4" onclick="event.stopPropagation()">${escapeHtml(post.content_text || '')}</textarea>
+            <input type="text" class="form-input mb-2" id="edit-hashtags-${id}" value="${escapeHtml(hashtags)}" placeholder="Hashtags (comma-separated)" onclick="event.stopPropagation()">
+            <div class="flex gap-2" onclick="event.stopPropagation()">
+                <button onclick="saveEdit('${id}')" class="btn btn-approve text-xs py-1.5 px-2.5">Save</button>
+                <button onclick="cancelEdit('${id}')" class="btn btn-ghost text-xs py-1.5 px-2.5">Cancel</button>
+            </div>
+        `;
+        const card = document.getElementById(`card-${id}`);
+        if (card) card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        const textarea = document.getElementById(`edit-content-${id}`);
+        if (textarea) textarea.focus();
+    }, 50);
+}
+
+async function saveEdit(id) {
+    const contentEl = document.getElementById(`edit-content-${id}`);
+    const hashtagsEl = document.getElementById(`edit-hashtags-${id}`);
+    if (!contentEl) return;
+    const content_text = contentEl.value;
+    const hashtags = hashtagsEl.value.split(',').map(h => h.trim()).filter(h => h);
+    try {
+        await writeApi('edit', { id, content_text, hashtags });
+        const post = allPosts.find(p => p.id === id);
+        if (post) { post.content_text = content_text; post.hashtags = hashtags; }
+        editingPostId = null;
+        renderCurrentView();
+        showToast('Post updated', 'success');
+    } catch (err) {
+        showToast('Failed to save: ' + err.message, 'error');
+    }
+}
+
+function cancelEdit(id) {
+    editingPostId = null;
+    renderCurrentView();
+}
+
+// ═══════════════════════════════════════
+// SCHEDULE MODAL
+// ═══════════════════════════════════════
+function openScheduleModal(id) {
+    scheduleTargetId = id;
+    const post = allPosts.find(p => p.id === id);
+    const input = document.getElementById('scheduleDateTime');
+    if (post && post.scheduled_at) {
+        input.value = post.scheduled_at.slice(0, 16);
+    } else {
+        const now = new Date();
+        now.setHours(now.getHours() + 1, 0, 0, 0);
+        input.value = toLocalDateTimeString(now);
+    }
+    document.getElementById('scheduleModal').classList.add('active');
+}
+
+function closeScheduleModal() {
+    document.getElementById('scheduleModal').classList.remove('active');
+    scheduleTargetId = null;
+}
+
+async function confirmSchedule() {
+    if (!scheduleTargetId) return;
+    const dt = document.getElementById('scheduleDateTime').value;
+    if (!dt) { showToast('Please select a date and time', 'error'); return; }
+
+    const scheduled_at = new Date(dt).toISOString();
+    try {
+        await writeApi('schedule', { id: scheduleTargetId, scheduled_at });
+        allPosts = allPosts.filter(p => p.id !== scheduleTargetId);
+        closeScheduleModal();
+        updateStats();
+        renderCurrentView();
+        showToast('Post scheduled', 'success');
+    } catch (err) {
+        showToast('Failed to schedule: ' + err.message, 'error');
+    }
+}
+
+// ═══════════════════════════════════════
+// BULK ACTIONS — Content Posts
+// ═══════════════════════════════════════
+function toggleSelect(id) {
+    if (selectedPosts.has(id)) { selectedPosts.delete(id); } else { selectedPosts.add(id); }
+    updateBulkBar();
+}
+
+function updateBulkBar() {
+    const bar = document.getElementById('bulkBar');
+    const count = selectedPosts.size;
+    document.getElementById('bulkCount').textContent = `${count} selected`;
+    bar.classList.toggle('visible', count > 0);
+}
+
+function bulkDeselect() {
+    selectedPosts.clear();
+    updateBulkBar();
+    renderCurrentView();
+}
+
+async function bulkApprove() {
+    const ids = [...selectedPosts];
+    let success = 0;
+    for (const id of ids) {
+        try {
+            await writeApi('approve', { id });
+            const post = allPosts.find(p => p.id === id);
+            if (post) { post.status = 'approved'; post.approved_at = new Date().toISOString(); }
+            success++;
+        } catch (e) { /* continue */ }
+    }
+    selectedPosts.clear();
+    updateStats();
+    renderCurrentView();
+    showToast(`Approved ${success} of ${ids.length} posts`, 'success');
+}
+
+function bulkScheduleOpen() {
+    scheduleTargetId = '__bulk__';
+    const now = new Date();
+    now.setHours(now.getHours() + 1, 0, 0, 0);
+    document.getElementById('scheduleDateTime').value = toLocalDateTimeString(now);
+    document.getElementById('scheduleModal').classList.add('active');
+}
+
+const _origConfirmSchedule = confirmSchedule;
+confirmSchedule = async function() {
+    if (scheduleTargetId !== '__bulk__') return _origConfirmSchedule();
+
+    const dt = document.getElementById('scheduleDateTime').value;
+    if (!dt) { showToast('Please select a date and time', 'error'); return; }
+
+    const baseDate = new Date(dt);
+    const ids = [...selectedPosts];
+    let success = 0;
+
+    for (let i = 0; i < ids.length; i++) {
+        const scheduled_at = new Date(baseDate.getTime() + i * 60 * 60 * 1000).toISOString();
+        try {
+            await writeApi('schedule', { id: ids[i], scheduled_at });
+            const post = allPosts.find(p => p.id === ids[i]);
+            if (post) { post.status = 'scheduled'; post.scheduled_at = scheduled_at; }
+            success++;
+        } catch (e) { /* continue */ }
+    }
+
+    selectedPosts.clear();
+    closeScheduleModal();
+    updateStats();
+    renderCurrentView();
+    showToast(`Scheduled ${success} of ${ids.length} posts (1 hour apart)`, 'success');
+};
+
+// ═══════════════════════════════════════
+// QUEUE TABLE VIEW
+// ═══════════════════════════════════════
+function renderQueueTable() {
+    const body = document.getElementById('queueBody');
+    let posts = getFilteredPosts();
+
+    posts.sort((a, b) => {
+        let va = a[currentSort.col];
+        let vb = b[currentSort.col];
+        if (va == null) va = '';
+        if (vb == null) vb = '';
+        if (typeof va === 'string') va = va.toLowerCase();
+        if (typeof vb === 'string') vb = vb.toLowerCase();
+        if (va < vb) return currentSort.dir === 'asc' ? -1 : 1;
+        if (va > vb) return currentSort.dir === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const total = posts.length;
+    const start = queuePage * PAGE_SIZE;
+    const paged = posts.slice(start, start + PAGE_SIZE);
+    const end = Math.min(start + PAGE_SIZE, total);
+
+    document.getElementById('paginationInfo').textContent = total > 0 ? `${start + 1}–${end} of ${total}` : 'No posts';
+    document.getElementById('prevPageBtn').disabled = queuePage === 0;
+    document.getElementById('nextPageBtn').disabled = end >= total;
+
+    document.querySelectorAll('#queueTable th').forEach(th => {
+        th.classList.toggle('sorted', th.dataset.col === currentSort.col);
+        const arrow = th.querySelector('.sort-arrow');
+        if (arrow) arrow.textContent = th.dataset.col === currentSort.col ? (currentSort.dir === 'asc' ? ' ↑' : ' ↓') : '';
+    });
+
+    if (paged.length === 0) {
+        body.innerHTML = '<tr><td colspan="8" class="empty-state py-8">No posts matching your filters</td></tr>';
+        return;
+    }
+
+    body.innerHTML = paged.map(post => {
+        const platform = PLATFORMS[post.platform] || { label: post.platform, color: '#8A95A9' };
+        const statusCfg = STATUS_CONFIG[post.status] || { label: post.status, badgeClass: 'badge-draft' };
+        const priorityCfg = PRIORITY_MAP[post.priority] || PRIORITY_MAP[3];
+
+        return `
+            <tr onclick="openDetail('${post.id}')">
+                <td><span class="badge badge-${post.platform}">${platform.label}</span></td>
+                <td class="text-txt-2 text-xs">${escapeHtml(post.post_type || '—')}</td>
+                <td><span class="badge ${statusCfg.badgeClass}">${statusCfg.label}</span></td>
+                <td class="text-sm max-w-[200px] truncate">${escapeHtml(truncate(post.content_text || '', 60))}</td>
+                <td class="text-xs text-txt-2 whitespace-nowrap">${post.scheduled_at ? formatDateTime(post.scheduled_at) : '—'}</td>
+                <td class="text-xs text-txt-2 whitespace-nowrap">${post.posted_at ? formatDateTime(post.posted_at) : '—'}</td>
+                <td><span class="badge ${priorityCfg.badgeClass}">${priorityCfg.label}</span></td>
+                <td onclick="event.stopPropagation()">
+                    <div class="flex items-center gap-1">
+                        <button onclick="openDetail('${post.id}')" class="btn btn-ghost text-xs py-1 px-2" title="View">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3" stroke="currentColor" stroke-width="1"/><path d="M1 6c1.5-3 3.5-4 5-4s3.5 1 5 4c-1.5 3-3.5 4-5 4S2.5 9 1 6z" stroke="currentColor" stroke-width="1"/></svg>
+                        </button>
+                        <button onclick="deletePost('${post.id}')" class="btn btn-ghost text-xs py-1 px-2 hover:text-alert" title="Delete">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        ${post.status === 'failed' ? `
+                            <button onclick="retryPost('${post.id}')" class="btn btn-ghost text-xs py-1 px-2 hover:text-accent" title="Retry">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function sortTable(col) {
+    if (currentSort.col === col) {
+        currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.col = col;
+        currentSort.dir = 'asc';
+    }
+    renderQueueTable();
+}
+
+function changePage(delta) {
+    queuePage = Math.max(0, queuePage + delta);
+    renderQueueTable();
+}
+
+// ═══════════════════════════════════════
+// CALENDAR VIEW
+// ═══════════════════════════════════════
+function renderCalendar() {
+    if (calendarViewMode === 'week') { renderWeekView(); } else { renderMonthView(); }
+}
+
+function setCalView(mode) {
+    calendarViewMode = mode;
+    document.querySelectorAll('.view-btn[data-cal]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.cal === mode);
+    });
+    renderCalendar();
+}
+
+function calNav(delta) {
+    if (calendarViewMode === 'week') {
+        calendarDate.setDate(calendarDate.getDate() + delta * 7);
+    } else {
+        calendarDate.setMonth(calendarDate.getMonth() + delta);
+    }
+    renderCalendar();
+}
+
+function calToday() { calendarDate = new Date(); renderCalendar(); }
+
+function getMonday(d) {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    date.setDate(diff);
+    date.setHours(0, 0, 0, 0);
+    return date;
+}
+
+function renderWeekView() {
+    const container = document.getElementById('calendarGrid');
+    const monday = getMonday(calendarDate);
+    const sunday = new Date(monday);
+    sunday.setDate(sunday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+    document.getElementById('calTitle').textContent = `${formatDateShort(monday)} — ${formatDateShort(sunday)}`;
+    const weekPosts = allPosts.filter(p => {
+        if (!p.scheduled_at || p.status === 'failed') return false;
+        const d = new Date(p.scheduled_at);
+        return d >= monday && d <= sunday;
+    });
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const days = [];
+    for (let i = 0; i < 7; i++) { const d = new Date(monday); d.setDate(d.getDate() + i); days.push(d); }
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    let html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);">';
+    days.forEach((d, i) => {
+        const isToday = d.getTime() === today.getTime();
+        html += `<div class="cal-header ${isToday ? 'text-accent' : ''}">${dayNames[i]} ${d.getDate()}</div>`;
+    });
+    days.forEach(d => {
+        const dayStart = new Date(d); dayStart.setHours(0, 0, 0, 0);
+        const dayEnd = new Date(d); dayEnd.setHours(23, 59, 59, 999);
+        const isToday = d.getTime() === today.getTime();
+        const dayPosts = weekPosts.filter(p => { const pd = new Date(p.scheduled_at); return pd >= dayStart && pd <= dayEnd; }).sort((a, b) => new Date(a.scheduled_at) - new Date(b.scheduled_at));
+        html += `<div class="cal-cell ${isToday ? 'today' : ''}">`;
+        dayPosts.forEach(post => {
+            const platform = PLATFORMS[post.platform] || { label: post.platform, color: '#8A95A9', dimBg: 'rgba(138,149,169,0.08)' };
+            const time = new Date(post.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const statusIcon = post.status === 'posted' ? '&#10003;' : post.status === 'failed' ? '&#10007;' : '&#9679;';
+            const statusColor = post.status === 'posted' ? '#10B981' : post.status === 'failed' ? '#FF6B6B' : '#8A95A9';
+            html += `<div class="cal-event" style="background:${platform.dimBg};border-left-color:${platform.color};color:${platform.color};" onclick="openDetail('${post.id}')" title="${escapeHtml(post.content_text || '')}">
+                <span style="color:${statusColor};font-size:0.55rem;margin-right:2px;">${statusIcon}</span>
+                <span style="color:#8A95A9;margin-right:3px;">${time}</span>
+                ${truncate(post.content_text || '', 25)}
+            </div>`;
+        });
+        if (dayPosts.length === 0) { html += '<div class="text-xs text-txt-3 opacity-40 pt-4 text-center">—</div>'; }
+        html += '</div>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function renderMonthView() {
+    const container = document.getElementById('calendarGrid');
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+    document.getElementById('calTitle').textContent = calendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDow = (firstDay.getDay() + 6) % 7;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const monthStart = new Date(year, month, 1 - startDow);
+    const totalCells = Math.ceil((startDow + lastDay.getDate()) / 7) * 7;
+    const monthEnd = new Date(monthStart); monthEnd.setDate(monthEnd.getDate() + totalCells);
+    const monthPosts = allPosts.filter(p => { if (!p.scheduled_at) return false; const d = new Date(p.scheduled_at); return d >= monthStart && d < monthEnd; });
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    let html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);">';
+    dayNames.forEach(name => { html += `<div class="cal-header">${name}</div>`; });
+    const cellDate = new Date(monthStart);
+    for (let i = 0; i < totalCells; i++) {
+        const isCurrentMonth = cellDate.getMonth() === month;
+        const cellStart = new Date(cellDate); cellStart.setHours(0, 0, 0, 0);
+        const cellEnd = new Date(cellDate); cellEnd.setHours(23, 59, 59, 999);
+        const isToday = cellStart.getTime() === today.getTime();
+        const dayPosts = monthPosts.filter(p => { const pd = new Date(p.scheduled_at); return pd >= cellStart && pd <= cellEnd; });
+        const platformCounts = {};
+        dayPosts.forEach(p => { platformCounts[p.platform] = (platformCounts[p.platform] || 0) + 1; });
+        html += `<div class="cal-cell ${isToday ? 'today' : ''} ${!isCurrentMonth ? 'other-month' : ''}" style="min-height:80px;">`;
+        html += `<div class="cal-day-num ${isToday ? 'text-accent' : ''}">${cellDate.getDate()}</div>`;
+        if (dayPosts.length > 0) {
+            html += '<div class="flex flex-wrap gap-1">';
+            Object.entries(platformCounts).forEach(([platform, count]) => {
+                const color = (PLATFORMS[platform] || {}).color || '#8A95A9';
+                html += `<span class="inline-flex items-center gap-0.5" style="font-size:0.55rem;color:${color};"><span style="width:5px;height:5px;border-radius:50%;background:${color};display:inline-block;"></span>${count}</span>`;
+            });
+            html += '</div>';
+        }
+        html += '</div>';
+        cellDate.setDate(cellDate.getDate() + 1);
+    }
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// ═══════════════════════════════════════
+// DETAIL SLIDE-OUT PANEL
+// ═══════════════════════════════════════
+function openDetail(id) {
+    const post = allPosts.find(p => String(p.id) === String(id));
+    if (!post) return;
+    const panel = document.getElementById('detailPanel');
+    const content = document.getElementById('detailContent');
+    const platform = PLATFORMS[post.platform] || { label: post.platform, color: '#8A95A9', charLimit: 5000 };
+    const statusCfg = STATUS_CONFIG[post.status] || { label: post.status, badgeClass: 'badge-draft' };
+    const priorityCfg = PRIORITY_MAP[post.priority] || PRIORITY_MAP[3];
+    const hashtags = Array.isArray(post.hashtags) ? post.hashtags : [];
+    const charCount = (post.content_text || '').length;
+    let imgHtml = '';
+    if (post.media_urls && Array.isArray(post.media_urls) && post.media_urls.length > 0) {
+        imgHtml = `<div class="rounded-lg overflow-hidden border border-border"><img src="${escapeHtml(post.media_urls[0])}" class="w-full" loading="eager"></div>`;
+    } else if (post.image_session_id && imageCache.has(post.image_session_id)) {
+        const cached = imageCache.get(post.image_session_id);
+        imgHtml = `<div class="rounded-lg overflow-hidden border border-border"><img src="data:${cached.mime};base64,${cached.data}" class="w-full"></div>`;
+    }
+    content.innerHTML = `
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="badge badge-${post.platform}" style="font-size:0.7rem;padding:0.25rem 0.5rem;">${platform.label}</span>
+            <span class="badge ${statusCfg.badgeClass}" style="font-size:0.7rem;padding:0.25rem 0.5rem;">${statusCfg.label}</span>
+            <span class="badge ${priorityCfg.badgeClass}" style="font-size:0.7rem;padding:0.25rem 0.5rem;">${priorityCfg.label}</span>
+        </div>
+        <div>
+            <div class="text-xs text-txt-3 font-mono uppercase tracking-wide mb-2">Content</div>
+            <p class="text-sm leading-relaxed text-txt whitespace-pre-wrap">${escapeHtml(post.content_text || 'No content')}</p>
+            <span class="char-count mt-1 ${charCount > platform.charLimit ? 'over' : ''}">${charCount}/${platform.charLimit}</span>
+        </div>
+        ${hashtags.length > 0 ? `<div><div class="text-xs text-txt-3 font-mono uppercase tracking-wide mb-2">Hashtags</div><div class="flex flex-wrap gap-1">${hashtags.map(h => `<span class="pill">${escapeHtml(h)}</span>`).join('')}</div></div>` : ''}
+        ${imgHtml}
+        <div>
+            <div class="text-xs text-txt-3 font-mono uppercase tracking-wide mb-2">Details</div>
+            <div class="space-y-1.5 text-sm">
+                ${post.content_category ? `<div class="flex justify-between"><span class="text-txt-3">Category</span><span class="pill">${escapeHtml(post.content_category)}</span></div>` : ''}
+                ${post.post_type ? `<div class="flex justify-between"><span class="text-txt-3">Type</span><span class="text-txt-2">${escapeHtml(post.post_type)}</span></div>` : ''}
+                <div class="flex justify-between"><span class="text-txt-3">Created</span><span class="text-txt-2">${post.created_at ? formatDateTime(post.created_at) : '—'}</span></div>
+                <div class="flex justify-between"><span class="text-txt-3">Scheduled</span><span class="text-txt-2">${post.scheduled_at ? formatDateTime(post.scheduled_at) : '—'}</span></div>
+                ${post.approved_at ? `<div class="flex justify-between"><span class="text-txt-3">Approved</span><span class="text-txt-2">${formatDateTime(post.approved_at)}</span></div>` : ''}
+                ${post.posted_at ? `<div class="flex justify-between"><span class="text-txt-3">Posted</span><span class="text-txt-2">${formatDateTime(post.posted_at)}</span></div>` : ''}
+                ${post.error_message ? `<div class="mt-2 p-2 rounded border border-alert/20 bg-alert-dim text-alert text-xs">${escapeHtml(post.error_message)}</div>` : ''}
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-2 pt-2 border-t border-border">
+            ${post.status === 'pending_approval' || post.status === 'draft' ? `
+                <button onclick="approvePost('${post.id}');closeDetail();" class="btn btn-approve text-xs py-1.5 px-3">Approve</button>
+                <button onclick="openScheduleModal('${post.id}')" class="btn btn-schedule text-xs py-1.5 px-3">Schedule</button>
+                <button onclick="startEdit('${post.id}')" class="btn btn-ghost text-xs py-1.5 px-3">Edit</button>
+                <button onclick="denyPost('${post.id}');closeDetail();" class="btn btn-deny text-xs py-1.5 px-3">Deny</button>
+            ` : post.status === 'scheduled' || post.status === 'approved' ? `
+                <button onclick="openScheduleModal('${post.id}')" class="btn btn-schedule text-xs py-1.5 px-3">Reschedule</button>
+            ` : post.status === 'failed' ? `
+                <button onclick="retryPost('${post.id}');closeDetail();" class="btn btn-approve text-xs py-1.5 px-3">Retry</button>
+            ` : ''}
+            <button onclick="deletePost('${post.id}');closeDetail();" class="btn btn-deny text-xs py-1.5 px-3">Delete</button>
+        </div>
+        <div class="text-xs text-txt-3 font-mono opacity-50 pt-2">${post.id || ''}</div>
+    `;
+    document.getElementById('detailBackdrop').classList.add('open');
+    panel.classList.add('open');
+}
+
+function closeDetail() {
+    document.getElementById('detailBackdrop').classList.remove('open');
+    document.getElementById('detailPanel').classList.remove('open');
+}
+
+// ═══════════════════════════════════════
+// QUICK POST MODAL
+// ═══════════════════════════════════════
+function openQuickPost() {
+    document.getElementById('quickPostForm').reset();
+    document.getElementById('qpCharCount').textContent = '0';
+    document.getElementById('qpCharCount').className = 'char-count';
+    document.getElementById('quickPostModal').classList.add('active');
+}
+function closeQuickPost() { document.getElementById('quickPostModal').classList.remove('active'); }
+
+function updateCharCount() {
+    const textarea = document.getElementById('qpContent');
+    const len = textarea.value.length;
+    const checked = document.querySelectorAll('input[name="platforms"]:checked');
+    let minLimit = 63206;
+    checked.forEach(cb => { const p = PLATFORMS[cb.value]; if (p && p.charLimit < minLimit) minLimit = p.charLimit; });
+    if (checked.length === 0) minLimit = 5000;
+    const counter = document.getElementById('qpCharCount');
+    counter.textContent = `${len}/${minLimit}`;
+    counter.className = 'char-count' + (len > minLimit ? ' over' : len > minLimit * 0.9 ? ' near' : '');
+}
+
+document.querySelectorAll('input[name="platforms"]').forEach(cb => { cb.addEventListener('change', updateCharCount); });
+
+async function handleQuickPost(e) {
+    e.preventDefault();
+    const form = e.target;
+    const platforms = [...form.querySelectorAll('input[name="platforms"]:checked')].map(cb => cb.value);
+    if (platforms.length === 0) { showToast('Select at least one platform', 'error'); return false; }
+    const content_text = form.content_text.value.trim();
+    if (!content_text) { showToast('Content is required', 'error'); return false; }
+    const hashtagsRaw = form.hashtags.value;
+    const hashtags = hashtagsRaw ? hashtagsRaw.split(',').map(h => h.trim().replace(/^#?/, '#')).filter(h => h.length > 1) : [];
+    const scheduled_at = form.scheduled_at.value ? new Date(form.scheduled_at.value).toISOString() : null;
+    const priority = parseInt(form.priority.value) || 3;
+    const content_category = form.content_category.value.trim() || null;
+    const post_type = form.post_type.value;
+    let created = 0;
+    for (const platform of platforms) {
+        try {
+            const status = scheduled_at ? 'scheduled' : 'pending_approval';
+            await writeApi('create', { platform, content_text, hashtags, scheduled_at, priority, content_category, post_type, status });
+            created++;
+        } catch (err) { showToast(`Failed for ${platform}: ${err.message}`, 'error'); }
+    }
+    if (created > 0) { closeQuickPost(); showToast(`Created ${created} post(s)`, 'success'); await refreshData(); }
+    return false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+//
+//  OUTREACH TAB — DM & Engagement Prospecting
+//
+// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════
+// OUTREACH — DATA LOADING
+// ═══════════════════════════════════════
+async function supabaseRpc(fnName, params) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fnName}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(params),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+
+async function refreshOutreach() {
+    const btn = document.getElementById('refreshBtn');
+    btn.disabled = true;
+    try {
+        await Promise.all([
+            fetchDailyCounters(),
+            fetchOutreachQueue(),
+            fetchActiveConversations(),
+            fetchConversionFunnel(),
+            fetchHistoryStats(),
+        ]);
+        showToast('Outreach data loaded', 'success');
+    } catch (err) {
+        console.error('Outreach fetch error:', err);
+        showToast('Failed to load outreach data: ' + err.message, 'error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+async function fetchDailyCounters() {
+    try {
+        dailyCounts = await supabaseRpc('get_social_daily_counts', { p_brand_id: 'carlton' });
+        if (!Array.isArray(dailyCounts)) dailyCounts = [];
+        renderDailyCounters();
+    } catch (e) {
+        dailyCounts = [];
+        document.getElementById('dailyCounters').innerHTML = '<div class="text-xs text-txt-3 py-2">No daily counter data available</div>';
+    }
+}
+
+async function fetchOutreachQueue() {
+    try {
+        const qt = queueType === 'conversations' ? 'approval' : queueType;
+        const result = await supabaseRpc('get_pending_social_drafts', {
+            p_brand_id: 'carlton',
+            p_queue_type: qt,
+            p_platform: outPlatformFilter,
+            p_outreach_type: outreachType,
+            p_limit: 50,
+            p_offset: 0,
+        });
+        socialDrafts = (result && result.drafts) ? result.drafts : (Array.isArray(result) ? result : []);
+        if (queueType !== 'conversations') renderOutreachView();
+    } catch (e) {
+        socialDrafts = [];
+        if (queueType !== 'conversations') renderOutreachView();
+    }
+}
+
+async function fetchActiveConversations() {
+    try {
+        const result = await supabaseRpc('get_active_conversations', {
+            p_brand_id: 'carlton',
+            p_platform: outPlatformFilter,
+        });
+        activeConversations = (result && result.conversations) ? result.conversations : (Array.isArray(result) ? result : []);
+        if (queueType === 'conversations') renderOutreachView();
+    } catch (e) {
+        activeConversations = [];
+        if (queueType === 'conversations') renderOutreachView();
+    }
+}
+
+// ═══════════════════════════════════════
+// OUTREACH — DAILY COUNTERS
+// ═══════════════════════════════════════
+function renderDailyCounters() {
+    const container = document.getElementById('dailyCounters');
+    if (!dailyCounts || dailyCounts.length === 0) {
+        container.innerHTML = '<div class="text-xs text-txt-3 py-2">No daily counter data</div>';
+        return;
+    }
+    container.innerHTML = dailyCounts.map(c => {
+        const platform = PLATFORMS[c.platform] || { label: c.platform || c.display_name, color: '#8A95A9' };
+        const dmPct = c.dm_limit > 0 ? (c.dm_count / c.dm_limit) * 100 : 0;
+        const engPct = c.engagement_limit > 0 ? (c.engagement_count / c.engagement_limit) * 100 : 0;
+        const dmClass = dmPct >= 100 ? 'counter-red' : dmPct >= 70 ? 'counter-amber' : 'counter-green';
+        const engClass = engPct >= 100 ? 'counter-red' : engPct >= 70 ? 'counter-amber' : 'counter-green';
+        return `
+            <div class="daily-badge ${dmClass}">
+                <span style="color:${platform.color};font-weight:600;font-size:0.65rem;">${platform.label}</span>
+                <span class="font-mono text-xs">DM ${c.dm_count || 0}/${c.dm_limit || 0}</span>
+            </div>
+            <div class="daily-badge ${engClass}">
+                <span style="color:${platform.color};font-weight:600;font-size:0.65rem;">${platform.label}</span>
+                <span class="font-mono text-xs">ENG ${c.engagement_count || 0}/${c.engagement_limit || 0}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+// ═══════════════════════════════════════
+// OUTREACH — TAB SWITCHING
+// ═══════════════════════════════════════
+function setOutreachType(type) {
+    outreachType = type;
+    document.getElementById('outTabDm').classList.toggle('active', type === 'dm');
+    document.getElementById('outTabEng').classList.toggle('active', type === 'engagement');
+    selectedOutreachDrafts.clear();
+    updateOutreachBulkBar();
+    fetchOutreachQueue();
+}
+
+function setQueueType(type) {
+    queueType = type;
+    document.getElementById('outSubApproval').classList.toggle('active', type === 'approval');
+    document.getElementById('outSubAction').classList.toggle('active', type === 'action');
+    document.getElementById('outSubConvo').classList.toggle('active', type === 'conversations');
+    selectedOutreachDrafts.clear();
+    updateOutreachBulkBar();
+    if (type === 'conversations') {
+        fetchActiveConversations();
+    } else {
+        fetchOutreachQueue();
+    }
+}
+
+function setOutPlatformFilter(platform) {
+    outPlatformFilter = platform;
+    document.querySelectorAll('[data-oplatform]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.oplatform === (platform || 'all'));
+    });
+    if (queueType === 'conversations') {
+        fetchActiveConversations();
+    } else {
+        fetchOutreachQueue();
+    }
+}
+
+// ═══════════════════════════════════════
+// OUTREACH — SEARCH
+// ═══════════════════════════════════════
+function applyOutreachSearch() {
+    outreachSearch = document.getElementById('outreachSearchInput').value.toLowerCase().trim();
+    document.getElementById('outreachSearchClear').style.display = outreachSearch ? '' : 'none';
+    renderOutreachView();
+}
+
+function clearOutreachSearch() {
+    document.getElementById('outreachSearchInput').value = '';
+    outreachSearch = '';
+    document.getElementById('outreachSearchClear').style.display = 'none';
+    document.getElementById('outreachResultCount').textContent = '';
+    renderOutreachView();
+}
+
+// ═══════════════════════════════════════
+// OUTREACH — MANUAL DISCOVERY TRIGGER
+// ═══════════════════════════════════════
+async function triggerDiscovery() {
+    const platform = document.getElementById('discoveryPlatformSelect').value || null;
+    const btn = document.getElementById('runDiscoveryBtn');
+    btn.disabled = true; btn.textContent = 'Starting...';
+    try {
+        await fetch(`${N8N_BASE}/social-orchestrator`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ brand_id: 'carlton', platform, user_id: activeProfileId }),
+        });
+        const label = platform ? PLATFORMS[platform]?.label || platform : 'all platforms';
+        showToast(`Discovery started for ${label} (may take 1-10 min)`, 'success');
+    } catch (err) {
+        showToast('Failed to trigger discovery: ' + err.message, 'error');
+    } finally {
+        setTimeout(() => { btn.disabled = false; btn.textContent = 'Run Discovery'; }, 5000);
+    }
+}
+
+async function triggerRedditDiscovery(mode) {
+    const btnId = mode === 'wave_catcher' ? 'runWaveBtn' : 'runPainBtn';
+    const btn = document.getElementById(btnId);
+    btn.disabled = true; const origText = btn.textContent; btn.textContent = '...';
+    try {
+        await fetch(`${N8N_BASE}/social-reddit-orch`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ brand_id: 'carlton', mode, user_id: activeProfileId }),
+        });
+        const label = mode === 'wave_catcher' ? 'Wave Catcher' : 'Pain Prospector';
+        showToast(`Reddit ${label} started`, 'success');
+    } catch (err) {
+        showToast('Failed: ' + err.message, 'error');
+    } finally {
+        setTimeout(() => { btn.disabled = false; btn.textContent = origText; }, 5000);
+    }
+}
+
+function filterByName(items) {
+    if (!outreachSearch) return items;
+    return items.filter(item => {
+        const name = (item.target_name || item.name || '').toLowerCase();
+        const username = (item.target_username || item.username || '').toLowerCase();
+        const company = (item.company || '').toLowerCase();
+        const threadTitle = (item.thread_title || '').toLowerCase();
+        return name.includes(outreachSearch) || username.includes(outreachSearch) || company.includes(outreachSearch) || threadTitle.includes(outreachSearch);
+    });
+}
+
+// ═══════════════════════════════════════
+// OUTREACH — RENDERING
+// ═══════════════════════════════════════
+function renderOutreachView() {
+    const container = document.getElementById('outreachCards');
+
+    updateRedditTypeCounts();
+
+    if (queueType === 'conversations') {
+        const filtered = filterByName(activeConversations);
+        updateOutreachResultCount(filtered.length, activeConversations.length);
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty-state py-12">No active conversations' + (outreachSearch ? ' matching "' + escapeHtml(outreachSearch) + '"' : '') + '</div>';
+            return;
+        }
+        container.innerHTML = filtered.map(c => renderConvoCard(c)).join('');
+    } else {
+        const filtered = filterByName(socialDrafts);
+        updateOutreachResultCount(filtered.length, socialDrafts.length);
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty-state py-12">No ' + (queueType === 'approval' ? 'drafts needing approval' : 'items ready to act on') + (outreachSearch ? ' matching "' + escapeHtml(outreachSearch) + '"' : '') + '</div>';
+            return;
+        }
+        if (queueType === 'approval') {
+            container.innerHTML = filtered.map(d => renderApprovalCard(d)).join('');
+        } else {
+            container.innerHTML = filtered.map(d => renderActionCard(d)).join('');
+        }
+    }
+}
+
+function updateRedditTypeCounts() {
+    const waveBadge = document.getElementById('redditWaveCount');
+    const painBadge = document.getElementById('redditPainCount');
+    let waveCount = 0, painCount = 0;
+    socialDrafts.forEach(d => {
+        if (d.platform === 'reddit') {
+            const t = getRedditCardType(d);
+            if (t === 'wave') waveCount++;
+            else if (t === 'pain') painCount++;
+        }
+    });
+    if (waveBadge) { waveBadge.textContent = waveCount; waveBadge.style.display = waveCount > 0 ? '' : 'none'; }
+    if (painBadge) { painBadge.textContent = painCount; painBadge.style.display = painCount > 0 ? '' : 'none'; }
+}
+
+function updateOutreachResultCount(shown, total) {
+    const el = document.getElementById('outreachResultCount');
+    if (outreachSearch) {
+        el.textContent = `${shown} of ${total}`;
+    } else {
+        el.textContent = total > 0 ? `${total} items` : '';
+    }
+}
+
+function getRedditCardType(draft) {
+    // discovery_type is now a top-level field from the RPC join
+    const dt = draft.discovery_type
+        || draft.generation_context?.discovery_type
+        || draft.engagement_subtype;
+    switch (dt) {
+        case 'wave_catcher': case 'reddit_wave_comment': return 'wave';
+        case 'pain_prospector': case 'reddit_pain_comment': return 'pain';
+        default: return 'standard';
+    }
+}
+
+function highlightPhrase(text, phrase) {
+    if (!phrase || !text) return escapeHtml(text);
+    const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escaped})`, 'gi');
+    return escapeHtml(text).replace(regex, '<span class="pain-highlight">$1</span>');
+}
+
+function postAge(createdAt) {
+    if (!createdAt) return '';
+    const diff = Date.now() - new Date(createdAt).getTime();
+    const mins = Math.floor(diff / 60000);
+    const hrs = Math.floor(mins / 60);
+    const stale = hrs >= 6;
+    let label = '';
+    if (mins < 60) label = `${mins}m ago`;
+    else if (hrs < 24) label = `${hrs}h ago`;
+    else label = `${Math.floor(hrs / 24)}d ago`;
+    return `<span class="${stale ? 'post-age-stale' : 'post-age-fresh'}" title="${stale ? 'Wave may be fading' : 'Fresh post'}">Posted ${label}</span>`;
+}
+
+function getDraftDisplayName(draft) {
+    const rsd = draft.raw_scrape_data || {};
+    return draft.target_name || draft.display_name || draft.platform_username
+        || rsd.author?.displayName || rsd.author?.name || rsd.displayName
+        || rsd.ownerUsername || rsd.userName
+        || (draft.platform_username ? '@' + draft.platform_username : null)
+        || 'Unknown';
+}
+
+function renderApprovalCard(draft) {
+    const platform = PLATFORMS[draft.platform] || { label: draft.platform, color: '#8A95A9' };
+    const name = getDraftDisplayName(draft);
+    const bio = draft.target_bio || draft.bio || draft.raw_scrape_data?.author?.description || '';
+    const company = draft.raw_scrape_data?.company || draft.company || '';
+    const followers = draft.follower_count ? `${formatNum(draft.follower_count)} followers` : '';
+    const score = draft.relevance_score || draft.score || '';
+    const message = draft.draft_content || draft.message_content || draft.content || '';
+    const reasoning = draft.classification_reason || draft.ai_reasoning || '';
+    const profileUrl = draft.target_profile_url || draft.target_url || '';
+    const threadUrl = draft.thread_url || '';
+    const targetUrl = draft.target_url || '';
+    const redraftCount = draft.revision_count || draft.redraft_count || 0;
+    const maxRedrafts = draft.max_revisions || draft.max_redrafts || 3;
+    const isReddit = draft.platform === 'reddit';
+    const isSelected = selectedOutreachDrafts.has(draft.id);
+    const contactId = draft.contact_id || '';
+    const redditType = isReddit ? getRedditCardType(draft) : null;
+    const otype = draft.outreach_type || outreachType;
+    const snippet = draft.target_content_snippet || '';
+
+    // ── Build link: engagement→post/thread link, dm→profile link ──
+    let linkLabel, linkUrl;
+    if (isReddit) {
+        linkUrl = threadUrl || targetUrl; linkLabel = 'Open Thread →';
+    } else if (otype === 'engagement' && targetUrl) {
+        linkUrl = targetUrl; linkLabel = draft.platform === 'facebook' ? 'View Post →' : draft.platform === 'twitter' ? 'View Tweet →' : 'View Post →';
+    } else {
+        linkUrl = profileUrl; linkLabel = 'View Profile →';
+    }
+    const linkHtml = linkUrl
+        ? `<a href="${escapeHtml(linkUrl)}" target="_blank" class="text-xs text-txt-3 hover:text-accent transition-colors" title="${escapeHtml(linkLabel)}">${linkLabel}</a>`
+        : '';
+
+    // ── Action buttons (shared across all card types) ──
+    const actionsHtml = `
+        <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="approveSocialDraft(${draft.id})" class="btn btn-approve text-xs py-1.5 px-2.5">Approve</button>
+            <button onclick="startSocialEdit(${draft.id})" class="btn btn-ghost text-xs py-1.5 px-2.5">Edit</button>
+            <button onclick="openRedraftModal(${draft.id})" class="btn btn-regenerate text-xs py-1.5 px-2.5">Redraft (${redraftCount}/${maxRedrafts})</button>
+            <button onclick="skipSocialDraft(${draft.id})" class="btn btn-skip text-xs py-1.5 px-2.5">Skip</button>
+            <span class="mx-1"></span>
+            <button onclick="copyToClip(\`${escapeHtml(message).replace(/`/g, '\\`')}\`)" class="btn btn-copy text-xs py-1.5 px-2.5">Copy</button>
+            <button onclick="quickActDraft(${draft.id})" class="btn btn-primary text-xs py-1.5 px-2.5" style="background:rgba(6,214,160,0.2);border-color:rgba(6,214,160,0.4);">Done &#10003;</button>
+        </div>
+    `;
+
+    // ══════════════════════════════════════
+    // REDDIT: WAVE CATCHER CARD
+    // ══════════════════════════════════════
+    if (redditType === 'wave') {
+        const subreddit = draft.subreddit || draft.raw_scrape_data?.subreddit || '';
+        const threadTitle = draft.thread_title || '';
+        const postCreatedAt = draft.raw_scrape_data?.created_utc ? new Date(draft.raw_scrape_data.created_utc * 1000) : null;
+        const commentCount = draft.raw_scrape_data?.num_comments ?? draft.target?.comment_count ?? '';
+
+        return `
+            <div class="outreach-card" id="out-card-${draft.id}" style="border-left: 3px solid #2DD4BF;cursor:pointer;" onclick="openOutreachDetail(${draft.id})">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <input type="checkbox" class="post-checkbox" ${isSelected ? 'checked' : ''} onchange="toggleOutreachSelect(${draft.id})" onclick="event.stopPropagation()">
+                        <span class="badge badge-wave">Wave</span>
+                        <span class="badge badge-reddit">Reddit</span>
+                        ${subreddit ? `<span class="text-sm font-semibold text-txt">r/${escapeHtml(subreddit)}</span>` : ''}
+                    </div>
+                    <div class="flex items-center gap-3 text-xs">
+                        ${postCreatedAt ? postAge(postCreatedAt) : ''}
+                        ${commentCount !== '' ? `<span class="text-txt-3 font-mono">${commentCount} comments</span>` : ''}
+                        ${contactId ? `<button onclick="window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2">CRM</button>` : ''}
+                        ${linkHtml}
+                    </div>
+                </div>
+                ${threadTitle ? `<div class="text-xs text-txt-2 mb-2">Post: "${escapeHtml(truncate(threadTitle, 120))}"</div>` : ''}
+                <div class="text-[0.65rem] text-txt-3 uppercase tracking-wide mb-1 font-mono">Draft comment</div>
+                <div class="msg-preview mb-2" id="out-msg-${draft.id}">${escapeHtml(message)}</div>
+                ${reasoning ? `
+                    <div class="mb-2">
+                        <div class="reasoning-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'; this.textContent=this.textContent.includes('▸')?'▾ AI Reasoning':'▸ AI Reasoning'">▸ AI Reasoning</div>
+                        <div class="reasoning-content mt-1" style="display:none;">${escapeHtml(reasoning)}</div>
+                    </div>
+                ` : ''}
+                ${actionsHtml}
+            </div>
+        `;
+    }
+
+    // ══════════════════════════════════════
+    // REDDIT: PAIN PROSPECTOR CARD
+    // ══════════════════════════════════════
+    if (redditType === 'pain') {
+        const subreddit = draft.subreddit || draft.raw_scrape_data?.subreddit || '';
+        const threadTitle = draft.thread_title || '';
+        const postCreatedAt = draft.raw_scrape_data?.created_utc ? new Date(draft.raw_scrape_data.created_utc * 1000) : null;
+        const matchedPhrase = draft.raw_scrape_data?.matched_phrase || '';
+        const postExcerpt = draft.raw_scrape_data?.post_text || threadTitle || '';
+
+        return `
+            <div class="outreach-card" id="out-card-${draft.id}" style="border-left: 3px solid #F59E0B;cursor:pointer;" onclick="openOutreachDetail(${draft.id})">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <input type="checkbox" class="post-checkbox" ${isSelected ? 'checked' : ''} onchange="toggleOutreachSelect(${draft.id})" onclick="event.stopPropagation()">
+                        <span class="badge badge-pain">Pain Point</span>
+                        <span class="badge badge-reddit">Reddit</span>
+                        ${subreddit ? `<span class="text-xs text-txt-2">r/${escapeHtml(subreddit)}</span>` : ''}
+                    </div>
+                    <div class="flex items-center gap-3 text-xs">
+                        ${postCreatedAt ? postAge(postCreatedAt) : ''}
+                        ${contactId ? `<button onclick="window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2">CRM</button>` : ''}
+                        ${linkHtml}
+                    </div>
+                </div>
+                ${matchedPhrase ? `<div class="text-xs mb-2"><span class="text-txt-3">Matched:</span> <span class="pain-highlight">"${escapeHtml(matchedPhrase)}"</span></div>` : ''}
+                ${postExcerpt ? `<div class="text-xs text-txt-2 mb-2" style="line-height:1.5;">Post: "${highlightPhrase(truncate(postExcerpt, 200), matchedPhrase)}"</div>` : ''}
+                <div class="text-[0.65rem] text-txt-3 uppercase tracking-wide mb-1 font-mono">Draft comment</div>
+                <div class="msg-preview mb-2" id="out-msg-${draft.id}">${escapeHtml(message)}</div>
+                ${reasoning ? `
+                    <div class="mb-2">
+                        <div class="reasoning-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'; this.textContent=this.textContent.includes('▸')?'▾ AI Reasoning':'▸ AI Reasoning'">▸ AI Reasoning</div>
+                        <div class="reasoning-content mt-1" style="display:none;">${escapeHtml(reasoning)}</div>
+                    </div>
+                ` : ''}
+                ${actionsHtml}
+            </div>
+        `;
+    }
+
+    // ══════════════════════════════════════
+    // ALL PLATFORMS: STANDARD CARD
+    // ══════════════════════════════════════
+    const rsd = draft.raw_scrape_data || {};
+    let metaLine = '';
+    let contextHtml = '';
+    const p = draft.platform;
+
+    if (p === 'linkedin') {
+        const headline = rsd.headline || '';
+        const jobTitle = rsd.jobTitle || bio || '';
+        const companyUrl = rsd.companyUrl || '';
+        const email = rsd.email || draft.email_from_profile || '';
+        metaLine = [company ? (companyUrl ? `<a href="${escapeHtml(companyUrl)}" target="_blank" class="hover:text-info" onclick="event.stopPropagation()">${escapeHtml(company)}</a>` : escapeHtml(company)) : '', jobTitle || headline ? escapeHtml(truncate(jobTitle || headline, 50)) : '', followers, score ? `Score: ${score}` : ''].filter(Boolean).join(' | ');
+        if (rsd.sourceJobTitle) contextHtml = `<div class="text-[0.65rem] text-txt-3 mb-1" onclick="event.stopPropagation()">Source job: ${escapeHtml(rsd.sourceJobTitle)}</div>`;
+        if (rsd.enriched && rsd.about) contextHtml += `<div class="text-[0.65rem] text-txt-3 mb-1" style="line-height:1.4;" onclick="event.stopPropagation()">${escapeHtml(truncate(rsd.about, 120))}</div>`;
+    } else if (p === 'twitter') {
+        const username = draft.platform_username ? `@${draft.platform_username}` : '';
+        const tweetText = rsd.text || snippet || '';
+        metaLine = [username, followers, score ? `Score: ${score}` : ''].filter(Boolean).join(' | ');
+        if (tweetText && otype === 'engagement') contextHtml = `<div class="text-xs text-txt-2 mb-2" style="border-left:2px solid rgba(29,161,242,0.3);padding-left:0.5rem;line-height:1.5;">${escapeHtml(truncate(tweetText, 200))}</div>`;
+    } else if (p === 'instagram') {
+        const username = draft.platform_username ? `@${draft.platform_username}` : '';
+        const caption = rsd.caption || snippet || '';
+        metaLine = [username, followers, score ? `Score: ${score}` : ''].filter(Boolean).join(' | ');
+        if (caption && otype === 'engagement') contextHtml = `<div class="text-xs text-txt-2 mb-2" style="border-left:2px solid rgba(225,48,108,0.3);padding-left:0.5rem;line-height:1.5;">${escapeHtml(truncate(caption, 200))}</div>`;
+    } else if (p === 'facebook') {
+        const authorName = rsd.author?.name || name;
+        const postMsg = rsd.message || snippet || '';
+        const reactions = rsd.reactions || '';
+        metaLine = [reactions ? `${reactions} reactions` : '', score ? `Score: ${score}` : ''].filter(Boolean).join(' | ');
+        if (postMsg && otype === 'engagement') contextHtml = `<div class="text-xs text-txt-2 mb-2" style="border-left:2px solid rgba(24,119,242,0.3);padding-left:0.5rem;line-height:1.5;">${escapeHtml(truncate(postMsg, 200))}</div>`;
+    } else if (isReddit) {
+        metaLine = [draft.thread_subreddit ? `r/${draft.thread_subreddit}` : (draft.subreddit ? `r/${draft.subreddit}` : ''), draft.thread_title ? `"${truncate(draft.thread_title, 50)}"` : '', score ? `Score: ${score}` : ''].filter(Boolean).join(' | ');
+    } else {
+        metaLine = [company, followers, score ? `Score: ${score}` : ''].filter(Boolean).join(' | ');
+    }
+
+    const draftLabel = otype === 'dm' ? 'Draft message' : 'Draft comment';
+    const borderColor = platform.color || '#8A95A9';
+
+    return `
+        <div class="outreach-card" id="out-card-${draft.id}" style="border-left: 3px solid ${borderColor};cursor:pointer;" onclick="openOutreachDetail(${draft.id})">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <input type="checkbox" class="post-checkbox" ${isSelected ? 'checked' : ''} onchange="toggleOutreachSelect(${draft.id})" onclick="event.stopPropagation()">
+                    <span class="badge badge-${draft.platform}">${platform.label}</span>
+                    <span class="text-sm font-semibold text-txt">${escapeHtml(name)}</span>
+                    ${bio && p === 'linkedin' ? `<span class="text-xs text-txt-3">${escapeHtml(truncate(bio, 40))}</span>` : ''}
+                    <span class="badge badge-${otype}">${otype.toUpperCase()}</span>
+                    ${draft.engagement_subtype ? `<span class="text-[0.55rem] text-txt-3 font-mono">${escapeHtml(draft.engagement_subtype)}</span>` : ''}
+                </div>
+                <div class="flex items-center gap-2">
+                    ${contactId ? `<button onclick="window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2" title="View in CRM">CRM</button>` : ''}
+                    ${linkHtml}
+                </div>
+            </div>
+            ${metaLine ? `<div class="text-xs text-txt-3 mb-2">${metaLine}</div>` : ''}
+            ${contextHtml}
+            <div class="text-[0.65rem] text-txt-3 uppercase tracking-wide mb-1 font-mono">${draftLabel}</div>
+            <div class="msg-preview mb-2" id="out-msg-${draft.id}">${escapeHtml(message)}</div>
+            ${reasoning ? `
+                <div class="mb-2">
+                    <div class="reasoning-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'; this.textContent=this.textContent.includes('▸')?'▾ AI Reasoning':'▸ AI Reasoning'">▸ AI Reasoning</div>
+                    <div class="reasoning-content mt-1" style="display:none;">${escapeHtml(reasoning)}</div>
+                </div>
+            ` : ''}
+            ${actionsHtml}
+        </div>
+    `;
+}
+
+function renderActionCard(draft) {
+    const platform = PLATFORMS[draft.platform] || { label: draft.platform, color: '#8A95A9' };
+    const name = getDraftDisplayName(draft);
+    const message = draft.final_content || draft.edited_content || draft.draft_content || draft.content || '';
+    const profileUrl = draft.target_profile_url || '';
+    const threadUrl = draft.thread_url || '';
+    const targetUrl = draft.target_url || '';
+    const contactId = draft.contact_id || '';
+    const isReddit = draft.platform === 'reddit';
+    const otype = draft.outreach_type || outreachType;
+
+    let linkLabel, linkUrl;
+    if (isReddit) { linkUrl = threadUrl || targetUrl; linkLabel = 'Open Thread →'; }
+    else if (otype === 'engagement' && targetUrl) { linkUrl = targetUrl; linkLabel = draft.platform === 'facebook' ? 'View Post →' : draft.platform === 'twitter' ? 'View Tweet →' : 'View Post →'; }
+    else { linkUrl = profileUrl || targetUrl; linkLabel = 'View Profile →'; }
+    const linkHtml = linkUrl ? `<a href="${escapeHtml(linkUrl)}" target="_blank" class="text-xs text-txt-3 hover:text-accent transition-colors">${linkLabel}</a>` : '';
+
+    return `
+        <div class="outreach-card" id="out-card-${draft.id}" style="cursor:pointer;" onclick="openOutreachDetail(${draft.id})">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-${draft.platform}">${platform.label}</span>
+                    <span class="text-sm font-semibold text-txt">${escapeHtml(name)}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    ${contactId ? `<button onclick="window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2" title="View in CRM">CRM</button>` : ''}
+                    ${linkHtml}
+                </div>
+            </div>
+            <div class="msg-preview mb-3">${escapeHtml(message)}</div>
+            <div class="flex items-center gap-2">
+                <button onclick="copyToClip(\`${escapeHtml(message).replace(/`/g, '\\`')}\`)" class="btn btn-copy text-xs py-1.5 px-3">Copy to Clipboard</button>
+                <button onclick="markActedUpon(${draft.id}, '${draft.platform}', '${draft.outreach_type || outreachType}')" class="btn btn-approve text-xs py-1.5 px-3">Mark Acted Upon</button>
+            </div>
+        </div>
+    `;
+}
+
+function renderConvoCard(convo) {
+    const platform = PLATFORMS[convo.platform] || { label: convo.platform, color: '#8A95A9' };
+    const name = convo.target_name || convo.platform_username || 'Unknown';
+    const inboundCount = convo.inbound_count || 0;
+    const convoCount = convo.conversation_count || 0;
+    const pendingReplies = convo.pending_replies || 0;
+    const lastActivity = convo.last_activity ? timeAgo(convo.last_activity) : '';
+    const ourMessage = convo.original_message || '';
+    const draftResponse = convo.pending_response || convo.draft_reply || '';
+    const isReddit = convo.platform === 'reddit';
+    const contactId = convo.contact_id || '';
+    const threadUrl = convo.thread_url || '';
+    const profileUrl = convo.target_profile_url || '';
+    const draftId = convo.draft_id || convo.id;
+
+    const linkHtml = isReddit && threadUrl
+        ? `<a href="${escapeHtml(threadUrl)}" target="_blank" class="text-xs text-txt-3 hover:text-accent transition-colors">Open Thread →</a>`
+        : profileUrl
+        ? `<a href="${escapeHtml(profileUrl)}" target="_blank" class="text-xs text-txt-3 hover:text-accent transition-colors">View Profile →</a>`
+        : '';
+
+    let contextLine = [
+        isReddit && convo.thread_title ? `"${truncate(convo.thread_title, 50)}"` : '',
+        inboundCount > 0 ? `${inboundCount} repl${inboundCount === 1 ? 'y' : 'ies'} received` : 'No replies',
+        convoCount > 0 ? `${convoCount} messages` : '',
+        lastActivity ? `Last: ${lastActivity}` : '',
+    ].filter(Boolean).join(' | ');
+
+    return `
+        <div class="outreach-card">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-${convo.platform}">${platform.label}</span>
+                    <span class="text-sm font-semibold text-txt">${escapeHtml(name)}</span>
+                    ${convo.response_received ? '<span class="badge badge-approved" style="font-size:0.5rem;">REPLIED</span>' : ''}
+                </div>
+                <div class="flex items-center gap-2">
+                    ${contactId ? `<button onclick="window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2">CRM</button>` : ''}
+                    <button onclick="viewConvoThread('${draftId}')" class="btn btn-ghost text-xs py-1 px-2" title="View full thread">Thread</button>
+                    ${linkHtml}
+                </div>
+            </div>
+            <div class="text-xs text-txt-3 mb-3">${escapeHtml(contextLine)}</div>
+            ${ourMessage ? `
+                <div class="mb-2">
+                    <div class="reasoning-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'; this.textContent=this.textContent.includes('▸')?'▾ Your Original Message':'▸ Your Original Message'">▸ Your Original Message</div>
+                    <div class="convo-msg ours mt-1" style="display:none;">${escapeHtml(ourMessage)}</div>
+                </div>
+            ` : ''}
+            ${pendingReplies > 0 && draftResponse ? `
+                <div class="mb-3">
+                    <div class="text-[0.65rem] text-warn uppercase tracking-wide mb-1 font-mono">Drafted Response (needs approval)</div>
+                    <div class="convo-msg draft-reply" id="convo-draft-${convo.id || convo.conversation_id}">${escapeHtml(draftResponse)}</div>
+                    <div class="flex items-center gap-2 mt-2">
+                        <button onclick="approveConvoResponse('${convo.id || convo.conversation_id}')" class="btn btn-approve text-xs py-1.5 px-2.5">Approve</button>
+                        <button onclick="copyToClip(\`${escapeHtml(draftResponse).replace(/`/g, '\\`')}\`)" class="btn btn-copy text-xs py-1.5 px-2.5">Copy</button>
+                        <button onclick="markConvoSent('${convo.id || convo.conversation_id}')" class="btn btn-primary text-xs py-1.5 px-2.5">Mark Sent</button>
+                    </div>
+                </div>
+            ` : ''}
+            <div class="flex items-center gap-2 pt-2 border-t border-border/30">
+                <button onclick="openLogReplyModal('${draftId}', '${convo.platform}', '${contactId}')" class="btn btn-ghost text-xs py-1.5 px-3">Log New Reply</button>
+            </div>
+        </div>
+    `;
+}
+
+// ═══════════════════════════════════════
+// OUTREACH — ACTIONS
+// ═══════════════════════════════════════
+async function quickActDraft(id) {
+    const card = document.getElementById(`out-card-${id}`);
+    if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
+    try {
+        const result = await supabaseRpc('quick_act_social_draft', {
+            p_draft_id: id,
+            p_brand_id: 'carlton',
+            p_notes: null,
+            p_override_type: null,
+        });
+        if (result && result.success === false) {
+            showToast(result.error || 'Daily limit reached', 'error');
+            if (card) { card.style.opacity = '1'; card.style.pointerEvents = ''; }
+            return;
+        }
+        socialDrafts = socialDrafts.filter(d => d.id !== id);
+        selectedOutreachDrafts.delete(id);
+        renderOutreachView();
+        // Update daily counters from response
+        if (result && typeof result.dm_count !== 'undefined') {
+            const existing = dailyCounts.find(c => c.platform === result.platform);
+            if (existing) {
+                existing.dm_count = result.dm_count;
+                existing.engagement_count = result.engagement_count;
+                renderDailyCounters();
+            }
+        }
+        showToast('Done — approved & acted', 'success');
+    } catch (err) {
+        if (card) { card.style.opacity = '1'; card.style.pointerEvents = ''; }
+        showToast('Failed: ' + err.message, 'error');
+    }
+}
+
+async function approveSocialDraft(id) {
+    const card = document.getElementById(`out-card-${id}`);
+    if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
+    try {
+        await supabaseRpc('approve_social_draft', {
+            p_draft_id: id,
+            p_action: 'approve',
+            p_brand_id: 'carlton',
+            p_notes: null,
+            p_edited_content: null,
+            p_override_type: null,
+        });
+        socialDrafts = socialDrafts.filter(d => d.id !== id);
+        selectedOutreachDrafts.delete(id);
+        renderOutreachView();
+        showToast('Draft approved', 'success');
+    } catch (err) {
+        if (card) { card.style.opacity = '1'; card.style.pointerEvents = ''; }
+        showToast('Failed to approve: ' + err.message, 'error');
+    }
+}
+
+async function skipSocialDraft(id) {
+    const card = document.getElementById(`out-card-${id}`);
+    if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
+    try {
+        await supabaseRpc('approve_social_draft', {
+            p_draft_id: id,
+            p_action: 'skip',
+            p_brand_id: 'carlton',
+            p_notes: null,
+            p_edited_content: null,
+            p_override_type: null,
+        });
+        socialDrafts = socialDrafts.filter(d => d.id !== id);
+        selectedOutreachDrafts.delete(id);
+        renderOutreachView();
+        showToast('Draft skipped', 'success');
+    } catch (err) {
+        if (card) { card.style.opacity = '1'; card.style.pointerEvents = ''; }
+        showToast('Failed to skip: ' + err.message, 'error');
+    }
+}
+
+function startSocialEdit(id) {
+    const draft = socialDrafts.find(d => d.id === id);
+    if (!draft) return;
+    const msgEl = document.getElementById(`out-msg-${id}`);
+    if (!msgEl) return;
+    const currentText = draft.message_content || draft.draft_content || draft.content || '';
+    msgEl.innerHTML = `
+        <textarea class="form-input mb-2" id="out-edit-${id}" rows="4">${escapeHtml(currentText)}</textarea>
+        <div class="flex gap-2">
+            <button onclick="saveSocialEdit(${id})" class="btn btn-approve text-xs py-1.5 px-2.5">Save & Approve</button>
+            <button onclick="renderOutreachView()" class="btn btn-ghost text-xs py-1.5 px-2.5">Cancel</button>
+        </div>
+    `;
+    document.getElementById(`out-edit-${id}`).focus();
+}
+
+async function saveSocialEdit(id) {
+    const textarea = document.getElementById(`out-edit-${id}`);
+    if (!textarea) return;
+    try {
+        await supabaseRpc('approve_social_draft', {
+            p_draft_id: id,
+            p_action: 'edit',
+            p_brand_id: 'carlton',
+            p_notes: null,
+            p_edited_content: textarea.value,
+            p_override_type: null,
+        });
+        socialDrafts = socialDrafts.filter(d => d.id !== id);
+        renderOutreachView();
+        showToast('Draft edited & approved', 'success');
+    } catch (err) {
+        showToast('Failed to save: ' + err.message, 'error');
+    }
+}
+
+async function markActedUpon(id, platform, outType) {
+    try {
+        const result = await supabaseRpc('increment_social_action', {
+            p_brand_id: 'carlton',
+            p_platform: platform,
+            p_outreach_type: outType,
+            p_draft_id: id,
+            p_engagement_subtype: null,
+        });
+        if (result && result.success === false) {
+            showToast(result.error || 'Daily limit reached', 'error');
+            return;
+        }
+        socialDrafts = socialDrafts.filter(d => d.id !== id);
+        renderOutreachView();
+        // Update daily counters with returned counts
+        if (result && typeof result.dm_count !== 'undefined') {
+            const existing = dailyCounts.find(c => c.platform === platform);
+            if (existing) {
+                existing.dm_count = result.dm_count;
+                existing.engagement_count = result.engagement_count;
+                renderDailyCounters();
+            }
+        }
+        showToast('Marked as acted upon', 'success');
+    } catch (err) {
+        showToast('Failed: ' + err.message, 'error');
+    }
+}
+
+async function copyToClip(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        showToast('Copied to clipboard', 'success');
+    } catch (e) {
+        showToast('Copy failed', 'error');
+    }
+}
+
+// ═══════════════════════════════════════
+// OUTREACH — BULK ACTIONS
+// ═══════════════════════════════════════
+function toggleOutreachSelect(id) {
+    if (selectedOutreachDrafts.has(id)) { selectedOutreachDrafts.delete(id); } else { selectedOutreachDrafts.add(id); }
+    updateOutreachBulkBar();
+}
+
+function updateOutreachBulkBar() {
+    const bar = document.getElementById('outreachBulkBar');
+    const count = selectedOutreachDrafts.size;
+    document.getElementById('outreachBulkCount').textContent = `${count} selected`;
+    bar.classList.toggle('visible', count > 0 && activeTopTab === 'outreach');
+}
+
+function outreachBulkDeselect() {
+    selectedOutreachDrafts.clear();
+    updateOutreachBulkBar();
+    renderOutreachView();
+}
+
+async function bulkApproveSocial() {
+    const ids = [...selectedOutreachDrafts];
+    let success = 0;
+    for (const id of ids) {
+        try {
+            await supabaseRpc('approve_social_draft', { p_draft_id: id, p_action: 'approve', p_brand_id: 'carlton', p_notes: null, p_edited_content: null, p_override_type: null });
+            socialDrafts = socialDrafts.filter(d => d.id !== id);
+            success++;
+        } catch (e) { /* continue */ }
+    }
+    selectedOutreachDrafts.clear();
+    updateOutreachBulkBar();
+    renderOutreachView();
+    showToast(`Approved ${success} of ${ids.length} drafts`, 'success');
+}
+
+async function bulkSkipSocial() {
+    const ids = [...selectedOutreachDrafts];
+    let success = 0;
+    for (const id of ids) {
+        try {
+            await supabaseRpc('approve_social_draft', { p_draft_id: id, p_action: 'skip', p_brand_id: 'carlton', p_notes: null, p_edited_content: null, p_override_type: null });
+            socialDrafts = socialDrafts.filter(d => d.id !== id);
+            success++;
+        } catch (e) { /* continue */ }
+    }
+    selectedOutreachDrafts.clear();
+    updateOutreachBulkBar();
+    renderOutreachView();
+    showToast(`Skipped ${success} of ${ids.length} drafts`, 'success');
+}
+
+// ═══════════════════════════════════════
+// OUTREACH — REDRAFT MODAL
+// ═══════════════════════════════════════
+function openRedraftModal(draftId) {
+    document.getElementById('redraftDraftId').value = draftId;
+    document.getElementById('redraftFeedback').value = '';
+    document.getElementById('redraftModal').classList.add('active');
+}
+
+function closeRedraftModal() {
+    document.getElementById('redraftModal').classList.remove('active');
+}
+
+async function submitRedraft() {
+    const draftId = document.getElementById('redraftDraftId').value;
+    const feedback = document.getElementById('redraftFeedback').value.trim();
+    if (!feedback) { showToast('Please provide feedback', 'error'); return; }
+
+    const btn = document.querySelector('#redraftModal .btn-regenerate');
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+
+    try {
+        await supabaseRpc('approve_social_draft', {
+            p_draft_id: parseInt(draftId),
+            p_action: 'redraft',
+            p_brand_id: 'carlton',
+            p_notes: feedback,
+            p_edited_content: null,
+            p_override_type: null,
+        });
+        await fetch(`${N8N_BASE}/social-approved`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'reject', draft_id: parseInt(draftId), feedback, brand_id: 'carlton', user_id: activeProfileId }),
+        });
+        socialDrafts = socialDrafts.filter(d => d.id !== parseInt(draftId));
+        closeRedraftModal();
+        renderOutreachView();
+        showToast('Sent for redraft', 'success');
+    } catch (err) {
+        showToast('Redraft failed: ' + err.message, 'error');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Redraft'; }
+    }
+}
+
+// ═══════════════════════════════════════
+// OUTREACH — LOG REPLY MODAL
+// ═══════════════════════════════════════
+function openLogReplyModal(draftId, platform, contactId) {
+    document.getElementById('logReplyDraftId').value = draftId || '';
+    document.getElementById('logReplyPlatform').value = platform || '';
+    document.getElementById('logReplyContactId').value = contactId || '';
+    document.getElementById('logReplyText').value = '';
+    document.getElementById('logReplyAuthor').value = '';
+    const toggle = document.getElementById('logReplyAutoDraft');
+    if (!toggle.classList.contains('on')) toggle.classList.add('on');
+    document.getElementById('logReplyModal').classList.add('active');
+}
+
+function closeLogReplyModal() {
+    document.getElementById('logReplyModal').classList.remove('active');
+}
+
+async function submitLogReply() {
+    const replyText = document.getElementById('logReplyText').value.trim();
+    if (!replyText) { showToast('Reply text is required', 'error'); return; }
+
+    const payload = {
+        reply_text: replyText,
+        author: document.getElementById('logReplyAuthor').value.trim() || 'Unknown',
+        platform: document.getElementById('logReplyPlatform').value,
+        brand_id: 'carlton',
+        user_id: activeProfileId,
+        generate_response: document.getElementById('logReplyAutoDraft').classList.contains('on'),
+    };
+
+    const draftId = document.getElementById('logReplyDraftId').value;
+    const contactId = document.getElementById('logReplyContactId').value;
+    if (contactId) {
+        payload.contact_id = contactId;
+    } else if (draftId) {
+        payload.draft_id = parseInt(draftId);
+    }
+
+    try {
+        const res = await fetch(`${N8N_BASE}/social-reply`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        const result = await res.json();
+        if (result && result.success) {
+            closeLogReplyModal();
+            showToast('Reply logged' + (result.response_drafted ? ' — response drafted' : ''), 'success');
+            fetchActiveConversations();
+        } else {
+            showToast('Failed: ' + (result.error || 'Unknown error'), 'error');
+        }
+    } catch (err) {
+        showToast('Failed to log reply: ' + err.message, 'error');
+    }
+}
+
+// ═══════════════════════════════════════
+// OUTREACH — CONVERSATION RESPONSE ACTIONS
+// ═══════════════════════════════════════
+async function approveConvoResponse(convoId) {
+    try {
+        await fetch(`${SUPABASE_URL}/rest/v1/social_conversations?id=eq.${convoId}`, {
+            method: 'PATCH',
+            headers: { ...headers, 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ approval_status: 'approved', approved_at: new Date().toISOString() }),
+        });
+        showToast('Response approved', 'success');
+        fetchActiveConversations();
+    } catch (err) {
+        showToast('Failed: ' + err.message, 'error');
+    }
+}
+
+async function markConvoSent(convoId) {
+    try {
+        await fetch(`${SUPABASE_URL}/rest/v1/social_conversations?id=eq.${convoId}`, {
+            method: 'PATCH',
+            headers: { ...headers, 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ action_status: 'acted', acted_at: new Date().toISOString() }),
+        });
+        showToast('Marked as sent', 'success');
+        fetchActiveConversations();
+    } catch (err) {
+        showToast('Failed: ' + err.message, 'error');
+    }
+}
+
+// ═══════════════════════════════════════
+// OUTREACH — DETAIL SIDE PANEL
+// ═══════════════════════════════════════
+function openOutreachDetail(draftId) {
+    const draft = socialDrafts.find(d => d.id === parseInt(draftId) || d.id === draftId);
+    if (!draft) return;
+
+    const panel = document.getElementById('detailPanel');
+    const content = document.getElementById('detailContent');
+    const p = PLATFORMS[draft.platform] || { label: draft.platform, color: '#8A95A9' };
+    const rsd = draft.raw_scrape_data || {};
+    const name = getDraftDisplayName(draft);
+    const username = draft.platform_username || rsd.author?.userName || rsd.ownerUsername || '';
+    const bio = draft.target_bio || rsd.author?.description || draft.bio || '';
+    const message = draft.draft_content || draft.message_content || '';
+    const otype = draft.outreach_type || outreachType;
+    const score = draft.relevance_score || '';
+    const profileUrl = draft.target_profile_url || draft.target_url || '';
+    const threadUrl = draft.thread_url || '';
+    const targetUrl = draft.target_url || '';
+    const snippet = draft.target_content_snippet || '';
+    const isReddit = draft.platform === 'reddit';
+
+    let html = '';
+
+    // ── Header badges ──
+    html += `<div class="flex flex-wrap items-center gap-2 mb-3">
+        <span class="badge badge-${draft.platform}" style="font-size:0.7rem;padding:0.25rem 0.5rem;">${p.label}</span>
+        <span class="badge badge-${otype}" style="font-size:0.7rem;padding:0.25rem 0.5rem;">${otype.toUpperCase()}</span>
+        ${draft.engagement_subtype ? `<span class="badge badge-draft">${escapeHtml(draft.engagement_subtype)}</span>` : ''}
+        ${draft.discovery_type === 'wave_catcher' ? '<span class="badge" style="background:rgba(20,184,166,0.15);color:#2DD4BF;">Wave</span>' : ''}
+        ${draft.discovery_type === 'pain_prospector' ? '<span class="badge" style="background:rgba(245,158,11,0.15);color:#F59E0B;">Pain Point</span>' : ''}
+        ${score ? `<span class="badge badge-approved">Score: ${score}</span>` : ''}
+    </div>`;
+
+    // ── Target info ──
+    html += `<div class="mb-4">
+        <div class="text-sm font-semibold text-txt mb-1">${escapeHtml(name)}</div>
+        ${username ? `<div class="text-xs text-txt-3 font-mono mb-1">@${escapeHtml(username)}</div>` : ''}
+        ${bio ? `<div class="text-xs text-txt-2 mb-1" style="line-height:1.5;">${escapeHtml(bio)}</div>` : ''}
+    </div>`;
+
+    // ── Platform-specific context ──
+    html += '<div class="mb-4">';
+    html += '<div class="text-[0.65rem] text-txt-3 font-mono uppercase tracking-wide mb-1.5">Target Context</div>';
+    const details = [];
+
+    if (draft.platform === 'linkedin') {
+        if (rsd.headline) details.push(['Headline', rsd.headline]);
+        if (rsd.company) details.push(['Company', rsd.company]);
+        if (rsd.companyUrl) details.push(['Company URL', `<a href="${escapeHtml(rsd.companyUrl)}" target="_blank" class="text-info hover:underline">${escapeHtml(rsd.companyUrl)}</a>`]);
+        if (rsd.jobTitle) details.push(['Job Title', rsd.jobTitle]);
+        if (rsd.sourceJobTitle) details.push(['Source Job Posting', rsd.sourceJobTitle]);
+        if (rsd.email) details.push(['Email', `<a href="mailto:${escapeHtml(rsd.email)}" class="text-info hover:underline">${escapeHtml(rsd.email)}</a>`]);
+        if (rsd.connectionsCount) details.push(['Connections', formatNum(rsd.connectionsCount)]);
+        if (draft.follower_count) details.push(['Followers', formatNum(draft.follower_count)]);
+        if (rsd.skills && rsd.skills.length) details.push(['Skills', rsd.skills.slice(0, 8).join(', ')]);
+    } else if (draft.platform === 'twitter') {
+        if (rsd.text) details.push(['Tweet', null]);
+        if (draft.follower_count) details.push(['Followers', formatNum(draft.follower_count)]);
+        if (rsd.retweetCount) details.push(['Retweets', rsd.retweetCount]);
+        if (rsd.likeCount) details.push(['Likes', rsd.likeCount]);
+    } else if (draft.platform === 'instagram') {
+        if (rsd.caption) details.push(['Caption', null]);
+        if (draft.follower_count) details.push(['Followers', formatNum(draft.follower_count)]);
+        if (rsd.likesCount) details.push(['Likes', rsd.likesCount]);
+    } else if (draft.platform === 'facebook') {
+        if (rsd.message) details.push(['Post', null]);
+        if (rsd.reactions) details.push(['Reactions', rsd.reactions]);
+    } else if (isReddit) {
+        if (draft.thread_subreddit || rsd.subreddit) details.push(['Subreddit', 'r/' + (draft.thread_subreddit || rsd.subreddit)]);
+        if (draft.thread_title) details.push(['Post Title', draft.thread_title]);
+        if (draft.thread_score || rsd.score) details.push(['Score', draft.thread_score || rsd.score]);
+        if (rsd.num_comments) details.push(['Comments', rsd.num_comments]);
+    }
+
+    if (draft.classification_reason) details.push(['AI Reasoning', draft.classification_reason]);
+    if (draft.contact_id) details.push(['Contact ID', draft.contact_id]);
+
+    details.forEach(([label, val]) => {
+        if (val === null) return; // Full-text fields handled separately below
+        html += `<div class="flex justify-between text-xs py-0.5"><span class="text-txt-3">${escapeHtml(label)}</span><span class="text-txt-2 text-right max-w-[60%]">${typeof val === 'string' && val.startsWith('<a') ? val : escapeHtml(String(val))}</span></div>`;
+    });
+    html += '</div>';
+
+    // ── Full original content (tweet, post, caption, thread body) ──
+    const originalContent = rsd.text || rsd.caption || rsd.message || rsd.selftext || draft.thread_body_snippet || snippet || '';
+    if (originalContent) {
+        html += `<div class="mb-4">
+            <div class="text-[0.65rem] text-txt-3 font-mono uppercase tracking-wide mb-1.5">Original ${isReddit ? 'Post' : draft.platform === 'twitter' ? 'Tweet' : 'Content'}</div>
+            <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:0.375rem;padding:0.75rem;border-left:3px solid ${p.color};">
+                <div class="text-xs text-txt-2" style="white-space:pre-wrap;line-height:1.6;">${escapeHtml(originalContent)}</div>
+            </div>
+        </div>`;
+    }
+
+    // ── LinkedIn enriched: About + Recent Posts ──
+    if (draft.platform === 'linkedin' && rsd.enriched) {
+        if (rsd.about) {
+            html += `<div class="mb-4">
+                <div class="text-[0.65rem] text-txt-3 font-mono uppercase tracking-wide mb-1.5">About</div>
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:0.375rem;padding:0.75rem;">
+                    <div class="text-xs text-txt-2" style="white-space:pre-wrap;line-height:1.6;">${escapeHtml(truncate(rsd.about, 500))}</div>
+                </div>
+            </div>`;
+        }
+        if (rsd.posts && rsd.posts.length > 0) {
+            html += `<div class="mb-4">
+                <div class="text-[0.65rem] text-txt-3 font-mono uppercase tracking-wide mb-1.5">Recent Activity (${rsd.posts.length})</div>
+                <div class="space-y-2">
+                    ${rsd.posts.slice(0, 3).map(post => `
+                        <div style="background:rgba(10,102,194,0.04);border:1px solid rgba(10,102,194,0.08);border-radius:0.375rem;padding:0.625rem 0.75rem;">
+                            <div class="text-xs text-txt-2" style="line-height:1.5;">${escapeHtml(truncate(post.text || post.content || '', 200))}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        }
+    }
+
+    // ── Matched phrase for pain prospector ──
+    if (rsd.matched_phrase) {
+        html += `<div class="mb-4">
+            <div class="text-[0.65rem] text-txt-3 font-mono uppercase tracking-wide mb-1">Matched Pain Phrase</div>
+            <span class="pain-highlight">"${escapeHtml(rsd.matched_phrase)}"</span>
+        </div>`;
+    }
+
+    // ── Draft message ──
+    html += `<div class="mb-4">
+        <div class="text-[0.65rem] text-txt-3 font-mono uppercase tracking-wide mb-1.5">Draft ${otype === 'dm' ? 'Message' : 'Comment'}</div>
+        <div style="background:rgba(6,214,160,0.04);border:1px solid rgba(6,214,160,0.1);border-radius:0.375rem;padding:0.75rem;">
+            <div class="text-sm text-txt" style="white-space:pre-wrap;line-height:1.6;">${escapeHtml(message)}</div>
+        </div>
+    </div>`;
+
+    // ── Links ──
+    let links = [];
+    if (isReddit && (threadUrl || targetUrl)) links.push({ url: threadUrl || targetUrl, label: 'Open Thread' });
+    else if (targetUrl && otype === 'engagement') links.push({ url: targetUrl, label: draft.platform === 'twitter' ? 'View Tweet' : 'View Post' });
+    if (profileUrl) links.push({ url: profileUrl, label: 'View Profile' });
+    if (draft.contact_id) links.push({ url: `/crm?contact=${draft.contact_id}`, label: 'View in CRM' });
+
+    if (links.length) {
+        html += `<div class="flex flex-wrap gap-2 mb-4">
+            ${links.map(l => `<a href="${escapeHtml(l.url)}" target="_blank" class="btn btn-ghost text-xs py-1.5 px-3" style="text-decoration:none;">${escapeHtml(l.label)} →</a>`).join('')}
+        </div>`;
+    }
+
+    // ── Actions ──
+    html += `<div class="flex flex-wrap gap-2 pt-3 border-t border-border">
+        <button onclick="approveSocialDraft(${draft.id});closeDetail();" class="btn btn-approve text-xs py-1.5 px-3">Approve</button>
+        <button onclick="closeDetail();startSocialEdit(${draft.id});" class="btn btn-ghost text-xs py-1.5 px-3">Edit</button>
+        <button onclick="closeDetail();openRedraftModal(${draft.id});" class="btn btn-regenerate text-xs py-1.5 px-3">Redraft</button>
+        <button onclick="skipSocialDraft(${draft.id});closeDetail();" class="btn btn-skip text-xs py-1.5 px-3">Skip</button>
+        <span class="mx-1"></span>
+        <button onclick="copyToClip(\`${escapeHtml(message).replace(/`/g, '\\`')}\`)" class="btn btn-copy text-xs py-1.5 px-3">Copy</button>
+        <button onclick="quickActDraft(${draft.id});closeDetail();" class="btn btn-primary text-xs py-1.5 px-3" style="background:rgba(6,214,160,0.2);border-color:rgba(6,214,160,0.4);">Done</button>
+    </div>`;
+
+    // ── ID ──
+    html += `<div class="text-[0.55rem] text-txt-3 font-mono opacity-40 pt-3">Draft #${draft.id} | Target: ${escapeHtml(draft.directive_id || draft.target_id || '')}</div>`;
+
+    content.innerHTML = html;
+    document.getElementById('detailBackdrop').classList.add('open');
+    panel.classList.add('open');
+}
+
+// ═══════════════════════════════════════
+// OUTREACH — VIEW CONVERSATION THREAD
+// ═══════════════════════════════════════
+async function viewConvoThread(draftId) {
+    // Open detail panel with full thread
+    const panel = document.getElementById('detailPanel');
+    const content = document.getElementById('detailContent');
+    document.getElementById('detailBackdrop').classList.add('open');
+    panel.classList.add('open');
+    content.innerHTML = '<div class="empty-state py-8">Loading thread...</div>';
+
+    try {
+        const data = await supabaseRpc('get_conversation_thread', {
+            p_draft_id: parseInt(draftId),
+            p_brand_id: 'carlton',
+        });
+
+        if (!data || data.error) {
+            content.innerHTML = '<div class="empty-state py-8">Failed to load thread</div>';
+            return;
+        }
+
+        const target = data.target || {};
+        const messages = data.messages || [];
+        const originalMessage = data.original_message || '';
+
+        let html = `
+            <div class="flex items-center gap-2 mb-3">
+                <span class="font-heading font-bold text-sm text-txt">Thread with ${escapeHtml(target.name || target.target_name || 'Unknown')}</span>
+                ${target.platform ? `<span class="badge badge-${target.platform}">${(PLATFORMS[target.platform] || {}).label || target.platform}</span>` : ''}
+            </div>
+        `;
+
+        if (originalMessage) {
+            html += `
+                <div class="mb-3">
+                    <div class="text-[0.6rem] text-accent font-mono uppercase mb-1">Your outreach</div>
+                    <div class="convo-msg ours">${escapeHtml(originalMessage)}</div>
+                </div>
+            `;
+        }
+
+        if (messages.length > 0) {
+            html += '<div class="space-y-2">';
+            messages.forEach(msg => {
+                const isUs = msg.author_is_us;
+                const author = msg.author || (isUs ? 'You' : 'Them');
+                const msgClass = isUs ? 'ours' : 'theirs';
+                const dirLabel = isUs ? 'YOU' : escapeHtml(author);
+                const timeStr = msg.created_at ? formatDateTime(msg.created_at) : '';
+
+                html += `
+                    <div>
+                        <div class="flex items-center justify-between mb-0.5">
+                            <span class="text-[0.6rem] font-mono uppercase ${isUs ? 'text-accent' : 'text-info'}">${dirLabel}</span>
+                            <span class="text-[0.55rem] text-txt-3 font-mono">${timeStr}</span>
+                        </div>
+                        <div class="convo-msg ${msgClass}">${escapeHtml(msg.content || '')}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        } else {
+            html += '<div class="empty-state text-xs py-4">No messages in thread yet</div>';
+        }
+
+        content.innerHTML = html;
+    } catch (err) {
+        content.innerHTML = `<div class="empty-state py-8">Error loading thread: ${escapeHtml(err.message)}</div>`;
+    }
+}
+
+// ═══════════════════════════════════════
+// OUTREACH — CONVERSION FUNNEL
+// ═══════════════════════════════════════
+async function fetchConversionFunnel() {
+    try {
+        const data = await supabaseRpc('get_social_conversion_funnel', {
+            p_brand_id: 'carlton',
+            p_days: 30,
+            p_platform: outPlatformFilter,
+        });
+        renderConversionFunnel(data);
+    } catch (e) {
+        document.getElementById('funnelWidget').style.display = 'none';
+    }
+}
+
+function renderConversionFunnel(data) {
+    const container = document.getElementById('funnelWidget');
+    if (!data || data.error) { container.style.display = 'none'; return; }
+
+    const funnel = data.funnel || {};
+    const responseRates = data.response_rates || [];
+    const tta = data.time_to_act || {};
+    container.style.display = '';
+
+    const stages = [
+        { key: 'discovered', label: 'Discovered', color: '#525E73' },
+        { key: 'classified', label: 'Classified', color: '#8A95A9' },
+        { key: 'drafted', label: 'Drafted', color: '#4CC9F0' },
+        { key: 'approved', label: 'Approved', color: '#FFD93D' },
+        { key: 'acted', label: 'Acted', color: '#06D6A0' },
+        { key: 'conversations_started', label: 'Convos', color: '#A855F7' },
+    ];
+
+    const maxVal = Math.max(...stages.map(s => funnel[s.key] || 0), 1);
+
+    let funnelHtml = '<div class="flex items-end gap-1" style="height: 48px;">';
+    stages.forEach(s => {
+        const val = funnel[s.key] || 0;
+        const pct = Math.max((val / maxVal) * 100, 4);
+        funnelHtml += `
+            <div class="flex-1 flex flex-col items-center gap-0.5">
+                <span class="text-[0.6rem] font-mono font-bold" style="color:${s.color};">${val}</span>
+                <div style="width:100%;height:${pct}%;min-height:2px;background:${s.color};border-radius:2px 2px 0 0;opacity:0.7;"></div>
+                <span class="text-[0.5rem] text-txt-3 text-center leading-tight">${s.label}</span>
+            </div>
+        `;
+    });
+    funnelHtml += '</div>';
+
+    let rateHtml = '';
+    if (responseRates.length > 0) {
+        rateHtml = '<div class="flex gap-2 flex-wrap">';
+        responseRates.forEach(r => {
+            const p = PLATFORMS[r.platform] || { label: r.platform, color: '#8A95A9' };
+            rateHtml += `<span class="daily-badge counter-green"><span style="color:${p.color};font-weight:600;font-size:0.6rem;">${p.label}</span><span class="font-mono text-xs">${r.response_rate_pct || 0}% response</span></span>`;
+        });
+        rateHtml += '</div>';
+    }
+
+    const avgTotal = tta.avg_hours_total != null ? `${Number(tta.avg_hours_total).toFixed(1)}h` : '—';
+
+    container.innerHTML = `
+        <div class="panel">
+            <div class="panel-body" style="padding: 0.75rem 1rem;">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[0.65rem] font-mono text-txt-3 uppercase tracking-wider">30-Day Funnel</span>
+                    <span class="text-[0.6rem] text-txt-3">Avg time to act: <span class="text-accent font-mono">${avgTotal}</span></span>
+                </div>
+                ${funnelHtml}
+                ${rateHtml ? `<div class="mt-2">${rateHtml}</div>` : ''}
+            </div>
+        </div>
+    `;
+}
+
+// ═══════════════════════════════════════
+// OUTREACH — HISTORICAL STATS
+// ═══════════════════════════════════════
+let allActedDrafts = [];
+let historyPeriod = 'lifetime';
+
+async function fetchHistoryStats() {
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/social_outreach_drafts?action_status=eq.acted&select=id,platform,outreach_type,acted_at&brand_id=eq.carlton&order=acted_at.desc`, { headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` } });
+        if (!res.ok) throw new Error(res.status);
+        allActedDrafts = await res.json();
+        if (!Array.isArray(allActedDrafts)) allActedDrafts = [];
+        document.getElementById('historyStatsPanel').style.display = '';
+        renderHistoryStats();
+    } catch (e) {
+        // Table might not exist or no data — hide panel
+        document.getElementById('historyStatsPanel').style.display = 'none';
+    }
+}
+
+function setHistoryPeriod(period) {
+    historyPeriod = period;
+    document.querySelectorAll('[data-hperiod]').forEach(b => b.classList.toggle('active', b.dataset.hperiod === period));
+    renderHistoryStats();
+}
+
+function renderHistoryStats() {
+    const container = document.getElementById('historyStatsBody');
+    if (allActedDrafts.length === 0) {
+        container.innerHTML = '<div class="text-xs text-txt-3 py-2">No outreach actions recorded yet</div>';
+        return;
+    }
+
+    const now = new Date();
+    const weekStart = new Date(now); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0,0,0,0);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    let filtered = allActedDrafts;
+    if (historyPeriod === 'week') {
+        filtered = allActedDrafts.filter(d => d.acted_at && new Date(d.acted_at) >= weekStart);
+    } else if (historyPeriod === 'month') {
+        filtered = allActedDrafts.filter(d => d.acted_at && new Date(d.acted_at) >= monthStart);
+    }
+
+    // Group by platform
+    const platforms = {};
+    filtered.forEach(d => {
+        const p = d.platform || 'unknown';
+        if (!platforms[p]) platforms[p] = { dm: 0, engagement: 0, total: 0 };
+        const type = d.outreach_type || 'engagement';
+        if (type === 'dm') platforms[p].dm++;
+        else platforms[p].engagement++;
+        platforms[p].total++;
+    });
+
+    const grandTotal = filtered.length;
+    const grandDm = filtered.filter(d => d.outreach_type === 'dm').length;
+    const grandEng = grandTotal - grandDm;
+    const periodLabel = historyPeriod === 'lifetime' ? 'All Time' : historyPeriod === 'month' ? 'This Month' : 'This Week';
+
+    // Build table
+    let html = `
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-txt-2 font-semibold">${periodLabel}: <span class="text-accent font-mono">${grandTotal}</span> total</span>
+            <span class="text-[0.65rem] text-txt-3 font-mono">DM: ${grandDm} | ENG: ${grandEng}</span>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem;">
+    `;
+
+    const platOrder = ['linkedin', 'instagram', 'facebook', 'twitter', 'reddit'];
+    platOrder.forEach(pKey => {
+        const stats = platforms[pKey];
+        if (!stats) return;
+        const p = PLATFORMS[pKey] || { label: pKey, color: '#8A95A9' };
+        html += `
+            <div style="background:rgba(255,255,255,0.02);border:1px solid #1E2130;border-radius:0.5rem;padding:0.625rem 0.75rem;border-left:3px solid ${p.color};">
+                <div class="text-[0.65rem] font-semibold mb-1" style="color:${p.color};">${p.label}</div>
+                <div class="font-heading font-bold text-lg text-txt" style="line-height:1;">${stats.total}</div>
+                <div class="flex gap-2 mt-1">
+                    <span class="text-[0.6rem] text-txt-3 font-mono">DM ${stats.dm}</span>
+                    <span class="text-[0.6rem] text-txt-3 font-mono">ENG ${stats.engagement}</span>
+                </div>
+            </div>
+        `;
+    });
+
+    // Show any unknown platforms
+    Object.keys(platforms).filter(k => !platOrder.includes(k)).forEach(pKey => {
+        const stats = platforms[pKey];
+        html += `
+            <div style="background:rgba(255,255,255,0.02);border:1px solid #1E2130;border-radius:0.5rem;padding:0.625rem 0.75rem;">
+                <div class="text-[0.65rem] font-semibold mb-1 text-txt-2">${escapeHtml(pKey)}</div>
+                <div class="font-heading font-bold text-lg text-txt" style="line-height:1;">${stats.total}</div>
+                <div class="flex gap-2 mt-1">
+                    <span class="text-[0.6rem] text-txt-3 font-mono">DM ${stats.dm}</span>
+                    <span class="text-[0.6rem] text-txt-3 font-mono">ENG ${stats.engagement}</span>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// ═══════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════
+function truncate(str, max) {
+    if (!str) return '';
+    return str.length > max ? str.substring(0, max - 1) + '\u2026' : str;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function formatDateTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+           d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDateShort(d) {
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function toLocalDateTimeString(d) {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${mins}`;
+}
+
+function formatNum(n) {
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+    return String(n);
+}
+
+function timeAgo(iso) {
+    if (!iso) return '';
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+}
+
+function showToast(msg, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        closeDetail();
+        closeQuickPost();
+        closeScheduleModal();
+        closeLogReplyModal();
+        closeRedraftModal();
+    }
+});
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(el => {
+    el.addEventListener('click', (e) => {
+        if (e.target === el) el.classList.remove('active');
+    });
+});
+
+// ── Profile Switcher ──
+(function initProfileSwitcher() {
+    const saved = localStorage.getItem('rdgr-active-profile');
+    if (saved) {
+        try {
+            const p = JSON.parse(saved);
+            activeProfileId = p.id || null;
+            const nameEl = document.getElementById('profileName');
+            const avatarEl = document.getElementById('profileAvatar');
+            if (nameEl) nameEl.textContent = p.name;
+            if (avatarEl) avatarEl.textContent = (p.name || 'B')[0].toUpperCase();
+        } catch(e) {}
+    }
+    const SB_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    fetch(`${SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    }).then(r => r.json()).then(profiles => {
+        const dd = document.getElementById('profileDropdown');
+        if (!dd || !profiles || profiles.length === 0) return;
+        const activeId = saved ? JSON.parse(saved).id : null;
+        dd.innerHTML = profiles.map(p => {
+            const name = p.display_name || p.email || '?';
+            const initial = name[0].toUpperCase();
+            const isActive = p.user_id === activeId;
+            return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, "\\'")}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div>
+                <span>${name}</span>
+                ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+            </button>`;
+        }).join('');
+        dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+    }).catch(() => {});
+})();
+
+function toggleProfileDD() {
+    const dd = document.getElementById('profileDropdown');
+    dd.classList.toggle('hidden');
+    if (!dd.classList.contains('hidden')) {
+        setTimeout(() => document.addEventListener('click', function closePDD(e) {
+            if (!document.getElementById('profileSwitcher').contains(e.target)) {
+                dd.classList.add('hidden');
+            }
+            document.removeEventListener('click', closePDD);
+        }), 0);
+    }
+}
+
+function selectProfileGlobal(userId, name) {
+    localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+    location.reload();
+}
+
+function signOut() {
+    localStorage.removeItem('rdgr-session');
+    localStorage.removeItem('rdgr-active-profile');
+    location.reload();
+}
+</script>
+</body>
+</html>

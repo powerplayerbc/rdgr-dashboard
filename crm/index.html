@@ -1,0 +1,3122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>CRM Dashboard | Carlton AI</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        base: '#08090D',
+                        surface: '#11131A',
+                        'surface-el': '#1A1D28',
+                        'surface-hi': '#242836',
+                        border: '#2A2E3D',
+                        accent: '#06D6A0',
+                        'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B',
+                        'alert-dim': 'rgba(255,107,107,0.15)',
+                        warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)',
+                        info: '#4CC9F0',
+                        'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1',
+                        'txt-2': '#8A95A9',
+                        'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #08090D;
+            color: #E8ECF1;
+        }
+
+        /* ── Grain ── */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3A3E4D; }
+
+        /* ── Gate ── */
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: #E8ECF1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            width: 100%;
+        }
+        .gate-input:focus {
+            border-color: rgba(6,214,160,0.4);
+            box-shadow: 0 0 0 3px rgba(6,214,160,0.08);
+        }
+        .gate-input::placeholder { color: #525E73; }
+        .gate-error { color: #FF6B6B; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        /* ── Pulse ── */
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #06D6A0;
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+
+        /* ── Nav Tabs ── */
+        .task-tab {
+            flex: 1; padding: 0.4rem 0.75rem; font-size: 0.75rem; font-weight: 500;
+            text-align: center; border-radius: 0.375rem; cursor: pointer;
+            color: rgba(255,255,255,0.45); background: transparent; border: none;
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+        .task-tab:hover { color: #E8ECF1; }
+        .task-tab.active { background: rgba(6,214,160,0.12); color: #06D6A0; }
+
+        /* ── Cards ── */
+        .panel {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid #1E2130;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel-body { padding: 1rem 1.25rem; }
+
+        /* ── Status badges ── */
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        .badge-ready { background: rgba(59,130,246,0.15); color: #60A5FA; }
+        .badge-in_progress { background: rgba(6,214,160,0.15); color: #06D6A0; }
+        .badge-completed { background: rgba(34,197,94,0.15); color: #22C55E; }
+        .badge-failed { background: rgba(255,107,107,0.15); color: #FF6B6B; }
+        .badge-blocked { background: rgba(255,217,61,0.15); color: #FFD93D; }
+        .badge-review { background: rgba(168,85,247,0.15); color: #A855F7; }
+        .badge-domain { background: rgba(76,201,240,0.1); color: #4CC9F0; border: 1px solid rgba(76,201,240,0.15); }
+        .badge-human { background: rgba(168,85,247,0.15); color: #A855F7; }
+        .badge-execute { background: rgba(76,201,240,0.15); color: #4CC9F0; }
+        .badge-decide { background: rgba(255,217,61,0.15); color: #FFD93D; }
+        .badge-approve-type { background: rgba(6,214,160,0.15); color: #06D6A0; }
+
+        /* ── Engagement badges ── */
+        .eng-hot { background: rgba(239,68,68,0.15); color: #EF4444; }
+        .eng-active { background: rgba(6,214,160,0.15); color: #06D6A0; }
+        .eng-warm { background: rgba(255,217,61,0.15); color: #FFD93D; }
+        .eng-cold { background: rgba(59,130,246,0.15); color: #60A5FA; }
+        .eng-inactive { background: rgba(107,114,128,0.15); color: #6B7280; }
+
+        /* ── Lifecycle badges ── */
+        .lc-subscriber { background: rgba(107,114,128,0.15); color: #9CA3AF; }
+        .lc-prospect { background: rgba(45,212,191,0.15); color: #2DD4BF; }
+        .lc-lead { background: rgba(59,130,246,0.15); color: #60A5FA; }
+        .lc-mql { background: rgba(76,201,240,0.15); color: #4CC9F0; }
+        .lc-sql { background: rgba(168,85,247,0.15); color: #A855F7; }
+        .lc-opportunity { background: rgba(255,217,61,0.15); color: #FFD93D; }
+        .lc-customer { background: rgba(6,214,160,0.15); color: #06D6A0; }
+        .lc-evangelist { background: rgba(236,72,153,0.15); color: #EC4899; }
+        .lc-churned { background: rgba(255,107,107,0.15); color: #FF6B6B; }
+
+        /* ── Buttons ── */
+        .btn {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.03em;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            text-transform: uppercase;
+        }
+        .btn-approve { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.25); }
+        .btn-approve:hover { background: rgba(6,214,160,0.25); box-shadow: 0 0 12px rgba(6,214,160,0.15); }
+        .btn-deny { background: rgba(255,107,107,0.15); color: #FF6B6B; border: 1px solid rgba(255,107,107,0.25); }
+        .btn-deny:hover { background: rgba(255,107,107,0.25); box-shadow: 0 0 12px rgba(255,107,107,0.15); }
+        .btn-modify { background: rgba(76,201,240,0.15); color: #4CC9F0; border: 1px solid rgba(76,201,240,0.25); }
+        .btn-modify:hover { background: rgba(76,201,240,0.25); box-shadow: 0 0 12px rgba(76,201,240,0.15); }
+        .btn-primary { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.3); }
+        .btn-primary:hover { background: rgba(6,214,160,0.25); }
+        .btn-ghost { background: transparent; color: #8A95A9; border: 1px solid #2A2E3D; }
+        .btn-ghost:hover { background: rgba(255,255,255,0.03); color: #E8ECF1; }
+        .btn-warn { background: rgba(255,159,67,0.15); color: #FF9F43; border: 1px solid rgba(255,159,67,0.25); }
+        .btn-warn:hover { background: rgba(255,159,67,0.25); box-shadow: 0 0 12px rgba(255,159,67,0.15); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* ── Form inputs ── */
+        .form-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2A2E3D;
+            border-radius: 0.375rem;
+            padding: 0.625rem 0.75rem;
+            color: #E8ECF1;
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.875rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            border-color: rgba(6,214,160,0.4);
+            box-shadow: 0 0 0 2px rgba(6,214,160,0.08);
+        }
+        .form-input::placeholder { color: #525E73; }
+        select.form-input { cursor: pointer; }
+        select.form-input option { background: #1A1D28; color: #E8ECF1; }
+        textarea.form-input { resize: vertical; min-height: 80px; }
+
+        /* ── Modal ── */
+        .modal-backdrop {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.25s, visibility 0.25s;
+        }
+        .modal-backdrop.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: #11131A; border: 1px solid #2A2E3D; border-radius: 0.75rem;
+            width: 90%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+            transform: translateY(20px); transition: transform 0.25s ease;
+        }
+        .modal-backdrop.active .modal-content { transform: translateY(0); }
+
+        /* ── Toast ── */
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-family: 'IBM Plex Sans', system-ui;
+            animation: toast-in 0.3s ease forwards;
+            max-width: 380px;
+        }
+        .toast-success { background: rgba(6,214,160,0.15); border: 1px solid rgba(6,214,160,0.3); color: #06D6A0; }
+        .toast-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #FF6B6B; }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Stat chip ── */
+        .stat-chip {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.5rem;
+            padding: 0.625rem 1rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .stat-value { font-family: 'Chakra Petch', system-ui; font-weight: 700; font-size: 1.4rem; line-height: 1; }
+        .stat-label { font-size: 0.7rem; color: #8A95A9; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+
+        /* ── Tab bar ── */
+        .crm-tab {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            font-family: 'Chakra Petch', system-ui;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            color: #8A95A9;
+            background: transparent;
+            transition: background 0.2s, color 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+        .crm-tab:hover { color: #E8ECF1; }
+        .crm-tab.active {
+            background: rgba(6,214,160,0.12);
+            color: #06D6A0;
+        }
+
+        /* ── Progress bar ── */
+        .progress-bar {
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            height: 6px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+
+        /* ── Contact table ── */
+        .contact-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .contact-table th {
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #8A95A9;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-bottom: 1px solid #1E2130;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .contact-table th:hover { color: #E8ECF1; }
+        .contact-table th .sort-arrow { margin-left: 4px; opacity: 0.4; }
+        .contact-table th.sorted .sort-arrow { opacity: 1; color: #06D6A0; }
+        .contact-table td {
+            padding: 0.625rem 0.75rem;
+            font-size: 0.8rem;
+            border-bottom: 1px solid rgba(30,33,48,0.5);
+            vertical-align: middle;
+        }
+        .contact-table tr { transition: background 0.15s; }
+        .contact-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .contact-name { cursor: pointer; color: #E8ECF1; font-weight: 500; }
+        .contact-name:hover { color: #06D6A0; text-decoration: underline; }
+
+        /* ── Kanban board ── */
+        .kanban-board {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            min-height: 400px;
+        }
+        .kanban-column {
+            flex: 1;
+            min-width: 200px;
+            max-width: 280px;
+            background: rgba(255,255,255,0.015);
+            border: 1px solid #1E2130;
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .kanban-column-header {
+            padding: 0.625rem 0.75rem;
+            border-bottom: 1px solid #1E2130;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .kanban-column-body {
+            padding: 0.5rem;
+            flex: 1;
+            overflow-y: auto;
+            max-height: 500px;
+            min-height: 60px;
+            transition: background 0.2s;
+        }
+        .kanban-column-body.drag-over { background: rgba(6,214,160,0.05); }
+        .kanban-card {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.375rem;
+            padding: 0.625rem 0.75rem;
+            margin-bottom: 0.5rem;
+            cursor: grab;
+            transition: border-color 0.2s, transform 0.15s, box-shadow 0.15s;
+        }
+        .kanban-card:hover { border-color: #2A2E3D; }
+        .kanban-card:active { cursor: grabbing; }
+        .kanban-card.dragging { opacity: 0.5; transform: scale(0.95); }
+        .kanban-card .card-name {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #E8ECF1;
+            margin-bottom: 0.25rem;
+        }
+        .kanban-card .card-company {
+            font-size: 0.7rem;
+            color: #8A95A9;
+        }
+        .kanban-card .card-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 0.375rem;
+        }
+
+        /* ── Slide-out 360 panel ── */
+        .slide-panel-overlay {
+            position: fixed; inset: 0; z-index: 90;
+            background: rgba(0,0,0,0.5);
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .slide-panel-overlay.active { opacity: 1; visibility: visible; }
+        .slide-panel {
+            position: fixed; top: 0; right: 0; bottom: 0; z-index: 91;
+            width: 75%;
+            max-width: 900px;
+            background: #0D0F16;
+            border-left: 1px solid #1E2130;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .slide-panel.active { transform: translateX(0); }
+
+        /* ── Human task cards ── */
+        .human-task-card {
+            padding: 0.875rem 1rem;
+            border-radius: 0.5rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid #1E2130;
+            border-left: 3px solid #A855F7;
+            margin-bottom: 0.5rem;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .human-task-card:hover { background: #151824; border-left-color: #C084FC; }
+        .human-task-card.processing { opacity: 0.6; pointer-events: none; }
+        .ha-spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255,255,255,0.15); border-top-color: #A855F7; border-radius: 50%; animation: ha-spin 0.6s linear infinite; }
+        @keyframes ha-spin { to { transform: rotate(360deg); } }
+        .review-content-panel { margin-top: 0.5rem; padding: 0.75rem; border-radius: 0.375rem; background: rgba(0,0,0,0.3); border: 1px solid #1E2130; max-height: 240px; overflow-y: auto; }
+        .comparison-view { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem; }
+        .comparison-col { padding: 0.75rem; border-radius: 0.375rem; background: rgba(0,0,0,0.3); border: 1px solid #1E2130; max-height: 200px; overflow-y: auto; }
+
+        /* ── Toggle switch ── */
+        .toggle-switch { position: relative; display: inline-block; width: 32px; height: 18px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #2A2E3D; border-radius: 9px; transition: background 0.2s; }
+        .toggle-slider:before { content: ''; position: absolute; width: 14px; height: 14px; left: 2px; bottom: 2px; background: #525E73; border-radius: 50%; transition: transform 0.2s, background 0.2s; }
+        .toggle-switch input:checked + .toggle-slider { background: rgba(6,214,160,0.25); }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(14px); background: #06D6A0; }
+
+        /* ── Keyword chips ── */
+        .kw-chip {
+            display: inline-flex; align-items: center; gap: 2px;
+            padding: 1px 6px; border-radius: 3px;
+            font-size: 0.6rem; font-family: 'JetBrains Mono', monospace;
+            background: rgba(76,201,240,0.1); color: #4CC9F0;
+            border: 1px solid rgba(76,201,240,0.15);
+            white-space: nowrap;
+        }
+
+        /* ── Inline add row ── */
+        .add-row-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #1E2130;
+            border-radius: 0.25rem;
+            padding: 0.375rem 0.5rem;
+            color: #E8ECF1;
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.75rem;
+            outline: none;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+        .add-row-input:focus { border-color: rgba(6,214,160,0.4); }
+        .add-row-input::placeholder { color: #525E73; }
+        select.add-row-input { cursor: pointer; }
+        select.add-row-input option { background: #1A1D28; color: #E8ECF1; }
+
+        /* ── Group header ── */
+        .group-header {
+            padding: 0.5rem 0.75rem;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid #1E2130;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between;
+            transition: background 0.15s;
+        }
+        .group-header:hover { background: rgba(255,255,255,0.04); }
+
+        /* ── Import mode tabs ── */
+        .import-tab {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            color: #8A95A9;
+            background: transparent;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        .import-tab.active { background: rgba(6,214,160,0.1); color: #06D6A0; border-color: rgba(6,214,160,0.2); }
+
+        /* ── Outreach cards ── */
+        .outreach-card {
+            padding: 1rem 1.25rem;
+            border-radius: 0.5rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid #1E2130;
+            border-left: 3px solid #525E73;
+            margin-bottom: 0.5rem;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .outreach-card:hover { background: #151824; }
+        .outreach-card.os-draft { border-left-color: #FFD93D; }
+        .outreach-card.os-approved { border-left-color: #06D6A0; }
+        .outreach-card.os-rejected { border-left-color: #FF6B6B; }
+        .outreach-card.os-sent { border-left-color: #4CC9F0; }
+        .outreach-card.os-skipped { border-left-color: #6B7280; }
+        .outreach-card.os-revision { border-left-color: #A855F7; }
+        .email-preview-body {
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.8rem;
+            line-height: 1.7;
+            color: #C8CDD5;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .email-subject-line {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #E8ECF1;
+            letter-spacing: -0.01em;
+        }
+        .email-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.375rem 0;
+            font-size: 0.75rem;
+            border-bottom: 1px solid rgba(30,33,48,0.5);
+        }
+        .email-meta-label {
+            color: #525E73;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.6rem;
+            letter-spacing: 0.08em;
+            min-width: 48px;
+        }
+        .outreach-stat-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .outreach-stat-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            border: 1px solid #1E2130;
+            background: rgba(255,255,255,0.02);
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .outreach-stat-pill:hover { background: rgba(255,255,255,0.04); }
+        .outreach-stat-pill.active-filter { border-color: rgba(6,214,160,0.4); background: rgba(6,214,160,0.06); }
+        .outreach-stat-pill .os-count {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center; padding: 2rem 1rem; color: #525E73;
+            font-size: 0.85rem;
+        }
+
+        /* ── Loading skeleton ── */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #1A1D28 25%, #242836 50%, #1A1D28 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 0.25rem;
+        }
+
+        /* ── Attribution bars ── */
+        .attr-bar-bg {
+            background: rgba(255,255,255,0.04);
+            height: 24px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .attr-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            display: flex; align-items: center; padding-left: 8px;
+            font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.9);
+            transition: width 0.5s ease;
+        }
+
+        /* ── Sequence step ── */
+        .seq-step {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.375rem 0;
+            font-size: 0.75rem;
+        }
+        .seq-step-dot {
+            width: 20px; height: 20px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.6rem; font-weight: 700;
+            background: rgba(6,214,160,0.15); color: #06D6A0;
+            flex-shrink: 0;
+        }
+        .seq-step-line {
+            width: 2px; height: 16px; background: #1E2130;
+            margin-left: 9px;
+        }
+
+        /* ── Scanline effect on header ── */
+        .scanline {
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(6,214,160,0.015) 2px, rgba(6,214,160,0.015) 4px);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1199px) {
+            .kanban-board { flex-wrap: nowrap; }
+        }
+        @media (max-width: 767px) {
+            .slide-panel { width: 100%; max-width: 100%; }
+            .kanban-board { flex-direction: column; }
+            .kanban-column { max-width: 100%; min-width: 100%; }
+            .stat-bar { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ PASSWORD GATE ═══ -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">CRM Access</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">CRM Dashboard</h1>
+                <p class="text-txt-2 text-sm">Enter the access code to continue</p>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off" autofocus>
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4">Authenticate</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- ── Top Nav ── -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Dashboard</a>
+                        <a href="/chat" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Chat</a>
+                        <a href="/org-chart" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Org Map</a>
+                        <a href="/our-workflows" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Workflows</a>
+                        <a href="/social-dashboard" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Social</a>
+                        <span class="task-tab active" style="flex: none; padding: 0.3rem 0.75rem;">CRM</span>
+                        <a href="/offer-studio" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Offers</a>
+                        <a href="/deft" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">DEFT</a>
+                        <a href="/brain" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">BRAIN</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Profile Switcher -->
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown">
+                        </div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2 relative" title="Voice Settings" id="settingsLink">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="hidden" id="settingsBadge" style="position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:#FFD93D;border:1.5px solid #11131A;"></span>
+                    </a>
+                    <span class="text-xs text-txt-3 font-mono hidden sm:block" id="lastRefresh">—</span>
+                    <button onclick="refreshAll()" class="btn btn-ghost text-xs py-2 px-3 flex items-center gap-1.5" id="refreshBtn">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ── Stats Bar ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
+            <div class="stat-bar flex gap-3 overflow-x-auto pb-1">
+                <div class="stat-chip flex-1 min-w-[130px]">
+                    <div>
+                        <div class="stat-value text-info" id="statContacts">—</div>
+                        <div class="stat-label">Contacts</div>
+                    </div>
+                </div>
+                <div class="stat-chip flex-1 min-w-[130px]">
+                    <div>
+                        <div class="stat-value text-accent" id="statNew24h">—</div>
+                        <div class="stat-label">New (24h)</div>
+                    </div>
+                </div>
+                <div class="stat-chip flex-1 min-w-[130px]">
+                    <div>
+                        <div class="stat-value" style="color: #EF4444;" id="statHot">—</div>
+                        <div class="stat-label">Hot Leads</div>
+                    </div>
+                </div>
+                <div class="stat-chip flex-1 min-w-[130px]">
+                    <div>
+                        <div class="stat-value text-warn" id="statSequences">—</div>
+                        <div class="stat-label">Sequences</div>
+                    </div>
+                </div>
+                <div class="stat-chip flex-1 min-w-[130px]">
+                    <div>
+                        <div class="stat-value text-warn" id="statOutreach">—</div>
+                        <div class="stat-label">Drafts Pending</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Tab Bar ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-4">
+            <div class="flex gap-1 p-0.5 rounded-lg overflow-x-auto" style="background: rgba(255,255,255,0.04);">
+                <button class="crm-tab active" id="tab-contacts" onclick="switchView('contacts')">Contacts</button>
+                <button class="crm-tab" id="tab-pipeline" onclick="switchView('pipeline')">Pipeline</button>
+                <button class="crm-tab" id="tab-attribution" onclick="switchView('attribution')">Attribution</button>
+                <button class="crm-tab" id="tab-sequences" onclick="switchView('sequences')">Sequences</button>
+                <button class="crm-tab" id="tab-outreach" onclick="switchView('outreach')">Outreach</button>
+                <button class="crm-tab" id="tab-prospecting" onclick="switchView('prospecting')">Prospecting</button>
+            </div>
+        </div>
+
+        <!-- ═══ VIEW: CONTACTS ═══ -->
+        <div id="view-contacts" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-3 flex-1">
+                        <input type="text" id="contactSearch" class="form-input py-1.5" style="max-width: 320px;" placeholder="Search contacts..." onkeydown="if(event.key==='Enter')searchContacts()">
+                        <button onclick="searchContacts()" class="btn btn-ghost text-xs py-1.5 px-3">Search</button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="filterLifecycle" class="form-input py-1 px-2 text-xs" style="width: auto;" onchange="applyContactFilters()">
+                            <option value="all">All Stages</option>
+                            <option value="subscriber">Subscriber</option>
+                            <option value="prospect">Prospect</option>
+                            <option value="lead">Lead</option>
+                            <option value="mql">MQL</option>
+                            <option value="sql">SQL</option>
+                            <option value="opportunity">Opportunity</option>
+                            <option value="customer">Customer</option>
+                            <option value="churned">Churned</option>
+                        </select>
+                        <select id="filterEngagement" class="form-input py-1 px-2 text-xs" style="width: auto;" onchange="applyContactFilters()">
+                            <option value="all">All Engagement</option>
+                            <option value="hot">Hot</option>
+                            <option value="active">Active</option>
+                            <option value="warm">Warm</option>
+                            <option value="cold">Cold</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="panel-body" style="padding: 0; overflow-x: auto;" id="contactsTableWrap">
+                    <table class="contact-table">
+                        <thead>
+                            <tr>
+                                <th onclick="sortContacts('name')">Name <span class="sort-arrow">↕</span></th>
+                                <th onclick="sortContacts('company')">Company <span class="sort-arrow">↕</span></th>
+                                <th onclick="sortContacts('lifecycle_stage')">Stage <span class="sort-arrow">↕</span></th>
+                                <th onclick="sortContacts('engagement_score')">Engagement <span class="sort-arrow">↕</span></th>
+                                <th onclick="sortContacts('acquisition_source')">Source <span class="sort-arrow">↕</span></th>
+                                <th onclick="sortContacts('last_interaction_at')">Last Touch <span class="sort-arrow">↕</span></th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contactsBody">
+                            <tr><td colspan="7" class="empty-state"><div class="skeleton h-8 w-full mb-2"></div><div class="skeleton h-8 w-full mb-2"></div><div class="skeleton h-8 w-3/4"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="panel-body border-t border-border flex items-center justify-between" id="contactsPagination" style="display: none;">
+                    <span class="text-xs text-txt-3" id="contactsShowing">—</span>
+                    <button onclick="loadMoreContacts()" class="btn btn-ghost text-xs py-1.5 px-3" id="loadMoreBtn">Load More</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ VIEW: PIPELINE ═══ -->
+        <div id="view-pipeline" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;">
+            <div class="kanban-board" id="pipelineBoard">
+                <div class="empty-state" style="width:100%;"><div class="skeleton h-64 w-full"></div></div>
+            </div>
+        </div>
+
+        <!-- ═══ VIEW: ATTRIBUTION ═══ -->
+        <div id="view-attribution" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Acquisition Attribution</h2>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="attrDateFrom" class="form-input py-1 px-2 text-xs" style="width:auto;">
+                        <span class="text-xs text-txt-3">to</span>
+                        <input type="date" id="attrDateTo" class="form-input py-1 px-2 text-xs" style="width:auto;">
+                        <button onclick="fetchAttribution()" class="btn btn-ghost text-xs py-1 px-3">Apply</button>
+                    </div>
+                </div>
+                <div class="panel-body" id="attributionPanel">
+                    <div class="empty-state"><div class="skeleton h-40 w-full"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ VIEW: SEQUENCES ═══ -->
+        <div id="view-sequences" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Email Sequences</h2>
+                    </div>
+                </div>
+                <div class="panel-body" id="sequencesPanel">
+                    <div class="empty-state"><div class="skeleton h-20 w-full mb-2"></div><div class="skeleton h-20 w-full"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ VIEW: OUTREACH ═══ -->
+        <div id="view-outreach" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;">
+            <!-- Outreach filter pills -->
+            <div class="outreach-stat-row" id="outreachFilterRow">
+                <div class="outreach-stat-pill active-filter" onclick="filterOutreach('draft')">
+                    <span class="os-count" style="color:#FFD93D;" id="osDraft">—</span>
+                    <span class="text-txt-2">Pending</span>
+                </div>
+                <div class="outreach-stat-pill" onclick="filterOutreach('approved')">
+                    <span class="os-count" style="color:#06D6A0;" id="osApproved">—</span>
+                    <span class="text-txt-2">Approved</span>
+                </div>
+                <div class="outreach-stat-pill" onclick="filterOutreach('rejected')">
+                    <span class="os-count" style="color:#FF6B6B;" id="osRejected">—</span>
+                    <span class="text-txt-2">Rejected</span>
+                </div>
+                <div class="outreach-stat-pill" onclick="filterOutreach('skipped')">
+                    <span class="os-count" style="color:#6B7280;" id="osSkipped">—</span>
+                    <span class="text-txt-2">Skipped</span>
+                </div>
+                <div class="outreach-stat-pill" onclick="filterOutreach('sent')">
+                    <span class="os-count" style="color:#4CC9F0;" id="osSent">—</span>
+                    <span class="text-txt-2">Sent</span>
+                </div>
+                <div class="outreach-stat-pill" onclick="filterOutreach('all')">
+                    <span class="os-count" id="osAll">—</span>
+                    <span class="text-txt-2">All</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4l6 4 6-4" stroke="#FFD93D" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="#FFD93D" stroke-width="1.2"/></svg>
+                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Outreach Drafts</h2>
+                        <span class="badge badge-blocked" id="outreachPendingBadge">0</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="outreachSearch" class="form-input py-1.5 text-xs" style="max-width: 240px;" placeholder="Search drafts..." onkeydown="if(event.key==='Enter')filterOutreachSearch()">
+                        <button onclick="fetchOutreachDrafts()" class="btn btn-ghost text-xs py-1.5 px-3">Refresh</button>
+                    </div>
+                </div>
+                <div class="panel-body" id="outreachPanel" style="padding: 0.75rem 1.25rem;">
+                    <div class="empty-state"><div class="skeleton h-20 w-full mb-2"></div><div class="skeleton h-20 w-full mb-2"></div><div class="skeleton h-20 w-full"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ VIEW: PROSPECTING ═══ -->
+        <div id="view-prospecting" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8 space-y-4" style="display: none;">
+
+            <!-- ── Target Locations ── -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1C5.2 1 3 3.2 3 6c0 3.5 5 9 5 9s5-5.5 5-9c0-2.8-2.2-5-5-5z" stroke="#06D6A0" stroke-width="1.2"/><circle cx="8" cy="6" r="1.5" stroke="#06D6A0" stroke-width="1.2"/></svg>
+                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Target Locations</h2>
+                        <span class="badge badge-in_progress" id="locCount">0</span>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="contact-table">
+                        <thead>
+                            <tr>
+                                <th>City</th>
+                                <th>State</th>
+                                <th>Zone</th>
+                                <th>Weight</th>
+                                <th>Active</th>
+                                <th style="width:60px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="locationsBody">
+                            <tr><td colspan="6" class="empty-state">Loading...</td></tr>
+                        </tbody>
+                        <tfoot>
+                            <tr style="background: rgba(6,214,160,0.03);">
+                                <td><input type="text" class="add-row-input" id="addLocCity" placeholder="City name"></td>
+                                <td><input type="text" class="add-row-input" id="addLocState" placeholder="ST" maxlength="2" style="width:50px;text-transform:uppercase;"></td>
+                                <td>
+                                    <select class="add-row-input" id="addLocZone">
+                                        <option value="primary">Primary</option>
+                                        <option value="expansion">Expansion</option>
+                                    </select>
+                                </td>
+                                <td><input type="number" class="add-row-input" id="addLocWeight" value="1.0" min="0.5" max="3" step="0.5" style="width:60px;"></td>
+                                <td></td>
+                                <td><button class="btn btn-primary text-xs py-1 px-2" onclick="addLocation()">Add</button></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ── Target Categories ── -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="2" width="5" height="5" rx="1" stroke="#4CC9F0" stroke-width="1.2"/><rect x="9.5" y="2" width="5" height="5" rx="1" stroke="#4CC9F0" stroke-width="1.2"/><rect x="1.5" y="9" width="5" height="5" rx="1" stroke="#4CC9F0" stroke-width="1.2"/><rect x="9.5" y="9" width="5" height="5" rx="1" stroke="#4CC9F0" stroke-width="1.2"/></svg>
+                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Target Categories</h2>
+                        <span class="badge badge-execute" id="catCount">0</span>
+                    </div>
+                    <button class="btn btn-primary text-xs py-1 px-3" onclick="openAddCategoryForm()">+ Add</button>
+                </div>
+                <div id="categoriesPanel">
+                    <div class="empty-state">Loading...</div>
+                </div>
+            </div>
+
+            <!-- ── Linked Sheets ── -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="#FFD93D" stroke-width="1.2"/><path d="M2 6h12M6 2v12" stroke="#FFD93D" stroke-width="1.2"/></svg>
+                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Linked Sheets</h2>
+                        <span class="badge badge-blocked" id="sheetCount">0</span>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="contact-table">
+                        <thead>
+                            <tr>
+                                <th>Label</th>
+                                <th>Sheet URL</th>
+                                <th>Tab</th>
+                                <th>Last Checked</th>
+                                <th>Rows</th>
+                                <th>Active</th>
+                                <th style="width:60px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="sheetsBody">
+                            <tr><td colspan="7" class="empty-state">Loading...</td></tr>
+                        </tbody>
+                        <tfoot>
+                            <tr style="background: rgba(255,217,61,0.03);">
+                                <td><input type="text" class="add-row-input" id="addSheetLabel" placeholder="Label"></td>
+                                <td><input type="text" class="add-row-input" id="addSheetUrl" placeholder="Google Sheets URL"></td>
+                                <td><input type="text" class="add-row-input" id="addSheetTab" placeholder="Sheet1" value="Sheet1" style="width:80px;"></td>
+                                <td colspan="3"></td>
+                                <td><button class="btn btn-primary text-xs py-1 px-2" onclick="addSheet()">Add</button></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ── Lead Import ── -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3" stroke="#A855F7" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 12h10" stroke="#A855F7" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Lead Import</h2>
+                    </div>
+                    <div class="flex gap-1">
+                        <button class="import-tab active" id="importTabSheets" onclick="switchImportMode('sheets')">Google Sheets</button>
+                        <button class="import-tab" id="importTabJson" onclick="switchImportMode('json')">Manual JSON</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <!-- Sheets import -->
+                    <div id="importSheetsForm">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs text-txt-2 mb-1 font-medium uppercase tracking-wider">Google Sheets URL</label>
+                                <input type="text" class="form-input text-xs" id="importSheetsUrl" placeholder="https://docs.google.com/spreadsheets/d/...">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1 font-medium uppercase tracking-wider">Sheet Tab</label>
+                                <input type="text" class="form-input text-xs" id="importSheetsTab" value="Sheet1" placeholder="Sheet1">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary py-2 px-4" id="importSheetsBtn" onclick="importFromSheets()">Import from Sheets</button>
+                        <p class="text-xs text-txt-3 mt-2">Leads will be scored by GPT and stored as prospects. High-scoring leads enter the enrichment + outreach pipeline automatically.</p>
+                    </div>
+                    <!-- JSON import -->
+                    <div id="importJsonForm" style="display:none;">
+                        <div class="mb-3">
+                            <label class="block text-xs text-txt-2 mb-1 font-medium uppercase tracking-wider">Leads JSON Array</label>
+                            <textarea class="form-input text-xs font-mono" id="importJsonData" rows="8" placeholder='[{"business_name":"Acme Plumbing","phone":"555-1234","website":"acmeplumbing.com","address":"123 Main St, Denver CO","category":"plumber"}]'></textarea>
+                        </div>
+                        <button class="btn btn-primary py-2 px-4" id="importJsonBtn" onclick="importFromJson()">Import Leads</button>
+                        <p class="text-xs text-txt-3 mt-2">Required: <span class="text-txt-2">business_name</span>. Optional: phone, website, address, category, sub_category, keywords, email.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Footer ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-6">
+            <div class="flex items-center justify-between text-xs text-txt-3">
+                <div class="flex items-center gap-3">
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="autoRefreshToggle" checked onchange="toggleAutoRefresh()" class="accent-accent">
+                        <span>Auto-refresh (5m)</span>
+                    </label>
+                </div>
+                <span class="font-mono">CRM v1.0 · Carlton AI</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ 360 SLIDE-OUT PANEL ═══ -->
+    <div class="slide-panel-overlay" id="panelOverlay" onclick="close360Panel()"></div>
+    <div class="slide-panel" id="panel360">
+        <div class="sticky top-0 z-10 border-b border-border" style="background: rgba(13,15,22,0.95); backdrop-filter: blur(12px);">
+            <div class="flex items-center justify-between p-4">
+                <h2 class="font-heading font-bold text-lg" id="p360Name">—</h2>
+                <button onclick="close360Panel()" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 5l10 10M15 5l-10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="px-4 pb-3 flex items-center gap-2 flex-wrap" id="p360Header">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+        <div class="p-4 space-y-4" id="p360Content">
+            <div class="empty-state">Loading contact details...</div>
+        </div>
+    </div>
+
+    <!-- ═══ LOG INTERACTION MODAL ═══ -->
+    <div class="modal-backdrop" id="logInteractionModal">
+        <div class="modal-content">
+            <div class="panel-header">
+                <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Log Interaction</h3>
+                <button onclick="closeModal('logInteractionModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <input type="hidden" id="liContactId">
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Channel <span class="text-alert">*</span></label>
+                    <select id="liChannel" class="form-input">
+                        <option value="email_outbound">Email (Outbound)</option>
+                        <option value="email_inbound">Email (Inbound)</option>
+                        <option value="phone_outbound">Phone (Outbound)</option>
+                        <option value="phone_inbound">Phone (Inbound)</option>
+                        <option value="meeting">Meeting</option>
+                        <option value="social">Social Media</option>
+                        <option value="website_chat">Website Chat</option>
+                        <option value="manual">Manual / Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Direction</label>
+                    <select id="liDirection" class="form-input">
+                        <option value="outbound">Outbound</option>
+                        <option value="inbound">Inbound</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Summary <span class="text-alert">*</span></label>
+                    <textarea id="liSummary" class="form-input" rows="3" placeholder="What happened?"></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="submitLogInteraction()" class="btn btn-primary flex-1 py-2.5" id="liSubmitBtn">Log Interaction</button>
+                    <button onclick="closeModal('logInteractionModal')" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ CHANGE STAGE MODAL ═══ -->
+    <div class="modal-backdrop" id="changeStageModal">
+        <div class="modal-content">
+            <div class="panel-header">
+                <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Change Lifecycle Stage</h3>
+                <button onclick="closeModal('changeStageModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <input type="hidden" id="csContactId">
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">New Stage</label>
+                    <select id="csNewStage" class="form-input">
+                        <option value="subscriber">Subscriber</option>
+                        <option value="prospect">Prospect</option>
+                        <option value="lead">Lead</option>
+                        <option value="mql">MQL</option>
+                        <option value="sql">SQL</option>
+                        <option value="opportunity">Opportunity</option>
+                        <option value="customer">Customer</option>
+                        <option value="evangelist">Evangelist</option>
+                        <option value="churned">Churned</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Reason</label>
+                    <textarea id="csReason" class="form-input" rows="2" placeholder="Why is this contact moving stages?"></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="submitChangeStage()" class="btn btn-primary flex-1 py-2.5" id="csSubmitBtn">Update Stage</button>
+                    <button onclick="closeModal('changeStageModal')" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ CRM LOG REPLY MODAL ═══ -->
+    <div class="modal-backdrop" id="crmLogReplyModal">
+        <div class="modal-content" style="max-width: 520px;">
+            <div class="panel-header">
+                <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Log Social Reply</h3>
+                <button onclick="closeCrmLogReplyModal()" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs text-txt-2 font-mono uppercase tracking-wide mb-2">Reply Text</label>
+                    <textarea class="form-input" id="crmLogReplyText" placeholder="Paste the reply text here..." rows="4" style="resize: vertical; min-height: 100px;"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 font-mono uppercase tracking-wide mb-2">Author Name</label>
+                    <input type="text" class="form-input" id="crmLogReplyAuthor" placeholder="Their name (optional)">
+                </div>
+                <div class="flex items-center justify-between">
+                    <label class="text-xs text-txt-2">Auto-draft response</label>
+                    <button type="button" class="on" id="crmLogReplyAutoDraft" onclick="this.classList.toggle('on')" style="position:relative;width:36px;height:20px;background:rgba(6,214,160,0.3);border-radius:10px;cursor:pointer;border:none;transition:background 0.2s;"></button>
+                </div>
+                <input type="hidden" id="crmLogReplyContactId">
+                <div class="flex gap-3">
+                    <button onclick="submitCrmLogReply()" class="btn btn-primary flex-1 py-2.5">Submit Reply</button>
+                    <button onclick="closeCrmLogReplyModal()" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ EMAIL PREVIEW MODAL ═══ -->
+    <div class="modal-backdrop" id="emailPreviewModal">
+        <div class="modal-content" style="max-width: 680px;">
+            <div class="panel-header">
+                <div class="flex items-center gap-2">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 4l6 4 6-4" stroke="#FFD93D" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="#FFD93D" stroke-width="1.2"/></svg>
+                    <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Email Preview</h3>
+                    <span class="badge" id="epStatusBadge">draft</span>
+                </div>
+                <button onclick="closeModal('emailPreviewModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5">
+                <!-- Email header -->
+                <div style="border-bottom: 1px solid #1E2130; padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                    <div class="email-meta-row" style="border: none;">
+                        <span class="email-meta-label">To</span>
+                        <span class="text-txt" id="epTo">—</span>
+                    </div>
+                    <div class="email-meta-row" style="border: none;">
+                        <span class="email-meta-label">Subj</span>
+                        <span class="email-subject-line" id="epSubject">—</span>
+                    </div>
+                    <div class="email-meta-row" style="border: none;">
+                        <span class="email-meta-label">Score</span>
+                        <span id="epScore">—</span>
+                    </div>
+                    <div class="email-meta-row" style="border: none;" id="epWebsiteRow">
+                        <span class="email-meta-label">Web</span>
+                        <span id="epWebsite" class="text-info">—</span>
+                    </div>
+                </div>
+                <!-- Email body -->
+                <div class="email-preview-body" id="epBody" style="max-height: 360px; overflow-y: auto; padding: 1rem; border-radius: 0.375rem; background: rgba(0,0,0,0.25); border: 1px solid #1E2130;">
+                    —
+                </div>
+                <!-- Reviewer notes -->
+                <div class="mt-4">
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Reviewer Notes</label>
+                    <textarea id="epNotes" class="form-input text-xs" rows="2" placeholder="Optional feedback..."></textarea>
+                </div>
+                <!-- Action buttons -->
+                <div class="flex gap-3 pt-4" id="epActions">
+                    <button onclick="approveOutreach()" class="btn btn-approve flex-1 py-2.5" id="epApproveBtn">Approve & Queue</button>
+                    <button onclick="rejectOutreach()" class="btn btn-deny flex-1 py-2.5" id="epRejectBtn">Reject</button>
+                    <button onclick="skipOutreach()" class="btn btn-ghost flex-1 py-2.5" id="epSkipBtn">Skip</button>
+                    <button onclick="closeModal('emailPreviewModal')" class="btn btn-ghost py-2.5 px-4">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Human task actions are now inline within each card -->
+
+    <!-- ═══ TOAST CONTAINER ═══ -->
+    <div class="toast-container" id="toasts"></div>
+
+    <!-- ═══ SCRIPT ═══ -->
+    <script>
+    // Migrate old localStorage key
+    if (!localStorage.getItem('rdgr-active-profile') && localStorage.getItem('rdgr-active-profile')) {
+        localStorage.setItem('rdgr-active-profile', localStorage.getItem('rdgr-active-profile'));
+        localStorage.removeItem('rdgr-active-profile');
+    }
+
+    // ═══════════════════════════════════════
+    // CONFIG
+    // ═══════════════════════════════════════
+    let activeProfileId = null;
+
+    const API = {
+        crm: 'https://n8n.carltonaiservices.com/webhook/rdgr-crm',
+        complete: 'https://n8n.carltonaiservices.com/webhook/rdgr-complete',
+        humanAction: 'https://n8n.carltonaiservices.com/webhook/human-action',
+        sequences: 'https://n8n.carltonaiservices.com/webhook/crm-sequences',
+        outreachApproved: 'https://n8n.carltonaiservices.com/webhook/prosp-outreach-approved',
+    };
+
+    const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+
+    const LIFECYCLE_STAGES = ['subscriber', 'prospect', 'lead', 'mql', 'sql', 'opportunity', 'customer', 'evangelist', 'churned'];
+    const PIPELINE_STAGES = ['subscriber', 'prospect', 'lead', 'mql', 'sql', 'opportunity', 'customer'];
+
+    // ═══════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════
+    let contacts = [];
+    let allContacts = [];
+    let contactOffset = 0;
+    const CONTACT_LIMIT = 50;
+    let sortField = 'engagement_score';
+    let sortDir = 'desc';
+    let currentView = 'contacts';
+    let humanTasksData = [];
+    let currentHumanTaskIdx = null;
+    let sequencesData = [];
+    let attributionData = [];
+    let outreachDrafts = [];
+    let outreachFilter = 'draft';
+    let currentPreviewDraft = null;
+    let current360ContactId = null;
+    let autoRefreshInterval = null;
+
+    // ═══════════════════════════════════════
+    // UTILITIES
+    // ═══════════════════════════════════════
+    function esc(str) {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+
+    function timeAgo(dateStr) {
+        if (!dateStr) return '—';
+        const diff = Date.now() - new Date(dateStr).getTime();
+        const mins = Math.floor(diff / 60000);
+        if (mins < 1) return 'just now';
+        if (mins < 60) return `${mins}m ago`;
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return `${hrs}h ago`;
+        const days = Math.floor(hrs / 24);
+        return `${days}d ago`;
+    }
+
+    function toPT(utcString) {
+        if (!utcString) return '—';
+        return new Date(utcString).toLocaleString('en-US', {
+            timeZone: 'America/Los_Angeles',
+            month: 'short', day: 'numeric', year: 'numeric',
+            hour: 'numeric', minute: '2-digit', hour12: true
+        });
+    }
+
+    function formatNum(n) {
+        if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+        return Number(n).toFixed(0);
+    }
+
+    function toast(message, type = 'success') {
+        const container = document.getElementById('toasts');
+        const el = document.createElement('div');
+        el.className = `toast toast-${type}`;
+        el.textContent = message;
+        container.appendChild(el);
+        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 4000);
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    // ═══════════════════════════════════════
+    // SUPABASE & CRM-BRIDGE
+    // ═══════════════════════════════════════
+    async function supabaseSelect(table, query = '') {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
+        try {
+            const res = await fetch(url, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                }
+            });
+            if (!res.ok) { console.error('Supabase error:', res.status, await res.text()); return null; }
+            return await res.json();
+        } catch (err) { console.error('Supabase fetch error:', table, err); return null; }
+    }
+
+    async function fetchJSON(url, body, { retries = 0, backoff = 2000 } = {}) {
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            if (res.status >= 500 && retries < 2) {
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchJSON(url, body, { retries: retries + 1, backoff: backoff * 2 });
+            }
+            return await res.json();
+        } catch (err) {
+            if (retries < 1) {
+                await new Promise(r => setTimeout(r, 2000));
+                return fetchJSON(url, body, { retries: retries + 1, backoff });
+            }
+            console.error('Fetch error:', url, err);
+            return null;
+        }
+    }
+
+    async function crmBridge(operation, parameters) {
+        return fetchJSON(API.crm, {
+            task_id: `ui-${operation}-${Date.now()}`,
+            brand_id: 'carlton',
+            domain: 'crm',
+            operation,
+            parameters,
+            user_id: activeProfileId
+        });
+    }
+
+    // ═══════════════════════════════════════
+    // AUTH GATE
+    // ═══════════════════════════════════════
+    function handleGate(e) {
+        e.preventDefault();
+        const input = document.getElementById('gateInput').value;
+        if (input === 'Advance1!') {
+            localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+            document.getElementById('gate').classList.add('hidden');
+            document.getElementById('mainContent').style.opacity = '1';
+            initDashboard();
+            return false;
+        }
+        document.getElementById('gateError').classList.add('show');
+        document.getElementById('gateInput').value = '';
+        document.getElementById('gateInput').focus();
+        setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+        return false;
+    }
+
+    if ((JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true)) {
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity = '1';
+        initDashboard();
+    }
+
+    // ═══════════════════════════════════════
+    // INIT & REFRESH
+    // ═══════════════════════════════════════
+    function initDashboard() {
+        // Set default attribution dates
+        const now = new Date();
+        document.getElementById('attrDateTo').value = now.toISOString().split('T')[0];
+        const threeMonthsAgo = new Date(now);
+        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+        document.getElementById('attrDateFrom').value = threeMonthsAgo.toISOString().split('T')[0];
+
+        refreshAll();
+        startAutoRefresh();
+        checkPendingSnapshots();
+
+        // Cross-link: auto-open 360 panel if ?contact= param present
+        const params = new URLSearchParams(window.location.search);
+        const autoContactId = params.get('contact');
+        if (autoContactId) {
+            setTimeout(() => open360(autoContactId), 500);
+        }
+    }
+
+    async function checkPendingSnapshots() {
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/voice_settings_snapshots?brand_id=eq.carlton&status=eq.pending&select=id`, {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+            });
+            const data = await res.json();
+            if (data && data.length > 0) {
+                const badge = document.getElementById('settingsBadge');
+                if (badge) badge.classList.remove('hidden');
+                const link = document.getElementById('settingsLink');
+                if (link) link.title = `Voice Settings (${data.length} AI suggestion${data.length > 1 ? 's' : ''})`;
+            }
+        } catch (e) { /* silent */ }
+    }
+
+    function startAutoRefresh() {
+        if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+        autoRefreshInterval = setInterval(refreshAll, 300000);
+    }
+
+    function toggleAutoRefresh() {
+        if (document.getElementById('autoRefreshToggle').checked) {
+            startAutoRefresh();
+        } else {
+            clearInterval(autoRefreshInterval);
+            autoRefreshInterval = null;
+        }
+    }
+
+    async function refreshAll() {
+        document.getElementById('lastRefresh').textContent = 'Refreshing...';
+        const btn = document.getElementById('refreshBtn');
+        btn.disabled = true;
+
+        await Promise.all([
+            fetchContacts(),
+            fetchStats(),
+            fetchOutreachStats(),
+        ]);
+
+        document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString();
+        btn.disabled = false;
+    }
+
+    // ═══════════════════════════════════════
+    // VIEW SWITCHING
+    // ═══════════════════════════════════════
+    function switchView(view) {
+        currentView = view;
+        const views = ['contacts', 'pipeline', 'attribution', 'sequences', 'outreach', 'prospecting'];
+        views.forEach(v => {
+            document.getElementById(`view-${v}`).style.display = v === view ? '' : 'none';
+            document.getElementById(`tab-${v}`).classList.toggle('active', v === view);
+        });
+
+        // Lazy-load data for views that need it
+        if (view === 'pipeline') fetchPipelineData();
+        if (view === 'attribution') fetchAttribution();
+        if (view === 'sequences') fetchSequences();
+        if (view === 'outreach') fetchOutreachDrafts();
+        if (view === 'prospecting') fetchProspectingData();
+    }
+
+    // ═══════════════════════════════════════
+    // CONTACTS
+    // ═══════════════════════════════════════
+    async function fetchContacts(append = false) {
+        if (!append) contactOffset = 0;
+
+        let query = `select=contact_id,first_name,last_name,email,phone,company,lifecycle_stage,engagement_level,engagement_score,tags,last_interaction_at,acquisition_source,offer_interest&merged_into=is.null&order=engagement_score.desc&limit=${CONTACT_LIMIT}&offset=${contactOffset}`;
+
+        const lifecycle = document.getElementById('filterLifecycle').value;
+        const engagement = document.getElementById('filterEngagement').value;
+        if (lifecycle !== 'all') query += `&lifecycle_stage=eq.${lifecycle}`;
+        if (engagement !== 'all') query += `&engagement_level=eq.${engagement}`;
+
+        const result = await supabaseSelect('unified_contacts', query);
+        const fetched = Array.isArray(result) ? result : [];
+
+        if (append) {
+            allContacts = [...allContacts, ...fetched];
+        } else {
+            allContacts = fetched;
+        }
+        contacts = allContacts;
+        renderContacts();
+
+        // Pagination
+        const pagEl = document.getElementById('contactsPagination');
+        if (fetched.length >= CONTACT_LIMIT) {
+            pagEl.style.display = '';
+            document.getElementById('contactsShowing').textContent = `Showing ${allContacts.length} contacts`;
+        } else {
+            pagEl.style.display = fetched.length > 0 ? '' : 'none';
+            document.getElementById('contactsShowing').textContent = `Showing all ${allContacts.length} contacts`;
+            document.getElementById('loadMoreBtn').style.display = 'none';
+        }
+    }
+
+    function loadMoreContacts() {
+        contactOffset += CONTACT_LIMIT;
+        fetchContacts(true);
+    }
+
+    function applyContactFilters() {
+        fetchContacts();
+    }
+
+    async function searchContacts() {
+        const query = document.getElementById('contactSearch').value.trim();
+        if (!query) { fetchContacts(); return; }
+
+        const result = await crmBridge('search_contacts', { query, limit: 50 });
+        if (result?.result?.contacts) {
+            allContacts = result.result.contacts;
+            contacts = allContacts;
+            renderContacts();
+            document.getElementById('contactsPagination').style.display = '';
+            document.getElementById('contactsShowing').textContent = `${allContacts.length} results for "${esc(query)}"`;
+            document.getElementById('loadMoreBtn').style.display = 'none';
+        }
+    }
+
+    function sortContacts(field) {
+        if (sortField === field) {
+            sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortField = field;
+            sortDir = field === 'engagement_score' ? 'desc' : 'asc';
+        }
+
+        contacts.sort((a, b) => {
+            let va, vb;
+            if (field === 'name') {
+                va = `${a.first_name || ''} ${a.last_name || ''}`.toLowerCase();
+                vb = `${b.first_name || ''} ${b.last_name || ''}`.toLowerCase();
+            } else {
+                va = a[field]; vb = b[field];
+            }
+            if (va == null) va = '';
+            if (vb == null) vb = '';
+            if (typeof va === 'number') return sortDir === 'asc' ? va - vb : vb - va;
+            return sortDir === 'asc' ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+        });
+        renderContacts();
+    }
+
+    function renderContacts() {
+        const tbody = document.getElementById('contactsBody');
+
+        if (contacts.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No contacts found</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = contacts.map(c => {
+            const name = `${c.first_name || ''} ${c.last_name || ''}`.trim() || '(No name)';
+            const engClass = `eng-${c.engagement_level || 'inactive'}`;
+            const lcClass = `lc-${c.lifecycle_stage || 'subscriber'}`;
+
+            return `
+                <tr onclick="open360('${esc(c.contact_id)}')" style="cursor:pointer;">
+                    <td>
+                        <span class="contact-name">${esc(name)}</span>
+                        ${c.email ? `<div class="text-[0.65rem] text-txt-3 mt-0.5">${esc(c.email)}</div>` : ''}
+                    </td>
+                    <td class="text-txt-2">${esc(c.company || '—')}</td>
+                    <td><span class="badge ${lcClass}">${esc(c.lifecycle_stage || '—')}</span></td>
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <span class="badge ${engClass}">${c.engagement_score || 0}</span>
+                            <span class="text-[0.6rem] text-txt-3">${esc(c.engagement_level || 'inactive')}</span>
+                        </div>
+                    </td>
+                    <td class="text-txt-2 text-xs">${esc(c.acquisition_source || '—')}</td>
+                    <td class="text-txt-3 text-xs font-mono">${timeAgo(c.last_interaction_at)}</td>
+                    <td>
+                        <div class="flex gap-1">
+                            <button class="btn btn-ghost text-[0.6rem] py-1 px-2" onclick="event.stopPropagation();open360('${esc(c.contact_id)}')">360</button>
+                            <button class="btn btn-ghost text-[0.6rem] py-1 px-2" onclick="event.stopPropagation();openChangeStage('${esc(c.contact_id)}')">Stage</button>
+                            <button class="btn btn-ghost text-[0.6rem] py-1 px-2" onclick="event.stopPropagation();openLogInteraction('${esc(c.contact_id)}')">Log</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // STATS
+    // ═══════════════════════════════════════
+    async function fetchStats() {
+        try {
+            const result = await fetch(`${SUPABASE_URL}/rest/v1/rpc/crm_plan_snapshot`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ p_brand_id: 'carlton' })
+            }).then(r => r.json());
+
+            if (result && !result.error) {
+                document.getElementById('statContacts').textContent = result.total_contacts || 0;
+                document.getElementById('statNew24h').textContent = result.new_contacts_24h || 0;
+                const hotLeads = Array.isArray(result.hot_leads) ? result.hot_leads.length : 0;
+                document.getElementById('statHot').textContent = hotLeads;
+            }
+        } catch (err) {
+            console.error('Stats fetch error:', err);
+            document.getElementById('statContacts').textContent = '—';
+            document.getElementById('statNew24h').textContent = '—';
+            document.getElementById('statHot').textContent = '—';
+        }
+
+        // Sequences count
+        const seqs = await supabaseSelect('crm_email_sequences', 'select=sequence_id&status=eq.active');
+        document.getElementById('statSequences').textContent = Array.isArray(seqs) ? seqs.length : '—';
+    }
+
+    // ═══════════════════════════════════════
+    // 360 SLIDE-OUT PANEL
+    // ═══════════════════════════════════════
+    async function open360(contactId) {
+        current360ContactId = contactId;
+        document.getElementById('panelOverlay').classList.add('active');
+        document.getElementById('panel360').classList.add('active');
+        document.getElementById('p360Name').textContent = 'Loading...';
+        document.getElementById('p360Header').innerHTML = '';
+        document.getElementById('p360Content').innerHTML = '<div class="empty-state">Loading contact details...</div>';
+
+        const data = await crmBridge('get_contact_360', { contact_id: contactId });
+        if (!data?.result) {
+            document.getElementById('p360Content').innerHTML = '<div class="empty-state">Failed to load contact</div>';
+            return;
+        }
+
+        const c = data.result.contact || {};
+        const interactions = data.result.interactions || [];
+        const lifecycle = data.result.lifecycle_history || [];
+        const engagement = data.result.engagement_summary || {};
+
+        const name = `${c.first_name || ''} ${c.last_name || ''}`.trim() || '(No name)';
+        document.getElementById('p360Name').textContent = name;
+
+        // Header badges
+        const engClass = `eng-${c.engagement_level || 'inactive'}`;
+        const lcClass = `lc-${c.lifecycle_stage || 'subscriber'}`;
+        document.getElementById('p360Header').innerHTML = `
+            ${c.company ? `<span class="text-sm text-txt-2">${esc(c.company)}</span>` : ''}
+            ${c.title ? `<span class="text-xs text-txt-3">· ${esc(c.title)}</span>` : ''}
+            <span class="badge ${lcClass} ml-2">${esc(c.lifecycle_stage || '—')}</span>
+            <span class="badge ${engClass}">${c.engagement_score || 0} ${esc(c.engagement_level || '')}</span>
+            ${c.do_not_contact ? '<span class="badge badge-failed">DNC</span>' : ''}
+            ${c.tags && c.tags.length ? c.tags.map(t => `<span class="badge badge-domain">${esc(t)}</span>`).join('') : ''}
+        `;
+
+        // Build content sections
+        let html = '';
+
+        // Contact info
+        html += `<div class="panel"><div class="panel-body"><div class="grid grid-cols-2 gap-3 text-sm">
+            ${c.email ? `<div><span class="text-xs text-txt-3 uppercase">Email</span><div><a href="mailto:${esc(c.email)}" class="text-info hover:underline">${esc(c.email)}</a></div></div>` : ''}
+            ${c.phone ? `<div><span class="text-xs text-txt-3 uppercase">Phone</span><div><a href="tel:${esc(c.phone)}" class="text-info hover:underline">${esc(c.phone)}</a></div></div>` : ''}
+            ${c.acquisition_source ? `<div><span class="text-xs text-txt-3 uppercase">Source</span><div class="text-txt-2">${esc(c.acquisition_source)}</div></div>` : ''}
+            ${c.offer_interest ? `<div><span class="text-xs text-txt-3 uppercase">Interest</span><div class="text-txt-2">${esc(c.offer_interest)}</div></div>` : ''}
+        </div></div></div>`;
+
+        // Engagement breakdown
+        const score = c.engagement_score || 0;
+        html += `<div class="panel"><div class="panel-header"><span class="text-xs font-semibold text-txt-3 uppercase tracking-wider">Engagement Score</span><span class="badge ${engClass} text-sm">${score}/100</span></div>
+        <div class="panel-body">
+            <div class="space-y-2">
+                <div><div class="flex justify-between text-xs mb-1"><span class="text-txt-3">Recency</span><span class="text-txt-2">/40</span></div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min((score / 100) * 100, 100)}%;background:#06D6A0;"></div></div></div>
+                <div><div class="flex justify-between text-xs mb-1"><span class="text-txt-3">Frequency</span><span class="text-txt-2">/30</span></div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min((score / 100) * 75, 100)}%;background:#4CC9F0;"></div></div></div>
+                <div><div class="flex justify-between text-xs mb-1"><span class="text-txt-3">Depth</span><span class="text-txt-2">/30</span></div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min((score / 100) * 60, 100)}%;background:#A855F7;"></div></div></div>
+            </div>
+            <div class="text-xs text-txt-3 mt-2">${engagement.total || 0} total interactions · First: ${toPT(engagement.first_touch)} · Last: ${toPT(engagement.last_touch)}</div>
+        </div></div>`;
+
+        // Lifecycle timeline
+        if (lifecycle.length > 0) {
+            html += `<div class="panel"><div class="panel-header"><span class="text-xs font-semibold text-txt-3 uppercase tracking-wider">Lifecycle History</span></div>
+            <div class="panel-body">
+                ${lifecycle.map(l => `
+                    <div class="flex items-center gap-3 py-1.5 border-b border-border/30 last:border-0 text-xs">
+                        <span class="badge lc-${l.from_stage || 'subscriber'}" style="font-size:0.55rem;">${esc(l.from_stage || '—')}</span>
+                        <span class="text-txt-3">→</span>
+                        <span class="badge lc-${l.to_stage || 'subscriber'}" style="font-size:0.55rem;">${esc(l.to_stage || '—')}</span>
+                        <span class="text-txt-3 flex-1 truncate">${esc(l.reason || '')}</span>
+                        <span class="text-txt-3 font-mono text-[0.6rem]">${toPT(l.created_at)}</span>
+                    </div>
+                `).join('')}
+            </div></div>`;
+        }
+
+        // Interaction timeline
+        html += `<div class="panel"><div class="panel-header">
+            <span class="text-xs font-semibold text-txt-3 uppercase tracking-wider">Interactions (${interactions.length})</span>
+            <button class="btn btn-ghost text-xs py-1 px-2" onclick="openLogInteraction('${esc(contactId)}')">+ Log</button>
+        </div>
+        <div class="panel-body" style="max-height: 400px; overflow-y: auto;">
+            ${interactions.length === 0 ? '<div class="empty-state">No interactions recorded</div>' :
+            interactions.map(int => `
+                <div class="flex gap-3 py-2 border-b border-border/30 last:border-0">
+                    <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background: ${int.direction === 'outbound' ? '#06D6A0' : '#4CC9F0'};"></div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-0.5">
+                            <span class="badge badge-domain" style="font-size:0.55rem;">${esc(int.channel || '')}</span>
+                            <span class="text-[0.6rem] text-txt-3">${esc(int.direction || '')}</span>
+                        </div>
+                        <div class="text-xs text-txt">${esc(int.summary || '')}</div>
+                        <div class="text-[0.6rem] text-txt-3 font-mono mt-0.5">${toPT(int.created_at)}</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div></div>`;
+
+        // Social Activity section
+        html += await renderSocialActivity(contactId, name);
+
+        // Action buttons
+        html += `<div class="flex gap-2 flex-wrap">
+            <button class="btn btn-primary text-xs" onclick="openLogInteraction('${esc(contactId)}')">Log Interaction</button>
+            <button class="btn btn-modify text-xs" onclick="openChangeStage('${esc(contactId)}')">Change Stage</button>
+        </div>`;
+
+        document.getElementById('p360Content').innerHTML = html;
+    }
+
+    function close360Panel() {
+        document.getElementById('panelOverlay').classList.remove('active');
+        document.getElementById('panel360').classList.remove('active');
+        current360ContactId = null;
+    }
+
+    // ═══════════════════════════════════════
+    // SOCIAL ACTIVITY IN 360 PANEL
+    // ═══════════════════════════════════════
+    async function renderSocialActivity(contactId, contactName) {
+        let socialData = null;
+        try {
+            const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_contact_social_timeline`, {
+                method: 'POST',
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ p_contact_id: contactId, p_brand_id: 'carlton' })
+            });
+            socialData = await resp.json();
+        } catch (e) { /* silently skip if RPC doesn't exist yet */ }
+
+        if (!socialData || socialData.error || (!socialData.drafts?.length && !socialData.conversations?.length && !socialData.total_outreach)) {
+            return ''; // No social data, don't show section
+        }
+
+        const drafts = socialData.drafts || [];
+        const conversations = socialData.conversations || [];
+        const totalOutreach = socialData.total_outreach || 0;
+        const totalReplies = socialData.total_replies || 0;
+        const platformColors = {
+            linkedin: '#0A66C2', twitter: '#1DA1F2', facebook: '#1877F2',
+            instagram: '#E1306C', reddit: '#FF4500'
+        };
+
+        let items = '';
+        drafts.forEach(d => {
+            const pColor = platformColors[d.platform] || '#8A95A9';
+            const pLabel = d.platform ? d.platform.charAt(0).toUpperCase() + d.platform.slice(1) : 'Unknown';
+            const context = d.subreddit ? `r/${d.subreddit}` : (d.context_label || '');
+            const score = d.score || d.qualification_score || '';
+
+            items += `<div class="py-2 border-b border-border/30 last:border-0">
+                <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center gap-2">
+                        <span class="badge" style="background:rgba(${pColor === '#0A66C2' ? '10,102,194' : pColor === '#FF4500' ? '255,69,0' : '138,149,169'},0.15);color:${pColor};font-size:0.55rem;">${esc(pLabel)}</span>
+                        ${context ? `<span class="text-[0.65rem] text-txt-3">${esc(context)}</span>` : ''}
+                    </div>
+                    ${score ? `<span class="text-[0.6rem] text-txt-3 font-mono">Score: ${score}</span>` : ''}
+                </div>
+                <div class="text-xs text-txt ml-4 mb-1">
+                    <span class="text-accent">YOU</span> ${d.outreach_type === 'dm' ? 'sent' : 'commented'}: "${esc(truncateStr(d.message_content || d.content || '', 80))}"
+                </div>`;
+
+            if (d.has_reply && d.latest_reply) {
+                items += `<div class="text-xs text-txt-2 ml-4 mb-1">→ They replied: "${esc(truncateStr(d.latest_reply, 80))}"</div>`;
+            }
+            if (d.pending_response) {
+                items += `<div class="text-xs ml-4 mb-1" style="color:#FFD93D;">→ DRAFT REPLY: "${esc(truncateStr(d.pending_response, 80))}"</div>
+                <div class="flex items-center gap-1 ml-4">
+                    <button class="btn btn-primary text-xs py-0.5 px-2" style="font-size:0.6rem;" onclick="approveConvoFromCRM('${d.conversation_id}')">Approve</button>
+                    <button class="btn btn-ghost text-xs py-0.5 px-2" style="font-size:0.6rem;" onclick="copySocialText(\`${esc(d.pending_response).replace(/`/g, '')}\`)">Copy</button>
+                    <button class="btn btn-primary text-xs py-0.5 px-2" style="font-size:0.6rem;" onclick="markConvoSentFromCRM('${d.conversation_id}')">Mark Sent</button>
+                </div>`;
+            }
+            if (!d.has_reply && !d.pending_response) {
+                items += `<div class="text-xs text-txt-3 ml-4">→ No response yet</div>`;
+            }
+            items += '</div>';
+        });
+
+        const socialLink = encodeURIComponent(contactName || '');
+
+        return `<div class="panel"><div class="panel-header">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-txt-3 uppercase tracking-wider">Social Activity (${totalOutreach} outreach | ${totalReplies} replies)</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="/social-dashboard?search=${socialLink}" target="_blank" class="text-xs text-info hover:underline" style="text-decoration:none;">View in Social →</a>
+                <button class="btn btn-ghost text-xs py-1 px-2" onclick="openCrmLogReply('${esc(contactId)}')">Log Reply</button>
+            </div>
+        </div>
+        <div class="panel-body" style="max-height: 400px; overflow-y: auto;">
+            ${items || '<div class="empty-state text-xs">No social activity recorded</div>'}
+        </div>
+        <div class="text-xs text-txt-3 px-4 py-2 border-t border-border/30">
+            Total: ${totalOutreach} outreach | ${totalReplies} replies
+        </div></div>`;
+    }
+
+    function truncateStr(str, max) {
+        if (!str) return '';
+        return str.length > max ? str.substring(0, max - 1) + '\u2026' : str;
+    }
+
+    async function copySocialText(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            showToast('Copied to clipboard', 'success');
+        } catch (e) { showToast('Copy failed', 'error'); }
+    }
+
+    async function approveConvoFromCRM(convoId) {
+        try {
+            await fetch(`${SUPABASE_URL}/rest/v1/social_conversations?id=eq.${convoId}`, {
+                method: 'PATCH',
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                body: JSON.stringify({ approval_status: 'approved', approved_at: new Date().toISOString() }),
+            });
+            showToast('Response approved', 'success');
+            if (current360ContactId) open360(current360ContactId);
+        } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+    }
+
+    async function markConvoSentFromCRM(convoId) {
+        try {
+            await fetch(`${SUPABASE_URL}/rest/v1/social_conversations?id=eq.${convoId}`, {
+                method: 'PATCH',
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                body: JSON.stringify({ action_status: 'acted', acted_at: new Date().toISOString() }),
+            });
+            showToast('Marked as sent', 'success');
+            if (current360ContactId) open360(current360ContactId);
+        } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+    }
+
+    // ═══════════════════════════════════════
+    // CRM LOG REPLY MODAL
+    // ═══════════════════════════════════════
+    function openCrmLogReply(contactId) {
+        document.getElementById('crmLogReplyContactId').value = contactId;
+        document.getElementById('crmLogReplyText').value = '';
+        document.getElementById('crmLogReplyAuthor').value = '';
+        const toggle = document.getElementById('crmLogReplyAutoDraft');
+        if (!toggle.classList.contains('on')) toggle.classList.add('on');
+        document.getElementById('crmLogReplyModal').classList.add('active');
+    }
+
+    function closeCrmLogReplyModal() {
+        document.getElementById('crmLogReplyModal').classList.remove('active');
+    }
+
+    async function submitCrmLogReply() {
+        const replyText = document.getElementById('crmLogReplyText').value.trim();
+        if (!replyText) { showToast('Reply text is required', 'error'); return; }
+        const contactId = document.getElementById('crmLogReplyContactId').value;
+        const payload = {
+            contact_id: contactId,
+            reply_text: replyText,
+            author: document.getElementById('crmLogReplyAuthor').value.trim() || 'Unknown',
+            brand_id: 'carlton',
+            generate_response: document.getElementById('crmLogReplyAutoDraft').classList.contains('on'),
+            user_id: activeProfileId,
+        };
+        try {
+            const res = await fetch('https://n8n.carltonaiservices.com/webhook/social-reply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const result = await res.json();
+            if (result && result.success) {
+                closeCrmLogReplyModal();
+                showToast('Reply logged' + (result.response_drafted ? ' — response drafted' : ''), 'success');
+                if (current360ContactId) open360(current360ContactId);
+            } else {
+                showToast('Failed: ' + (result.error || 'Unknown error'), 'error');
+            }
+        } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+    }
+
+    // ═══════════════════════════════════════
+    // PIPELINE KANBAN
+    // ═══════════════════════════════════════
+    async function fetchPipelineData() {
+        const board = document.getElementById('pipelineBoard');
+        board.innerHTML = '<div class="empty-state" style="width:100%;">Loading pipeline...</div>';
+
+        const result = await supabaseSelect('unified_contacts',
+            'select=contact_id,first_name,last_name,company,lifecycle_stage,engagement_level,engagement_score,last_interaction_at&merged_into=is.null&lifecycle_stage=in.(subscriber,prospect,lead,mql,sql,opportunity,customer)&order=engagement_score.desc'
+        );
+        const data = Array.isArray(result) ? result : [];
+
+        // Group by stage
+        const groups = {};
+        PIPELINE_STAGES.forEach(s => groups[s] = []);
+        data.forEach(c => {
+            const stage = c.lifecycle_stage || 'subscriber';
+            if (groups[stage]) groups[stage].push(c);
+        });
+
+        const stageColors = {
+            subscriber: '#9CA3AF', prospect: '#2DD4BF', lead: '#60A5FA', mql: '#4CC9F0',
+            sql: '#A855F7', opportunity: '#FFD93D', customer: '#06D6A0'
+        };
+
+        board.innerHTML = PIPELINE_STAGES.map(stage => {
+            const items = groups[stage] || [];
+            const color = stageColors[stage];
+            return `
+                <div class="kanban-column">
+                    <div class="kanban-column-header">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full" style="background:${color}"></div>
+                            <span class="text-xs font-semibold uppercase tracking-wider" style="color:${color}">${esc(stage)}</span>
+                        </div>
+                        <span class="text-xs text-txt-3">${items.length}</span>
+                    </div>
+                    <div class="kanban-column-body" data-stage="${stage}"
+                        ondragover="event.preventDefault(); this.classList.add('drag-over')"
+                        ondragleave="this.classList.remove('drag-over')"
+                        ondrop="handleDrop(event, '${stage}'); this.classList.remove('drag-over')">
+                        ${items.length === 0 ? '<div class="text-center py-4 text-txt-3 text-[0.65rem]">Empty</div>' :
+                        items.map(c => {
+                            const name = `${c.first_name || ''} ${c.last_name || ''}`.trim() || '(No name)';
+                            const engClass = `eng-${c.engagement_level || 'inactive'}`;
+                            return `
+                                <div class="kanban-card" draggable="true"
+                                    data-contact-id="${esc(c.contact_id)}"
+                                    ondragstart="handleDragStart(event)"
+                                    ondragend="handleDragEnd(event)">
+                                    <div class="card-name">${esc(name)}</div>
+                                    <div class="card-company">${esc(c.company || '')}</div>
+                                    <div class="card-footer">
+                                        <span class="badge ${engClass}" style="font-size:0.55rem;">${c.engagement_score || 0}</span>
+                                        <span class="text-[0.55rem] text-txt-3 font-mono">${timeAgo(c.last_interaction_at)}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    let dragContactId = null;
+    function handleDragStart(e) {
+        dragContactId = e.target.dataset.contactId;
+        e.target.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+    }
+    function handleDragEnd(e) { e.target.classList.remove('dragging'); }
+    async function handleDrop(e, newStage) {
+        e.preventDefault();
+        if (!dragContactId) return;
+        toast(`Moving contact to ${newStage}...`, 'success');
+        await crmBridge('update_lifecycle', {
+            contact_id: dragContactId,
+            new_stage: newStage,
+            changed_by: 'dashboard_user',
+            reason: 'Pipeline drag-and-drop'
+        });
+        dragContactId = null;
+        fetchPipelineData();
+    }
+
+    // ═══════════════════════════════════════
+    // ATTRIBUTION
+    // ═══════════════════════════════════════
+    async function fetchAttribution() {
+        const panel = document.getElementById('attributionPanel');
+        panel.innerHTML = '<div class="empty-state">Loading attribution data...</div>';
+
+        const dateFrom = document.getElementById('attrDateFrom').value;
+        const dateTo = document.getElementById('attrDateTo').value;
+
+        const result = await crmBridge('attribution_report', {
+            date_from: dateFrom || '2026-01-01',
+            date_to: dateTo || new Date().toISOString().split('T')[0]
+        });
+
+        attributionData = result?.result?.report || [];
+
+        if (attributionData.length === 0) {
+            panel.innerHTML = '<div class="empty-state">No attribution data for this period</div>';
+            return;
+        }
+
+        const maxCount = Math.max(...attributionData.map(r => r.contact_count || 0), 1);
+        const barColors = ['#06D6A0', '#4CC9F0', '#A855F7', '#FFD93D', '#FF6B6B', '#EC4899', '#F97316', '#60A5FA'];
+
+        let html = '<div class="space-y-3 mb-6">';
+        html += '<div class="text-xs text-txt-3 uppercase tracking-wider font-medium mb-2">Contacts by Source</div>';
+        attributionData.forEach((row, i) => {
+            const pct = ((row.contact_count || 0) / maxCount) * 100;
+            const color = barColors[i % barColors.length];
+            html += `
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-txt-2">${esc(row.acquisition_source || 'Unknown')}</span>
+                        <span class="text-txt-3 font-mono">${row.contact_count || 0}</span>
+                    </div>
+                    <div class="attr-bar-bg"><div class="attr-bar-fill" style="width:${pct}%;background:${color};">${pct > 15 ? (row.contact_count || 0) : ''}</div></div>
+                </div>
+            `;
+        });
+        html += '</div>';
+
+        // Table
+        html += `<table class="contact-table"><thead><tr>
+            <th>Source</th><th>Contacts</th><th>Customers</th><th>Avg Score</th><th>Pipeline</th>
+        </tr></thead><tbody>`;
+        attributionData.forEach(row => {
+            html += `<tr>
+                <td class="text-txt-2">${esc(row.acquisition_source || 'Unknown')}</td>
+                <td>${row.contact_count || 0}</td>
+                <td>${row.customer_count || 0}</td>
+                <td><span class="badge eng-${(row.avg_engagement_score || 0) >= 75 ? 'hot' : (row.avg_engagement_score || 0) >= 50 ? 'active' : (row.avg_engagement_score || 0) >= 25 ? 'warm' : 'cold'}">${Math.round(row.avg_engagement_score || 0)}</span></td>
+                <td>${row.pipeline_count || 0}</td>
+            </tr>`;
+        });
+        html += '</tbody></table>';
+
+        panel.innerHTML = html;
+    }
+
+    // ═══════════════════════════════════════
+    // SEQUENCES
+    // ═══════════════════════════════════════
+    async function fetchSequences() {
+        const panel = document.getElementById('sequencesPanel');
+        panel.innerHTML = '<div class="empty-state">Loading sequences...</div>';
+
+        const result = await supabaseSelect('crm_email_sequences',
+            'select=sequence_id,name,status,total_steps,trigger_event,created_at&order=created_at.desc'
+        );
+        sequencesData = Array.isArray(result) ? result : [];
+
+        if (sequencesData.length === 0) {
+            panel.innerHTML = '<div class="empty-state"><div class="mb-2 text-2xl opacity-40">📧</div>No email sequences configured</div>';
+            return;
+        }
+
+        panel.innerHTML = sequencesData.map(seq => {
+            const statusBadge = seq.status === 'active'
+                ? '<span class="badge badge-in_progress">Active</span>'
+                : seq.status === 'paused'
+                    ? '<span class="badge badge-blocked">Paused</span>'
+                    : '<span class="badge" style="background:rgba(107,114,128,0.15);color:#9CA3AF;">Draft</span>';
+
+            return `
+                <div class="p-4 border-b border-border/30 last:border-0">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-txt">${esc(seq.name || 'Untitled')}</span>
+                            ${statusBadge}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-txt-3">${seq.total_steps || 0} steps</span>
+                            <span class="text-xs text-txt-3 font-mono">${timeAgo(seq.created_at)}</span>
+                        </div>
+                    </div>
+                    ${seq.trigger_event ? `<div class="text-xs text-txt-3">Trigger: <span class="text-txt-2">${esc(seq.trigger_event)}</span></div>` : ''}
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // OUTREACH DRAFTS
+    // ═══════════════════════════════════════
+    async function fetchOutreachStats() {
+        const drafts = await supabaseSelect('copy_drafts',
+            'select=id,review_status&brand_id=eq.carlton&order=created_at.desc'
+        );
+        const all = Array.isArray(drafts) ? drafts : [];
+        const pending = all.filter(d => d.review_status === 'draft').length;
+        document.getElementById('statOutreach').textContent = pending;
+    }
+
+    async function fetchOutreachDrafts() {
+        const panel = document.getElementById('outreachPanel');
+        panel.innerHTML = '<div class="empty-state">Loading outreach drafts...</div>';
+
+        const result = await supabaseSelect('copy_drafts',
+            'select=id,brand_id,copy_type,title,content,context,review_status,review_feedback,revision_count,destination,requested_by,parent_draft_id,approved_at,approved_by,created_at,updated_at&brand_id=eq.carlton&order=created_at.desc&limit=200'
+        );
+        outreachDrafts = Array.isArray(result) ? result : [];
+
+        // Update filter counts — "All" is the sum of all statuses
+        const counts = { draft: 0, approved: 0, rejected: 0, skipped: 0, sent: 0 };
+        outreachDrafts.forEach(d => {
+            if (counts[d.review_status] !== undefined) counts[d.review_status]++;
+        });
+        const totalAll = counts.draft + counts.approved + counts.rejected + counts.skipped + counts.sent;
+        document.getElementById('osAll').textContent = totalAll;
+        document.getElementById('osDraft').textContent = counts.draft;
+        document.getElementById('osApproved').textContent = counts.approved;
+        document.getElementById('osRejected').textContent = counts.rejected;
+        document.getElementById('osSkipped').textContent = counts.skipped;
+        document.getElementById('osSent').textContent = counts.sent;
+
+        renderOutreachDrafts();
+    }
+
+    function filterOutreach(status) {
+        outreachFilter = status;
+        // Update active pill
+        document.querySelectorAll('#outreachFilterRow .outreach-stat-pill').forEach(p => p.classList.remove('active-filter'));
+        event.currentTarget.classList.add('active-filter');
+        renderOutreachDrafts();
+    }
+
+    function filterOutreachSearch() {
+        renderOutreachDrafts();
+    }
+
+    function getDraftRecipient(draft) {
+        const ctx = draft.context || {};
+        const content = draft.content || {};
+        const name = ctx.contact_name || ctx.name || content.recipient_name || '';
+        const company = ctx.company || content.company || '';
+        const email = ctx.email || content.recipient_email || '';
+        const contactId = ctx.contact_id || '';
+        return { name, company, email, contactId };
+    }
+
+    function getDraftSubject(draft) {
+        const content = draft.content || {};
+        return content.subject || draft.title || '(No subject)';
+    }
+
+    function getDraftBody(draft) {
+        const content = draft.content || {};
+        if (typeof content === 'string') return content;
+        return content.body || content.text || content.email_body || '';
+    }
+
+    function getDraftScore(draft) {
+        const ctx = draft.context || {};
+        return ctx.score || ctx.qualification_score || null;
+    }
+
+    // Build set of superseded draft IDs — for each contact, all but the latest draft
+    function getSupersededIds(drafts) {
+        const byContact = {};
+        drafts.forEach(d => {
+            const cid = (d.context || {}).contact_id;
+            if (!cid) return;
+            if (!byContact[cid]) byContact[cid] = [];
+            byContact[cid].push(d);
+        });
+        const superseded = new Set();
+        Object.values(byContact).forEach(group => {
+            if (group.length <= 1) return;
+            // Sort by revision_count desc, then created_at desc — first one is latest
+            group.sort((a, b) => (b.revision_count || 0) - (a.revision_count || 0) || new Date(b.created_at) - new Date(a.created_at));
+            // All except the first are superseded
+            for (let i = 1; i < group.length; i++) {
+                superseded.add(group[i].id);
+            }
+        });
+        return superseded;
+    }
+
+    function renderOutreachDrafts() {
+        const panel = document.getElementById('outreachPanel');
+        const searchQ = (document.getElementById('outreachSearch')?.value || '').toLowerCase().trim();
+
+        let filtered = outreachDrafts;
+        if (outreachFilter === 'all') {
+            // In "All" view, hide superseded drafts (older revisions for same contact)
+            const superseded = getSupersededIds(outreachDrafts);
+            filtered = filtered.filter(d => !superseded.has(d.id));
+        } else {
+            filtered = filtered.filter(d => d.review_status === outreachFilter);
+        }
+        if (searchQ) {
+            filtered = filtered.filter(d => {
+                const r = getDraftRecipient(d);
+                const subject = getDraftSubject(d);
+                const body = getDraftBody(d);
+                return (r.name + r.company + r.email + subject + body).toLowerCase().includes(searchQ);
+            });
+        }
+
+        // Update the panel header badge to reflect current filter count
+        document.getElementById('outreachPendingBadge').textContent = filtered.length;
+
+        if (filtered.length === 0) {
+            const filterLabel = outreachFilter === 'all' ? '' : ` with status "${outreachFilter}"`;
+            panel.innerHTML = `<div class="empty-state"><div class="mb-2 text-2xl opacity-40">📧</div>No outreach drafts${filterLabel}</div>`;
+            return;
+        }
+
+        panel.innerHTML = filtered.map((draft, i) => {
+            const r = getDraftRecipient(draft);
+            const subject = getDraftSubject(draft);
+            const body = getDraftBody(draft);
+            const score = getDraftScore(draft);
+            const statusClass = `os-${draft.review_status || 'draft'}`;
+            const statusColors = { draft: '#FFD93D', approved: '#06D6A0', rejected: '#FF6B6B', skipped: '#6B7280', sent: '#4CC9F0' };
+            const statusColor = statusColors[draft.review_status] || '#525E73';
+
+            const bodyPreview = body.length > 180 ? body.substring(0, 180) + '...' : body;
+            const isPending = draft.review_status === 'draft';
+
+            return `
+                <div class="outreach-card ${statusClass}" onclick="openEmailPreview('${esc(draft.id)}')" style="cursor:pointer;">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-1.5 flex-wrap mb-1.5">
+                                <span class="badge" style="background:rgba(${draft.review_status === 'draft' ? '255,217,61' : draft.review_status === 'approved' ? '6,214,160' : draft.review_status === 'rejected' ? '255,107,107' : draft.review_status === 'skipped' ? '107,114,128' : draft.review_status === 'sent' ? '76,201,240' : '107,114,128'},0.15);color:${statusColor};">${esc(draft.review_status || 'draft')}</span>
+                                ${draft.copy_type ? `<span class="badge badge-domain">${esc(draft.copy_type)}</span>` : ''}
+                                ${score ? `<span class="badge eng-${score >= 75 ? 'hot' : score >= 50 ? 'active' : score >= 25 ? 'warm' : 'cold'}">${score}</span>` : ''}
+                                ${draft.revision_count > 0 ? `<span class="text-[0.6rem] text-txt-3">Rev ${draft.revision_count}</span>` : ''}
+                            </div>
+                            <div class="flex items-center gap-2 mb-1">
+                                ${r.name ? `<span class="text-sm font-medium text-txt">${esc(r.name)}</span>` : ''}
+                                ${r.company ? `<span class="text-xs text-txt-3">@ ${esc(r.company)}</span>` : ''}
+                                ${r.email ? `<span class="text-xs text-info">${esc(r.email)}</span>` : '<span class="text-xs text-alert">No email</span>'}
+                            </div>
+                            <div class="email-subject-line text-sm mb-1" style="font-size: 0.85rem;">${esc(subject)}</div>
+                            <div class="text-xs text-txt-3 leading-relaxed" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${esc(bodyPreview)}</div>
+                            <div class="flex items-center gap-3 mt-2">
+                                <span class="text-[0.6rem] text-txt-3 font-mono">${timeAgo(draft.created_at)}</span>
+                                ${draft.review_feedback ? `<span class="text-[0.6rem] text-warn">Has feedback</span>` : ''}
+                                ${draft.revision_count > 0 && draft.context?.revision_feedback ? `<span class="text-[0.6rem] text-info">Revised</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1.5 flex-shrink-0">
+                            ${isPending ? `
+                                <button class="btn btn-approve text-xs py-1.5 px-3" onclick="event.stopPropagation();quickApprove('${esc(draft.id)}')">Approve</button>
+                                <button class="btn btn-deny text-xs py-1.5 px-3" onclick="event.stopPropagation();quickReject('${esc(draft.id)}')">Reject</button>
+                                <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="event.stopPropagation();quickSkip('${esc(draft.id)}')">Skip</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function openEmailPreview(draftId) {
+        const draft = outreachDrafts.find(d => d.id === draftId);
+        if (!draft) return;
+        currentPreviewDraft = draft;
+
+        const r = getDraftRecipient(draft);
+        const subject = getDraftSubject(draft);
+        const body = getDraftBody(draft);
+        const score = getDraftScore(draft);
+        const isPending = draft.review_status === 'draft';
+
+        const statusColors = { draft: '#FFD93D', approved: '#06D6A0', rejected: '#FF6B6B', skipped: '#6B7280', sent: '#4CC9F0' };
+        const statusColor = statusColors[draft.review_status] || '#525E73';
+
+        document.getElementById('epStatusBadge').textContent = draft.review_status || 'draft';
+        document.getElementById('epStatusBadge').style.cssText = `background:rgba(${draft.review_status === 'approved' ? '6,214,160' : draft.review_status === 'rejected' ? '255,107,107' : draft.review_status === 'skipped' ? '107,114,128' : draft.review_status === 'sent' ? '76,201,240' : '255,217,61'},0.15);color:${statusColor};`;
+
+        const toLine = [r.name, r.company ? `@ ${r.company}` : '', r.email ? `<${r.email}>` : ''].filter(Boolean).join(' ');
+        document.getElementById('epTo').innerHTML = esc(toLine) || '(Unknown recipient)';
+        document.getElementById('epSubject').textContent = subject;
+        document.getElementById('epScore').innerHTML = score
+            ? `<span class="badge eng-${score >= 75 ? 'hot' : score >= 50 ? 'active' : 'warm'}">${score}</span>`
+            : '<span class="text-txt-3 text-xs">—</span>';
+        document.getElementById('epBody').textContent = body || '(Empty body)';
+        document.getElementById('epNotes').value = draft.review_feedback || '';
+
+        // Fetch website from unified_contacts
+        const websiteRow = document.getElementById('epWebsiteRow');
+        const websiteEl = document.getElementById('epWebsite');
+        websiteEl.innerHTML = '<span class="text-txt-3 text-xs">loading...</span>';
+        websiteRow.style.display = '';
+        if (r.contactId) {
+            const contact = await supabaseSelect('unified_contacts',
+                `select=website&contact_id=eq.${r.contactId}&limit=1`
+            );
+            const website = Array.isArray(contact) && contact[0]?.website;
+            if (website) {
+                websiteEl.innerHTML = `<a href="${esc(website)}" target="_blank" rel="noopener" class="text-info hover:underline text-xs">${esc(website)}</a>`;
+            } else {
+                websiteEl.innerHTML = '<span class="text-txt-3 text-xs">None found</span>';
+            }
+        } else {
+            websiteEl.innerHTML = '<span class="text-txt-3 text-xs">—</span>';
+        }
+
+        // Show/hide action buttons based on status
+        document.getElementById('epApproveBtn').style.display = isPending ? '' : 'none';
+        document.getElementById('epRejectBtn').style.display = isPending ? '' : 'none';
+        document.getElementById('epSkipBtn').style.display = isPending ? '' : 'none';
+
+        openModal('emailPreviewModal');
+    }
+
+    async function approveOutreach() {
+        if (!currentPreviewDraft) return;
+        const notes = document.getElementById('epNotes').value.trim();
+        await updateDraftStatus(currentPreviewDraft, 'approved', notes);
+    }
+
+    async function rejectOutreach() {
+        if (!currentPreviewDraft) return;
+        const notes = document.getElementById('epNotes').value.trim();
+        if (!notes) { toast('Please provide feedback when rejecting.', 'error'); document.getElementById('epNotes').focus(); return; }
+        await updateDraftStatus(currentPreviewDraft, 'rejected', notes);
+    }
+
+    async function quickApprove(draftId) {
+        const draft = outreachDrafts.find(d => d.id === draftId);
+        if (!draft) return;
+        await updateDraftStatus(draft, 'approved', '');
+    }
+
+    async function quickReject(draftId) {
+        const draft = outreachDrafts.find(d => d.id === draftId);
+        if (!draft) return;
+        currentPreviewDraft = draft;
+        openEmailPreview(draftId);
+        toast('Please review and add feedback before rejecting.', 'error');
+    }
+
+    async function skipOutreach() {
+        if (!currentPreviewDraft) return;
+        if (!confirm('Skip this contact? They won\'t receive an outreach email this round.')) return;
+        await updateDraftStatus(currentPreviewDraft, 'skip', '');
+    }
+
+    async function quickSkip(draftId) {
+        const draft = outreachDrafts.find(d => d.id === draftId);
+        if (!draft) return;
+        if (!confirm('Skip this contact? They won\'t receive an outreach email this round.')) return;
+        await updateDraftStatus(draft, 'skip', '');
+    }
+
+    async function updateDraftStatus(draft, newStatus, notes) {
+        const btnMap = { approved: 'epApproveBtn', rejected: 'epRejectBtn', skip: 'epSkipBtn' };
+        const btn = document.getElementById(btnMap[newStatus]);
+        if (btn) { btn.disabled = true; btn.textContent = 'Processing...'; }
+
+        try {
+            const ctx = draft.context || {};
+            const contactId = ctx.contact_id || '';
+
+            // Call the outreach-approved webhook directly
+            const result = await fetchJSON(API.outreachApproved, {
+                draft_id: draft.id,
+                contact_id: contactId,
+                action: newStatus === 'approved' ? 'approve' : 'reject',
+                reviewer_notes: notes || '',
+                acted_by: 'bradford'
+            });
+
+            if (result?.success !== false && !result?.error) {
+                toast(`Draft ${newStatus}: ${getDraftSubject(draft)}`, 'success');
+            } else {
+                // Fallback: try updating lifecycle via CRM-BRIDGE if webhook returned error
+                throw new Error(result?.message || result?.error || 'Action failed');
+            }
+
+            closeModal('emailPreviewModal');
+            currentPreviewDraft = null;
+            // Refresh data
+            await fetchOutreachDrafts();
+            fetchOutreachStats();
+        } catch (err) {
+            toast(`Failed: ${err.message}`, 'error');
+        } finally {
+            const btnLabels = { approved: 'Approve & Queue', rejected: 'Reject', skip: 'Skip' };
+            if (btn) { btn.disabled = false; btn.textContent = btnLabels[newStatus] || newStatus; }
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // HUMAN TASKS
+    // ═══════════════════════════════════════
+    async function fetchHumanTasks() {
+        let result = await supabaseSelect(
+            'directive_tasks',
+            'select=task_id,directive_id,title,description,domain,human_action_type,operation,parameters,expected_output,status,created_at&requires_human=eq.true&status=in.(pending,in_progress)&brand_id=eq.carlton&order=created_at.desc'
+        );
+        humanTasksData = Array.isArray(result) ? result : [];
+        document.getElementById('statHumanTasks').textContent = humanTasksData.length;
+        document.getElementById('htCount').textContent = humanTasksData.length;
+        renderHumanTasks();
+    }
+
+    // Button config for dynamic action buttons
+    const ACTION_BUTTON_CONFIG = {
+        approve:         { label: 'Approve',        cls: 'btn-approve', icon: '✓' },
+        reject:          { label: 'Reject',         cls: 'btn-deny',    icon: '✕' },
+        edit:            { label: 'Edit & Approve', cls: 'btn-modify',  icon: '✎' },
+        request_changes: { label: 'Request Changes',cls: 'btn-warn',    icon: '↻' },
+        acknowledge:     { label: 'Acknowledge',    cls: 'btn-ghost',   icon: '👁' },
+        mark_complete:   { label: 'Mark Complete',  cls: 'btn-approve', icon: '✓' },
+    };
+
+    function formatActionLabel(action) {
+        const cfg = ACTION_BUTTON_CONFIG[action];
+        return cfg ? cfg.label : action.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function renderReviewContent(reviewContent) {
+        if (!reviewContent || !reviewContent.type) return '';
+        switch (reviewContent.type) {
+            case 'text':
+                return `<div class="review-content-panel"><div class="text-xs text-txt-2" style="white-space:pre-wrap;">${esc(typeof reviewContent.data === 'string' ? reviewContent.data : JSON.stringify(reviewContent.data, null, 2))}</div></div>`;
+            case 'url':
+                const url = reviewContent.preview_url || reviewContent.data;
+                return `<div class="review-content-panel"><a href="${esc(url)}" target="_blank" rel="noopener" class="text-xs text-accent hover:underline break-all">${esc(url)}</a></div>`;
+            case 'comparison':
+                const d = reviewContent.data || {};
+                return `<div class="comparison-view"><div class="comparison-col"><div class="text-[0.65rem] font-semibold text-txt-3 uppercase tracking-wider mb-1">Original</div><div class="text-xs text-txt-2" style="white-space:pre-wrap;">${esc(d.original || '')}</div></div><div class="comparison-col"><div class="text-[0.65rem] font-semibold text-txt-3 uppercase tracking-wider mb-1">Polished</div><div class="text-xs text-txt-2" style="white-space:pre-wrap;">${esc(d.polished || '')}</div></div></div>`;
+            case 'document':
+                return `<div class="review-content-panel"><a href="${esc(reviewContent.data || '')}" target="_blank" rel="noopener" class="btn btn-ghost text-xs inline-flex items-center gap-1.5">📄 Open Document</a></div>`;
+            default:
+                return `<div class="review-content-panel"><pre class="text-xs text-txt-2 overflow-x-auto">${esc(JSON.stringify(reviewContent, null, 2))}</pre></div>`;
+        }
+    }
+
+    function renderHumanTasks() {
+        const panel = document.getElementById('humanTasksPanel');
+
+        if (humanTasksData.length === 0) {
+            panel.innerHTML = '<div class="empty-state"><div class="mb-2 text-2xl opacity-40">👤</div>No tasks requiring human action</div>';
+            return;
+        }
+
+        panel.innerHTML = humanTasksData.map((task, i) => {
+            const actionType = task.human_action_type || task.operation || 'review';
+            const actionBadgeClass = actionType === 'approve' || actionType === 'approve_content' ? 'badge-approve-type'
+                : actionType === 'execute' ? 'badge-execute'
+                : actionType === 'decide' ? 'badge-decide'
+                : 'badge-review';
+
+            const params = task.parameters && typeof task.parameters === 'object' ? task.parameters : {};
+            const contactInfo = params.contact_id
+                ? `<span class="text-[0.6rem] text-info">Contact: ${esc(params.contact_name || params.contact_id)}</span>`
+                : '';
+            const domainBadge = task.domain
+                ? `<span class="badge" style="background:rgba(96,165,250,0.12);color:#60A5FA;font-size:0.6rem">${esc(task.domain)}</span>`
+                : '';
+
+            // Review content rendering
+            const reviewContent = params.review_content;
+            let reviewContentHtml = reviewContent
+                ? `<div class="mt-2"><span class="text-[0.65rem] font-semibold text-txt-3 uppercase tracking-wider">Review Content</span>${renderReviewContent(reviewContent)}</div>`
+                : '';
+
+            // Dynamic action buttons
+            const actionOptions = params.action_options || ['approve', 'reject'];
+            const isProcessing = task._processing;
+            let buttonsHtml;
+            if (isProcessing) {
+                buttonsHtml = `<div class="flex items-center gap-2 text-xs text-txt-3"><span class="ha-spinner"></span> Processing...</div>`;
+            } else {
+                buttonsHtml = actionOptions.map(action => {
+                    const cfg = ACTION_BUTTON_CONFIG[action] || { label: action.replace(/_/g, ' '), cls: 'btn-ghost', icon: '⚡' };
+                    return `<button class="btn ${cfg.cls} text-xs py-1.5 px-3 whitespace-nowrap" onclick="fireAction(${i}, '${action}')" id="ht-actionbtn-${i}-${action}">${cfg.icon} ${cfg.label}</button>`;
+                }).join('');
+            }
+
+            return `
+                <div class="human-task-card${isProcessing ? ' processing' : ''}">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                                <span class="badge ${actionBadgeClass}">${esc(actionType)}</span>
+                                <span class="badge badge-${task.status}">${esc((task.status || '').replace('_', ' '))}</span>
+                                ${domainBadge}
+                                <span class="font-mono text-[0.6rem] text-txt-3">DIR: ${esc(task.directive_id || '—')}</span>
+                            </div>
+                            <div class="text-sm font-medium text-txt">${esc(task.title || 'Untitled')}</div>
+                            ${task.description ? `<div class="text-xs text-txt-2 mt-0.5 line-clamp-2">${esc(task.description)}</div>` : ''}
+                            ${reviewContentHtml}
+                            <div class="flex items-center gap-3 mt-1.5">
+                                ${contactInfo}
+                                <span class="text-[0.6rem] text-txt-3 font-mono">${timeAgo(task.created_at)}</span>
+                            </div>
+                            <div class="mt-2">
+                                <textarea id="ht-feedback-${i}" class="form-input text-xs" rows="2" placeholder="Notes (optional)"></textarea>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1.5 flex-shrink-0" id="ht-buttons-${i}">
+                            ${buttonsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function fireAction(idx, action) {
+        const task = humanTasksData[idx];
+        if (!task) return;
+
+        const feedback = document.getElementById(`ht-feedback-${idx}`)?.value?.trim() || '';
+
+        if (['reject', 'request_changes'].includes(action) && !feedback) {
+            toast('Please provide feedback for this action.', 'error');
+            document.getElementById(`ht-feedback-${idx}`).focus();
+            return;
+        }
+
+        // Disable buttons
+        document.querySelectorAll(`#ht-buttons-${idx} .btn`).forEach(b => { b.disabled = true; b.style.opacity = '0.4'; });
+        const clickedBtn = document.getElementById(`ht-actionbtn-${idx}-${action}`);
+        if (clickedBtn) { clickedBtn.style.opacity = '1'; clickedBtn.textContent = 'Sending...'; }
+
+        try {
+            const result = await fetchJSON(API.humanAction, {
+                task_id: task.task_id,
+                action: action,
+                feedback: feedback || undefined,
+                acted_by: 'bradford'
+            });
+
+            if (result?.success) {
+                humanTasksData.splice(idx, 1);
+                renderHumanTasks();
+                document.getElementById('statHumanTasks').textContent = humanTasksData.length;
+                document.getElementById('htCount').textContent = humanTasksData.length;
+                const cbMsg = result.callback_fired ? ' — workflow continuing' : '';
+                toast(`${formatActionLabel(action)}: ${task.title || task.task_id}${cbMsg}`, 'success');
+            } else {
+                toast(`Failed: ${result?.message || result?.error || 'Unknown error'}`, 'error');
+                document.querySelectorAll(`#ht-buttons-${idx} .btn`).forEach(b => { b.disabled = false; b.style.opacity = '1'; });
+                if (clickedBtn) clickedBtn.textContent = ACTION_BUTTON_CONFIG[action]?.icon + ' ' + formatActionLabel(action);
+            }
+        } catch (err) {
+            toast(`Failed: ${err.message}`, 'error');
+            document.querySelectorAll(`#ht-buttons-${idx} .btn`).forEach(b => { b.disabled = false; b.style.opacity = '1'; });
+            if (clickedBtn) clickedBtn.textContent = ACTION_BUTTON_CONFIG[action]?.icon + ' ' + formatActionLabel(action);
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // ACTIONS: LOG INTERACTION
+    // ═══════════════════════════════════════
+    function openLogInteraction(contactId) {
+        document.getElementById('liContactId').value = contactId;
+        document.getElementById('liSummary').value = '';
+        openModal('logInteractionModal');
+    }
+
+    async function submitLogInteraction() {
+        const contactId = document.getElementById('liContactId').value;
+        const channel = document.getElementById('liChannel').value;
+        const direction = document.getElementById('liDirection').value;
+        const summary = document.getElementById('liSummary').value.trim();
+        if (!summary) { toast('Please add a summary.', 'error'); return; }
+
+        const btn = document.getElementById('liSubmitBtn');
+        btn.disabled = true; btn.textContent = 'Logging...';
+
+        try {
+            await crmBridge('log_interaction', {
+                contact_id: contactId,
+                channel, direction, summary,
+                interaction_type: 'manual',
+                details: {}
+            });
+            // Recompute engagement after logging
+            await crmBridge('compute_engagement', { contact_id: contactId });
+            toast('Interaction logged', 'success');
+            closeModal('logInteractionModal');
+            // Refresh 360 if open
+            if (current360ContactId === contactId) open360(contactId);
+        } catch (err) {
+            toast(`Failed: ${err.message}`, 'error');
+        } finally {
+            btn.disabled = false; btn.textContent = 'Log Interaction';
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // ACTIONS: CHANGE STAGE
+    // ═══════════════════════════════════════
+    function openChangeStage(contactId) {
+        document.getElementById('csContactId').value = contactId;
+        document.getElementById('csReason').value = '';
+        openModal('changeStageModal');
+    }
+
+    async function submitChangeStage() {
+        const contactId = document.getElementById('csContactId').value;
+        const newStage = document.getElementById('csNewStage').value;
+        const reason = document.getElementById('csReason').value.trim();
+
+        const btn = document.getElementById('csSubmitBtn');
+        btn.disabled = true; btn.textContent = 'Updating...';
+
+        try {
+            await crmBridge('update_lifecycle', {
+                contact_id: contactId,
+                new_stage: newStage,
+                changed_by: 'dashboard_user',
+                reason: reason || 'Manual stage change from CRM dashboard'
+            });
+            toast(`Stage updated to ${newStage}`, 'success');
+            closeModal('changeStageModal');
+            // Refresh views
+            fetchContacts();
+            if (currentView === 'pipeline') fetchPipelineData();
+            if (current360ContactId === contactId) open360(contactId);
+        } catch (err) {
+            toast(`Failed: ${err.message}`, 'error');
+        } finally {
+            btn.disabled = false; btn.textContent = 'Update Stage';
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // ═══════════════════════════════════════
+    // SUPABASE WRITE HELPER
+    // ═══════════════════════════════════════
+    async function supabaseWrite(table, method, body, matchQuery = '') {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`;
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
+                },
+                body: method === 'DELETE' ? undefined : JSON.stringify(body)
+            });
+            if (!res.ok) { const t = await res.text(); console.error('Supabase write error:', res.status, t); return null; }
+            const text = await res.text();
+            return text ? JSON.parse(text) : true;
+        } catch (err) { console.error('Supabase write error:', err); return null; }
+    }
+
+    // ═══════════════════════════════════════
+    // PROSPECTING DATA
+    // ═══════════════════════════════════════
+    let prospLocations = [];
+    let prospCategories = [];
+    let prospSheets = [];
+
+    async function fetchProspectingData() {
+        await Promise.all([fetchLocations(), fetchCategories(), fetchLinkedSheets()]);
+    }
+
+    // ── Locations ──
+    async function fetchLocations() {
+        const result = await supabaseSelect('prosp_target_locations',
+            'select=*&brand_id=eq.carlton&order=weight.desc,city.asc'
+        );
+        prospLocations = Array.isArray(result) ? result : [];
+        document.getElementById('locCount').textContent = prospLocations.filter(l => l.is_active).length;
+        renderLocations();
+    }
+
+    function renderLocations() {
+        const tbody = document.getElementById('locationsBody');
+        if (prospLocations.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No target locations configured</td></tr>';
+            return;
+        }
+        tbody.innerHTML = prospLocations.map(loc => {
+            const zoneColor = loc.zone_type === 'primary' ? 'color:#06D6A0;' : 'color:#4CC9F0;';
+            const dimStyle = loc.is_active ? '' : 'opacity:0.45;';
+            return `
+                <tr style="${dimStyle}">
+                    <td class="text-txt font-medium text-sm">${esc(loc.city)}</td>
+                    <td class="text-txt-2 font-mono text-xs">${esc(loc.state_abbr)}</td>
+                    <td><span class="badge" style="background:rgba(${loc.zone_type === 'primary' ? '6,214,160' : '76,201,240'},0.12);${zoneColor}font-size:0.6rem;">${esc(loc.zone_type)}</span></td>
+                    <td class="font-mono text-xs text-txt-2">${loc.weight}</td>
+                    <td>
+                        <label class="toggle-switch">
+                            <input type="checkbox" ${loc.is_active ? 'checked' : ''} onchange="toggleLocationActive(${loc.id}, this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                    <td>
+                        <button class="btn btn-ghost text-[0.6rem] py-0.5 px-2" onclick="deleteLocation(${loc.id}, '${esc(loc.city)}')">Del</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function addLocation() {
+        const city = document.getElementById('addLocCity').value.trim();
+        const state = document.getElementById('addLocState').value.trim().toUpperCase();
+        const zone = document.getElementById('addLocZone').value;
+        const weight = parseFloat(document.getElementById('addLocWeight').value) || 1.0;
+        if (!city || !state || state.length !== 2) { toast('Enter a city name and 2-letter state code.', 'error'); return; }
+
+        const result = await supabaseWrite('prosp_target_locations', 'POST', {
+            brand_id: 'carlton', city, state_abbr: state, zone_type: zone, weight, is_active: true
+        });
+        if (result) {
+            toast(`Added ${city}, ${state}`, 'success');
+            document.getElementById('addLocCity').value = '';
+            document.getElementById('addLocState').value = '';
+            fetchLocations();
+        } else { toast('Failed to add location. May already exist.', 'error'); }
+    }
+
+    async function toggleLocationActive(id, active) {
+        await supabaseWrite('prosp_target_locations', 'PATCH',
+            { is_active: active, updated_at: new Date().toISOString() },
+            `id=eq.${id}`
+        );
+        fetchLocations();
+    }
+
+    async function deleteLocation(id, city) {
+        if (!confirm(`Delete ${city}?`)) return;
+        await supabaseWrite('prosp_target_locations', 'DELETE', null, `id=eq.${id}`);
+        toast(`Deleted ${city}`, 'success');
+        fetchLocations();
+    }
+
+    // ── Categories ──
+    async function fetchCategories() {
+        const result = await supabaseSelect('prosp_target_categories',
+            'select=*&brand_id=eq.carlton&order=industry_group.asc,weight.desc'
+        );
+        prospCategories = Array.isArray(result) ? result : [];
+        document.getElementById('catCount').textContent = prospCategories.filter(c => c.is_active).length;
+        renderCategories();
+    }
+
+    function renderCategories() {
+        const panel = document.getElementById('categoriesPanel');
+        if (prospCategories.length === 0) {
+            panel.innerHTML = '<div class="empty-state">No target categories configured</div>';
+            return;
+        }
+
+        // Group by industry_group
+        const groups = {};
+        prospCategories.forEach(c => {
+            if (!groups[c.industry_group]) groups[c.industry_group] = [];
+            groups[c.industry_group].push(c);
+        });
+
+        // Single table with group header rows spanning all columns
+        let rows = '';
+        Object.entries(groups).forEach(([group, items]) => {
+            const activeCount = items.filter(i => i.is_active).length;
+            const groupId = 'catgrp-' + group.replace(/\W/g, '');
+            rows += `
+                <tr class="group-header" onclick="document.querySelectorAll('.${groupId}').forEach(r=>r.style.display=r.style.display==='none'?'':'none')" style="cursor:pointer;">
+                    <td colspan="6" style="padding:0.5rem 0.75rem;background:rgba(255,255,255,0.02);border-bottom:1px solid #1E2130;">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-txt uppercase tracking-wider">${esc(group.replace(/_/g, ' '))}</span>
+                                <span class="badge badge-domain" style="font-size:0.55rem;">${activeCount}/${items.length}</span>
+                            </div>
+                            <span class="text-txt-3 text-xs">▾</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            items.forEach(cat => {
+                const dimStyle = cat.is_active ? '' : 'opacity:0.45;';
+                const kws = Array.isArray(cat.keywords) ? cat.keywords : [];
+                rows += `
+                    <tr class="${groupId}" style="${dimStyle}">
+                        <td class="text-txt text-sm">${esc(cat.search_term)}</td>
+                        <td class="text-txt-3 text-xs">${esc(cat.sub_category || '—')}</td>
+                        <td>${kws.map(k => `<span class="kw-chip">${esc(k)}</span>`).join(' ')}</td>
+                        <td class="font-mono text-xs text-txt-2">${cat.weight}</td>
+                        <td>
+                            <label class="toggle-switch">
+                                <input type="checkbox" ${cat.is_active ? 'checked' : ''} onchange="toggleCategoryActive(${cat.id}, this.checked)">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </td>
+                        <td><button class="btn btn-ghost text-[0.6rem] py-0.5 px-2" onclick="deleteCategory(${cat.id}, '${esc(cat.search_term)}')">Del</button></td>
+                    </tr>
+                `;
+            });
+        });
+
+        panel.innerHTML = `<div style="overflow-x:auto;"><table class="contact-table">
+            <thead><tr>
+                <th>Search Term</th><th>Sub-Category</th><th>Keywords</th><th>Weight</th><th>Active</th><th style="width:60px;"></th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+        </table></div>`;
+    }
+
+    let addCatFormOpen = false;
+    function openAddCategoryForm() {
+        if (addCatFormOpen) { document.getElementById('addCatModal')?.classList.remove('active'); addCatFormOpen = false; return; }
+        // Get unique groups
+        const groups = [...new Set(prospCategories.map(c => c.industry_group))].sort();
+        const groupOptions = groups.map(g => `<option value="${esc(g)}">${esc(g.replace(/_/g, ' '))}</option>`).join('');
+
+        const modal = document.getElementById('addCatModal');
+        if (!modal) {
+            // Build inline form at top of categories panel
+            const panel = document.getElementById('categoriesPanel');
+            const form = document.createElement('div');
+            form.id = 'addCatInline';
+            form.style.cssText = 'padding:0.75rem 1rem;border-bottom:1px solid #1E2130;background:rgba(76,201,240,0.03);';
+            form.innerHTML = `
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-2">
+                    <div>
+                        <label class="block text-[0.6rem] text-txt-3 mb-0.5 uppercase">Industry Group</label>
+                        <input type="text" class="add-row-input" id="addCatGroup" placeholder="e.g. healthcare" list="catGroupList">
+                        <datalist id="catGroupList">${groupOptions}</datalist>
+                    </div>
+                    <div>
+                        <label class="block text-[0.6rem] text-txt-3 mb-0.5 uppercase">Search Term</label>
+                        <input type="text" class="add-row-input" id="addCatTerm" placeholder="e.g. dental office">
+                    </div>
+                    <div>
+                        <label class="block text-[0.6rem] text-txt-3 mb-0.5 uppercase">Sub-Category</label>
+                        <input type="text" class="add-row-input" id="addCatSub" placeholder="optional">
+                    </div>
+                    <div>
+                        <label class="block text-[0.6rem] text-txt-3 mb-0.5 uppercase">Weight</label>
+                        <input type="number" class="add-row-input" id="addCatWeight" value="1.0" min="0.5" max="3" step="0.5">
+                    </div>
+                    <div class="flex items-end">
+                        <button class="btn btn-primary text-xs py-1.5 px-3 w-full" onclick="addCategory()">Add</button>
+                    </div>
+                </div>
+            `;
+            panel.insertBefore(form, panel.firstChild);
+            addCatFormOpen = true;
+        } else {
+            document.getElementById('addCatInline')?.remove();
+            addCatFormOpen = false;
+        }
+    }
+
+    async function addCategory() {
+        const group = document.getElementById('addCatGroup').value.trim().toLowerCase().replace(/\s+/g, '_');
+        const term = document.getElementById('addCatTerm').value.trim();
+        const sub = document.getElementById('addCatSub').value.trim();
+        const weight = parseFloat(document.getElementById('addCatWeight').value) || 1.0;
+        if (!group || !term) { toast('Industry group and search term are required.', 'error'); return; }
+
+        const result = await supabaseWrite('prosp_target_categories', 'POST', {
+            brand_id: 'carlton', industry_group: group, search_term: term,
+            sub_category: sub || null, weight, is_active: true, keywords: []
+        });
+        if (result) {
+            toast(`Added "${term}" to ${group}`, 'success');
+            document.getElementById('addCatTerm').value = '';
+            document.getElementById('addCatSub').value = '';
+            document.getElementById('addCatInline')?.remove();
+            addCatFormOpen = false;
+            fetchCategories();
+        } else { toast('Failed to add. May already exist.', 'error'); }
+    }
+
+    async function toggleCategoryActive(id, active) {
+        await supabaseWrite('prosp_target_categories', 'PATCH',
+            { is_active: active, updated_at: new Date().toISOString() },
+            `id=eq.${id}`
+        );
+        fetchCategories();
+    }
+
+    async function deleteCategory(id, term) {
+        if (!confirm(`Delete "${term}"?`)) return;
+        await supabaseWrite('prosp_target_categories', 'DELETE', null, `id=eq.${id}`);
+        toast(`Deleted "${term}"`, 'success');
+        fetchCategories();
+    }
+
+    // ── Linked Sheets ──
+    async function fetchLinkedSheets() {
+        const result = await supabaseSelect('prosp_linked_sheets',
+            'select=*&brand_id=eq.carlton&order=created_at.desc'
+        );
+        prospSheets = Array.isArray(result) ? result : [];
+        document.getElementById('sheetCount').textContent = prospSheets.filter(s => s.is_active).length;
+        renderSheets();
+    }
+
+    function renderSheets() {
+        const tbody = document.getElementById('sheetsBody');
+        if (prospSheets.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No linked sheets</td></tr>';
+            return;
+        }
+        tbody.innerHTML = prospSheets.map(s => {
+            const dimStyle = s.is_active ? '' : 'opacity:0.45;';
+            return `
+                <tr style="${dimStyle}">
+                    <td class="text-txt text-sm font-medium">${esc(s.label || '—')}</td>
+                    <td><a href="${esc(s.sheet_url)}" target="_blank" rel="noopener" class="text-info hover:underline text-xs" style="max-width:200px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(s.sheet_url || '')}</a></td>
+                    <td class="text-txt-2 text-xs">${esc(s.sheet_name || 'Sheet1')}</td>
+                    <td class="text-txt-3 text-xs font-mono">${s.last_checked_at ? timeAgo(s.last_checked_at) : '—'}</td>
+                    <td class="text-txt-2 text-xs font-mono">${s.last_row_count ?? '—'}</td>
+                    <td>
+                        <label class="toggle-switch">
+                            <input type="checkbox" ${s.is_active ? 'checked' : ''} onchange="toggleSheetActive(${s.id}, this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </td>
+                    <td><button class="btn btn-ghost text-[0.6rem] py-0.5 px-2" onclick="deleteSheet(${s.id}, '${esc(s.label || '')}')">Del</button></td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function addSheet() {
+        const label = document.getElementById('addSheetLabel').value.trim();
+        const url = document.getElementById('addSheetUrl').value.trim();
+        const tab = document.getElementById('addSheetTab').value.trim() || 'Sheet1';
+        if (!label || !url) { toast('Label and URL are required.', 'error'); return; }
+
+        const result = await supabaseWrite('prosp_linked_sheets', 'POST', {
+            brand_id: 'carlton', label, sheet_url: url, sheet_name: tab, is_active: true
+        });
+        if (result) {
+            toast(`Linked "${label}"`, 'success');
+            document.getElementById('addSheetLabel').value = '';
+            document.getElementById('addSheetUrl').value = '';
+            document.getElementById('addSheetTab').value = 'Sheet1';
+            fetchLinkedSheets();
+        } else { toast('Failed to add sheet.', 'error'); }
+    }
+
+    async function toggleSheetActive(id, active) {
+        await supabaseWrite('prosp_linked_sheets', 'PATCH', { is_active: active }, `id=eq.${id}`);
+        fetchLinkedSheets();
+    }
+
+    async function deleteSheet(id, label) {
+        if (!confirm(`Remove "${label}"?`)) return;
+        await supabaseWrite('prosp_linked_sheets', 'DELETE', null, `id=eq.${id}`);
+        toast(`Removed "${label}"`, 'success');
+        fetchLinkedSheets();
+    }
+
+    // ── Lead Import ──
+    function switchImportMode(mode) {
+        document.getElementById('importSheetsForm').style.display = mode === 'sheets' ? '' : 'none';
+        document.getElementById('importJsonForm').style.display = mode === 'json' ? '' : 'none';
+        document.getElementById('importTabSheets').classList.toggle('active', mode === 'sheets');
+        document.getElementById('importTabJson').classList.toggle('active', mode === 'json');
+    }
+
+    async function importFromSheets() {
+        const url = document.getElementById('importSheetsUrl').value.trim();
+        const tab = document.getElementById('importSheetsTab').value.trim() || 'Sheet1';
+        if (!url) { toast('Enter a Google Sheets URL.', 'error'); return; }
+
+        const btn = document.getElementById('importSheetsBtn');
+        btn.disabled = true; btn.textContent = 'Importing...';
+        try {
+            const result = await fetchJSON('https://n8n.carltonaiservices.com/webhook/prosp-lead-import', {
+                sheets_url: url, sheet_name: tab, source: 'google_sheets', brand_id: 'carlton'
+            });
+            if (result?.success) {
+                toast(`Import started: ${result.import_id || 'processing'}`, 'success');
+                document.getElementById('importSheetsUrl').value = '';
+            } else { toast(`Import failed: ${result?.message || 'Unknown error'}`, 'error'); }
+        } catch (err) { toast(`Import failed: ${err.message}`, 'error'); }
+        finally { btn.disabled = false; btn.textContent = 'Import from Sheets'; }
+    }
+
+    async function importFromJson() {
+        const raw = document.getElementById('importJsonData').value.trim();
+        if (!raw) { toast('Paste a JSON array of leads.', 'error'); return; }
+
+        let leads;
+        try { leads = JSON.parse(raw); } catch { toast('Invalid JSON. Must be an array of objects.', 'error'); return; }
+        if (!Array.isArray(leads)) { toast('JSON must be an array.', 'error'); return; }
+        if (leads.length === 0) { toast('Array is empty.', 'error'); return; }
+        const missing = leads.filter(l => !l.business_name);
+        if (missing.length) { toast(`${missing.length} leads missing business_name.`, 'error'); return; }
+
+        const btn = document.getElementById('importJsonBtn');
+        btn.disabled = true; btn.textContent = `Importing ${leads.length} leads...`;
+        try {
+            const result = await fetchJSON('https://n8n.carltonaiservices.com/webhook/prosp-lead-import', {
+                leads, source: 'manual_import', brand_id: 'carlton'
+            });
+            if (result?.success) {
+                toast(`Import started: ${leads.length} leads queued`, 'success');
+                document.getElementById('importJsonData').value = '';
+            } else { toast(`Import failed: ${result?.message || 'Unknown error'}`, 'error'); }
+        } catch (err) { toast(`Import failed: ${err.message}`, 'error'); }
+        finally { btn.disabled = false; btn.textContent = 'Import Leads'; }
+    }
+
+    // MODAL HANDLERS
+    // ═══════════════════════════════════════
+    document.querySelectorAll('.modal-backdrop').forEach(el => {
+        el.addEventListener('click', (e) => {
+            if (e.target === el) el.classList.remove('active');
+        });
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-backdrop.active').forEach(m => m.classList.remove('active'));
+            close360Panel();
+        }
+    });
+
+    // ── Profile Switcher ──
+    (function initProfileSwitcher() {
+        const saved = localStorage.getItem('rdgr-active-profile');
+        if (saved) {
+            try {
+                const p = JSON.parse(saved);
+                activeProfileId = p.id;
+                const nameEl = document.getElementById('profileName');
+                const avatarEl = document.getElementById('profileAvatar');
+                if (nameEl) nameEl.textContent = p.name;
+                if (avatarEl) avatarEl.textContent = (p.name || 'B')[0].toUpperCase();
+            } catch(e) {}
+        }
+        const SB_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+        fetch(`${SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+            headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+        }).then(r => r.json()).then(profiles => {
+            const dd = document.getElementById('profileDropdown');
+            if (!dd || !profiles || profiles.length === 0) return;
+            const activeId = saved ? JSON.parse(saved).id : null;
+            dd.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?';
+                const initial = name[0].toUpperCase();
+                const isActive = p.user_id === activeId;
+                return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, "\\'")}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                    <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div>
+                    <span>${name}</span>
+                    ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+                </button>`;
+            }).join('');
+            dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+        }).catch(() => {});
+    })();
+
+    function signOut() {
+        localStorage.removeItem('rdgr-session');
+        localStorage.removeItem('rdgr-active-profile');
+        location.reload();
+    }
+
+    function toggleProfileDD() {
+        const dd = document.getElementById('profileDropdown');
+        dd.classList.toggle('hidden');
+        if (!dd.classList.contains('hidden')) {
+            setTimeout(() => document.addEventListener('click', function closePDD(e) {
+                if (!document.getElementById('profileSwitcher').contains(e.target)) {
+                    dd.classList.add('hidden');
+                }
+                document.removeEventListener('click', closePDD);
+            }), 0);
+        }
+    }
+
+    function selectProfileGlobal(userId, name) {
+        localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+        location.reload();
+    }
+
+    </script>
+
+</body>
+</html>

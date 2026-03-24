@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Command Chat | RDGR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        base: '#08090D',
+                        surface: '#11131A',
+                        'surface-el': '#1A1D28',
+                        'surface-hi': '#242836',
+                        border: '#2A2E3D',
+                        accent: '#06D6A0',
+                        'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B',
+                        'alert-dim': 'rgba(255,107,107,0.15)',
+                        warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)',
+                        info: '#4CC9F0',
+                        'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1',
+                        'txt-2': '#8A95A9',
+                        'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #08090D;
+            color: #E8ECF1;
+        }
+
+        /* Grain overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3A3E4D; }
+
+        /* Gate */
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: #E8ECF1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            width: 100%;
+        }
+        .gate-input:focus {
+            border-color: rgba(6,214,160,0.4);
+            box-shadow: 0 0 0 3px rgba(6,214,160,0.08);
+        }
+        .gate-input::placeholder { color: #525E73; }
+        .gate-error { color: #FF6B6B; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        /* Buttons */
+        .btn {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.03em;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            text-transform: uppercase;
+        }
+        .btn-primary { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.3); }
+        .btn-primary:hover { background: rgba(6,214,160,0.25); }
+        .btn-ghost { background: transparent; color: #8A95A9; border: 1px solid #2A2E3D; }
+        .btn-ghost:hover { background: rgba(255,255,255,0.03); color: #E8ECF1; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Form inputs */
+        .form-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2A2E3D;
+            border-radius: 0.375rem;
+            padding: 0.625rem 0.75rem;
+            color: #E8ECF1;
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.875rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            border-color: rgba(6,214,160,0.4);
+            box-shadow: 0 0 0 2px rgba(6,214,160,0.08);
+        }
+        .form-input::placeholder { color: #525E73; }
+        select.form-input { cursor: pointer; }
+        select.form-input option { background: #1A1D28; color: #E8ECF1; }
+
+        /* Toast */
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-family: 'IBM Plex Sans', system-ui;
+            animation: toast-in 0.3s ease forwards;
+            max-width: 380px;
+        }
+        .toast-success { background: rgba(6,214,160,0.15); border: 1px solid rgba(6,214,160,0.3); color: #06D6A0; }
+        .toast-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #FF6B6B; }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center; padding: 2rem 1rem; color: #525E73;
+            font-size: 0.85rem;
+        }
+
+        /* Tab style */
+        .task-tab {
+            flex: 1;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-align: center;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            color: #8A95A9;
+            background: transparent;
+            transition: background 0.2s, color 0.2s;
+        }
+        .task-tab:hover { color: #E8ECF1; }
+        .task-tab.active {
+            background: rgba(6,214,160,0.12);
+            color: #06D6A0;
+        }
+
+        /* Thread sidebar */
+        .thread-item {
+            padding: 0.625rem 0.75rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: background 0.15s ease, border-color 0.15s ease;
+            margin-bottom: 0.25rem;
+        }
+        .thread-item:hover { background: rgba(255,255,255,0.03); }
+        .thread-item.active {
+            background: var(--accent-08, rgba(6,214,160,0.06));
+            border-color: var(--accent-15, rgba(6,214,160,0.15));
+        }
+        .thread-item .thread-title {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #E8ECF1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .thread-item .thread-preview {
+            font-size: 0.7rem;
+            color: #525E73;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 0.125rem;
+        }
+        .thread-item .thread-time {
+            font-size: 0.6rem;
+            color: #525E73;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Chat message bubbles */
+        .chat-msg {
+            display: flex;
+            gap: 0.625rem;
+            margin-bottom: 0.875rem;
+            animation: chat-msg-in 0.2s ease;
+        }
+        .chat-msg.human { flex-direction: row-reverse; }
+        .chat-msg-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-size: 0.65rem; font-weight: 600;
+        }
+        .chat-msg-bubble {
+            max-width: 70%;
+            border-radius: 0.5rem;
+            padding: 0.625rem 0.875rem;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+        .chat-msg.human .chat-msg-bubble {
+            background: var(--accent-08, rgba(6,214,160,0.08));
+            border: 1px solid var(--accent-15, rgba(6,214,160,0.15));
+        }
+        .chat-msg.ai .chat-msg-bubble {
+            background: #1A1D28;
+            border: 1px solid #1E2130;
+        }
+        .chat-msg.system .chat-msg-bubble {
+            background: rgba(82,94,115,0.1);
+            border: 1px solid rgba(82,94,115,0.15);
+            font-style: italic;
+            color: #8A95A9;
+            max-width: 90%;
+        }
+        .chat-msg-meta {
+            font-size: 0.65rem;
+            color: #8A95A9;
+            margin-bottom: 0.25rem;
+        }
+        .chat-msg-meta .sender { font-weight: 500; }
+        .chat-msg-meta .time { margin-left: 0.5rem; font-family: 'JetBrains Mono', monospace; }
+        .chat-msg.human .chat-msg-meta { text-align: right; }
+
+        @keyframes chat-msg-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Typing indicator */
+        @keyframes typing-bounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-4px); opacity: 1; }
+        }
+        .typing-dot {
+            animation: typing-bounce 1.2s ease-in-out infinite;
+            background: var(--accent, #06D6A0) !important;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+        /* Chat attachment preview chips */
+        .chat-attach-chip {
+            display: inline-flex; align-items: center; gap: 0.375rem;
+            padding: 0.25rem 0.5rem 0.25rem 0.375rem;
+            border-radius: 0.375rem;
+            background: rgba(76,201,240,0.08);
+            border: 1px solid rgba(76,201,240,0.15);
+            font-size: 0.7rem; color: #4CC9F0;
+        }
+        .chat-attach-chip img {
+            width: 24px; height: 24px; object-fit: cover; border-radius: 0.25rem;
+        }
+        .chat-attach-remove {
+            background: none; border: none; cursor: pointer;
+            color: #FF6B6B; font-size: 0.8rem; padding: 0;
+            margin-left: 0.25rem; line-height: 1;
+        }
+
+        /* Chat themed overrides */
+        #chatView .btn-primary {
+            background: var(--accent-30, rgba(6,214,160,0.3));
+            color: var(--accent, #06D6A0);
+            border: 1px solid var(--accent-40, rgba(6,214,160,0.4));
+            font-weight: 600;
+        }
+        #chatView .btn-primary:hover {
+            background: var(--accent-40, rgba(6,214,160,0.4));
+            box-shadow: 0 0 12px var(--accent-15, rgba(6,214,160,0.15));
+        }
+        #chatView .form-input:focus {
+            border-color: var(--accent-40, rgba(6,214,160,0.4));
+            box-shadow: 0 0 0 2px var(--accent-08, rgba(6,214,160,0.08));
+        }
+
+        /* Chat light mode */
+        #chatView.chat-light #messageList {
+            background: #F5F6F8;
+        }
+        #chatView.chat-light .chat-msg.human .chat-msg-bubble {
+            background: var(--accent-15, rgba(6,214,160,0.15));
+            border-color: var(--accent-30, rgba(6,214,160,0.3));
+            color: #1A1D28;
+        }
+        #chatView.chat-light .chat-msg.ai .chat-msg-bubble {
+            background: #FFFFFF;
+            border: 1px solid #D8DBE3;
+            color: #1A1D28;
+        }
+        #chatView.chat-light .chat-msg.system .chat-msg-bubble {
+            background: #E8ECF1;
+            border-color: #D8DBE3;
+            color: #525E73;
+        }
+        #chatView.chat-light .chat-msg-meta { color: #6B7280; }
+        #chatView.chat-light .chat-msg-bubble code {
+            background: rgba(0,0,0,0.06) !important;
+            color: #1A1D28 !important;
+        }
+        #chatView.chat-light .chat-msg-bubble a { color: #2563EB !important; }
+        #chatView.chat-light .empty-state { color: #6B7280; }
+        #chatView.chat-light .empty-state .text-txt-3 { color: #6B7280 !important; }
+        #chatView.chat-light #chatHeader {
+            background: #F5F6F8;
+            border-bottom-color: #D8DBE3;
+        }
+        #chatView.chat-light #chatHeader h3 { color: #1A1D28 !important; }
+        #chatView.chat-light #chatHeader span { color: #6B7280 !important; }
+        #chatView.chat-light #chatHeader .btn-ghost {
+            color: #6B7280;
+            border-color: #D8DBE3;
+        }
+        #chatView.chat-light #chatHeader .btn-ghost:hover {
+            background: rgba(0,0,0,0.04);
+            color: #1A1D28;
+        }
+
+        /* Chat input auto-resize */
+        #chatInput {
+            font-family: 'IBM Plex Sans', system-ui;
+            line-height: 1.5;
+            overflow-y: auto;
+        }
+
+        /* Mobile chat sidebar */
+        #chatMobileToggle { display: none; }
+
+        /* Responsive */
+        @media (max-width: 767px) {
+            #chatSidebar {
+                position: absolute !important;
+                z-index: 10 !important;
+                width: 100% !important;
+                height: 100% !important;
+                background: #08090D !important;
+                transition: transform 0.25s ease;
+            }
+            #chatSidebar.mobile-hidden { transform: translateX(-100%); pointer-events: none; }
+            #chatMobileToggle { display: inline-flex !important; }
+            .chat-msg-bubble { max-width: 85% !important; }
+        }
+
+        /* Pulse animation (for pending threads) */
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- ═══ AUTH GATE ═══ -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Enter the access code to continue</p>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off" autofocus>
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4">Authenticate</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div id="mainContent" style="opacity: 0;">
+        <!-- Top Nav -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Chat</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Dashboard</a>
+                        <a href="/chat" class="task-tab active" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Chat</a>
+                        <a href="/org-chart" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Org Map</a>
+                        <a href="/our-workflows" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Workflows</a>
+                        <a href="/social-dashboard" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Social</a>
+                        <a href="/crm" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">CRM</a>
+                        <a href="/offer-studio" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Offers</a>
+                        <a href="/deft" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">DEFT</a>
+                        <a href="/brain" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">BRAIN</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Profile Switcher -->
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown">
+                        </div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2" title="Settings">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76z M8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ═══ CHAT CONTENT ═══ -->
+        <div id="chatView">
+            <div style="display: flex; height: calc(100vh - 57px);">
+                <!-- Thread Sidebar -->
+                <div id="chatSidebar" style="width: 280px; border-right: 1px solid #1E2130; display: flex; flex-direction: column; flex-shrink: 0; background: #0B0D14;">
+                    <!-- Theme Picker -->
+                    <div style="padding: 0.5rem 1rem 0.75rem; border-bottom: 1px solid #1E2130;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.375rem;">
+                            <div style="font-size:0.6rem;color:#525E73;text-transform:uppercase;letter-spacing:0.08em;font-weight:500;">Theme</div>
+                            <button id="chatModeToggle" onclick="toggleChatMode()" style="display:inline-flex;align-items:center;gap:0.25rem;background:rgba(255,255,255,0.04);border:1px solid #2A2E3D;border-radius:0.25rem;padding:0.15rem 0.4rem;cursor:pointer;font-size:0.55rem;color:#8A95A9;text-transform:uppercase;letter-spacing:0.06em;transition:background 0.15s;" title="Toggle light/dark mode">
+                                <span id="chatModeIcon">&#9789;</span>
+                                <span id="chatModeLabel">Dark</span>
+                            </button>
+                        </div>
+                        <div style="display:flex;gap:0.375rem;flex-wrap:wrap;" id="themePicker"></div>
+                    </div>
+                    <!-- New Thread -->
+                    <div style="padding: 0.75rem 1rem; border-bottom: 1px solid #1E2130;">
+                        <button onclick="createNewThread()" class="btn btn-primary w-full text-xs py-2 flex items-center justify-center gap-1.5">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                            New Thread
+                        </button>
+                    </div>
+                    <!-- Thread List -->
+                    <div id="threadList" style="flex: 1; overflow-y: auto; padding: 0.5rem;">
+                        <div class="empty-state" style="padding: 2rem 1rem;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="margin: 0 auto 0.5rem;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="#525E73" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <div class="text-txt-3 text-xs">No threads yet</div>
+                            <div class="text-txt-3 text-[0.65rem] mt-0.5">Start a new conversation</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Main Chat Area -->
+                <div style="flex: 1; display: flex; flex-direction: column; min-width: 0; background: #08090D;">
+                    <!-- Thread Header -->
+                    <div id="chatHeader" style="padding: 0.75rem 1.25rem; border-bottom: 1px solid #1E2130; display: flex; align-items: center; justify-content: space-between; min-height: 49px;">
+                        <div>
+                            <h3 id="chatThreadTitle" class="font-heading font-semibold text-sm tracking-wide" style="color: #8A95A9;">Select or create a thread</h3>
+                            <span id="chatThreadMeta" class="text-[0.65rem] text-txt-3 font-mono"></span>
+                        </div>
+                        <div class="flex gap-2" id="chatHeaderActions" style="display: none;">
+                            <button onclick="renameCurrentThread()" class="btn btn-ghost text-xs py-1.5 px-2.5">Rename</button>
+                            <button onclick="archiveCurrentThread()" class="btn btn-ghost text-xs py-1.5 px-2.5" style="color: #FF6B6B; border-color: rgba(255,107,107,0.2);">Archive</button>
+                        </div>
+                    </div>
+                    <!-- Message List -->
+                    <div id="messageList" style="flex: 1; overflow-y: auto; padding: 1rem 1.25rem;">
+                        <div class="empty-state" style="padding: 4rem 2rem;">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" style="margin: 0 auto 0.75rem;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#2A2E3D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <div class="text-txt-3 text-sm font-medium">RDGR Command Chat</div>
+                            <div class="text-txt-3 text-xs mt-1" style="max-width: 300px; margin: 0.25rem auto 0;">Send directives, share ideas, attach files. Each thread maintains its own memory.</div>
+                        </div>
+                    </div>
+                    <!-- Typing Indicator -->
+                    <div id="typingIndicator" style="display: none; padding: 0.5rem 1.25rem;">
+                        <div class="flex items-center gap-2">
+                            <div class="flex gap-1">
+                                <span class="typing-dot" style="width: 6px; height: 6px; border-radius: 50%; background: #06D6A0;"></span>
+                                <span class="typing-dot" style="width: 6px; height: 6px; border-radius: 50%; background: #06D6A0;"></span>
+                                <span class="typing-dot" style="width: 6px; height: 6px; border-radius: 50%; background: #06D6A0;"></span>
+                            </div>
+                            <span id="typingText" class="text-xs text-txt-3 font-mono">RDGR is thinking...</span>
+                        </div>
+                    </div>
+                    <!-- Input Area -->
+                    <div id="chatInputArea" style="padding: 0.75rem 1.25rem; border-top: 1px solid #1E2130; background: #0B0D14;">
+                        <!-- Attachment Previews -->
+                        <div id="chatAttachmentPreview" style="display: none;" class="flex gap-2 mb-2 flex-wrap"></div>
+                        <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
+                            <button onclick="document.getElementById('chatFileInput').click()" class="btn btn-ghost text-xs py-2 px-2" title="Attach file" style="flex-shrink: 0;">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 8.5l-5.5 5.5a4 4 0 01-5.66-5.66l5.5-5.5a2.5 2.5 0 013.54 3.54l-5.5 5.5a1 1 0 01-1.42-1.42L10 5.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            </button>
+                            <input type="file" id="chatFileInput" style="display: none;" multiple accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json,.md" onchange="handleChatFileSelect(this)">
+                            <textarea id="chatInput" class="form-input" rows="1" placeholder="Type a message..." style="resize: none; min-height: 40px; max-height: 140px; flex: 1;" onkeydown="handleChatKeydown(event)" oninput="autoResizeChatInput()"></textarea>
+                            <button onclick="sendChatMessage()" class="btn btn-primary text-xs py-2 px-3" id="chatSendBtn" style="flex-shrink: 0;">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12.5 1.5l-11 4.5 4.5 2 5-5-3.5 5.5 2 4.5z" fill="currentColor"/></svg>
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-end mt-1.5">
+                            <span id="chatCharCount" class="text-[0.6rem] text-txt-3 font-mono">0 chars</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TOAST CONTAINER ═══ -->
+    <div class="toast-container" id="toasts"></div>
+
+    <script>
+    // ═══════════════════════════════════════════════════════════════
+    // CONFIG & STATE
+    // ═══════════════════════════════════════════════════════════════
+
+    let activeProfileId = null;
+
+    const API = {
+        chat: 'https://n8n.carltonaiservices.com/webhook/rdgr-chat',
+    };
+
+    const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+
+    // ═══════════════════════════════════════════════════════════════
+    // CHAT STATE
+    // ═══════════════════════════════════════════════════════════════
+
+    const _savedProfile = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+    let chatCurrentUser = (_savedProfile.name || 'Bradford').toLowerCase();
+
+    // Migrate old chat theme keys (name-based → profile-id-based)
+    if (activeProfileId && !localStorage.getItem('rdgr-chat-prefs-migrated-' + activeProfileId)) {
+        const oldTheme = localStorage.getItem('rdgr-chat-theme-' + chatCurrentUser);
+        const oldMode = localStorage.getItem('rdgr-chat-mode-' + chatCurrentUser);
+        if (oldTheme) localStorage.setItem('rdgr-chat-theme-' + activeProfileId, oldTheme);
+        if (oldMode) localStorage.setItem('rdgr-chat-mode-' + activeProfileId, oldMode);
+        localStorage.setItem('rdgr-chat-prefs-migrated-' + activeProfileId, 'true');
+    }
+
+    let chatThreads = [];
+    let chatActiveThreadId = null;
+    let chatMessages = [];
+    let chatAttachments = [];
+    let chatSessionStart = null;
+    let chatThreadMemory = null;
+    let chatTypingTimer = null;
+    let chatPendingThreads = new Set();
+    const CHAT_USER_COLORS = { bradford: '#06D6A0', dianna: '#A855F7', brianna: '#4CC9F0', ai: '#FFD93D', system: '#525E73' };
+    const CHAT_THEMES = {
+        teal: '#06D6A0', violet: '#A78BFA', rose: '#FB7185', amber: '#FBBF24',
+        sky: '#38BDF8', emerald: '#10B981', orange: '#FB923C', fuchsia: '#D946EF',
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    // SUPABASE HELPERS
+    // ═══════════════════════════════════════════════════════════════
+
+    async function supabaseSelect(table, query = '') {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
+        try {
+            const res = await fetch(url, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                }
+            });
+            if (!res.ok) { console.error('Supabase error:', res.status, await res.text()); return null; }
+            return await res.json();
+        } catch (err) { console.error('Supabase fetch error:', table, err); return null; }
+    }
+
+    async function supabaseWrite(table, method, body, matchQuery = '') {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`;
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation',
+                },
+                body: JSON.stringify(body),
+            });
+            if (!res.ok) { console.error('Supabase write error:', res.status, await res.text()); return null; }
+            return await res.json();
+        } catch (err) { console.error('Supabase write error:', table, err); return null; }
+    }
+
+    async function fetchJSON(url, body, { retries = 0, backoff = 2000 } = {}) {
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            if (res.status >= 500 && retries < 2) {
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchJSON(url, body, { retries: retries + 1, backoff: backoff * 2 });
+            }
+            return await res.json();
+        } catch (err) {
+            if (retries < 1) {
+                await new Promise(r => setTimeout(r, 2000));
+                return fetchJSON(url, body, { retries: retries + 1, backoff });
+            }
+            console.error('Fetch error:', url, err);
+            return null;
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // UTILITY FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════
+
+    function esc(str) {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+
+    function toast(message, type = 'success') {
+        const container = document.getElementById('toasts');
+        const el = document.createElement('div');
+        el.className = `toast toast-${type}`;
+        el.textContent = message;
+        container.appendChild(el);
+        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 4000);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // AUTH GATE
+    // ═══════════════════════════════════════════════════════════════
+
+    function handleGate(e) {
+        e.preventDefault();
+        const input = document.getElementById('gateInput').value;
+        if (input === 'Advance1!') {
+            localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+            document.getElementById('gate').classList.add('hidden');
+            document.getElementById('mainContent').style.opacity = '1';
+            initChat();
+            return false;
+        }
+        document.getElementById('gateError').classList.add('show');
+        document.getElementById('gateInput').value = '';
+        document.getElementById('gateInput').focus();
+        setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+        return false;
+    }
+
+    if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity = '1';
+        initChat();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // CHAT FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════
+
+    async function syncChatPrefsToSupabase(chatTheme, chatMode) {
+        if (!activeProfileId) return;
+        try {
+            const rows = await supabaseSelect('deft_user_profiles',
+                `user_id=eq.${activeProfileId}&select=preferences`);
+            const prefs = rows?.[0]?.preferences || {};
+            if (chatTheme !== undefined) prefs.chatTheme = chatTheme;
+            if (chatMode !== undefined) prefs.chatMode = chatMode;
+            await supabaseWrite('deft_user_profiles', 'PATCH',
+                { preferences: prefs }, `user_id=eq.${activeProfileId}`);
+        } catch(e) { console.warn('Chat prefs sync failed:', e); }
+    }
+
+    function applyChatTheme(themeName) {
+        const hex = CHAT_THEMES[themeName] || CHAT_THEMES.teal;
+        const cv = document.getElementById('chatView');
+        if (!cv) return;
+        cv.style.setProperty('--accent', hex);
+        cv.style.setProperty('--accent-08', hex + '14');
+        cv.style.setProperty('--accent-15', hex + '26');
+        cv.style.setProperty('--accent-30', hex + '4D');
+        cv.style.setProperty('--accent-40', hex + '66');
+        localStorage.setItem('rdgr-chat-theme-' + activeProfileId, themeName);
+        syncChatPrefsToSupabase(themeName, undefined);
+        document.querySelectorAll('.theme-swatch').forEach(s => {
+            s.style.outline = s.dataset.theme === themeName ? '2px solid #fff' : 'none';
+            s.style.outlineOffset = s.dataset.theme === themeName ? '1px' : '0';
+        });
+
+        // Tint sidebar and input area with accent color
+        const sidebar = document.getElementById('chatSidebar');
+        const inputArea = document.getElementById('chatInputArea');
+        if (sidebar) sidebar.style.background = `linear-gradient(135deg, ${hex}0D 0%, #0B0D14 100%)`;
+        if (inputArea) inputArea.style.background = `linear-gradient(0deg, ${hex}0D 0%, #0B0D14 100%)`;
+    }
+
+    function applyChatMode(mode) {
+        const cv = document.getElementById('chatView');
+        if (!cv) return;
+        if (mode === 'light') {
+            cv.classList.add('chat-light');
+        } else {
+            cv.classList.remove('chat-light');
+        }
+        localStorage.setItem('rdgr-chat-mode-' + activeProfileId, mode);
+        syncChatPrefsToSupabase(undefined, mode);
+        const icon = document.getElementById('chatModeIcon');
+        const label = document.getElementById('chatModeLabel');
+        if (icon) icon.innerHTML = mode === 'light' ? '&#9788;' : '&#9789;';
+        if (label) label.textContent = mode === 'light' ? 'Light' : 'Dark';
+    }
+
+    function toggleChatMode() {
+        const current = localStorage.getItem('rdgr-chat-mode-' + activeProfileId) || 'dark';
+        applyChatMode(current === 'dark' ? 'light' : 'dark');
+    }
+
+    function renderThemePicker() {
+        const picker = document.getElementById('themePicker');
+        if (!picker) return;
+        picker.innerHTML = '';
+        const current = localStorage.getItem('rdgr-chat-theme-' + activeProfileId) || 'teal';
+        Object.entries(CHAT_THEMES).forEach(([name, hex]) => {
+            const s = document.createElement('div');
+            s.className = 'theme-swatch';
+            s.dataset.theme = name;
+            s.title = name.charAt(0).toUpperCase() + name.slice(1);
+            const isActive = name === current;
+            s.style.cssText = `width:20px;height:20px;border-radius:50%;background:${hex};cursor:pointer;transition:transform 0.15s,outline 0.15s;outline:${isActive ? '2px solid #fff' : 'none'};outline-offset:${isActive ? '1px' : '0'};`;
+            s.onclick = () => applyChatTheme(name);
+            s.onmouseenter = () => { s.style.transform = 'scale(1.2)'; };
+            s.onmouseleave = () => { s.style.transform = 'scale(1)'; };
+            picker.appendChild(s);
+        });
+    }
+
+    async function initChat() {
+        renderThemePicker();
+        let chatTheme = 'teal', chatMode = 'dark';
+        if (activeProfileId) {
+            try {
+                const rows = await supabaseSelect('deft_user_profiles',
+                    `user_id=eq.${activeProfileId}&select=preferences`);
+                if (rows?.[0]?.preferences) {
+                    chatTheme = rows[0].preferences.chatTheme || chatTheme;
+                    chatMode = rows[0].preferences.chatMode || chatMode;
+                }
+            } catch(e) {
+                chatTheme = localStorage.getItem('rdgr-chat-theme-' + activeProfileId) || chatTheme;
+                chatMode = localStorage.getItem('rdgr-chat-mode-' + activeProfileId) || chatMode;
+            }
+        } else {
+            chatTheme = localStorage.getItem('rdgr-chat-theme-' + activeProfileId) || chatTheme;
+            chatMode = localStorage.getItem('rdgr-chat-mode-' + activeProfileId) || chatMode;
+        }
+        applyChatTheme(chatTheme);
+        applyChatMode(chatMode);
+        fetchThreads();
+    }
+
+    function generateChatId(prefix) {
+        const now = new Date();
+        const yy = String(now.getFullYear()).slice(-2);
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mi = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        return `${prefix}_${yy}${mm}${dd}${hh}${mi}${ss}`;
+    }
+
+    // ── Thread management ──
+
+    async function fetchThreads() {
+        const data = await supabaseSelect('command_threads',
+            `created_by=eq.${chatCurrentUser}&status=eq.active&order=last_message_at.desc.nullsfirst,created_at.desc&limit=50`
+        );
+        chatThreads = data || [];
+        renderThreadList();
+    }
+
+    function renderThreadList() {
+        const el = document.getElementById('threadList');
+        if (!chatThreads.length) {
+            el.innerHTML = `
+                <div class="empty-state" style="padding: 2rem 1rem;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="margin: 0 auto 0.5rem;"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="#525E73" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <div class="text-txt-3 text-xs">No threads yet</div>
+                    <div class="text-txt-3 text-[0.65rem] mt-0.5">Start a new conversation</div>
+                </div>`;
+            return;
+        }
+        el.innerHTML = chatThreads.map(t => {
+            const isActive = t.thread_id === chatActiveThreadId;
+            const time = t.last_message_at
+                ? new Date(t.last_message_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : 'Just created';
+            return `
+                <div class="thread-item ${isActive ? 'active' : ''}" onclick="selectThread('${esc(t.thread_id)}')">
+                    <div class="flex items-center justify-between">
+                        <div class="thread-title flex items-center gap-1.5">${chatPendingThreads.has(t.thread_id) ? '<span style="width:6px;height:6px;border-radius:50%;background:#FFD93D;animation:pulse-live 2s ease-in-out infinite;flex-shrink:0;" title="Processing..."></span>' : ''}${t.has_new_message ? '<span style="width:8px;height:8px;border-radius:50%;background:var(--accent,#06D6A0);flex-shrink:0;" title="New response"></span>' : ''}${esc(t.title)}</div>
+                        <div class="thread-time">${time}</div>
+                    </div>
+                    <div class="thread-preview">${t.preview_text ? esc(t.preview_text) : 'No messages yet'}</div>
+                    ${t.message_count ? `<div class="text-[0.6rem] text-txt-3 font-mono mt-0.5">${t.message_count} message${t.message_count !== 1 ? 's' : ''}</div>` : ''}
+                </div>`;
+        }).join('');
+    }
+
+    async function selectThread(threadId) {
+        chatActiveThreadId = threadId;
+
+        // Clear "new message" flag since user is now viewing this thread
+        const thread = chatThreads.find(t => t.thread_id === threadId);
+        if (thread && thread.has_new_message) {
+            thread.has_new_message = false;
+        }
+        renderThreadList(); // highlight active
+
+        document.getElementById('chatThreadTitle').textContent = thread ? thread.title : 'Thread';
+        document.getElementById('chatThreadTitle').style.color = '#E8ECF1';
+        document.getElementById('chatThreadMeta').textContent = threadId;
+        document.getElementById('chatHeaderActions').style.display = 'flex';
+
+        // Fetch messages
+        await fetchMessages(threadId);
+
+        // Show/hide typing indicator based on whether this thread has a pending request
+        if (chatPendingThreads.has(threadId)) {
+            document.getElementById('typingIndicator').style.display = 'block';
+            document.getElementById('chatSendBtn').disabled = true;
+        } else {
+            document.getElementById('typingIndicator').style.display = 'none';
+            document.getElementById('chatSendBtn').disabled = false;
+        }
+
+        // Fetch thread memory
+        const memData = await supabaseSelect('command_thread_memory', `thread_id=eq.${threadId}`);
+        chatThreadMemory = (memData && memData.length) ? memData[0] : null;
+    }
+
+    async function createNewThread() {
+        const threadId = generateChatId('CT');
+        const payload = {
+            thread_id: threadId,
+            title: 'New Chat',
+            created_by: chatCurrentUser,
+            status: 'active',
+            message_count: 0,
+            created_at: new Date().toISOString(),
+        };
+
+        // Insert to Supabase directly
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/command_threads`, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation',
+                },
+                body: JSON.stringify(payload),
+            });
+            if (!res.ok) {
+                console.error('Create thread error:', await res.text());
+                toast('Failed to create thread', 'error');
+                return;
+            }
+            const created = await res.json();
+            chatThreads.unshift(created[0] || payload);
+            renderThreadList();
+            selectThread(threadId);
+        } catch (err) {
+            console.error('Create thread error:', err);
+            toast('Failed to create thread', 'error');
+        }
+    }
+
+    async function archiveCurrentThread() {
+        if (!chatActiveThreadId) return;
+        try {
+            await fetch(`${SUPABASE_URL}/rest/v1/command_threads?thread_id=eq.${chatActiveThreadId}`, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: 'archived', updated_at: new Date().toISOString() }),
+            });
+            chatThreads = chatThreads.filter(t => t.thread_id !== chatActiveThreadId);
+            chatActiveThreadId = null;
+            chatMessages = [];
+            chatThreadMemory = null;
+            renderThreadList();
+            renderMessages();
+            document.getElementById('chatThreadTitle').textContent = 'Select or create a thread';
+            document.getElementById('chatThreadTitle').style.color = '#8A95A9';
+            document.getElementById('chatThreadMeta').textContent = '';
+            document.getElementById('chatHeaderActions').style.display = 'none';
+            toast('Thread archived', 'success');
+        } catch (err) {
+            toast('Failed to archive thread', 'error');
+        }
+    }
+
+    async function renameCurrentThread() {
+        if (!chatActiveThreadId) return;
+        const thread = chatThreads.find(t => t.thread_id === chatActiveThreadId);
+        const newTitle = prompt('Thread title:', thread ? thread.title : '');
+        if (!newTitle || newTitle.trim() === '') return;
+        try {
+            await fetch(`${SUPABASE_URL}/rest/v1/command_threads?thread_id=eq.${chatActiveThreadId}`, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title: newTitle.trim(), updated_at: new Date().toISOString() }),
+            });
+            if (thread) thread.title = newTitle.trim();
+            document.getElementById('chatThreadTitle').textContent = newTitle.trim();
+            renderThreadList();
+        } catch (err) {
+            toast('Failed to rename thread', 'error');
+        }
+    }
+
+    // ── Messages ──
+
+    async function fetchMessages(threadId) {
+        const data = await supabaseSelect('command_messages',
+            `thread_id=eq.${threadId}&order=created_at.asc&limit=200`
+        );
+        chatMessages = data || [];
+        renderMessages();
+    }
+
+    function renderMessages() {
+        const el = document.getElementById('messageList');
+        if (!chatActiveThreadId || !chatMessages.length) {
+            if (!chatActiveThreadId) {
+                el.innerHTML = `
+                    <div class="empty-state" style="padding: 4rem 2rem;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" style="margin: 0 auto 0.75rem;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#2A2E3D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <div class="text-txt-3 text-sm font-medium">RDGR Command Chat</div>
+                        <div class="text-txt-3 text-xs mt-1" style="max-width: 300px; margin: 0.25rem auto 0;">Send directives, share ideas, attach files. Each thread maintains its own memory.</div>
+                    </div>`;
+            } else {
+                el.innerHTML = `
+                    <div class="empty-state" style="padding: 3rem 2rem;">
+                        <div class="text-txt-3 text-xs">No messages yet. Start typing below.</div>
+                    </div>`;
+            }
+            return;
+        }
+
+        el.innerHTML = chatMessages.map(msg => renderMessageHTML(msg)).join('');
+        // Auto-scroll to bottom
+        el.scrollTop = el.scrollHeight;
+    }
+
+    function renderMessageHTML(msg) {
+        const isHuman = msg.sender_type === 'human';
+        const isSystem = msg.sender_type === 'system';
+        const typeClass = isHuman ? 'human' : isSystem ? 'system' : 'ai';
+        const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const avatarColor = CHAT_USER_COLORS[msg.sender] || '#8A95A9';
+        const initial = (msg.sender || 'U')[0].toUpperCase();
+        const senderName = msg.sender === 'ai' ? 'RDGR' : msg.sender.charAt(0).toUpperCase() + msg.sender.slice(1);
+
+        // Render attachments
+        let attachHTML = '';
+        if (msg.attachments && Array.isArray(msg.attachments) && msg.attachments.length) {
+            attachHTML = '<div class="mt-2 flex flex-wrap gap-2">' + msg.attachments.map(a => {
+                if (a.mimeType && a.mimeType.startsWith('image/')) {
+                    const src = a.url || (a.base64_or_url ? `data:${a.mimeType};base64,${a.base64_or_url}` : '');
+                    return src ? `<img src="${src}" alt="${esc(a.filename)}" style="max-width: 300px; max-height: 200px; border-radius: 0.375rem; border: 1px solid #1E2130;">` : '';
+                }
+                return `<div class="chat-attach-chip"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="currentColor" stroke-width="1"/></svg>${esc(a.filename)} <span class="text-txt-3">(${(a.size / 1024).toFixed(0)}KB)</span></div>`;
+            }).join('') + '</div>';
+        }
+
+        // Format content - basic markdown support
+        let content = esc(msg.content);
+        // Bold
+        content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Inline code
+        content = content.replace(/`([^`]+)`/g, '<code style="background: rgba(255,255,255,0.06); padding: 0.1rem 0.3rem; border-radius: 0.25rem; font-family: JetBrains Mono, monospace; font-size: 0.8em;">$1</code>');
+        // Line breaks
+        content = content.replace(/\n/g, '<br>');
+        // Markdown links [text](url) — must come before bare URL detection
+        content = content.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
+            '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: underline; word-break: break-all;">$1</a>');
+        // Bare URLs (not already inside an href)
+        content = content.replace(/(?<!href="|">)(https?:\/\/[^\s<]+)/g,
+            '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: #3b82f6; text-decoration: underline; word-break: break-all;">$1</a>');
+
+        return `
+            <div class="chat-msg ${typeClass}">
+                <div class="chat-msg-avatar" style="background: ${avatarColor}20; border: 1px solid ${avatarColor}40; color: ${avatarColor};">
+                    ${initial}
+                </div>
+                <div style="max-width: 70%;">
+                    <div class="chat-msg-meta">
+                        <span class="sender">${senderName}</span>
+                        <span class="time">${time}</span>
+                    </div>
+                    <div class="chat-msg-bubble">
+                        ${content}
+                        ${attachHTML}
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    // ── Sending messages ──
+
+    async function sendChatMessage() {
+        const input = document.getElementById('chatInput');
+        const content = input.value.trim();
+        if (!content && !chatAttachments.length) return;
+        if (!chatActiveThreadId) {
+            toast('Create or select a thread first', 'error');
+            return;
+        }
+
+        // Capture thread ID at send time — response will use this, not whatever is active later
+        const requestThreadId = chatActiveThreadId;
+        const requestUser = chatCurrentUser;
+        const msgId = generateChatId('CM') + '_' + String(Date.now()).slice(-3);
+        const now = new Date().toISOString();
+
+        // Build attachments payload
+        const attachments = chatAttachments.map(a => ({
+            filename: a.filename,
+            mimeType: a.mimeType,
+            size: a.size,
+            base64_or_url: a.base64,
+        }));
+
+        // Optimistic: render user message immediately
+        const optimisticMsg = {
+            message_id: msgId,
+            thread_id: requestThreadId,
+            sender: requestUser,
+            sender_type: 'human',
+            content: content || '(attachment)',
+            content_type: 'text',
+            attachments: attachments.length ? attachments : null,
+            created_at: now,
+        };
+        chatMessages.push(optimisticMsg);
+        renderMessages();
+
+        // Clear input
+        input.value = '';
+        input.style.height = '40px';
+        chatAttachments = [];
+        document.getElementById('chatAttachmentPreview').style.display = 'none';
+        document.getElementById('chatAttachmentPreview').innerHTML = '';
+        document.getElementById('chatCharCount').textContent = '0 chars';
+
+        // Show typing indicator (only if still on this thread)
+        document.getElementById('typingIndicator').style.display = 'block';
+        document.getElementById('messageList').scrollTop = document.getElementById('messageList').scrollHeight;
+        document.getElementById('chatSendBtn').disabled = true;
+
+        // Track this thread as pending
+        chatPendingThreads.add(requestThreadId);
+        renderThreadList();
+
+        // Start typing timer with progressive messages
+        const typingStartTime = Date.now();
+        const typingTextEl = document.getElementById('typingText');
+        typingTextEl.textContent = 'RDGR is thinking...';
+        const localTimer = setInterval(() => {
+            // Only update typing text if user is still viewing this thread
+            if (chatActiveThreadId !== requestThreadId) return;
+            const elapsed = Math.floor((Date.now() - typingStartTime) / 1000);
+            if (elapsed < 10) {
+                typingTextEl.textContent = 'RDGR is thinking...';
+            } else if (elapsed < 30) {
+                typingTextEl.textContent = `Working on it... (${elapsed}s)`;
+            } else {
+                typingTextEl.textContent = `Still working \u2014 this one takes a moment... (${elapsed}s)`;
+            }
+        }, 1000);
+
+        // Build thread context from recent messages
+        const recentMsgs = chatMessages.slice(-10).map(m => ({
+            sender: m.sender,
+            sender_type: m.sender_type,
+            content: m.content,
+            created_at: m.created_at,
+        }));
+
+        const sessionDuration = chatSessionStart ? Math.floor((Date.now() - chatSessionStart) / 1000) : 0;
+
+        try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 300000);
+
+            const result = await fetchJSON(API.chat, {
+                thread_id: requestThreadId,
+                brand_id: 'carlton',
+                domain: 'chat',
+                operation: 'send_message',
+                sender: requestUser,
+                parameters: {
+                    content: content,
+                    content_type: 'text',
+                    attachments: attachments,
+                    session_started_at: chatSessionStart ? new Date(chatSessionStart).toISOString() : now,
+                    session_duration_seconds: sessionDuration,
+                    thread_context: {
+                        message_count: chatMessages.length,
+                        memory_summary: chatThreadMemory ? chatThreadMemory.memory_summary : null,
+                        key_facts: chatThreadMemory ? chatThreadMemory.key_facts : null,
+                        recent_messages: recentMsgs,
+                    },
+                },
+            });
+            clearTimeout(timeout);
+            clearInterval(localTimer);
+            chatPendingThreads.delete(requestThreadId);
+
+            const stillViewing = chatActiveThreadId === requestThreadId;
+
+            if (stillViewing) {
+                if (chatTypingTimer) { clearInterval(chatTypingTimer); chatTypingTimer = null; }
+                document.getElementById('typingIndicator').style.display = 'none';
+            }
+
+            if (result && result.success && result.reply) {
+                const aiMsg = {
+                    message_id: result.message_id || generateChatId('CM') + '_ai',
+                    thread_id: requestThreadId,
+                    sender: 'ai',
+                    sender_type: 'ai',
+                    content: result.reply.content || result.reply,
+                    content_type: result.reply.content_type || 'text',
+                    attachments: null,
+                    metadata: result.reply.metadata || null,
+                    created_at: result.timestamp || new Date().toISOString(),
+                };
+
+                // Update thread sidebar metadata
+                const thread = chatThreads.find(t => t.thread_id === requestThreadId);
+                if (thread) {
+                    thread.last_message_at = aiMsg.created_at;
+                    thread.message_count = (thread.message_count || 0) + 2;
+                    thread.preview_text = (aiMsg.content || '').slice(0, 100);
+                }
+
+                if (stillViewing) {
+                    // User is still on this thread — render the reply
+                    chatMessages.push(aiMsg);
+                    renderMessages();
+                    if (thread) renderThreadList();
+
+                    // Auto-title
+                    if (thread && thread.title === 'New Chat' && chatMessages.length <= 3) {
+                        const autoTitle = content.slice(0, 50) + (content.length > 50 ? '...' : '');
+                        thread.title = autoTitle;
+                        document.getElementById('chatThreadTitle').textContent = autoTitle;
+                        renderThreadList();
+                        fetch(`${SUPABASE_URL}/rest/v1/command_threads?thread_id=eq.${requestThreadId}`, {
+                            method: 'PATCH',
+                            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title: autoTitle }),
+                        }).catch(() => {});
+                    }
+                } else {
+                    // User switched to a different thread — flag for "new message" dot
+                    if (thread) {
+                        thread.has_new_message = true;
+                        renderThreadList();
+                    }
+                }
+            } else {
+                const errContent = (result && result.error) ? result.error : 'Failed to get a response. The backend may not be configured yet.';
+                if (stillViewing) {
+                    chatMessages.push({ message_id: 'sys_' + Date.now(), thread_id: requestThreadId, sender: 'system', sender_type: 'system', content: errContent, created_at: new Date().toISOString() });
+                    renderMessages();
+                }
+            }
+        } catch (err) {
+            clearInterval(localTimer);
+            chatPendingThreads.delete(requestThreadId);
+            const stillViewing = chatActiveThreadId === requestThreadId;
+            if (stillViewing) {
+                if (chatTypingTimer) { clearInterval(chatTypingTimer); chatTypingTimer = null; }
+                document.getElementById('typingIndicator').style.display = 'none';
+                const errMsg = err.name === 'AbortError' ? 'Request timed out (5m). Try again.' : 'Network error. Check your connection.';
+                chatMessages.push({ message_id: 'sys_' + Date.now(), thread_id: requestThreadId, sender: 'system', sender_type: 'system', content: errMsg, created_at: new Date().toISOString() });
+                renderMessages();
+            }
+            renderThreadList();
+        }
+
+        // Re-enable send if user is on the request thread or any non-pending thread
+        if (!chatPendingThreads.has(chatActiveThreadId)) {
+            document.getElementById('chatSendBtn').disabled = false;
+        }
+        document.getElementById('chatInput').focus();
+    }
+
+    function handleChatKeydown(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendChatMessage();
+        }
+    }
+
+    function autoResizeChatInput() {
+        const el = document.getElementById('chatInput');
+        el.style.height = '40px';
+        el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+        document.getElementById('chatCharCount').textContent = el.value.length + ' chars';
+    }
+
+    // ── File attachments ──
+
+    function handleChatFileSelect(input) {
+        const files = Array.from(input.files);
+        if (!files.length) return;
+
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        const maxFiles = 3;
+
+        files.forEach(file => {
+            if (chatAttachments.length >= maxFiles) {
+                toast(`Max ${maxFiles} attachments per message`, 'error');
+                return;
+            }
+            if (file.size > maxSize) {
+                toast(`${file.name} exceeds 5MB limit`, 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64 = reader.result.split(',')[1]; // strip data:... prefix
+                chatAttachments.push({
+                    file,
+                    base64,
+                    filename: file.name,
+                    mimeType: file.type,
+                    size: file.size,
+                    previewUrl: file.type.startsWith('image/') ? reader.result : null,
+                });
+                renderAttachmentPreviews();
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Reset file input so same file can be re-selected
+        input.value = '';
+    }
+
+    function renderAttachmentPreviews() {
+        const container = document.getElementById('chatAttachmentPreview');
+        if (!chatAttachments.length) {
+            container.style.display = 'none';
+            container.innerHTML = '';
+            return;
+        }
+        container.style.display = 'flex';
+        container.innerHTML = chatAttachments.map((a, i) => {
+            const preview = a.previewUrl
+                ? `<img src="${a.previewUrl}" alt="${esc(a.filename)}">`
+                : `<svg width="14" height="14" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="currentColor" stroke-width="1"/></svg>`;
+            return `
+                <div class="chat-attach-chip">
+                    ${preview}
+                    <span>${esc(a.filename.length > 20 ? a.filename.slice(0, 17) + '...' : a.filename)}</span>
+                    <button class="chat-attach-remove" onclick="removeChatAttachment(${i})" title="Remove">&times;</button>
+                </div>`;
+        }).join('');
+    }
+
+    function removeChatAttachment(idx) {
+        chatAttachments.splice(idx, 1);
+        renderAttachmentPreviews();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PROFILE SWITCHER
+    // ═══════════════════════════════════════════════════════════════
+
+    (function initProfileSwitcher() {
+        const saved = localStorage.getItem('rdgr-active-profile');
+        if (saved) {
+            try {
+                const p = JSON.parse(saved);
+                activeProfileId = p.id;
+                const nameEl = document.getElementById('profileName');
+                const avatarEl = document.getElementById('profileAvatar');
+                if (nameEl) nameEl.textContent = p.name;
+                if (avatarEl) avatarEl.textContent = (p.name || 'B')[0].toUpperCase();
+            } catch(e) {}
+        }
+        const SB_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+        fetch(`${SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+            headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+        }).then(r => r.json()).then(profiles => {
+            const dd = document.getElementById('profileDropdown');
+            if (!dd || !profiles || profiles.length === 0) return;
+            const activeId = saved ? JSON.parse(saved).id : null;
+            dd.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?';
+                const initial = name[0].toUpperCase();
+                const isActive = p.user_id === activeId;
+                return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, "\\'")}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                    <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div>
+                    <span>${name}</span>
+                    ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+                </button>`;
+            }).join('');
+            dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+        }).catch(() => {});
+    })();
+
+    function toggleProfileDD() {
+        const dd = document.getElementById('profileDropdown');
+        dd.classList.toggle('hidden');
+        if (!dd.classList.contains('hidden')) {
+            setTimeout(() => document.addEventListener('click', function closePDD(e) {
+                if (!document.getElementById('profileSwitcher').contains(e.target)) {
+                    dd.classList.add('hidden');
+                }
+                document.removeEventListener('click', closePDD);
+            }), 0);
+        }
+    }
+
+    function selectProfileGlobal(userId, name) {
+        localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+        location.reload();
+    }
+
+    function signOut() {
+        localStorage.removeItem('rdgr-session');
+        localStorage.removeItem('rdgr-active-profile');
+        location.reload();
+    }
+    </script>
+</body>
+</html>

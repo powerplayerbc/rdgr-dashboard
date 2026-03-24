@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Org Map | Carlton AI</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        base: '#08090D',
+                        surface: '#11131A',
+                        'surface-el': '#1A1D28',
+                        'surface-hi': '#242836',
+                        border: '#2A2E3D',
+                        accent: '#06D6A0',
+                        'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B',
+                        'alert-dim': 'rgba(255,107,107,0.15)',
+                        warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)',
+                        info: '#4CC9F0',
+                        'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1',
+                        'txt-2': '#8A95A9',
+                        'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #08090D;
+            color: #E8ECF1;
+        }
+
+        /* ── Grain ── */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3A3E4D; }
+
+        /* ── Gate ── */
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: #E8ECF1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            width: 100%;
+        }
+        .gate-input:focus {
+            border-color: rgba(6,214,160,0.4);
+            box-shadow: 0 0 0 3px rgba(6,214,160,0.08);
+        }
+        .gate-input::placeholder { color: #525E73; }
+        .gate-error { color: #FF6B6B; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        /* ── Pulse ── */
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #06D6A0;
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+
+        /* ── Nav Tabs ── */
+        .task-tab {
+            flex: 1; padding: 0.4rem 0.75rem; font-size: 0.75rem; font-weight: 500;
+            text-align: center; border-radius: 0.375rem; cursor: pointer;
+            color: rgba(255,255,255,0.45); background: transparent; border: none;
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+        .task-tab:hover { color: #E8ECF1; }
+        .task-tab.active { background: rgba(6,214,160,0.12); color: #06D6A0; }
+
+        /* ── Stat chip ── */
+        .stat-chip {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.5rem;
+            padding: 0.625rem 1rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .stat-value { font-family: 'Chakra Petch', system-ui; font-weight: 700; font-size: 1.4rem; line-height: 1; }
+        .stat-label { font-size: 0.7rem; color: #8A95A9; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+
+        /* ── Buttons ── */
+        .btn {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.03em;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+            border: none;
+            text-transform: uppercase;
+        }
+        .btn-primary { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.3); }
+        .btn-primary:hover { background: rgba(6,214,160,0.25); }
+        .btn-ghost { background: transparent; color: #8A95A9; border: 1px solid #2A2E3D; }
+        .btn-ghost:hover { background: rgba(255,255,255,0.03); color: #E8ECF1; }
+        .btn-ghost.active { background: rgba(6,214,160,0.1); color: #06D6A0; border-color: rgba(6,214,160,0.3); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* ── Filter buttons ── */
+        .view-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            background: transparent;
+            color: #8A95A9;
+            border: 1px solid transparent;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .view-btn:hover { color: #E8ECF1; background: rgba(255,255,255,0.03); }
+        .view-btn.active { color: #06D6A0; background: rgba(6,214,160,0.1); border-color: rgba(6,214,160,0.2); }
+
+        .status-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 0.3rem 0.625rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            background: transparent;
+            color: #525E73;
+            border: 1px solid transparent;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .status-btn:hover { color: #8A95A9; }
+        .status-btn.active { color: #E8ECF1; background: rgba(255,255,255,0.05); border-color: #2A2E3D; }
+
+        /* ── Search ── */
+        .search-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2A2E3D;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem 0.5rem 2rem;
+            color: #E8ECF1;
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.8rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+            max-width: 240px;
+        }
+        .search-input:focus { border-color: rgba(6,214,160,0.4); box-shadow: 0 0 0 2px rgba(6,214,160,0.08); }
+        .search-input::placeholder { color: #525E73; }
+
+        /* ── Badges ── */
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.2rem;
+            line-height: 1.2;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+        }
+        .badge-active { background: rgba(6,214,160,0.15); color: #06D6A0; }
+        .badge-planned { background: rgba(107,114,128,0.15); color: #6B7280; border: 1px dashed rgba(107,114,128,0.3); }
+        .badge-deprecated { background: rgba(255,107,107,0.1); color: #FF6B6B; text-decoration: line-through; }
+        .badge-amber { background: rgba(255,217,61,0.15); color: #FFD93D; }
+        .badge-broken { background: rgba(255,107,107,0.15); color: #FF6B6B; }
+
+        .badge-primary { background: rgba(6,214,160,0.12); color: #06D6A0; }
+        .badge-secondary { background: rgba(76,201,240,0.12); color: #4CC9F0; }
+        .badge-supporting { background: rgba(168,85,247,0.12); color: #A855F7; }
+
+        /* ── Panels & Cards ── */
+        .panel {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .dept-card {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .dept-card:hover { border-color: #2A2E3D; }
+
+        .persona-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.75rem;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 0.8rem;
+        }
+        .persona-row:hover { background: rgba(255,255,255,0.02); }
+
+        /* ── Status dots ── */
+        .status-dot {
+            width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+        }
+        .status-dot.green { background: #06D6A0; }
+        .status-dot.amber { background: #FFD93D; }
+        .status-dot.red { background: #FF6B6B; }
+        .status-dot.gray { background: #525E73; border: 1px dashed #6B7280; }
+
+        /* ── Progress bar ── */
+        .progress-bar {
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            height: 5px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #06D6A0, #4CC9F0);
+            transition: width 0.6s ease;
+        }
+
+        /* ── Table ── */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        .data-table th {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #525E73;
+            text-align: left;
+            padding: 0.625rem 0.75rem;
+            border-bottom: 1px solid #1E2130;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .data-table th:hover { color: #8A95A9; }
+        .data-table th.sorted { color: #06D6A0; }
+        .data-table td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid rgba(30,33,48,0.5);
+            vertical-align: middle;
+        }
+        .data-table tbody tr { cursor: pointer; transition: background 0.15s; }
+        .data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+        /* ── Slide-out panel ── */
+        .detail-backdrop {
+            position: fixed; inset: 0; z-index: 80;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(3px);
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .detail-backdrop.open { opacity: 1; visibility: visible; }
+
+        .detail-panel {
+            position: fixed; top: 0; right: 0; bottom: 0; z-index: 81;
+            width: 440px; max-width: 95vw;
+            background: #0D0F16;
+            border-left: 1px solid #1E2130;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .detail-panel.open { transform: translateX(0); }
+
+        /* ── Modal ── */
+        .modal-backdrop {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.25s, visibility 0.25s;
+        }
+        .modal-backdrop.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: #11131A; border: 1px solid #2A2E3D; border-radius: 0.75rem;
+            width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto;
+            transform: translateY(20px); transition: transform 0.25s ease;
+        }
+        .modal-backdrop.active .modal-content { transform: translateY(0); }
+
+        /* ── Toast ── */
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-family: 'IBM Plex Sans', system-ui;
+            animation: toast-in 0.3s ease forwards;
+            max-width: 380px;
+        }
+        .toast-success { background: rgba(6,214,160,0.15); border: 1px solid rgba(6,214,160,0.3); color: #06D6A0; }
+        .toast-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #FF6B6B; }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Skeleton ── */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #1A1D28 25%, #242836 50%, #1A1D28 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 0.25rem;
+        }
+
+        /* ── Scanline ── */
+        .scanline {
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(6,214,160,0.015) 2px,
+                rgba(6,214,160,0.015) 4px
+            );
+        }
+
+        /* ── D3 Tree ── */
+        #treeContainer svg { width: 100%; height: 100%; }
+        .tree-node rect {
+            fill: #11131A;
+            stroke: #2A2E3D;
+            stroke-width: 1;
+            rx: 6;
+            cursor: pointer;
+            transition: fill 0.15s;
+        }
+        .tree-node rect:hover { fill: #1A1D28; }
+        .tree-node text { fill: #E8ECF1; font-family: 'IBM Plex Sans', system-ui; }
+        .tree-node .node-name { font-weight: 500; font-size: 12px; }
+        .tree-node .node-title { fill: #8A95A9; font-size: 10px; }
+        .tree-node .node-wf { fill: #525E73; font-family: 'JetBrains Mono', monospace; font-size: 9px; }
+        .tree-link {
+            fill: none;
+            stroke: #1E2130;
+            stroke-width: 1.5;
+        }
+        .tree-toggle {
+            fill: #1A1D28;
+            stroke: #2A2E3D;
+            stroke-width: 1;
+            cursor: pointer;
+        }
+        .tree-toggle:hover { fill: #242836; }
+
+        /* ── Dept select ── */
+        .dept-select {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2A2E3D;
+            border-radius: 0.375rem;
+            padding: 0.4rem 0.625rem;
+            color: #E8ECF1;
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.8rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .dept-select:focus { border-color: rgba(6,214,160,0.4); }
+        .dept-select option { background: #1A1D28; color: #E8ECF1; }
+
+        /* ── Breadcrumb ── */
+        .breadcrumb { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; }
+        .breadcrumb-item { font-size: 0.75rem; color: #525E73; }
+        .breadcrumb-sep { font-size: 0.65rem; color: #2A2E3D; }
+        .breadcrumb-current { color: #E8ECF1; }
+
+        /* ── Pill badge ── */
+        .pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 9999px;
+            background: rgba(255,255,255,0.05);
+            color: #8A95A9;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center; padding: 3rem 1rem; color: #525E73;
+            font-size: 0.85rem;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .stat-bar { flex-wrap: wrap; }
+            .filter-row { flex-direction: column; gap: 0.5rem; }
+            .search-input { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ PASSWORD GATE ═══ -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">Org Map</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">Organization Map</h1>
+                <p class="text-txt-2 text-sm">Enter the access code to continue</p>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off" autofocus>
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4">Authenticate</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- ── Top Nav ── -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Dashboard</a>
+                        <a href="/chat" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Chat</a>
+                        <span class="task-tab active" style="flex: none; padding: 0.3rem 0.75rem;">Org Map</span>
+                        <a href="/our-workflows" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Workflows</a>
+                        <a href="/social-dashboard" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Social</a>
+                        <a href="/crm" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">CRM</a>
+                        <a href="/offer-studio" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Offers</a>
+                        <a href="/deft" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">DEFT</a>
+                        <a href="/brain" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">BRAIN</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Profile Switcher -->
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown">
+                        </div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2 relative" title="Voice Settings" id="settingsLink">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="hidden" id="settingsBadge" style="position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:#FFD93D;border:1.5px solid #11131A;"></span>
+                    </a>
+                    <button onclick="refreshData()" class="btn btn-ghost text-xs py-2 px-3 flex items-center gap-1.5" id="refreshBtn">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ── Stats Bar ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
+            <div class="stat-bar flex gap-3 overflow-x-auto pb-1" id="statsBar">
+                <div class="stat-chip flex-1 min-w-[120px]">
+                    <div>
+                        <div class="stat-value text-txt" id="statTotal">—</div>
+                        <div class="stat-label">Total Roles</div>
+                    </div>
+                </div>
+                <div class="stat-chip flex-1 min-w-[120px]">
+                    <div>
+                        <div class="stat-value text-accent" id="statActive">—</div>
+                        <div class="stat-label">Active</div>
+                    </div>
+                </div>
+                <div class="stat-chip flex-1 min-w-[120px]">
+                    <div>
+                        <div class="stat-value text-txt-2" id="statPlanned">—</div>
+                        <div class="stat-label">Planned</div>
+                    </div>
+                </div>
+                <div class="stat-chip flex-1 min-w-[120px]">
+                    <div>
+                        <div class="stat-value text-info" id="statWorkflows">—</div>
+                        <div class="stat-label">Workflows</div>
+                    </div>
+                </div>
+                <div class="stat-chip flex-1 min-w-[120px]">
+                    <div>
+                        <div class="stat-value text-warn" id="statDepts">—</div>
+                        <div class="stat-label">Departments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Filter Bar ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
+            <div class="filter-row flex flex-wrap items-center gap-3">
+                <!-- View Switcher -->
+                <div class="flex items-center gap-1 bg-surface rounded-lg p-1 border border-border/50">
+                    <button class="view-btn active" data-view="tree" onclick="switchView('tree')">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="inline mr-1 -mt-px"><path d="M6 1v3M6 8v3M1 6h3M8 6h3M2.5 2.5l2 2M7.5 7.5l2 2M2.5 9.5l2-2M7.5 4.5l2-2" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                        Tree
+                    </button>
+                    <button class="view-btn" data-view="grid" onclick="switchView('grid')">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="inline mr-1 -mt-px"><rect x="1" y="1" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1"/><rect x="7" y="1" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1"/><rect x="1" y="7" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1"/><rect x="7" y="7" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1"/></svg>
+                        Grid
+                    </button>
+                    <button class="view-btn" data-view="table" onclick="switchView('table')">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="inline mr-1 -mt-px"><path d="M1.5 3h9M1.5 6h9M1.5 9h9" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                        Table
+                    </button>
+                    <button class="view-btn" data-view="backlog" onclick="switchView('backlog')">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="inline mr-1 -mt-px"><path d="M3 1v10M6 4v7M9 3v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        Backlog
+                    </button>
+                </div>
+
+                <!-- Department Filter -->
+                <select class="dept-select" id="deptFilter" onchange="applyFilters()">
+                    <option value="">All Departments</option>
+                </select>
+
+                <!-- Status Filter -->
+                <div class="flex items-center gap-1">
+                    <button class="status-btn active" data-status="all" onclick="setStatusFilter('all')">All</button>
+                    <button class="status-btn" data-status="active" onclick="setStatusFilter('active')">Active</button>
+                    <button class="status-btn" data-status="planned" onclick="setStatusFilter('planned')">Planned</button>
+                </div>
+
+                <!-- Search -->
+                <div class="relative ml-auto">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-txt-3">
+                        <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/>
+                        <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                    </svg>
+                    <input type="text" class="search-input" placeholder="Search personas..." id="searchInput" oninput="applyFilters()">
+                </div>
+            </div>
+        </div>
+
+        <!-- ── View Containers ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8">
+
+            <!-- Tree View -->
+            <div id="viewTree" class="view-container">
+                <div id="treeContainer" style="height: calc(100vh - 260px); min-height: 400px; border: 1px solid #1E2130; border-radius: 0.75rem; overflow: hidden; background: #0A0C12;">
+                    <div class="empty-state py-20">
+                        <div class="skeleton w-48 h-4 mx-auto mb-3"></div>
+                        <div class="skeleton w-32 h-3 mx-auto"></div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 mt-2 px-1">
+                    <span class="text-xs text-txt-3 font-mono">Scroll to zoom &middot; Drag to pan &middot; Click node to expand</span>
+                </div>
+            </div>
+
+            <!-- Grid View -->
+            <div id="viewGrid" class="view-container hidden">
+                <div id="gridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="empty-state col-span-full"><div class="skeleton w-48 h-4 mx-auto"></div></div>
+                </div>
+            </div>
+
+            <!-- Table View -->
+            <div id="viewTable" class="view-container hidden">
+                <div class="panel overflow-x-auto">
+                    <table class="data-table" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('display_name')" data-col="display_name">Name <span class="sort-arrow"></span></th>
+                                <th onclick="sortTable('title')" data-col="title">Title <span class="sort-arrow"></span></th>
+                                <th onclick="sortTable('department')" data-col="department">Dept <span class="sort-arrow"></span></th>
+                                <th onclick="sortTable('parent')" data-col="parent">Reports To <span class="sort-arrow"></span></th>
+                                <th onclick="sortTable('status')" data-col="status">Status <span class="sort-arrow"></span></th>
+                                <th onclick="sortTable('workflow_count')" data-col="workflow_count">Workflows <span class="sort-arrow"></span></th>
+                                <th>Health</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr><td colspan="7" class="text-center py-8"><div class="skeleton w-48 h-4 mx-auto"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Backlog View -->
+            <div id="viewBacklog" class="view-container hidden">
+                <div id="backlogProgress" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6"></div>
+                <div id="backlogContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="empty-state col-span-full"><div class="skeleton w-48 h-4 mx-auto"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ DETAIL SLIDE-OUT PANEL ═══ -->
+    <div class="detail-backdrop" id="detailBackdrop" onclick="closeDetail()"></div>
+    <div class="detail-panel" id="detailPanel">
+        <div class="sticky top-0 z-10 flex items-center justify-between px-5 py-4 border-b border-border" style="background: rgba(13,15,22,0.95); backdrop-filter: blur(12px);">
+            <span class="font-heading font-bold text-sm tracking-wide uppercase text-txt-2">Persona Detail</span>
+            <button onclick="closeDetail()" class="text-txt-3 hover:text-txt transition-colors p-1">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <div id="detailContent" class="p-5 space-y-5"></div>
+    </div>
+
+    <!-- ═══ BUILD PROMPT MODAL ═══ -->
+    <div class="modal-backdrop" id="promptModal">
+        <div class="modal-content">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-border">
+                <h3 class="font-heading font-bold text-sm tracking-wide uppercase">Build Prompt</h3>
+                <button onclick="closePromptModal()" class="text-txt-3 hover:text-txt transition-colors p-1">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5">
+                <div id="promptContent" class="font-mono text-xs leading-relaxed text-txt-2 whitespace-pre-wrap bg-base border border-border rounded-lg p-4 max-h-[60vh] overflow-y-auto">
+                    Loading...
+                </div>
+                <button onclick="copyPrompt()" class="btn btn-primary w-full mt-4 py-2.5 flex items-center justify-center gap-2" id="copyPromptBtn">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="4.5" y="4.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 4.5V3a1.5 1.5 0 00-1.5-1.5H3A1.5 1.5 0 001.5 3v5A1.5 1.5 0 003 9.5h1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+                    Copy to Clipboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TOAST ═══ -->
+    <div class="toast-container" id="toastContainer"></div>
+
+<script>
+// Migrate old localStorage key
+if (!localStorage.getItem('rdgr-active-profile') && localStorage.getItem('rdgr-active-profile')) {
+    localStorage.setItem('rdgr-active-profile', localStorage.getItem('rdgr-active-profile'));
+    localStorage.removeItem('rdgr-active-profile');
+}
+
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+const headers = {
+    'apikey': ANON_KEY,
+    'Authorization': `Bearer ${ANON_KEY}`,
+    'Content-Type': 'application/json'
+};
+
+const DEPT_COLORS = {
+    'ownership': '#F59E0B',
+    'executive': '#6366F1',
+    'production': '#F97316',
+    'newsroom': '#14B8A6',
+    'ethics-standards': '#EF4444',
+    'creative': '#A855F7',
+    'digital-strategy': '#0EA5E9',
+    'administration': '#64748B',
+    'research': '#10B981',
+    'marketing': '#EC4899',
+    'sales': '#22C55E',
+    'technology': '#06B6D4',
+    'accounting': '#84CC16',
+    'customer-service': '#F59E0B',
+    'special-roles': '#9CA3AF',
+};
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let orgData = [];
+let workflowMappings = [];
+let backlogData = [];
+let treeRoots = [];
+let nodeMap = {};
+let currentView = 'tree';
+let currentSort = { col: 'display_name', dir: 'asc' };
+let filters = { department: '', status: 'all', search: '' };
+
+// ═══════════════════════════════════════
+// AUTH GATE
+// ═══════════════════════════════════════
+function handleGate(e) {
+    e.preventDefault();
+    const input = document.getElementById('gateInput').value;
+    if (input === 'Advance1!') {
+        localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity = '1';
+        initDashboard();
+        return false;
+    }
+    document.getElementById('gateError').classList.add('show');
+    document.getElementById('gateInput').value = '';
+    document.getElementById('gateInput').focus();
+    setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+    return false;
+}
+
+if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('mainContent').style.opacity = '1';
+    initDashboard();
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+function initDashboard() {
+    refreshData();
+    checkPendingSnapshots();
+}
+
+async function checkPendingSnapshots() {
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/voice_settings_snapshots?brand_id=eq.carlton&status=eq.pending&select=id`, { headers });
+        const data = await res.json();
+        if (data && data.length > 0) {
+            const badge = document.getElementById('settingsBadge');
+            if (badge) badge.classList.remove('hidden');
+            const link = document.getElementById('settingsLink');
+            if (link) link.title = `Voice Settings (${data.length} AI suggestion${data.length > 1 ? 's' : ''})`;
+        }
+    } catch (e) { /* silent */ }
+}
+
+async function refreshData() {
+    const btn = document.getElementById('refreshBtn');
+    btn.disabled = true;
+    try {
+        const [orgRes, mappingRes, backlogRes] = await Promise.all([
+            fetch(`${SUPABASE_URL}/rest/v1/rpc/get_org_chart`, { method: 'POST', headers, body: '{}' }).then(r => r.json()),
+            fetch(`${SUPABASE_URL}/rest/v1/agent_role_workflows?select=role_key,relationship,notes,system_registry(id,name,category,metadata)`, { headers }).then(r => r.json()),
+            fetch(`${SUPABASE_URL}/rest/v1/rpc/get_build_backlog`, { method: 'POST', headers, body: JSON.stringify({ p_department: null, p_limit: 200 }) }).then(r => r.json()),
+        ]);
+
+        orgData = Array.isArray(orgRes) ? orgRes : [];
+        workflowMappings = Array.isArray(mappingRes) ? mappingRes : [];
+        backlogData = Array.isArray(backlogRes) ? backlogRes : [];
+
+        buildNodeMap();
+        treeRoots = buildTree(orgData);
+        attachWorkflows(treeRoots, workflowMappings);
+        populateDeptFilter();
+        updateStats();
+        renderCurrentView();
+        showToast('Data refreshed', 'success');
+    } catch (err) {
+        console.error('Fetch error:', err);
+        showToast('Failed to load data', 'error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ═══════════════════════════════════════
+// DATA TRANSFORMATION
+// ═══════════════════════════════════════
+function buildNodeMap() {
+    nodeMap = {};
+    orgData.forEach(item => {
+        nodeMap[item.role_key] = { ...item, children: [], workflows: [] };
+    });
+}
+
+function buildTree(flatData) {
+    const roots = [];
+    const map = {};
+    flatData.forEach(item => {
+        map[item.role_key] = nodeMap[item.role_key];
+        map[item.role_key].children = [];
+    });
+    flatData.forEach(item => {
+        if (item.parent_role_key && map[item.parent_role_key]) {
+            map[item.parent_role_key].children.push(map[item.role_key]);
+        } else if (!item.parent_role_key) {
+            roots.push(map[item.role_key]);
+        }
+    });
+    Object.values(map).forEach(node => {
+        node.children.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    });
+    return roots;
+}
+
+function attachWorkflows(roots, mappings) {
+    const wfMap = {};
+    mappings.forEach(m => {
+        if (!m.system_registry) return;
+        if (!wfMap[m.role_key]) wfMap[m.role_key] = [];
+        wfMap[m.role_key].push({
+            name: m.system_registry.name,
+            category: m.system_registry.category,
+            status: m.system_registry.metadata?.status || 'unknown',
+            webhookPath: m.system_registry.metadata?.webhook_path,
+            nodeCount: m.system_registry.metadata?.node_count,
+            workflowId: m.system_registry.metadata?.workflow_id,
+            relationship: m.relationship,
+            notes: m.notes,
+        });
+    });
+    function walk(node) {
+        node.workflows = wfMap[node.role_key] || [];
+        node.health = computeHealth(node);
+        node.children.forEach(walk);
+    }
+    roots.forEach(walk);
+}
+
+function computeHealth(node) {
+    if (node.status === 'deprecated') return 'deprecated';
+    if (node.status === 'planned' || node.workflows.length === 0) return 'gray';
+    const statuses = node.workflows.map(w => w.status);
+    if (statuses.some(s => s === 'broken')) return 'red';
+    if (statuses.some(s => s === 'inactive' || s === 'broken')) return 'amber';
+    if (statuses.every(s => s === 'active')) return 'green';
+    return 'amber';
+}
+
+function getHealthDot(health) {
+    const cls = { green: 'green', amber: 'amber', red: 'red', gray: 'gray', deprecated: 'red' };
+    return `<span class="status-dot ${cls[health] || 'gray'}"></span>`;
+}
+
+function getDeptColor(dept) {
+    return DEPT_COLORS[dept] || '#525E73';
+}
+
+function getDeptBadge(dept) {
+    const color = getDeptColor(dept);
+    const label = dept ? dept.replace(/-/g, ' ') : 'unknown';
+    return `<span class="badge" style="background: ${color}15; color: ${color}; border: 1px solid ${color}25;">${label}</span>`;
+}
+
+function getStatusBadge(status) {
+    const map = { active: 'badge-active', planned: 'badge-planned', deprecated: 'badge-deprecated' };
+    return `<span class="badge ${map[status] || 'badge-planned'}">${status || 'unknown'}</span>`;
+}
+
+function getParentName(roleKey) {
+    const node = nodeMap[roleKey];
+    if (!node || !node.parent_role_key) return '—';
+    const parent = nodeMap[node.parent_role_key];
+    return parent ? parent.display_name : '—';
+}
+
+function getReportingChain(roleKey) {
+    const chain = [];
+    let current = nodeMap[roleKey];
+    while (current) {
+        chain.unshift(current);
+        current = current.parent_role_key ? nodeMap[current.parent_role_key] : null;
+    }
+    return chain;
+}
+
+// ═══════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════
+function updateStats() {
+    document.getElementById('statTotal').textContent = orgData.length;
+    document.getElementById('statActive').textContent = orgData.filter(n => n.status === 'active').length;
+    document.getElementById('statPlanned').textContent = orgData.filter(n => n.status === 'planned').length;
+    document.getElementById('statWorkflows').textContent = orgData.reduce((sum, n) => sum + (n.workflow_count || 0), 0);
+    document.getElementById('statDepts').textContent = new Set(orgData.map(n => n.department)).size;
+}
+
+// ═══════════════════════════════════════
+// FILTERS
+// ═══════════════════════════════════════
+function populateDeptFilter() {
+    const select = document.getElementById('deptFilter');
+    const depts = [...new Set(orgData.map(n => n.department).filter(Boolean))].sort();
+    select.innerHTML = '<option value="">All Departments</option>' +
+        depts.map(d => `<option value="${d}">${d.replace(/-/g, ' ')}</option>`).join('');
+}
+
+function setStatusFilter(status) {
+    filters.status = status;
+    document.querySelectorAll('.status-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.status === status);
+    });
+    applyFilters();
+}
+
+function applyFilters() {
+    filters.department = document.getElementById('deptFilter').value;
+    filters.search = document.getElementById('searchInput').value.toLowerCase().trim();
+    renderCurrentView();
+}
+
+function filterNodes(nodes) {
+    return nodes.filter(node => {
+        if (filters.department && node.department !== filters.department) return false;
+        if (filters.status !== 'all' && node.status !== filters.status) return false;
+        if (filters.search) {
+            const q = filters.search;
+            const match = (node.display_name || '').toLowerCase().includes(q)
+                || (node.title || '').toLowerCase().includes(q)
+                || (node.department || '').toLowerCase().includes(q)
+                || (node.role_key || '').toLowerCase().includes(q);
+            if (!match) return false;
+        }
+        return true;
+    });
+}
+
+// ═══════════════════════════════════════
+// VIEW SWITCHING
+// ═══════════════════════════════════════
+function switchView(view) {
+    currentView = view;
+    document.querySelectorAll('.view-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.view === view);
+    });
+    document.querySelectorAll('.view-container').forEach(c => c.classList.add('hidden'));
+    document.getElementById('view' + view.charAt(0).toUpperCase() + view.slice(1)).classList.remove('hidden');
+    renderCurrentView();
+}
+
+function renderCurrentView() {
+    switch (currentView) {
+        case 'tree': renderTreeView(); break;
+        case 'grid': renderGridView(); break;
+        case 'table': renderTableView(); break;
+        case 'backlog': renderBacklogView(); break;
+    }
+}
+
+// ═══════════════════════════════════════
+// GRID VIEW
+// ═══════════════════════════════════════
+function renderGridView() {
+    const container = document.getElementById('gridContainer');
+    const filtered = filterNodes(Object.values(nodeMap));
+    const depts = {};
+    filtered.forEach(n => {
+        const d = n.department || 'unknown';
+        if (!depts[d]) depts[d] = [];
+        depts[d].push(n);
+    });
+
+    if (Object.keys(depts).length === 0) {
+        container.innerHTML = '<div class="empty-state col-span-full">No personas match your filters</div>';
+        return;
+    }
+
+    const sortedDepts = Object.keys(depts).sort();
+    container.innerHTML = sortedDepts.map(dept => {
+        const personas = depts[dept];
+        const active = personas.filter(p => p.status === 'active').length;
+        const total = personas.length;
+        const color = getDeptColor(dept);
+        const pct = total > 0 ? (active / total * 100) : 0;
+
+        return `
+        <div class="dept-card" style="border-top: 2px solid ${color};">
+            <div class="px-4 py-3 border-b border-border/50">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-2.5 h-2.5 rounded-full" style="background: ${color};"></span>
+                    <span class="font-heading font-semibold text-sm tracking-wide uppercase">${dept.replace(/-/g, ' ')}</span>
+                    <span class="ml-auto font-mono text-xs text-txt-3">${active}/${total}</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${pct}%; background: linear-gradient(90deg, ${color}, ${color}88);"></div>
+                </div>
+            </div>
+            <div class="py-1">
+                ${personas.map(p => `
+                    <div class="persona-row" onclick="openDetail('${p.role_key}')">
+                        ${getHealthDot(p.health)}
+                        <span class="flex-1 truncate">${p.display_name}</span>
+                        <span class="text-txt-3 text-xs truncate max-w-[120px]">${p.title || ''}</span>
+                        ${p.workflow_count ? `<span class="font-mono text-xs text-txt-3">${p.workflow_count}wf</span>` : ''}
+                    </div>
+                `).join('')}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ═══════════════════════════════════════
+// TABLE VIEW
+// ═══════════════════════════════════════
+function renderTableView() {
+    const tbody = document.getElementById('tableBody');
+    let filtered = filterNodes(Object.values(nodeMap));
+
+    // Sort
+    filtered.sort((a, b) => {
+        let va, vb;
+        switch (currentSort.col) {
+            case 'display_name': va = a.display_name || ''; vb = b.display_name || ''; break;
+            case 'title': va = a.title || ''; vb = b.title || ''; break;
+            case 'department': va = a.department || ''; vb = b.department || ''; break;
+            case 'parent': va = getParentName(a.role_key); vb = getParentName(b.role_key); break;
+            case 'status': va = a.status || ''; vb = b.status || ''; break;
+            case 'workflow_count': va = a.workflow_count || 0; vb = b.workflow_count || 0; break;
+            default: va = a.display_name; vb = b.display_name;
+        }
+        if (typeof va === 'number') {
+            return currentSort.dir === 'asc' ? va - vb : vb - va;
+        }
+        return currentSort.dir === 'asc'
+            ? String(va).localeCompare(String(vb))
+            : String(vb).localeCompare(String(va));
+    });
+
+    // Update sort indicators
+    document.querySelectorAll('.data-table th').forEach(th => {
+        th.classList.toggle('sorted', th.dataset.col === currentSort.col);
+        const arrow = th.querySelector('.sort-arrow');
+        if (arrow) {
+            arrow.textContent = th.dataset.col === currentSort.col ? (currentSort.dir === 'asc' ? ' \u2191' : ' \u2193') : '';
+        }
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-txt-3">No personas match your filters</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(n => `
+        <tr onclick="openDetail('${n.role_key}')">
+            <td class="font-medium">${n.display_name}</td>
+            <td class="text-txt-2">${n.title || '—'}</td>
+            <td>${getDeptBadge(n.department)}</td>
+            <td class="text-txt-2">${getParentName(n.role_key)}</td>
+            <td>${getStatusBadge(n.status)}</td>
+            <td class="font-mono text-center">${n.workflow_count || 0}</td>
+            <td>${getHealthDot(n.health)}</td>
+        </tr>
+    `).join('');
+}
+
+function sortTable(col) {
+    if (currentSort.col === col) {
+        currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.col = col;
+        currentSort.dir = 'asc';
+    }
+    renderTableView();
+}
+
+// ═══════════════════════════════════════
+// BACKLOG VIEW
+// ═══════════════════════════════════════
+function renderBacklogView() {
+    const progressContainer = document.getElementById('backlogProgress');
+    const container = document.getElementById('backlogContainer');
+
+    // Group by department
+    const filtered = filters.department
+        ? backlogData.filter(b => b.department === filters.department)
+        : backlogData;
+
+    // Department progress
+    const allDepts = {};
+    orgData.forEach(n => {
+        const d = n.department || 'unknown';
+        if (!allDepts[d]) allDepts[d] = { total: 0, built: 0 };
+        allDepts[d].total++;
+        if (n.workflow_count > 0) allDepts[d].built++;
+    });
+
+    progressContainer.innerHTML = Object.keys(allDepts).sort().map(dept => {
+        const { total, built } = allDepts[dept];
+        const pct = total > 0 ? (built / total * 100) : 0;
+        const color = getDeptColor(dept);
+        return `
+        <div class="stat-chip flex-col items-start gap-1" style="border-top: 2px solid ${color};">
+            <div class="flex items-center justify-between w-full">
+                <span class="font-mono text-xs text-txt-2 uppercase">${dept.replace(/-/g, ' ')}</span>
+                <span class="font-mono text-xs text-txt-3">${built}/${total}</span>
+            </div>
+            <div class="progress-bar w-full">
+                <div class="progress-fill" style="width: ${pct}%; background: ${color};"></div>
+            </div>
+        </div>`;
+    }).join('');
+
+    // Backlog cards grouped by department
+    const groups = {};
+    filtered.forEach(b => {
+        const d = b.department || 'unknown';
+        if (!groups[d]) groups[d] = [];
+        groups[d].push(b);
+    });
+
+    if (Object.keys(groups).length === 0) {
+        container.innerHTML = '<div class="empty-state col-span-full">No backlog items match your filters</div>';
+        return;
+    }
+
+    container.innerHTML = Object.keys(groups).sort().map(dept => {
+        const items = groups[dept];
+        const color = getDeptColor(dept);
+        return `
+        <div class="dept-card" style="border-top: 2px solid ${color};">
+            <div class="px-4 py-3 border-b border-border/50">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full" style="background: ${color};"></span>
+                    <span class="font-heading font-semibold text-sm tracking-wide uppercase">${dept.replace(/-/g, ' ')}</span>
+                    <span class="ml-auto font-mono text-xs text-txt-3">${items.length} to build</span>
+                </div>
+            </div>
+            <div class="divide-y divide-border/30">
+                ${items.map(b => `
+                    <div class="px-4 py-3">
+                        <div class="flex items-start justify-between gap-2 mb-1">
+                            <div>
+                                <span class="font-medium text-sm">${b.display_name}</span>
+                                <span class="text-txt-3 text-xs ml-2">${b.title || ''}</span>
+                            </div>
+                            <button onclick="generateBuildPrompt('${b.role_key}')" class="btn btn-ghost text-xs py-1 px-2 flex-shrink-0">
+                                Build Prompt
+                            </button>
+                        </div>
+                        <div class="text-xs text-txt-3">
+                            Reports to: <span class="text-txt-2">${b.parent_name || '—'}</span>
+                            ${b.parent_title ? `<span class="text-txt-3">(${b.parent_title})</span>` : ''}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function generateBuildPrompt(roleKey) {
+    const modal = document.getElementById('promptModal');
+    const content = document.getElementById('promptContent');
+    content.textContent = 'Generating build prompt...';
+    modal.classList.add('active');
+
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/generate_build_prompt`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ p_role_key: roleKey })
+        }).then(r => r.json());
+
+        if (res && res.prompt) {
+            content.textContent = res.prompt;
+        } else if (typeof res === 'string') {
+            content.textContent = res;
+        } else {
+            content.textContent = JSON.stringify(res, null, 2);
+        }
+    } catch (err) {
+        content.textContent = 'Error generating prompt: ' + err.message;
+    }
+}
+
+function copyPrompt() {
+    const text = document.getElementById('promptContent').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyPromptBtn');
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Copied!';
+        setTimeout(() => {
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="4.5" y="4.5" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 4.5V3a1.5 1.5 0 00-1.5-1.5H3A1.5 1.5 0 001.5 3v5A1.5 1.5 0 003 9.5h1.5" stroke="currentColor" stroke-width="1.2"/></svg> Copy to Clipboard';
+        }, 2000);
+    });
+}
+
+function closePromptModal() {
+    document.getElementById('promptModal').classList.remove('active');
+}
+
+// ═══════════════════════════════════════
+// DETAIL PANEL
+// ═══════════════════════════════════════
+function openDetail(roleKey) {
+    const node = nodeMap[roleKey];
+    if (!node) return;
+
+    const panel = document.getElementById('detailPanel');
+    const backdrop = document.getElementById('detailBackdrop');
+    const content = document.getElementById('detailContent');
+
+    // Reporting chain
+    const chain = getReportingChain(roleKey);
+    const breadcrumb = chain.map((c, i) => {
+        const isCurrent = i === chain.length - 1;
+        return `<span class="breadcrumb-item ${isCurrent ? 'breadcrumb-current' : ''}" ${!isCurrent ? `onclick="openDetail('${c.role_key}')" style="cursor:pointer;"` : ''}>${c.display_name}</span>`;
+    }).join('<span class="breadcrumb-sep">&rsaquo;</span>');
+
+    // Capabilities
+    const caps = node.metadata?.capabilities || [];
+    const capsHtml = caps.length > 0
+        ? `<div class="flex flex-wrap gap-1.5">${caps.map(c => `<span class="pill">${c}</span>`).join('')}</div>`
+        : '<span class="text-txt-3 text-xs">None defined</span>';
+
+    // Workflows
+    let wfHtml = '';
+    if (node.workflows.length > 0) {
+        wfHtml = `
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs">
+                <thead>
+                    <tr class="text-left">
+                        <th class="font-mono text-txt-3 font-medium uppercase tracking-wider text-[0.6rem] pb-2">Workflow</th>
+                        <th class="font-mono text-txt-3 font-medium uppercase tracking-wider text-[0.6rem] pb-2">Status</th>
+                        <th class="font-mono text-txt-3 font-medium uppercase tracking-wider text-[0.6rem] pb-2">Role</th>
+                        <th class="font-mono text-txt-3 font-medium uppercase tracking-wider text-[0.6rem] pb-2">Nodes</th>
+                        <th class="font-mono text-txt-3 font-medium uppercase tracking-wider text-[0.6rem] pb-2"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${node.workflows.map(w => {
+                        const statusCls = { active: 'green', inactive: 'gray', broken: 'red' };
+                        const relCls = { primary: 'badge-primary', secondary: 'badge-secondary', supporting: 'badge-supporting' };
+                        const n8nLink = w.workflowId ? `<a href="https://n8n.carltonaiservices.com/workflow/${w.workflowId}" target="_blank" class="text-info hover:underline">Open</a>` : '';
+                        return `
+                        <tr class="border-t border-border/30">
+                            <td class="py-1.5 pr-2 text-txt-2">${w.name}</td>
+                            <td class="py-1.5 pr-2"><span class="status-dot ${statusCls[w.status] || 'gray'} inline-block"></span></td>
+                            <td class="py-1.5 pr-2"><span class="badge ${relCls[w.relationship] || ''}">${w.relationship || '—'}</span></td>
+                            <td class="py-1.5 pr-2 font-mono text-txt-3">${w.nodeCount || '—'}</td>
+                            <td class="py-1.5">${n8nLink}</td>
+                        </tr>`;
+                    }).join('')}
+                </tbody>
+            </table>
+        </div>`;
+    } else {
+        wfHtml = '<span class="text-txt-3 text-xs">No workflows mapped</span>';
+    }
+
+    const deptColor = getDeptColor(node.department);
+
+    content.innerHTML = `
+        <!-- Header -->
+        <div class="mb-4">
+            <div class="flex items-start gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-heading font-bold flex-shrink-0" style="background: ${deptColor}15; color: ${deptColor}; border: 1px solid ${deptColor}30;">
+                    ${(node.display_name || '?')[0]}
+                </div>
+                <div class="min-w-0">
+                    <h3 class="font-heading font-bold text-lg leading-tight ${node.status === 'deprecated' ? 'line-through opacity-50' : ''}">${node.display_name}</h3>
+                    <p class="text-txt-2 text-sm">${node.title || ''}</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                ${getStatusBadge(node.status)}
+                ${getDeptBadge(node.department)}
+                ${getHealthDot(node.health)}
+            </div>
+        </div>
+
+        <!-- Reporting Chain -->
+        <div>
+            <div class="font-mono text-[0.6rem] uppercase tracking-widest text-txt-3 mb-1.5">Reporting Chain</div>
+            <div class="breadcrumb">${breadcrumb}</div>
+        </div>
+
+        <!-- Description -->
+        ${node.metadata?.description ? `
+        <div>
+            <div class="font-mono text-[0.6rem] uppercase tracking-widest text-txt-3 mb-1.5">Description</div>
+            <p class="text-sm text-txt-2 leading-relaxed">${node.metadata.description}</p>
+        </div>` : ''}
+
+        <!-- Capabilities -->
+        <div>
+            <div class="font-mono text-[0.6rem] uppercase tracking-widest text-txt-3 mb-1.5">Capabilities</div>
+            ${capsHtml}
+        </div>
+
+        <!-- Agent File -->
+        ${node.metadata?.agent_file ? `
+        <div>
+            <div class="font-mono text-[0.6rem] uppercase tracking-widest text-txt-3 mb-1.5">Agent File</div>
+            <code class="text-xs font-mono text-info bg-info-dim px-2 py-1 rounded">~/.claude/agents/${node.metadata.agent_file}</code>
+        </div>` : ''}
+
+        <!-- Persona Key -->
+        ${node.metadata?.persona_key ? `
+        <div>
+            <div class="font-mono text-[0.6rem] uppercase tracking-widest text-txt-3 mb-1.5">Persona Key</div>
+            <p class="text-xs text-txt-2">Used in Agent Config Library as <code class="font-mono text-accent">${node.metadata.persona_key}</code></p>
+        </div>` : ''}
+
+        <!-- Workflows -->
+        <div>
+            <div class="font-mono text-[0.6rem] uppercase tracking-widest text-txt-3 mb-1.5">Mapped Workflows (${node.workflows.length})</div>
+            ${wfHtml}
+        </div>
+
+        <!-- Build Prompt (if no workflows) -->
+        ${node.workflows.length === 0 ? `
+        <div class="pt-2">
+            <button onclick="generateBuildPrompt('${node.role_key}')" class="btn btn-primary w-full py-2.5 flex items-center justify-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Generate Build Prompt
+            </button>
+        </div>` : ''}
+    `;
+
+    backdrop.classList.add('open');
+    panel.classList.add('open');
+}
+
+function closeDetail() {
+    document.getElementById('detailBackdrop').classList.remove('open');
+    document.getElementById('detailPanel').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        closeDetail();
+        closePromptModal();
+    }
+});
+
+// ═══════════════════════════════════════
+// TREE VIEW (D3.js)
+// ═══════════════════════════════════════
+let treeZoom = null;
+let collapsedNodes = new Set();
+let treeInitialized = false;
+let savedTransform = null; // preserve zoom/pan across re-renders
+
+function renderTreeView() {
+    const container = document.getElementById('treeContainer');
+    container.innerHTML = '';
+
+    if (treeRoots.length === 0) {
+        container.innerHTML = '<div class="empty-state py-20">No data loaded</div>';
+        return;
+    }
+
+    // Auto-collapse deeper levels on first render
+    if (!treeInitialized) {
+        treeInitialized = true;
+        function collapseDeep(node, depth) {
+            if (depth >= 2 && node.children && node.children.length > 0) {
+                collapsedNodes.add(node.role_key);
+            }
+            (node.children || []).forEach(c => collapseDeep(c, depth + 1));
+        }
+        treeRoots.forEach(r => collapseDeep(r, 0));
+    }
+
+    // Build filtered tree — keep ancestors of matching nodes
+    const root = treeRoots[0]; // Rodger as root
+    const filteredRoot = pruneTree(JSON.parse(JSON.stringify(root)));
+
+    if (!filteredRoot) {
+        container.innerHTML = '<div class="empty-state py-20">No personas match your filters</div>';
+        return;
+    }
+
+    // Apply collapsed state
+    function applyCollapse(node) {
+        if (collapsedNodes.has(node.role_key) && node.children) {
+            node._children = node.children;
+            node.children = [];
+        }
+        (node.children || []).forEach(applyCollapse);
+    }
+    applyCollapse(filteredRoot);
+
+    const hierarchy = d3.hierarchy(filteredRoot, d => d.children && d.children.length > 0 ? d.children : null);
+
+    const nodeW = 220;
+    const nodeH = 60;
+    const hSpacing = 280;
+    const vSpacing = 72;
+
+    const treeLayout = d3.tree().nodeSize([vSpacing, hSpacing]);
+    treeLayout(hierarchy);
+
+    // Compute bounds
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    hierarchy.each(d => {
+        if (d.x < x0) x0 = d.x;
+        if (d.x > x1) x1 = d.x;
+        if (d.y < y0) y0 = d.y;
+        if (d.y > y1) y1 = d.y;
+    });
+
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    const treeW = (y1 - y0) + nodeW + 100;
+    const treeH = (x1 - x0) + nodeH + 100;
+
+    const svg = d3.select(container)
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+
+    const g = svg.append('g');
+
+    // Zoom — save transform on every zoom event so it persists across re-renders
+    treeZoom = d3.zoom()
+        .scaleExtent([0.1, 3])
+        .on('zoom', (event) => {
+            g.attr('transform', event.transform);
+            savedTransform = event.transform;
+        });
+
+    svg.call(treeZoom);
+
+    // Restore saved zoom/pan or compute initial transform
+    if (savedTransform) {
+        svg.call(treeZoom.transform, savedTransform);
+    } else {
+        const initialScale = Math.min(width / (treeW + 80), height / (treeH + 80), 0.85);
+        const finalScale = Math.max(initialScale, 0.5);
+        const tx = 40;
+        const ty = -x0 * finalScale + height / 2 - (treeH * finalScale) / 2;
+        svg.call(treeZoom.transform, d3.zoomIdentity.translate(tx, ty).scale(finalScale));
+    }
+
+    // Links
+    g.selectAll('.tree-link')
+        .data(hierarchy.links())
+        .join('path')
+        .attr('class', 'tree-link')
+        .attr('d', d => {
+            return `M${d.source.y + nodeW},${d.x + nodeH / 2}
+                    C${d.source.y + nodeW + 40},${d.source.x + nodeH / 2}
+                     ${d.target.y - 40},${d.target.x + nodeH / 2}
+                     ${d.target.y},${d.target.x + nodeH / 2}`;
+        });
+
+    // Nodes
+    const nodes = g.selectAll('.tree-node')
+        .data(hierarchy.descendants())
+        .join('g')
+        .attr('class', 'tree-node')
+        .attr('transform', d => `translate(${d.y},${d.x})`);
+
+    // Node rect with dept color left border
+    nodes.each(function(d) {
+        const el = d3.select(this);
+        const color = getDeptColor(d.data.department);
+        const health = d.data.health || 'gray';
+        const isPlanned = d.data.status === 'planned';
+
+        // Background rect
+        el.append('rect')
+            .attr('width', nodeW)
+            .attr('height', nodeH)
+            .attr('rx', 6)
+            .style('fill', '#11131A')
+            .style('stroke', isPlanned ? '#3A3E4D' : '#2A2E3D')
+            .style('stroke-width', 1)
+            .style('stroke-dasharray', isPlanned ? '4,3' : 'none')
+            .on('click', () => openDetail(d.data.role_key));
+
+        // Left color bar
+        el.append('rect')
+            .attr('width', 3)
+            .attr('height', nodeH)
+            .attr('rx', 1.5)
+            .style('fill', color);
+
+        // Status dot
+        const dotColors = { green: '#06D6A0', amber: '#FFD93D', red: '#FF6B6B', gray: '#525E73', deprecated: '#FF6B6B' };
+        el.append('circle')
+            .attr('cx', 18)
+            .attr('cy', 16)
+            .attr('r', 4)
+            .style('fill', dotColors[health] || '#525E73');
+
+        // Name
+        el.append('text')
+            .attr('class', 'node-name')
+            .attr('x', 28)
+            .attr('y', 19)
+            .text(truncate(d.data.display_name, 24))
+            .style('text-decoration', d.data.status === 'deprecated' ? 'line-through' : 'none');
+
+        // Title
+        el.append('text')
+            .attr('class', 'node-title')
+            .attr('x', 18)
+            .attr('y', 35)
+            .text(truncate(d.data.title || '', 30));
+
+        // Workflow count + dept badge
+        el.append('text')
+            .attr('class', 'node-wf')
+            .attr('x', 18)
+            .attr('y', 50)
+            .text(`${d.data.workflow_count || 0} wf \u00b7 ${(d.data.department || '').replace(/-/g, ' ')}`);
+
+        // Toggle button for expand/collapse (if has children or collapsed children)
+        const hasChildren = (d.data.children && d.data.children.length > 0) || d.data._children;
+        if (hasChildren) {
+            const isCollapsed = collapsedNodes.has(d.data.role_key);
+            const toggleG = el.append('g')
+                .attr('transform', `translate(${nodeW - 8}, ${nodeH / 2})`)
+                .style('cursor', 'pointer')
+                .on('click', (event) => {
+                    event.stopPropagation();
+                    toggleNode(d.data.role_key);
+                });
+
+            toggleG.append('circle')
+                .attr('r', 8)
+                .attr('class', 'tree-toggle');
+
+            toggleG.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('dominant-baseline', 'central')
+                .style('fill', '#8A95A9')
+                .style('font-size', '10px')
+                .style('font-family', 'JetBrains Mono, monospace')
+                .text(isCollapsed ? '+' : '\u2013');
+        }
+    });
+}
+
+function pruneTree(node) {
+    if (!node) return null;
+
+    const matches = matchesFilter(node);
+    if (node.children) {
+        node.children = node.children.map(c => pruneTree(c)).filter(Boolean);
+    }
+    if (matches || (node.children && node.children.length > 0)) {
+        return node;
+    }
+    return null;
+}
+
+function matchesFilter(node) {
+    if (filters.department && node.department !== filters.department) return false;
+    if (filters.status !== 'all' && node.status !== filters.status) return false;
+    if (filters.search) {
+        const q = filters.search;
+        const match = (node.display_name || '').toLowerCase().includes(q)
+            || (node.title || '').toLowerCase().includes(q)
+            || (node.department || '').toLowerCase().includes(q);
+        if (!match) return false;
+    }
+    return true;
+}
+
+function toggleNode(roleKey) {
+    if (collapsedNodes.has(roleKey)) {
+        collapsedNodes.delete(roleKey);
+    } else {
+        collapsedNodes.add(roleKey);
+    }
+    renderTreeView();
+}
+
+function truncate(str, max) {
+    if (!str) return '';
+    return str.length > max ? str.substring(0, max - 1) + '\u2026' : str;
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function showToast(msg, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// ── Profile Switcher ──
+(function initProfileSwitcher() {
+    const saved = localStorage.getItem('rdgr-active-profile');
+    if (saved) {
+        try {
+            const p = JSON.parse(saved);
+            const nameEl = document.getElementById('profileName');
+            const avatarEl = document.getElementById('profileAvatar');
+            if (nameEl) nameEl.textContent = p.name;
+            if (avatarEl) avatarEl.textContent = (p.name || 'B')[0].toUpperCase();
+        } catch(e) {}
+    }
+    const SB_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    fetch(`${SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    }).then(r => r.json()).then(profiles => {
+        const dd = document.getElementById('profileDropdown');
+        if (!dd || !profiles || profiles.length === 0) return;
+        const activeId = saved ? JSON.parse(saved).id : null;
+        dd.innerHTML = profiles.map(p => {
+            const name = p.display_name || p.email || '?';
+            const initial = name[0].toUpperCase();
+            const isActive = p.user_id === activeId;
+            return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, "\\'")}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div>
+                <span>${name}</span>
+                ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+            </button>`;
+        }).join('');
+        dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+    }).catch(() => {});
+})();
+
+function toggleProfileDD() {
+    const dd = document.getElementById('profileDropdown');
+    dd.classList.toggle('hidden');
+    if (!dd.classList.contains('hidden')) {
+        setTimeout(() => document.addEventListener('click', function closePDD(e) {
+            if (!document.getElementById('profileSwitcher').contains(e.target)) {
+                dd.classList.add('hidden');
+            }
+            document.removeEventListener('click', closePDD);
+        }), 0);
+    }
+}
+
+function selectProfileGlobal(userId, name) {
+    localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+    location.reload();
+}
+
+function signOut() {
+    localStorage.removeItem('rdgr-session');
+    localStorage.removeItem('rdgr-active-profile');
+    location.reload();
+}
+
+</script>
+</body>
+</html>

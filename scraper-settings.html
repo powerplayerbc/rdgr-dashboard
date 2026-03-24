@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Scraper & Discovery Settings | Carlton AI</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        base: '#08090D', surface: '#11131A', 'surface-el': '#1A1D28', 'surface-hi': '#242836',
+                        border: '#2A2E3D', accent: '#06D6A0', 'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B', 'alert-dim': 'rgba(255,107,107,0.15)', warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)', info: '#4CC9F0', 'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1', 'txt-2': '#8A95A9', 'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'IBM Plex Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; background: #08090D; color: #E8ECF1; }
+        body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:9998; opacity:0.04; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-repeat:repeat; background-size:256px 256px; }
+        ::-webkit-scrollbar { width:6px; height:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#2A2E3D; border-radius:3px; } ::-webkit-scrollbar-thumb:hover { background:#3A3E4D; }
+
+        /* ── Gate ── */
+        .gate-overlay { position:fixed; inset:0; z-index:9999; background:radial-gradient(ellipse at center,#0D0F16 0%,#08090D 70%); display:flex; align-items:center; justify-content:center; }
+        .gate-overlay.hidden { display:none; }
+        .gate-input { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:0.5rem; padding:0.875rem 1rem; color:#E8ECF1; font-family:'JetBrains Mono',monospace; font-size:0.9rem; outline:none; transition:border-color 0.25s,box-shadow 0.25s; width:100%; }
+        .gate-input:focus { border-color:rgba(6,214,160,0.4); box-shadow:0 0 0 3px rgba(6,214,160,0.08); }
+        .gate-input::placeholder { color:#525E73; }
+        .gate-error { color:#FF6B6B; font-size:0.8rem; margin-top:0.5rem; opacity:0; transition:opacity 0.2s; }
+        .gate-error.show { opacity:1; }
+
+        /* ── Pulse ── */
+        @keyframes pulse-live { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(6,214,160,0.5);} 50%{opacity:0.7;box-shadow:0 0 0 6px rgba(6,214,160,0);} }
+        .pulse-dot { width:8px; height:8px; border-radius:50%; background:#06D6A0; animation:pulse-live 2s ease-in-out infinite; }
+
+        /* ── Nav Tabs ── */
+        .task-tab { flex:1; padding:0.4rem 0.75rem; font-size:0.75rem; font-weight:500; text-align:center; border-radius:0.375rem; cursor:pointer; color:rgba(255,255,255,0.45); background:transparent; border:none; transition:color 0.2s,background 0.2s; }
+        .task-tab:hover { color:#E8ECF1; }
+        .task-tab.active { background:rgba(6,214,160,0.12); color:#06D6A0; }
+
+        /* ── Buttons ── */
+        .btn { font-family:'Chakra Petch',system-ui; font-weight:600; font-size:0.8rem; letter-spacing:0.03em; padding:0.5rem 1rem; border-radius:0.375rem; cursor:pointer; transition:background 0.2s,border-color 0.2s,box-shadow 0.2s,color 0.2s; border:none; text-transform:uppercase; }
+        .btn-primary { background:rgba(6,214,160,0.15); color:#06D6A0; border:1px solid rgba(6,214,160,0.3); }
+        .btn-primary:hover { background:rgba(6,214,160,0.25); }
+        .btn-ghost { background:transparent; color:#8A95A9; border:1px solid #2A2E3D; }
+        .btn-ghost:hover { background:rgba(255,255,255,0.03); color:#E8ECF1; }
+        .btn:disabled { opacity:0.4; cursor:not-allowed; pointer-events:none; }
+        .btn-danger { background:rgba(255,107,107,0.15); color:#FF6B6B; border:1px solid rgba(255,107,107,0.25); }
+        .btn-danger:hover { background:rgba(255,107,107,0.25); }
+        .btn-info { background:rgba(76,201,240,0.15); color:#4CC9F0; border:1px solid rgba(76,201,240,0.25); }
+        .btn-info:hover { background:rgba(76,201,240,0.25); }
+        .btn-warn { background:rgba(255,217,61,0.12); color:#FFD93D; border:1px solid rgba(255,217,61,0.2); }
+        .btn-warn:hover { background:rgba(255,217,61,0.2); }
+
+        /* ── Panel ── */
+        .panel { background:#11131A; border:1px solid #1E2130; border-radius:0.75rem; overflow:hidden; }
+        .panel-header { display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1rem; border-bottom:1px solid #1E2130; }
+        .panel-body { padding:1rem; }
+
+        /* ── Form ── */
+        .form-input { background:rgba(255,255,255,0.03); border:1px solid #2A2E3D; border-radius:0.375rem; padding:0.5rem 0.75rem; color:#E8ECF1; font-family:'IBM Plex Sans',system-ui; font-size:0.8rem; outline:none; transition:border-color 0.2s,box-shadow 0.2s; width:100%; }
+        .form-input:focus { border-color:rgba(6,214,160,0.4); box-shadow:0 0 0 2px rgba(6,214,160,0.08); }
+        .form-input::placeholder { color:#525E73; }
+        select.form-input { cursor:pointer; }
+        select.form-input option { background:#1A1D28; color:#E8ECF1; }
+
+        /* ── Platform tab ── */
+        .plat-tab { padding:0.5rem 1rem; font-family:'Chakra Petch',system-ui; font-size:0.8rem; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; border-radius:0.375rem; cursor:pointer; border:1px solid transparent; transition:color 0.2s,background 0.2s,border-color 0.2s; background:transparent; color:#525E73; }
+        .plat-tab:hover { color:#8A95A9; }
+        .plat-tab.active { border-color:var(--plat-color, rgba(6,214,160,0.3)); color:var(--plat-color, #06D6A0); background:var(--plat-dim, rgba(6,214,160,0.08)); }
+
+        /* ── Badges ── */
+        .badge { font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:500; letter-spacing:0.05em; text-transform:uppercase; padding:0.15rem 0.4rem; border-radius:0.2rem; line-height:1.2; white-space:nowrap; display:inline-flex; align-items:center; }
+        .badge-linkedin { background:rgba(10,102,194,0.15); color:#3B9BF5; }
+        .badge-twitter { background:rgba(29,161,242,0.15); color:#1DA1F2; }
+        .badge-facebook { background:rgba(24,119,242,0.15); color:#5B9CF5; }
+        .badge-instagram { background:linear-gradient(135deg,rgba(225,48,108,0.15),rgba(131,58,180,0.15)); color:#E1306C; }
+        .badge-reddit { background:rgba(255,69,0,0.15); color:#FF6347; }
+        .badge-completed { background:rgba(6,214,160,0.15); color:#06D6A0; }
+        .badge-running { background:rgba(76,201,240,0.15); color:#4CC9F0; }
+        .badge-failed { background:rgba(255,107,107,0.15); color:#FF6B6B; }
+
+        /* ── Toggle switch ── */
+        .toggle-sw { position:relative; width:36px; height:20px; background:rgba(255,255,255,0.08); border-radius:10px; cursor:pointer; border:none; transition:background 0.2s; flex-shrink:0; }
+        .toggle-sw.on { background:rgba(6,214,160,0.3); }
+        .toggle-sw::after { content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:#8A95A9; transition:transform 0.2s,background 0.2s; }
+        .toggle-sw.on::after { transform:translateX(16px); background:#06D6A0; }
+
+        /* ── Chip input ── */
+        .chip-container { display:flex; flex-wrap:wrap; gap:0.375rem; padding:0.5rem; background:rgba(255,255,255,0.02); border:1px solid #2A2E3D; border-radius:0.375rem; min-height:38px; cursor:text; }
+        .chip { display:inline-flex; align-items:center; gap:0.25rem; padding:0.2rem 0.5rem; background:rgba(6,214,160,0.1); color:#06D6A0; border:1px solid rgba(6,214,160,0.2); border-radius:9999px; font-size:0.7rem; font-family:'JetBrains Mono',monospace; }
+        .chip-remove { cursor:pointer; opacity:0.6; transition:opacity 0.15s; font-size:0.75rem; line-height:1; }
+        .chip-remove:hover { opacity:1; }
+        .chip-input { border:none; background:transparent; color:#E8ECF1; font-size:0.75rem; outline:none; min-width:80px; flex:1; font-family:'IBM Plex Sans',system-ui; }
+        .chip-input::placeholder { color:#525E73; }
+
+        /* ── Toast ── */
+        .toast-container { position:fixed; bottom:1.5rem; right:1.5rem; z-index:200; display:flex; flex-direction:column; gap:0.5rem; }
+        .toast { padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.8rem; font-family:'IBM Plex Sans',system-ui; animation:toast-in 0.3s ease forwards; max-width:380px; }
+        .toast-success { background:rgba(6,214,160,0.15); border:1px solid rgba(6,214,160,0.3); color:#06D6A0; }
+        .toast-error { background:rgba(255,107,107,0.15); border:1px solid rgba(255,107,107,0.3); color:#FF6B6B; }
+        .toast-info { background:rgba(76,201,240,0.15); border:1px solid rgba(76,201,240,0.3); color:#4CC9F0; }
+        @keyframes toast-in { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+
+        /* ── Table rows ── */
+        .data-row { display:grid; align-items:center; padding:0.5rem 0.75rem; border-bottom:1px solid rgba(255,255,255,0.04); font-size:0.78rem; transition:background 0.15s; }
+        .data-row:hover { background:rgba(255,255,255,0.02); }
+        .data-row:last-child { border-bottom:none; }
+
+        /* ── Budget bar ── */
+        .budget-bar-track { height:6px; background:#1E2130; border-radius:3px; overflow:hidden; }
+        .budget-bar-fill { height:100%; border-radius:3px; transition:width 0.5s ease; }
+
+        /* ── Collapsible ── */
+        .collapse-header { cursor:pointer; user-select:none; }
+        .collapse-header .collapse-icon { transition:transform 0.2s; }
+        .collapse-header.open .collapse-icon { transform:rotate(180deg); }
+        .collapse-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+        .collapse-body.open { max-height:2000px; }
+
+        /* ── Inline form ── */
+        .inline-form { background:#0D0F16; border:1px solid #1E2130; border-radius:0.5rem; padding:1rem; margin-top:0.75rem; }
+
+        /* ── Empty state ── */
+        .empty-state { text-align:center; padding:3rem 1rem; color:#525E73; font-size:0.85rem; }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .data-row { font-size:0.7rem; }
+            .plat-tab { font-size:0.7rem; padding:0.4rem 0.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PASSWORD GATE -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">Discovery Config</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">Scraper & Discovery Settings</h1>
+                <p class="text-txt-2 text-sm">Enter the access code to continue</p>
+            </div>
+            <form onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off" autofocus>
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4">Authenticate</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- Top Nav -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Dashboard</a>
+                        <a href="/chat" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Chat</a>
+                        <a href="/org-chart" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Org Map</a>
+                        <a href="/our-workflows" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Workflows</a>
+                        <a href="/social-dashboard" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Social</a>
+                        <a href="/crm" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">CRM</a>
+                        <a href="/offer-studio" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Offers</a>
+                        <a href="/deft" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">DEFT</a>
+                        <a href="/brain" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">BRAIN</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Profile Switcher -->
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown">
+                        </div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-txt transition-colors p-2" title="Settings">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Header + Platform Tabs -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pt-4 pb-2">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="font-heading font-bold text-lg tracking-wide">Scraper & Discovery Settings</h2>
+                    <p class="text-xs text-txt-3 mt-0.5">Configure search inputs, Reddit strategies, and trigger discovery runs</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="/social-voice-settings" class="text-xs text-txt-3 hover:text-info transition-colors" style="text-decoration:none;">Voice Settings &#8594;</a>
+                </div>
+            </div>
+            <div class="flex gap-2 overflow-x-auto pb-2" id="platformTabs">
+                <button class="plat-tab active" style="--plat-color:#3B9BF5;--plat-dim:rgba(10,102,194,0.08);" onclick="selectPlatform('linkedin')">LinkedIn</button>
+                <button class="plat-tab" style="--plat-color:#1DA1F2;--plat-dim:rgba(29,161,242,0.08);" onclick="selectPlatform('twitter')">Twitter</button>
+                <button class="plat-tab" style="--plat-color:#E1306C;--plat-dim:rgba(225,48,108,0.08);" onclick="selectPlatform('instagram')">Instagram</button>
+                <button class="plat-tab" style="--plat-color:#5B9CF5;--plat-dim:rgba(24,119,242,0.08);" onclick="selectPlatform('facebook')">Facebook</button>
+                <button class="plat-tab" style="--plat-color:#FF6347;--plat-dim:rgba(255,69,0,0.08);" onclick="selectPlatform('reddit')">Reddit</button>
+            </div>
+        </div>
+
+        <!-- APIFY Budget Widget -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
+            <div class="panel">
+                <div class="flex items-center gap-4 px-4 py-3">
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="#8A95A9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="text-xs font-mono text-txt-3 uppercase tracking-wider">APIFY Budget</span>
+                    </div>
+                    <div class="flex-1 flex items-center gap-3">
+                        <div class="budget-bar-track flex-1 max-w-xs">
+                            <div class="budget-bar-fill" id="budgetBarFill" style="width:0%;background:#06D6A0;"></div>
+                        </div>
+                        <span class="text-xs font-mono text-txt-2" id="budgetLabel">Loading...</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge" id="budgetWarning" style="display:none;"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-4">
+
+            <!-- LinkedIn Employee Targeting (standalone panel, visible only on LinkedIn tab) -->
+            <div id="linkedinTargetingPanel" style="display:none;" class="mb-4">
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="text-xs font-semibold text-txt-3 uppercase tracking-wider font-mono">LinkedIn Employee Targeting</span>
+                        <button class="btn btn-primary text-xs py-1 px-2" onclick="saveLinkedinTargeting()" id="liTargetingSaveBtn">Save Targeting</button>
+                    </div>
+                    <div class="panel-body">
+                        <div class="text-[0.6rem] text-txt-3 mb-3">Controls the 3-step pipeline: find jobs, scrape companies, extract matching employees. These settings apply to all LinkedIn search inputs.</div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1">Country</label>
+                                <select class="form-input" id="liCountry">
+                                    <option value="US" selected>United States</option>
+                                    <option value="GB">United Kingdom</option>
+                                    <option value="CA">Canada</option>
+                                    <option value="AU">Australia</option>
+                                    <option value="">All countries</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1">Max Companies</label>
+                                <input type="number" class="form-input" id="liMaxCompanies" value="20" min="1" max="50">
+                                <div class="text-[0.55rem] text-txt-3 mt-0.5">From job results</div>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1">Employees / Company</label>
+                                <input type="number" class="form-input" id="liMaxEmployees" value="5" min="1" max="10">
+                                <div class="text-[0.55rem] text-txt-3 mt-0.5">~$0.01 each</div>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1">Est. Cost / Run</label>
+                                <div class="text-sm font-mono text-accent mt-1" id="liCostEstimate">$1.00</div>
+                                <div class="text-[0.55rem] text-txt-3 mt-0.5">companies x employees x $0.01</div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-txt-2 mb-1.5">Target Job Titles <span class="text-txt-3">(employees matching these titles will be scraped)</span></label>
+                            <div class="chip-container" id="liTargetTitles" onclick="focusChipInput(this)"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- APIFY Platforms: Inputs Table -->
+            <div id="apifySection">
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="text-xs font-semibold text-txt-3 uppercase tracking-wider font-mono">Search Inputs &mdash; <span id="platformLabel">LinkedIn</span></span>
+                        <div class="flex items-center gap-2">
+                            <button class="btn btn-primary text-xs py-1.5 px-3" onclick="showAddForm()">
+                                <svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="inline mr-1" style="vertical-align:-1px;"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                Add Input
+                            </button>
+                            <button class="btn btn-info text-xs py-1.5 px-3" id="runDiscoveryBtn" onclick="triggerDiscovery()">
+                                <svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="inline mr-1" style="vertical-align:-1px;"><path d="M3 1.5l7 4.5-7 4.5V1.5z" fill="currentColor"/></svg>
+                                Run Discovery
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Add/Edit Inline Form -->
+                    <div id="inlineForm" class="inline-form mx-4 mt-3" style="display:none;">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-semibold text-accent uppercase tracking-wider font-mono" id="formTitle">New Input</span>
+                            <button class="text-txt-3 hover:text-txt text-sm" onclick="hideForm()">&times;</button>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <div class="col-span-2 sm:col-span-1">
+                                <label class="block text-xs text-txt-2 mb-1">Search Term</label>
+                                <input type="text" class="form-input" id="fSearchTerm" placeholder="e.g. HVAC contractor">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1">Type</label>
+                                <select class="form-input" id="fSearchType"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1">Industry Group</label>
+                                <input type="text" class="form-input" id="fIndustryGroup" placeholder="general">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1">Location</label>
+                                <input type="text" class="form-input" id="fLocation" placeholder="United States">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1">Weight</label>
+                                <input type="number" class="form-input" id="fWeight" value="1.0" min="0.5" max="3.0" step="0.1">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1">Max Results</label>
+                                <input type="number" class="form-input" id="fMaxResults" value="50" min="1" max="1000">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-end gap-2 mt-4">
+                            <button class="btn btn-ghost text-xs py-1.5" onclick="hideForm()">Cancel</button>
+                            <button class="btn btn-primary text-xs py-1.5" onclick="saveInput()" id="formSaveBtn">Save Input</button>
+                        </div>
+                        <input type="hidden" id="fEditId" value="">
+                    </div>
+
+                    <!-- Data Table -->
+                    <div class="panel-body p-0">
+                        <div class="data-row" style="grid-template-columns: 2fr 1fr 1fr 1fr 0.6fr 0.8fr 0.5fr 0.8fr; background:rgba(255,255,255,0.02); border-bottom:1px solid #1E2130;">
+                            <span class="text-[0.65rem] font-mono text-txt-3 uppercase tracking-wider px-2">Search Term</span>
+                            <span class="text-[0.65rem] font-mono text-txt-3 uppercase tracking-wider">Type</span>
+                            <span class="text-[0.65rem] font-mono text-txt-3 uppercase tracking-wider">Industry</span>
+                            <span class="text-[0.65rem] font-mono text-txt-3 uppercase tracking-wider">Location</span>
+                            <span class="text-[0.65rem] font-mono text-txt-3 uppercase tracking-wider text-center">Weight</span>
+                            <span class="text-[0.65rem] font-mono text-txt-3 uppercase tracking-wider text-center">Max Res.</span>
+                            <span class="text-[0.65rem] font-mono text-txt-3 uppercase tracking-wider text-center">Active</span>
+                            <span class="text-[0.65rem] font-mono text-txt-3 uppercase tracking-wider text-center">Actions</span>
+                        </div>
+                        <div id="inputsTableBody">
+                            <div class="empty-state" id="inputsEmpty">Loading inputs...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reddit Section -->
+            <div id="redditSection" style="display:none;">
+                <div class="space-y-4">
+
+                    <!-- Manual Trigger Buttons -->
+                    <div class="flex gap-2 mb-1">
+                        <button class="btn btn-info text-xs py-1.5 px-3" id="runWaveCatcherBtn" onclick="triggerReddit('wave_catcher')">
+                            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="inline mr-1" style="vertical-align:-1px;"><path d="M3 1.5l7 4.5-7 4.5V1.5z" fill="currentColor"/></svg>
+                            Run Wave Catcher
+                        </button>
+                        <button class="btn btn-warn text-xs py-1.5 px-3" id="runPainProspectorBtn" onclick="triggerReddit('pain_prospector')">
+                            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="inline mr-1" style="vertical-align:-1px;"><path d="M3 1.5l7 4.5-7 4.5V1.5z" fill="currentColor"/></svg>
+                            Run Pain Prospector
+                        </button>
+                    </div>
+
+                    <!-- Wave Catcher -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="text-xs font-semibold text-txt-3 uppercase tracking-wider font-mono">Wave Catcher Strategy</span>
+                            <span class="badge badge-reddit">reddit</span>
+                        </div>
+                        <div class="panel-body space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1.5">Group A &mdash; Subreddits</label>
+                                    <div class="chip-container" id="wcGroupA" onclick="focusChipInput(this)"></div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1.5">Group B &mdash; Subreddits</label>
+                                    <div class="chip-container" id="wcGroupB" onclick="focusChipInput(this)"></div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1.5">Group C &mdash; Subreddits</label>
+                                    <div class="chip-container" id="wcGroupC" onclick="focusChipInput(this)"></div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1.5">Group D &mdash; Subreddits</label>
+                                    <div class="chip-container" id="wcGroupD" onclick="focusChipInput(this)"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 max-w-sm">
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1">Posts per Subreddit</label>
+                                    <input type="number" class="form-input" id="wcPostsPerSub" value="25" min="1">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1">Top N to Qualify</label>
+                                    <input type="number" class="form-input" id="wcTopN" value="10" min="1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pain Prospector -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="text-xs font-semibold text-txt-3 uppercase tracking-wider font-mono">Pain Prospector Strategy</span>
+                            <span class="badge badge-reddit">reddit</span>
+                        </div>
+                        <div class="panel-body space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1.5">Search Phrases</label>
+                                    <div class="chip-container" id="ppSearchPhrases" onclick="focusChipInput(this)"></div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1.5">Industry Subreddits</label>
+                                    <div class="chip-container" id="ppIndustrySubreddits" onclick="focusChipInput(this)"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 max-w-sm">
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1">Max Results / Phrase</label>
+                                    <input type="number" class="form-input" id="ppMaxResults" value="20" min="1">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1">Top N to Qualify</label>
+                                    <input type="number" class="form-input" id="ppTopN" value="10" min="1">
+                                </div>
+                            </div>
+                            <div class="flex justify-end pt-2">
+                                <button class="btn btn-primary text-xs py-1.5 px-4" onclick="saveRedditConfig()">
+                                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="inline mr-1" style="vertical-align:-1px;"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    Save Reddit Config
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discovery Run History -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8">
+            <div class="panel">
+                <div class="panel-header collapse-header" onclick="toggleHistory()">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-txt-3 uppercase tracking-wider font-mono">Discovery Run History</span>
+                        <span class="badge" id="historyCount" style="background:rgba(255,255,255,0.05);color:#8A95A9;">--</span>
+                    </div>
+                    <svg class="collapse-icon text-txt-3" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="collapse-body" id="historyBody">
+                    <div class="p-0">
+                        <div class="data-row" style="grid-template-columns: 0.6fr 1.5fr 0.7fr 0.6fr 0.6fr 0.6fr 0.8fr 1fr; background:rgba(255,255,255,0.02); border-bottom:1px solid #1E2130;">
+                            <span class="text-[0.6rem] font-mono text-txt-3 uppercase tracking-wider px-2">Platform</span>
+                            <span class="text-[0.6rem] font-mono text-txt-3 uppercase tracking-wider">Query</span>
+                            <span class="text-[0.6rem] font-mono text-txt-3 uppercase tracking-wider">Type</span>
+                            <span class="text-[0.6rem] font-mono text-txt-3 uppercase tracking-wider text-center">Found</span>
+                            <span class="text-[0.6rem] font-mono text-txt-3 uppercase tracking-wider text-center">Dupes</span>
+                            <span class="text-[0.6rem] font-mono text-txt-3 uppercase tracking-wider text-center">New</span>
+                            <span class="text-[0.6rem] font-mono text-txt-3 uppercase tracking-wider text-center">Cost</span>
+                            <span class="text-[0.6rem] font-mono text-txt-3 uppercase tracking-wider text-right pr-2">Status / Time</span>
+                        </div>
+                        <div id="historyTableBody">
+                            <div class="empty-state">Loading history...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toasts"></div>
+
+<script>
+// Migrate old localStorage key
+if (!localStorage.getItem('rdgr-active-profile') && localStorage.getItem('rdgr-active-profile')) {
+    localStorage.setItem('rdgr-active-profile', localStorage.getItem('rdgr-active-profile'));
+    localStorage.removeItem('rdgr-active-profile');
+}
+
+/* ── Constants ── */
+const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+const BRAND_ID = 'carlton';
+const N8N_BASE = 'https://n8n.carltonaiservices.com/webhook';
+const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' };
+
+const SEARCH_TYPES = {
+    linkedin: ['job_search'],
+    twitter: ['keyword_search'],
+    instagram: ['profile_search'],
+    facebook: ['posts', 'pages', 'places', 'global'],
+};
+
+const PLATFORM_LABELS = {
+    linkedin: 'LinkedIn', twitter: 'Twitter', instagram: 'Instagram', facebook: 'Facebook', reddit: 'Reddit'
+};
+
+let selectedPlatform = 'linkedin';
+let inputsData = [];
+let redditConfig = null;
+let editingId = null;
+
+/* ── Auth Gate ── */
+function handleGate(e) {
+    e.preventDefault();
+    if (document.getElementById('gateInput').value === 'Advance1!') {
+        localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+        unlockPage();
+        return false;
+    }
+    document.getElementById('gateError').classList.add('show');
+    document.getElementById('gateInput').value = '';
+    document.getElementById('gateInput').focus();
+    setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+    return false;
+}
+
+function unlockPage() {
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('mainContent').style.opacity = '1';
+    loadBudget();
+    loadHistory();
+    selectPlatform(selectedPlatform);
+}
+
+// Single entry point: wait for DOM, then check auth
+document.addEventListener('DOMContentLoaded', function() {
+    if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+        unlockPage();
+    }
+});
+// Also handle bfcache
+window.addEventListener('pageshow', function(e) {
+    if (e.persisted && JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+        unlockPage();
+    }
+});
+
+/* ── Toast ── */
+function toast(msg, type = 'success') {
+    const el = document.createElement('div');
+    el.className = 'toast toast-' + type;
+    el.textContent = msg;
+    document.getElementById('toasts').appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3500);
+}
+
+/* ── Platform Selection ── */
+function selectPlatform(platform) {
+    selectedPlatform = platform;
+    document.querySelectorAll('.plat-tab').forEach((t, i) => {
+        const plats = ['linkedin','twitter','instagram','facebook','reddit'];
+        t.classList.toggle('active', plats[i] === platform);
+    });
+    document.getElementById('platformLabel').textContent = PLATFORM_LABELS[platform];
+
+    if (platform === 'reddit') {
+        document.getElementById('apifySection').style.display = 'none';
+        document.getElementById('redditSection').style.display = 'block';
+        document.getElementById('linkedinTargetingPanel').style.display = 'none';
+        loadRedditConfig();
+    } else {
+        document.getElementById('apifySection').style.display = 'block';
+        document.getElementById('redditSection').style.display = 'none';
+        document.getElementById('linkedinTargetingPanel').style.display = platform === 'linkedin' ? '' : 'none';
+        hideForm();
+        loadInputs();
+        if (platform === 'linkedin') loadLinkedinTargeting();
+    }
+}
+
+/* ── APIFY Budget ── */
+async function loadBudget() {
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/get_apify_monthly_spend', {
+            method: 'POST', headers, body: JSON.stringify({ p_brand_id: BRAND_ID })
+        });
+        const data = await res.json();
+        if (data && !data.error) {
+            const d = Array.isArray(data) ? data[0] : data;
+            const pct = d.pct_used || 0;
+            const fill = document.getElementById('budgetBarFill');
+            fill.style.width = Math.min(pct, 100) + '%';
+            fill.style.background = pct < 75 ? '#06D6A0' : pct < 90 ? '#FFD93D' : '#FF6B6B';
+            document.getElementById('budgetLabel').textContent = '$' + (d.total_spend || 0).toFixed(2) + ' / $' + (d.budget || 0).toFixed(2) + ' (' + pct.toFixed(1) + '%)';
+
+            const warn = document.getElementById('budgetWarning');
+            if (d.throttle_stop) {
+                warn.style.display = 'inline-flex';
+                warn.className = 'badge badge-failed';
+                warn.textContent = 'STOPPED';
+            } else if (d.throttle_warning) {
+                warn.style.display = 'inline-flex';
+                warn.className = 'badge';
+                warn.style.background = 'rgba(255,217,61,0.15)';
+                warn.style.color = '#FFD93D';
+                warn.textContent = 'WARNING';
+            } else {
+                warn.style.display = 'none';
+            }
+        }
+    } catch (err) {
+        document.getElementById('budgetLabel').textContent = 'Error loading budget';
+    }
+}
+
+/* ── Load Inputs ── */
+async function loadInputs() {
+    const body = document.getElementById('inputsTableBody');
+    body.innerHTML = '<div class="empty-state">Loading inputs...</div>';
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/social_discovery_inputs?brand_id=eq.' + BRAND_ID + '&platform=eq.' + selectedPlatform + '&order=weight.desc', { headers });
+        inputsData = await res.json();
+        renderInputs();
+    } catch (err) {
+        body.innerHTML = '<div class="empty-state" style="color:#FF6B6B;">Failed to load inputs</div>';
+    }
+}
+
+/* ── LinkedIn Targeting (standalone panel) ── */
+async function loadLinkedinTargeting() {
+    // Read targeting from the first LinkedIn input's extra_params
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/social_discovery_inputs?brand_id=eq.' + BRAND_ID + '&platform=eq.linkedin&order=weight.desc&limit=1', {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        const data = await res.json();
+        const ep = (data && data[0]?.extra_params) || {};
+        document.getElementById('liCountry').value = ep.splitCountry || 'US';
+        document.getElementById('liMaxCompanies').value = ep.max_companies_to_scrape || 20;
+        document.getElementById('liMaxEmployees').value = ep.max_employees_per_company || 5;
+        initChipContainer('liTargetTitles', ep.target_titles || ['CEO', 'CTO', 'VP', 'Director', 'Founder', 'Owner', 'President', 'Head of', 'Managing Director', 'Partner']);
+        updateLiCostEstimate();
+    } catch (e) {
+        initChipContainer('liTargetTitles', ['CEO', 'CTO', 'VP', 'Director', 'Founder', 'Owner']);
+    }
+    // Bind cost estimate update
+    document.getElementById('liMaxCompanies').addEventListener('input', updateLiCostEstimate);
+    document.getElementById('liMaxEmployees').addEventListener('input', updateLiCostEstimate);
+}
+
+function updateLiCostEstimate() {
+    const companies = parseInt(document.getElementById('liMaxCompanies').value) || 20;
+    const employees = parseInt(document.getElementById('liMaxEmployees').value) || 5;
+    const cost = (companies * employees * 0.01).toFixed(2);
+    document.getElementById('liCostEstimate').textContent = '$' + cost;
+}
+
+async function saveLinkedinTargeting() {
+    const btn = document.getElementById('liTargetingSaveBtn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    const ep = {
+        splitCountry: document.getElementById('liCountry').value || 'US',
+        max_companies_to_scrape: parseInt(document.getElementById('liMaxCompanies').value) || 20,
+        max_employees_per_company: parseInt(document.getElementById('liMaxEmployees').value) || 5,
+        target_titles: getChipValues('liTargetTitles'),
+    };
+    try {
+        // Update ALL LinkedIn inputs with these targeting params
+        await fetch(SUPABASE_URL + '/rest/v1/social_discovery_inputs?brand_id=eq.' + BRAND_ID + '&platform=eq.linkedin', {
+            method: 'PATCH',
+            headers: { ...headers, 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ extra_params: ep }),
+        });
+        toast('LinkedIn targeting saved (applied to all inputs)', 'success');
+    } catch (err) {
+        toast('Failed to save: ' + err.message, 'error');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Save Targeting';
+    }
+}
+
+function renderInputs() {
+    const body = document.getElementById('inputsTableBody');
+    if (!inputsData || inputsData.length === 0) {
+        body.innerHTML = '<div class="empty-state">No inputs configured for ' + PLATFORM_LABELS[selectedPlatform] + '. Click "Add Input" to create one.</div>';
+        return;
+    }
+    body.innerHTML = inputsData.map(row => {
+        const activeClass = row.is_active ? 'on' : '';
+        return `<div class="data-row" style="grid-template-columns: 2fr 1fr 1fr 1fr 0.6fr 0.8fr 0.5fr 0.8fr;">
+            <span class="text-sm text-txt px-2 truncate" title="${esc(row.search_term)}">${esc(row.search_term)}</span>
+            <span class="font-mono text-xs text-txt-2">${esc(row.search_type || '--')}</span>
+            <span class="text-xs text-txt-2">${esc(row.industry_group || '--')}</span>
+            <span class="text-xs text-txt-2">${esc(row.location || '--')}</span>
+            <span class="text-xs font-mono text-accent text-center">${row.weight || 1.0}</span>
+            <span class="text-xs font-mono text-txt-2 text-center">${row.max_results || 50}</span>
+            <div class="flex justify-center"><button class="toggle-sw ${activeClass}" onclick="toggleActive(${row.id}, ${!row.is_active})"></button></div>
+            <div class="flex justify-center gap-1">
+                <button class="btn btn-ghost text-[0.65rem] py-1 px-2" onclick="editInput(${row.id})" title="Edit">
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2M1 8.5V11h2.5L10 4.5l-2-2L1 8.5z" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button class="btn btn-danger text-[0.65rem] py-1 px-2" onclick="deleteInput(${row.id})" title="Delete">
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M4.5 3V2a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v1M9.5 3v7a1 1 0 01-1 1h-5a1 1 0 01-1-1V3" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+/* ── Toggle Active ── */
+async function toggleActive(id, newState) {
+    try {
+        await fetch(SUPABASE_URL + '/rest/v1/social_discovery_inputs?id=eq.' + id, {
+            method: 'PATCH', headers: { ...headers, 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ is_active: newState })
+        });
+        const row = inputsData.find(r => r.id === id);
+        if (row) row.is_active = newState;
+        renderInputs();
+        toast(newState ? 'Input activated' : 'Input deactivated');
+    } catch (err) {
+        toast('Failed to toggle input', 'error');
+    }
+}
+
+/* ── Delete Input ── */
+async function deleteInput(id) {
+    if (!confirm('Delete this search input?')) return;
+    try {
+        await fetch(SUPABASE_URL + '/rest/v1/social_discovery_inputs?id=eq.' + id, {
+            method: 'DELETE', headers
+        });
+        inputsData = inputsData.filter(r => r.id !== id);
+        renderInputs();
+        toast('Input deleted');
+    } catch (err) {
+        toast('Failed to delete input', 'error');
+    }
+}
+
+/* ── Show Add/Edit Form ── */
+function showAddForm() {
+    editingId = null;
+    document.getElementById('formTitle').textContent = 'New Input';
+    document.getElementById('formSaveBtn').textContent = 'Save Input';
+    document.getElementById('fEditId').value = '';
+    document.getElementById('fSearchTerm').value = '';
+    document.getElementById('fIndustryGroup').value = '';
+    document.getElementById('fLocation').value = '';
+    document.getElementById('fWeight').value = '1.0';
+    document.getElementById('fMaxResults').value = '50';
+    populateSearchTypes();
+    toggleLinkedinExtras();
+    document.getElementById('inlineForm').style.display = 'block';
+    document.getElementById('fSearchTerm').focus();
+}
+
+function editInput(id) {
+    const row = inputsData.find(r => r.id === id);
+    if (!row) return;
+    editingId = id;
+    document.getElementById('formTitle').textContent = 'Edit Input';
+    document.getElementById('formSaveBtn').textContent = 'Update Input';
+    document.getElementById('fEditId').value = id;
+    document.getElementById('fSearchTerm').value = row.search_term || '';
+    document.getElementById('fIndustryGroup').value = row.industry_group || '';
+    document.getElementById('fLocation').value = row.location || '';
+    document.getElementById('fWeight').value = row.weight || 1.0;
+    document.getElementById('fMaxResults').value = row.max_results || 50;
+    populateSearchTypes();
+    document.getElementById('fSearchType').value = row.search_type || '';
+    // LinkedIn targeting is now in the standalone panel, no inline fields needed
+    document.getElementById('inlineForm').style.display = 'block';
+    document.getElementById('fSearchTerm').focus();
+}
+
+function hideForm() {
+    document.getElementById('inlineForm').style.display = 'none';
+    editingId = null;
+}
+
+function populateSearchTypes() {
+    const sel = document.getElementById('fSearchType');
+    const types = SEARCH_TYPES[selectedPlatform] || [];
+    sel.innerHTML = types.map(t => `<option value="${t}">${t}</option>`).join('');
+}
+
+function toggleLinkedinExtras() {
+    // No-op: LinkedIn targeting is now in the standalone panel
+}
+
+/* ── Save Input (Insert or Update) ── */
+async function saveInput() {
+    const term = document.getElementById('fSearchTerm').value.trim();
+    if (!term) { toast('Search term is required', 'error'); return; }
+
+    const payload = {
+        brand_id: BRAND_ID,
+        platform: selectedPlatform,
+        search_term: term,
+        search_type: document.getElementById('fSearchType').value,
+        industry_group: document.getElementById('fIndustryGroup').value.trim() || null,
+        location: document.getElementById('fLocation').value.trim() || null,
+        weight: parseFloat(document.getElementById('fWeight').value) || 1.0,
+        max_results: parseInt(document.getElementById('fMaxResults').value) || 50,
+        is_active: true,
+    };
+
+    if (selectedPlatform === 'linkedin') {
+        // Read targeting from the standalone panel
+        payload.extra_params = {
+            splitCountry: document.getElementById('liCountry').value || 'US',
+            max_companies_to_scrape: parseInt(document.getElementById('liMaxCompanies').value) || 20,
+            max_employees_per_company: parseInt(document.getElementById('liMaxEmployees').value) || 5,
+            target_titles: getChipValues('liTargetTitles'),
+        };
+    }
+
+    try {
+        if (editingId) {
+            await fetch(SUPABASE_URL + '/rest/v1/social_discovery_inputs?id=eq.' + editingId, {
+                method: 'PATCH', headers: { ...headers, 'Prefer': 'return=minimal' },
+                body: JSON.stringify(payload)
+            });
+            toast('Input updated');
+        } else {
+            await fetch(SUPABASE_URL + '/rest/v1/social_discovery_inputs', {
+                method: 'POST', headers: { ...headers, 'Prefer': 'return=minimal' },
+                body: JSON.stringify(payload)
+            });
+            toast('Input created');
+        }
+        hideForm();
+        loadInputs();
+    } catch (err) {
+        toast('Failed to save input', 'error');
+    }
+}
+
+/* ── Reddit Config ── */
+async function loadRedditConfig() {
+    // Show loading state in the Reddit section
+    const containers = ['wcGroupA','wcGroupB','wcGroupC','wcGroupD','ppSearchPhrases','ppIndustrySubreddits'];
+    containers.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '<span class="text-xs text-txt-3">Loading...</span>';
+    });
+
+    try {
+        const url = SUPABASE_URL + '/rest/v1/social_platform_config?brand_id=eq.' + BRAND_ID + '&platform=eq.reddit&select=search_strategies';
+        const res = await fetch(url, {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch (e) { throw new Error('Invalid JSON: ' + text.substring(0, 100)); }
+        if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + text.substring(0, 200));
+
+        if (Array.isArray(data) && data.length > 0 && data[0].search_strategies) {
+            redditConfig = data[0].search_strategies;
+        } else {
+            redditConfig = [];
+        }
+        renderRedditConfig();
+    } catch (err) {
+        toast('Reddit config error: ' + err.message, 'error');
+        // Still init empty chip containers so user can add items
+        containers.forEach(id => initChipContainer(id, []));
+    }
+}
+
+function renderRedditConfig() {
+    const wc = redditConfig.find(s => s.type === 'wave_catcher');
+    const pp = redditConfig.find(s => s.type === 'pain_prospector');
+
+    // Wave Catcher
+    if (wc) {
+        const labels = ['wcGroupA', 'wcGroupB', 'wcGroupC', 'wcGroupD'];
+        const groups = wc.subreddit_groups || [];
+        // Handle both array-of-objects [{group:"A",subreddits:[...]}] and flat-object {group_a:[...]} formats
+        if (Array.isArray(groups)) {
+            groups.forEach((g, i) => {
+                if (labels[i]) initChipContainer(labels[i], g.subreddits || g || []);
+            });
+            // Init remaining empty groups if fewer than 4
+            for (let i = groups.length; i < 4; i++) initChipContainer(labels[i], []);
+        } else {
+            const keys = Object.keys(groups);
+            keys.forEach((key, i) => { if (labels[i]) initChipContainer(labels[i], groups[key] || []); });
+            for (let i = keys.length; i < 4; i++) initChipContainer(labels[i], []);
+        }
+        document.getElementById('wcPostsPerSub').value = wc.posts_per_subreddit || 25;
+        document.getElementById('wcTopN').value = wc.top_n_to_qualify || 10;
+    } else {
+        ['wcGroupA','wcGroupB','wcGroupC','wcGroupD'].forEach(id => initChipContainer(id, []));
+    }
+
+    // Pain Prospector
+    if (pp) {
+        initChipContainer('ppSearchPhrases', pp.search_phrases || []);
+        initChipContainer('ppIndustrySubreddits', pp.industry_subreddits || []);
+        document.getElementById('ppMaxResults').value = pp.max_results_per_phrase || 20;
+        document.getElementById('ppTopN').value = pp.top_n_to_qualify || 10;
+    } else {
+        initChipContainer('ppSearchPhrases', []);
+        initChipContainer('ppIndustrySubreddits', []);
+    }
+}
+
+/* ── Chip Input System ── */
+function initChipContainer(containerId, values) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    values.forEach(v => addChip(container, v));
+
+    // Wrapper for input + add button
+    const wrapper = document.createElement('span');
+    wrapper.style.cssText = 'display:inline-flex;align-items:center;gap:4px;flex:1;min-width:100px;';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'chip-input';
+    input.placeholder = 'Type + Enter or click +';
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            const val = this.value.trim().replace(/,$/,'');
+            if (val) { addChip(container, val); this.value = ''; }
+        }
+        if (e.key === 'Backspace' && !this.value) {
+            const chips = container.querySelectorAll('.chip');
+            if (chips.length) chips[chips.length - 1].remove();
+        }
+    });
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.textContent = '+';
+    addBtn.style.cssText = 'width:22px;height:22px;border-radius:4px;background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.3);cursor:pointer;font-size:0.85rem;font-weight:bold;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s;';
+    addBtn.title = 'Add item';
+    addBtn.addEventListener('mouseenter', function() { this.style.background = 'rgba(6,214,160,0.3)'; });
+    addBtn.addEventListener('mouseleave', function() { this.style.background = 'rgba(6,214,160,0.15)'; });
+    addBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const val = input.value.trim();
+        if (val) { addChip(container, val); input.value = ''; }
+        input.focus();
+    });
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(addBtn);
+    container.appendChild(wrapper);
+}
+
+function addChip(container, value) {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = esc(value) + '<span class="chip-remove" onclick="this.parentElement.remove()">&times;</span>';
+    chip.dataset.value = value;
+    // Insert before the input wrapper (last child)
+    const wrapper = container.lastElementChild;
+    if (wrapper) container.insertBefore(chip, wrapper);
+    else container.appendChild(chip);
+}
+
+function getChipValues(containerId) {
+    return Array.from(document.getElementById(containerId).querySelectorAll('.chip')).map(c => c.dataset.value);
+}
+
+function focusChipInput(container) {
+    const input = container.querySelector('.chip-input');
+    if (input) input.focus();
+}
+
+/* ── Save Reddit Config ── */
+async function saveRedditConfig() {
+    const wc = redditConfig.find(s => s.type === 'wave_catcher') || { type: 'wave_catcher' };
+    const pp = redditConfig.find(s => s.type === 'pain_prospector') || { type: 'pain_prospector' };
+
+    // Gather wave catcher groups as array-of-objects (matching DB format)
+    const subreddit_groups = [
+        { group: 'A', subreddits: getChipValues('wcGroupA') },
+        { group: 'B', subreddits: getChipValues('wcGroupB') },
+        { group: 'C', subreddits: getChipValues('wcGroupC') },
+        { group: 'D', subreddits: getChipValues('wcGroupD') },
+    ];
+
+    const newWc = {
+        type: 'wave_catcher',
+        subreddit_groups,
+        posts_per_subreddit: parseInt(document.getElementById('wcPostsPerSub').value) || 25,
+        top_n_to_qualify: parseInt(document.getElementById('wcTopN').value) || 10,
+    };
+
+    const newPp = {
+        type: 'pain_prospector',
+        search_phrases: getChipValues('ppSearchPhrases'),
+        industry_subreddits: getChipValues('ppIndustrySubreddits'),
+        max_results_per_phrase: parseInt(document.getElementById('ppMaxResults').value) || 20,
+        top_n_to_qualify: parseInt(document.getElementById('ppTopN').value) || 10,
+    };
+
+    try {
+        await fetch(SUPABASE_URL + '/rest/v1/social_platform_config?brand_id=eq.' + BRAND_ID + '&platform=eq.reddit', {
+            method: 'PATCH',
+            headers: { ...headers, 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ search_strategies: [newWc, newPp] })
+        });
+        redditConfig = [newWc, newPp];
+        toast('Reddit config saved');
+    } catch (err) {
+        toast('Failed to save Reddit config', 'error');
+    }
+}
+
+/* ── Discovery Run History ── */
+let historyOpen = false;
+function toggleHistory() {
+    historyOpen = !historyOpen;
+    const header = document.querySelector('.collapse-header');
+    const body = document.getElementById('historyBody');
+    header.classList.toggle('open', historyOpen);
+    body.classList.toggle('open', historyOpen);
+}
+
+async function loadHistory() {
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/social_discovery_runs?brand_id=eq.' + BRAND_ID + '&order=created_at.desc&limit=20&select=id,platform,search_type,search_query,discovery_type,profiles_found,profiles_duplicate,targets_created,cost_usd,status,created_at', { headers });
+        const data = await res.json();
+        const count = document.getElementById('historyCount');
+        count.textContent = (data.length || 0) + ' runs';
+        const body = document.getElementById('historyTableBody');
+        if (!data || data.length === 0) {
+            body.innerHTML = '<div class="empty-state">No discovery runs found</div>';
+            return;
+        }
+        body.innerHTML = data.map(row => {
+            const platBadge = 'badge-' + (row.platform || 'linkedin');
+            const statusBadge = row.status === 'completed' ? 'badge-completed' : row.status === 'running' ? 'badge-running' : 'badge-failed';
+            const ts = row.created_at ? new Date(row.created_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '--';
+            return `<div class="data-row" style="grid-template-columns: 0.6fr 1.5fr 0.7fr 0.6fr 0.6fr 0.6fr 0.8fr 1fr;">
+                <span class="px-2"><span class="badge ${platBadge}">${esc(row.platform || '--')}</span></span>
+                <span class="text-xs text-txt truncate" title="${esc(row.search_query || '')}">${esc(row.search_query || row.discovery_type || '--')}</span>
+                <span class="text-xs text-txt-2 font-mono">${esc(row.search_type || row.discovery_type || '--')}</span>
+                <span class="text-xs font-mono text-center ${row.profiles_found ? 'text-accent' : 'text-txt-3'}">${row.profiles_found ?? '--'}</span>
+                <span class="text-xs font-mono text-center text-txt-3">${row.profiles_duplicate ?? '--'}</span>
+                <span class="text-xs font-mono text-center ${row.targets_created ? 'text-accent' : 'text-txt-3'}">${row.targets_created ?? '--'}</span>
+                <span class="text-xs font-mono text-center text-txt-2">${row.cost_usd != null ? '$' + parseFloat(row.cost_usd).toFixed(3) : '--'}</span>
+                <div class="flex items-center justify-end gap-2 pr-2">
+                    <span class="badge ${statusBadge}">${esc(row.status || '--')}</span>
+                    <span class="text-[0.6rem] text-txt-3">${ts}</span>
+                </div>
+            </div>`;
+        }).join('');
+    } catch (err) {
+        document.getElementById('historyTableBody').innerHTML = '<div class="empty-state" style="color:#FF6B6B;">Failed to load history</div>';
+    }
+}
+
+/* ── Manual Triggers ── */
+async function triggerDiscovery() {
+    const btn = document.getElementById('runDiscoveryBtn');
+    btn.disabled = true;
+    btn.textContent = 'Triggering...';
+    try {
+        await fetch(N8N_BASE + '/social-orchestrator', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ brand_id: BRAND_ID, platform: selectedPlatform })
+        });
+        toast('Discovery run triggered for ' + PLATFORM_LABELS[selectedPlatform], 'info');
+    } catch (err) {
+        toast('Failed to trigger discovery run', 'error');
+    }
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="inline mr-1" style="vertical-align:-1px;"><path d="M3 1.5l7 4.5-7 4.5V1.5z" fill="currentColor"/></svg>Run Discovery';
+    }, 5000);
+}
+
+async function triggerReddit(mode) {
+    const btnId = mode === 'wave_catcher' ? 'runWaveCatcherBtn' : 'runPainProspectorBtn';
+    const btn = document.getElementById(btnId);
+    btn.disabled = true;
+    const origText = btn.innerHTML;
+    btn.textContent = 'Triggering...';
+    try {
+        await fetch(N8N_BASE + '/social-reddit-orch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ brand_id: BRAND_ID, mode })
+        });
+        toast('Reddit ' + mode.replace('_', ' ') + ' triggered', 'info');
+    } catch (err) {
+        toast('Failed to trigger Reddit ' + mode.replace('_', ' '), 'error');
+    }
+    setTimeout(() => { btn.disabled = false; btn.innerHTML = origText; }, 5000);
+}
+
+// ── Profile Switcher ──
+(function initProfileSwitcher() {
+    const saved = localStorage.getItem('rdgr-active-profile');
+    if (saved) {
+        try {
+            const p = JSON.parse(saved);
+            const nameEl = document.getElementById('profileName');
+            const avatarEl = document.getElementById('profileAvatar');
+            if (nameEl) nameEl.textContent = p.name;
+            if (avatarEl) avatarEl.textContent = (p.name || 'B')[0].toUpperCase();
+        } catch(e) {}
+    }
+    const SB_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    fetch(`${SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    }).then(r => r.json()).then(profiles => {
+        const dd = document.getElementById('profileDropdown');
+        if (!dd || !profiles || profiles.length === 0) return;
+        const activeId = saved ? JSON.parse(saved).id : null;
+        dd.innerHTML = profiles.map(p => {
+            const name = p.display_name || p.email || '?';
+            const initial = name[0].toUpperCase();
+            const isActive = p.user_id === activeId;
+            return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, "\\'")}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div>
+                <span>${name}</span>
+                ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+            </button>`;
+        }).join('');
+        dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+    }).catch(() => {});
+})();
+
+function toggleProfileDD() {
+    const dd = document.getElementById('profileDropdown');
+    dd.classList.toggle('hidden');
+    if (!dd.classList.contains('hidden')) {
+        setTimeout(() => document.addEventListener('click', function closePDD(e) {
+            if (!document.getElementById('profileSwitcher').contains(e.target)) {
+                dd.classList.add('hidden');
+            }
+            document.removeEventListener('click', closePDD);
+        }), 0);
+    }
+}
+
+function selectProfileGlobal(userId, name) {
+    localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+    location.reload();
+}
+
+function signOut() {
+    localStorage.removeItem('rdgr-session');
+    localStorage.removeItem('rdgr-active-profile');
+    location.reload();
+}
+</script>
+</body>
+</html>

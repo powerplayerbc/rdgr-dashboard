@@ -1,0 +1,2194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Voice Settings | Carlton AI</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        base: '#08090D',
+                        surface: '#11131A',
+                        'surface-el': '#1A1D28',
+                        'surface-hi': '#242836',
+                        border: '#2A2E3D',
+                        accent: '#06D6A0',
+                        'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B',
+                        'alert-dim': 'rgba(255,107,107,0.15)',
+                        warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)',
+                        info: '#4CC9F0',
+                        'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1',
+                        'txt-2': '#8A95A9',
+                        'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #08090D;
+            color: #E8ECF1;
+        }
+
+        /* ── Grain ── */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3A3E4D; }
+
+        /* ── Gate ── */
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: #E8ECF1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            width: 100%;
+        }
+        .gate-input:focus {
+            border-color: rgba(6,214,160,0.4);
+            box-shadow: 0 0 0 3px rgba(6,214,160,0.08);
+        }
+        .gate-input::placeholder { color: #525E73; }
+        .gate-error { color: #FF6B6B; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        /* ── Pulse ── */
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #06D6A0;
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+
+        /* ── Nav Tabs ── */
+        .task-tab {
+            flex: 1; padding: 0.4rem 0.75rem; font-size: 0.75rem; font-weight: 500;
+            text-align: center; border-radius: 0.375rem; cursor: pointer;
+            color: rgba(255,255,255,0.45); background: transparent; border: none;
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+        .task-tab:hover { color: #E8ECF1; }
+        .task-tab.active { background: rgba(6,214,160,0.12); color: #06D6A0; }
+
+        /* ── Cards ── */
+        .panel {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid #1E2130;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel-body { padding: 1rem 1.25rem; }
+
+        /* ── Badges ── */
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem; font-weight: 500;
+            letter-spacing: 0.05em; text-transform: uppercase;
+            padding: 0.2rem 0.5rem; border-radius: 0.25rem;
+            line-height: 1; white-space: nowrap;
+        }
+        .badge-accent { background: rgba(6,214,160,0.15); color: #06D6A0; }
+        .badge-info { background: rgba(76,201,240,0.15); color: #4CC9F0; }
+        .badge-warn { background: rgba(255,217,61,0.15); color: #FFD93D; }
+        .badge-alert { background: rgba(255,107,107,0.15); color: #FF6B6B; }
+        .badge-purple { background: rgba(168,85,247,0.15); color: #A855F7; }
+
+        /* ── Buttons ── */
+        .btn {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 600; font-size: 0.8rem;
+            letter-spacing: 0.03em; padding: 0.5rem 1rem;
+            border-radius: 0.375rem; cursor: pointer;
+            transition: all 0.2s ease; border: none;
+            text-transform: uppercase;
+        }
+        .btn-primary { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.3); }
+        .btn-primary:hover { background: rgba(6,214,160,0.25); }
+        .btn-approve { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.25); }
+        .btn-approve:hover { background: rgba(6,214,160,0.25); box-shadow: 0 0 12px rgba(6,214,160,0.15); }
+        .btn-ghost { background: transparent; color: #8A95A9; border: 1px solid #2A2E3D; }
+        .btn-ghost:hover { background: rgba(255,255,255,0.03); color: #E8ECF1; }
+        .btn-deny { background: rgba(255,107,107,0.15); color: #FF6B6B; border: 1px solid rgba(255,107,107,0.25); }
+        .btn-deny:hover { background: rgba(255,107,107,0.25); box-shadow: 0 0 12px rgba(255,107,107,0.15); }
+        .btn-info { background: rgba(76,201,240,0.15); color: #4CC9F0; border: 1px solid rgba(76,201,240,0.25); }
+        .btn-info:hover { background: rgba(76,201,240,0.25); box-shadow: 0 0 12px rgba(76,201,240,0.15); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* ── Form inputs ── */
+        .form-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2A2E3D;
+            border-radius: 0.375rem;
+            padding: 0.625rem 0.75rem;
+            color: #E8ECF1;
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.875rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            border-color: rgba(6,214,160,0.4);
+            box-shadow: 0 0 0 2px rgba(6,214,160,0.08);
+        }
+        .form-input::placeholder { color: #525E73; }
+        select.form-input { cursor: pointer; }
+        select.form-input option { background: #1A1D28; color: #E8ECF1; }
+        textarea.form-input { resize: vertical; min-height: 80px; }
+
+        /* ── Toggle switch ── */
+        .toggle-switch { position: relative; display: inline-block; width: 32px; height: 18px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #2A2E3D; border-radius: 9px; transition: background 0.2s; }
+        .toggle-slider:before { content: ''; position: absolute; width: 14px; height: 14px; left: 2px; bottom: 2px; background: #525E73; border-radius: 50%; transition: transform 0.2s, background 0.2s; }
+        .toggle-switch input:checked + .toggle-slider { background: rgba(6,214,160,0.25); }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(14px); background: #06D6A0; }
+
+        /* ── Modal ── */
+        .modal-backdrop {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.25s, visibility 0.25s;
+        }
+        .modal-backdrop.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: #11131A; border: 1px solid #2A2E3D; border-radius: 0.75rem;
+            width: 90%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+            transform: translateY(20px); transition: transform 0.25s ease;
+        }
+        .modal-backdrop.active .modal-content { transform: translateY(0); }
+
+        /* ── Toast ── */
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            padding: 0.75rem 1rem; border-radius: 0.5rem;
+            font-size: 0.8rem; font-family: 'IBM Plex Sans', system-ui;
+            animation: toast-in 0.3s ease forwards; max-width: 380px;
+        }
+        .toast-success { background: rgba(6,214,160,0.15); border: 1px solid rgba(6,214,160,0.3); color: #06D6A0; }
+        .toast-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #FF6B6B; }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Radio pills ── */
+        .pill-group { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+        .radio-pill {
+            padding: 0.35rem 0.75rem; border-radius: 0.375rem;
+            border: 1px solid #2A2E3D; background: transparent;
+            color: #8A95A9; cursor: pointer;
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.75rem; font-weight: 500;
+            transition: all 0.2s ease; user-select: none;
+        }
+        .radio-pill:hover { color: #E8ECF1; border-color: #3A3E4D; }
+        .radio-pill.selected {
+            border-color: rgba(6,214,160,0.4);
+            background: rgba(6,214,160,0.08);
+            color: #06D6A0;
+        }
+
+        /* ── Tone sliders ── */
+        .tone-slider {
+            -webkit-appearance: none; appearance: none;
+            width: 100%; height: 6px; border-radius: 3px;
+            background: #2A2E3D; outline: none; cursor: pointer;
+        }
+        .tone-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: #06D6A0; cursor: pointer;
+            border: 2px solid #11131A;
+            box-shadow: 0 0 8px rgba(6,214,160,0.3);
+        }
+        .tone-slider::-moz-range-thumb {
+            width: 18px; height: 18px; border-radius: 50%;
+            background: #06D6A0; cursor: pointer;
+            border: 2px solid #11131A;
+            box-shadow: 0 0 8px rgba(6,214,160,0.3);
+        }
+        .tone-slider::-moz-range-track { height: 6px; border-radius: 3px; background: transparent; }
+
+        /* ── Chips ── */
+        .settings-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 0.3rem 0.6rem; border-radius: 0.25rem;
+            font-size: 0.75rem; font-family: 'IBM Plex Sans', system-ui;
+            line-height: 1.3;
+        }
+        .settings-chip .chip-x {
+            cursor: pointer; opacity: 0.5; transition: opacity 0.2s;
+            display: flex; align-items: center;
+        }
+        .settings-chip .chip-x:hover { opacity: 1; }
+        .chip-keyword { background: rgba(6,214,160,0.1); color: #06D6A0; border: 1px solid rgba(6,214,160,0.2); }
+        .chip-value { background: rgba(76,201,240,0.1); color: #4CC9F0; border: 1px solid rgba(76,201,240,0.2); }
+        .chip-banned { background: rgba(255,107,107,0.1); color: #FF6B6B; border: 1px solid rgba(255,107,107,0.2); }
+
+        /* ── Proof card ── */
+        .proof-card {
+            background: #1A1D28; border: 1px solid #2A2E3D; border-radius: 0.5rem;
+            padding: 0.875rem 1rem; transition: border-color 0.2s;
+        }
+        .proof-card:hover { border-color: #3A3E4D; }
+        .proof-card .proof-actions { opacity: 0; transition: opacity 0.2s; }
+        .proof-card:hover .proof-actions { opacity: 1; }
+
+        /* ── Save bar ── */
+        .save-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+            background: rgba(17,19,26,0.95); backdrop-filter: blur(12px);
+            border-top: 1px solid #1E2130;
+            padding: 0.75rem 1.5rem;
+            display: flex; align-items: center; justify-content: flex-end; gap: 1rem;
+            transform: translateY(100%); transition: transform 0.3s ease;
+        }
+        .save-bar.has-changes { transform: translateY(0); }
+
+        /* ── AI expand card ── */
+        .ai-expand-card {
+            background: #1A1D28; border: 1px solid rgba(6,214,160,0.2);
+            border-radius: 0.5rem; padding: 1rem; margin-top: 0.75rem;
+            animation: slide-down 0.25s ease;
+        }
+        @keyframes slide-down { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Suggestion card ── */
+        .suggestion-card {
+            background: #1A1D28; border: 1px solid rgba(255,217,61,0.15);
+            border-radius: 0.5rem; padding: 1rem;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .suggestion-card.fade-out { opacity: 0; transform: translateY(-10px); }
+        .suggestion-card.instruction-card { background: rgba(76,201,240,0.06); border-color: rgba(76,201,240,0.2); }
+        .suggestion-card.instruction-card:hover { border-color: rgba(76,201,240,0.35); }
+        .badge-instruction { background: rgba(76,201,240,0.15); color: #4CC9F0; }
+
+        /* ── Misc ── */
+        .form-label {
+            font-size: 0.75rem; font-weight: 500; color: #8A95A9;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            margin-bottom: 0.375rem; display: block;
+        }
+        .form-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.625rem 0; border-bottom: 1px solid rgba(42,46,61,0.5);
+        }
+        .form-row:last-child { border-bottom: none; }
+        .section-divider { border-top: 1px solid #1E2130; margin: 1rem 0; }
+        .preview-box {
+            background: #0D0F16; border: 1px solid #1E2130; border-radius: 0.375rem;
+            padding: 0.875rem 1rem; font-size: 0.8rem; line-height: 1.6;
+        }
+        .spinner {
+            display: inline-block; width: 14px; height: 14px;
+            border: 2px solid rgba(6,214,160,0.3); border-top-color: #06D6A0;
+            border-radius: 50%; animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- ── Auth Gate ── -->
+    <div class="gate-overlay" id="gate">
+        <div style="width: 320px; text-align: center;">
+            <div style="font-family: 'Chakra Petch'; font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem; color: #8A95A9;">
+                <span style="color: #06D6A0;">RDGR</span> Voice Settings
+            </div>
+            <input type="password" class="gate-input" id="gateInput" placeholder="Enter access code" autocomplete="off">
+            <div class="gate-error" id="gateError">Invalid code</div>
+        </div>
+    </div>
+
+    <!-- ── Main Content ── -->
+    <div id="mainContent" style="display: none; opacity: 0; transition: opacity 0.4s;">
+
+        <!-- ── Top Nav ── -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Dashboard</a>
+                        <a href="/chat" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Chat</a>
+                        <a href="/org-chart" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Org Map</a>
+                        <a href="/our-workflows" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Workflows</a>
+                        <a href="/social-dashboard" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Social</a>
+                        <a href="/crm" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">CRM</a>
+                        <a href="/offer-studio" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Offers</a>
+                        <a href="/deft" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">DEFT</a>
+                        <a href="/brain" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">BRAIN</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Profile Switcher -->
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown">
+                        </div>
+                    </div>
+                    <a href="/settings" class="flex items-center justify-center p-2 rounded-md text-accent transition-colors" title="Voice & Style Settings" style="background: rgba(6,214,160,0.08);">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ── Page Header ── -->
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-4">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                    <h2 class="font-heading font-bold text-xl tracking-wide">Email Voice & Style</h2>
+                    <p class="text-txt-3 text-sm mt-1">Configure how outreach email copy is generated</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-accent" id="versionBadge">loading...</span>
+                    <span class="text-xs text-txt-3 font-mono" id="lastSaved"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Panels Container ── -->
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 pb-24 space-y-5" id="panelsContainer">
+
+            <!-- ══ Appearance ══ -->
+            <div class="panel mb-4" id="panel-appearance">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1a6 6 0 100 12A6 6 0 007 1z" stroke="#A78BFA" stroke-width="1.2"/><path d="M7 1v12M1.5 4.5h11M1.5 9.5h11" stroke="#A78BFA" stroke-width="1" stroke-linecap="round"/></svg>
+                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Appearance</h2>
+                        <span style="font-size:0.6rem;padding:0.15rem 0.4rem;border-radius:0.25rem;background:rgba(167,139,250,0.12);color:#A78BFA;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.05em;">Cross-App</span>
+                    </div>
+                </div>
+                <div class="panel-body space-y-5">
+                    <!-- DEFT Theme -->
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">DEFT Theme</label>
+                        <p class="text-[0.7rem] mb-3" style="color: #525E73;">Applied to DEFT nutrition tracker, BRAIN, and settings pages</p>
+                        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2" id="appearanceDeftThemes"></div>
+                    </div>
+                    <div style="border-top: 1px solid rgba(255,255,255,0.05); margin: 0 -1.25rem; padding: 0 1.25rem;"></div>
+                    <!-- Chat Accent -->
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Chat Accent Color</label>
+                        <p class="text-[0.7rem] mb-3" style="color: #525E73;">Accent color for the Command Center chat interface</p>
+                        <div class="flex flex-wrap gap-2" id="appearanceChatThemes"></div>
+                    </div>
+                    <div style="border-top: 1px solid rgba(255,255,255,0.05); margin: 0 -1.25rem; padding: 0 1.25rem;"></div>
+                    <!-- Chat Mode -->
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Chat Mode</label>
+                        <div class="flex gap-2" id="appearanceChatMode">
+                            <button class="btn btn-ghost text-xs py-1.5 px-4" id="chatModeDarkBtn" onclick="setAppearanceChatMode('dark')">Dark</button>
+                            <button class="btn btn-ghost text-xs py-1.5 px-4" id="chatModeLightBtn" onclick="setAppearanceChatMode('light')">Light</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ Panel 1: About You & Company ══ -->
+            <div class="panel" id="panel-about">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">About You & Company</span>
+                </div>
+                <div class="panel-body space-y-4">
+                    <div>
+                        <label class="form-label">About You</label>
+                        <textarea class="form-input" id="about_you" rows="5" placeholder="Describe what you do, who you help, and what makes your approach unique..."></textarea>
+                        <div class="flex items-center gap-2 mt-2">
+                            <button class="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5" onclick="expandWithAI('about_you', 'brand_guardian')">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6l2.5-3L6 6l2.5-3L11 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                Expand with AI
+                            </button>
+                            <span class="text-xs text-txt-3" id="about_you_ai_status"></span>
+                        </div>
+                        <div id="about_you_ai_result" class="hidden"></div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Signature Name</label>
+                            <input type="text" class="form-input" id="signature_name" placeholder="Bradford">
+                        </div>
+                        <div>
+                            <label class="form-label">Company Name</label>
+                            <input type="text" class="form-input" id="company_name" placeholder="Carlton AI">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ Panel 2: Voice & Tone ══ -->
+            <div class="panel" id="panel-tone">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">Voice & Tone</span>
+                </div>
+                <div class="panel-body space-y-5">
+                    <div class="slider-row" data-field="tone_warmth">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Warmth</span>
+                            <span class="badge badge-accent text-xs" id="val_tone_warmth">7</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-txt-2 w-12 text-right shrink-0">Direct</span>
+                            <input type="range" class="tone-slider flex-1" id="tone_warmth" min="1" max="10" value="7">
+                            <span class="text-xs text-txt-2 w-12 shrink-0">Warm</span>
+                        </div>
+                        <p class="text-xs text-txt-3 italic mt-1" id="desc_tone_warmth"></p>
+                    </div>
+                    <div class="slider-row" data-field="tone_formality">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Formality</span>
+                            <span class="badge badge-accent text-xs" id="val_tone_formality">3</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-txt-2 w-12 text-right shrink-0">Casual</span>
+                            <input type="range" class="tone-slider flex-1" id="tone_formality" min="1" max="10" value="3">
+                            <span class="text-xs text-txt-2 w-12 shrink-0">Formal</span>
+                        </div>
+                        <p class="text-xs text-txt-3 italic mt-1" id="desc_tone_formality"></p>
+                    </div>
+                    <div class="slider-row" data-field="tone_confidence">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Confidence</span>
+                            <span class="badge badge-accent text-xs" id="val_tone_confidence">8</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-txt-2 w-12 text-right shrink-0">Humble</span>
+                            <input type="range" class="tone-slider flex-1" id="tone_confidence" min="1" max="10" value="8">
+                            <span class="text-xs text-txt-2 w-12 shrink-0">Bold</span>
+                        </div>
+                        <p class="text-xs text-txt-3 italic mt-1" id="desc_tone_confidence"></p>
+                    </div>
+                    <div class="slider-row" data-field="tone_humor">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Humor</span>
+                            <span class="badge badge-accent text-xs" id="val_tone_humor">4</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-txt-2 w-12 text-right shrink-0">Serious</span>
+                            <input type="range" class="tone-slider flex-1" id="tone_humor" min="1" max="10" value="4">
+                            <span class="text-xs text-txt-2 w-12 shrink-0">Witty</span>
+                        </div>
+                        <p class="text-xs text-txt-3 italic mt-1" id="desc_tone_humor"></p>
+                    </div>
+                    <div class="slider-row" data-field="tone_salesiness">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Salesiness</span>
+                            <span class="badge badge-accent text-xs" id="val_tone_salesiness">3</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-txt-2 w-12 text-right shrink-0">Genuine</span>
+                            <input type="range" class="tone-slider flex-1" id="tone_salesiness" min="1" max="10" value="3">
+                            <span class="text-xs text-txt-2 w-12 shrink-0">Salesy</span>
+                        </div>
+                        <p class="text-xs text-txt-3 italic mt-1" id="desc_tone_salesiness"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ Panel 3: Greeting & Sign-off ══ -->
+            <div class="panel" id="panel-greeting">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">Greeting & Sign-off</span>
+                </div>
+                <div class="panel-body space-y-5">
+                    <!-- Greeting -->
+                    <div>
+                        <label class="form-label">Greeting Style</label>
+                        <div class="pill-group" id="pills_greeting_style">
+                            <button class="radio-pill" data-value="none" onclick="selectPill('greeting_style','none')">None</button>
+                            <button class="radio-pill" data-value="name" onclick="selectPill('greeting_style','name')">Name</button>
+                            <button class="radio-pill" data-value="casual" onclick="selectPill('greeting_style','casual')">Casual</button>
+                            <button class="radio-pill" data-value="formal" onclick="selectPill('greeting_style','formal')">Formal</button>
+                            <button class="radio-pill" data-value="custom" onclick="selectPill('greeting_style','custom')">Custom</button>
+                        </div>
+                        <div id="greeting_custom_wrap" class="mt-3 hidden">
+                            <input type="text" class="form-input" id="greeting_custom" placeholder="e.g., Howdy {name},">
+                        </div>
+                    </div>
+                    <div class="section-divider"></div>
+                    <!-- Sign-off -->
+                    <div>
+                        <label class="form-label">Sign-off Style</label>
+                        <div class="pill-group" id="pills_signoff_style">
+                            <button class="radio-pill" data-value="none" onclick="selectPill('signoff_style','none')">None</button>
+                            <button class="radio-pill" data-value="minimal" onclick="selectPill('signoff_style','minimal')">Minimal</button>
+                            <button class="radio-pill" data-value="warm" onclick="selectPill('signoff_style','warm')">Warm</button>
+                            <button class="radio-pill" data-value="forward" onclick="selectPill('signoff_style','forward')">Forward</button>
+                            <button class="radio-pill" data-value="custom" onclick="selectPill('signoff_style','custom')">Custom</button>
+                        </div>
+                        <div id="signoff_custom_wrap" class="mt-3 hidden">
+                            <textarea class="form-input" id="signoff_custom" rows="2" placeholder="Custom sign-off (multiline supported)"></textarea>
+                        </div>
+                    </div>
+                    <div class="section-divider"></div>
+                    <!-- Preview -->
+                    <div>
+                        <label class="form-label">Preview</label>
+                        <div class="preview-box" id="greetingSignoffPreview">
+                            <div class="text-txt-2" id="previewGreeting"></div>
+                            <div class="text-txt-3 my-2">— email body —</div>
+                            <div class="text-txt-2" id="previewSignoff"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ Panel 4: Subject Lines ══ -->
+            <div class="panel" id="panel-subject">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">Subject Lines</span>
+                </div>
+                <div class="panel-body space-y-4">
+                    <div>
+                        <label class="form-label">Subject Style</label>
+                        <div class="pill-group" id="pills_subject_style">
+                            <button class="radio-pill" data-value="curiosity" onclick="selectPill('subject_style','curiosity')">Curiosity</button>
+                            <button class="radio-pill" data-value="direct" onclick="selectPill('subject_style','direct')">Direct</button>
+                            <button class="radio-pill" data-value="question" onclick="selectPill('subject_style','question')">Question</button>
+                            <button class="radio-pill" data-value="statistic" onclick="selectPill('subject_style','statistic')">Statistic</button>
+                            <button class="radio-pill" data-value="personalized" onclick="selectPill('subject_style','personalized')">Personalized</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Length Target</label>
+                        <div class="pill-group" id="pills_subject_length_target">
+                            <button class="radio-pill" data-value="short" onclick="selectPill('subject_length_target','short')">Short (&lt;40)</button>
+                            <button class="radio-pill" data-value="medium" onclick="selectPill('subject_length_target','medium')">Medium (40-60)</button>
+                            <button class="radio-pill" data-value="long" onclick="selectPill('subject_length_target','long')">Long (60-80)</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Max Length (hard ceiling)</label>
+                            <input type="number" class="form-input" id="subject_max_length" min="20" max="120" value="60">
+                        </div>
+                        <div class="flex items-center justify-between pt-5">
+                            <span class="text-sm text-txt-2">Use Emoji</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="subject_use_emoji">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ Panel 5: Email Structure ══ -->
+            <div class="panel" id="panel-structure">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">Email Structure</span>
+                </div>
+                <div class="panel-body space-y-4">
+                    <div>
+                        <label class="form-label">Email Length</label>
+                        <div class="pill-group" id="pills_email_length">
+                            <button class="radio-pill" data-value="short" onclick="selectPill('email_length','short')">Short (2-3 sentences)</button>
+                            <button class="radio-pill" data-value="medium" onclick="selectPill('email_length','medium')">Medium (3-4 para)</button>
+                            <button class="radio-pill" data-value="long" onclick="selectPill('email_length','long')">Long (4-5 para)</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Opening Style</label>
+                        <div class="pill-group" id="pills_opening_style">
+                            <button class="radio-pill" data-value="problem" onclick="selectPill('opening_style','problem')">Problem</button>
+                            <button class="radio-pill" data-value="compliment" onclick="selectPill('opening_style','compliment')">Compliment</button>
+                            <button class="radio-pill" data-value="observation" onclick="selectPill('opening_style','observation')">Observation</button>
+                            <button class="radio-pill" data-value="statistic" onclick="selectPill('opening_style','statistic')">Statistic</button>
+                            <button class="radio-pill" data-value="story" onclick="selectPill('opening_style','story')">Story</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">CTA Style</label>
+                        <div class="pill-group" id="pills_cta_style">
+                            <button class="radio-pill" data-value="soft" onclick="selectPill('cta_style','soft')">Soft</button>
+                            <button class="radio-pill" data-value="direct" onclick="selectPill('cta_style','direct')">Direct</button>
+                            <button class="radio-pill" data-value="question" onclick="selectPill('cta_style','question')">Question</button>
+                            <button class="radio-pill" data-value="none" onclick="selectPill('cta_style','none')">None</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">First Person</label>
+                            <div class="pill-group" id="pills_first_person_style">
+                                <button class="radio-pill" data-value="i" onclick="selectPill('first_person_style','i')">I / My</button>
+                                <button class="radio-pill" data-value="we" onclick="selectPill('first_person_style','we')">We / Our</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="form-label">Personalization Depth</label>
+                            <div class="pill-group" id="pills_personalization_depth">
+                                <button class="radio-pill" data-value="light" onclick="selectPill('personalization_depth','light')">Light</button>
+                                <button class="radio-pill" data-value="medium" onclick="selectPill('personalization_depth','medium')">Medium</button>
+                                <button class="radio-pill" data-value="deep" onclick="selectPill('personalization_depth','deep')">Deep</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Proof Style</label>
+                        <div class="pill-group" id="pills_proof_style">
+                            <button class="radio-pill" data-value="case_study" onclick="selectPill('proof_style','case_study')">Case Study</button>
+                            <button class="radio-pill" data-value="statistic" onclick="selectPill('proof_style','statistic')">Statistic</button>
+                            <button class="radio-pill" data-value="testimonial" onclick="selectPill('proof_style','testimonial')">Testimonial</button>
+                            <button class="radio-pill" data-value="none" onclick="selectPill('proof_style','none')">None</button>
+                        </div>
+                    </div>
+                    <div class="section-divider"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Max Paragraphs</label>
+                            <input type="number" class="form-input" id="max_paragraphs" min="1" max="8" value="4">
+                        </div>
+                        <div>
+                            <label class="form-label">Max Sentences / Paragraph</label>
+                            <input type="number" class="form-input" id="max_sentences_per_paragraph" min="1" max="6" value="3">
+                        </div>
+                    </div>
+                    <div class="section-divider"></div>
+                    <div class="form-row">
+                        <span class="text-sm text-txt-2">Use recipient's name</span>
+                        <label class="toggle-switch"><input type="checkbox" id="use_recipient_name"><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="form-row">
+                        <span class="text-sm text-txt-2">Include case studies / proof</span>
+                        <label class="toggle-switch"><input type="checkbox" id="use_case_studies"><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="form-row">
+                        <span class="text-sm text-txt-2">Use specific numbers & stats</span>
+                        <label class="toggle-switch"><input type="checkbox" id="use_specific_numbers"><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="form-row">
+                        <span class="text-sm text-txt-2">Include questions in body</span>
+                        <label class="toggle-switch"><input type="checkbox" id="use_questions"><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="form-row">
+                        <span class="text-sm text-txt-2">Identify as sender ("I'm [Name] from [Company]")</span>
+                        <label class="toggle-switch"><input type="checkbox" id="identify_as_sender"><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="form-row">
+                        <span class="text-sm text-txt-2">Include value propositions in prompt</span>
+                        <label class="toggle-switch"><input type="checkbox" id="include_value_props"><span class="toggle-slider"></span></label>
+                    </div>
+                    <div class="form-row">
+                        <span class="text-sm text-txt-2">Prefer industry-matched proof entries</span>
+                        <label class="toggle-switch"><input type="checkbox" id="industry_match_proofs"><span class="toggle-slider"></span></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ Panel 5b: Creativity & Advanced ══ -->
+            <div class="panel" id="panel-creativity">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">Creativity & Advanced</span>
+                </div>
+                <div class="panel-body space-y-5">
+                    <div class="slider-row" data-field="creativity">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Creativity</span>
+                            <span class="badge badge-accent text-xs" id="val_creativity">7</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-txt-2 w-16 text-right shrink-0">Predictable</span>
+                            <input type="range" class="tone-slider flex-1" id="creativity" min="1" max="10" value="7">
+                            <span class="text-xs text-txt-2 w-16 shrink-0">Creative</span>
+                        </div>
+                        <p class="text-xs text-txt-3 italic mt-1" id="desc_creativity"></p>
+                        <p class="text-xs text-txt-3 mt-1">Lower = more consistent emails, Higher = more unique approaches</p>
+                    </div>
+                    <div class="section-divider"></div>
+                    <div>
+                        <label class="form-label">Custom Instruction</label>
+                        <textarea class="form-input" id="custom_instruction" rows="3" placeholder="Additional guidance appended to every GPT prompt, e.g. &quot;Always reference the lead's city&quot; or &quot;Focus on how automation reduces hiring needs&quot;"></textarea>
+                        <p class="text-xs text-txt-3 mt-1">Free-text appended to every outreach prompt. Token budget auto-scales with email length.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ Panel 6: Proof Bank ══ -->
+            <div class="panel" id="panel-proof">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <span class="font-heading font-semibold text-sm tracking-wide">Proof Bank</span>
+                        <span class="badge badge-accent" id="proofCount">0</span>
+                    </div>
+                    <button class="btn btn-primary text-xs py-1.5 px-3" onclick="openProofModal()">+ Add Proof</button>
+                </div>
+                <div class="panel-body">
+                    <p class="text-xs text-txt-3 mb-3">Case studies, stats, and testimonials the AI can reference. It will never fabricate proof — only use what's here.</p>
+                    <div class="space-y-3" id="proofList">
+                        <div class="text-center text-txt-3 text-sm py-6" id="proofEmpty">No proof entries yet</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ Panel 7: Keywords, Value Props & Banned Phrases ══ -->
+            <div class="panel" id="panel-chips">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">Keywords, Value Props & Banned Phrases</span>
+                </div>
+                <div class="panel-body space-y-5">
+                    <!-- Keywords -->
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <label class="form-label mb-0">Keywords</label>
+                            <span class="badge badge-accent" id="keywordsCount">0</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5 mb-2" id="keywordsChips"></div>
+                        <div class="flex gap-2">
+                            <input type="text" class="form-input flex-1" id="keywordsInput" placeholder="Add keyword..." onkeydown="if(event.key==='Enter'){addChip('keywords')}">
+                            <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="addChip('keywords')">Add</button>
+                            <button class="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1" onclick="expandWithAI('keywords', 'content_creator')">
+                                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6l2.5-3L6 6l2.5-3L11 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                AI
+                            </button>
+                        </div>
+                        <div id="keywords_ai_result" class="hidden"></div>
+                    </div>
+                    <div class="section-divider"></div>
+                    <!-- Value Propositions -->
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <label class="form-label mb-0">Value Propositions</label>
+                            <span class="badge badge-info" id="valuePropsCount">0</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5 mb-2" id="value_propositionsChips"></div>
+                        <div class="flex gap-2">
+                            <input type="text" class="form-input flex-1" id="value_propositionsInput" placeholder="Add value proposition..." onkeydown="if(event.key==='Enter'){addChip('value_propositions')}">
+                            <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="addChip('value_propositions')">Add</button>
+                            <button class="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1" onclick="expandWithAI('value_propositions', 'content_creator')">
+                                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6l2.5-3L6 6l2.5-3L11 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                AI
+                            </button>
+                        </div>
+                        <div id="value_propositions_ai_result" class="hidden"></div>
+                    </div>
+                    <div class="section-divider"></div>
+                    <!-- Banned Phrases -->
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <label class="form-label mb-0">Banned Phrases</label>
+                            <span class="badge badge-alert" id="bannedCount">0</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5 mb-2" id="banned_phrasesChips"></div>
+                        <div class="flex gap-2">
+                            <input type="text" class="form-input flex-1" id="banned_phrasesInput" placeholder="Add banned phrase..." onkeydown="if(event.key==='Enter'){addChip('banned_phrases')}">
+                            <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="addChip('banned_phrases')">Add</button>
+                            <button class="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1" onclick="expandWithAI('banned_phrases', 'growth_hacker')">
+                                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6l2.5-3L6 6l2.5-3L11 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                AI
+                            </button>
+                        </div>
+                        <div id="banned_phrases_ai_result" class="hidden"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ Panel 8: AI Suggested Settings (Snapshot) ══ -->
+            <div class="panel hidden" id="panel-snapshot">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <span class="font-heading font-semibold text-sm tracking-wide">AI Suggested Settings</span>
+                        <span class="badge badge-warn" id="snapshotBadge">NEW</span>
+                    </div>
+                </div>
+                <div class="panel-body" id="snapshotBody"></div>
+            </div>
+
+            <!-- ══ Panel 8b: Individual AI Suggestions (legacy) ══ -->
+            <div class="panel hidden" id="panel-suggestions">
+                <div class="panel-header cursor-pointer" onclick="toggleIndividualSuggestions()">
+                    <div class="flex items-center gap-2">
+                        <span class="font-heading font-semibold text-sm tracking-wide">Individual Suggestions</span>
+                        <span class="badge badge-warn" id="suggestionsCount">0</span>
+                    </div>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" id="suggestionsChevron" style="transition: transform 0.2s; transform: rotate(0deg);"><path d="M3 4.5l3 3 3-3" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="panel-body hidden" id="suggestionsBody">
+                    <p class="text-xs text-txt-3 mb-3">Accept or dismiss changes individually</p>
+                    <div class="space-y-3" id="suggestionsList"></div>
+                </div>
+            </div>
+
+            <!-- ══ Panel 9: Recent Patterns ══ -->
+            <div class="panel" id="panel-patterns">
+                <div class="panel-header cursor-pointer" onclick="togglePatterns()">
+                    <div class="flex items-center gap-2">
+                        <span class="font-heading font-semibold text-sm tracking-wide">Recent Patterns</span>
+                        <span class="badge badge-info" id="patternsCount">—</span>
+                    </div>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" id="patternsChevron" style="transition: transform 0.2s; transform: rotate(0deg);"><path d="M3 4.5l3 3 3-3" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="panel-body hidden" id="patternsBody">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4" id="patternsStats"></div>
+                    <div id="rejectedList"></div>
+                </div>
+            </div>
+
+        </div><!-- end panels container -->
+
+        <!-- ── Sticky Save Bar ── -->
+        <div class="save-bar" id="saveBar">
+            <span class="text-xs text-warn font-mono">Unsaved changes</span>
+            <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="discardChanges()">Discard</button>
+            <button class="btn btn-primary text-xs py-2 px-4" id="saveBtn" onclick="saveSettings()">Save Settings</button>
+        </div>
+
+    </div><!-- end mainContent -->
+
+    <!-- ── Proof Modal ── -->
+    <div class="modal-backdrop" id="proofModal">
+        <div class="modal-content">
+            <div class="panel-header">
+                <span class="font-heading font-semibold text-sm" id="proofModalTitle">Add Proof Entry</span>
+                <button class="text-txt-3 hover:text-txt transition-colors" onclick="closeProofModal()">&times;</button>
+            </div>
+            <div class="panel-body space-y-4">
+                <div>
+                    <label class="form-label">Type</label>
+                    <select class="form-input" id="proof_type">
+                        <option value="case_study">Case Study</option>
+                        <option value="statistic">Statistic</option>
+                        <option value="testimonial">Testimonial</option>
+                        <option value="credential">Credential</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Title</label>
+                    <input type="text" class="form-input" id="proof_title" placeholder="e.g., Automated follow-up for SaaS client">
+                </div>
+                <div>
+                    <label class="form-label">Content</label>
+                    <textarea class="form-input" id="proof_content" rows="3" placeholder="Describe the proof point..."></textarea>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-label">Metrics (optional)</label>
+                        <input type="text" class="form-input" id="proof_metrics" placeholder="e.g., 20+ hrs/week saved">
+                    </div>
+                    <div>
+                        <label class="form-label">Industry (optional)</label>
+                        <input type="text" class="form-input" id="proof_industry" placeholder="e.g., SaaS">
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label">Client Name (optional)</label>
+                    <input type="text" class="form-input" id="proof_client_name" placeholder="e.g., Acme Corp">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="closeProofModal()">Cancel</button>
+                    <button class="btn btn-primary text-xs py-1.5 px-3" id="proofSaveBtn" onclick="saveProofEntry()">Save Entry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Toast Container ── -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+    // Migrate old localStorage key
+    if (!localStorage.getItem('rdgr-active-profile') && localStorage.getItem('rdgr-active-profile')) {
+        localStorage.setItem('rdgr-active-profile', localStorage.getItem('rdgr-active-profile'));
+        localStorage.removeItem('rdgr-active-profile');
+    }
+
+    // ═══════════════════════════════════════════════════
+    // CONSTANTS
+    // ═══════════════════════════════════════════════════
+
+    let activeProfileId = null;
+
+    const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    const VOICE_EXPAND_URL = 'https://n8n.carltonaiservices.com/webhook/voice-expand';
+    const BRAND_ID = 'carlton';
+    const AUTH_CODE = 'Advance1!';
+
+    const DEFAULTS = {
+        about_you: '',
+        signature_name: 'Bradford',
+        company_name: 'Carlton AI',
+        tone_warmth: 7, tone_formality: 3, tone_confidence: 8, tone_humor: 4, tone_salesiness: 3,
+        subject_style: 'curiosity', subject_max_length: 60, subject_use_emoji: false,
+        subject_length_target: 'medium',
+        keywords: ['automation', 'efficiency', 'revenue growth', 'time savings'],
+        value_propositions: ['Saved clients 20+ hours per week through automation', 'Built systems that generate revenue while you sleep'],
+        banned_phrases: ['leverage', 'synergy', 'AI-powered', 'game-changer', 'disrupt', 'circle back', 'low-hanging fruit', 'paradigm shift', 'I hope this email finds you well'],
+        max_paragraphs: 4, max_sentences_per_paragraph: 3,
+        use_case_studies: true, use_specific_numbers: true, use_questions: true,
+        cta_style: 'soft', opening_style: 'problem',
+        greeting_style: 'none', greeting_custom: '',
+        signoff_style: 'warm', signoff_custom: '',
+        email_length: 'medium', use_recipient_name: true,
+        personalization_depth: 'medium', proof_style: 'case_study',
+        first_person_style: 'i',
+        creativity: 7, identify_as_sender: true, include_value_props: true,
+        custom_instruction: '', industry_match_proofs: true,
+        version: 1
+    };
+
+    const TONE_LABELS = {
+        tone_warmth:     ['','Ice Cold','Very Direct','Businesslike','Reserved','Neutral','Friendly','Warm','Very Warm','Caring','Heartfelt'],
+        tone_formality:  ['','Text Message','Very Informal','Relaxed','Casual Pro','Balanced','Polished','Business Formal','Very Formal','Highly Formal','Executive'],
+        tone_confidence: ['','Tentative','Unsure','Modest','Humble','Balanced','Self-Assured','Confident','Bold','Very Bold','Absolute'],
+        tone_humor:      ['','Dead Serious','Strictly Pro','Mostly Serious','Dry Wit','Balanced','Light-Hearted','Playful','Witty','Very Humorous','Full Comedy'],
+        tone_salesiness: ['','Anti-Sales','Very Genuine','Helpful First','Subtle','Balanced','Lightly Persuasive','Persuasive','Sales-Forward','Aggressive','Hard Close'],
+        creativity:      ['','Predictable','Conservative','Conservative','Balanced','Balanced','Balanced','Creative','Creative','Wild','Wild'],
+    };
+
+    const TONE_DESCRIPTIONS = {
+        tone_warmth:     ['','ice-cold and blunt — zero pleasantries','very direct — no small talk, facts only','businesslike and efficient — minimal warmth','polite but reserved — professional distance','neutral and balanced — neither cold nor warm','friendly and personable — like a colleague','warm and approachable — genuine interest in them','very warm — like writing to someone you want to help','caring and empathetic — you genuinely want their success','deeply personal and heartfelt — like writing to a friend'],
+        tone_formality:  ['','extremely casual — like a text message','very informal — slang is fine, contractions everywhere','relaxed and conversational — easy-going','casual professional — friendly but competent','balanced — standard business communication','polished professional — clean and composed','business formal — structured and precise','very formal — corporate boardroom appropriate','highly formal — no contractions, measured language','ultra-formal — executive correspondence level'],
+        tone_confidence: ['','extremely tentative — hedging everything','very unsure — lots of qualifiers and maybes','modest — downplaying your expertise','humble — letting results speak quietly','balanced — confident without overstatement','self-assured — clear belief in your value','confident — strong claims backed by experience','bold — assertive statements, no hedging','very bold — commanding authority on the topic','absolute conviction — unwavering certainty'],
+        tone_humor:      ['','dead serious — no levity whatsoever','very serious — strictly professional','mostly serious — an occasional light touch','professional with dry wit — subtle','balanced — a light moment feels natural','light-hearted — warm humor throughout','playful — witty observations, fun analogies','witty — clever wordplay and personality','very humorous — jokes and colorful language','full comedy — entertaining above all else'],
+        tone_salesiness: ['','anti-sales — purely helpful, zero pitch','very genuine — sharing info with no agenda','helpful first — any business angle is incidental','subtle — gently pointing toward a conversation','balanced — clear value prop but no pressure','lightly persuasive — nudging toward a next step','persuasive — making a clear case for action','sales-forward — definite pitch with urgency','aggressive pitch — strong push for commitment','hard close — maximum urgency and pressure'],
+        creativity:      ['','very consistent, safe, formulaic','reliable with minor variation','reliable with minor variation','good mix of consistency and creativity','good mix of consistency and creativity','good mix of consistency and creativity','more varied language and approaches','more varied language and approaches','maximum creativity, least predictable','maximum creativity, least predictable'],
+    };
+
+    // ═══════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════
+
+    let originalSettings = {};
+    let currentSettings = {};
+    let dirtyFields = new Set();
+    let proofBank = [];
+    let editingProofId = null;
+
+    // ═══════════════════════════════════════════════════
+    // AUTH GATE
+    // ═══════════════════════════════════════════════════
+
+    const gate = document.getElementById('gate');
+    const gateInput = document.getElementById('gateInput');
+    const gateError = document.getElementById('gateError');
+    const mainContent = document.getElementById('mainContent');
+
+    function checkAuth() {
+        if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) { passGate(); return; }
+        gateInput.focus();
+    }
+
+    gateInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            if (gateInput.value === AUTH_CODE) { passGate(); }
+            else { gateError.classList.add('show'); gateInput.value = ''; }
+        }
+    });
+
+    function passGate() {
+        localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+        gate.classList.add('hidden');
+        mainContent.style.display = '';
+        requestAnimationFrame(() => { mainContent.style.opacity = '1'; });
+        initSettings();
+    }
+
+    // ═══════════════════════════════════════════════════
+    // SUPABASE HELPERS
+    // ═══════════════════════════════════════════════════
+
+    const sbHeaders = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json'
+    };
+
+    async function supabaseGet(path) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: sbHeaders });
+        if (!res.ok) throw new Error(`GET ${path} failed: ${res.status}`);
+        return res.json();
+    }
+
+    async function supabaseRPC(fn, body) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+            method: 'POST', headers: sbHeaders, body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error(`RPC ${fn} failed: ${res.status}`);
+        return res.json();
+    }
+
+    async function supabasePost(table, body) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+            method: 'POST', headers: { ...sbHeaders, 'Prefer': 'return=representation' }, body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error(`POST ${table} failed: ${res.status}`);
+        return res.json();
+    }
+
+    async function supabasePatch(table, query, body) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
+            method: 'PATCH', headers: { ...sbHeaders, 'Prefer': 'return=representation' }, body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error(`PATCH ${table} failed: ${res.status}`);
+        return res.json();
+    }
+
+    async function supabaseDelete(table, query) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
+            method: 'DELETE',
+            headers: { ...sbHeaders, 'Prefer': 'return=minimal' }
+        });
+        if (!res.ok) {
+            const body = await res.text().catch(() => '');
+            throw new Error(`DELETE ${table} failed: ${res.status} ${body}`);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════
+    // APPEARANCE SETTINGS
+    // ═══════════════════════════════════════════════════
+
+    const DEFT_THEMES = {
+        forest:     { accent: '#A8D65B', label: 'Forest' },
+        sunrise:    { accent: '#F0A830', label: 'Sunrise' },
+        ocean:      { accent: '#38BDF8', label: 'Ocean' },
+        berry:      { accent: '#C084FC', label: 'Berry' },
+        rdgr:       { accent: '#06D6A0', label: 'RDGR' },
+        monochrome: { accent: '#E8E8E8', label: 'Mono' },
+    };
+
+    const CHAT_THEMES = {
+        teal: '#06D6A0', violet: '#A78BFA', rose: '#FB7185', amber: '#FBBF24',
+        sky: '#38BDF8', emerald: '#10B981', orange: '#FB923C', fuchsia: '#D946EF',
+    };
+
+    async function loadAppearanceSettings() {
+        let prefs = {};
+        if (activeProfileId) {
+            try {
+                const rows = await supabaseGet(`deft_user_profiles?user_id=eq.${activeProfileId}&select=preferences`);
+                prefs = rows?.[0]?.preferences || {};
+            } catch(e) {}
+        }
+
+        // DEFT theme
+        let deftPreset = prefs.theme?.preset || 'forest';
+        try {
+            const stored = JSON.parse(localStorage.getItem(`deft-theme-${activeProfileId}`) || '{}');
+            if (!prefs.theme?.preset && stored.preset) deftPreset = stored.preset;
+        } catch(e) {}
+        renderDeftThemeGrid(deftPreset);
+
+        // Chat theme
+        const chatTheme = prefs.chatTheme || localStorage.getItem('rdgr-chat-theme-' + activeProfileId) || 'teal';
+        renderChatThemeSwatches(chatTheme);
+
+        // Chat mode
+        const chatMode = prefs.chatMode || localStorage.getItem('rdgr-chat-mode-' + activeProfileId) || 'dark';
+        highlightChatMode(chatMode);
+    }
+
+    function renderDeftThemeGrid(currentPreset) {
+        const container = document.getElementById('appearanceDeftThemes');
+        if (!container) return;
+        container.innerHTML = Object.entries(DEFT_THEMES).map(([key, theme]) => {
+            const isActive = key === currentPreset;
+            return `<button onclick="setAppearanceDeftTheme('${key}')" class="p-3 rounded-lg text-center transition-all" style="background: ${isActive ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)'}; border: 1px solid ${isActive ? theme.accent + '66' : '#2A2E3D'}; cursor: pointer;" onmouseenter="this.style.borderColor='${theme.accent}66'" onmouseleave="this.style.borderColor='${isActive ? theme.accent + '66' : '#2A2E3D'}'">
+                <div class="w-6 h-6 rounded-full mx-auto mb-1.5" style="background: ${theme.accent};${isActive ? ' box-shadow: 0 0 8px ' + theme.accent + '66;' : ''}"></div>
+                <div class="text-[0.65rem] font-medium" style="color: ${isActive ? theme.accent : '#8A95A9'};">${theme.label}</div>
+                ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="mx-auto mt-1"><path d="M2 6l3 3 5-5" stroke="' + theme.accent + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+            </button>`;
+        }).join('');
+    }
+
+    function renderChatThemeSwatches(currentTheme) {
+        const container = document.getElementById('appearanceChatThemes');
+        if (!container) return;
+        container.innerHTML = Object.entries(CHAT_THEMES).map(([name, hex]) => {
+            const isActive = name === currentTheme;
+            return `<button onclick="setAppearanceChatTheme('${name}')" class="transition-all" style="width:28px;height:28px;border-radius:50%;background:${hex};cursor:pointer;outline:${isActive ? '2px solid #fff' : 'none'};outline-offset:${isActive ? '2px' : '0'};transform:${isActive ? 'scale(1.15)' : 'scale(1)'};" title="${name.charAt(0).toUpperCase() + name.slice(1)}" onmouseenter="this.style.transform='scale(1.15)'" onmouseleave="this.style.transform='${isActive ? 'scale(1.15)' : 'scale(1)}'"></button>`;
+        }).join('');
+    }
+
+    function highlightChatMode(mode) {
+        const darkBtn = document.getElementById('chatModeDarkBtn');
+        const lightBtn = document.getElementById('chatModeLightBtn');
+        if (darkBtn) {
+            darkBtn.style.background = mode === 'dark' ? 'rgba(6,214,160,0.15)' : '';
+            darkBtn.style.color = mode === 'dark' ? '#06D6A0' : '';
+            darkBtn.style.borderColor = mode === 'dark' ? 'rgba(6,214,160,0.3)' : '';
+        }
+        if (lightBtn) {
+            lightBtn.style.background = mode === 'light' ? 'rgba(255,217,61,0.15)' : '';
+            lightBtn.style.color = mode === 'light' ? '#FFD93D' : '';
+            lightBtn.style.borderColor = mode === 'light' ? 'rgba(255,217,61,0.3)' : '';
+        }
+    }
+
+    async function setAppearanceDeftTheme(preset) {
+        const config = { preset };
+        localStorage.setItem(`deft-theme-${activeProfileId}`, JSON.stringify(config));
+        renderDeftThemeGrid(preset);
+        await syncAppearanceToSupabase({ theme: config });
+    }
+
+    async function setAppearanceChatTheme(themeName) {
+        localStorage.setItem('rdgr-chat-theme-' + activeProfileId, themeName);
+        renderChatThemeSwatches(themeName);
+        await syncAppearanceToSupabase({ chatTheme: themeName });
+    }
+
+    async function setAppearanceChatMode(mode) {
+        localStorage.setItem('rdgr-chat-mode-' + activeProfileId, mode);
+        highlightChatMode(mode);
+        await syncAppearanceToSupabase({ chatMode: mode });
+    }
+
+    async function syncAppearanceToSupabase(updates) {
+        if (!activeProfileId) return;
+        try {
+            const rows = await supabaseGet(`deft_user_profiles?user_id=eq.${activeProfileId}&select=preferences`);
+            const prefs = rows?.[0]?.preferences || {};
+            Object.assign(prefs, updates);
+            await supabasePatch('deft_user_profiles', `user_id=eq.${activeProfileId}`, { preferences: prefs });
+        } catch(e) { console.warn('Appearance sync failed:', e); }
+    }
+
+    // ═══════════════════════════════════════════════════
+    // INIT — LOAD ALL DATA
+    // ═══════════════════════════════════════════════════
+
+    function safeGet(path) {
+        return supabaseGet(path).catch(err => { console.warn('Non-critical fetch failed:', path, err.message); return []; });
+    }
+
+    async function initSettings() {
+        // Settings + proof bank are critical — fail visibly if they break
+        let settingsArr, proofArr;
+        try {
+            [settingsArr, proofArr] = await Promise.all([
+                supabaseGet(`outreach_voice_settings?brand_id=eq.${BRAND_ID}&limit=1`),
+                safeGet(`outreach_proof_bank?brand_id=eq.${BRAND_ID}&is_active=eq.true&order=sort_order.asc`)
+            ]);
+        } catch (err) {
+            console.error('Settings load failed:', err);
+            toast('Failed to load settings: ' + err.message, 'error');
+            return;
+        }
+
+        // Populate core settings
+        const raw = settingsArr.length ? settingsArr[0] : { ...DEFAULTS };
+        currentSettings = { ...DEFAULTS, ...raw };
+        originalSettings = JSON.parse(JSON.stringify(currentSettings));
+        populateForm();
+
+        // Proof bank
+        proofBank = proofArr || [];
+        renderProofBank();
+
+        // Non-critical data — load in parallel, each one independent
+        const [suggestionsArr, snapshotsArr, draftsArr] = await Promise.all([
+            safeGet(`voice_learning_log?brand_id=eq.${BRAND_ID}&status=eq.pending&order=created_at.desc`),
+            safeGet(`voice_settings_snapshots?brand_id=eq.${BRAND_ID}&status=eq.pending&order=created_at.desc`),
+            safeGet(`copy_drafts?brand_id=eq.${BRAND_ID}&copy_type=eq.cold_outreach_email&review_status=in.(approved,rejected,skipped)&order=updated_at.desc&limit=50&select=id,review_status,human_feedback,updated_at`)
+        ]);
+
+        renderSnapshot(snapshotsArr || []);
+        renderSuggestions(suggestionsArr || []);
+        renderPatterns(draftsArr || []);
+
+        // Appearance panel (cross-app settings)
+        loadAppearanceSettings();
+    }
+
+    // ═══════════════════════════════════════════════════
+    // POPULATE FORM FROM STATE
+    // ═══════════════════════════════════════════════════
+
+    function populateForm() {
+        const s = currentSettings;
+
+        // Text fields
+        document.getElementById('about_you').value = s.about_you || '';
+        document.getElementById('signature_name').value = s.signature_name || '';
+        document.getElementById('company_name').value = s.company_name || '';
+
+        // Sliders (including creativity)
+        ['tone_warmth', 'tone_formality', 'tone_confidence', 'tone_humor', 'tone_salesiness', 'creativity'].forEach(f => {
+            const slider = document.getElementById(f);
+            slider.value = s[f];
+            updateSliderFill(slider);
+            updateSliderDesc(f, s[f]);
+            document.getElementById(`val_${f}`).textContent = s[f];
+        });
+
+        // Number inputs
+        document.getElementById('subject_max_length').value = s.subject_max_length;
+        document.getElementById('max_paragraphs').value = s.max_paragraphs;
+        document.getElementById('max_sentences_per_paragraph').value = s.max_sentences_per_paragraph;
+
+        // Text fields (advanced)
+        document.getElementById('custom_instruction').value = s.custom_instruction || '';
+
+        // Toggles
+        document.getElementById('subject_use_emoji').checked = !!s.subject_use_emoji;
+        document.getElementById('use_recipient_name').checked = s.use_recipient_name !== false;
+        document.getElementById('use_case_studies').checked = s.use_case_studies !== false;
+        document.getElementById('use_specific_numbers').checked = s.use_specific_numbers !== false;
+        document.getElementById('use_questions').checked = s.use_questions !== false;
+        document.getElementById('identify_as_sender').checked = s.identify_as_sender !== false;
+        document.getElementById('include_value_props').checked = s.include_value_props !== false;
+        document.getElementById('industry_match_proofs').checked = s.industry_match_proofs !== false;
+
+        // Pills
+        const pillFields = ['subject_style', 'subject_length_target', 'greeting_style', 'signoff_style',
+            'email_length', 'opening_style', 'cta_style', 'first_person_style', 'personalization_depth', 'proof_style'];
+        pillFields.forEach(f => {
+            const container = document.getElementById(`pills_${f}`);
+            if (!container) return;
+            container.querySelectorAll('.radio-pill').forEach(p => {
+                p.classList.toggle('selected', p.getAttribute('data-value') === String(s[f]));
+            });
+        });
+
+        // Custom greeting/signoff visibility
+        document.getElementById('greeting_custom_wrap').classList.toggle('hidden', s.greeting_style !== 'custom');
+        document.getElementById('greeting_custom').value = s.greeting_custom || '';
+        document.getElementById('signoff_custom_wrap').classList.toggle('hidden', s.signoff_style !== 'custom');
+        document.getElementById('signoff_custom').value = s.signoff_custom || '';
+
+        // Chips
+        renderChips('keywords');
+        renderChips('value_propositions');
+        renderChips('banned_phrases');
+
+        // Preview
+        updateGreetingPreview();
+
+        // Version
+        document.getElementById('versionBadge').textContent = `v${s.version || 1}`;
+        if (s.updated_at) {
+            document.getElementById('lastSaved').textContent = 'Saved ' + new Date(s.updated_at).toLocaleString();
+        }
+    }
+
+    // ═══════════════════════════════════════════════════
+    // SLIDER HELPERS
+    // ═══════════════════════════════════════════════════
+
+    function updateSliderFill(slider) {
+        const pct = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+        slider.style.background = `linear-gradient(to right, #06D6A0 0%, #06D6A0 ${pct}%, #2A2E3D ${pct}%, #2A2E3D 100%)`;
+    }
+
+    function updateSliderDesc(field, val) {
+        const el = document.getElementById(`desc_${field}`);
+        if (!el) return;
+        const v = parseInt(val);
+        const descs = TONE_DESCRIPTIONS[field];
+        const labels = TONE_LABELS[field];
+        if (descs && descs[v]) el.textContent = (labels && labels[v] ? labels[v] + ' — ' : '') + descs[v];
+    }
+
+    // Wire up sliders
+    document.querySelectorAll('.tone-slider').forEach(slider => {
+        slider.addEventListener('input', () => {
+            const field = slider.id;
+            document.getElementById(`val_${field}`).textContent = slider.value;
+            updateSliderFill(slider);
+            updateSliderDesc(field, slider.value);
+            currentSettings[field] = parseInt(slider.value);
+            markDirty(field);
+        });
+    });
+
+    // ═══════════════════════════════════════════════════
+    // PILL SELECTION
+    // ═══════════════════════════════════════════════════
+
+    function selectPill(group, value) {
+        const container = document.getElementById(`pills_${group}`);
+        if (!container) return;
+        container.querySelectorAll('.radio-pill').forEach(p => {
+            p.classList.toggle('selected', p.getAttribute('data-value') === value);
+        });
+        currentSettings[group] = value;
+        markDirty(group);
+
+        // Conditional visibility
+        if (group === 'greeting_style') {
+            document.getElementById('greeting_custom_wrap').classList.toggle('hidden', value !== 'custom');
+            updateGreetingPreview();
+        }
+        if (group === 'signoff_style') {
+            document.getElementById('signoff_custom_wrap').classList.toggle('hidden', value !== 'custom');
+            updateGreetingPreview();
+        }
+    }
+
+    // ═══════════════════════════════════════════════════
+    // GREETING/SIGNOFF PREVIEW
+    // ═══════════════════════════════════════════════════
+
+    function updateGreetingPreview() {
+        const name = currentSettings.signature_name || 'Bradford';
+        const gs = currentSettings.greeting_style;
+        const ss = currentSettings.signoff_style;
+        let greeting = '';
+        let signoff = '';
+
+        switch (gs) {
+            case 'none': greeting = '(no greeting)'; break;
+            case 'name': greeting = 'Hi [FirstName],'; break;
+            case 'casual': greeting = 'Hey there,'; break;
+            case 'formal': greeting = 'Dear [Name],'; break;
+            case 'custom': greeting = currentSettings.greeting_custom || '(custom greeting)'; break;
+        }
+
+        switch (ss) {
+            case 'none': signoff = '(no sign-off)'; break;
+            case 'minimal': signoff = name; break;
+            case 'warm': signoff = `Best,\n${name}`; break;
+            case 'forward': signoff = `Looking forward to hearing from you,\n${name}`; break;
+            case 'custom': signoff = currentSettings.signoff_custom || '(custom sign-off)'; break;
+        }
+
+        document.getElementById('previewGreeting').textContent = greeting;
+        document.getElementById('previewSignoff').textContent = signoff;
+    }
+
+    // ═══════════════════════════════════════════════════
+    // CHIP/TAG MANAGEMENT
+    // ═══════════════════════════════════════════════════
+
+    const CHIP_CLASSES = {
+        keywords: 'chip-keyword',
+        value_propositions: 'chip-value',
+        banned_phrases: 'chip-banned'
+    };
+
+    function renderChips(field) {
+        const container = document.getElementById(`${field}Chips`);
+        const arr = currentSettings[field] || [];
+        const cls = CHIP_CLASSES[field];
+        container.innerHTML = arr.map((text, i) =>
+            `<span class="settings-chip ${cls}">
+                ${esc(text)}
+                <span class="chip-x" onclick="removeChip('${field}', ${i})">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                </span>
+            </span>`
+        ).join('');
+
+        // Update counts
+        const countMap = { keywords: 'keywordsCount', value_propositions: 'valuePropsCount', banned_phrases: 'bannedCount' };
+        const countEl = document.getElementById(countMap[field]);
+        if (countEl) countEl.textContent = arr.length;
+    }
+
+    function addChip(field) {
+        const input = document.getElementById(`${field}Input`);
+        const val = input.value.trim();
+        if (!val) return;
+        if (!currentSettings[field]) currentSettings[field] = [];
+        if (currentSettings[field].includes(val)) { input.value = ''; return; }
+        currentSettings[field].push(val);
+        input.value = '';
+        renderChips(field);
+        markDirty(field);
+    }
+
+    function removeChip(field, index) {
+        currentSettings[field].splice(index, 1);
+        renderChips(field);
+        markDirty(field);
+    }
+
+    // ═══════════════════════════════════════════════════
+    // PROOF BANK CRUD
+    // ═══════════════════════════════════════════════════
+
+    const PROOF_TYPE_BADGES = {
+        case_study: 'badge-accent',
+        statistic: 'badge-info',
+        testimonial: 'badge-warn',
+        credential: 'badge-purple'
+    };
+
+    function renderProofBank() {
+        const list = document.getElementById('proofList');
+        document.getElementById('proofCount').textContent = proofBank.length;
+
+        if (!proofBank.length) {
+            list.innerHTML = '<div class="text-center text-txt-3 text-sm py-6">No proof entries yet</div>';
+            return;
+        }
+
+        list.innerHTML = proofBank.map((p, i) => `
+            <div class="proof-card" data-id="${p.id}">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span class="badge ${PROOF_TYPE_BADGES[p.proof_type] || 'badge-accent'}">${esc(p.proof_type)}</span>
+                            ${p.industry ? `<span class="badge badge-info">${esc(p.industry)}</span>` : ''}
+                        </div>
+                        <div class="text-sm font-medium mb-1">${esc(p.title)}</div>
+                        <div class="text-xs text-txt-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${esc(p.content)}</div>
+                        ${p.metrics ? `<div class="text-xs text-accent mt-1">${esc(p.metrics)}</div>` : ''}
+                    </div>
+                    <div class="flex items-center gap-1 proof-actions shrink-0">
+                        ${i > 0 ? `<button class="btn btn-ghost text-xs py-1 px-1.5" onclick="moveProof(${p.id}, -1)" title="Move up">&uarr;</button>` : ''}
+                        ${i < proofBank.length - 1 ? `<button class="btn btn-ghost text-xs py-1 px-1.5" onclick="moveProof(${p.id}, 1)" title="Move down">&darr;</button>` : ''}
+                        <button class="btn btn-ghost text-xs py-1 px-1.5" onclick="editProof(${p.id})" title="Edit">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5V8.5l7-7z" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <button class="btn btn-ghost text-xs py-1 px-1.5 text-alert" onclick="deleteProof(${p.id})" title="Delete">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M4.5 3V2h3v1M3 3l.5 7h5l.5-7" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function openProofModal(id) {
+        editingProofId = id || null;
+        document.getElementById('proofModalTitle').textContent = id ? 'Edit Proof Entry' : 'Add Proof Entry';
+        if (id) {
+            const p = proofBank.find(x => x.id === id);
+            if (p) {
+                document.getElementById('proof_type').value = p.proof_type;
+                document.getElementById('proof_title').value = p.title;
+                document.getElementById('proof_content').value = p.content;
+                document.getElementById('proof_metrics').value = p.metrics || '';
+                document.getElementById('proof_industry').value = p.industry || '';
+                document.getElementById('proof_client_name').value = p.client_name || '';
+            }
+        } else {
+            document.getElementById('proof_type').value = 'case_study';
+            document.getElementById('proof_title').value = '';
+            document.getElementById('proof_content').value = '';
+            document.getElementById('proof_metrics').value = '';
+            document.getElementById('proof_industry').value = '';
+            document.getElementById('proof_client_name').value = '';
+        }
+        document.getElementById('proofModal').classList.add('active');
+    }
+
+    function closeProofModal() {
+        document.getElementById('proofModal').classList.remove('active');
+        editingProofId = null;
+    }
+
+    async function saveProofEntry() {
+        const data = {
+            brand_id: BRAND_ID,
+            proof_type: document.getElementById('proof_type').value,
+            title: document.getElementById('proof_title').value.trim(),
+            content: document.getElementById('proof_content').value.trim(),
+            metrics: document.getElementById('proof_metrics').value.trim() || null,
+            industry: document.getElementById('proof_industry').value.trim() || null,
+            client_name: document.getElementById('proof_client_name').value.trim() || null
+        };
+
+        if (!data.title || !data.content) { toast('Title and content are required', 'error'); return; }
+
+        try {
+            if (editingProofId) {
+                await supabasePatch('outreach_proof_bank', `id=eq.${editingProofId}`, data);
+                const idx = proofBank.findIndex(p => p.id === editingProofId);
+                if (idx >= 0) Object.assign(proofBank[idx], data);
+                toast('Proof entry updated', 'success');
+            } else {
+                data.sort_order = proofBank.length;
+                const result = await supabasePost('outreach_proof_bank', data);
+                if (Array.isArray(result) && result.length) proofBank.push(result[0]);
+                else proofBank.push({ ...data, id: Date.now() });
+                toast('Proof entry added', 'success');
+            }
+            renderProofBank();
+            closeProofModal();
+        } catch (err) {
+            console.error('Save proof failed:', err);
+            toast('Failed to save proof entry', 'error');
+        }
+    }
+
+    function editProof(id) { openProofModal(id); }
+
+    async function deleteProof(id) {
+        if (!confirm('Delete this proof entry?')) return;
+        try {
+            await supabaseDelete('outreach_proof_bank', `id=eq.${id}`);
+            proofBank = proofBank.filter(p => p.id !== id);
+            renderProofBank();
+            toast('Proof entry deleted', 'success');
+        } catch (err) {
+            console.error('Delete proof failed:', err);
+            toast('Failed to delete: ' + err.message, 'error');
+        }
+    }
+
+    async function moveProof(id, dir) {
+        const idx = proofBank.findIndex(p => p.id === id);
+        const swapIdx = idx + dir;
+        if (swapIdx < 0 || swapIdx >= proofBank.length) return;
+        [proofBank[idx], proofBank[swapIdx]] = [proofBank[swapIdx], proofBank[idx]];
+        renderProofBank();
+        try {
+            await Promise.all([
+                supabasePatch('outreach_proof_bank', `id=eq.${proofBank[idx].id}`, { sort_order: idx }),
+                supabasePatch('outreach_proof_bank', `id=eq.${proofBank[swapIdx].id}`, { sort_order: swapIdx })
+            ]);
+        } catch (err) { console.error('Reorder failed:', err); }
+    }
+
+    // ═══════════════════════════════════════════════════
+    // AI SNAPSHOT (apply-all-at-once)
+    // ═══════════════════════════════════════════════════
+
+    let lastAppliedSnapshotId = null;
+
+    function renderSnapshot(snapshots) {
+        const panel = document.getElementById('panel-snapshot');
+        const body = document.getElementById('snapshotBody');
+
+        if (!snapshots.length) { panel.classList.add('hidden'); return; }
+
+        const snap = snapshots[0];
+        panel.classList.remove('hidden');
+
+        const changes = snap.individual_changes || [];
+        const changesHtml = changes.map(c => `
+            <div class="flex items-start gap-3 py-2 border-b border-border/50 last:border-0">
+                <span class="font-mono text-xs text-txt-3 w-40 shrink-0 pt-0.5">${esc(c.setting_field)}</span>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-alert">${esc(String(c.current_value))}</span>
+                        <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M1 4h12M9 1l4 3-4 3" stroke="#06D6A0" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="text-accent">${esc(String(c.suggested_value))}</span>
+                    </div>
+                    <p class="text-xs text-txt-3 mt-0.5">${esc(c.reasoning || '')}</p>
+                </div>
+            </div>
+        `).join('');
+
+        body.innerHTML = `
+            <div class="mb-3">
+                <div class="text-sm font-medium mb-1">${esc(snap.label || 'AI Suggested Settings')}</div>
+                <div class="text-xs text-txt-3">
+                    Based on ${snap.drafts_analyzed || 0} drafts
+                    (${snap.approval_rate || 0}% approval rate)
+                    ${snap.source_version ? ` · from v${snap.source_version}` : ''}
+                </div>
+            </div>
+            <div class="mb-4">${changesHtml || '<div class="text-xs text-txt-3">No individual changes listed</div>'}</div>
+            <div class="flex items-center gap-2" id="snapshotActions-${snap.id}">
+                <button class="btn btn-approve text-xs py-1.5 px-4" onclick="applySnapshot(${snap.id})">Apply Suggested Settings</button>
+                <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="dismissSnapshot(${snap.id})">Dismiss</button>
+            </div>
+        `;
+    }
+
+    async function applySnapshot(id) {
+        try {
+            await supabaseRPC('apply_voice_snapshot', { p_snapshot_id: id, p_applied_by: 'bradford' });
+            lastAppliedSnapshotId = id;
+
+            // Reload settings
+            const settingsArr = await supabaseGet(`outreach_voice_settings?brand_id=eq.${BRAND_ID}&limit=1`);
+            const raw = settingsArr.length ? settingsArr[0] : { ...DEFAULTS };
+            currentSettings = { ...DEFAULTS, ...raw };
+            originalSettings = JSON.parse(JSON.stringify(currentSettings));
+            dirtyFields.clear();
+            document.getElementById('saveBar').classList.remove('has-changes');
+            populateForm();
+
+            // Replace the snapshot card content with success + undo
+            const panel = document.getElementById('panel-snapshot');
+            const body = document.getElementById('snapshotBody');
+            body.innerHTML = `
+                <div class="flex items-center gap-3 py-2">
+                    <span class="text-accent text-sm font-medium">Settings applied (v${currentSettings.version})</span>
+                    <button class="text-xs text-info hover:underline" onclick="undoSnapshot()">Undo</button>
+                </div>
+            `;
+            toast('AI suggested settings applied', 'success');
+        } catch (err) {
+            console.error('Apply snapshot failed:', err);
+            toast('Failed to apply snapshot', 'error');
+        }
+    }
+
+    async function undoSnapshot() {
+        try {
+            // Find the manual backup created by the apply
+            const backups = await supabaseGet(`voice_settings_snapshots?snapshot_type=eq.manual_backup&order=created_at.desc&limit=1`);
+            if (!backups.length) { toast('No backup found to undo', 'error'); return; }
+
+            await supabaseRPC('rollback_voice_snapshot', { p_snapshot_id: backups[0].id });
+
+            // Reload settings
+            const settingsArr = await supabaseGet(`outreach_voice_settings?brand_id=eq.${BRAND_ID}&limit=1`);
+            const raw = settingsArr.length ? settingsArr[0] : { ...DEFAULTS };
+            currentSettings = { ...DEFAULTS, ...raw };
+            originalSettings = JSON.parse(JSON.stringify(currentSettings));
+            dirtyFields.clear();
+            document.getElementById('saveBar').classList.remove('has-changes');
+            populateForm();
+
+            // Hide snapshot panel
+            document.getElementById('panel-snapshot').classList.add('hidden');
+            toast('Settings rolled back to previous version', 'success');
+        } catch (err) {
+            console.error('Rollback failed:', err);
+            toast('Failed to undo', 'error');
+        }
+    }
+
+    async function dismissSnapshot(id) {
+        try {
+            await supabasePatch('voice_settings_snapshots', `id=eq.${id}`, { status: 'dismissed' });
+            document.getElementById('panel-snapshot').classList.add('hidden');
+            toast('Snapshot dismissed', 'success');
+        } catch (err) {
+            console.error('Dismiss snapshot failed:', err);
+            toast('Failed to dismiss', 'error');
+        }
+    }
+
+    // ═══════════════════════════════════════════════════
+    // INDIVIDUAL AI SUGGESTIONS
+    // ═══════════════════════════════════════════════════
+
+    function toggleIndividualSuggestions() {
+        const body = document.getElementById('suggestionsBody');
+        const chevron = document.getElementById('suggestionsChevron');
+        const isHidden = body.classList.contains('hidden');
+        body.classList.toggle('hidden');
+        chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+
+    function renderSuggestions(suggestions) {
+        const panel = document.getElementById('panel-suggestions');
+        const list = document.getElementById('suggestionsList');
+        const count = document.getElementById('suggestionsCount');
+
+        if (!suggestions.length) { panel.classList.add('hidden'); return; }
+
+        panel.classList.remove('hidden');
+        count.textContent = suggestions.length;
+
+        list.innerHTML = suggestions.map(s => {
+            if (s.suggestion_type === 'instruction_change') {
+                return `
+                <div class="suggestion-card instruction-card" id="suggestion-${s.id}">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="badge badge-instruction">System Prompt</span>
+                        <span class="badge ${s.confidence === 'high' ? 'badge-accent' : s.confidence === 'medium' ? 'badge-warn' : 'badge-info'}">${esc(s.confidence)}</span>
+                        <span class="text-xs text-txt-3 ml-auto">Based on ${s.drafts_analyzed} drafts</span>
+                    </div>
+                    <div class="text-sm text-txt mb-2 p-2.5 rounded" style="background:rgba(76,201,240,0.05);border:1px solid rgba(76,201,240,0.1);line-height:1.7;">${esc(String(s.suggested_value || ''))}</div>
+                    ${s.reasoning ? `<p class="text-sm text-txt-2 mb-3">${esc(s.reasoning)}</p>` : ''}
+                    <div class="flex gap-2">
+                        <button class="btn btn-approve text-xs py-1.5 px-3" onclick="acceptInstructionChange(${s.id}, ${JSON.stringify(String(s.suggested_value || '')).replace(/'/g, "\\'")})">Add to System Prompt</button>
+                        <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="dismissSuggestion(${s.id})">Dismiss</button>
+                    </div>
+                </div>`;
+            }
+            return `
+            <div class="suggestion-card" id="suggestion-${s.id}">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="badge badge-warn">${esc(s.suggestion_type)}</span>
+                    <span class="badge ${s.confidence === 'high' ? 'badge-accent' : s.confidence === 'medium' ? 'badge-warn' : 'badge-info'}">${esc(s.confidence)}</span>
+                    <span class="text-xs text-txt-3 ml-auto">Based on ${s.drafts_analyzed} drafts</span>
+                </div>
+                <p class="text-sm text-txt-2 mb-3">${esc(s.reasoning)}</p>
+                <div class="flex items-center gap-3 mb-3 text-sm">
+                    <span class="font-mono text-alert">${esc(s.setting_field)}: ${esc(String(s.current_value))}</span>
+                    <svg width="16" height="10" viewBox="0 0 16 10" fill="none"><path d="M1 5h14M11 1l4 4-4 4" stroke="#06D6A0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="font-mono text-accent">${esc(String(s.suggested_value))}</span>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-approve text-xs py-1.5 px-3" onclick="acceptSuggestion(${s.id}, '${esc(s.setting_field)}', '${esc(String(s.suggested_value))}')">Accept</button>
+                    <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="dismissSuggestion(${s.id})">Dismiss</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    async function acceptSuggestion(id, field, value) {
+        try {
+            await supabaseRPC('resolve_voice_suggestion', { p_suggestion_id: id, p_action: 'accepted' });
+
+            // Parse value for correct type
+            let parsed = value;
+            if (!isNaN(value) && value !== '') parsed = parseInt(value);
+            else if (value === 'true') parsed = true;
+            else if (value === 'false') parsed = false;
+
+            currentSettings[field] = parsed;
+            await supabaseRPC('save_voice_settings', { p_brand_id: BRAND_ID, p_settings: { [field]: parsed } });
+
+            // Update UI
+            populateForm();
+            fadeSuggestion(id);
+            toast(`Suggestion accepted — ${field} updated`, 'success');
+        } catch (err) {
+            console.error('Accept suggestion failed:', err);
+            toast('Failed to accept suggestion', 'error');
+        }
+    }
+
+    async function dismissSuggestion(id) {
+        try {
+            await supabaseRPC('resolve_voice_suggestion', { p_suggestion_id: id, p_action: 'dismissed' });
+            fadeSuggestion(id);
+            toast('Suggestion dismissed', 'success');
+        } catch (err) {
+            console.error('Dismiss suggestion failed:', err);
+            toast('Failed to dismiss suggestion', 'error');
+        }
+    }
+
+    async function acceptInstructionChange(id, instructionText) {
+        try {
+            await supabaseRPC('resolve_voice_suggestion', { p_suggestion_id: id, p_action: 'accepted' });
+            const el = document.getElementById('custom_instruction');
+            const current = el.value.trim();
+            const updated = current ? current + '\n\n' + instructionText : instructionText;
+            currentSettings.custom_instruction = updated;
+            await supabaseRPC('save_voice_settings', { p_brand_id: BRAND_ID, p_settings: { custom_instruction: updated } });
+            el.value = updated;
+            fadeSuggestion(id);
+            toast('System prompt updated', 'success');
+        } catch (err) {
+            console.error('Accept instruction change failed:', err);
+            toast('Failed to update system prompt', 'error');
+        }
+    }
+
+    function fadeSuggestion(id) {
+        const card = document.getElementById(`suggestion-${id}`);
+        if (card) {
+            card.classList.add('fade-out');
+            setTimeout(() => {
+                card.remove();
+                const remaining = document.querySelectorAll('#suggestionsList .suggestion-card').length;
+                document.getElementById('suggestionsCount').textContent = remaining;
+                if (!remaining) document.getElementById('panel-suggestions').classList.add('hidden');
+            }, 300);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════
+    // RECENT PATTERNS
+    // ═══════════════════════════════════════════════════
+
+    function renderPatterns(drafts) {
+        if (!drafts.length) {
+            document.getElementById('patternsCount').textContent = '0';
+            return;
+        }
+
+        const total = drafts.length;
+        const approved = drafts.filter(d => d.review_status === 'approved').length;
+        const rejected = drafts.filter(d => d.review_status === 'rejected').length;
+        const skipped = drafts.filter(d => d.review_status === 'skipped').length;
+
+        document.getElementById('patternsCount').textContent = total;
+
+        document.getElementById('patternsStats').innerHTML = `
+            <div class="text-center p-3 rounded-lg" style="background: rgba(255,255,255,0.02);">
+                <div class="font-heading font-bold text-lg text-txt">${total}</div>
+                <div class="text-xs text-txt-3 uppercase">Total</div>
+            </div>
+            <div class="text-center p-3 rounded-lg" style="background: rgba(6,214,160,0.05);">
+                <div class="font-heading font-bold text-lg text-accent">${Math.round(approved / total * 100)}%</div>
+                <div class="text-xs text-txt-3 uppercase">Approved</div>
+            </div>
+            <div class="text-center p-3 rounded-lg" style="background: rgba(255,107,107,0.05);">
+                <div class="font-heading font-bold text-lg text-alert">${Math.round(rejected / total * 100)}%</div>
+                <div class="text-xs text-txt-3 uppercase">Rejected</div>
+            </div>
+            <div class="text-center p-3 rounded-lg" style="background: rgba(255,217,61,0.05);">
+                <div class="font-heading font-bold text-lg text-warn">${Math.round(skipped / total * 100)}%</div>
+                <div class="text-xs text-txt-3 uppercase">Skipped</div>
+            </div>
+        `;
+
+        const rejectedDrafts = drafts.filter(d => d.review_status === 'rejected' && d.human_feedback);
+        if (rejectedDrafts.length) {
+            document.getElementById('rejectedList').innerHTML = `
+                <div class="text-xs text-txt-3 uppercase tracking-wider font-medium mb-2">Recent Rejected Feedback</div>
+                ${rejectedDrafts.slice(0, 10).map(d => `
+                    <div class="text-xs text-txt-2 py-1.5 border-b border-border/50">
+                        <span class="text-txt-3 font-mono">${new Date(d.updated_at).toLocaleDateString()}</span>
+                        — ${esc(d.human_feedback)}
+                    </div>
+                `).join('')}
+            `;
+        }
+    }
+
+    function togglePatterns() {
+        const body = document.getElementById('patternsBody');
+        const chevron = document.getElementById('patternsChevron');
+        const isHidden = body.classList.contains('hidden');
+        body.classList.toggle('hidden');
+        chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+
+    // ═══════════════════════════════════════════════════
+    // AI EXPAND
+    // ═══════════════════════════════════════════════════
+
+    async function expandWithAI(field, personality) {
+        const statusEl = document.getElementById(`${field}_ai_status`);
+        const resultEl = document.getElementById(`${field}_ai_result`);
+
+        // Get input text
+        let inputText = '';
+        if (field === 'about_you') {
+            inputText = document.getElementById('about_you').value.trim();
+        } else {
+            inputText = (currentSettings[field] || []).join(', ');
+        }
+
+        if (!inputText) { toast('Enter some text first before expanding', 'error'); return; }
+
+        if (statusEl) statusEl.innerHTML = '<span class="spinner"></span> Expanding...';
+        resultEl.classList.add('hidden');
+
+        try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 15000);
+
+            const res = await fetch(VOICE_EXPAND_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    brand_id: BRAND_ID,
+                    field: field,
+                    input_text: inputText,
+                    personality: personality,
+                    current_settings: currentSettings,
+                    user_id: activeProfileId
+                }),
+                signal: controller.signal
+            });
+            clearTimeout(timeout);
+
+            if (!res.ok) throw new Error(`Expand failed: ${res.status}`);
+            const data = await res.json();
+
+            if (statusEl) statusEl.textContent = '';
+            showAIResult(field, data);
+        } catch (err) {
+            console.error('AI expand failed:', err);
+            if (statusEl) statusEl.textContent = '';
+            toast(err.name === 'AbortError' ? 'AI expand timed out' : 'AI expand failed', 'error');
+        }
+    }
+
+    function showAIResult(field, data) {
+        const resultEl = document.getElementById(`${field}_ai_result`);
+        resultEl.classList.remove('hidden');
+
+        const isArray = Array.isArray(currentSettings[field]);
+
+        if (isArray) {
+            // For array fields, show suggested items as clickable chips
+            const suggestions = [];
+            if (data.expanded_text) suggestions.push(...data.expanded_text.split(',').map(s => s.trim()).filter(Boolean));
+            if (data.alternatives) data.alternatives.forEach(a => {
+                if (typeof a === 'string') suggestions.push(...a.split(',').map(s => s.trim()).filter(Boolean));
+            });
+            const unique = [...new Set(suggestions)].filter(s => !(currentSettings[field] || []).includes(s));
+
+            resultEl.innerHTML = `
+                <div class="ai-expand-card">
+                    <div class="text-xs text-txt-3 uppercase tracking-wider font-medium mb-2">AI Suggestions — click to add</div>
+                    <div class="flex flex-wrap gap-1.5">
+                        ${unique.map(s => `<button class="settings-chip chip-keyword cursor-pointer hover:opacity-80" onclick="addAISuggestion('${field}', this, '${esc(s.replace(/'/g, "\\'"))}')">${esc(s)}</button>`).join('')}
+                    </div>
+                    <button class="text-xs text-txt-3 hover:text-txt mt-2" onclick="this.closest('.ai-expand-card').remove(); document.getElementById('${field}_ai_result').classList.add('hidden');">Dismiss</button>
+                </div>
+            `;
+        } else {
+            // For text fields (about_you), show primary + alternatives
+            resultEl.innerHTML = `
+                <div class="ai-expand-card">
+                    <div class="text-xs text-txt-3 uppercase tracking-wider font-medium mb-2">AI Expansion</div>
+                    <div class="p-3 rounded border border-border mb-2 text-sm text-txt-2" style="background: rgba(255,255,255,0.02);">${esc(data.expanded_text || '')}</div>
+                    <button class="btn btn-primary text-xs py-1 px-3 mb-2" onclick="useAIText('${field}', this.parentElement.querySelector('.ai-primary-text')?.textContent || '${esc((data.expanded_text || '').replace(/'/g, "\\'"))}')">Use This</button>
+                    ${data.alternatives && data.alternatives.length ? `
+                        <details class="mt-2">
+                            <summary class="text-xs text-txt-3 cursor-pointer hover:text-txt">Show ${data.alternatives.length} alternatives</summary>
+                            <div class="space-y-2 mt-2">
+                                ${data.alternatives.map(alt => `
+                                    <div class="p-3 rounded border border-border text-sm text-txt-2" style="background: rgba(255,255,255,0.02);">${esc(alt)}</div>
+                                    <button class="btn btn-ghost text-xs py-1 px-3" onclick="useAIText('${field}', '${esc(alt.replace(/'/g, "\\'"))}')">Use This</button>
+                                `).join('')}
+                            </div>
+                        </details>
+                    ` : ''}
+                    <div class="mt-2"><button class="text-xs text-txt-3 hover:text-txt" onclick="this.closest('.ai-expand-card').remove(); document.getElementById('${field}_ai_result').classList.add('hidden');">Dismiss</button></div>
+                </div>
+            `;
+        }
+    }
+
+    function useAIText(field, text) {
+        document.getElementById(field).value = text;
+        currentSettings[field] = text;
+        markDirty(field);
+        document.getElementById(`${field}_ai_result`).classList.add('hidden');
+        toast('AI text applied', 'success');
+    }
+
+    function addAISuggestion(field, btn, text) {
+        if (!currentSettings[field]) currentSettings[field] = [];
+        if (!currentSettings[field].includes(text)) {
+            currentSettings[field].push(text);
+            renderChips(field);
+            markDirty(field);
+        }
+        btn.style.opacity = '0.3';
+        btn.style.pointerEvents = 'none';
+    }
+
+    // ═══════════════════════════════════════════════════
+    // DIRTY TRACKING & SAVE
+    // ═══════════════════════════════════════════════════
+
+    function markDirty(field) {
+        dirtyFields.add(field);
+        document.getElementById('saveBar').classList.add('has-changes');
+    }
+
+    function discardChanges() {
+        currentSettings = JSON.parse(JSON.stringify(originalSettings));
+        dirtyFields.clear();
+        populateForm();
+        document.getElementById('saveBar').classList.remove('has-changes');
+        toast('Changes discarded', 'success');
+    }
+
+    async function saveSettings() {
+        if (!dirtyFields.size) return;
+
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+
+        const changed = {};
+        dirtyFields.forEach(field => {
+            changed[field] = currentSettings[field];
+        });
+
+        try {
+            const result = await supabaseRPC('save_voice_settings', {
+                p_brand_id: BRAND_ID,
+                p_settings: changed
+            });
+
+            if (result && result.success) {
+                currentSettings.version = result.version;
+                originalSettings = JSON.parse(JSON.stringify(currentSettings));
+                dirtyFields.clear();
+                document.getElementById('saveBar').classList.remove('has-changes');
+                document.getElementById('versionBadge').textContent = `v${result.version}`;
+                document.getElementById('lastSaved').textContent = 'Saved ' + new Date().toLocaleString();
+                toast(`Settings saved (v${result.version})`, 'success');
+            } else {
+                throw new Error('Save returned unexpected result');
+            }
+        } catch (err) {
+            console.error('Save failed:', err);
+            toast('Failed to save settings', 'error');
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Settings';
+        }
+    }
+
+    // ═══════════════════════════════════════════════════
+    // WIRE UP FORM CHANGE LISTENERS
+    // ═══════════════════════════════════════════════════
+
+    // Text inputs & textareas
+    ['about_you', 'signature_name', 'company_name', 'greeting_custom', 'signoff_custom', 'custom_instruction'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', () => {
+            currentSettings[id] = el.value;
+            markDirty(id);
+            if (id === 'signature_name' || id === 'greeting_custom' || id === 'signoff_custom') {
+                updateGreetingPreview();
+            }
+        });
+    });
+
+    // Number inputs
+    ['subject_max_length', 'max_paragraphs', 'max_sentences_per_paragraph'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('change', () => {
+            currentSettings[id] = parseInt(el.value) || DEFAULTS[id];
+            markDirty(id);
+        });
+    });
+
+    // Toggles
+    ['subject_use_emoji', 'use_recipient_name', 'use_case_studies', 'use_specific_numbers', 'use_questions', 'identify_as_sender', 'include_value_props', 'industry_match_proofs'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('change', () => {
+            currentSettings[id] = el.checked;
+            markDirty(id);
+        });
+    });
+
+    // ═══════════════════════════════════════════════════
+    // UTILITIES
+    // ═══════════════════════════════════════════════════
+
+    function esc(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+
+    function toast(msg, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast toast-${type}`;
+        t.textContent = msg;
+        container.appendChild(t);
+        setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(10px)'; t.style.transition = 'all 0.3s'; }, 3500);
+        setTimeout(() => t.remove(), 4000);
+    }
+
+    // ═══════════════════════════════════════════════════
+    // BOOT
+    // ═══════════════════════════════════════════════════
+
+    checkAuth();
+
+    // ── Profile Switcher ──
+    (function initProfileSwitcher() {
+        const saved = localStorage.getItem('rdgr-active-profile');
+        if (saved) {
+            try {
+                const p = JSON.parse(saved);
+                activeProfileId = p.id;
+                const nameEl = document.getElementById('profileName');
+                const avatarEl = document.getElementById('profileAvatar');
+                if (nameEl) nameEl.textContent = p.name;
+                if (avatarEl) avatarEl.textContent = (p.name || 'B')[0].toUpperCase();
+            } catch(e) {}
+        }
+        const SB_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+        fetch(`${SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+            headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+        }).then(r => r.json()).then(profiles => {
+            const dd = document.getElementById('profileDropdown');
+            if (!dd || !profiles || profiles.length === 0) return;
+            const activeId = saved ? JSON.parse(saved).id : null;
+            dd.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?';
+                const initial = name[0].toUpperCase();
+                const isActive = p.user_id === activeId;
+                return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, "\\'")}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                    <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div>
+                    <span>${name}</span>
+                    ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+                </button>`;
+            }).join('');
+            dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+        }).catch(() => {});
+    })();
+
+    function signOut() {
+        localStorage.removeItem('rdgr-session');
+        localStorage.removeItem('rdgr-active-profile');
+        location.reload();
+    }
+
+    function toggleProfileDD() {
+        const dd = document.getElementById('profileDropdown');
+        dd.classList.toggle('hidden');
+        if (!dd.classList.contains('hidden')) {
+            setTimeout(() => document.addEventListener('click', function closePDD(e) {
+                if (!document.getElementById('profileSwitcher').contains(e.target)) {
+                    dd.classList.add('hidden');
+                }
+                document.removeEventListener('click', closePDD);
+            }), 0);
+        }
+    }
+
+    function selectProfileGlobal(userId, name) {
+        localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+        location.reload();
+    }
+
+    </script>
+</body>
+</html>

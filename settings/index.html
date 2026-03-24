@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Settings | Carlton AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: { base:'#08090D', surface:'#11131A', 'surface-el':'#1A1D28', 'surface-hi':'#242836', border:'#2A2E3D', accent:'#06D6A0', 'accent-dim':'rgba(6,214,160,0.15)', alert:'#FF6B6B', warn:'#FFD93D', info:'#4CC9F0', txt:'#E8ECF1', 'txt-2':'#8A95A9', 'txt-3':'#525E73' },
+                fontFamily: { heading:['"Chakra Petch"','system-ui','sans-serif'], body:['"IBM Plex Sans"','system-ui','sans-serif'], mono:['"JetBrains Mono"','monospace'] },
+            }}
+        }
+    </script>
+    <style>
+        body { font-family:'IBM Plex Sans',system-ui,sans-serif; -webkit-font-smoothing:antialiased; background:#08090D; color:#E8ECF1; }
+        body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:9998; opacity:0.04; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-repeat:repeat; background-size:256px 256px; }
+        ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#2A2E3D; border-radius:3px; }
+        .gate-overlay { position:fixed; inset:0; z-index:9999; background:radial-gradient(ellipse at center,#0D0F16 0%,#08090D 70%); display:flex; align-items:center; justify-content:center; }
+        .gate-overlay.hidden { display:none; }
+        .gate-input { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:0.5rem; padding:0.875rem 1rem; color:#E8ECF1; font-family:'JetBrains Mono',monospace; font-size:0.9rem; outline:none; transition:border-color 0.25s,box-shadow 0.25s; width:100%; }
+        .gate-input:focus { border-color:rgba(6,214,160,0.4); box-shadow:0 0 0 3px rgba(6,214,160,0.08); }
+        .gate-input::placeholder { color:#525E73; }
+        .gate-error { color:#FF6B6B; font-size:0.8rem; margin-top:0.5rem; opacity:0; transition:opacity 0.2s; }
+        .gate-error.show { opacity:1; }
+        @keyframes pulse-live { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(6,214,160,0.5);} 50%{opacity:0.7;box-shadow:0 0 0 6px rgba(6,214,160,0);} }
+        .pulse-dot { width:8px; height:8px; border-radius:50%; background:#06D6A0; animation:pulse-live 2s ease-in-out infinite; }
+        .task-tab { flex:1; padding:0.4rem 0.75rem; font-size:0.75rem; font-weight:500; text-align:center; border-radius:0.375rem; cursor:pointer; color:rgba(255,255,255,0.45); background:transparent; border:none; transition:color 0.2s,background 0.2s; }
+        .task-tab:hover { color:#E8ECF1; }
+        .task-tab.active { background:rgba(6,214,160,0.12); color:#06D6A0; }
+        .btn { font-family:'Chakra Petch',system-ui; font-weight:600; font-size:0.8rem; letter-spacing:0.03em; padding:0.5rem 1rem; border-radius:0.375rem; cursor:pointer; transition:background 0.2s,border-color 0.2s,box-shadow 0.2s,color 0.2s,transform 0.15s; border:none; text-transform:uppercase; }
+        .btn-primary { background:rgba(6,214,160,0.15); color:#06D6A0; border:1px solid rgba(6,214,160,0.3); }
+        .btn-primary:hover { background:rgba(6,214,160,0.25); }
+
+        .settings-card {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: border-color 0.25s, background 0.2s, transform 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+        .settings-card:hover {
+            border-color: var(--card-accent, rgba(6,214,160,0.3));
+            background: #131620;
+            transform: translateY(-2px);
+        }
+        .settings-card .card-icon {
+            width: 48px; height: 48px;
+            border-radius: 0.625rem;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ PASSWORD GATE ═══ -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">Configuration</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">Settings</h1>
+                <p class="text-txt-2 text-sm">Enter the access code to continue</p>
+            </div>
+            <form onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off" autofocus>
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4">Authenticate</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- ── Top Nav ── -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Dashboard</a>
+                        <a href="/chat" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Chat</a>
+                        <a href="/org-chart" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Org Map</a>
+                        <a href="/our-workflows" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Workflows</a>
+                        <a href="/social-dashboard" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Social</a>
+                        <a href="/crm" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">CRM</a>
+                        <a href="/offer-studio" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Offers</a>
+                        <a href="/deft" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">DEFT</a>
+                        <a href="/brain" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">BRAIN</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Profile Switcher -->
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown">
+                        </div>
+                    </div>
+                    <span class="task-tab active" style="flex:none;padding:0.3rem 0.75rem;">Settings</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ── Settings Directory ── -->
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-12">
+            <div class="text-center mb-8">
+                <h2 class="font-heading font-bold text-2xl tracking-wide mb-2">Settings</h2>
+                <p class="text-txt-3 text-sm">Configure AI voice, style, and platform behavior</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                <!-- Social Voice Settings -->
+                <a href="/social-voice-settings" class="settings-card" style="--card-accent: rgba(6,214,160,0.4);">
+                    <div class="card-icon" style="background: rgba(6,214,160,0.08);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-heading font-bold text-base mb-1 text-txt">Social Voice & Style</h3>
+                    <p class="text-xs text-txt-3 leading-relaxed mb-3">Configure how the AI writes DMs and engagement messages across LinkedIn, Instagram, Facebook, X, and Reddit.</p>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-accent">Tone Sliders</span>
+                        <span class="text-txt-3">·</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Content Rules</span>
+                        <span class="text-txt-3">·</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Daily Limits</span>
+                        <span class="text-txt-3">·</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">AI Suggestions</span>
+                    </div>
+                </a>
+
+                <!-- Email Voice Settings -->
+                <a href="/email-voice-settings" class="settings-card" style="--card-accent: rgba(255,217,61,0.4);">
+                    <div class="card-icon" style="background: rgba(255,217,61,0.08);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="#FFD93D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M22 6l-10 7L2 6" stroke="#FFD93D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-heading font-bold text-base mb-1 text-txt">Email Voice & Style</h3>
+                    <p class="text-xs text-txt-3 leading-relaxed mb-3">Configure how outreach email copy is generated, including tone, structure, and AI learning from approved drafts.</p>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider" style="color:#FFD93D;">Voice Config</span>
+                        <span class="text-txt-3">·</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">AI Snapshots</span>
+                        <span class="text-txt-3">·</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Learning Log</span>
+                    </div>
+                </a>
+
+                <!-- Scraper & Discovery Settings -->
+                <a href="/scraper-settings" class="settings-card" style="--card-accent: rgba(76,201,240,0.4);">
+                    <div class="card-icon" style="background: rgba(76,201,240,0.08);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <circle cx="11" cy="11" r="8" stroke="#4CC9F0" stroke-width="1.5"/>
+                            <path d="M21 21l-4.35-4.35" stroke="#4CC9F0" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M8 11h6M11 8v6" stroke="#4CC9F0" stroke-width="1.2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-heading font-bold text-base mb-1 text-txt">Scraper & Discovery</h3>
+                    <p class="text-xs text-txt-3 leading-relaxed mb-3">Configure APIFY scraper inputs for LinkedIn, Twitter, Instagram, Facebook. Manage Reddit wave catcher and pain prospector strategies.</p>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider" style="color:#4CC9F0;">Search Inputs</span>
+                        <span class="text-txt-3">·</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Reddit Strategies</span>
+                        <span class="text-txt-3">·</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">APIFY Budget</span>
+                        <span class="text-txt-3">·</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Run History</span>
+                    </div>
+                </a>
+
+                <!-- DEFT Appearance Settings -->
+                <a href="/deft-settings.html" class="settings-card" style="--card-accent: rgba(168,214,91,0.4);">
+                    <div class="card-icon" style="background: rgba(168,214,91,0.08);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" stroke="#A8D65B" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 8v4l3 3" stroke="#A8D65B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-heading font-bold text-base mb-1 text-txt">DEFT Appearance</h3>
+                    <p class="text-xs text-txt-3 leading-relaxed mb-3">Customize the diet & fitness tracker theme, colors, fonts, background images, and component styling.</p>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider" style="color:#A8D65B;">Themes</span>
+                        <span class="text-txt-3">·</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Colors</span>
+                        <span class="text-txt-3">·</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Fonts</span>
+                        <span class="text-txt-3">·</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Backgrounds</span>
+                    </div>
+                </a>
+
+                <!-- BRAIN Settings -->
+                <a href="/brain" class="settings-card" onclick="event.preventDefault(); window.location.href='/brain'; setTimeout(()=>{ const t=document.getElementById('tab-settings'); if(t) t.click(); }, 500);" style="--card-accent: rgba(245,158,11,0.4);">
+                    <div class="card-icon" style="background: rgba(245,158,11,0.08);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 01-1 1H9a1 1 0 01-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 21h6M10 17v2M14 17v2" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-heading font-bold text-base mb-1 text-txt">BRAIN Settings</h3>
+                    <p class="text-xs text-txt-3 leading-relaxed mb-3">Configure time tracking categories, daily goals, schedule, Google Calendar connection, and directive point values.</p>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider" style="color:#F59E0B;">Categories</span>
+                        <span class="text-txt-3">·</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Daily Goal</span>
+                        <span class="text-txt-3">·</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Schedule</span>
+                        <span class="text-txt-3">·</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Calendar</span>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </div>
+
+<script>
+function handleGate(e) {
+    e.preventDefault();
+    if (document.getElementById('gateInput').value === 'Advance1!') {
+        localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity = '1';
+        return false;
+    }
+    document.getElementById('gateError').classList.add('show');
+    document.getElementById('gateInput').value = '';
+    document.getElementById('gateInput').focus();
+    setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+    return false;
+}
+if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('mainContent').style.opacity = '1';
+}
+
+// ── Profile Switcher ──
+(function initProfileSwitcher() {
+    const saved = localStorage.getItem('rdgr-active-profile');
+    if (saved) {
+        try {
+            const p = JSON.parse(saved);
+            const nameEl = document.getElementById('profileName');
+            const avatarEl = document.getElementById('profileAvatar');
+            if (nameEl) nameEl.textContent = p.name;
+            if (avatarEl) avatarEl.textContent = (p.name || 'B')[0].toUpperCase();
+        } catch(e) {}
+    }
+    const SB_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    fetch(`${SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    }).then(r => r.json()).then(profiles => {
+        const dd = document.getElementById('profileDropdown');
+        if (!dd || !profiles || profiles.length === 0) return;
+        const activeId = saved ? JSON.parse(saved).id : null;
+        dd.innerHTML = profiles.map(p => {
+            const name = p.display_name || p.email || '?';
+            const initial = name[0].toUpperCase();
+            const isActive = p.user_id === activeId;
+            return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, "\\'")}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div>
+                <span>${name}</span>
+                ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+            </button>`;
+        }).join('');
+        dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+    }).catch(() => {});
+})();
+
+function toggleProfileDD() {
+    const dd = document.getElementById('profileDropdown');
+    dd.classList.toggle('hidden');
+    if (!dd.classList.contains('hidden')) {
+        setTimeout(() => document.addEventListener('click', function closePDD(e) {
+            if (!document.getElementById('profileSwitcher').contains(e.target)) {
+                dd.classList.add('hidden');
+            }
+            document.removeEventListener('click', closePDD);
+        }), 0);
+    }
+}
+
+function selectProfileGlobal(userId, name) {
+    localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+    location.reload();
+}
+
+function signOut() {
+    localStorage.removeItem('rdgr-session');
+    localStorage.removeItem('rdgr-active-profile');
+    location.reload();
+}
+</script>
+</body>
+</html>

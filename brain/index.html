@@ -1,0 +1,3469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>BRAIN Tracker | Carlton AI</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        base: 'var(--brain-base)',
+                        surface: 'var(--brain-surface)',
+                        'surface-el': 'var(--brain-surface-el)',
+                        'surface-hi': 'var(--brain-surface-hi)',
+                        border: 'var(--brain-border)',
+                        accent: 'var(--brain-accent)',
+                        'accent-dim': 'var(--brain-accent-dim)',
+                        'accent-2': 'var(--brain-accent-2)',
+                        'accent-2-dim': 'var(--brain-accent-2-dim)',
+                        success: 'var(--brain-success)',
+                        'success-dim': 'var(--brain-success-dim)',
+                        danger: 'var(--brain-danger)',
+                        'danger-dim': 'var(--brain-danger-dim)',
+                        warm: 'var(--brain-warm)',
+                        'warm-dim': 'var(--brain-warm-dim)',
+                        txt: 'var(--brain-txt)',
+                        'txt-2': 'var(--brain-txt-2)',
+                        'txt-3': 'var(--brain-txt-3)',
+                    },
+                    fontFamily: {
+                        heading: ['Rajdhani', 'system-ui', 'sans-serif'],
+                        body: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ═══════════════════════════════════════
+           CSS CUSTOM PROPERTIES — Amber/Gold Theme
+           ═══════════════════════════════════════ */
+        :root {
+            --brain-base: #08090D;
+            --brain-surface: #11131A;
+            --brain-surface-el: #1A1D28;
+            --brain-surface-hi: #232738;
+            --brain-border: #2A2E3D;
+            --brain-accent: #F59E0B;
+            --brain-accent-dim: rgba(245,158,11,0.12);
+            --brain-accent-2: #8B5CF6;
+            --brain-accent-2-dim: rgba(139,92,246,0.12);
+            --brain-success: #10B981;
+            --brain-success-dim: rgba(16,185,129,0.12);
+            --brain-danger: #EF4444;
+            --brain-danger-dim: rgba(239,68,68,0.12);
+            --brain-warm: #FB923C;
+            --brain-warm-dim: rgba(251,146,60,0.12);
+            --brain-txt: #E8ECF1;
+            --brain-txt-2: #8A95A9;
+            --brain-txt-3: #525E73;
+            --brain-radius: 0.75rem;
+        }
+
+        /* ═══════════════════════════════════════
+           BASE STYLES
+           ═══════════════════════════════════════ */
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: var(--brain-base);
+            color: var(--brain-txt);
+        }
+
+        /* Grain Overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.018;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--brain-border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--brain-accent); }
+
+        /* ═══════════════════════════════════════
+           GATE OVERLAY
+           ═══════════════════════════════════════ */
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #0D0E14 0%, #08090D 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: var(--brain-txt);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            width: 100%;
+        }
+        .gate-input:focus {
+            border-color: rgba(245,158,11,0.4);
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.08);
+        }
+        .gate-input::placeholder { color: var(--brain-txt-3); }
+        .gate-error { color: var(--brain-danger); font-size: 0.8rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        /* ═══════════════════════════════════════
+           PULSE DOT (RDGR fixed)
+           ═══════════════════════════════════════ */
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #06D6A0;
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+
+        /* ═══════════════════════════════════════
+           NAV TABS (RDGR fixed styling)
+           ═══════════════════════════════════════ */
+        .task-tab {
+            flex: 1; padding: 0.4rem 0.75rem; font-size: 0.75rem; font-weight: 500;
+            text-align: center; border-radius: 0.375rem; cursor: pointer;
+            color: rgba(255,255,255,0.45); background: transparent; border: none;
+            transition: color 0.2s ease, background 0.2s ease;
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+        }
+        .task-tab:hover { color: #E8ECF1; }
+        .task-tab.active { background: rgba(6,214,160,0.12); color: #06D6A0; }
+
+        /* ═══════════════════════════════════════
+           BRAIN SUB-TABS
+           ═══════════════════════════════════════ */
+        .brain-tab {
+            font-family: 'Rajdhani', system-ui, sans-serif;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--brain-txt-2);
+            border: none;
+            background: transparent;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: color 0.2s, background-color 0.2s;
+            white-space: nowrap;
+        }
+        .brain-tab:hover { color: var(--brain-txt); }
+        .brain-tab.active {
+            background: var(--brain-accent-dim);
+            color: var(--brain-accent);
+        }
+        .brain-tab.disabled {
+            color: var(--brain-txt-3);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .brain-tab.disabled:hover { color: var(--brain-txt-3); }
+
+        /* ═══════════════════════════════════════
+           PANELS & CARDS
+           ═══════════════════════════════════════ */
+        .panel {
+            background: var(--brain-surface);
+            border: 1px solid var(--brain-border);
+            border-radius: var(--brain-radius);
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--brain-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .panel-body { padding: 1rem; }
+
+        /* ═══════════════════════════════════════
+           BUTTONS
+           ═══════════════════════════════════════ */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem;
+            padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.8rem; font-weight: 600;
+            cursor: pointer; border: none; transition: transform 0.15s, opacity 0.15s, box-shadow 0.2s;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary {
+            background: var(--brain-accent); color: #08090D;
+            box-shadow: 0 2px 8px rgba(245,158,11,0.2);
+        }
+        .btn-primary:hover { box-shadow: 0 4px 16px rgba(245,158,11,0.3); }
+        .btn-secondary {
+            background: var(--brain-accent-2); color: #fff;
+            box-shadow: 0 2px 8px rgba(139,92,246,0.2);
+        }
+        .btn-ghost {
+            background: rgba(255,255,255,0.04); color: var(--brain-txt-2);
+            border: 1px solid var(--brain-border);
+        }
+        .btn-ghost:hover { background: rgba(255,255,255,0.06); color: var(--brain-txt); }
+        .btn-success { background: var(--brain-success); color: #fff; }
+        .btn-danger { background: var(--brain-danger-dim); color: var(--brain-danger); }
+        .btn-danger:hover { background: var(--brain-danger); color: #fff; }
+        .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.7rem; }
+
+        /* ═══════════════════════════════════════
+           FORM ELEMENTS
+           ═══════════════════════════════════════ */
+        .form-input {
+            background: var(--brain-surface-el);
+            border: 1px solid var(--brain-border);
+            color: var(--brain-txt);
+            padding: 0.625rem 0.875rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-family: 'Inter', system-ui, sans-serif;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        .form-input:focus {
+            border-color: var(--brain-accent);
+            box-shadow: 0 0 0 2px var(--brain-accent-dim);
+        }
+        .form-input::placeholder { color: var(--brain-txt-3); }
+        .form-label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--brain-txt-2);
+            margin-bottom: 0.375rem;
+        }
+        select.form-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%238A95A9' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            padding-right: 2rem;
+        }
+
+        /* ═══════════════════════════════════════
+           BADGES
+           ═══════════════════════════════════════ */
+        .badge {
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            padding: 0.15rem 0.5rem; border-radius: 9999px;
+            font-size: 0.65rem; font-weight: 600;
+        }
+        .badge-accent { background: var(--brain-accent-dim); color: var(--brain-accent); }
+        .badge-violet { background: var(--brain-accent-2-dim); color: var(--brain-accent-2); }
+        .badge-success { background: var(--brain-success-dim); color: var(--brain-success); }
+        .badge-danger { background: var(--brain-danger-dim); color: var(--brain-danger); }
+        .badge-warm { background: var(--brain-warm-dim); color: var(--brain-warm); }
+        .badge-ghost { background: rgba(255,255,255,0.04); color: var(--brain-txt-2); }
+
+        /* ═══════════════════════════════════════
+           MODAL
+           ═══════════════════════════════════════ */
+        .modal-backdrop {
+            position: fixed; inset: 0; z-index: 9000;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            display: none; align-items: center; justify-content: center;
+            padding: 1rem;
+        }
+        .modal-backdrop.active { display: flex; }
+        .modal-content {
+            background: var(--brain-surface);
+            border: 1px solid var(--brain-border);
+            border-radius: var(--brain-radius);
+            width: 100%; max-width: 480px; max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--brain-border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .modal-body { padding: 1.25rem; }
+        .modal-footer {
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--brain-border);
+            display: flex; gap: 0.5rem; justify-content: flex-end;
+        }
+
+        /* ═══════════════════════════════════════
+           TOAST
+           ═══════════════════════════════════════ */
+        .toast-container {
+            position: fixed; top: 1rem; right: 1rem; z-index: 9500;
+            display: flex; flex-direction: column; gap: 0.5rem;
+        }
+        .toast {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem; font-weight: 500;
+            color: #fff;
+            animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 360px;
+        }
+        .toast-success { background: var(--brain-success); }
+        .toast-error { background: var(--brain-danger); }
+        .toast-info { background: var(--brain-accent-2); }
+        .toast-warning { background: var(--brain-warm); }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(40px); }
+        }
+
+        /* ═══════════════════════════════════════
+           REVEAL ANIMATIONS
+           ═══════════════════════════════════════ */
+        .brain-reveal {
+            animation: brainReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .brain-reveal-1 { animation-delay: 0.05s; opacity: 0; }
+        .brain-reveal-2 { animation-delay: 0.1s; opacity: 0; }
+        .brain-reveal-3 { animation-delay: 0.15s; opacity: 0; }
+        .brain-reveal-4 { animation-delay: 0.2s; opacity: 0; }
+        .brain-reveal-5 { animation-delay: 0.25s; opacity: 0; }
+        .brain-reveal-6 { animation-delay: 0.3s; opacity: 0; }
+        @keyframes brainReveal {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ═══════════════════════════════════════
+           SCORE RING
+           ═══════════════════════════════════════ */
+        .score-ring-container { position: relative; width: 160px; height: 160px; }
+        .score-ring-bg { fill: none; stroke: var(--brain-border); stroke-width: 10; }
+        .score-ring-fill {
+            fill: none; stroke: var(--brain-accent); stroke-width: 10;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .score-ring-fill.goal-met { stroke: var(--brain-success); }
+        .score-ring-center {
+            position: absolute; inset: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+
+        /* ═══════════════════════════════════════
+           TIMER DISPLAY
+           ═══════════════════════════════════════ */
+        .stopwatch {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            line-height: 1;
+            color: var(--brain-txt);
+            text-shadow: 0 0 40px rgba(245,158,11,0.15);
+        }
+        .timer-banner {
+            background: var(--brain-surface);
+            border: 1px solid var(--brain-border);
+            border-radius: var(--brain-radius);
+            overflow: hidden;
+            position: relative;
+        }
+        .timer-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.06;
+            pointer-events: none;
+        }
+
+        /* ═══════════════════════════════════════
+           CATEGORY BUTTON GRID
+           ═══════════════════════════════════════ */
+        .cat-btn {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 0.5rem; padding: 1.25rem 0.75rem;
+            border-radius: var(--brain-radius);
+            border: 1px solid var(--brain-border);
+            cursor: pointer;
+            transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+            background: var(--brain-surface);
+            min-height: 110px;
+        }
+        .cat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .cat-btn:active { transform: scale(0.97); }
+        .cat-btn-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        /* ═══════════════════════════════════════
+           ACTIVITY CARD
+           ═══════════════════════════════════════ */
+        .activity-card {
+            background: var(--brain-surface);
+            border: 1px solid var(--brain-border);
+            border-radius: var(--brain-radius);
+            padding: 0.875rem 1rem;
+            display: flex; align-items: center; gap: 0.75rem;
+            transition: background 0.15s;
+            cursor: pointer;
+            position: relative;
+        }
+        .activity-card:hover { background: var(--brain-surface-el); }
+        .activity-dot {
+            width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+        }
+
+        /* ═══════════════════════════════════════
+           STREAK & LEVEL
+           ═══════════════════════════════════════ */
+        @keyframes flamePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+        }
+        .streak-fire { animation: flamePulse 1.5s ease-in-out infinite; }
+        .xp-bar {
+            height: 6px; border-radius: 3px; background: var(--brain-border);
+            overflow: hidden;
+        }
+        .xp-bar-fill {
+            height: 100%; border-radius: 3px;
+            background: linear-gradient(90deg, var(--brain-accent-2), var(--brain-accent));
+            transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* ═══════════════════════════════════════
+           LEADERBOARD
+           ═══════════════════════════════════════ */
+        .rank-gold { color: #FFD700; }
+        .rank-silver { color: #C0C0C0; }
+        .rank-bronze { color: #CD7F32; }
+
+        /* ═══════════════════════════════════════
+           DATE PICKER
+           ═══════════════════════════════════════ */
+        .date-nav {
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .date-nav-btn {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.04); border: 1px solid var(--brain-border);
+            color: var(--brain-txt-2); cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+        .date-nav-btn:hover { background: var(--brain-accent-dim); color: var(--brain-accent); }
+
+        /* ═══════════════════════════════════════
+           SETTINGS
+           ═══════════════════════════════════════ */
+        .setting-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--brain-border);
+        }
+        .setting-row:last-child { border-bottom: none; }
+        .toggle-switch {
+            width: 36px; height: 20px; border-radius: 10px;
+            background: var(--brain-border); cursor: pointer; position: relative;
+            transition: background 0.2s;
+        }
+        .toggle-switch.on { background: var(--brain-accent); }
+        .toggle-switch::after {
+            content: ''; position: absolute; top: 2px; left: 2px;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #fff; transition: transform 0.2s;
+        }
+        .toggle-switch.on::after { transform: translateX(16px); }
+
+        /* ═══════════════════════════════════════
+           ACHIEVEMENT UNLOCK TOAST
+           ═══════════════════════════════════════ */
+        @keyframes achieveShine {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        .achieve-toast {
+            background: linear-gradient(90deg, var(--brain-accent-2), var(--brain-accent), var(--brain-accent-2));
+            background-size: 200% auto;
+            animation: achieveShine 2s linear;
+        }
+
+        /* ═══════════════════════════════════════
+           DONUT CHART
+           ═══════════════════════════════════════ */
+        .donut-chart { width: 120px; height: 120px; }
+
+        /* Utility */
+        .line-clamp-1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     PASSWORD GATE
+     ═══════════════════════════════════════ -->
+<div id="gate" class="gate-overlay">
+    <div class="w-full max-w-xs px-4">
+        <div class="text-center mb-6">
+            <h2 class="font-heading font-bold text-xl tracking-wide mb-1" style="color: var(--brain-accent);">BRAIN Tracker</h2>
+            <p class="text-xs" style="color: var(--brain-txt-3);">Time Management &middot; Gamification</p>
+        </div>
+        <form onsubmit="return handleGate(event)">
+            <input type="password" id="gateInput" class="gate-input" placeholder="Enter access code" autocomplete="off" autofocus>
+            <div id="gateError" class="gate-error">Invalid code. Try again.</div>
+        </form>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MAIN APPLICATION
+     ═══════════════════════════════════════ -->
+<div id="brainApp" style="opacity: 0;">
+
+    <!-- TOP NAV BAR -->
+    <nav class="sticky top-0 z-50 border-b" style="border-color: #2A2E3D; background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="pulse-dot"></div>
+                <h1 style="font-family: 'Chakra Petch', system-ui, sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.025em; color: #E8ECF1;">RDGR <span style="color: #525E73; font-weight: 400;">Command Center</span></h1>
+                <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                    <a href="/rdgr" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Dashboard</a>
+                    <a href="/chat" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Chat</a>
+                    <a href="/org-chart" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Org Map</a>
+                    <a href="/our-workflows" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Workflows</a>
+                    <a href="/social-dashboard" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Social</a>
+                    <a href="/crm" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">CRM</a>
+                    <a href="/offer-studio" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Offers</a>
+                    <a href="/deft" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">DEFT</a>
+                    <span class="task-tab active" style="flex:none;padding:0.3rem 0.75rem;">BRAIN</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- PROFILE SWITCHER -->
+                <div class="relative" id="profileSwitcher">
+                    <button onclick="toggleProfileDropdown()" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-colors" style="background: rgba(255,255,255,0.04);" id="profileBtn" aria-label="Switch profile" aria-expanded="false" aria-haspopup="true">
+                        <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                        <span class="text-xs font-medium hidden sm:block" id="profileName">Bradford</span>
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    </button>
+                    <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 180px; z-index: 10000;" id="profileDropdown" role="menu"></div>
+                </div>
+                <!-- Settings link -->
+                <a href="/settings" class="hover:opacity-80 transition-opacity p-2" title="Settings" style="color: #525E73;" aria-label="Settings">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 10a2 2 0 100-4 2 2 0 000 4z" stroke="currentColor" stroke-width="1.2"/><path d="M13.5 8a5.5 5.5 0 01-.08.92l1.47 1.15a.35.35 0 01.08.45l-1.4 2.42a.35.35 0 01-.43.15l-1.73-.7a5.4 5.4 0 01-1.59.92l-.26 1.84a.35.35 0 01-.35.3H7.29a.35.35 0 01-.35-.3l-.26-1.84a5.4 5.4 0 01-1.59-.92l-1.73.7a.35.35 0 01-.43-.15l-1.4-2.42a.35.35 0 01.08-.45l1.47-1.15A5.6 5.6 0 012.5 8c0-.31.03-.62.08-.92L1.11 5.93a.35.35 0 01-.08-.45l1.4-2.42a.35.35 0 01.43-.15l1.73.7a5.4 5.4 0 011.59-.92l.26-1.84A.35.35 0 016.79.55h1.42c.17 0 .32.13.35.3l.26 1.84c.58.2 1.12.52 1.59.92l1.73-.7a.35.35 0 01.43.15l1.4 2.42a.35.35 0 01-.08.45l-1.47 1.15c.05.3.08.61.08.92z" stroke="currentColor" stroke-width="1.2"/></svg>
+                </a>
+            </div>
+        </div>
+        <!-- Mobile nav -->
+        <div class="flex gap-1 p-1 overflow-x-auto sm:hidden mx-4 mb-2 rounded-lg" style="background: rgba(255,255,255,0.04);">
+            <a href="/rdgr" class="task-tab" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">Dashboard</a>
+            <a href="/chat" class="task-tab" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">Chat</a>
+            <a href="/org-chart" class="task-tab" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">Org Map</a>
+            <a href="/our-workflows" class="task-tab" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">Workflows</a>
+            <a href="/social-dashboard" class="task-tab" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">Social</a>
+            <a href="/crm" class="task-tab" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">CRM</a>
+            <a href="/offer-studio" class="task-tab" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">Offers</a>
+            <a href="/deft" class="task-tab" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">DEFT</a>
+            <span class="task-tab active" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;">BRAIN</span>
+        </div>
+    </nav>
+
+    <!-- BRAIN SUB-TAB BAR -->
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pt-4 pb-4">
+        <div class="flex gap-1 p-0.5 rounded-lg overflow-x-auto" style="background: rgba(255,255,255,0.04);" role="tablist" aria-label="BRAIN sections">
+            <button class="brain-tab active" id="tab-dashboard" onclick="switchView('dashboard')" role="tab" aria-selected="true" aria-controls="view-dashboard">Dashboard</button>
+            <button class="brain-tab" id="tab-timer" onclick="switchView('timer')" role="tab" aria-selected="false" aria-controls="view-timer">Timer</button>
+            <button class="brain-tab" id="tab-activities" onclick="switchView('activities')" role="tab" aria-selected="false" aria-controls="view-activities">Activities</button>
+            <button class="brain-tab" id="tab-calendar" onclick="switchView('calendar')" role="tab" aria-selected="false" aria-controls="view-calendar">Calendar</button>
+            <button class="brain-tab" id="tab-leaderboard" onclick="switchView('leaderboard')" role="tab" aria-selected="false" aria-controls="view-leaderboard">Leaderboard</button>
+            <button class="brain-tab" id="tab-achievements" onclick="switchView('achievements')" role="tab" aria-selected="false" aria-controls="view-achievements">Achievements</button>
+            <button class="brain-tab" id="tab-analytics" onclick="switchView('analytics')" role="tab" aria-selected="false" aria-controls="view-analytics">Analytics</button>
+            <button class="brain-tab" id="tab-settings" onclick="switchView('settings')" role="tab" aria-selected="false" aria-controls="view-settings">Settings</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: DASHBOARD (Home)
+         ═══════════════════════════════════════ -->
+    <div id="view-dashboard" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" role="tabpanel" aria-labelledby="tab-dashboard">
+
+        <!-- Active Timer Banner (shown when timer is running) -->
+        <div id="dashTimerBanner" class="timer-banner mb-4 brain-reveal brain-reveal-1" style="display: none;">
+            <div class="p-4 flex items-center justify-between flex-wrap gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-3 h-3 rounded-full animate-pulse" id="dashTimerDot"></div>
+                    <div>
+                        <p class="font-heading font-bold text-sm" id="dashTimerTitle">Timer Running</p>
+                        <p class="text-xs" style="color: var(--brain-txt-2);" id="dashTimerCategory">Category</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="font-mono text-2xl font-bold" style="color: var(--brain-accent);" id="dashTimerClock">00:00:00</span>
+                    <span class="badge badge-accent" id="dashTimerEst">~0 pts</span>
+                    <button class="btn btn-success btn-sm" onclick="handleStopTimer()">Stop</button>
+                    <button class="btn btn-ghost btn-sm" onclick="handleCancelTimer()">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main grid: Score Ring + Stats + Activities -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+            <!-- Left column: Score ring + Streak + Level -->
+            <div class="space-y-4">
+                <!-- Daily Score Ring -->
+                <div class="panel brain-reveal brain-reveal-1">
+                    <div class="panel-body flex flex-col items-center py-6">
+                        <p class="font-heading font-bold text-xs uppercase tracking-widest mb-3" style="color: var(--brain-txt-2);">Today's Score</p>
+                        <div class="score-ring-container">
+                            <svg viewBox="0 0 180 180" class="w-full h-full" style="transform: rotate(-90deg);">
+                                <circle cx="90" cy="90" r="75" class="score-ring-bg"/>
+                                <circle cx="90" cy="90" r="75" class="score-ring-fill" id="scoreRingFill"
+                                    stroke-dasharray="471.24" stroke-dashoffset="471.24"/>
+                            </svg>
+                            <div class="score-ring-center">
+                                <span class="font-mono text-3xl font-bold" id="scorePoints">0</span>
+                                <span class="text-xs" style="color: var(--brain-txt-3);">pts</span>
+                                <span class="text-xs mt-1 font-mono" style="color: var(--brain-txt-2);" id="scoreGoalLabel">/ 100 goal</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 mt-3">
+                            <div class="text-center">
+                                <p class="font-mono text-sm font-bold" style="color: var(--brain-txt);" id="scoreMinutes">0</p>
+                                <p class="text-xs" style="color: var(--brain-txt-3);">minutes</p>
+                            </div>
+                            <div style="width: 1px; height: 24px; background: var(--brain-border);"></div>
+                            <div class="text-center">
+                                <p class="font-mono text-sm font-bold" style="color: var(--brain-txt);" id="scoreActivities">0</p>
+                                <p class="text-xs" style="color: var(--brain-txt-3);">activities</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Streak + Level Row -->
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Streak -->
+                    <div class="panel brain-reveal brain-reveal-2">
+                        <div class="panel-body text-center py-4">
+                            <span class="text-2xl streak-fire" id="streakIcon">&#128293;</span>
+                            <p class="font-mono text-xl font-bold mt-1" id="streakCount">0</p>
+                            <p class="text-xs" style="color: var(--brain-txt-3);">day streak</p>
+                        </div>
+                    </div>
+                    <!-- Level -->
+                    <div class="panel brain-reveal brain-reveal-2">
+                        <div class="panel-body text-center py-4">
+                            <div class="inline-flex items-center justify-center w-10 h-10 rounded-lg font-heading font-bold text-lg" style="background: var(--brain-accent-2-dim); color: var(--brain-accent-2);" id="levelBadge">1</div>
+                            <p class="text-xs mt-2 font-medium" style="color: var(--brain-txt-2);">Level <span id="levelNum">1</span></p>
+                            <div class="xp-bar mt-2 mx-2">
+                                <div class="xp-bar-fill" id="xpBarFill" style="width: 0%;"></div>
+                            </div>
+                            <p class="text-xs mt-1 font-mono" style="color: var(--brain-txt-3);" id="xpLabel">0 / 100 XP</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mini Leaderboard -->
+                <div class="panel brain-reveal brain-reveal-3">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Leaderboard</span>
+                        <span class="badge badge-ghost">This Week</span>
+                    </div>
+                    <div class="panel-body p-0" id="leaderboardSnippet">
+                        <div class="px-4 py-6 text-center text-xs" style="color: var(--brain-txt-3);">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center column: Category Donut + Today's Activities -->
+            <div class="space-y-4">
+                <!-- Category Breakdown -->
+                <div class="panel brain-reveal brain-reveal-2">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Categories Today</span>
+                    </div>
+                    <div class="panel-body flex items-center gap-4">
+                        <div class="flex-shrink-0">
+                            <svg class="donut-chart" viewBox="0 0 120 120" id="categoryDonut">
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="var(--brain-border)" stroke-width="16"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1 space-y-1.5" id="categoryLegend">
+                            <p class="text-xs" style="color: var(--brain-txt-3);">No activities yet</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Activities -->
+                <div class="panel brain-reveal brain-reveal-3">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Today's Activities</span>
+                        <span class="font-mono text-xs" style="color: var(--brain-txt-3);" id="todayActivityCount">0 activities</span>
+                    </div>
+                    <div class="panel-body p-0 max-h-[400px] overflow-y-auto" id="todayActivityList">
+                        <div class="px-4 py-8 text-center text-xs" style="color: var(--brain-txt-3);">No activities logged today</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column: Quick Actions -->
+            <div class="space-y-4">
+                <div class="panel brain-reveal brain-reveal-2">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Quick Start Timer</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="grid grid-cols-2 gap-3" id="quickActionGrid">
+                            <div class="text-center py-6 text-xs" style="color: var(--brain-txt-3);">Loading categories...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Directive Points Summary -->
+                <div class="panel brain-reveal brain-reveal-3">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Directive Points</span>
+                        <span class="badge badge-violet" id="directivePointsTotal">0 pts</span>
+                    </div>
+                    <div class="panel-body">
+                        <p class="text-xs" style="color: var(--brain-txt-3);">Points earned from approving directives, reviewing content, and other RDGR actions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: TIMER
+         ═══════════════════════════════════════ -->
+    <div id="view-timer" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-timer">
+
+        <!-- Active Timer (shown when running) -->
+        <div id="timerActiveSection" style="display: none;">
+            <div class="panel brain-reveal brain-reveal-1">
+                <div class="panel-body py-10 text-center">
+                    <div class="inline-flex items-center gap-2 mb-4">
+                        <div class="w-4 h-4 rounded-full animate-pulse" id="timerActiveDot"></div>
+                        <span class="badge" id="timerActiveCatBadge">Category</span>
+                    </div>
+                    <h2 class="font-heading font-bold text-lg mb-2" id="timerActiveTitle">Timer Running</h2>
+                    <div class="stopwatch my-6" id="timerStopwatch">00:00:00</div>
+                    <div class="flex items-center justify-center gap-3 mb-6">
+                        <span class="badge badge-accent text-sm px-3 py-1" id="timerEstPoints">~0 pts</span>
+                    </div>
+                    <div class="flex items-center justify-center gap-3">
+                        <button class="btn btn-success px-6" onclick="handleStopTimer()">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="3" width="10" height="10" rx="1" fill="currentColor"/></svg>
+                            Stop & Log
+                        </button>
+                        <button class="btn btn-ghost" onclick="handleCancelTimer()">Cancel</button>
+                    </div>
+                    <p class="text-xs mt-3 font-mono" style="color: var(--brain-txt-3);" id="timerStartedAt">Started at --:--</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Grid (shown when no timer) -->
+        <div id="timerIdleSection">
+            <div class="mb-6">
+                <h2 class="font-heading font-bold text-lg" style="color: var(--brain-txt);">Start a Timer</h2>
+                <p class="text-xs mt-1" style="color: var(--brain-txt-2);">Choose a category to begin tracking time</p>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4" id="timerCategoryGrid">
+                <div class="text-center py-8 text-xs col-span-full" style="color: var(--brain-txt-3);">Loading categories...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: ACTIVITIES
+         ═══════════════════════════════════════ -->
+    <div id="view-activities" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-activities">
+
+        <!-- Activity Log Header -->
+        <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+            <div class="date-nav">
+                <button class="date-nav-btn" onclick="navDate(-1)" aria-label="Previous day">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8.5 3.5L5 7l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+                <button class="px-3 py-1.5 rounded-lg text-sm font-medium" style="background: rgba(255,255,255,0.04); color: var(--brain-txt);" onclick="openDatePicker()" id="activityDateLabel">Today</button>
+                <button class="date-nav-btn" onclick="navDate(1)" aria-label="Next day">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.5 3.5L9 7l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+                <input type="date" id="activityDateInput" class="sr-only" onchange="setDateFromPicker(this.value)">
+            </div>
+            <div class="flex gap-2">
+                <button class="btn btn-primary" onclick="openModal('logActivityModal')">Log Activity</button>
+                <button class="btn btn-ghost" onclick="openModal('logChainModal')">Log Chain</button>
+            </div>
+        </div>
+
+        <!-- Activity List -->
+        <div class="space-y-2" id="activityLogList">
+            <div class="text-center py-8 text-xs" style="color: var(--brain-txt-3);">Loading activities...</div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: CALENDAR
+         ═══════════════════════════════════════ -->
+    <div id="view-calendar" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-calendar">
+
+        <!-- Calendar Header -->
+        <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+            <div class="date-nav">
+                <button class="date-nav-btn" onclick="navCalWeek(-1)" aria-label="Previous week">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8.5 3.5L5 7l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+                <span class="px-3 py-1.5 rounded-lg text-sm font-medium" style="background: rgba(255,255,255,0.04); color: var(--brain-txt);" id="calWeekLabel">This Week</span>
+                <button class="date-nav-btn" onclick="navCalWeek(1)" aria-label="Next week">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.5 3.5L9 7l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="flex gap-2">
+                <button class="btn btn-ghost btn-sm" onclick="loadCalendarEvents()" id="calRefreshBtn">Refresh</button>
+            </div>
+        </div>
+
+        <!-- Calendar Events List -->
+        <div class="space-y-2" id="calendarEventList">
+            <div class="text-center py-12 text-xs" style="color: var(--brain-txt-3);">Loading calendar events...</div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: LEADERBOARD
+         ═══════════════════════════════════════ -->
+    <div id="view-leaderboard" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-leaderboard">
+
+        <!-- Period Tabs -->
+        <div class="flex gap-2 mb-6">
+            <button class="btn btn-primary btn-sm lb-period-btn active" onclick="loadLeaderboard('day')" data-period="day">Today</button>
+            <button class="btn btn-ghost btn-sm lb-period-btn" onclick="loadLeaderboard('week')" data-period="week">This Week</button>
+            <button class="btn btn-ghost btn-sm lb-period-btn" onclick="loadLeaderboard('month')" data-period="month">This Month</button>
+            <button class="btn btn-ghost btn-sm lb-period-btn" onclick="loadLeaderboard('all')" data-period="all">All Time</button>
+        </div>
+
+        <!-- Leaderboard Cards -->
+        <div class="space-y-3" id="leaderboardFullList">
+            <div class="text-center py-12 text-xs" style="color: var(--brain-txt-3);">Loading leaderboard...</div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: ACHIEVEMENTS
+         ═══════════════════════════════════════ -->
+    <div id="view-achievements" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-achievements">
+
+        <!-- Achievement Stats Bar -->
+        <div class="flex items-center gap-4 mb-6 flex-wrap">
+            <div class="panel px-4 py-3 brain-reveal brain-reveal-1">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">&#127942;</span>
+                    <div>
+                        <p class="font-mono text-sm font-bold" id="achieveEarnedCount">0</p>
+                        <p class="text-xs" style="color: var(--brain-txt-3);">Earned</p>
+                    </div>
+                </div>
+            </div>
+            <div class="panel px-4 py-3 brain-reveal brain-reveal-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">&#11088;</span>
+                    <div>
+                        <p class="font-mono text-sm font-bold" id="achieveTotalXP">0 XP</p>
+                        <p class="text-xs" style="color: var(--brain-txt-3);">From Achievements</p>
+                    </div>
+                </div>
+            </div>
+            <div class="panel px-4 py-3 brain-reveal brain-reveal-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">&#128274;</span>
+                    <div>
+                        <p class="font-mono text-sm font-bold" id="achieveLockedCount">0</p>
+                        <p class="text-xs" style="color: var(--brain-txt-3);">Remaining</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievement Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" id="achievementGrid">
+            <div class="text-center py-12 col-span-full text-xs" style="color: var(--brain-txt-3);">Loading achievements...</div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: ANALYTICS
+         ═══════════════════════════════════════ -->
+    <div id="view-analytics" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-analytics">
+
+        <!-- Period Selector -->
+        <div class="flex items-center justify-between flex-wrap gap-3 mb-6">
+            <div class="flex gap-2">
+                <button class="btn btn-primary btn-sm an-period-btn active" onclick="loadAnalytics('7')" data-period="7">7 Days</button>
+                <button class="btn btn-ghost btn-sm an-period-btn" onclick="loadAnalytics('30')" data-period="30">30 Days</button>
+                <button class="btn btn-ghost btn-sm an-period-btn" onclick="loadAnalytics('90')" data-period="90">90 Days</button>
+            </div>
+            <span class="text-xs font-mono" style="color: var(--brain-txt-3);" id="analyticsDateRange"></span>
+        </div>
+
+        <!-- Stats Cards Row -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="panel brain-reveal brain-reveal-1">
+                <div class="panel-body text-center py-4">
+                    <p class="font-mono text-2xl font-bold" style="color: var(--brain-accent);" id="anTotalPoints">0</p>
+                    <p class="text-xs mt-1" style="color: var(--brain-txt-3);">Total Points</p>
+                </div>
+            </div>
+            <div class="panel brain-reveal brain-reveal-2">
+                <div class="panel-body text-center py-4">
+                    <p class="font-mono text-2xl font-bold" style="color: var(--brain-accent-2);" id="anAvgDaily">0</p>
+                    <p class="text-xs mt-1" style="color: var(--brain-txt-3);">Avg Daily</p>
+                </div>
+            </div>
+            <div class="panel brain-reveal brain-reveal-3">
+                <div class="panel-body text-center py-4">
+                    <p class="font-mono text-2xl font-bold" style="color: var(--brain-success);" id="anBestDay">0</p>
+                    <p class="text-xs mt-1" style="color: var(--brain-txt-3);">Best Day</p>
+                </div>
+            </div>
+            <div class="panel brain-reveal brain-reveal-4">
+                <div class="panel-body text-center py-4">
+                    <p class="font-mono text-2xl font-bold" style="color: var(--brain-warm);" id="anGoalDays">0</p>
+                    <p class="text-xs mt-1" style="color: var(--brain-txt-3);">Days Goal Met</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Points Trend Chart -->
+        <div class="panel mb-4 brain-reveal brain-reveal-3">
+            <div class="panel-header">
+                <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Points Trend</span>
+                <span class="badge badge-ghost" id="anTrendGoalLine">Goal: 100</span>
+            </div>
+            <div class="panel-body" style="height: 220px; position: relative; overflow: hidden;">
+                <svg id="pointsChart" width="100%" height="100%" viewBox="0 0 800 200" preserveAspectRatio="none"></svg>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Category Breakdown -->
+            <div class="panel brain-reveal brain-reveal-4">
+                <div class="panel-header">
+                    <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Category Breakdown</span>
+                </div>
+                <div class="panel-body">
+                    <div class="flex items-start gap-6">
+                        <svg class="flex-shrink-0" viewBox="0 0 160 160" width="140" height="140" id="anCatDonut">
+                            <circle cx="80" cy="80" r="65" fill="none" stroke="var(--brain-border)" stroke-width="20"/>
+                        </svg>
+                        <div class="flex-1 space-y-2" id="anCatLegend">
+                            <p class="text-xs" style="color: var(--brain-txt-3);">No data</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Report -->
+            <div class="panel brain-reveal brain-reveal-5">
+                <div class="panel-header">
+                    <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Weekly Report</span>
+                </div>
+                <div class="panel-body" id="weeklyReportContent">
+                    <div class="text-xs" style="color: var(--brain-txt-3);">Loading report...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Minutes Bar Chart -->
+        <div class="panel mt-4 brain-reveal brain-reveal-5">
+            <div class="panel-header">
+                <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Minutes Per Day</span>
+            </div>
+            <div class="panel-body" style="height: 180px; position: relative; overflow: hidden;">
+                <svg id="minutesChart" width="100%" height="100%" viewBox="0 0 800 160" preserveAspectRatio="none"></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: SETTINGS
+         ═══════════════════════════════════════ -->
+    <div id="view-settings" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-settings">
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- Profile & Schedule -->
+            <div class="space-y-4">
+                <!-- Profile -->
+                <div class="panel brain-reveal brain-reveal-1">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Profile</span>
+                    </div>
+                    <div class="panel-body space-y-3">
+                        <div>
+                            <label class="form-label">Display Name</label>
+                            <input type="text" class="form-input" id="settDisplayName" readonly style="opacity: 0.6;">
+                        </div>
+                        <div>
+                            <label class="form-label">Timezone</label>
+                            <select class="form-input" id="settTimezone">
+                                <option value="America/New_York">Eastern (New York)</option>
+                                <option value="America/Chicago">Central (Chicago)</option>
+                                <option value="America/Denver">Mountain (Denver)</option>
+                                <option value="America/Los_Angeles">Pacific (Los Angeles)</option>
+                                <option value="UTC">UTC</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Schedule -->
+                <div class="panel brain-reveal brain-reveal-2">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Schedule</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="form-label">Wake Time</label>
+                                <input type="time" class="form-input" id="settWakeTime" value="06:00">
+                            </div>
+                            <div>
+                                <label class="form-label">Sleep Time</label>
+                                <input type="time" class="form-input" id="settSleepTime" value="22:00">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Goal -->
+                <div class="panel brain-reveal brain-reveal-3">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Daily Goal</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="flex items-center gap-3">
+                            <input type="number" class="form-input" id="settDailyGoal" value="100" min="10" max="1000" step="10" style="max-width: 120px;">
+                            <span class="text-sm" style="color: var(--brain-txt-2);">points per day</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary w-full" onclick="saveProfileSettings()">Save Profile Settings</button>
+
+                <!-- Google Calendar -->
+                <div class="panel brain-reveal brain-reveal-4">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Google Calendar</span>
+                        <span class="badge badge-ghost" id="calConnectionStatus">Not Connected</span>
+                    </div>
+                    <div class="panel-body space-y-3">
+                        <div>
+                            <label class="form-label">Calendar ID</label>
+                            <input type="text" class="form-input" id="settCalendarId" placeholder="primary">
+                        </div>
+                        <button class="btn btn-ghost btn-sm" onclick="testCalendarConnection()">Test Connection</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories & Directive Points -->
+            <div class="space-y-4">
+                <!-- Categories -->
+                <div class="panel brain-reveal brain-reveal-1">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Categories</span>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('addCategoryModal')">+ Add</button>
+                    </div>
+                    <div class="panel-body p-0" id="settCategoryList">
+                        <div class="px-4 py-6 text-center text-xs" style="color: var(--brain-txt-3);">Loading categories...</div>
+                    </div>
+                </div>
+
+                <!-- Directive Points (Admin) -->
+                <div class="panel brain-reveal brain-reveal-2">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Directive Points</span>
+                        <span class="badge badge-ghost">Admin</span>
+                    </div>
+                    <div class="panel-body" id="settDirectivePoints">
+                        <div class="text-xs" style="color: var(--brain-txt-3);">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- end #brainApp -->
+
+<!-- ═══════════════════════════════════════
+     MODALS
+     ═══════════════════════════════════════ -->
+
+<!-- Stop Timer Modal -->
+<div class="modal-backdrop" id="stopTimerModal" onclick="if(event.target===this)closeModal('stopTimerModal')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="font-heading font-bold text-base">Stop Timer</h3>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('stopTimerModal')">&times;</button>
+        </div>
+        <div class="modal-body space-y-3">
+            <div class="flex items-center justify-between p-3 rounded-lg" style="background: var(--brain-surface-el);">
+                <div>
+                    <p class="text-sm font-medium" id="stopTimerTitle">Activity</p>
+                    <p class="text-xs" style="color: var(--brain-txt-2);" id="stopTimerDuration">Duration: 0 min</p>
+                </div>
+                <span class="badge badge-accent text-sm" id="stopTimerPoints">~0 pts</span>
+            </div>
+            <div>
+                <label class="form-label">Notes (optional)</label>
+                <textarea class="form-input" id="stopTimerNotes" rows="2" placeholder="How did it go?"></textarea>
+            </div>
+            <div>
+                <label class="form-label">People involved (optional)</label>
+                <input type="text" class="form-input" id="stopTimerPeople" placeholder="Comma-separated names">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('stopTimerModal')">Keep Running</button>
+            <button class="btn btn-success" onclick="confirmStopTimer()">Stop & Log</button>
+        </div>
+    </div>
+</div>
+
+<!-- Log Activity Modal -->
+<div class="modal-backdrop" id="logActivityModal" onclick="if(event.target===this)closeModal('logActivityModal')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="font-heading font-bold text-base">Log Activity</h3>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('logActivityModal')">&times;</button>
+        </div>
+        <div class="modal-body space-y-3">
+            <div>
+                <label class="form-label">Category</label>
+                <select class="form-input" id="logActCategory"></select>
+            </div>
+            <div>
+                <label class="form-label">Title</label>
+                <input type="text" class="form-input" id="logActTitle" placeholder="What did you do?">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Duration (min)</label>
+                    <input type="number" class="form-input" id="logActDuration" min="1" max="480" value="30">
+                </div>
+                <div>
+                    <label class="form-label">Started At</label>
+                    <input type="datetime-local" class="form-input" id="logActStarted">
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Description (optional)</label>
+                <textarea class="form-input" id="logActDescription" rows="2" placeholder="Details..."></textarea>
+            </div>
+            <div>
+                <label class="form-label">People (optional)</label>
+                <input type="text" class="form-input" id="logActPeople" placeholder="Comma-separated names">
+            </div>
+            <div>
+                <label class="form-label">Notes (optional)</label>
+                <input type="text" class="form-input" id="logActNotes" placeholder="Any notes">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('logActivityModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitLogActivity()">Log Activity</button>
+        </div>
+    </div>
+</div>
+
+<!-- Log Chain Modal -->
+<div class="modal-backdrop" id="logChainModal" onclick="if(event.target===this)closeModal('logChainModal')">
+    <div class="modal-content" style="max-width: 560px;">
+        <div class="modal-header">
+            <h3 class="font-heading font-bold text-base">Log Chained Activities</h3>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('logChainModal')">&times;</button>
+        </div>
+        <div class="modal-body space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Chain Start</label>
+                    <input type="datetime-local" class="form-input" id="chainStart">
+                </div>
+                <div>
+                    <label class="form-label">Chain End</label>
+                    <input type="datetime-local" class="form-input" id="chainEnd">
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Distribution</label>
+                <div class="flex gap-2">
+                    <label class="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" name="chainDist" value="even" checked> Even</label>
+                    <label class="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" name="chainDist" value="weighted"> Weighted</label>
+                    <label class="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" name="chainDist" value="manual"> Manual</label>
+                </div>
+            </div>
+            <div id="chainActivitiesList" class="space-y-2">
+                <!-- Dynamic rows added here -->
+            </div>
+            <button class="btn btn-ghost btn-sm w-full" onclick="addChainRow()">+ Add Activity</button>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('logChainModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitLogChain()">Log Chain</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal-backdrop" id="addCategoryModal" onclick="if(event.target===this)closeModal('addCategoryModal')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="font-heading font-bold text-base">Add Category</h3>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('addCategoryModal')">&times;</button>
+        </div>
+        <div class="modal-body space-y-3">
+            <div>
+                <label class="form-label">Name</label>
+                <input type="text" class="form-input" id="addCatName" placeholder="e.g., Meditation">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Color</label>
+                    <input type="color" class="form-input" id="addCatColor" value="#F59E0B" style="height: 40px; padding: 4px;">
+                </div>
+                <div>
+                    <label class="form-label">Icon</label>
+                    <div class="relative">
+                        <button type="button" class="form-input text-left flex items-center gap-2" id="addCatIconBtn" onclick="toggleEmojiPicker()" style="cursor: pointer;">
+                            <span id="addCatIconPreview" class="text-lg">&#11088;</span>
+                            <span class="text-xs" style="color: var(--brain-txt-3);">Pick emoji</span>
+                        </button>
+                        <input type="hidden" id="addCatIcon" value="star">
+                        <div id="emojiPickerDropdown" class="absolute left-0 top-full mt-1 p-2 rounded-lg border hidden" style="background: var(--brain-surface); border-color: var(--brain-border); z-index: 100; width: 260px;">
+                            <div class="grid grid-cols-7 gap-1" id="emojiPickerGrid"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Points/min</label>
+                    <input type="number" class="form-input" id="addCatPtsMin" value="1.0" min="0.1" max="10" step="0.1">
+                </div>
+                <div>
+                    <label class="form-label">Bonus Multiplier</label>
+                    <input type="number" class="form-input" id="addCatMultiplier" value="1.0" min="0.5" max="5" step="0.1">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('addCategoryModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitAddCategory()">Add Category</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Activity Modal -->
+<div class="modal-backdrop" id="editActivityModal" onclick="if(event.target===this)closeModal('editActivityModal')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="font-heading font-bold text-base">Edit Activity</h3>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('editActivityModal')">&times;</button>
+        </div>
+        <div class="modal-body space-y-3">
+            <input type="hidden" id="editActId">
+            <div>
+                <label class="form-label">Category</label>
+                <select class="form-input" id="editActCategory"></select>
+            </div>
+            <div>
+                <label class="form-label">Title</label>
+                <input type="text" class="form-input" id="editActTitle">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Duration (min)</label>
+                    <input type="number" class="form-input" id="editActDuration" min="1" max="480">
+                </div>
+                <div>
+                    <label class="form-label">Started At</label>
+                    <input type="datetime-local" class="form-input" id="editActStarted">
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Notes</label>
+                <input type="text" class="form-input" id="editActNotes">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-danger" onclick="deleteEditActivity()">Delete</button>
+            <div class="flex-1"></div>
+            <button class="btn btn-ghost" onclick="closeModal('editActivityModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitEditActivity()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Start Timer Title Prompt -->
+<div class="modal-backdrop" id="timerTitleModal" onclick="if(event.target===this)closeModal('timerTitleModal')">
+    <div class="modal-content" style="max-width: 360px;">
+        <div class="modal-header">
+            <h3 class="font-heading font-bold text-base">Start Timer</h3>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('timerTitleModal')">&times;</button>
+        </div>
+        <div class="modal-body space-y-3">
+            <input type="hidden" id="timerTitleCatSlug">
+            <div class="flex items-center gap-2 mb-2">
+                <div class="w-3 h-3 rounded-full" id="timerTitleCatDot"></div>
+                <span class="text-sm font-medium" id="timerTitleCatName">Category</span>
+            </div>
+            <div>
+                <label class="form-label">Title (optional)</label>
+                <input type="text" class="form-input" id="timerTitleInput" placeholder="What are you doing?">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('timerTitleModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="confirmStartTimer()">Start</button>
+        </div>
+    </div>
+</div>
+
+<!-- Sync Calendar Event Modal -->
+<div class="modal-backdrop" id="syncEventModal" onclick="if(event.target===this)closeModal('syncEventModal')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="font-heading font-bold text-base">Log Calendar Event as Activity</h3>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('syncEventModal')">&times;</button>
+        </div>
+        <div class="modal-body space-y-3">
+            <input type="hidden" id="syncEventId">
+            <input type="hidden" id="syncEventStart">
+            <div class="p-3 rounded-lg" style="background: var(--brain-surface-el);">
+                <p class="text-sm font-medium" id="syncEventTitle">Event</p>
+                <p class="text-xs mt-1" style="color: var(--brain-txt-2);" id="syncEventTime">Time</p>
+            </div>
+            <div>
+                <label class="form-label">Category</label>
+                <select class="form-input" id="syncEventCategory"></select>
+            </div>
+            <div>
+                <label class="form-label">Duration (min)</label>
+                <input type="number" class="form-input" id="syncEventDuration" min="1" max="480">
+            </div>
+            <div>
+                <label class="form-label">Notes (optional)</label>
+                <textarea class="form-input" id="syncEventNotes" rows="2" placeholder="Add notes about this event..."></textarea>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded-lg" style="background: var(--brain-accent-dim);">
+                <span class="text-xs font-medium" style="color: var(--brain-accent);">Estimated points</span>
+                <span class="font-mono text-sm font-bold" style="color: var(--brain-accent);" id="syncEventEstPts">0 pts</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('syncEventModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="confirmSyncEvent()">Log Activity</button>
+        </div>
+    </div>
+</div>
+
+<!-- Leaderboard User Detail Modal -->
+<div class="modal-backdrop" id="lbDetailModal" onclick="if(event.target===this)closeModal('lbDetailModal')">
+    <div class="modal-content" style="max-width: 520px;">
+        <div class="modal-header">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style="background: var(--brain-accent-dim); color: var(--brain-accent);" id="lbDetailAvatar">?</div>
+                <div>
+                    <h3 class="font-heading font-bold text-base" id="lbDetailName">User</h3>
+                    <p class="text-xs" style="color: var(--brain-txt-3);" id="lbDetailPeriod">This Week</p>
+                </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('lbDetailModal')">&times;</button>
+        </div>
+        <div class="modal-body" id="lbDetailBody">
+            <div class="text-xs" style="color: var(--brain-txt-3);">Loading...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════ -->
+<script>
+
+// ═══════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════
+const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+const BRAIN_BRIDGE_URL = 'https://n8n.carltonaiservices.com/webhook/brain-bridge';
+const PROFILE_STORAGE_KEY = 'rdgr-active-profile';
+
+// Supabase JS client for real-time
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let activeProfileId = null;
+let activeProfileName = 'Bradford';
+let currentView = 'dashboard';
+let activeTimer = null;
+let timerInterval = null;
+let categories = [];
+let dailySummary = null;
+let todayActivities = [];
+let realtimeChannels = [];
+let activityLogDate = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+let webhookAvailable = false; // checked on init
+let settingsLoaded = false;
+
+// Category icons fallback
+const CAT_ICONS = {
+    business: '\uD83D\uDCBC', study: '\uD83D\uDCDA', exercise: '\uD83C\uDFCB\uFE0F',
+    household: '\uD83C\uDFE0', family: '\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67', general: '\u2B50',
+    meditation: '\uD83E\uDDD8', social: '\uD83D\uDCAC', creative: '\uD83C\uDFA8',
+    // Icon name → emoji map (DB stores icon names like "briefcase")
+    briefcase: '\uD83D\uDCBC', book: '\uD83D\uDCDA', dumbbell: '\uD83C\uDFCB\uFE0F',
+    home: '\uD83C\uDFE0', heart: '\u2764\uFE0F', clock: '\u23F0',
+    brain: '\uD83E\uDDE0', star: '\u2B50', fire: '\uD83D\uDD25',
+    music: '\uD83C\uDFB5', palette: '\uD83C\uDFA8', chat: '\uD83D\uDCAC',
+    run: '\uD83C\uDFC3', yoga: '\uD83E\uDDD8', cook: '\uD83C\uDF73',
+    code: '\uD83D\uDCBB', write: '\u270D\uFE0F', read: '\uD83D\uDCD6',
+    pray: '\uD83D\uDE4F', sleep: '\uD83D\uDE34', walk: '\uD83D\uDEB6',
+};
+
+function getCatIcon(cat) {
+    if (!cat.icon) return CAT_ICONS[cat.slug] || '\u2B50';
+    // If the icon is already an emoji (starts with non-ASCII), use it directly
+    if (cat.icon.charCodeAt(0) > 127) return cat.icon;
+    // Otherwise map the icon name to an emoji
+    return CAT_ICONS[cat.icon] || CAT_ICONS[cat.slug] || '\u2B50';
+}
+
+// ═══════════════════════════════════════
+// SUPABASE HELPERS
+// ═══════════════════════════════════════
+async function supabaseSelect(table, query = '') {
+    const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
+    try {
+        const res = await fetch(url, {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+        });
+        if (!res.ok) { console.error('Supabase error:', res.status, await res.text()); return null; }
+        return await res.json();
+    } catch (err) { console.error('Supabase fetch error:', table, err); return null; }
+}
+
+async function supabaseWrite(table, method, body, matchQuery = '') {
+    const url = `${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`;
+    try {
+        const res = await fetch(url, {
+            method,
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            },
+            body: method === 'DELETE' ? undefined : JSON.stringify(body)
+        });
+        if (!res.ok) { console.error('Supabase write error:', res.status, await res.text()); return null; }
+        const text = await res.text();
+        return text ? JSON.parse(text) : true;
+    } catch (err) { console.error('Supabase write error:', err); return null; }
+}
+
+// ═══════════════════════════════════════
+// BRAIN-BRIDGE API
+// ═══════════════════════════════════════
+async function brainApi(operation, data = {}, { silent = false } = {}) {
+    if (!activeProfileId) {
+        if (!silent) toast('Please select a profile first', 'error');
+        return null;
+    }
+    try {
+        const res = await fetch(BRAIN_BRIDGE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ operation, user_id: activeProfileId, data })
+        });
+        const text = await res.text();
+        if (!text) { console.warn(`brainApi(${operation}): empty response`); return null; }
+        let result;
+        try { result = JSON.parse(text); } catch(e) {
+            console.warn(`brainApi(${operation}): non-JSON response:`, text.substring(0, 200));
+            return null;
+        }
+        if (result && result.success === false) {
+            if (!silent) toast(result.error || 'Something went wrong', 'error');
+            return null;
+        }
+        return result;
+    } catch (err) {
+        console.warn(`brainApi(${operation}) error:`, err.message);
+        if (!silent) toast('Connection error', 'error');
+        return null;
+    }
+}
+
+// ═══════════════════════════════════════
+// WEBHOOK HEALTH CHECK
+// ═══════════════════════════════════════
+async function checkWebhookHealth() {
+    try {
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(), 5000);
+        const res = await fetch(BRAIN_BRIDGE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ operation: 'get_settings', user_id: '00000000-0000-0000-0000-000000000001', data: {} }),
+            signal: controller.signal
+        });
+        const json = await res.json();
+        webhookAvailable = json.success === true;
+    } catch {
+        webhookAvailable = false;
+    }
+    console.log('BRAIN webhook available:', webhookAvailable);
+    return webhookAvailable;
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function toast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = `toast toast-${type}`;
+    el.textContent = message;
+    container.appendChild(el);
+    setTimeout(() => {
+        el.style.animation = 'toastOut 0.3s ease forwards';
+        setTimeout(() => el.remove(), 300);
+    }, 3000);
+}
+
+// ═══════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-backdrop.active').forEach(m => m.classList.remove('active'));
+    }
+});
+
+// ═══════════════════════════════════════
+// AUTH GATE
+// ═══════════════════════════════════════
+function handleGate(e) {
+    e.preventDefault();
+    if (document.getElementById('gateInput').value === 'Advance1!') {
+        localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('brainApp').style.opacity = '1';
+        initBrain();
+        return false;
+    }
+    document.getElementById('gateError').classList.add('show');
+    document.getElementById('gateInput').value = '';
+    document.getElementById('gateInput').focus();
+    setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+    return false;
+}
+
+if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('brainApp').style.opacity = '1';
+    initBrain();
+}
+
+// ═══════════════════════════════════════
+// PROFILE SWITCHER
+// ═══════════════════════════════════════
+
+// Migrate old localStorage key
+if (!localStorage.getItem(PROFILE_STORAGE_KEY) && localStorage.getItem('deft-active-profile')) {
+    localStorage.setItem(PROFILE_STORAGE_KEY, localStorage.getItem('deft-active-profile'));
+    localStorage.removeItem('deft-active-profile');
+}
+
+async function loadProfiles() {
+    const profiles = await supabaseSelect('deft_user_profiles', 'select=user_id,display_name,email&order=display_name');
+    const dropdown = document.getElementById('profileDropdown');
+    dropdown.innerHTML = '';
+    if (profiles && profiles.length > 0) {
+        profiles.forEach(p => {
+            const btn = document.createElement('button');
+            btn.className = 'w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2';
+            btn.style.cssText = 'color: #E8ECF1; background: transparent;';
+            btn.onmouseenter = () => btn.style.background = 'rgba(255,255,255,0.04)';
+            btn.onmouseleave = () => btn.style.background = 'transparent';
+            const initial = (p.display_name || p.email || '?')[0].toUpperCase();
+            const isActive = p.user_id === activeProfileId;
+            btn.innerHTML = `
+                <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                     style="background: ${isActive ? 'rgba(6,214,160,0.15)' : 'rgba(255,255,255,0.06)'}; color: ${isActive ? '#06D6A0' : '#8A95A9'};">
+                    ${initial}
+                </div>
+                <span>${p.display_name || p.email}</span>
+                ${isActive ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+            `;
+            btn.setAttribute('role', 'menuitem');
+            btn.onclick = () => selectProfile(p.user_id, p.display_name || p.email);
+            dropdown.appendChild(btn);
+        });
+    }
+
+    // Sign Out button
+    const signOutDiv = document.createElement('div');
+    signOutDiv.style.cssText = 'border-top: 1px solid #2A2E3D; margin-top: 0.25rem; padding-top: 0.25rem;';
+    signOutDiv.innerHTML = '<button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button>';
+    dropdown.appendChild(signOutDiv);
+}
+
+function signOut() {
+    localStorage.removeItem('rdgr-session');
+    localStorage.removeItem('rdgr-active-profile');
+    location.reload();
+}
+
+function selectProfile(userId, name) {
+    localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+    location.reload();
+}
+
+function toggleProfileDropdown() {
+    const dd = document.getElementById('profileDropdown');
+    const btn = document.getElementById('profileBtn');
+    dd.classList.toggle('hidden');
+    btn.setAttribute('aria-expanded', !dd.classList.contains('hidden'));
+    if (!dd.classList.contains('hidden')) {
+        setTimeout(() => {
+            document.addEventListener('click', closeProfileDropdown, { once: true });
+        }, 0);
+    }
+}
+
+function closeProfileDropdown(e) {
+    const dd = document.getElementById('profileDropdown');
+    if (!document.getElementById('profileSwitcher').contains(e.target)) {
+        dd.classList.add('hidden');
+        document.getElementById('profileBtn').setAttribute('aria-expanded', 'false');
+    }
+}
+
+// ═══════════════════════════════════════
+// REAL-TIME SUBSCRIPTIONS
+// ═══════════════════════════════════════
+function setupRealtimeSubscriptions() {
+    realtimeChannels.forEach(ch => supabaseClient.removeChannel(ch));
+    realtimeChannels = [];
+    if (!activeProfileId) return;
+
+    const timerCh = supabaseClient.channel('brain-timer-' + activeProfileId)
+        .on('postgres_changes', {
+            event: '*', schema: 'public', table: 'brain_timers',
+            filter: `user_id=eq.${activeProfileId}`
+        }, handleTimerChange)
+        .subscribe();
+    realtimeChannels.push(timerCh);
+
+    const scoreCh = supabaseClient.channel('brain-scores-' + activeProfileId)
+        .on('postgres_changes', {
+            event: '*', schema: 'public', table: 'brain_daily_scores',
+            filter: `user_id=eq.${activeProfileId}`
+        }, handleScoreChange)
+        .subscribe();
+    realtimeChannels.push(scoreCh);
+
+    const actCh = supabaseClient.channel('brain-activities-' + activeProfileId)
+        .on('postgres_changes', {
+            event: 'INSERT', schema: 'public', table: 'brain_activities',
+            filter: `user_id=eq.${activeProfileId}`
+        }, handleNewActivity)
+        .subscribe();
+    realtimeChannels.push(actCh);
+
+    const achieveCh = supabaseClient.channel('brain-achievements-' + activeProfileId)
+        .on('postgres_changes', {
+            event: 'INSERT', schema: 'public', table: 'brain_achievements',
+            filter: `user_id=eq.${activeProfileId}`
+        }, handleAchievementUnlock)
+        .subscribe();
+    realtimeChannels.push(achieveCh);
+}
+
+function handleTimerChange(payload) {
+    if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+        activeTimer = payload.new;
+        startStopwatchDisplay();
+        renderTimerState();
+    } else if (payload.eventType === 'DELETE') {
+        activeTimer = null;
+        stopStopwatchDisplay();
+        renderTimerState();
+    }
+}
+
+function handleScoreChange(payload) {
+    if (payload.new) {
+        dailySummary = payload.new;
+        renderScoreRing();
+    }
+}
+
+function handleNewActivity(payload) {
+    if (payload.new) {
+        todayActivities.unshift(payload.new);
+        renderTodayActivities();
+        if (currentView === 'activities') loadActivities();
+    }
+}
+
+function handleAchievementUnlock(payload) {
+    if (payload.new) {
+        toast(`Achievement unlocked: ${payload.new.title || 'New achievement'}!`, 'success');
+    }
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+async function initBrain() {
+    const savedProfile = localStorage.getItem(PROFILE_STORAGE_KEY);
+    if (savedProfile) {
+        try {
+            const p = JSON.parse(savedProfile);
+            activeProfileId = p.id;
+            activeProfileName = p.name;
+            document.getElementById('profileName').textContent = p.name;
+            document.getElementById('profileAvatar').textContent = p.name[0].toUpperCase();
+        } catch(e) {}
+    }
+
+    await loadProfiles();
+
+    if (!activeProfileId) {
+        const profiles = await supabaseSelect('deft_user_profiles', 'select=user_id,display_name,email&order=display_name&limit=1');
+        if (profiles && profiles.length > 0) {
+            const p = profiles[0];
+            selectProfile(p.user_id, p.display_name || p.email);
+            return; // selectProfile will call loadDashboardData
+        }
+    }
+
+    if (activeProfileId) {
+        // Check webhook health (non-blocking for page load)
+        checkWebhookHealth();
+        setupRealtimeSubscriptions();
+        await loadDashboardData();
+    }
+}
+
+async function loadDashboardData() {
+    if (!activeProfileId) return;
+    const today = new Date().toLocaleDateString('en-CA');
+
+    // Read directly from Supabase tables (reliable) — webhook used only for writes
+    const [profileRows, catRows, timerRows, scoreRows, activityRows, leaderboardResult] = await Promise.all([
+        supabaseSelect('brain_user_profiles', `user_id=eq.${activeProfileId}&select=*`),
+        supabaseSelect('brain_categories', `user_id=eq.${activeProfileId}&is_active=eq.true&order=sort_order&select=*`),
+        supabaseSelect('brain_timers', `user_id=eq.${activeProfileId}&select=*`),
+        supabaseSelect('brain_daily_scores', `user_id=eq.${activeProfileId}&score_date=eq.${today}&select=*`),
+        supabaseSelect('brain_activities', `user_id=eq.${activeProfileId}&started_at=gte.${today}T00:00:00&started_at=lt.${today}T23:59:59&order=started_at.desc&select=*`),
+        brainApi('get_leaderboard', { period: 'week' }, { silent: true }),
+    ]);
+
+    // Profile
+    const profile = (profileRows && profileRows[0]) || {};
+    document.getElementById('settDisplayName').value = activeProfileName;
+    document.getElementById('settWakeTime').value = (profile.wake_time || '06:00:00').slice(0, 5);
+    document.getElementById('settSleepTime').value = (profile.sleep_time || '22:00:00').slice(0, 5);
+    document.getElementById('settDailyGoal').value = profile.daily_goal_points || 100;
+    if (profile.google_credential_id) {
+        document.getElementById('calConnectionStatus').textContent = 'Connected';
+        document.getElementById('calConnectionStatus').className = 'badge badge-success';
+        document.getElementById('settCalendarId').value = profile.google_calendar_id || 'primary';
+    }
+
+    // Categories
+    categories = catRows || [];
+
+    // Timer
+    activeTimer = (timerRows && timerRows.length > 0) ? timerRows[0] : null;
+    if (activeTimer) startStopwatchDisplay();
+    else stopStopwatchDisplay();
+
+    // Daily score
+    dailySummary = (scoreRows && scoreRows[0]) || {};
+    dailySummary.daily_goal = profile.daily_goal_points || 100;
+
+    // Today's activities
+    todayActivities = activityRows || [];
+
+    // Level info from profile
+    const levelInfo = {
+        level: profile.level || 1,
+        xp: profile.xp || profile.total_points || 0,
+        xp_for_current_level: 0,
+        xp_for_next_level: 100,
+    };
+    // Level = floor(sqrt(total_xp / 100)) + 1
+    const totalXp = levelInfo.xp;
+    levelInfo.level = Math.floor(Math.sqrt(totalXp / 100)) + 1;
+    levelInfo.xp_for_current_level = Math.pow(levelInfo.level - 1, 2) * 100;
+    levelInfo.xp_for_next_level = Math.pow(levelInfo.level, 2) * 100;
+
+    // Streak from profile
+    const streakInfo = {
+        current_streak: profile.current_streak || 0,
+        longest_streak: profile.longest_streak || 0,
+    };
+
+    // Render everything
+    renderScoreRing();
+    renderStreakBadge(streakInfo);
+    renderLevelBadge(levelInfo);
+    renderLeaderboardSnippet(leaderboardResult);
+    renderCategoryDonut();
+    renderTodayActivities();
+    renderQuickActions();
+    renderTimerState();
+    renderCategoryGrid();
+    renderSettingsCategories();
+    populateCategoryDropdowns();
+}
+
+// ═══════════════════════════════════════
+// VIEW SWITCHING
+// ═══════════════════════════════════════
+function switchView(view) {
+    currentView = view;
+    const views = ['dashboard', 'timer', 'activities', 'calendar', 'leaderboard', 'achievements', 'analytics', 'settings'];
+    views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.style.display = v === view ? '' : 'none';
+        const tab = document.getElementById(`tab-${v}`);
+        if (tab) {
+            tab.classList.toggle('active', v === view);
+            tab.setAttribute('aria-selected', v === view ? 'true' : 'false');
+        }
+    });
+
+    // Re-trigger reveal animations
+    const activeView = document.getElementById(`view-${view}`);
+    if (activeView) {
+        activeView.querySelectorAll('.brain-reveal').forEach(el => {
+            el.style.animation = 'none';
+            el.offsetHeight;
+            el.style.animation = '';
+        });
+    }
+
+    // Lazy-load
+    if (view === 'dashboard') loadDashboardData();
+    if (view === 'activities') loadActivities();
+    if (view === 'settings' && !settingsLoaded) loadSettings();
+    if (view === 'calendar') loadCalendarEvents();
+    if (view === 'leaderboard') loadLeaderboard('week');
+    if (view === 'achievements') loadAchievements();
+    if (view === 'analytics') loadAnalytics('7');
+}
+
+// ═══════════════════════════════════════
+// DASHBOARD RENDERING
+// ═══════════════════════════════════════
+function renderScoreRing() {
+    const ds = dailySummary || {};
+    const points = ds.total_points || 0;
+    const goal = ds.daily_goal || 100;
+    const pct = Math.min(points / goal, 1);
+    const circumference = 2 * Math.PI * 75;
+    const offset = circumference * (1 - pct);
+
+    const ring = document.getElementById('scoreRingFill');
+    ring.setAttribute('stroke-dashoffset', offset);
+    ring.classList.toggle('goal-met', pct >= 1);
+
+    document.getElementById('scorePoints').textContent = Math.round(points);
+    document.getElementById('scoreGoalLabel').textContent = `/ ${goal} goal`;
+    document.getElementById('scoreMinutes').textContent = Math.round(ds.total_minutes || 0);
+    document.getElementById('scoreActivities').textContent = ds.activities_count || todayActivities.length || 0;
+    document.getElementById('directivePointsTotal').textContent = `${ds.directive_points || 0} pts`;
+}
+
+function renderStreakBadge(result) {
+    const data = result?.data || result || {};
+    const streak = data.current_streak || 0;
+    document.getElementById('streakCount').textContent = streak;
+    document.getElementById('streakIcon').style.opacity = streak > 0 ? '1' : '0.3';
+}
+
+function renderLevelBadge(result) {
+    const data = result?.data || result || {};
+    const level = data.level || 1;
+    const xp = data.xp || 0;
+    const xpNext = data.xp_for_next_level || 100;
+    const xpCurr = data.xp_for_current_level || 0;
+    const pct = xpNext > xpCurr ? ((xp - xpCurr) / (xpNext - xpCurr)) * 100 : 0;
+
+    document.getElementById('levelBadge').textContent = level;
+    document.getElementById('levelNum').textContent = level;
+    document.getElementById('xpBarFill').style.width = `${Math.min(pct, 100)}%`;
+    document.getElementById('xpLabel').textContent = `${xp} / ${xpNext} XP`;
+}
+
+function renderLeaderboardSnippet(result) {
+    const data = result?.data?.leaderboard || result?.leaderboard || [];
+    const container = document.getElementById('leaderboardSnippet');
+    if (!data.length) {
+        container.innerHTML = '<div class="px-4 py-4 text-center text-xs" style="color: var(--brain-txt-3);">No data yet</div>';
+        return;
+    }
+    const ranks = ['rank-gold', 'rank-silver', 'rank-bronze'];
+    const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
+    container.innerHTML = data.slice(0, 3).map((u, i) => `
+        <div class="flex items-center gap-3 px-4 py-2.5 ${i < 2 ? 'border-b' : ''}" style="border-color: var(--brain-border); ${u.user_id === activeProfileId ? 'background: var(--brain-accent-dim);' : ''}">
+            <span class="text-sm ${ranks[i] || ''}">${medals[i] || (i + 1)}</span>
+            <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background: rgba(255,255,255,0.06); color: var(--brain-txt-2);">${(u.display_name || '?')[0]}</div>
+            <span class="text-sm flex-1 line-clamp-1">${u.display_name || 'User'}</span>
+            <span class="font-mono text-xs font-bold" style="color: var(--brain-accent);">${u.period_points || 0}</span>
+        </div>
+    `).join('');
+}
+
+function renderCategoryDonut() {
+    const ds = dailySummary || {};
+    const breakdown = ds.category_breakdown || {};
+    const entries = Object.entries(breakdown).filter(([_, v]) => v > 0);
+    const svg = document.getElementById('categoryDonut');
+    const legend = document.getElementById('categoryLegend');
+
+    if (!entries.length) {
+        svg.innerHTML = '<circle cx="60" cy="60" r="50" fill="none" stroke="var(--brain-border)" stroke-width="16"/>';
+        legend.innerHTML = '<p class="text-xs" style="color: var(--brain-txt-3);">No activities yet</p>';
+        return;
+    }
+
+    const total = entries.reduce((s, [_, v]) => s + v, 0);
+    const circumference = 2 * Math.PI * 50;
+    let offset = 0;
+    let paths = '';
+    let legendHtml = '';
+
+    entries.forEach(([catName, value]) => {
+        const cat = categories.find(c => c.name === catName || c.slug === catName);
+        const color = cat?.color || '#8A95A9';
+        const pct = value / total;
+        const dash = circumference * pct;
+        paths += `<circle cx="60" cy="60" r="50" fill="none" stroke="${color}" stroke-width="16"
+            stroke-dasharray="${dash} ${circumference - dash}" stroke-dashoffset="${-offset}"
+            transform="rotate(-90 60 60)"/>`;
+        offset += dash;
+        legendHtml += `<div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background: ${color};"></div>
+            <span class="text-xs flex-1 line-clamp-1">${catName}</span>
+            <span class="text-xs font-mono" style="color: var(--brain-txt-2);">${Math.round(pct * 100)}%</span>
+        </div>`;
+    });
+
+    svg.innerHTML = paths;
+    legend.innerHTML = legendHtml;
+}
+
+function renderTodayActivities() {
+    const container = document.getElementById('todayActivityList');
+    const count = document.getElementById('todayActivityCount');
+    count.textContent = `${todayActivities.length} activit${todayActivities.length === 1 ? 'y' : 'ies'}`;
+
+    if (!todayActivities.length) {
+        container.innerHTML = '<div class="px-4 py-8 text-center text-xs" style="color: var(--brain-txt-3);">No activities logged today</div>';
+        return;
+    }
+
+    container.innerHTML = todayActivities.map(a => {
+        const cat = categories.find(c => c.category_id === a.category_id || c.slug === a.category_slug);
+        const color = cat?.color || '#8A95A9';
+        const catName = cat?.name || a.category_slug || 'General';
+        const time = a.started_at ? new Date(a.started_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+        return `<div class="flex items-center gap-3 px-4 py-2.5 border-b" style="border-color: var(--brain-border);">
+            <div class="activity-dot" style="background: ${color};"></div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium line-clamp-1">${a.title || 'Untitled'}</p>
+                <p class="text-xs" style="color: var(--brain-txt-3);">${time} &middot; ${catName}</p>
+            </div>
+            <span class="badge badge-ghost">${a.duration_min || 0}m</span>
+            <span class="badge badge-accent">${a.points_earned || 0} pts</span>
+        </div>`;
+    }).join('');
+}
+
+function renderQuickActions() {
+    const grid = document.getElementById('quickActionGrid');
+    if (!categories.length) {
+        grid.innerHTML = '<div class="text-center py-4 col-span-2 text-xs" style="color: var(--brain-txt-3);">No categories configured</div>';
+        return;
+    }
+    grid.innerHTML = categories.filter(c => c.is_active !== false).map(c => {
+        const icon = getCatIcon(c);
+        return `<button class="cat-btn" onclick="promptStartTimer('${c.slug}', '${c.name}', '${c.color}')" style="border-color: ${c.color}20;">
+            <div class="cat-btn-icon" style="background: ${c.color}20; color: ${c.color};">${icon}</div>
+            <span class="text-xs font-medium" style="color: var(--brain-txt);">${c.name}</span>
+            <span class="text-xs font-mono" style="color: var(--brain-txt-3);">${c.points_per_minute || 1} pts/m</span>
+        </button>`;
+    }).join('');
+}
+
+// ═══════════════════════════════════════
+// TIMER FUNCTIONS
+// ═══════════════════════════════════════
+function renderTimerState() {
+    const banner = document.getElementById('dashTimerBanner');
+    const activeSection = document.getElementById('timerActiveSection');
+    const idleSection = document.getElementById('timerIdleSection');
+
+    if (activeTimer) {
+        banner.style.display = '';
+        activeSection.style.display = '';
+        idleSection.style.display = 'none';
+        const cat = categories.find(c => c.category_id === activeTimer.category_id || c.slug === activeTimer.category_slug);
+        const color = cat?.color || '#F59E0B';
+        const catName = cat?.name || activeTimer.category_slug || 'Activity';
+
+        // Dashboard banner
+        document.getElementById('dashTimerDot').style.background = color;
+        document.getElementById('dashTimerTitle').textContent = activeTimer.title || catName;
+        document.getElementById('dashTimerCategory').textContent = catName;
+        banner.style.borderColor = color + '40';
+
+        // Timer page
+        document.getElementById('timerActiveDot').style.background = color;
+        document.getElementById('timerActiveCatBadge').textContent = catName;
+        document.getElementById('timerActiveCatBadge').style.cssText = `background: ${color}20; color: ${color};`;
+        document.getElementById('timerActiveTitle').textContent = activeTimer.title || catName;
+        document.getElementById('timerStartedAt').textContent = `Started at ${new Date(activeTimer.started_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+    } else {
+        banner.style.display = 'none';
+        activeSection.style.display = 'none';
+        idleSection.style.display = '';
+    }
+}
+
+function renderCategoryGrid() {
+    const grid = document.getElementById('timerCategoryGrid');
+    if (!categories.length) {
+        grid.innerHTML = '<div class="text-center py-8 col-span-full text-xs" style="color: var(--brain-txt-3);">No categories. Go to Settings to add some.</div>';
+        return;
+    }
+    grid.innerHTML = categories.filter(c => c.is_active !== false).map(c => {
+        const icon = getCatIcon(c);
+        return `<button class="cat-btn" onclick="promptStartTimer('${c.slug}', '${c.name}', '${c.color}')">
+            <div class="cat-btn-icon" style="background: ${c.color}20; color: ${c.color}; font-size: 1.5rem;">${icon}</div>
+            <span class="text-sm font-bold font-heading" style="color: var(--brain-txt);">${c.name}</span>
+            <span class="text-xs font-mono" style="color: var(--brain-txt-3);">${c.points_per_minute || 1} pts/min</span>
+            <span class="text-xs" style="color: var(--brain-txt-3);">60 min = ${Math.round((c.points_per_minute || 1) * 60 * (c.bonus_multiplier || 1))} pts</span>
+        </button>`;
+    }).join('');
+}
+
+function promptStartTimer(slug, name, color) {
+    if (activeTimer) { toast('A timer is already running', 'warning'); return; }
+    document.getElementById('timerTitleCatSlug').value = slug;
+    document.getElementById('timerTitleCatDot').style.background = color;
+    document.getElementById('timerTitleCatName').textContent = name;
+    document.getElementById('timerTitleInput').value = '';
+    openModal('timerTitleModal');
+    document.getElementById('timerTitleInput').focus();
+}
+
+async function confirmStartTimer() {
+    const slug = document.getElementById('timerTitleCatSlug').value;
+    const title = document.getElementById('timerTitleInput').value.trim();
+    closeModal('timerTitleModal');
+
+    // Find the category to get its ID
+    const cat = categories.find(c => c.slug === slug);
+    if (!cat) { toast('Category not found', 'error'); return; }
+
+    toast('Starting timer...', 'info');
+
+    // Write directly to Supabase
+    const now = new Date().toISOString();
+    const result = await supabaseWrite('brain_timers', 'POST', {
+        user_id: activeProfileId,
+        category_id: cat.category_id,
+        title: title || cat.name,
+        started_at: now,
+    });
+
+    if (result && result.length > 0) {
+        activeTimer = result[0];
+        startStopwatchDisplay();
+        renderTimerState();
+        toast('Timer started!', 'success');
+    } else {
+        toast('Failed to start timer', 'error');
+    }
+}
+
+function handleStopTimer() {
+    if (!activeTimer || !activeTimer.started_at) return;
+    const startTime = new Date(activeTimer.started_at).getTime();
+    if (isNaN(startTime)) { toast('Timer has invalid start time', 'error'); return; }
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const mins = Math.max(1, Math.round(elapsed / 60));
+    const cat = categories.find(c => c.category_id === activeTimer.category_id);
+    const est = Math.round(mins * (cat?.points_per_minute || 1) * (cat?.bonus_multiplier || 1));
+
+    document.getElementById('stopTimerTitle').textContent = activeTimer.title || cat?.name || 'Activity';
+    document.getElementById('stopTimerDuration').textContent = `Duration: ${mins} min`;
+    document.getElementById('stopTimerPoints').textContent = `~${est} pts`;
+    document.getElementById('stopTimerNotes').value = '';
+    document.getElementById('stopTimerPeople').value = '';
+    openModal('stopTimerModal');
+}
+
+async function confirmStopTimer() {
+    closeModal('stopTimerModal');
+    if (!activeTimer || !activeTimer.started_at) return;
+
+    const notes = document.getElementById('stopTimerNotes').value.trim();
+    const peopleStr = document.getElementById('stopTimerPeople').value.trim();
+    const people = peopleStr ? peopleStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    toast('Stopping timer...', 'info');
+
+    // Try webhook first (handles points, achievements, streaks, daily score)
+    if (webhookAvailable) {
+        const result = await brainApi('stop_timer', { notes, people, connections: [] });
+        if (result && result.success !== false) {
+            activeTimer = null;
+            stopStopwatchDisplay();
+            renderTimerState();
+            // Webhook response data:{} is empty — re-read from Supabase
+            await loadDashboardData();
+            toast('Timer stopped — activity logged!', 'success');
+            return;
+        }
+        console.warn('stop_timer webhook failed, using fallback');
+    }
+
+    // Fallback: direct Supabase writes (skips achievement/streak checks)
+    const startTime = new Date(activeTimer.started_at).getTime();
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const durationMin = Math.max(1, Math.round(elapsed / 60));
+    const cat = categories.find(c => c.category_id === activeTimer.category_id);
+    const pointsEarned = Math.round(durationMin * (cat?.points_per_minute || 1) * (cat?.bonus_multiplier || 1) * 10) / 10;
+
+    const actResult = await supabaseWrite('brain_activities', 'POST', {
+        user_id: activeProfileId,
+        category_id: activeTimer.category_id,
+        title: activeTimer.title || cat?.name || 'Activity',
+        duration_min: durationMin,
+        started_at: activeTimer.started_at,
+        ended_at: new Date().toISOString(),
+        status: 'completed',
+        points_earned: pointsEarned,
+        notes: notes || null,
+        people: people.length > 0 ? people : null,
+        source: 'timer',
+    });
+
+    if (actResult) {
+        await supabaseWrite('brain_timers', 'DELETE', null, `timer_id=eq.${activeTimer.timer_id}`);
+        // Update profile totals
+        const profile = await supabaseSelect('brain_user_profiles', `user_id=eq.${activeProfileId}&select=total_points`);
+        if (profile && profile[0]) {
+            await supabaseWrite('brain_user_profiles', 'PATCH', {
+                total_points: (profile[0].total_points || 0) + pointsEarned,
+                xp: (profile[0].total_points || 0) + pointsEarned,
+            }, `user_id=eq.${activeProfileId}`);
+        }
+        // Update daily score
+        const today = new Date().toLocaleDateString('en-CA');
+        const existingScore = await supabaseSelect('brain_daily_scores', `user_id=eq.${activeProfileId}&score_date=eq.${today}&select=*`);
+        if (existingScore && existingScore.length > 0) {
+            const s = existingScore[0];
+            await supabaseWrite('brain_daily_scores', 'PATCH', {
+                total_points: (s.total_points || 0) + pointsEarned,
+                total_minutes: (s.total_minutes || 0) + durationMin,
+                activities_count: (s.activities_count || 0) + 1,
+            }, `user_id=eq.${activeProfileId}&score_date=eq.${today}`);
+        } else {
+            await supabaseWrite('brain_daily_scores', 'POST', {
+                user_id: activeProfileId, score_date: today,
+                total_points: pointsEarned, total_minutes: durationMin,
+                activities_count: 1, daily_goal: dailySummary?.daily_goal || 100,
+            });
+        }
+        activeTimer = null;
+        stopStopwatchDisplay();
+        renderTimerState();
+        toast(`Logged ${durationMin} min \u2014 ${pointsEarned} pts (fallback mode)`, 'success');
+        loadDashboardData();
+    } else {
+        toast('Failed to save activity', 'error');
+    }
+}
+
+async function handleCancelTimer() {
+    if (!activeTimer) return;
+    if (!confirm('Cancel this timer? No points will be awarded.')) return;
+
+    // Delete timer directly from Supabase
+    await supabaseWrite('brain_timers', 'DELETE', null, `timer_id=eq.${activeTimer.timer_id}`);
+    activeTimer = null;
+    stopStopwatchDisplay();
+    renderTimerState();
+    toast('Timer cancelled', 'warning');
+}
+
+function startStopwatchDisplay() {
+    stopStopwatchDisplay();
+    updateStopwatch();
+    timerInterval = setInterval(updateStopwatch, 1000);
+}
+
+function stopStopwatchDisplay() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+function updateStopwatch() {
+    if (!activeTimer) return;
+    const elapsed = Math.floor((Date.now() - new Date(activeTimer.started_at).getTime()) / 1000);
+    const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+    const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+    const s = String(elapsed % 60).padStart(2, '0');
+    const display = `${h}:${m}:${s}`;
+
+    const dashClock = document.getElementById('dashTimerClock');
+    const timerClock = document.getElementById('timerStopwatch');
+    if (dashClock) dashClock.textContent = display;
+    if (timerClock) timerClock.textContent = display;
+
+    const mins = elapsed / 60;
+    const cat = categories.find(c => c.category_id === activeTimer.category_id || c.slug === activeTimer.category_slug);
+    const est = Math.round(mins * (cat?.points_per_minute || 1) * (cat?.bonus_multiplier || 1));
+    const dashEst = document.getElementById('dashTimerEst');
+    const timerEst = document.getElementById('timerEstPoints');
+    if (dashEst) dashEst.textContent = `~${est} pts`;
+    if (timerEst) timerEst.textContent = `~${est} pts`;
+}
+
+// ═══════════════════════════════════════
+// ACTIVITY LOG
+// ═══════════════════════════════════════
+async function loadActivities() {
+    if (!activeProfileId) return;
+    // Read directly from Supabase
+    const activities = await supabaseSelect('brain_activities',
+        `user_id=eq.${activeProfileId}&started_at=gte.${activityLogDate}T00:00:00&started_at=lt.${activityLogDate}T23:59:59&order=started_at.desc&select=*`);
+    renderActivityLog(Array.isArray(activities) ? activities : []);
+    updateDateLabel();
+}
+
+function updateDateLabel() {
+    const d = new Date(activityLogDate + 'T12:00:00');
+    const today = new Date().toLocaleDateString('en-CA');
+    const label = activityLogDate === today ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    document.getElementById('activityDateLabel').textContent = label;
+}
+
+function navDate(delta) {
+    const d = new Date(activityLogDate + 'T12:00:00');
+    d.setDate(d.getDate() + delta);
+    activityLogDate = d.toLocaleDateString('en-CA');
+    loadActivities();
+}
+
+function openDatePicker() {
+    const input = document.getElementById('activityDateInput');
+    input.value = activityLogDate;
+    input.showPicker();
+}
+
+function setDateFromPicker(val) {
+    if (val) { activityLogDate = val; loadActivities(); }
+}
+
+function renderActivityLog(activities) {
+    const container = document.getElementById('activityLogList');
+    if (!activities.length) {
+        container.innerHTML = `<div class="text-center py-12 text-xs" style="color: var(--brain-txt-3);">No activities on this date</div>`;
+        return;
+    }
+    container.innerHTML = activities.map(a => {
+        const cat = categories.find(c => c.category_id === a.category_id || c.slug === a.category_slug);
+        const color = cat?.color || '#8A95A9';
+        const catName = cat?.name || a.category_slug || 'General';
+        const time = a.started_at ? new Date(a.started_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+        const source = a.source || 'manual';
+        const people = (a.people || []).join(', ');
+        return `<div class="activity-card" onclick="openEditActivity('${a.activity_id}', ${JSON.stringify(a).replace(/'/g, "\\'").replace(/"/g, '&quot;')})">
+            <div class="activity-dot" style="background: ${color};"></div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                    <p class="text-sm font-medium line-clamp-1">${a.title || 'Untitled'}</p>
+                    ${a.chain_id ? '<span class="badge badge-ghost">\u26D3\uFE0F chain</span>' : ''}
+                </div>
+                <p class="text-xs mt-0.5" style="color: var(--brain-txt-3);">${time} &middot; ${catName}${people ? ' &middot; ' + people : ''}</p>
+            </div>
+            <span class="badge badge-ghost">${a.duration_min || 0}m</span>
+            <span class="badge badge-accent">${a.points_earned || 0} pts</span>
+            <span class="badge badge-ghost text-xs">${source}</span>
+        </div>`;
+    }).join('');
+}
+
+function openEditActivity(id, data) {
+    // data comes as HTML-encoded JSON, decode it
+    let a;
+    try {
+        const decoded = data.replace ? data : JSON.stringify(data);
+        a = typeof data === 'object' ? data : JSON.parse(decoded);
+    } catch(e) { a = {}; }
+
+    document.getElementById('editActId').value = a.activity_id || id;
+    document.getElementById('editActTitle').value = a.title || '';
+    document.getElementById('editActDuration').value = a.duration_min || 30;
+    document.getElementById('editActNotes').value = a.notes || '';
+    if (a.started_at) {
+        document.getElementById('editActStarted').value = a.started_at.slice(0, 16);
+    }
+    populateCategoryDropdown('editActCategory', a.category_slug);
+    openModal('editActivityModal');
+}
+
+async function submitEditActivity() {
+    const id = document.getElementById('editActId').value;
+    const data = {
+        activity_id: id,
+        title: document.getElementById('editActTitle').value.trim(),
+        duration_min: parseInt(document.getElementById('editActDuration').value) || 30,
+        category_slug: document.getElementById('editActCategory').value,
+        notes: document.getElementById('editActNotes').value.trim(),
+    };
+    const started = document.getElementById('editActStarted').value;
+    if (started) data.started_at = started;
+
+    closeModal('editActivityModal');
+    const result = await brainApi('edit_activity', data);
+    if (result) { toast('Activity updated', 'success'); loadActivities(); loadDashboardData(); }
+}
+
+async function deleteEditActivity() {
+    const id = document.getElementById('editActId').value;
+    if (!confirm('Delete this activity? Points will be recalculated.')) return;
+    closeModal('editActivityModal');
+    const result = await brainApi('delete_activity', { activity_id: id });
+    if (result) { toast('Activity deleted', 'warning'); loadActivities(); loadDashboardData(); }
+}
+
+async function submitLogActivity() {
+    const catSlug = document.getElementById('logActCategory').value;
+    const title = document.getElementById('logActTitle').value.trim();
+    const duration = parseInt(document.getElementById('logActDuration').value) || 30;
+    if (!title) { toast('Title is required', 'error'); return; }
+
+    const data = { category_slug: catSlug, title, duration_min: duration };
+    const started = document.getElementById('logActStarted').value;
+    if (started) data.started_at = started;
+    const desc = document.getElementById('logActDescription').value.trim();
+    if (desc) data.description = desc;
+    const peopleStr = document.getElementById('logActPeople').value.trim();
+    if (peopleStr) data.people = peopleStr.split(',').map(s => s.trim()).filter(Boolean);
+    const notes = document.getElementById('logActNotes').value.trim();
+    if (notes) data.notes = notes;
+
+    closeModal('logActivityModal');
+    toast('Logging activity...', 'info');
+
+    const resetForm = () => {
+        document.getElementById('logActTitle').value = '';
+        document.getElementById('logActDescription').value = '';
+        document.getElementById('logActPeople').value = '';
+        document.getElementById('logActNotes').value = '';
+    };
+
+    // Try webhook first (handles points, achievements, streaks)
+    if (webhookAvailable) {
+        const result = await brainApi('log_activity', data);
+        if (result && result.success !== false) {
+            // Re-read from Supabase since webhook returns empty data:{}
+            await loadDashboardData();
+            loadActivities();
+            toast('Activity logged!', 'success');
+            resetForm();
+            return;
+        }
+        console.warn('log_activity webhook failed, using fallback');
+    }
+
+    // Fallback: direct Supabase writes
+    const cat = categories.find(c => c.slug === catSlug);
+    const pointsEarned = Math.round(duration * (cat?.points_per_minute || 1) * (cat?.bonus_multiplier || 1) * 10) / 10;
+    const startedAt = started ? new Date(started).toISOString() : new Date(Date.now() - duration * 60000).toISOString();
+
+    const result = await supabaseWrite('brain_activities', 'POST', {
+        user_id: activeProfileId,
+        category_id: cat?.category_id,
+        title, description: desc || null,
+        duration_min: duration,
+        started_at: startedAt,
+        ended_at: new Date(new Date(startedAt).getTime() + duration * 60000).toISOString(),
+        status: 'completed', points_earned: pointsEarned,
+        people: data.people || null, notes: notes || null, source: 'manual',
+    });
+
+    if (result) {
+        const today = new Date().toLocaleDateString('en-CA');
+        const existingScore = await supabaseSelect('brain_daily_scores', `user_id=eq.${activeProfileId}&score_date=eq.${today}&select=*`);
+        if (existingScore && existingScore.length > 0) {
+            const s = existingScore[0];
+            await supabaseWrite('brain_daily_scores', 'PATCH', {
+                total_points: (s.total_points || 0) + pointsEarned,
+                total_minutes: (s.total_minutes || 0) + duration,
+                activities_count: (s.activities_count || 0) + 1,
+            }, `user_id=eq.${activeProfileId}&score_date=eq.${today}`);
+        } else {
+            await supabaseWrite('brain_daily_scores', 'POST', {
+                user_id: activeProfileId, score_date: today,
+                total_points: pointsEarned, total_minutes: duration,
+                activities_count: 1, daily_goal: dailySummary?.daily_goal || 100,
+            });
+        }
+        const profile = await supabaseSelect('brain_user_profiles', `user_id=eq.${activeProfileId}&select=total_points`);
+        if (profile && profile[0]) {
+            await supabaseWrite('brain_user_profiles', 'PATCH', {
+                total_points: (profile[0].total_points || 0) + pointsEarned,
+                xp: (profile[0].total_points || 0) + pointsEarned,
+            }, `user_id=eq.${activeProfileId}`);
+        }
+        toast(`Logged! ${pointsEarned} pts (fallback mode)`, 'success');
+        loadActivities();
+        loadDashboardData();
+        resetForm();
+    } else {
+        toast('Failed to log activity', 'error');
+    }
+}
+
+// ═══════════════════════════════════════
+// CHAIN ACTIVITIES
+// ═══════════════════════════════════════
+let chainRowCount = 0;
+
+function addChainRow() {
+    chainRowCount++;
+    const list = document.getElementById('chainActivitiesList');
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-2';
+    row.id = `chainRow${chainRowCount}`;
+    const catOptions = categories.filter(c => c.is_active !== false).map(c => `<option value="${c.slug}">${c.name}</option>`).join('');
+    row.innerHTML = `
+        <select class="form-input" style="max-width: 120px;" data-chain-cat>${catOptions}</select>
+        <input type="text" class="form-input flex-1" placeholder="Title" data-chain-title>
+        <input type="number" class="form-input" style="max-width: 70px;" placeholder="Wt" data-chain-weight value="1">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('chainRow${chainRowCount}').remove()">&times;</button>
+    `;
+    list.appendChild(row);
+}
+
+async function submitLogChain() {
+    const chainStart = document.getElementById('chainStart').value;
+    const chainEnd = document.getElementById('chainEnd').value;
+    if (!chainStart || !chainEnd) { toast('Start and end times are required', 'error'); return; }
+
+    const dist = document.querySelector('input[name="chainDist"]:checked')?.value || 'even';
+    const rows = document.querySelectorAll('#chainActivitiesList > div');
+    if (rows.length < 2) { toast('Add at least 2 activities', 'error'); return; }
+
+    const activities = [];
+    rows.forEach(row => {
+        const catSlug = row.querySelector('[data-chain-cat]')?.value;
+        const title = row.querySelector('[data-chain-title]')?.value?.trim();
+        const weight = parseInt(row.querySelector('[data-chain-weight]')?.value) || 1;
+        if (catSlug && title) {
+            const item = { category_slug: catSlug, title };
+            if (dist === 'weighted') item.weight = weight;
+            if (dist === 'manual') item.duration_min = weight;
+            activities.push(item);
+        }
+    });
+
+    if (!activities.length) { toast('Fill in at least 2 activities', 'error'); return; }
+
+    closeModal('logChainModal');
+    toast('Logging chain...', 'info');
+    const result = await brainApi('log_chain', { chain_start: chainStart, chain_end: chainEnd, distribution: dist, activities });
+    if (result) { toast('Chain logged!', 'success'); loadActivities(); loadDashboardData(); }
+}
+
+// ═══════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════
+async function loadSettings() {
+    renderSettingsCategories();
+    loadDirectivePointsSettings();
+    settingsLoaded = true;
+}
+
+async function saveProfileSettings() {
+    const data = {
+        daily_goal_points: parseInt(document.getElementById('settDailyGoal').value) || 100,
+        wake_time: document.getElementById('settWakeTime').value || '06:00',
+        sleep_time: document.getElementById('settSleepTime').value || '22:00',
+        timezone: document.getElementById('settTimezone').value,
+    };
+    toast('Saving...', 'info');
+    const result = await brainApi('update_profile', data);
+    if (result) {
+        toast('Profile settings saved', 'success');
+    } else {
+        // Fallback: write directly to Supabase
+        const sbResult = await supabaseWrite('brain_user_profiles', 'PATCH', data, `user_id=eq.${activeProfileId}`);
+        if (sbResult) {
+            toast('Profile settings saved', 'success');
+        } else {
+            toast('Failed to save settings', 'error');
+        }
+    }
+}
+
+function renderSettingsCategories() {
+    const container = document.getElementById('settCategoryList');
+    if (!categories.length) {
+        container.innerHTML = '<div class="px-4 py-6 text-center text-xs" style="color: var(--brain-txt-3);">No categories configured</div>';
+        return;
+    }
+    container.innerHTML = categories.map(c => `
+        <div class="setting-row px-4">
+            <div class="flex items-center gap-3">
+                <div class="w-4 h-4 rounded-full" style="background: ${c.color};"></div>
+                <div>
+                    <p class="text-sm font-medium">${c.name}</p>
+                    <p class="text-xs" style="color: var(--brain-txt-3);">${c.slug} &middot; ${c.points_per_minute} pts/min &middot; x${c.bonus_multiplier || 1}</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="toggle-switch ${c.is_active !== false ? 'on' : ''}" onclick="toggleCategory('${c.category_id}', ${c.is_active === false})"></div>
+                <button class="btn btn-ghost btn-sm" onclick="deleteCategory('${c.category_id}', '${c.name}')">&times;</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function submitAddCategory() {
+    const name = document.getElementById('addCatName').value.trim();
+    if (!name) { toast('Name is required', 'error'); return; }
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    const data = {
+        name,
+        slug,
+        color: document.getElementById('addCatColor').value,
+        icon: document.getElementById('addCatIcon').value || '',
+        points_per_minute: parseFloat(document.getElementById('addCatPtsMin').value) || 1.0,
+        bonus_multiplier: parseFloat(document.getElementById('addCatMultiplier').value) || 1.0,
+    };
+    closeModal('addCategoryModal');
+    toast('Adding category...', 'info');
+    const result = await brainApi('add_category', data);
+    if (result) {
+        toast(`Category "${name}" added`, 'success');
+        document.getElementById('addCatName').value = '';
+        await loadDashboardData();
+    }
+}
+
+async function toggleCategory(catId, currentlyInactive) {
+    await brainApi('update_category', { category_id: catId, is_active: currentlyInactive });
+    await loadDashboardData();
+}
+
+async function deleteCategory(catId, name) {
+    if (!confirm(`Delete category "${name}"?`)) return;
+    const result = await brainApi('delete_category', { category_id: catId });
+    if (result) { toast('Category deleted', 'warning'); await loadDashboardData(); }
+}
+
+async function loadDirectivePointsSettings() {
+    const defaults = { approve: 5, deny: 10, edit: 15, review_social: 3, review_email: 5, review_crm: 5 };
+    let dp = null;
+
+    // Try webhook first
+    const result = await brainApi('get_settings', {}, { silent: true });
+    if (result?.data?.directive_points || result?.directive_points) {
+        dp = result?.data?.directive_points || result.directive_points;
+    }
+
+    // Fallback: read from deft_user_profiles.preferences
+    if (!dp && activeProfileId) {
+        const rows = await supabaseSelect('deft_user_profiles', `user_id=eq.${activeProfileId}&select=preferences`);
+        if (rows?.[0]?.preferences?.directive_points) {
+            dp = rows[0].preferences.directive_points;
+        }
+    }
+
+    dp = dp || defaults;
+
+    const container = document.getElementById('settDirectivePoints');
+    container.innerHTML = Object.entries(dp).map(([key, val]) => `
+        <div class="setting-row">
+            <span class="text-sm">${key.replace(/_/g, ' ')}</span>
+            <input type="number" class="form-input" style="max-width: 80px;" value="${val}" min="0" data-dp-key="${key}">
+        </div>
+    `).join('') + `<button class="btn btn-primary btn-sm mt-3 w-full" onclick="saveDirectivePoints()">Save Directive Points</button>`;
+}
+
+async function saveDirectivePoints() {
+    const inputs = document.querySelectorAll('[data-dp-key]');
+    const values = {};
+    inputs.forEach(input => { values[input.dataset.dpKey] = parseInt(input.value) || 0; });
+    toast('Saving...', 'info');
+
+    // Try webhook first
+    const result = await brainApi('update_settings', { setting_key: 'directive_points', setting_value: values });
+    if (result) {
+        toast('Directive points saved', 'success');
+    } else {
+        // Fallback: save to deft_user_profiles.preferences
+        const rows = await supabaseSelect('deft_user_profiles', `user_id=eq.${activeProfileId}&select=preferences`);
+        const prefs = rows?.[0]?.preferences || {};
+        prefs.directive_points = values;
+        const wr = await supabaseWrite('deft_user_profiles', 'PATCH', { preferences: prefs }, `user_id=eq.${activeProfileId}`);
+        if (wr) {
+            toast('Directive points saved', 'success');
+        } else {
+            toast('Failed to save directive points', 'error');
+        }
+    }
+}
+
+async function testCalendarConnection() {
+    const today = new Date().toLocaleDateString('en-CA');
+    toast('Testing connection...', 'info');
+    const result = await brainApi('get_events', { start_date: today, end_date: today }, { silent: true });
+    const status = document.getElementById('calConnectionStatus');
+    if (result && result.events) {
+        status.textContent = 'Connected';
+        status.className = 'badge badge-success';
+        toast(`Connected! Found ${result.events.length} events today.`, 'success');
+    } else {
+        status.textContent = 'Failed';
+        status.className = 'badge badge-danger';
+        toast('Connection failed', 'error');
+    }
+}
+
+// ═══════════════════════════════════════
+// UTILITY: Populate category dropdowns
+// ═══════════════════════════════════════
+function populateCategoryDropdowns() {
+    populateCategoryDropdown('logActCategory');
+    populateCategoryDropdown('editActCategory');
+    // Set default start time for log activity
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - 30);
+    document.getElementById('logActStarted').value = now.toISOString().slice(0, 16);
+    // Chain defaults
+    const chainStart = new Date();
+    chainStart.setHours(chainStart.getHours() - 2);
+    document.getElementById('chainStart').value = chainStart.toISOString().slice(0, 16);
+    document.getElementById('chainEnd').value = new Date().toISOString().slice(0, 16);
+    // Reset chain rows
+    document.getElementById('chainActivitiesList').innerHTML = '';
+    chainRowCount = 0;
+    addChainRow();
+    addChainRow();
+}
+
+// ═══════════════════════════════════════
+// EMOJI PICKER
+// ═══════════════════════════════════════
+const EMOJI_OPTIONS = [
+    { emoji: '\uD83D\uDCBC', name: 'briefcase' }, { emoji: '\uD83D\uDCDA', name: 'book' },
+    { emoji: '\uD83C\uDFCB\uFE0F', name: 'dumbbell' }, { emoji: '\uD83C\uDFE0', name: 'home' },
+    { emoji: '\u2764\uFE0F', name: 'heart' }, { emoji: '\u23F0', name: 'clock' },
+    { emoji: '\u2B50', name: 'star' }, { emoji: '\uD83D\uDD25', name: 'fire' },
+    { emoji: '\uD83E\uDDE0', name: 'brain' }, { emoji: '\uD83C\uDFB5', name: 'music' },
+    { emoji: '\uD83C\uDFA8', name: 'palette' }, { emoji: '\uD83D\uDCAC', name: 'chat' },
+    { emoji: '\uD83C\uDFC3', name: 'run' }, { emoji: '\uD83E\uDDD8', name: 'yoga' },
+    { emoji: '\uD83C\uDF73', name: 'cook' }, { emoji: '\uD83D\uDCBB', name: 'code' },
+    { emoji: '\u270D\uFE0F', name: 'write' }, { emoji: '\uD83D\uDCD6', name: 'read' },
+    { emoji: '\uD83D\uDE4F', name: 'pray' }, { emoji: '\uD83D\uDEB6', name: 'walk' },
+    { emoji: '\uD83C\uDF1F', name: 'sparkle' }, { emoji: '\uD83D\uDCA1', name: 'idea' },
+    { emoji: '\uD83C\uDFAF', name: 'target' }, { emoji: '\uD83D\uDE80', name: 'rocket' },
+    { emoji: '\uD83C\uDF3F', name: 'plant' }, { emoji: '\u2615', name: 'coffee' },
+    { emoji: '\uD83D\uDCF1', name: 'phone' }, { emoji: '\uD83D\uDCDD', name: 'memo' },
+    { emoji: '\uD83C\uDFAE', name: 'game' }, { emoji: '\uD83D\uDED2', name: 'cart' },
+    { emoji: '\uD83D\uDE97', name: 'car' }, { emoji: '\u2708\uFE0F', name: 'plane' },
+    { emoji: '\uD83C\uDFC6', name: 'trophy' }, { emoji: '\uD83D\uDC8E', name: 'gem' },
+    { emoji: '\uD83C\uDF08', name: 'rainbow' },
+];
+
+function initEmojiPicker() {
+    const grid = document.getElementById('emojiPickerGrid');
+    grid.innerHTML = EMOJI_OPTIONS.map(e =>
+        `<button type="button" class="w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-lg cursor-pointer transition-transform" style="border: none; background: transparent;" onclick="selectEmoji('${e.name}', '${e.emoji}')" title="${e.name}">${e.emoji}</button>`
+    ).join('');
+}
+
+function toggleEmojiPicker() {
+    const dd = document.getElementById('emojiPickerDropdown');
+    dd.classList.toggle('hidden');
+    if (!dd.classList.contains('hidden')) {
+        setTimeout(() => {
+            document.addEventListener('click', closeEmojiPicker, { once: true });
+        }, 0);
+    }
+}
+
+function closeEmojiPicker(e) {
+    const dd = document.getElementById('emojiPickerDropdown');
+    if (!dd.contains(e.target) && e.target.id !== 'addCatIconBtn') {
+        dd.classList.add('hidden');
+    }
+}
+
+function selectEmoji(name, emoji) {
+    document.getElementById('addCatIcon').value = name;
+    document.getElementById('addCatIconPreview').textContent = emoji;
+    document.getElementById('emojiPickerDropdown').classList.add('hidden');
+}
+
+// Init emoji picker on page load
+initEmojiPicker();
+
+function populateCategoryDropdown(selectId, selectedSlug) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    sel.innerHTML = categories.filter(c => c.is_active !== false).map(c =>
+        `<option value="${c.slug}" ${c.slug === selectedSlug ? 'selected' : ''}>${c.name}</option>`
+    ).join('');
+}
+
+// ═══════════════════════════════════════
+// CALENDAR VIEW
+// ═══════════════════════════════════════
+let calWeekOffset = 0;
+
+function getCalWeekRange() {
+    const now = new Date();
+    now.setDate(now.getDate() + calWeekOffset * 7);
+    const start = new Date(now);
+    start.setDate(start.getDate() - start.getDay()); // Sunday
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6); // Saturday
+    return {
+        start_date: start.toLocaleDateString('en-CA'),
+        end_date: end.toLocaleDateString('en-CA'),
+        label: `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+    };
+}
+
+function navCalWeek(delta) {
+    calWeekOffset += delta;
+    loadCalendarEvents();
+}
+
+async function loadCalendarEvents() {
+    if (!activeProfileId) return;
+    const range = getCalWeekRange();
+    document.getElementById('calWeekLabel').textContent = range.label;
+    document.getElementById('calendarEventList').innerHTML = '<div class="text-center py-12 text-xs" style="color: var(--brain-txt-3);">Loading events...</div>';
+
+    if (!webhookAvailable) {
+        // Re-check in case it came online
+        await checkWebhookHealth();
+    }
+    if (!webhookAvailable) {
+        document.getElementById('calendarEventList').innerHTML = '<div class="text-center py-12"><span class="text-3xl block mb-2">&#128197;</span><p class="text-sm" style="color: var(--brain-txt-2);">Calendar requires the backend service</p><p class="text-xs mt-1" style="color: var(--brain-txt-3);">The BRAIN webhook is currently unavailable. Check n8n.</p></div>';
+        return;
+    }
+
+    const result = await brainApi('get_events', { start_date: range.start_date, end_date: range.end_date }, { silent: true });
+    const events = result?.data?.events || result?.events || [];
+    renderCalendarEvents(Array.isArray(events) ? events : []);
+}
+
+function renderCalendarEvents(events) {
+    const container = document.getElementById('calendarEventList');
+    if (!events.length) {
+        container.innerHTML = '<div class="text-center py-12"><span class="text-3xl block mb-2">&#128197;</span><p class="text-xs" style="color: var(--brain-txt-3);">No calendar events this week</p></div>';
+        return;
+    }
+
+    // Group by date
+    const grouped = {};
+    events.forEach(e => {
+        const date = (e.start || '').split('T')[0];
+        if (!grouped[date]) grouped[date] = [];
+        grouped[date].push(e);
+    });
+
+    container.innerHTML = Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)).map(([date, dayEvents]) => {
+        const d = new Date(date + 'T12:00:00');
+        const dayLabel = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+        const eventCards = dayEvents.map(e => {
+            const startTime = e.start ? new Date(e.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+            const endTime = e.end ? new Date(e.end).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+            const sugCat = e.suggested_category || '';
+            const synced = e.activity_id || e.synced;
+            return `<div class="activity-card" style="cursor: default;">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <p class="text-sm font-medium line-clamp-1">${e.title || 'Untitled Event'}</p>
+                        ${synced ? '<span class="badge badge-success">&#10003; Logged</span>' : ''}
+                        ${sugCat ? `<span class="badge badge-ghost">${sugCat}</span>` : ''}
+                    </div>
+                    <p class="text-xs mt-0.5" style="color: var(--brain-txt-3);">${startTime}${endTime ? ' - ' + endTime : ''} &middot; ${e.duration_min || 0} min</p>
+                </div>
+                ${!synced ? `<button class="btn btn-primary btn-sm" onclick="openSyncEventModal('${e.event_id}', '${(e.title || '').replace(/'/g, "\\'")}', ${e.duration_min || 0}, '${e.start || ''}', '${sugCat}')">Log as Activity</button>` : `<span class="badge badge-accent">${e.points_earned || ''} pts</span>`}
+            </div>`;
+        }).join('');
+        return `<div class="mb-4">
+            <p class="text-xs font-heading font-bold uppercase tracking-wide mb-2" style="color: var(--brain-txt-2);">${dayLabel}</p>
+            <div class="space-y-2">${eventCards}</div>
+        </div>`;
+    }).join('');
+}
+
+function openSyncEventModal(eventId, title, durationMin, start, suggestedCategory) {
+    document.getElementById('syncEventId').value = eventId;
+    document.getElementById('syncEventStart').value = start;
+    document.getElementById('syncEventTitle').textContent = title || 'Untitled Event';
+    const startTime = start ? new Date(start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+    document.getElementById('syncEventTime').textContent = `${startTime} \u00b7 ${durationMin} min`;
+    document.getElementById('syncEventDuration').value = durationMin || 30;
+    document.getElementById('syncEventNotes').value = '';
+
+    // Populate category dropdown with suggested pre-selected
+    const sel = document.getElementById('syncEventCategory');
+    sel.innerHTML = categories.filter(c => c.is_active !== false).map(c =>
+        `<option value="${c.slug}" ${c.slug === suggestedCategory ? 'selected' : ''}>${c.name}</option>`
+    ).join('');
+
+    // Calculate estimated points
+    updateSyncEstimate();
+    sel.onchange = updateSyncEstimate;
+    document.getElementById('syncEventDuration').oninput = updateSyncEstimate;
+
+    openModal('syncEventModal');
+}
+
+function updateSyncEstimate() {
+    const catSlug = document.getElementById('syncEventCategory').value;
+    const dur = parseInt(document.getElementById('syncEventDuration').value) || 0;
+    const cat = categories.find(c => c.slug === catSlug);
+    const pts = Math.round(dur * (cat?.points_per_minute || 1) * (cat?.bonus_multiplier || 1) * 10) / 10;
+    document.getElementById('syncEventEstPts').textContent = `${pts} pts`;
+}
+
+async function confirmSyncEvent() {
+    const eventId = document.getElementById('syncEventId').value;
+    const title = document.getElementById('syncEventTitle').textContent;
+    const start = document.getElementById('syncEventStart').value;
+    const durationMin = parseInt(document.getElementById('syncEventDuration').value) || 30;
+    const catSlug = document.getElementById('syncEventCategory').value;
+    const notes = document.getElementById('syncEventNotes').value.trim();
+
+    closeModal('syncEventModal');
+    toast('Logging event...', 'info');
+
+    // Try webhook first
+    if (webhookAvailable) {
+        const result = await brainApi('sync_event_to_activity', {
+            event_id: eventId, title, duration_min: durationMin, start, category_slug: catSlug, notes
+        });
+        if (result && result.success !== false) {
+            await loadDashboardData();
+            loadCalendarEvents();
+            toast('Event logged as activity!', 'success');
+            return;
+        }
+    }
+
+    // Fallback: create activity directly
+    const cat = categories.find(c => c.slug === catSlug);
+    const pointsEarned = Math.round(durationMin * (cat?.points_per_minute || 1) * (cat?.bonus_multiplier || 1) * 10) / 10;
+    const startedAt = start || new Date().toISOString();
+
+    const actResult = await supabaseWrite('brain_activities', 'POST', {
+        user_id: activeProfileId,
+        category_id: cat?.category_id,
+        title, duration_min: durationMin,
+        started_at: startedAt,
+        ended_at: new Date(new Date(startedAt).getTime() + durationMin * 60000).toISOString(),
+        status: 'completed', points_earned: pointsEarned,
+        notes: notes || null, source: 'calendar',
+        calendar_event_id: eventId,
+    });
+
+    if (actResult) {
+        // Update scores
+        const today = new Date().toLocaleDateString('en-CA');
+        const existing = await supabaseSelect('brain_daily_scores', `user_id=eq.${activeProfileId}&score_date=eq.${today}&select=*`);
+        if (existing && existing.length > 0) {
+            const s = existing[0];
+            await supabaseWrite('brain_daily_scores', 'PATCH', {
+                total_points: (s.total_points || 0) + pointsEarned,
+                total_minutes: (s.total_minutes || 0) + durationMin,
+                activities_count: (s.activities_count || 0) + 1,
+            }, `user_id=eq.${activeProfileId}&score_date=eq.${today}`);
+        } else {
+            await supabaseWrite('brain_daily_scores', 'POST', {
+                user_id: activeProfileId, score_date: today,
+                total_points: pointsEarned, total_minutes: durationMin,
+                activities_count: 1, daily_goal: dailySummary?.daily_goal || 100,
+            });
+        }
+        const profile = await supabaseSelect('brain_user_profiles', `user_id=eq.${activeProfileId}&select=total_points`);
+        if (profile && profile[0]) {
+            await supabaseWrite('brain_user_profiles', 'PATCH', {
+                total_points: (profile[0].total_points || 0) + pointsEarned,
+                xp: (profile[0].total_points || 0) + pointsEarned,
+            }, `user_id=eq.${activeProfileId}`);
+        }
+        toast(`Logged! ${pointsEarned} pts earned`, 'success');
+        loadCalendarEvents();
+        loadDashboardData();
+    } else {
+        toast('Failed to log event', 'error');
+    }
+}
+
+// ═══════════════════════════════════════
+// LEADERBOARD VIEW
+// ═══════════════════════════════════════
+let currentLbPeriod = 'week';
+
+async function loadLeaderboard(period) {
+    currentLbPeriod = period;
+    // Update period button states
+    document.querySelectorAll('.lb-period-btn').forEach(btn => {
+        const isActive = btn.dataset.period === period;
+        btn.className = `btn btn-sm lb-period-btn ${isActive ? 'btn-primary' : 'btn-ghost'}`;
+    });
+
+    const container = document.getElementById('leaderboardFullList');
+    container.innerHTML = '<div class="text-center py-12 text-xs" style="color: var(--brain-txt-3);">Loading...</div>';
+
+    // Try webhook first, fall back to direct Supabase read
+    let data = [];
+    const result = await brainApi('get_leaderboard', { period }, { silent: true });
+    data = result?.data?.leaderboard || result?.leaderboard || [];
+
+    // Fallback: build leaderboard from brain_user_profiles + platform_users
+    if (!data.length) {
+        const profiles = await supabaseSelect('brain_user_profiles', 'select=user_id,total_points,current_streak,level,xp');
+        const users = await supabaseSelect('platform_users', 'select=user_id,display_name,avatar_url');
+        if (profiles && users) {
+            const userMap = {};
+            users.forEach(u => userMap[u.user_id] = u);
+            data = profiles.map(p => ({
+                user_id: p.user_id,
+                display_name: userMap[p.user_id]?.display_name || 'User',
+                avatar_url: userMap[p.user_id]?.avatar_url,
+                total_points: p.total_points || 0,
+                period_points: p.total_points || 0,
+                level: p.level || 1,
+                current_streak: p.current_streak || 0,
+            })).sort((a, b) => b.total_points - a.total_points);
+        }
+    }
+    renderFullLeaderboard(Array.isArray(data) ? data : []);
+}
+
+function renderFullLeaderboard(users) {
+    const container = document.getElementById('leaderboardFullList');
+    if (!users.length) {
+        container.innerHTML = '<div class="text-center py-12"><span class="text-3xl block mb-2">&#127942;</span><p class="text-xs" style="color: var(--brain-txt-3);">No leaderboard data for this period</p></div>';
+        return;
+    }
+
+    const medals = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
+    const rankColors = ['#FFD700', '#C0C0C0', '#CD7F32'];
+    const periodLabels = { day: 'Today', week: 'This Week', month: 'This Month', all: 'All Time' };
+
+    container.innerHTML = users.map((u, i) => {
+        const isMe = u.user_id === activeProfileId;
+        const initial = (u.display_name || '?')[0].toUpperCase();
+        const rank = i + 1;
+        const medal = medals[i] || '';
+        const borderColor = i < 3 ? rankColors[i] : 'var(--brain-border)';
+
+        return `<div class="panel brain-reveal" style="${isMe ? 'border-color: var(--brain-accent); background: var(--brain-accent-dim);' : `border-color: ${borderColor}30;`} cursor: pointer;" onclick="showLbDetail('${u.user_id}', '${(u.display_name || 'User').replace(/'/g, "\\'")}')">
+            <div class="panel-body py-4">
+                <div class="flex items-center gap-4">
+                    <div class="text-center" style="min-width: 40px;">
+                        ${medal ? `<span class="text-2xl">${medal}</span>` : `<span class="font-mono text-lg font-bold" style="color: var(--brain-txt-3);">#${rank}</span>`}
+                    </div>
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background: ${isMe ? 'var(--brain-accent-dim)' : 'rgba(255,255,255,0.06)'}; color: ${isMe ? 'var(--brain-accent)' : 'var(--brain-txt-2)'};">
+                        ${u.avatar_url ? `<img src="${u.avatar_url}" class="w-full h-full rounded-full object-cover">` : initial}
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-medium text-sm">${u.display_name || 'User'}${isMe ? ' (You)' : ''}</p>
+                        <div class="flex items-center gap-3 mt-1">
+                            <span class="badge badge-violet">Lv. ${u.level || 1}</span>
+                            <span class="text-xs" style="color: var(--brain-txt-3);">${u.active_days || 0} active days</span>
+                            ${u.current_streak ? `<span class="text-xs" style="color: var(--brain-warm);">&#128293; ${u.current_streak}d streak</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-mono text-xl font-bold" style="color: var(--brain-accent);">${u.period_points || u.total_points || 0}</p>
+                        <p class="text-xs" style="color: var(--brain-txt-3);">points &rsaquo;</p>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function showLbDetail(userId, displayName) {
+    const periodLabels = { day: 'Today', week: 'This Week', month: 'This Month', all: 'All Time' };
+    document.getElementById('lbDetailAvatar').textContent = displayName[0].toUpperCase();
+    document.getElementById('lbDetailName').textContent = displayName;
+    document.getElementById('lbDetailPeriod').textContent = periodLabels[currentLbPeriod] || currentLbPeriod;
+    document.getElementById('lbDetailBody').innerHTML = '<div class="text-center py-4 text-xs" style="color: var(--brain-txt-3);">Loading breakdown...</div>';
+    openModal('lbDetailModal');
+
+    // Fetch activities for this user in the selected period
+    const end = new Date().toLocaleDateString('en-CA');
+    let start = end;
+    if (currentLbPeriod === 'week') { const d = new Date(); d.setDate(d.getDate() - 7); start = d.toLocaleDateString('en-CA'); }
+    else if (currentLbPeriod === 'month') { const d = new Date(); d.setDate(d.getDate() - 30); start = d.toLocaleDateString('en-CA'); }
+    else if (currentLbPeriod === 'all') { start = '2020-01-01'; }
+
+    const activities = await supabaseSelect('brain_activities',
+        `user_id=eq.${userId}&started_at=gte.${start}T00:00:00&started_at=lte.${end}T23:59:59&select=category_id,duration_min,points_earned&order=started_at.desc`);
+
+    const userCats = await supabaseSelect('brain_categories', `user_id=eq.${userId}&select=category_id,name,slug,color,icon`);
+    const catMap = {};
+    (userCats || []).forEach(c => catMap[c.category_id] = c);
+
+    // Aggregate by category
+    const breakdown = {};
+    let totalPts = 0, totalMins = 0, totalCount = 0;
+    (activities || []).forEach(a => {
+        const cat = catMap[a.category_id] || { name: 'Unknown', color: '#6B7280' };
+        if (!breakdown[cat.name]) breakdown[cat.name] = { color: cat.color, icon: cat.icon, points: 0, minutes: 0, count: 0 };
+        breakdown[cat.name].points += (a.points_earned || 0);
+        breakdown[cat.name].minutes += (a.duration_min || 0);
+        breakdown[cat.name].count++;
+        totalPts += (a.points_earned || 0);
+        totalMins += (a.duration_min || 0);
+        totalCount++;
+    });
+
+    const entries = Object.entries(breakdown).sort((a, b) => b[1].points - a[1].points);
+    const body = document.getElementById('lbDetailBody');
+
+    if (!entries.length) {
+        body.innerHTML = '<p class="text-xs text-center py-4" style="color: var(--brain-txt-3);">No activities in this period</p>';
+        return;
+    }
+
+    body.innerHTML = `
+        <div class="flex items-center justify-between mb-4 pb-3" style="border-bottom: 1px solid var(--brain-border);">
+            <div class="text-center flex-1">
+                <p class="font-mono text-lg font-bold" style="color: var(--brain-accent);">${Math.round(totalPts)}</p>
+                <p class="text-xs" style="color: var(--brain-txt-3);">Points</p>
+            </div>
+            <div class="text-center flex-1">
+                <p class="font-mono text-lg font-bold" style="color: var(--brain-accent-2);">${Math.round(totalMins)}</p>
+                <p class="text-xs" style="color: var(--brain-txt-3);">Minutes</p>
+            </div>
+            <div class="text-center flex-1">
+                <p class="font-mono text-lg font-bold">${totalCount}</p>
+                <p class="text-xs" style="color: var(--brain-txt-3);">Activities</p>
+            </div>
+        </div>
+        <div class="space-y-2">
+            ${entries.map(([name, d]) => {
+                const pct = totalPts > 0 ? Math.round(d.points / totalPts * 100) : 0;
+                const icon = getCatIcon({ icon: d.icon, slug: name.toLowerCase() });
+                return `<div class="flex items-center gap-3 py-2" style="border-bottom: 1px solid var(--brain-border);">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: ${d.color}20;">${icon}</div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium">${name}</span>
+                            <span class="font-mono text-sm font-bold" style="color: var(--brain-accent);">${Math.round(d.points)} pts</span>
+                        </div>
+                        <div class="flex items-center gap-2 mt-1">
+                            <div class="flex-1 h-1.5 rounded-full" style="background: var(--brain-border);">
+                                <div class="h-full rounded-full" style="width: ${pct}%; background: ${d.color};"></div>
+                            </div>
+                            <span class="text-xs font-mono" style="color: var(--brain-txt-3);">${d.count} &middot; ${Math.round(d.minutes)}m</span>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('')}
+        </div>
+    `;
+}
+
+// ═══════════════════════════════════════
+// ACHIEVEMENTS VIEW
+// ═══════════════════════════════════════
+const ACHIEVE_ICONS = {
+    first_activity: '\uD83C\uDF1F', streak_3: '\uD83D\uDD25', streak_7: '\uD83D\uDCAA',
+    streak_30: '\uD83D\uDC51', '100_points_day': '\uD83C\uDFAF', '500_points_day': '\uD83D\uDE80',
+    all_categories: '\uD83C\uDF08', early_bird: '\uD83C\uDF05', marathon_session: '\u23F1\uFE0F',
+    social_butterfly: '\uD83E\uDD8B'
+};
+const ACHIEVE_XP = {
+    first_activity: 10, streak_3: 25, streak_7: 50, streak_30: 200,
+    '100_points_day': 50, '500_points_day': 100, all_categories: 75,
+    early_bird: 15, marathon_session: 30, social_butterfly: 20
+};
+
+async function loadAchievements() {
+    if (!activeProfileId) return;
+    const container = document.getElementById('achievementGrid');
+    container.innerHTML = '<div class="text-center py-12 col-span-full text-xs" style="color: var(--brain-txt-3);">Loading...</div>';
+
+    // Read directly from Supabase
+    const rows = await supabaseSelect('brain_achievements', `user_id=eq.${activeProfileId}&select=*&order=earned_at.desc`);
+    const earned = (rows || []).filter(a => a.earned_at);
+    const available = (rows || []).filter(a => !a.earned_at);
+    // If no rows at all, show default definitions
+    if (!rows || rows.length === 0) {
+        const earnedXP = 0;
+        document.getElementById('achieveEarnedCount').textContent = 0;
+        document.getElementById('achieveTotalXP').textContent = '0 XP';
+        document.getElementById('achieveLockedCount').textContent = Object.keys(ACHIEVE_XP).length;
+        renderAchievementGrid([], []);
+        return;
+    }
+
+    // Stats
+    const earnedXP = earned.reduce((s, a) => s + (a.xp_awarded || ACHIEVE_XP[a.achievement_key] || 0), 0);
+    document.getElementById('achieveEarnedCount').textContent = earned.length;
+    document.getElementById('achieveTotalXP').textContent = `${earnedXP} XP`;
+    document.getElementById('achieveLockedCount').textContent = available.length;
+
+    renderAchievementGrid(earned, available);
+}
+
+function renderAchievementGrid(earned, available) {
+    const container = document.getElementById('achievementGrid');
+    const earnedKeys = new Set(earned.map(a => a.achievement_key));
+
+    // Merge: earned first, then available
+    const all = [
+        ...earned.map(a => ({ ...a, isEarned: true })),
+        ...available.filter(a => !earnedKeys.has(a.achievement_key)).map(a => ({ ...a, isEarned: false }))
+    ];
+
+    if (!all.length) {
+        // Show default achievement definitions
+        const defaults = Object.entries(ACHIEVE_XP).map(([key, xp]) => ({
+            achievement_key: key, title: key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+            xp_value: xp, isEarned: false
+        }));
+        container.innerHTML = defaults.map(a => renderAchievementTile(a)).join('');
+        return;
+    }
+
+    container.innerHTML = all.map(a => renderAchievementTile(a)).join('');
+}
+
+function renderAchievementTile(a) {
+    const key = a.achievement_key || '';
+    const icon = ACHIEVE_ICONS[key] || '\uD83C\uDFC6';
+    const xp = a.xp_awarded || ACHIEVE_XP[key] || 0;
+    const title = a.title || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const earnedDate = a.earned_at ? new Date(a.earned_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+    const progress = a.progress || '';
+
+    if (a.isEarned) {
+        return `<div class="panel brain-reveal" style="border-color: var(--brain-accent)30;">
+            <div class="panel-body text-center py-5">
+                <span class="text-3xl block mb-2">${icon}</span>
+                <p class="font-heading font-bold text-sm">${title}</p>
+                <span class="badge badge-accent mt-2">${xp} XP</span>
+                <p class="text-xs mt-2" style="color: var(--brain-success);">${earnedDate}</p>
+            </div>
+        </div>`;
+    } else {
+        return `<div class="panel brain-reveal" style="opacity: 0.45;">
+            <div class="panel-body text-center py-5">
+                <span class="text-3xl block mb-2 grayscale">${icon}</span>
+                <p class="font-heading font-bold text-sm" style="color: var(--brain-txt-2);">${title}</p>
+                <span class="badge badge-ghost mt-2">${xp} XP</span>
+                ${progress ? `<p class="text-xs mt-2" style="color: var(--brain-txt-3);">${progress}</p>` : ''}
+            </div>
+        </div>`;
+    }
+}
+
+// ═══════════════════════════════════════
+// ANALYTICS VIEW
+// ═══════════════════════════════════════
+let currentAnalyticsPeriod = '7';
+
+async function loadAnalytics(period) {
+    currentAnalyticsPeriod = period;
+    // Update period button states
+    document.querySelectorAll('.an-period-btn').forEach(btn => {
+        const isActive = btn.dataset.period === period;
+        btn.className = `btn btn-sm an-period-btn ${isActive ? 'btn-primary' : 'btn-ghost'}`;
+    });
+
+    const end = new Date().toLocaleDateString('en-CA');
+    const startD = new Date();
+    startD.setDate(startD.getDate() - parseInt(period));
+    const start = startD.toLocaleDateString('en-CA');
+    document.getElementById('analyticsDateRange').textContent = `${start} to ${end}`;
+
+    // Read daily scores directly from Supabase for the period
+    const scoreRows = await supabaseSelect('brain_daily_scores',
+        `user_id=eq.${activeProfileId}&score_date=gte.${start}&score_date=lte.${end}&order=score_date.asc&select=*`);
+
+    // Build series from daily scores
+    let series = [];
+    let totalPts = 0, bestDay = 0, goalDays = 0, totalMins = 0;
+    const goal = dailySummary?.daily_goal || 100;
+    const catTotals = {};
+
+    if (scoreRows && scoreRows.length > 0) {
+        series = scoreRows.map(s => {
+            const pts = s.total_points || 0;
+            totalPts += pts;
+            totalMins += (s.total_minutes || 0);
+            if (pts > bestDay) bestDay = pts;
+            if (pts >= goal) goalDays++;
+            // Category breakdown aggregation
+            const breakdown = s.category_breakdown || {};
+            Object.entries(breakdown).forEach(([cat, val]) => {
+                catTotals[cat] = (catTotals[cat] || 0) + val;
+            });
+            return { date: s.score_date, value: pts, minutes: s.total_minutes || 0, goal_met: pts >= goal };
+        });
+    }
+
+    const days = Math.max(series.length, 1);
+    renderPointsChart(series, goal);
+
+    // Stats cards
+    document.getElementById('anTotalPoints').textContent = Math.round(totalPts);
+    document.getElementById('anAvgDaily').textContent = Math.round(totalPts / days);
+    document.getElementById('anBestDay').textContent = Math.round(bestDay);
+    document.getElementById('anGoalDays').textContent = goalDays;
+    document.getElementById('anTrendGoalLine').textContent = `Goal: ${goal}`;
+
+    // Category and weekly report (try webhook, accept empty gracefully)
+    const catResult = { categories: catTotals };
+    const weeklyResult = await brainApi('get_weekly_report', {}, { silent: true });
+
+    // Category donut
+    const catData = catResult?.data || catResult || {};
+    renderAnalyticsCatDonut(catData);
+
+    // Weekly report
+    renderWeeklyReport(weeklyResult);
+
+    // Minutes chart (reuse points series data if it has minutes)
+    renderMinutesChart(series);
+}
+
+function renderPointsChart(series, goal) {
+    const svg = document.getElementById('pointsChart');
+    if (!series.length) {
+        svg.innerHTML = '<text x="400" y="100" text-anchor="middle" fill="var(--brain-txt-3)" font-size="12">No data for this period</text>';
+        return;
+    }
+
+    const maxVal = Math.max(goal, ...series.map(d => d.value || 0)) * 1.1;
+    const w = 800, h = 200;
+    const stepX = w / Math.max(series.length - 1, 1);
+    const goalY = h - (goal / maxVal) * h;
+
+    // Goal line
+    let content = `<line x1="0" y1="${goalY}" x2="${w}" y2="${goalY}" stroke="var(--brain-success)" stroke-width="1" stroke-dasharray="6,4" opacity="0.4"/>`;
+
+    // Area fill
+    const points = series.map((d, i) => {
+        const x = i * stepX;
+        const y = h - ((d.value || 0) / maxVal) * h;
+        return `${x},${y}`;
+    });
+    content += `<polygon points="0,${h} ${points.join(' ')} ${(series.length - 1) * stepX},${h}" fill="url(#pointsGrad)" opacity="0.3"/>`;
+    content += `<defs><linearGradient id="pointsGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--brain-accent)"/><stop offset="100%" stop-color="var(--brain-accent)" stop-opacity="0"/></linearGradient></defs>`;
+
+    // Line
+    content += `<polyline points="${points.join(' ')}" fill="none" stroke="var(--brain-accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+    // Dots
+    series.forEach((d, i) => {
+        const x = i * stepX;
+        const y = h - ((d.value || 0) / maxVal) * h;
+        const met = (d.value || 0) >= goal;
+        content += `<circle cx="${x}" cy="${y}" r="3.5" fill="${met ? 'var(--brain-success)' : 'var(--brain-accent)'}" stroke="var(--brain-base)" stroke-width="1.5"/>`;
+    });
+
+    // X-axis labels (every few days)
+    const labelStep = Math.max(1, Math.floor(series.length / 7));
+    series.forEach((d, i) => {
+        if (i % labelStep === 0 || i === series.length - 1) {
+            const x = i * stepX;
+            const label = (d.date || '').slice(5); // MM-DD
+            content += `<text x="${x}" y="${h + 14}" text-anchor="middle" fill="var(--brain-txt-3)" font-size="9" font-family="JetBrains Mono">${label}</text>`;
+        }
+    });
+
+    svg.innerHTML = content;
+}
+
+function renderMinutesChart(series) {
+    const svg = document.getElementById('minutesChart');
+    if (!series.length) {
+        svg.innerHTML = '<text x="400" y="80" text-anchor="middle" fill="var(--brain-txt-3)" font-size="12">No data</text>';
+        return;
+    }
+
+    const w = 800, h = 160;
+    const maxMins = Math.max(60, ...series.map(d => d.minutes || d.total_minutes || 0)) * 1.1;
+    const barW = Math.min(30, (w / series.length) * 0.6);
+    const gap = w / series.length;
+
+    let content = '';
+    series.forEach((d, i) => {
+        const mins = d.minutes || d.total_minutes || 0;
+        const barH = (mins / maxMins) * (h - 20);
+        const x = i * gap + (gap - barW) / 2;
+        const y = h - 16 - barH;
+        content += `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="3" fill="var(--brain-accent-2)" opacity="0.7"/>`;
+        // Label
+        if (series.length <= 14 || i % Math.ceil(series.length / 10) === 0) {
+            content += `<text x="${x + barW / 2}" y="${h - 2}" text-anchor="middle" fill="var(--brain-txt-3)" font-size="8" font-family="JetBrains Mono">${(d.date || '').slice(5)}</text>`;
+        }
+        if (mins > 0) {
+            content += `<text x="${x + barW / 2}" y="${y - 4}" text-anchor="middle" fill="var(--brain-txt-2)" font-size="8" font-family="JetBrains Mono">${Math.round(mins)}</text>`;
+        }
+    });
+
+    svg.innerHTML = content;
+}
+
+function renderAnalyticsCatDonut(catData) {
+    const entries = Object.entries(catData.categories || catData.category_breakdown || {}).filter(([_, v]) => v > 0);
+    const svg = document.getElementById('anCatDonut');
+    const legend = document.getElementById('anCatLegend');
+
+    if (!entries.length) {
+        svg.innerHTML = '<circle cx="80" cy="80" r="65" fill="none" stroke="var(--brain-border)" stroke-width="20"/>';
+        legend.innerHTML = '<p class="text-xs" style="color: var(--brain-txt-3);">No data for this period</p>';
+        return;
+    }
+
+    const total = entries.reduce((s, [_, v]) => s + v, 0);
+    const circumference = 2 * Math.PI * 65;
+    let offset = 0;
+    let paths = '';
+    let legendHtml = '';
+
+    entries.forEach(([catName, value]) => {
+        const cat = categories.find(c => c.name === catName || c.slug === catName);
+        const color = cat?.color || '#8A95A9';
+        const pct = value / total;
+        const dash = circumference * pct;
+        paths += `<circle cx="80" cy="80" r="65" fill="none" stroke="${color}" stroke-width="20"
+            stroke-dasharray="${dash} ${circumference - dash}" stroke-dashoffset="${-offset}"
+            transform="rotate(-90 80 80)"/>`;
+        offset += dash;
+        legendHtml += `<div class="flex items-center gap-2">
+            <div class="w-3 h-3 rounded-full flex-shrink-0" style="background: ${color};"></div>
+            <span class="text-sm flex-1">${catName}</span>
+            <span class="text-xs font-mono font-bold" style="color: var(--brain-txt-2);">${Math.round(value)}</span>
+            <span class="text-xs font-mono" style="color: var(--brain-txt-3);">${Math.round(pct * 100)}%</span>
+        </div>`;
+    });
+
+    svg.innerHTML = paths;
+    legend.innerHTML = legendHtml;
+}
+
+function renderWeeklyReport(result) {
+    const container = document.getElementById('weeklyReportContent');
+    const data = result?.data || result || {};
+
+    if (!data.this_week && !data.comparison) {
+        container.innerHTML = '<p class="text-xs" style="color: var(--brain-txt-3);">No weekly report data available yet. Complete a full week of activity to generate comparisons.</p>';
+        return;
+    }
+
+    const tw = data.this_week || {};
+    const lw = data.last_week || {};
+    const comp = data.comparison || {};
+    const trendIcon = comp.points_trend === 'up' ? '\u2B06\uFE0F' : comp.points_trend === 'down' ? '\u2B07\uFE0F' : '\u27A1\uFE0F';
+    const trendColor = comp.points_trend === 'up' ? 'var(--brain-success)' : comp.points_trend === 'down' ? 'var(--brain-danger)' : 'var(--brain-txt-2)';
+    const diffSign = (comp.points_diff || 0) >= 0 ? '+' : '';
+
+    container.innerHTML = `
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="text-sm font-medium">This Week</span>
+                <span class="font-mono text-sm font-bold" style="color: var(--brain-accent);">${tw.total_points || 0} pts</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-sm" style="color: var(--brain-txt-2);">Last Week</span>
+                <span class="font-mono text-sm" style="color: var(--brain-txt-2);">${lw.total_points || 0} pts</span>
+            </div>
+            <div style="border-top: 1px solid var(--brain-border); padding-top: 0.75rem;" class="flex items-center justify-between">
+                <span class="text-sm font-medium">Trend</span>
+                <div class="flex items-center gap-2">
+                    <span>${trendIcon}</span>
+                    <span class="font-mono text-sm font-bold" style="color: ${trendColor};">${diffSign}${comp.points_diff || 0} pts</span>
+                </div>
+            </div>
+            ${data.insight ? `<div class="mt-3 p-3 rounded-lg text-xs" style="background: var(--brain-accent-2-dim); color: var(--brain-txt);">${data.insight}</div>` : ''}
+        </div>
+    `;
+}
+
+</script>
+</body>
+</html>
