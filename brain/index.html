@@ -1165,53 +1165,15 @@
          ═══════════════════════════════════════ -->
     <div id="view-settings" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-settings">
 
+        <div class="text-xs mb-4 p-3 rounded-lg" style="background: rgba(76,201,240,0.06); border: 1px solid rgba(76,201,240,0.15); color: var(--deft-txt-2, #8A95A9);">
+            Personal details, timezone, and calendar settings are managed in your <a href="/profile" style="color: var(--deft-accent, #4CC9F0); text-decoration: underline;">User Profile</a>.
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <!-- Profile & Schedule -->
+            <!-- Scoring & Goals -->
             <div class="space-y-4">
-                <!-- Profile -->
-                <div class="panel brain-reveal brain-reveal-1">
-                    <div class="panel-header">
-                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Profile</span>
-                    </div>
-                    <div class="panel-body space-y-3">
-                        <div>
-                            <label class="form-label">Display Name</label>
-                            <input type="text" class="form-input" id="settDisplayName" readonly style="opacity: 0.6;">
-                        </div>
-                        <div>
-                            <label class="form-label">Timezone</label>
-                            <select class="form-input" id="settTimezone">
-                                <option value="America/New_York">Eastern (New York)</option>
-                                <option value="America/Chicago">Central (Chicago)</option>
-                                <option value="America/Denver">Mountain (Denver)</option>
-                                <option value="America/Los_Angeles">Pacific (Los Angeles)</option>
-                                <option value="UTC">UTC</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Schedule -->
-                <div class="panel brain-reveal brain-reveal-2">
-                    <div class="panel-header">
-                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Schedule</span>
-                    </div>
-                    <div class="panel-body">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="form-label">Wake Time</label>
-                                <input type="time" class="form-input" id="settWakeTime" value="06:00">
-                            </div>
-                            <div>
-                                <label class="form-label">Sleep Time</label>
-                                <input type="time" class="form-input" id="settSleepTime" value="22:00">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Daily Goal -->
-                <div class="panel brain-reveal brain-reveal-3">
+                <div class="panel brain-reveal brain-reveal-1">
                     <div class="panel-header">
                         <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Daily Goal</span>
                     </div>
@@ -1223,22 +1185,7 @@
                     </div>
                 </div>
 
-                <button class="btn btn-primary w-full" onclick="saveProfileSettings()">Save Profile Settings</button>
-
-                <!-- Google Calendar -->
-                <div class="panel brain-reveal brain-reveal-4">
-                    <div class="panel-header">
-                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Google Calendar</span>
-                        <span class="badge badge-ghost" id="calConnectionStatus">Not Connected</span>
-                    </div>
-                    <div class="panel-body space-y-3">
-                        <div>
-                            <label class="form-label">Calendar ID</label>
-                            <input type="text" class="form-input" id="settCalendarId" placeholder="primary">
-                        </div>
-                        <button class="btn btn-ghost btn-sm" onclick="testCalendarConnection()">Test Connection</button>
-                    </div>
-                </div>
+                <button class="btn btn-primary w-full" onclick="saveProfileSettings()">Save BRAIN Settings</button>
             </div>
 
             <!-- Categories & Directive Points -->
@@ -2026,21 +1973,7 @@ async function loadDashboardData() {
 
     // Profile
     const profile = (profileRows && profileRows[0]) || {};
-    document.getElementById('settDisplayName').value = activeProfileName;
-    document.getElementById('settWakeTime').value = (profile.wake_time || '06:00:00').slice(0, 5);
-    document.getElementById('settSleepTime').value = (profile.sleep_time || '22:00:00').slice(0, 5);
     document.getElementById('settDailyGoal').value = profile.daily_goal_points || 100;
-    if (profile.timezone) {
-        document.getElementById('settTimezone').value = profile.timezone;
-    } else {
-        // Fallback: try loading from deft_user_profiles.preferences.brainSettings
-        loadBrainSettingsFallback();
-    }
-    if (profile.google_credential_id) {
-        document.getElementById('calConnectionStatus').textContent = 'Connected';
-        document.getElementById('calConnectionStatus').className = 'badge badge-success';
-        document.getElementById('settCalendarId').value = profile.google_calendar_id || 'primary';
-    }
 
     // Categories
     categories = catRows || [];
@@ -2767,60 +2700,35 @@ async function loadSettings() {
 async function saveProfileSettings() {
     const data = {
         daily_goal_points: parseInt(document.getElementById('settDailyGoal').value) || 100,
-        wake_time: document.getElementById('settWakeTime').value || '06:00',
-        sleep_time: document.getElementById('settSleepTime').value || '22:00',
-        timezone: document.getElementById('settTimezone').value,
     };
     toast('Saving...', 'info');
     const result = await brainApi('update_profile', data);
     if (result) {
-        toast('Profile settings saved', 'success');
+        toast('BRAIN settings saved', 'success');
     } else {
         // Fallback: write directly to Supabase
         const sbResult = await supabaseWrite('brain_user_profiles', 'PATCH', data, `user_id=eq.${activeProfileId}`);
         if (sbResult) {
-            toast('Profile settings saved', 'success');
+            toast('BRAIN settings saved', 'success');
         } else {
             toast('Failed to save settings', 'error');
         }
     }
-    // Also sync to deft_user_profiles.preferences.brainSettings for cross-page access
-    syncBrainSettingsToProfile(data);
 }
 
-async function loadBrainSettingsFallback() {
-    if (!activeProfileId) return;
-    try {
-        const rows = await supabaseSelect('deft_user_profiles', `user_id=eq.${activeProfileId}&select=preferences`);
-        const bs = rows?.[0]?.preferences?.brainSettings;
-        if (bs) {
-            if (bs.timezone) document.getElementById('settTimezone').value = bs.timezone;
-            if (bs.wake_time) document.getElementById('settWakeTime').value = bs.wake_time;
-            if (bs.sleep_time) document.getElementById('settSleepTime').value = bs.sleep_time;
-            if (bs.daily_goal_points) document.getElementById('settDailyGoal').value = bs.daily_goal_points;
-            if (bs.google_calendar_id) document.getElementById('settCalendarId').value = bs.google_calendar_id;
-        }
-    } catch (e) {
-        console.warn('Brain settings fallback load failed:', e);
+// getUserTimezone — reads from deft_user_profiles.preferences.profileSummary (definitive source)
+async function getUserTimezone() {
+    // Primary: read from user profile (definitive source)
+    if (activeProfileId) {
+        try {
+            const rows = await supabaseSelect('deft_user_profiles',
+                'user_id=eq.' + activeProfileId + '&select=preferences');
+            const tz = rows?.[0]?.preferences?.profileSummary?.timezone;
+            if (tz) return tz;
+        } catch(e) {}
     }
-}
-
-async function syncBrainSettingsToProfile(settings) {
-    if (!activeProfileId) return;
-    try {
-        const rows = await supabaseSelect('deft_user_profiles', `user_id=eq.${activeProfileId}&select=preferences`);
-        const prefs = rows?.[0]?.preferences || {};
-        prefs.brainSettings = {
-            timezone: settings.timezone,
-            wake_time: settings.wake_time,
-            sleep_time: settings.sleep_time,
-            daily_goal_points: settings.daily_goal_points,
-            google_calendar_id: document.getElementById('settCalendarId')?.value || 'primary',
-        };
-        await supabaseWrite('deft_user_profiles', 'PATCH', { preferences: prefs }, `user_id=eq.${activeProfileId}`);
-    } catch (e) {
-        console.warn('Brain settings sync to deft_user_profiles failed:', e);
-    }
+    // Fallback: Intl default
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 
 function renderSettingsCategories() {
@@ -2929,22 +2837,6 @@ async function saveDirectivePoints() {
         } else {
             toast('Failed to save directive points', 'error');
         }
-    }
-}
-
-async function testCalendarConnection() {
-    const today = new Date().toLocaleDateString('en-CA');
-    toast('Testing connection...', 'info');
-    const result = await brainApi('get_events', { start_date: today, end_date: today }, { silent: true });
-    const status = document.getElementById('calConnectionStatus');
-    if (result && result.events) {
-        status.textContent = 'Connected';
-        status.className = 'badge badge-success';
-        toast(`Connected! Found ${result.events.length} events today.`, 'success');
-    } else {
-        status.textContent = 'Failed';
-        status.className = 'badge badge-danger';
-        toast('Connection failed', 'error');
     }
 }
 

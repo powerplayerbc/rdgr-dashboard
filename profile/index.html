@@ -1267,7 +1267,7 @@ async function initProfile() {
 
     try {
         // Fetch the profile from Supabase
-        const profiles = await supabaseSelect('deft_user_profiles', `user_id=eq.${activeProfileId}&select=user_id,display_name,email,preferences`);
+        const profiles = await supabaseSelect('deft_user_profiles', `user_id=eq.${activeProfileId}&select=user_id,preferences`);
         if (!profiles || profiles.length === 0) {
             toast('Profile not found in database.', 'error');
             return;
@@ -1277,31 +1277,8 @@ async function initProfile() {
         const prefs = row.preferences || {};
         const userProfile = prefs.userProfile || {};
 
-        // Backwards compat: pull timezone and calendar from brainSettings if not in userProfile
-        const brainSettings = prefs.brainSettings || {};
-        if (!userProfile.scheduling) userProfile.scheduling = {};
-        if (!userProfile.scheduling.timezone && brainSettings.timezone) {
-            userProfile.scheduling.timezone = brainSettings.timezone;
-        }
-        if (!userProfile.scheduling.googleCalendarId && brainSettings.calendarId) {
-            userProfile.scheduling.googleCalendarId = brainSettings.calendarId;
-        }
-
-        // Pull identity defaults from top-level profile fields
-        if (!userProfile.identity) userProfile.identity = {};
-        if (!userProfile.identity.fullName && row.display_name) {
-            userProfile.identity.fullName = row.display_name;
-        }
-        if (!userProfile.identity.preferredName && row.display_name) {
-            userProfile.identity.preferredName = row.display_name;
-        }
-        if (!userProfile.identity.email && row.email) {
-            userProfile.identity.email = row.email;
-        }
-        // Pull timezone into identity if present in scheduling
-        if (!userProfile.identity.timezone && userProfile.scheduling && userProfile.scheduling.timezone) {
-            userProfile.identity.timezone = userProfile.scheduling.timezone;
-        }
+        // userProfile is the single source of truth — no backward compat fallbacks.
+        // If userProfile doesn't exist yet, fields will be empty for the user to fill in.
 
         populateForm(userProfile);
         originalProfile = JSON.parse(JSON.stringify(userProfile));
@@ -1346,7 +1323,18 @@ async function saveProfile() {
         // Merge userProfile into preferences
         currentPrefs.userProfile = userProfile;
 
-        // PATCH preferences
+        // Build a flat profileSummary for easy cross-page access
+        currentPrefs.profileSummary = {
+            name: userProfile.identity?.preferredName || userProfile.identity?.fullName || '',
+            timezone: userProfile.identity?.timezone || '',
+            googleCalendarId: userProfile.scheduling?.googleCalendarId || '',
+            workStart: userProfile.scheduling?.workStart || '',
+            workEnd: userProfile.scheduling?.workEnd || '',
+            wakeTime: userProfile.scheduling?.wakeTime || '',
+            sleepTime: userProfile.scheduling?.sleepTime || '',
+        };
+
+        // PATCH preferences only — userProfile is the single source of truth
         const result = await supabaseWrite(
             'deft_user_profiles',
             'PATCH',
@@ -1359,16 +1347,9 @@ async function saveProfile() {
             return;
         }
 
-        // Also update display_name if preferred name changed
+        // Update localStorage and nav display with preferred name
         const preferredName = val('preferredName');
         if (preferredName) {
-            await supabaseWrite(
-                'deft_user_profiles',
-                'PATCH',
-                { display_name: preferredName },
-                `user_id=eq.${activeProfileId}`
-            );
-            // Update localStorage and nav display
             const savedProfile = localStorage.getItem('rdgr-active-profile');
             if (savedProfile) {
                 try {
