@@ -440,41 +440,6 @@
         <!-- ── Panels Container ── -->
         <div class="max-w-4xl mx-auto px-4 sm:px-6 pb-24 space-y-5" id="panelsContainer">
 
-            <!-- ══ Appearance ══ -->
-            <div class="panel mb-4" id="panel-appearance">
-                <div class="panel-header">
-                    <div class="flex items-center gap-2">
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1a6 6 0 100 12A6 6 0 007 1z" stroke="#A78BFA" stroke-width="1.2"/><path d="M7 1v12M1.5 4.5h11M1.5 9.5h11" stroke="#A78BFA" stroke-width="1" stroke-linecap="round"/></svg>
-                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Appearance</h2>
-                        <span style="font-size:0.6rem;padding:0.15rem 0.4rem;border-radius:0.25rem;background:rgba(167,139,250,0.12);color:#A78BFA;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.05em;">Cross-App</span>
-                    </div>
-                </div>
-                <div class="panel-body space-y-5">
-                    <!-- DEFT Theme -->
-                    <div>
-                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">DEFT Theme</label>
-                        <p class="text-[0.7rem] mb-3" style="color: #525E73;">Applied to DEFT nutrition tracker, BRAIN, and settings pages</p>
-                        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2" id="appearanceDeftThemes"></div>
-                    </div>
-                    <div style="border-top: 1px solid rgba(255,255,255,0.05); margin: 0 -1.25rem; padding: 0 1.25rem;"></div>
-                    <!-- Chat Accent -->
-                    <div>
-                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Chat Accent Color</label>
-                        <p class="text-[0.7rem] mb-3" style="color: #525E73;">Accent color for the Command Center chat interface</p>
-                        <div class="flex flex-wrap gap-2" id="appearanceChatThemes"></div>
-                    </div>
-                    <div style="border-top: 1px solid rgba(255,255,255,0.05); margin: 0 -1.25rem; padding: 0 1.25rem;"></div>
-                    <!-- Chat Mode -->
-                    <div>
-                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Chat Mode</label>
-                        <div class="flex gap-2" id="appearanceChatMode">
-                            <button class="btn btn-ghost text-xs py-1.5 px-4" id="chatModeDarkBtn" onclick="setAppearanceChatMode('dark')">Dark</button>
-                            <button class="btn btn-ghost text-xs py-1.5 px-4" id="chatModeLightBtn" onclick="setAppearanceChatMode('light')">Light</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- ══ Panel 1: About You & Company ══ -->
             <div class="panel" id="panel-about">
                 <div class="panel-header">
@@ -1194,116 +1159,6 @@
     }
 
     // ═══════════════════════════════════════════════════
-    // APPEARANCE SETTINGS
-    // ═══════════════════════════════════════════════════
-
-    const DEFT_THEMES = {
-        forest:     { accent: '#A8D65B', label: 'Forest' },
-        sunrise:    { accent: '#F0A830', label: 'Sunrise' },
-        ocean:      { accent: '#38BDF8', label: 'Ocean' },
-        berry:      { accent: '#C084FC', label: 'Berry' },
-        rdgr:       { accent: '#06D6A0', label: 'RDGR' },
-        monochrome: { accent: '#E8E8E8', label: 'Mono' },
-    };
-
-    const CHAT_THEMES = {
-        teal: '#06D6A0', violet: '#A78BFA', rose: '#FB7185', amber: '#FBBF24',
-        sky: '#38BDF8', emerald: '#10B981', orange: '#FB923C', fuchsia: '#D946EF',
-    };
-
-    async function loadAppearanceSettings() {
-        let prefs = {};
-        if (activeProfileId) {
-            try {
-                const rows = await supabaseGet(`deft_user_profiles?user_id=eq.${activeProfileId}&select=preferences`);
-                prefs = rows?.[0]?.preferences || {};
-            } catch(e) {}
-        }
-
-        // DEFT theme
-        let deftPreset = prefs.theme?.preset || 'forest';
-        try {
-            const stored = JSON.parse(localStorage.getItem(`deft-theme-${activeProfileId}`) || '{}');
-            if (!prefs.theme?.preset && stored.preset) deftPreset = stored.preset;
-        } catch(e) {}
-        renderDeftThemeGrid(deftPreset);
-
-        // Chat theme
-        const chatTheme = prefs.chatTheme || localStorage.getItem('rdgr-chat-theme-' + activeProfileId) || 'teal';
-        renderChatThemeSwatches(chatTheme);
-
-        // Chat mode
-        const chatMode = prefs.chatMode || localStorage.getItem('rdgr-chat-mode-' + activeProfileId) || 'dark';
-        highlightChatMode(chatMode);
-    }
-
-    function renderDeftThemeGrid(currentPreset) {
-        const container = document.getElementById('appearanceDeftThemes');
-        if (!container) return;
-        container.innerHTML = Object.entries(DEFT_THEMES).map(([key, theme]) => {
-            const isActive = key === currentPreset;
-            return `<button onclick="setAppearanceDeftTheme('${key}')" class="p-3 rounded-lg text-center transition-all" style="background: ${isActive ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)'}; border: 1px solid ${isActive ? theme.accent + '66' : '#2A2E3D'}; cursor: pointer;" onmouseenter="this.style.borderColor='${theme.accent}66'" onmouseleave="this.style.borderColor='${isActive ? theme.accent + '66' : '#2A2E3D'}'">
-                <div class="w-6 h-6 rounded-full mx-auto mb-1.5" style="background: ${theme.accent};${isActive ? ' box-shadow: 0 0 8px ' + theme.accent + '66;' : ''}"></div>
-                <div class="text-[0.65rem] font-medium" style="color: ${isActive ? theme.accent : '#8A95A9'};">${theme.label}</div>
-                ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="mx-auto mt-1"><path d="M2 6l3 3 5-5" stroke="' + theme.accent + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
-            </button>`;
-        }).join('');
-    }
-
-    function renderChatThemeSwatches(currentTheme) {
-        const container = document.getElementById('appearanceChatThemes');
-        if (!container) return;
-        container.innerHTML = Object.entries(CHAT_THEMES).map(([name, hex]) => {
-            const isActive = name === currentTheme;
-            return `<button onclick="setAppearanceChatTheme('${name}')" class="transition-all" style="width:28px;height:28px;border-radius:50%;background:${hex};cursor:pointer;outline:${isActive ? '2px solid #fff' : 'none'};outline-offset:${isActive ? '2px' : '0'};transform:${isActive ? 'scale(1.15)' : 'scale(1)'};" title="${name.charAt(0).toUpperCase() + name.slice(1)}" onmouseenter="this.style.transform='scale(1.15)'" onmouseleave="this.style.transform='${isActive ? 'scale(1.15)' : 'scale(1)}'"></button>`;
-        }).join('');
-    }
-
-    function highlightChatMode(mode) {
-        const darkBtn = document.getElementById('chatModeDarkBtn');
-        const lightBtn = document.getElementById('chatModeLightBtn');
-        if (darkBtn) {
-            darkBtn.style.background = mode === 'dark' ? 'rgba(6,214,160,0.15)' : '';
-            darkBtn.style.color = mode === 'dark' ? '#06D6A0' : '';
-            darkBtn.style.borderColor = mode === 'dark' ? 'rgba(6,214,160,0.3)' : '';
-        }
-        if (lightBtn) {
-            lightBtn.style.background = mode === 'light' ? 'rgba(255,217,61,0.15)' : '';
-            lightBtn.style.color = mode === 'light' ? '#FFD93D' : '';
-            lightBtn.style.borderColor = mode === 'light' ? 'rgba(255,217,61,0.3)' : '';
-        }
-    }
-
-    async function setAppearanceDeftTheme(preset) {
-        const config = { preset };
-        localStorage.setItem(`deft-theme-${activeProfileId}`, JSON.stringify(config));
-        renderDeftThemeGrid(preset);
-        await syncAppearanceToSupabase({ theme: config });
-    }
-
-    async function setAppearanceChatTheme(themeName) {
-        localStorage.setItem('rdgr-chat-theme-' + activeProfileId, themeName);
-        renderChatThemeSwatches(themeName);
-        await syncAppearanceToSupabase({ chatTheme: themeName });
-    }
-
-    async function setAppearanceChatMode(mode) {
-        localStorage.setItem('rdgr-chat-mode-' + activeProfileId, mode);
-        highlightChatMode(mode);
-        await syncAppearanceToSupabase({ chatMode: mode });
-    }
-
-    async function syncAppearanceToSupabase(updates) {
-        if (!activeProfileId) return;
-        try {
-            const rows = await supabaseGet(`deft_user_profiles?user_id=eq.${activeProfileId}&select=preferences`);
-            const prefs = rows?.[0]?.preferences || {};
-            Object.assign(prefs, updates);
-            await supabasePatch('deft_user_profiles', `user_id=eq.${activeProfileId}`, { preferences: prefs });
-        } catch(e) { console.warn('Appearance sync failed:', e); }
-    }
-
-    // ═══════════════════════════════════════════════════
     // INIT — LOAD ALL DATA
     // ═══════════════════════════════════════════════════
 
@@ -1346,8 +1201,6 @@
         renderSuggestions(suggestionsArr || []);
         renderPatterns(draftsArr || []);
 
-        // Appearance panel (cross-app settings)
-        loadAppearanceSettings();
     }
 
     // ═══════════════════════════════════════════════════
