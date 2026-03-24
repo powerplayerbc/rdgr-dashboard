@@ -51,6 +51,8 @@
             _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
             _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
             _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+            var _fs = _tc.fontScale || 1;
+            _r.style.setProperty('--deft-font-scale', _fs);
         } catch(e) {}
     </script>
     <style>
@@ -124,6 +126,15 @@
             border-color: var(--deft-border, #2A2E3D) !important;
         }
         select.form-input option { background: var(--deft-surface-el, #1A1D28) !important; color: var(--deft-txt, #E8ECF1) !important; }
+        /* Font scale */
+        body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
+        .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
+        .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
+        .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
+        .text-3xl { font-size: calc(1.875rem * var(--deft-font-scale, 1)) !important; }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
 

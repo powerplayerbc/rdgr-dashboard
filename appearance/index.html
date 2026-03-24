@@ -780,6 +780,30 @@
                         </div>
                     </div>
 
+                    <!-- ── Saved Presets ── -->
+                    <div class="panel deft-reveal deft-reveal-2" style="margin-top: 0.75rem;">
+                        <div class="panel-header">
+                            <div class="section-header" style="margin-bottom: 0;">
+                                <div class="section-icon" style="background: rgba(167,139,250,0.08);">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V4z" stroke="#A78BFA" stroke-width="1.2"/><path d="M5 2v4h6V2M5 10h6" stroke="#A78BFA" stroke-width="1.2" stroke-linecap="round"/></svg>
+                                </div>
+                                <div>
+                                    <div class="section-title">Saved Presets</div>
+                                    <div class="section-subtitle">Save your current settings as a named preset to share with others</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div id="savedPresetsGrid" class="space-y-2 mb-3">
+                                <div class="text-xs text-center" style="color: var(--deft-txt-3);">Loading saved presets...</div>
+                            </div>
+                            <div class="flex gap-2">
+                                <input type="text" id="newPresetName" class="form-input text-xs py-1.5" placeholder="Preset name (e.g. Bradford Dark)" style="flex: 1;">
+                                <button onclick="saveCurrentAsPreset()" class="btn btn-primary text-xs py-1.5 px-3" style="flex-shrink: 0;">Save Current</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- ── 2. Custom Colors ── -->
                     <div class="panel deft-reveal deft-reveal-3">
                         <div class="panel-header">
@@ -929,10 +953,10 @@
                                     <label class="text-xs font-medium uppercase tracking-wider" style="color: var(--deft-txt-2);">Font Scale</label>
                                     <span id="fontScaleValue" class="font-mono text-sm font-bold" style="color: var(--deft-accent);">1.00x</span>
                                 </div>
-                                <input type="range" id="fontScale" min="0.85" max="1.25" step="0.01" value="1" oninput="onFontScaleChange()">
+                                <input type="range" id="fontScale" min="0.75" max="2.0" step="0.05" value="1" oninput="onFontScaleChange()">
                                 <div class="flex justify-between mt-1">
-                                    <span class="text-xs" style="color: var(--deft-txt-3);">0.85x</span>
-                                    <span class="text-xs" style="color: var(--deft-txt-3);">1.25x</span>
+                                    <span class="text-xs" style="color: var(--deft-txt-3);">0.75x</span>
+                                    <span class="text-xs" style="color: var(--deft-txt-3);">2.0x</span>
                                 </div>
                             </div>
                         </div>
@@ -1552,6 +1576,111 @@ function selectThemePreset(key) {
     populateCustomColors(THEMES[key]);
     populateTypography(THEMES[key]);
     markDirty();
+}
+
+// ═══════════════════════════════════════
+// SAVED PRESETS
+// ═══════════════════════════════════════
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+async function loadSavedPresets() {
+    const container = document.getElementById('savedPresetsGrid');
+    if (!container) return;
+    try {
+        const rows = await supabaseSelect('deft_user_profiles',
+            `select=user_id,display_name,preferences&order=display_name`);
+        const presets = [];
+        (rows || []).forEach(row => {
+            const saved = row.preferences?.savedPresets;
+            if (saved && Array.isArray(saved)) {
+                saved.forEach(p => presets.push({ ...p, owner: row.display_name, ownerId: row.user_id }));
+            }
+        });
+
+        if (presets.length === 0) {
+            container.innerHTML = '<div class="text-xs text-center" style="color: var(--deft-txt-3); padding: 0.5rem;">No saved presets yet. Save your current settings to create one.</div>';
+            return;
+        }
+
+        container.innerHTML = presets.map((p, i) => {
+            const accent = p.config?.custom?.accent || p.config?.preset && THEMES[p.config.preset]?.accent || '#888';
+            const isOwner = p.ownerId === activeProfileId;
+            return '<div class="flex items-center gap-2 p-2 rounded-lg" style="background: rgba(255,255,255,0.02); border: 1px solid var(--deft-border);">' +
+                '<div style="width:24px;height:24px;border-radius:50%;background:' + accent + ';flex-shrink:0;"></div>' +
+                '<div style="flex:1;min-width:0;">' +
+                    '<div class="text-xs font-medium" style="color: var(--deft-txt);">' + esc(p.name) + '</div>' +
+                    '<div class="text-xs" style="color: var(--deft-txt-3);">by ' + esc(p.owner) + '</div>' +
+                '</div>' +
+                '<button onclick="loadSavedPreset(' + JSON.stringify(JSON.stringify(p.config)) + ')" class="btn btn-ghost text-xs py-1 px-2">Apply</button>' +
+                (isOwner ? '<button onclick="deleteSavedPreset(\'' + esc(p.name) + '\')" class="text-xs px-1" style="color: var(--deft-danger); cursor: pointer; background: none; border: none;" title="Delete">&times;</button>' : '') +
+            '</div>';
+        }).join('');
+    } catch(e) {
+        container.innerHTML = '<div class="text-xs text-center" style="color: var(--deft-txt-3);">Could not load presets</div>';
+    }
+}
+
+async function saveCurrentAsPreset() {
+    const nameInput = document.getElementById('newPresetName');
+    const name = (nameInput.value || '').trim();
+    if (!name) { toast('Enter a preset name', 'error'); return; }
+    if (!activeProfileId) { toast('No profile selected', 'error'); return; }
+
+    try {
+        // Get current profile preferences
+        const rows = await supabaseSelect('deft_user_profiles',
+            'user_id=eq.' + activeProfileId + '&select=preferences');
+        const prefs = rows?.[0]?.preferences || {};
+        const savedPresets = prefs.savedPresets || [];
+
+        // Check for duplicate name
+        const existing = savedPresets.findIndex(p => p.name === name);
+        const presetData = { name: name, config: JSON.parse(JSON.stringify(currentConfig)), savedAt: new Date().toISOString() };
+
+        if (existing >= 0) {
+            savedPresets[existing] = presetData;
+        } else {
+            savedPresets.push(presetData);
+        }
+
+        prefs.savedPresets = savedPresets;
+        await supabaseWrite('deft_user_profiles', 'PATCH', { preferences: prefs }, 'user_id=eq.' + activeProfileId);
+
+        nameInput.value = '';
+        toast('Preset "' + name + '" saved', 'success');
+        loadSavedPresets();
+    } catch(e) {
+        toast('Failed to save preset', 'error');
+    }
+}
+
+function loadSavedPreset(configJson) {
+    try {
+        const config = JSON.parse(configJson);
+        currentConfig = JSON.parse(JSON.stringify(config));
+        applyTheme(currentConfig);
+        renderThemeGrid();
+        populateSettingsUI(currentConfig);
+        hasUnsavedChanges = true;
+        toast('Preset loaded — click Save to keep it', 'success');
+    } catch(e) {
+        toast('Failed to load preset', 'error');
+    }
+}
+
+async function deleteSavedPreset(name) {
+    if (!confirm('Delete preset "' + name + '"?')) return;
+    try {
+        const rows = await supabaseSelect('deft_user_profiles',
+            'user_id=eq.' + activeProfileId + '&select=preferences');
+        const prefs = rows?.[0]?.preferences || {};
+        prefs.savedPresets = (prefs.savedPresets || []).filter(p => p.name !== name);
+        await supabaseWrite('deft_user_profiles', 'PATCH', { preferences: prefs }, 'user_id=eq.' + activeProfileId);
+        toast('Preset deleted', 'success');
+        loadSavedPresets();
+    } catch(e) {
+        toast('Failed to delete preset', 'error');
+    }
 }
 
 // ═══════════════════════════════════════
@@ -2200,6 +2329,7 @@ async function initSettings() {
 
     // Render all UI
     renderThemeGrid();
+    loadSavedPresets();
     renderBgPresets();
     renderAvatarPresets();
     populateSettingsUI(currentConfig);

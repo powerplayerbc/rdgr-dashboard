@@ -54,6 +54,8 @@
             _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
             _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
             _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+            var _fs = _tc.fontScale || 1;
+            _r.style.setProperty('--deft-font-scale', _fs);
         } catch(e) {}
     </script>
     <style>
@@ -127,6 +129,15 @@
             border-color: var(--deft-border, #2A2E3D) !important;
         }
         select.form-input option { background: var(--deft-surface-el, #1A1D28) !important; color: var(--deft-txt, #E8ECF1) !important; }
+        /* Font scale */
+        body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
+        .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
+        .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
+        .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
+        .text-3xl { font-size: calc(1.875rem * var(--deft-font-scale, 1)) !important; }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -2019,6 +2030,12 @@ async function loadDashboardData() {
     document.getElementById('settWakeTime').value = (profile.wake_time || '06:00:00').slice(0, 5);
     document.getElementById('settSleepTime').value = (profile.sleep_time || '22:00:00').slice(0, 5);
     document.getElementById('settDailyGoal').value = profile.daily_goal_points || 100;
+    if (profile.timezone) {
+        document.getElementById('settTimezone').value = profile.timezone;
+    } else {
+        // Fallback: try loading from deft_user_profiles.preferences.brainSettings
+        loadBrainSettingsFallback();
+    }
     if (profile.google_credential_id) {
         document.getElementById('calConnectionStatus').textContent = 'Connected';
         document.getElementById('calConnectionStatus').className = 'badge badge-success';
@@ -2766,6 +2783,43 @@ async function saveProfileSettings() {
         } else {
             toast('Failed to save settings', 'error');
         }
+    }
+    // Also sync to deft_user_profiles.preferences.brainSettings for cross-page access
+    syncBrainSettingsToProfile(data);
+}
+
+async function loadBrainSettingsFallback() {
+    if (!activeProfileId) return;
+    try {
+        const rows = await supabaseSelect('deft_user_profiles', `user_id=eq.${activeProfileId}&select=preferences`);
+        const bs = rows?.[0]?.preferences?.brainSettings;
+        if (bs) {
+            if (bs.timezone) document.getElementById('settTimezone').value = bs.timezone;
+            if (bs.wake_time) document.getElementById('settWakeTime').value = bs.wake_time;
+            if (bs.sleep_time) document.getElementById('settSleepTime').value = bs.sleep_time;
+            if (bs.daily_goal_points) document.getElementById('settDailyGoal').value = bs.daily_goal_points;
+            if (bs.google_calendar_id) document.getElementById('settCalendarId').value = bs.google_calendar_id;
+        }
+    } catch (e) {
+        console.warn('Brain settings fallback load failed:', e);
+    }
+}
+
+async function syncBrainSettingsToProfile(settings) {
+    if (!activeProfileId) return;
+    try {
+        const rows = await supabaseSelect('deft_user_profiles', `user_id=eq.${activeProfileId}&select=preferences`);
+        const prefs = rows?.[0]?.preferences || {};
+        prefs.brainSettings = {
+            timezone: settings.timezone,
+            wake_time: settings.wake_time,
+            sleep_time: settings.sleep_time,
+            daily_goal_points: settings.daily_goal_points,
+            google_calendar_id: document.getElementById('settCalendarId')?.value || 'primary',
+        };
+        await supabaseWrite('deft_user_profiles', 'PATCH', { preferences: prefs }, `user_id=eq.${activeProfileId}`);
+    } catch (e) {
+        console.warn('Brain settings sync to deft_user_profiles failed:', e);
     }
 }
 
