@@ -653,7 +653,7 @@
                 </div>
                 <div class="stat-chip flex-1 min-w-[130px]">
                     <div>
-                        <div class="stat-value text-warn" id="statSequences">—</div>
+                        <a href="/email-outreach?auth=rdgr&tab=sequences" class="stat-value text-info hover:text-accent transition-colors" style="text-decoration: none;">View →</a>
                         <div class="stat-label">Sequences</div>
                     </div>
                 </div>
@@ -672,7 +672,6 @@
                 <button class="crm-tab active" id="tab-contacts" onclick="switchView('contacts')">Contacts</button>
                 <button class="crm-tab" id="tab-pipeline" onclick="switchView('pipeline')">Pipeline</button>
                 <button class="crm-tab" id="tab-attribution" onclick="switchView('attribution')">Attribution</button>
-                <button class="crm-tab" id="tab-sequences" onclick="switchView('sequences')">Sequences</button>
                 <button class="crm-tab" id="tab-prospecting" onclick="switchView('prospecting')">Prospecting</button>
             </div>
         </div>
@@ -755,20 +754,6 @@
                 </div>
                 <div class="panel-body" id="attributionPanel">
                     <div class="empty-state"><div class="skeleton h-40 w-full"></div></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ═══ VIEW: SEQUENCES ═══ -->
-        <div id="view-sequences" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;">
-            <div class="panel">
-                <div class="panel-header">
-                    <div class="flex items-center gap-2">
-                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Email Sequences</h2>
-                    </div>
-                </div>
-                <div class="panel-body" id="sequencesPanel">
-                    <div class="empty-state"><div class="skeleton h-20 w-full mb-2"></div><div class="skeleton h-20 w-full"></div></div>
                 </div>
             </div>
         </div>
@@ -1079,7 +1064,6 @@
         crm: 'https://n8n.carltonaiservices.com/webhook/rdgr-crm',
         complete: 'https://n8n.carltonaiservices.com/webhook/rdgr-complete',
         humanAction: 'https://n8n.carltonaiservices.com/webhook/human-action',
-        sequences: 'https://n8n.carltonaiservices.com/webhook/crm-sequences',
     };
 
     const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
@@ -1100,7 +1084,6 @@
     let currentView = 'contacts';
     let humanTasksData = [];
     let currentHumanTaskIdx = null;
-    let sequencesData = [];
     let attributionData = [];
     let current360ContactId = null;
     let autoRefreshInterval = null;
@@ -1298,11 +1281,12 @@
     // VIEW SWITCHING
     // ═══════════════════════════════════════
     function switchView(view) {
-        // Redirect legacy outreach calls to the new email page
+        // Redirect legacy outreach/sequences calls to the new email page
         if (view === 'outreach') { window.location.href = '/email-outreach?auth=rdgr'; return; }
+        if (view === 'sequences') { window.location.href = '/email-outreach?auth=rdgr&tab=sequences'; return; }
 
         currentView = view;
-        const views = ['contacts', 'pipeline', 'attribution', 'sequences', 'prospecting'];
+        const views = ['contacts', 'pipeline', 'attribution', 'prospecting'];
         views.forEach(v => {
             document.getElementById(`view-${v}`).style.display = v === view ? '' : 'none';
             document.getElementById(`tab-${v}`).classList.toggle('active', v === view);
@@ -1311,7 +1295,6 @@
         // Lazy-load data for views that need it
         if (view === 'pipeline') fetchPipelineData();
         if (view === 'attribution') fetchAttribution();
-        if (view === 'sequences') fetchSequences();
         if (view === 'prospecting') fetchProspectingData();
     }
 
@@ -1468,9 +1451,6 @@
             document.getElementById('statHot').textContent = '—';
         }
 
-        // Sequences count
-        const seqs = await supabaseSelect('crm_email_sequences', 'select=sequence_id&status=eq.active');
-        document.getElementById('statSequences').textContent = Array.isArray(seqs) ? seqs.length : '—';
     }
 
     // ═══════════════════════════════════════
@@ -1896,48 +1876,6 @@
         html += '</tbody></table>';
 
         panel.innerHTML = html;
-    }
-
-    // ═══════════════════════════════════════
-    // SEQUENCES
-    // ═══════════════════════════════════════
-    async function fetchSequences() {
-        const panel = document.getElementById('sequencesPanel');
-        panel.innerHTML = '<div class="empty-state">Loading sequences...</div>';
-
-        const result = await supabaseSelect('crm_email_sequences',
-            'select=sequence_id,name,status,total_steps,trigger_event,created_at&order=created_at.desc'
-        );
-        sequencesData = Array.isArray(result) ? result : [];
-
-        if (sequencesData.length === 0) {
-            panel.innerHTML = '<div class="empty-state"><div class="mb-2 text-2xl opacity-40">📧</div>No email sequences configured</div>';
-            return;
-        }
-
-        panel.innerHTML = sequencesData.map(seq => {
-            const statusBadge = seq.status === 'active'
-                ? '<span class="badge badge-in_progress">Active</span>'
-                : seq.status === 'paused'
-                    ? '<span class="badge badge-blocked">Paused</span>'
-                    : '<span class="badge" style="background:rgba(107,114,128,0.15);color:#9CA3AF;">Draft</span>';
-
-            return `
-                <div class="p-4 border-b border-border/30 last:border-0">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium text-txt">${esc(seq.name || 'Untitled')}</span>
-                            ${statusBadge}
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs text-txt-3">${seq.total_steps || 0} steps</span>
-                            <span class="text-xs text-txt-3 font-mono">${timeAgo(seq.created_at)}</span>
-                        </div>
-                    </div>
-                    ${seq.trigger_event ? `<div class="text-xs text-txt-3">Trigger: <span class="text-txt-2">${esc(seq.trigger_event)}</span></div>` : ''}
-                </div>
-            `;
-        }).join('');
     }
 
     // ═══════════════════════════════════════

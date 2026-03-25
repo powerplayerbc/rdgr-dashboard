@@ -706,11 +706,12 @@
             <!-- ── Tab Bar ── -->
             <div class="flex gap-1 p-1 rounded-lg mb-6" style="background: rgba(255,255,255,0.03);">
                 <button class="crm-tab active" id="tab-drafts" onclick="switchView('drafts')">Drafts</button>
-                <button class="crm-tab" id="tab-settings" onclick="switchView('settings')">Settings</button>
+                <button class="crm-tab" id="tab-compose" onclick="switchView('compose')">Compose</button>
                 <button class="crm-tab" id="tab-templates" onclick="switchView('templates')">Templates</button>
                 <button class="crm-tab" id="tab-prompts" onclick="switchView('prompts')">Prompts</button>
-                <button class="crm-tab" id="tab-feedback" onclick="switchView('feedback')">Optimization</button>
                 <button class="crm-tab" id="tab-sequences" onclick="switchView('sequences')">Sequences</button>
+                <button class="crm-tab" id="tab-feedback" onclick="switchView('feedback')">Optimization</button>
+                <button class="crm-tab" id="tab-settings" onclick="switchView('settings')">Settings</button>
             </div>
         </div>
 
@@ -760,6 +761,123 @@
                 </div>
                 <div class="panel-body" id="outreachPanel" style="padding: 0.75rem 1.25rem;">
                     <div class="empty-state"><div class="skeleton h-20 w-full mb-2"></div><div class="skeleton h-20 w-full mb-2"></div><div class="skeleton h-20 w-full"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════ -->
+        <!-- VIEW: COMPOSE                                      -->
+        <!-- ══════════════════════════════════════════════════ -->
+        <div id="view-compose" class="max-w-4xl mx-auto px-4 sm:px-6 pb-8" style="display: none;">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4l6 4 6-4" stroke="#06D6A0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="#06D6A0" stroke-width="1.2"/></svg>
+                        <span class="font-heading font-semibold text-sm tracking-wide">Compose Email</span>
+                    </div>
+                    <button class="btn btn-ghost text-xs py-1 px-2" onclick="clearComposeForm()">Clear</button>
+                </div>
+                <div class="panel-body space-y-4">
+                    <!-- Recipient -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">To (Email)</label>
+                            <input type="email" class="form-input" id="composeToEmail" placeholder="jane@example.com">
+                        </div>
+                        <div>
+                            <label class="form-label">To (Name)</label>
+                            <input type="text" class="form-input" id="composeToName" placeholder="Jane Smith">
+                        </div>
+                    </div>
+
+                    <!-- From -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">From (Email)</label>
+                            <input type="email" class="form-input" id="composeFromEmail" value="bradford@carltonaiservices.com">
+                        </div>
+                        <div>
+                            <label class="form-label">From (Name)</label>
+                            <input type="text" class="form-input" id="composeFromName" value="Bradford">
+                        </div>
+                    </div>
+
+                    <!-- Campaign type -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Campaign Type</label>
+                            <select class="form-input" id="composeCampaignType">
+                                <option value="cold_prospecting">Cold Prospecting</option>
+                                <option value="jv_partner">JV / Partner</option>
+                                <option value="speaking_opps">Speaking Opps</option>
+                                <option value="university_outreach">University Outreach</option>
+                                <option value="one_off">One-off Email</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Contact (optional)</label>
+                            <input type="text" class="form-input" id="composeContactSearch" placeholder="Search contacts..." oninput="searchComposeContacts(this.value)">
+                            <input type="hidden" id="composeContactId" value="">
+                            <div id="composeContactResults" class="hidden" style="position: relative;">
+                                <div id="composeContactList" style="position: absolute; top: 0; left: 0; right: 0; z-index: 10; background: #1A1D28; border: 1px solid #2A2E3D; border-radius: 0.375rem; max-height: 200px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <!-- Subject -->
+                    <div>
+                        <label class="form-label">Subject</label>
+                        <input type="text" class="form-input" id="composeSubject" placeholder="Quick question about...">
+                    </div>
+
+                    <!-- Body -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="form-label mb-0">Body</label>
+                            <div class="flex items-center gap-2">
+                                <button class="text-xs text-txt-3 hover:text-txt transition-colors" onclick="toggleComposePreview()" id="composePreviewToggle">Preview</button>
+                            </div>
+                        </div>
+                        <textarea class="form-input font-body" id="composeBody" rows="12" placeholder="Write your email...&#10;&#10;Use {name} for recipient name, {company} for their company.&#10;&#10;Plain text — the backend will format it into clean HTML."></textarea>
+                        <div id="composePreviewBox" class="hidden preview-box mt-2" style="max-height: 400px; overflow-y: auto; white-space: pre-wrap;"></div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-between pt-2">
+                        <div class="text-xs text-txt-3">
+                            <span id="composeCharCount">0</span> characters
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button class="btn btn-ghost text-xs py-2 px-4" onclick="clearComposeForm()">Discard</button>
+                            <button class="btn btn-primary text-xs py-2 px-6" id="composeSendBtn" onclick="sendComposedEmail()">
+                                <span class="flex items-center gap-1.5">
+                                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M14.5 1.5l-6 13-2.5-5.5L.5 6.5l14-5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.5 1.5L6 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    Send Email
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Send status -->
+                    <div id="composeSendStatus" class="hidden">
+                        <div class="preview-box flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-accent"></span>
+                            <span class="text-sm text-accent" id="composeSendMessage">Email sent successfully</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Sent (below compose) -->
+            <div class="panel mt-5">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">Recently Sent</span>
+                    <span class="badge badge-accent" id="recentSentCount">0</span>
+                </div>
+                <div class="panel-body" id="recentSentPanel" style="padding: 0;">
+                    <div class="text-center text-txt-3 text-sm py-6">No emails sent from this session</div>
                 </div>
             </div>
         </div>
@@ -1278,14 +1396,17 @@
         <!-- ══════════════════════════════════════════════════ -->
         <div id="view-feedback" class="max-w-4xl mx-auto px-4 sm:px-6 pb-8 space-y-5" style="display: none;">
             <div class="panel">
-                <div class="panel-header">
+                <div class="panel-header cursor-pointer" onclick="toggleFeedbackCategories()">
                     <div class="flex items-center gap-2">
                         <span class="font-heading font-semibold text-sm tracking-wide">Feedback Categories</span>
                         <span class="badge badge-accent" id="feedbackCatCount">0</span>
                     </div>
-                    <button class="btn btn-primary text-xs py-1.5 px-3" onclick="addFeedbackCategory()">+ Add Category</button>
+                    <div class="flex items-center gap-2">
+                        <button class="btn btn-primary text-xs py-1.5 px-3" onclick="event.stopPropagation(); addFeedbackCategory()">+ Add Category</button>
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" id="feedbackCategoriesChevron" style="transition: transform 0.2s; transform: rotate(0deg);"><path d="M3 4.5l3 3 3-3" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
                 </div>
-                <div class="panel-body" id="feedbackCategoriesPanel">
+                <div class="panel-body hidden" id="feedbackCategoriesBody">
                     <div class="empty-state">Loading feedback categories...</div>
                 </div>
             </div>
@@ -1604,7 +1725,8 @@
 
     const API = {
         outreachApproved: 'https://n8n.carltonaiservices.com/webhook/prosp-outreach-approved',
-        voiceExpand: 'https://n8n.carltonaiservices.com/webhook/voice-expand'
+        voiceExpand: 'https://n8n.carltonaiservices.com/webhook/voice-expand',
+        sendEmail: 'https://n8n.carltonaiservices.com/webhook/send-outreach-email'
     };
 
     const DEFAULTS = {
@@ -1844,7 +1966,7 @@
     // VIEW SWITCHING
     // ═══════════════════════════════════════════════════
 
-    const ALL_VIEWS = ['drafts', 'settings', 'templates', 'prompts', 'feedback', 'sequences'];
+    const ALL_VIEWS = ['drafts', 'compose', 'templates', 'prompts', 'sequences', 'feedback', 'settings'];
 
     function switchView(viewName) {
         currentView = viewName;
@@ -2575,6 +2697,14 @@
         chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
     }
 
+    function toggleFeedbackCategories() {
+        const body = document.getElementById('feedbackCategoriesBody');
+        const chevron = document.getElementById('feedbackCategoriesChevron');
+        const isHidden = body.classList.contains('hidden');
+        body.classList.toggle('hidden');
+        chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+
     // ═══════════════════════════════════════════════════
     // SETTINGS: AI EXPAND
     // ═══════════════════════════════════════════════════
@@ -3143,6 +3273,185 @@
     }
 
     // ═══════════════════════════════════════════════════
+    // COMPOSE EMAIL
+    // ═══════════════════════════════════════════════════
+
+    let recentSentEmails = [];
+    let composeContactSearchTimeout = null;
+
+    function clearComposeForm() {
+        document.getElementById('composeToEmail').value = '';
+        document.getElementById('composeToName').value = '';
+        document.getElementById('composeSubject').value = '';
+        document.getElementById('composeBody').value = '';
+        document.getElementById('composeContactId').value = '';
+        document.getElementById('composeContactSearch').value = '';
+        document.getElementById('composeCharCount').textContent = '0';
+        document.getElementById('composeSendStatus').classList.add('hidden');
+        document.getElementById('composePreviewBox').classList.add('hidden');
+    }
+
+    function toggleComposePreview() {
+        const preview = document.getElementById('composePreviewBox');
+        const body = document.getElementById('composeBody');
+        const toggle = document.getElementById('composePreviewToggle');
+        if (preview.classList.contains('hidden')) {
+            const text = body.value || '(empty)';
+            // Simple text-to-preview: replace {name} and {company} with sample values
+            const toName = document.getElementById('composeToName').value || '[Name]';
+            const previewText = text.replace(/\{name\}/g, toName).replace(/\{company\}/g, '[Company]');
+            preview.textContent = previewText;
+            preview.classList.remove('hidden');
+            toggle.textContent = 'Edit';
+            body.classList.add('hidden');
+        } else {
+            preview.classList.add('hidden');
+            toggle.textContent = 'Preview';
+            body.classList.remove('hidden');
+        }
+    }
+
+    function searchComposeContacts(query) {
+        clearTimeout(composeContactSearchTimeout);
+        const resultsDiv = document.getElementById('composeContactResults');
+        const listDiv = document.getElementById('composeContactList');
+
+        if (!query || query.length < 2) {
+            resultsDiv.classList.add('hidden');
+            return;
+        }
+
+        composeContactSearchTimeout = setTimeout(async () => {
+            try {
+                const results = await supabaseGet(
+                    `unified_contacts?or=(full_name.ilike.*${encodeURIComponent(query)}*,email.ilike.*${encodeURIComponent(query)}*,company.ilike.*${encodeURIComponent(query)}*)&select=contact_id,full_name,email,company&limit=8&order=engagement_score.desc`
+                );
+                if (!results || !results.length) {
+                    resultsDiv.classList.add('hidden');
+                    return;
+                }
+                listDiv.innerHTML = results.map(c => `
+                    <div class="px-3 py-2 text-xs cursor-pointer hover:bg-surface-el transition-colors border-b border-border/30 last:border-0"
+                         onclick="selectComposeContact('${c.contact_id}', '${esc((c.full_name || '').replace(/'/g, "\\'"))}', '${esc((c.email || '').replace(/'/g, "\\'"))}', '${esc((c.company || '').replace(/'/g, "\\'"))}')">
+                        <span class="text-txt font-medium">${esc(c.full_name || '(No name)')}</span>
+                        ${c.company ? `<span class="text-txt-3"> @ ${esc(c.company)}</span>` : ''}
+                        ${c.email ? `<div class="text-info text-[0.65rem]">${esc(c.email)}</div>` : ''}
+                    </div>
+                `).join('');
+                resultsDiv.classList.remove('hidden');
+            } catch (err) {
+                console.warn('Contact search failed:', err);
+            }
+        }, 300);
+    }
+
+    function selectComposeContact(contactId, name, email, company) {
+        document.getElementById('composeContactId').value = contactId;
+        document.getElementById('composeContactSearch').value = name + (company ? ` @ ${company}` : '');
+        document.getElementById('composeToEmail').value = email || '';
+        document.getElementById('composeToName').value = name || '';
+        document.getElementById('composeContactResults').classList.add('hidden');
+    }
+
+    async function sendComposedEmail() {
+        const toEmail = document.getElementById('composeToEmail').value.trim();
+        const toName = document.getElementById('composeToName').value.trim();
+        const fromEmail = document.getElementById('composeFromEmail').value.trim();
+        const fromName = document.getElementById('composeFromName').value.trim();
+        const subject = document.getElementById('composeSubject').value.trim();
+        const body = document.getElementById('composeBody').value.trim();
+        const contactId = document.getElementById('composeContactId').value || null;
+        const campaignType = document.getElementById('composeCampaignType').value;
+
+        // Validation
+        if (!toEmail) { toast('Recipient email is required', 'error'); document.getElementById('composeToEmail').focus(); return; }
+        if (!toEmail.includes('@')) { toast('Invalid email address', 'error'); document.getElementById('composeToEmail').focus(); return; }
+        if (!subject) { toast('Subject is required', 'error'); document.getElementById('composeSubject').focus(); return; }
+        if (!body) { toast('Email body is required', 'error'); document.getElementById('composeBody').focus(); return; }
+
+        const btn = document.getElementById('composeSendBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Sending...';
+
+        const payload = {
+            brand_id: BRAND_ID,
+            mode: 'compose',
+            to_email: toEmail,
+            to_name: toName,
+            from_email: fromEmail,
+            from_name: fromName,
+            subject: subject,
+            body_text: body,
+            contact_id: contactId,
+            campaign_type: campaignType,
+            metadata: { sent_by: 'bradford', sent_from: 'email-outreach-dashboard' }
+        };
+
+        try {
+            const result = await fetchJSON(API.sendEmail, payload);
+            if (result && result.success !== false && !result.error) {
+                // Show success
+                const statusDiv = document.getElementById('composeSendStatus');
+                document.getElementById('composeSendMessage').textContent = `Email sent to ${toEmail}`;
+                document.getElementById('composeSendMessage').style.color = '';
+                statusDiv.querySelector('.w-2').style.background = '';
+                statusDiv.classList.remove('hidden');
+
+                // Add to recent sent
+                recentSentEmails.unshift({
+                    to_email: toEmail,
+                    to_name: toName,
+                    subject: subject,
+                    sent_at: new Date().toISOString(),
+                    campaign_type: campaignType
+                });
+                renderRecentSent();
+
+                toast(`Email sent to ${toEmail}`, 'success');
+            } else {
+                throw new Error(result?.error || result?.message || 'Send failed');
+            }
+        } catch (err) {
+            console.error('Send email failed:', err);
+            toast('Failed to send: ' + err.message, 'error');
+            // Show "not configured" message if it's a 404/connection error
+            const statusDiv = document.getElementById('composeSendStatus');
+            document.getElementById('composeSendMessage').textContent = 'Send webhook not configured yet — see backend handoff doc';
+            document.getElementById('composeSendMessage').style.color = '#FFD93D';
+            statusDiv.querySelector('.w-2').style.background = '#FFD93D';
+            statusDiv.classList.remove('hidden');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="flex items-center gap-1.5"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M14.5 1.5l-6 13-2.5-5.5L.5 6.5l14-5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.5 1.5L6 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Send Email</span>';
+        }
+    }
+
+    function renderRecentSent() {
+        const panel = document.getElementById('recentSentPanel');
+        const count = document.getElementById('recentSentCount');
+        count.textContent = recentSentEmails.length;
+
+        if (!recentSentEmails.length) {
+            panel.innerHTML = '<div class="text-center text-txt-3 text-sm py-6">No emails sent from this session</div>';
+            return;
+        }
+
+        panel.innerHTML = recentSentEmails.map(e => `
+            <div class="px-4 py-3 border-b border-border/30 last:border-0">
+                <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-accent">sent</span>
+                        <span class="text-sm font-medium text-txt">${esc(e.to_name || e.to_email)}</span>
+                        ${e.to_name ? `<span class="text-xs text-info">${esc(e.to_email)}</span>` : ''}
+                    </div>
+                    <span class="text-xs text-txt-3 font-mono">${timeAgo(e.sent_at)}</span>
+                </div>
+                <div class="text-xs text-txt-2">${esc(e.subject)}</div>
+            </div>
+        `).join('');
+    }
+
+    // ═══════════════════════════════════════════════════
     // TEMPLATES: LOAD & RENDER
     // ═══════════════════════════════════════════════════
 
@@ -3544,7 +3853,7 @@
     }
 
     function renderFeedbackCategoriesAdmin() {
-        const panel = document.getElementById('feedbackCategoriesPanel');
+        const panel = document.getElementById('feedbackCategoriesBody');
         document.getElementById('feedbackCatCount').textContent = feedbackCategoriesAdmin.length;
 
         if (!feedbackCategoriesAdmin.length) {
@@ -4057,6 +4366,19 @@
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
             document.querySelectorAll('.modal-backdrop.active').forEach(m => m.classList.remove('active'));
+        }
+    });
+
+    // ── Compose: character counter ──
+    document.getElementById('composeBody')?.addEventListener('input', function() {
+        document.getElementById('composeCharCount').textContent = this.value.length;
+    });
+
+    // ── Compose: close contact search on click outside ──
+    document.addEventListener('click', function(e) {
+        const contactResults = document.getElementById('composeContactResults');
+        if (contactResults && !contactResults.contains(e.target) && e.target.id !== 'composeContactSearch') {
+            contactResults.classList.add('hidden');
         }
     });
 
