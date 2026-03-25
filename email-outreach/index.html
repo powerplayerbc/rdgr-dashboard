@@ -703,35 +703,13 @@
                 </div>
             </div>
 
-            <!-- ── Channel & Campaign Dropdowns ── -->
-            <div class="flex items-center gap-4 mb-4 flex-wrap">
-                <div class="flex items-center gap-2">
-                    <label class="text-xs text-txt-3 uppercase tracking-wider font-medium">Channel</label>
-                    <select class="form-input py-1.5 text-xs" style="width: auto; min-width: 160px;" id="channelSelect" onchange="onChannelChange()">
-                        <option value="cold_email" selected>Cold Email</option>
-                        <option value="social_dm">Social DM</option>
-                        <option value="crm_sequence">CRM Sequence</option>
-                        <option value="meeting">Meeting</option>
-                    </select>
-                </div>
-                <div class="flex items-center gap-2">
-                    <label class="text-xs text-txt-3 uppercase tracking-wider font-medium">Campaign</label>
-                    <select class="form-input py-1.5 text-xs" style="width: auto; min-width: 180px;" id="campaignTypeSelect" onchange="onCampaignTypeChange()">
-                        <option value="cold_prospecting" selected>Cold Prospecting</option>
-                        <option value="jv_partner">JV Partner</option>
-                        <option value="speaking_opps">Speaking Opps</option>
-                        <option value="university_outreach">University Outreach</option>
-                    </select>
-                </div>
-            </div>
-
             <!-- ── Tab Bar ── -->
             <div class="flex gap-1 p-1 rounded-lg mb-6" style="background: rgba(255,255,255,0.03);">
                 <button class="crm-tab active" id="tab-drafts" onclick="switchView('drafts')">Drafts</button>
                 <button class="crm-tab" id="tab-settings" onclick="switchView('settings')">Settings</button>
                 <button class="crm-tab" id="tab-templates" onclick="switchView('templates')">Templates</button>
                 <button class="crm-tab" id="tab-prompts" onclick="switchView('prompts')">Prompts</button>
-                <button class="crm-tab" id="tab-feedback" onclick="switchView('feedback')">Feedback</button>
+                <button class="crm-tab" id="tab-feedback" onclick="switchView('feedback')">Optimization</button>
                 <button class="crm-tab" id="tab-sequences" onclick="switchView('sequences')">Sequences</button>
             </div>
         </div>
@@ -1190,47 +1168,6 @@
                 </div>
             </div>
 
-            <!-- Panel 8: AI Suggested Settings (Snapshot) -->
-            <div class="panel hidden" id="panel-snapshot">
-                <div class="panel-header">
-                    <div class="flex items-center gap-2">
-                        <span class="font-heading font-semibold text-sm tracking-wide">AI Suggested Settings</span>
-                        <span class="badge badge-warn" id="snapshotBadge">NEW</span>
-                    </div>
-                </div>
-                <div class="panel-body" id="snapshotBody"></div>
-            </div>
-
-            <!-- Panel 8b: Individual AI Suggestions -->
-            <div class="panel hidden" id="panel-suggestions">
-                <div class="panel-header cursor-pointer" onclick="toggleIndividualSuggestions()">
-                    <div class="flex items-center gap-2">
-                        <span class="font-heading font-semibold text-sm tracking-wide">Individual Suggestions</span>
-                        <span class="badge badge-warn" id="suggestionsCount">0</span>
-                    </div>
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" id="suggestionsChevron" style="transition: transform 0.2s; transform: rotate(0deg);"><path d="M3 4.5l3 3 3-3" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </div>
-                <div class="panel-body hidden" id="suggestionsBody">
-                    <p class="text-xs text-txt-3 mb-3">Accept or dismiss changes individually</p>
-                    <div class="space-y-3" id="suggestionsList"></div>
-                </div>
-            </div>
-
-            <!-- Panel 9: Recent Patterns -->
-            <div class="panel" id="panel-patterns">
-                <div class="panel-header cursor-pointer" onclick="togglePatterns()">
-                    <div class="flex items-center gap-2">
-                        <span class="font-heading font-semibold text-sm tracking-wide">Recent Patterns</span>
-                        <span class="badge badge-info" id="patternsCount">--</span>
-                    </div>
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" id="patternsChevron" style="transition: transform 0.2s; transform: rotate(0deg);"><path d="M3 4.5l3 3 3-3" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </div>
-                <div class="panel-body hidden" id="patternsBody">
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4" id="patternsStats"></div>
-                    <div id="rejectedList"></div>
-                </div>
-            </div>
-
         </div><!-- end view-settings -->
 
         <!-- ══════════════════════════════════════════════════ -->
@@ -1339,7 +1276,7 @@
         <!-- ══════════════════════════════════════════════════ -->
         <!-- VIEW: FEEDBACK                                     -->
         <!-- ══════════════════════════════════════════════════ -->
-        <div id="view-feedback" class="max-w-4xl mx-auto px-4 sm:px-6 pb-8" style="display: none;">
+        <div id="view-feedback" class="max-w-4xl mx-auto px-4 sm:px-6 pb-8 space-y-5" style="display: none;">
             <div class="panel">
                 <div class="panel-header">
                     <div class="flex items-center gap-2">
@@ -1350,6 +1287,54 @@
                 </div>
                 <div class="panel-body" id="feedbackCategoriesPanel">
                     <div class="empty-state">Loading feedback categories...</div>
+                </div>
+            </div>
+
+            <!-- ── Section Divider ── -->
+            <div class="flex items-center gap-3 pt-2">
+                <div class="h-px flex-1 bg-border"></div>
+                <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">AI Optimization</span>
+                <div class="h-px flex-1 bg-border"></div>
+            </div>
+
+            <!-- Panel: AI Suggested Settings (Snapshot) -->
+            <div class="panel hidden" id="panel-snapshot">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <span class="font-heading font-semibold text-sm tracking-wide">AI Suggested Settings</span>
+                        <span class="badge badge-warn" id="snapshotBadge">NEW</span>
+                    </div>
+                </div>
+                <div class="panel-body" id="snapshotBody"></div>
+            </div>
+
+            <!-- Panel: Individual AI Suggestions -->
+            <div class="panel hidden" id="panel-suggestions">
+                <div class="panel-header cursor-pointer" onclick="toggleIndividualSuggestions()">
+                    <div class="flex items-center gap-2">
+                        <span class="font-heading font-semibold text-sm tracking-wide">Individual Suggestions</span>
+                        <span class="badge badge-warn" id="suggestionsCount">0</span>
+                    </div>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" id="suggestionsChevron" style="transition: transform 0.2s; transform: rotate(0deg);"><path d="M3 4.5l3 3 3-3" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="panel-body hidden" id="suggestionsBody">
+                    <p class="text-xs text-txt-3 mb-3">Accept or dismiss changes individually</p>
+                    <div class="space-y-3" id="suggestionsList"></div>
+                </div>
+            </div>
+
+            <!-- Panel: Recent Patterns -->
+            <div class="panel" id="panel-patterns">
+                <div class="panel-header cursor-pointer" onclick="togglePatterns()">
+                    <div class="flex items-center gap-2">
+                        <span class="font-heading font-semibold text-sm tracking-wide">Recent Patterns</span>
+                        <span class="badge badge-info" id="patternsCount">--</span>
+                    </div>
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" id="patternsChevron" style="transition: transform 0.2s; transform: rotate(0deg);"><path d="M3 4.5l3 3 3-3" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="panel-body hidden" id="patternsBody">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4" id="patternsStats"></div>
+                    <div id="rejectedList"></div>
                 </div>
             </div>
         </div>
@@ -1875,16 +1860,17 @@
         history.replaceState(null, '', url);
     }
 
-    function onChannelChange() {
-        currentChannel = document.getElementById('channelSelect').value;
+    // Channel/campaign dropdowns removed from UI — these functions kept for internal use if needed
+    function onChannelChange(channel) {
+        if (channel) currentChannel = channel;
         loadEmailTemplates();
         loadPromptTemplates();
         loadFeedbackCategoriesAdmin();
         fetchOutreachDrafts();
     }
 
-    function onCampaignTypeChange() {
-        currentCampaignType = document.getElementById('campaignTypeSelect').value;
+    function onCampaignTypeChange(type) {
+        if (type) currentCampaignType = type;
         filterSequences();
     }
 
@@ -3398,10 +3384,12 @@
     function populatePromptEditors() {
         const sysEditor = document.getElementById('systemPromptEditor');
         const usrEditor = document.getElementById('userPromptEditor');
-        sysEditor.value = promptTemplates.system_prompt || '';
-        usrEditor.value = promptTemplates.user_prompt || '';
-        document.getElementById('systemPromptVersion').textContent = `v${promptTemplates.version || 1}`;
-        document.getElementById('userPromptVersion').textContent = `v${promptTemplates.version || 1}`;
+        const sys = promptTemplates.system || {};
+        const usr = promptTemplates.user || {};
+        sysEditor.value = sys.template_text || '';
+        usrEditor.value = usr.template_text || '';
+        document.getElementById('systemPromptVersion').textContent = `v${sys.version || 1}`;
+        document.getElementById('userPromptVersion').textContent = `v${usr.version || 1}`;
         updatePromptPreviews();
     }
 
@@ -3504,17 +3492,25 @@
     });
 
     async function savePrompts() {
+        const sysText = document.getElementById('systemPromptEditor').value;
+        const usrText = document.getElementById('userPromptEditor').value;
         try {
-            const result = await supabaseRPC('save_prompt_template', {
-                p_brand_id: BRAND_ID,
-                p_channel: currentChannel,
-                p_system_prompt: document.getElementById('systemPromptEditor').value,
-                p_user_prompt: document.getElementById('userPromptEditor').value
-            });
-            if (result && result.version) {
-                document.getElementById('systemPromptVersion').textContent = `v${result.version}`;
-                document.getElementById('userPromptVersion').textContent = `v${result.version}`;
-            }
+            const [sysResult, usrResult] = await Promise.all([
+                supabaseRPC('save_prompt_template', {
+                    p_brand_id: BRAND_ID,
+                    p_channel: currentChannel,
+                    p_prompt_type: 'system',
+                    p_template_text: sysText
+                }),
+                supabaseRPC('save_prompt_template', {
+                    p_brand_id: BRAND_ID,
+                    p_channel: currentChannel,
+                    p_prompt_type: 'user',
+                    p_template_text: usrText
+                })
+            ]);
+            if (sysResult?.version) document.getElementById('systemPromptVersion').textContent = `v${sysResult.version}`;
+            if (usrResult?.version) document.getElementById('userPromptVersion').textContent = `v${usrResult.version}`;
             toast('Prompts saved', 'success');
         } catch (err) {
             console.error('Save prompts failed:', err);
