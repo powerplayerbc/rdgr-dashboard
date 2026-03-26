@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Knowledge Manager | Carlton AI</title>
+    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://yrwrswyjawmgtxrgbnim.supabase.co">
+    <script>
+        // Instant auth check + theme application — runs before body renders
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _presets = {
+                forest:     { accent:'#A8D65B',accentWarm:'#F0A830',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                sunrise:    { accent:'#F0A830',accentWarm:'#E85D5D',base:'#100D08',surface:'#1C1810',surfaceEl:'#272118',surfaceHi:'#322B20',border:'#3F382C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                ocean:      { accent:'#38BDF8',accentWarm:'#06D6A0',base:'#080D10',surface:'#10161C',surfaceEl:'#182027',surfaceHi:'#202A32',border:'#2C363F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E0E8EA',txt2:'#8C9BA0',txt3:'#586B6B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                berry:      { accent:'#C084FC',accentWarm:'#FB7185',base:'#0D0810',surface:'#16101C',surfaceEl:'#201827',surfaceHi:'#2A2032',border:'#3A2C3F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E0EA',txt2:'#A08CA0',txt3:'#6B586B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                rdgr:       { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' },
+                monochrome: { accent:'#E8E8E8',accentWarm:'#A0A0A0',base:'#000000',surface:'#0A0A0A',surfaceEl:'#141414',surfaceHi:'#1E1E1E',border:'#2A2A2A',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E8E8',txt2:'#A0A0A0',txt3:'#666666',headingFont:'Nunito',bodyFont:'DM Sans' },
+            };
+            var _t = (_tc.preset === 'custom' && _tc.custom) ? _tc.custom : (_presets[_tc.preset] || _presets.rdgr);
+            if (_tc.statusOverrides) {
+                if (_tc.statusOverrides.success) _t.success = _tc.statusOverrides.success;
+                if (_tc.statusOverrides.warning) _t.warning = _tc.statusOverrides.warning;
+                if (_tc.statusOverrides.danger) _t.danger = _tc.statusOverrides.danger;
+            }
+            var _r = document.documentElement;
+            _r.style.setProperty('--deft-accent', _t.accent);
+            _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+            _r.style.setProperty('--deft-accent-warm', _t.accentWarm || _t.accent);
+            _r.style.setProperty('--deft-base', _t.base);
+            _r.style.setProperty('--deft-surface', _t.surface);
+            _r.style.setProperty('--deft-surface-el', _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-surface-hi', _t.surfaceHi || _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-border', _t.border);
+            _r.style.setProperty('--deft-success', _t.success || '#6BCB77');
+            _r.style.setProperty('--deft-success-dim', (_t.success || '#6BCB77') + '26');
+            _r.style.setProperty('--deft-warning', _t.warning || '#F0A830');
+            _r.style.setProperty('--deft-warning-dim', (_t.warning || '#F0A830') + '26');
+            _r.style.setProperty('--deft-danger', _t.danger || '#E85D5D');
+            _r.style.setProperty('--deft-danger-dim', (_t.danger || '#E85D5D') + '26');
+            _r.style.setProperty('--deft-txt', _t.txt);
+            _r.style.setProperty('--deft-txt-2', _t.txt2 || '#8A95A9');
+            _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
+            _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
+            _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+            var _fs = _tc.fontScale || 1;
+            _r.style.setProperty('--deft-font-scale', _fs);
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent { opacity: 1 !important; }
+        body {
+            background: var(--deft-base, #08090D) !important;
+            color: var(--deft-txt, #E8ECF1) !important;
+            font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important;
+        }
+        .font-heading, h1, h2, h3 {
+            font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important;
+        }
+        nav {
+            background: color-mix(in srgb, var(--deft-base, #08090D) 92%, transparent) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel { background: var(--deft-surface, #11131A) !important; border-color: var(--deft-border, #2A2E3D) !important; }
+        .panel-header { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input:focus {
+            border-color: var(--deft-accent, #06D6A0) !important;
+            box-shadow: 0 0 0 2px var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+        }
+        .text-accent { color: var(--deft-accent, #06D6A0) !important; }
+        .task-tab.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+        .btn-primary {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent) !important;
+        }
+        .btn-primary:hover { background: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent) !important; }
+        .btn-ghost { border-color: var(--deft-border, #2A2E3D) !important; }
+        .btn-approve { background: var(--deft-success-dim) !important; color: var(--deft-success) !important; border-color: color-mix(in srgb, var(--deft-success) 25%, transparent) !important; }
+        .btn-deny { background: var(--deft-danger-dim) !important; color: var(--deft-danger) !important; border-color: color-mix(in srgb, var(--deft-danger) 25%, transparent) !important; }
+        .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+        .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+        .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+        ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D) !important; }
+        .pulse-dot { background: var(--deft-accent, #06D6A0) !important; }
+        .gate-input:focus {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent) !important;
+        }
+        select.form-input option { background: var(--deft-surface-el, #1A1D28) !important; color: var(--deft-txt, #E8ECF1) !important; }
+        body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
+        .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
+        .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: { base:'#08090D', surface:'#11131A', 'surface-el':'#1A1D28', 'surface-hi':'#242836', border:'#2A2E3D', accent:'#06D6A0', 'accent-dim':'rgba(6,214,160,0.15)', alert:'#FF6B6B', warn:'#FFD93D', info:'#4CC9F0', txt:'#E8ECF1', 'txt-2':'#8A95A9', 'txt-3':'#525E73' },
+                fontFamily: { heading:['"Chakra Petch"','system-ui','sans-serif'], body:['"IBM Plex Sans"','system-ui','sans-serif'], mono:['"JetBrains Mono"','monospace'] },
+            }}
+        }
+    </script>
+    <style>
+        body { font-family:'IBM Plex Sans',system-ui,sans-serif; -webkit-font-smoothing:antialiased; background:#08090D; color:#E8ECF1; }
+        body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:9998; opacity:0.04; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-repeat:repeat; background-size:256px 256px; }
+        ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#2A2E3D; border-radius:3px; }
+        .gate-overlay { position:fixed; inset:0; z-index:9999; background:radial-gradient(ellipse at center,#0D0F16 0%,#08090D 70%); display:flex; align-items:center; justify-content:center; }
+        .gate-overlay.hidden { display:none; }
+        .gate-input { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:0.5rem; padding:0.875rem 1rem; color:#E8ECF1; font-family:'JetBrains Mono',monospace; font-size:0.9rem; outline:none; transition:border-color 0.25s,box-shadow 0.25s; width:100%; }
+        .gate-input:focus { border-color:rgba(6,214,160,0.4); box-shadow:0 0 0 3px rgba(6,214,160,0.08); }
+        .gate-input::placeholder { color:#525E73; }
+        .gate-error { color:#FF6B6B; font-size:0.8rem; margin-top:0.5rem; opacity:0; transition:opacity 0.2s; }
+        .gate-error.show { opacity:1; }
+        @keyframes pulse-live { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(6,214,160,0.5);} 50%{opacity:0.7;box-shadow:0 0 0 6px rgba(6,214,160,0);} }
+        .pulse-dot { width:8px; height:8px; border-radius:50%; background:#06D6A0; animation:pulse-live 2s ease-in-out infinite; }
+        .task-tab { flex:1; padding:0.4rem 0.75rem; font-size:0.75rem; font-weight:500; text-align:center; border-radius:0.375rem; cursor:pointer; color:rgba(255,255,255,0.45); background:transparent; border:none; transition:color 0.2s,background 0.2s; }
+        .task-tab:hover { color:#E8ECF1; }
+        .task-tab.active { background:rgba(6,214,160,0.12); color:#06D6A0; }
+        .btn { font-family:'Chakra Petch',system-ui; font-weight:600; font-size:0.8rem; letter-spacing:0.03em; padding:0.5rem 1rem; border-radius:0.375rem; cursor:pointer; transition:background 0.2s,border-color 0.2s,box-shadow 0.2s,color 0.2s,transform 0.15s; border:none; text-transform:uppercase; }
+        .btn-primary { background:rgba(6,214,160,0.15); color:#06D6A0; border:1px solid rgba(6,214,160,0.3); }
+        .btn-primary:hover { background:rgba(6,214,160,0.25); }
+        .btn-ghost { background:transparent; color:#8A95A9; border:1px solid #2A2E3D; }
+        .btn-ghost:hover { background:rgba(255,255,255,0.03); color:#E8ECF1; }
+        .btn:disabled { opacity:0.4; cursor:not-allowed; }
+        textarea.form-input { background: rgba(255,255,255,0.03) !important; color: var(--deft-txt, #E8ECF1) !important; }
+        .panel { background:#11131A; border:1px solid #1E2130; border-radius:0.75rem; overflow:hidden; }
+        .panel-header { padding:0.75rem 1rem; border-bottom:1px solid #1E2130; display:flex; align-items:center; justify-content:space-between; }
+        .panel-body { padding:0.75rem 1rem; }
+        .badge { font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:500; letter-spacing:0.05em; text-transform:uppercase; padding:0.15rem 0.4rem; border-radius:0.25rem; line-height:1; white-space:nowrap; }
+
+        /* ── Toast ── */
+        .toast-container { position:fixed; bottom:1.5rem; right:1.5rem; z-index:200; display:flex; flex-direction:column; gap:0.5rem; }
+        .toast { padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.8rem; font-family:'IBM Plex Sans',system-ui; animation:toast-in 0.3s ease forwards; max-width:420px; display:flex; align-items:center; gap:0.75rem; }
+        .toast-success { background:rgba(6,214,160,0.15); border:1px solid rgba(6,214,160,0.3); color:#06D6A0; }
+        .toast-error { background:rgba(255,107,107,0.15); border:1px solid rgba(255,107,107,0.3); color:#FF6B6B; }
+        .toast-info { background:rgba(76,201,240,0.15); border:1px solid rgba(76,201,240,0.3); color:#4CC9F0; }
+        @keyframes toast-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+        /* ── Knowledge Manager Specific ── */
+        .km-group {
+            padding: 0.625rem 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            border: 1px solid transparent;
+            margin-bottom: 0.25rem;
+        }
+        .km-group:hover { background: rgba(255,255,255,0.03); }
+        .km-group.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.1));
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 20%, transparent);
+        }
+        .km-item {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            border-left: 2px solid transparent;
+            margin-bottom: 0.125rem;
+        }
+        .km-item:hover { background: rgba(255,255,255,0.03); }
+        .km-item.active {
+            background: rgba(255,255,255,0.04);
+            border-left-color: var(--deft-accent, #06D6A0);
+        }
+        .km-content-block {
+            background: var(--deft-surface-el, #1A1D28);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .km-chat-msg {
+            padding: 0.625rem 0.875rem;
+            border-radius: 0.5rem;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            max-width: 85%;
+        }
+        .km-chat-user {
+            background: var(--deft-surface-hi, #242836);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            margin-left: auto;
+        }
+        .km-chat-agent {
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, var(--deft-surface, #11131A));
+            border: 1px solid color-mix(in srgb, var(--deft-accent, #06D6A0) 15%, transparent);
+        }
+        .km-diff-add { background: rgba(6,214,160,0.08); border-left: 2px solid var(--deft-success, #06D6A0); padding-left: 0.5rem; }
+        .km-diff-remove { background: rgba(255,107,107,0.08); border-left: 2px solid var(--deft-danger, #FF6B6B); padding-left: 0.5rem; text-decoration: line-through; opacity: 0.6; }
+        .km-sidebar { scrollbar-width: thin; }
+        .km-sidebar::-webkit-scrollbar { width: 4px; }
+        .km-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+        .km-filter-chip {
+            padding: 0.2rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.65rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            color: var(--deft-txt-2, #8A95A9);
+            background: transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .km-filter-chip.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent);
+        }
+        .km-filter-chip:hover:not(.active) { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        /* History modal */
+        .km-history-overlay {
+            position: fixed; inset: 0; z-index: 150;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            display: none; align-items: center; justify-content: center;
+        }
+        .km-history-overlay.visible { display: flex; }
+        .km-history-modal {
+            background: var(--deft-surface, #11131A);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.75rem;
+            max-width: 700px; width: 90%; max-height: 80vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ PASSWORD GATE ═══ -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+            </div>
+            <div id="gateProfiles" class="flex justify-center gap-3 mb-6">
+                <div class="text-center text-xs text-txt-3">Loading profiles...</div>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- ── Top Nav ── -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Dashboard</a>
+                        <a href="/chat" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Chat</a>
+                        <a href="/org-chart" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Org Map</a>
+                        <a href="/our-workflows" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Workflows</a>
+                        <a href="/social-dashboard" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Social</a>
+                        <a href="/email-outreach?auth=rdgr" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Email</a>
+                        <a href="/crm" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">CRM</a>
+                        <a href="/offer-studio" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Offers</a>
+                        <a href="/deft" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">DEFT</a>
+                        <a href="/brain" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">BRAIN</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Profile Switcher -->
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown"></div>
+                    </div>
+                    <a href="/settings" class="task-tab active" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Settings</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ── Breadcrumb + Filters ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pt-4 pb-2">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <div class="flex items-center gap-2 text-xs">
+                    <a href="/settings" class="text-txt-3 hover:text-txt transition-colors" style="text-decoration:none;">Settings</a>
+                    <span class="text-txt-3">/</span>
+                    <span class="font-heading font-semibold" style="color: #818CF8;">Knowledge Manager</span>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs text-txt-3 mr-1">Filter:</span>
+                    <button class="km-filter-chip active" onclick="setRoleFilter('all')">All</button>
+                    <button class="km-filter-chip" onclick="setRoleFilter('frontend')">Frontend</button>
+                    <button class="km-filter-chip" onclick="setRoleFilter('backend')">Backend</button>
+                    <button class="km-filter-chip" onclick="setRoleFilter('shared')">Shared</button>
+                    <select id="projectFilter" class="form-input text-xs py-1 px-2" style="width:auto;min-width:120px;background:rgba(255,255,255,0.03);" onchange="setProjectFilter(this.value)">
+                        <option value="all">All Projects</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Main Layout: Sidebar + Detail ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8">
+            <div class="flex gap-4" style="min-height: calc(100vh - 140px);">
+
+                <!-- LEFT: Groups + Item List -->
+                <div class="w-full lg:w-[300px] lg:min-w-[300px] flex-shrink-0">
+                    <!-- Mobile: group selector dropdown -->
+                    <div class="lg:hidden mb-3">
+                        <select id="mobileGroupSelect" class="form-input text-sm" onchange="selectGroupByIndex(this.value)">
+                            <option value="">Select a group...</option>
+                        </select>
+                    </div>
+
+                    <div class="panel km-sidebar" style="position:sticky;top:72px;max-height:calc(100vh - 88px);overflow-y:auto;">
+                        <!-- Search -->
+                        <div class="p-2" style="border-bottom:1px solid var(--deft-border, #1E2130);">
+                            <div class="relative">
+                                <svg class="absolute left-2.5 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#525E73" stroke-width="1.3"/><path d="M11 11l3.5 3.5" stroke="#525E73" stroke-width="1.3" stroke-linecap="round"/></svg>
+                                <input type="text" id="kmSearch" class="form-input text-xs py-1.5 pl-8 pr-2" placeholder="Search entries..." oninput="handleSearch(this.value)">
+                            </div>
+                        </div>
+
+                        <!-- Groups (hidden on mobile) -->
+                        <div id="groupList" class="p-2 hidden lg:block"></div>
+
+                        <!-- Items -->
+                        <div id="itemList" class="p-2" style="border-top:1px solid var(--deft-border, #1E2130);"></div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Detail Panel -->
+                <div class="flex-1 min-w-0">
+                    <!-- Empty state -->
+                    <div id="emptyState" class="panel flex items-center justify-center" style="min-height:400px;">
+                        <div class="text-center">
+                            <svg class="mx-auto mb-3 opacity-30" width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                <circle cx="8" cy="6" r="1.5" fill="currentColor" opacity="0.4"/>
+                                <circle cx="8" cy="12" r="1.5" fill="currentColor" opacity="0.4"/>
+                                <circle cx="8" cy="18" r="1.5" fill="currentColor" opacity="0.4"/>
+                            </svg>
+                            <p class="text-txt-3 text-sm">Select a group and item to view details</p>
+                        </div>
+                    </div>
+
+                    <!-- Detail view (hidden until item selected) -->
+                    <div id="detailView" style="display:none;">
+
+                        <!-- Section A: Current Content -->
+                        <div class="panel mb-4">
+                            <div class="panel-header">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-heading font-semibold text-sm" id="detailTitle">—</span>
+                                    <span class="badge" id="detailCategoryBadge" style="background:rgba(129,140,248,0.15);color:#818CF8;"></span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button class="btn btn-ghost text-xs py-1 px-2" onclick="toggleHistory()" title="Version history">
+                                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 4v4l3 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 8A6.5 6.5 0 018 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                                    </button>
+                                    <button class="btn btn-ghost text-xs py-1 px-2" onclick="copyContent()" title="Copy content">
+                                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M3 11V3.5A.5.5 0 013.5 3H11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                                    </button>
+                                    <button class="btn btn-ghost text-xs py-1 px-2" id="toggleContentBtn" onclick="toggleContentCollapse()">
+                                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="detailMeta" class="px-3 py-2 flex items-center gap-2 flex-wrap text-xs" style="border-bottom:1px solid var(--deft-border, #1E2130);"></div>
+                            <div class="panel-body" id="detailContentWrap">
+                                <div class="km-content-block" id="detailContent"></div>
+                            </div>
+                        </div>
+
+                        <!-- Section B: Suggestion Chat -->
+                        <div class="panel mb-4">
+                            <div class="panel-header">
+                                <span class="font-heading font-semibold text-sm">Suggest Changes</span>
+                                <span class="badge" id="chatCountBadge" style="background:rgba(129,140,248,0.15);color:#818CF8;display:none;">0</span>
+                            </div>
+                            <div class="panel-body">
+                                <div id="chatMessages" class="flex flex-col gap-2 mb-3" style="max-height:300px;overflow-y:auto;"></div>
+                                <div class="flex gap-2">
+                                    <textarea id="chatInput" class="form-input text-sm flex-1" rows="2" placeholder="Describe what you'd like to change about this entry..." style="resize:vertical;min-height:44px;"></textarea>
+                                    <button class="btn btn-primary self-end" onclick="sendSuggestion()" id="sendBtn" style="white-space:nowrap;">
+                                        Send
+                                        <svg class="inline ml-1" width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M2 8l12-5-5 12-2-5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section C: Agent Draft -->
+                        <div class="panel" id="draftPanel" style="display:none;">
+                            <div class="panel-header">
+                                <span class="font-heading font-semibold text-sm">Agent Draft</span>
+                                <span class="badge" style="background:rgba(129,140,248,0.15);color:#818CF8;">Draft</span>
+                            </div>
+                            <div class="panel-body">
+                                <div id="draftSummary" class="text-sm text-txt-2 mb-3"></div>
+                                <div id="draftChanges" class="mb-3 text-xs space-y-1"></div>
+                                <div class="km-content-block mb-4" id="draftContent" style="border-color:color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, var(--deft-border, #2A2E3D));"></div>
+                                <div class="flex items-center gap-3">
+                                    <button class="btn btn-approve" onclick="approveDraft()">
+                                        <svg class="inline mr-1" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        Approve
+                                    </button>
+                                    <button class="btn btn-ghost" onclick="requestChanges()">Request Changes</button>
+                                    <button class="btn btn-ghost" onclick="discardDraft()" style="color:var(--deft-danger, #FF6B6B);border-color:color-mix(in srgb, var(--deft-danger, #FF6B6B) 25%, transparent);">Discard</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══ VERSION HISTORY MODAL ═══ -->
+    <div class="km-history-overlay" id="historyOverlay" onclick="if(event.target===this)closeHistory()">
+        <div class="km-history-modal">
+            <div class="panel-header">
+                <span class="font-heading font-semibold text-sm">Version History</span>
+                <button class="btn btn-ghost text-xs py-1 px-2" onclick="closeHistory()">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div id="historyList" class="p-4 space-y-3"></div>
+        </div>
+    </div>
+
+    <!-- ═══ TOAST CONTAINER ═══ -->
+    <div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// CONSTANTS & STATE
+// ═══════════════════════════════════════════
+
+const SB_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+const WEBHOOK_URL = ''; // To be set when backend builds the webhook
+
+const SEMANTIC_GROUPS = [
+    { id: 'brain-rules', label: 'Brain & Rules', icon: '&#x1F9E0;', table: 'claude_knowledge', categories: ['instruction','lesson','memory'], color: '#818CF8' },
+    { id: 'skills-guides', label: 'Skills & Guides', icon: '&#x2699;', table: 'claude_knowledge', categories: ['skill','integration_guide'], color: '#06D6A0' },
+    { id: 'project-context', label: 'Project Context', icon: '&#x1F4CB;', table: 'claude_knowledge', categories: ['project_context'], color: '#4CC9F0' },
+    { id: 'capabilities', label: 'Capabilities', icon: '&#x26A1;', table: 'system_registry', categories: ['capability'], color: '#F59E0B' },
+    { id: 'workflows-tools', label: 'Workflows & Tools', icon: '&#x1F527;', table: 'system_registry', categories: ['workflow','utility','tool','rpc'], color: '#FB7185' },
+    { id: 'infrastructure', label: 'Infrastructure', icon: '&#x1F5C4;', table: 'system_registry', categories: ['credential','config','supabase_table','table','integration'], color: '#A78BFA' },
+    { id: 'web-properties', label: 'Web Properties', icon: '&#x1F310;', table: 'system_registry', categories: ['website','frontend','link'], color: '#38BDF8' },
+];
+
+let state = {
+    knowledgeData: [],
+    registryData: [],
+    activeGroup: null,
+    activeItem: null,
+    roleFilter: 'all',
+    projectFilter: 'all',
+    searchQuery: '',
+    currentDraft: null,
+    loading: false,
+};
+
+let activeProfileId = null;
+
+// ═══════════════════════════════════════════
+// SUPABASE FETCH
+// ═══════════════════════════════════════════
+
+async function sbFetch(table, query = '') {
+    const res = await fetch(`${SB_URL}/rest/v1/${table}?${query}`, {
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+    if (!res.ok) throw new Error(`Supabase error: ${res.status}`);
+    return res.json();
+}
+
+async function sbPatch(table, id, data) {
+    const idField = table === 'claude_knowledge' ? 'id' : 'id';
+    const res = await fetch(`${SB_URL}/rest/v1/${table}?${idField}=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+            'apikey': SB_KEY,
+            'Authorization': `Bearer ${SB_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`Supabase PATCH error: ${res.status}`);
+    return res.json();
+}
+
+// ═══════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════
+
+async function loadAllData() {
+    state.loading = true;
+    try {
+        const [knowledge, registry] = await Promise.all([
+            sbFetch('claude_knowledge', 'select=id,name,category,title,content,role,project,version,metadata,updated_at,updated_by&order=category,title'),
+            sbFetch('system_registry', 'select=id,category,name,metadata,updated_at,updated_by&order=category,name')
+        ]);
+        state.knowledgeData = knowledge || [];
+        state.registryData = registry || [];
+        populateProjectFilter();
+        renderGroups();
+    } catch (e) {
+        toast('Failed to load data: ' + e.message, 'error');
+    }
+    state.loading = false;
+}
+
+function populateProjectFilter() {
+    const projects = new Set();
+    state.knowledgeData.forEach(d => { if (d.project) projects.add(d.project); });
+    const sel = document.getElementById('projectFilter');
+    sel.innerHTML = '<option value="all">All Projects</option>';
+    [...projects].sort().forEach(p => {
+        sel.innerHTML += `<option value="${p}">${p}</option>`;
+    });
+}
+
+// ═══════════════════════════════════════════
+// GROUPS
+// ═══════════════════════════════════════════
+
+function getGroupItems(group) {
+    const data = group.table === 'claude_knowledge' ? state.knowledgeData : state.registryData;
+    return data.filter(d => {
+        if (!group.categories.includes(d.category)) return false;
+        if (state.roleFilter !== 'all' && group.table === 'claude_knowledge' && d.role !== state.roleFilter) return false;
+        if (state.projectFilter !== 'all' && group.table === 'claude_knowledge' && d.project !== state.projectFilter) return false;
+        if (state.searchQuery) {
+            const q = state.searchQuery.toLowerCase();
+            const searchable = (d.title || d.name || '').toLowerCase() + ' ' + (d.category || '').toLowerCase();
+            if (!searchable.includes(q)) return false;
+        }
+        return true;
+    });
+}
+
+function renderGroups() {
+    const container = document.getElementById('groupList');
+    const mobileSelect = document.getElementById('mobileGroupSelect');
+    let html = '';
+    let mobileHtml = '<option value="">Select a group...</option>';
+
+    SEMANTIC_GROUPS.forEach((g, i) => {
+        const count = getGroupItems(g).length;
+        const isActive = state.activeGroup === g.id;
+        html += `<div class="km-group ${isActive ? 'active' : ''}" onclick="selectGroup('${g.id}')" style="${isActive ? 'border-color:' + g.color + '33;' : ''}">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span style="font-size:0.9rem;">${g.icon}</span>
+                    <span class="text-xs font-medium">${g.label}</span>
+                </div>
+                <span class="badge" style="background:${g.color}20;color:${g.color};">${count}</span>
+            </div>
+        </div>`;
+        mobileHtml += `<option value="${i}" ${isActive ? 'selected' : ''}>${g.icon} ${g.label} (${count})</option>`;
+    });
+
+    container.innerHTML = html;
+    mobileSelect.innerHTML = mobileHtml;
+}
+
+function selectGroup(groupId) {
+    state.activeGroup = groupId;
+    state.activeItem = null;
+    renderGroups();
+    renderItems();
+    document.getElementById('emptyState').style.display = 'flex';
+    document.getElementById('detailView').style.display = 'none';
+}
+
+function selectGroupByIndex(idx) {
+    if (idx === '') return;
+    selectGroup(SEMANTIC_GROUPS[parseInt(idx)].id);
+}
+
+// ═══════════════════════════════════════════
+// ITEMS
+// ═══════════════════════════════════════════
+
+function renderItems() {
+    const container = document.getElementById('itemList');
+    if (!state.activeGroup) {
+        container.innerHTML = '<p class="text-xs text-txt-3 text-center py-4">Select a group above</p>';
+        return;
+    }
+    const group = SEMANTIC_GROUPS.find(g => g.id === state.activeGroup);
+    const items = getGroupItems(group);
+
+    if (items.length === 0) {
+        container.innerHTML = '<p class="text-xs text-txt-3 text-center py-4">No matching entries</p>';
+        return;
+    }
+
+    container.innerHTML = items.map(item => {
+        const id = item.id;
+        const title = item.title || item.name || '(unnamed)';
+        const isActive = state.activeItem && state.activeItem.id === id;
+        const chatKey = `${group.table}:${id}`;
+        const hasChat = localStorage.getItem(`km-chat:${chatKey}`);
+        const ago = timeAgo(item.updated_at);
+        return `<div class="km-item ${isActive ? 'active' : ''}" onclick="selectItem('${group.table}','${id}')">
+            <div class="flex items-center justify-between gap-1">
+                <span class="text-xs font-medium truncate" style="max-width:180px;">${escHtml(title)}</span>
+                ${hasChat ? '<span style="width:6px;height:6px;border-radius:50%;background:#818CF8;flex-shrink:0;" title="Has suggestions"></span>' : ''}
+            </div>
+            <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="badge" style="background:${group.color}15;color:${group.color};font-size:0.55rem;">${item.category}</span>
+                <span class="text-txt-3" style="font-size:0.6rem;">${ago}</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function selectItem(table, id) {
+    const data = table === 'claude_knowledge' ? state.knowledgeData : state.registryData;
+    const item = data.find(d => String(d.id) === String(id));
+    if (!item) return;
+    state.activeItem = { ...item, _table: table };
+    renderItems();
+    renderDetail();
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('detailView').style.display = 'block';
+}
+
+// ═══════════════════════════════════════════
+// DETAIL PANEL
+// ═══════════════════════════════════════════
+
+function renderDetail() {
+    const item = state.activeItem;
+    if (!item) return;
+    const group = SEMANTIC_GROUPS.find(g => g.id === state.activeGroup);
+
+    // Title & badge
+    document.getElementById('detailTitle').textContent = item.title || item.name || '(unnamed)';
+    const badge = document.getElementById('detailCategoryBadge');
+    badge.textContent = item.category;
+    badge.style.background = (group ? group.color : '#818CF8') + '20';
+    badge.style.color = group ? group.color : '#818CF8';
+
+    // Metadata row
+    const meta = document.getElementById('detailMeta');
+    let metaHtml = '';
+    if (item.role) metaHtml += `<span class="badge" style="background:rgba(138,149,169,0.12);color:#8A95A9;">${item.role}</span>`;
+    if (item.project) metaHtml += `<span class="badge" style="background:rgba(76,201,240,0.12);color:#4CC9F0;">${item.project}</span>`;
+    if (item.version) metaHtml += `<span class="text-txt-3" style="font-size:0.65rem;">v${item.version}</span>`;
+    if (item.updated_by) metaHtml += `<span class="text-txt-3" style="font-size:0.65rem;">by ${escHtml(item.updated_by)}</span>`;
+    if (item.updated_at) metaHtml += `<span class="text-txt-3" style="font-size:0.65rem;">${timeAgo(item.updated_at)}</span>`;
+    meta.innerHTML = metaHtml;
+
+    // Content
+    const contentEl = document.getElementById('detailContent');
+    if (item._table === 'claude_knowledge') {
+        contentEl.textContent = item.content || '(no content)';
+    } else {
+        contentEl.textContent = item.metadata ? JSON.stringify(item.metadata, null, 2) : '(no metadata)';
+    }
+    document.getElementById('detailContentWrap').style.display = '';
+
+    // Chat
+    loadChat();
+
+    // Draft
+    state.currentDraft = null;
+    document.getElementById('draftPanel').style.display = 'none';
+}
+
+function toggleContentCollapse() {
+    const wrap = document.getElementById('detailContentWrap');
+    const btn = document.getElementById('toggleContentBtn');
+    if (wrap.style.display === 'none') {
+        wrap.style.display = '';
+        btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>';
+    } else {
+        wrap.style.display = 'none';
+        btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M4 2l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>';
+    }
+}
+
+function copyContent() {
+    const item = state.activeItem;
+    if (!item) return;
+    const text = item._table === 'claude_knowledge' ? (item.content || '') : JSON.stringify(item.metadata, null, 2);
+    navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard'));
+}
+
+// ═══════════════════════════════════════════
+// CHAT
+// ═══════════════════════════════════════════
+
+function getChatKey() {
+    if (!state.activeItem) return null;
+    return `km-chat:${state.activeItem._table}:${state.activeItem.id}`;
+}
+
+function loadChat() {
+    const key = getChatKey();
+    const container = document.getElementById('chatMessages');
+    const badge = document.getElementById('chatCountBadge');
+    if (!key) { container.innerHTML = ''; return; }
+
+    const messages = JSON.parse(localStorage.getItem(key) || '[]');
+    badge.style.display = messages.length > 0 ? '' : 'none';
+    badge.textContent = messages.length;
+
+    container.innerHTML = messages.map(m => `
+        <div class="km-chat-msg ${m.role === 'user' ? 'km-chat-user' : 'km-chat-agent'}">
+            <div class="text-xs text-txt-3 mb-1">${m.role === 'user' ? 'You' : 'Agent'} &middot; ${timeAgo(m.timestamp)}</div>
+            <div style="white-space:pre-wrap;">${escHtml(m.content)}</div>
+        </div>
+    `).join('');
+    container.scrollTop = container.scrollHeight;
+    document.getElementById('chatInput').value = '';
+}
+
+function saveChat(messages) {
+    const key = getChatKey();
+    if (!key) return;
+    localStorage.setItem(key, JSON.stringify(messages));
+}
+
+async function sendSuggestion() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text || !state.activeItem) return;
+
+    const key = getChatKey();
+    const messages = JSON.parse(localStorage.getItem(key) || '[]');
+    messages.push({ role: 'user', content: text, timestamp: new Date().toISOString() });
+    saveChat(messages);
+    loadChat();
+
+    // Send to webhook
+    if (WEBHOOK_URL) {
+        const item = state.activeItem;
+        const profile = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+        document.getElementById('sendBtn').disabled = true;
+        try {
+            const res = await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'draft_update',
+                    table: item._table,
+                    item_id: item.id,
+                    current_content: item._table === 'claude_knowledge' ? item.content : JSON.stringify(item.metadata),
+                    user_suggestion: text,
+                    chat_history: messages,
+                    user_profile: profile
+                })
+            });
+            const data = await res.json();
+            if (data.success && data.draft) {
+                messages.push({ role: 'agent', content: data.agent_message || 'Draft ready for review.', timestamp: new Date().toISOString() });
+                saveChat(messages);
+                loadChat();
+                showDraft(data.draft);
+            } else {
+                messages.push({ role: 'agent', content: 'Error: ' + (data.error || 'Unknown error'), timestamp: new Date().toISOString() });
+                saveChat(messages);
+                loadChat();
+            }
+        } catch (e) {
+            messages.push({ role: 'agent', content: 'Webhook unavailable. Suggestion saved locally for processing.', timestamp: new Date().toISOString() });
+            saveChat(messages);
+            loadChat();
+            toast('Suggestion saved — webhook not yet connected', 'info');
+        }
+        document.getElementById('sendBtn').disabled = false;
+    } else {
+        // No webhook configured — store locally
+        const agentMsg = { role: 'agent', content: 'Suggestion recorded. The backend webhook is not yet connected — your suggestion has been saved locally and will be processed once the Knowledge Manager workflow is built.', timestamp: new Date().toISOString() };
+        messages.push(agentMsg);
+        saveChat(messages);
+        loadChat();
+        toast('Suggestion saved locally', 'info');
+    }
+}
+
+// ═══════════════════════════════════════════
+// DRAFT
+// ═══════════════════════════════════════════
+
+function showDraft(draft) {
+    state.currentDraft = draft;
+    document.getElementById('draftPanel').style.display = '';
+    document.getElementById('draftSummary').textContent = draft.summary || '';
+
+    const changesEl = document.getElementById('draftChanges');
+    if (draft.changes && draft.changes.length) {
+        changesEl.innerHTML = draft.changes.map(c => `<div class="km-diff-add text-xs py-0.5">${escHtml(c)}</div>`).join('');
+    } else {
+        changesEl.innerHTML = '';
+    }
+    document.getElementById('draftContent').textContent = draft.content || '';
+}
+
+async function approveDraft() {
+    if (!state.currentDraft || !state.activeItem) return;
+    const item = state.activeItem;
+
+    // Step 1: Save current version to history
+    saveVersionHistory(item);
+
+    // Step 2: Write to Supabase
+    try {
+        const profile = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+        let patchData;
+        if (item._table === 'claude_knowledge') {
+            patchData = { content: state.currentDraft.content, updated_by: (profile.name || 'human') + '-km' };
+        } else {
+            let parsed;
+            try { parsed = JSON.parse(state.currentDraft.content); } catch { parsed = item.metadata; }
+            patchData = { metadata: parsed, updated_by: (profile.name || 'human') + '-km' };
+        }
+
+        const result = await sbPatch(item._table, item.id, patchData);
+
+        // Update local data
+        const dataArr = item._table === 'claude_knowledge' ? state.knowledgeData : state.registryData;
+        const idx = dataArr.findIndex(d => String(d.id) === String(item.id));
+        if (idx >= 0 && result && result[0]) {
+            dataArr[idx] = result[0];
+            state.activeItem = { ...result[0], _table: item._table };
+        }
+
+        state.currentDraft = null;
+        document.getElementById('draftPanel').style.display = 'none';
+        renderDetail();
+        toastWithUndo('Updated successfully', item);
+    } catch (e) {
+        toast('Failed to save: ' + e.message, 'error');
+    }
+}
+
+function requestChanges() {
+    const input = document.getElementById('chatInput');
+    input.value = 'Please revise: ';
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+    document.getElementById('chatInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function discardDraft() {
+    state.currentDraft = null;
+    document.getElementById('draftPanel').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════
+// VERSION HISTORY
+// ═══════════════════════════════════════════
+
+function getHistoryKey(item) {
+    return `km-history:${item._table}:${item.id}`;
+}
+
+function saveVersionHistory(item) {
+    const key = getHistoryKey(item);
+    const history = JSON.parse(localStorage.getItem(key) || '[]');
+    const profile = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+
+    const snapshot = {
+        content: item._table === 'claude_knowledge' ? item.content : JSON.stringify(item.metadata),
+        timestamp: new Date().toISOString(),
+        approved_by: profile.name || 'unknown',
+        version_label: `Before edit ${history.length + 1}`
+    };
+
+    history.push(snapshot);
+    // Keep max 3
+    while (history.length > 3) history.shift();
+    localStorage.setItem(key, JSON.stringify(history));
+}
+
+function pruneOldHistory() {
+    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key || !key.startsWith('km-history:')) continue;
+        try {
+            let history = JSON.parse(localStorage.getItem(key) || '[]');
+            history = history.filter(h => new Date(h.timestamp).getTime() > thirtyDaysAgo);
+            if (history.length === 0) localStorage.removeItem(key);
+            else localStorage.setItem(key, JSON.stringify(history));
+        } catch (e) {}
+    }
+}
+
+function toggleHistory() {
+    const overlay = document.getElementById('historyOverlay');
+    if (overlay.classList.contains('visible')) { closeHistory(); return; }
+    if (!state.activeItem) return;
+
+    const key = getHistoryKey(state.activeItem);
+    const history = JSON.parse(localStorage.getItem(key) || '[]');
+    const container = document.getElementById('historyList');
+
+    if (history.length === 0) {
+        container.innerHTML = '<p class="text-sm text-txt-3 text-center">No version history for this entry yet. History is saved automatically when you approve changes.</p>';
+    } else {
+        container.innerHTML = history.slice().reverse().map((h, i) => `
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-medium">${escHtml(h.version_label)}</span>
+                        <span class="text-txt-3" style="font-size:0.6rem;">${timeAgo(h.timestamp)}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-txt-3">by ${escHtml(h.approved_by)}</span>
+                        <button class="btn btn-ghost text-xs py-1 px-2" onclick="restoreVersion(${history.length - 1 - i})">Restore</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="km-content-block" style="max-height:200px;font-size:0.7rem;">${escHtml(h.content)}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+    overlay.classList.add('visible');
+}
+
+function closeHistory() {
+    document.getElementById('historyOverlay').classList.remove('visible');
+}
+
+async function restoreVersion(idx) {
+    if (!state.activeItem) return;
+    const key = getHistoryKey(state.activeItem);
+    const history = JSON.parse(localStorage.getItem(key) || '[]');
+    const version = history[idx];
+    if (!version) return;
+
+    // Save current as a new history entry before restoring
+    saveVersionHistory(state.activeItem);
+
+    const item = state.activeItem;
+    const profile = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+
+    try {
+        let patchData;
+        if (item._table === 'claude_knowledge') {
+            patchData = { content: version.content, updated_by: (profile.name || 'human') + '-km-restore' };
+        } else {
+            let parsed;
+            try { parsed = JSON.parse(version.content); } catch { return toast('Invalid JSON in history', 'error'); }
+            patchData = { metadata: parsed, updated_by: (profile.name || 'human') + '-km-restore' };
+        }
+
+        const result = await sbPatch(item._table, item.id, patchData);
+        const dataArr = item._table === 'claude_knowledge' ? state.knowledgeData : state.registryData;
+        const dataIdx = dataArr.findIndex(d => String(d.id) === String(item.id));
+        if (dataIdx >= 0 && result && result[0]) {
+            dataArr[dataIdx] = result[0];
+            state.activeItem = { ...result[0], _table: item._table };
+        }
+
+        closeHistory();
+        renderDetail();
+        toast('Version restored successfully');
+    } catch (e) {
+        toast('Failed to restore: ' + e.message, 'error');
+    }
+}
+
+// ═══════════════════════════════════════════
+// UNDO TOAST
+// ═══════════════════════════════════════════
+
+function toastWithUndo(msg, previousItem) {
+    const container = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'toast toast-success';
+    t.innerHTML = `<span>${escHtml(msg)}</span><button onclick="undoLastApprove(this)" class="btn btn-ghost text-xs py-0.5 px-2 ml-2" style="color:var(--deft-accent);border-color:color-mix(in srgb, var(--deft-accent) 30%, transparent);font-size:0.7rem;">Undo</button>`;
+    t._previousItem = previousItem;
+    container.appendChild(t);
+
+    // 10-second undo window
+    setTimeout(() => {
+        if (t.parentNode) {
+            t.style.opacity = '0'; t.style.transform = 'translateY(10px)'; t.style.transition = 'all 0.3s';
+            setTimeout(() => t.remove(), 300);
+        }
+    }, 10000);
+}
+
+async function undoLastApprove(btn) {
+    const toastEl = btn.closest('.toast');
+    const previousItem = toastEl._previousItem;
+    if (!previousItem) return;
+
+    const key = `km-history:${previousItem._table}:${previousItem.id}`;
+    const history = JSON.parse(localStorage.getItem(key) || '[]');
+    if (history.length === 0) return toast('No history to undo', 'error');
+
+    const lastVersion = history.pop();
+    localStorage.setItem(key, JSON.stringify(history));
+
+    const profile = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+    try {
+        let patchData;
+        if (previousItem._table === 'claude_knowledge') {
+            patchData = { content: lastVersion.content, updated_by: (profile.name || 'human') + '-km-undo' };
+        } else {
+            let parsed;
+            try { parsed = JSON.parse(lastVersion.content); } catch { return toast('Invalid JSON in undo history', 'error'); }
+            patchData = { metadata: parsed, updated_by: (profile.name || 'human') + '-km-undo' };
+        }
+        const result = await sbPatch(previousItem._table, previousItem.id, patchData);
+        const dataArr = previousItem._table === 'claude_knowledge' ? state.knowledgeData : state.registryData;
+        const idx = dataArr.findIndex(d => String(d.id) === String(previousItem.id));
+        if (idx >= 0 && result && result[0]) {
+            dataArr[idx] = result[0];
+            if (state.activeItem && String(state.activeItem.id) === String(previousItem.id)) {
+                state.activeItem = { ...result[0], _table: previousItem._table };
+                renderDetail();
+            }
+        }
+        toastEl.remove();
+        toast('Undo successful');
+    } catch (e) {
+        toast('Undo failed: ' + e.message, 'error');
+    }
+}
+
+// ═══════════════════════════════════════════
+// FILTERS
+// ═══════════════════════════════════════════
+
+function setRoleFilter(role) {
+    state.roleFilter = role;
+    document.querySelectorAll('.km-filter-chip').forEach(chip => {
+        chip.classList.toggle('active', chip.textContent.trim().toLowerCase() === role);
+    });
+    renderGroups();
+    renderItems();
+}
+
+function setProjectFilter(project) {
+    state.projectFilter = project;
+    renderGroups();
+    renderItems();
+}
+
+function handleSearch(query) {
+    state.searchQuery = query;
+    renderGroups();
+    renderItems();
+}
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+
+function escHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return hours + 'h ago';
+    const days = Math.floor(hours / 24);
+    if (days < 30) return days + 'd ago';
+    return Math.floor(days / 30) + 'mo ago';
+}
+
+function toast(msg, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.textContent = msg;
+    container.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(10px)'; t.style.transition = 'all 0.3s'; }, 4000);
+    setTimeout(() => t.remove(), 4500);
+}
+
+// ═══════════════════════════════════════════
+// AUTH GATE (same as settings)
+// ═══════════════════════════════════════════
+
+let gateSelectedProfile = null;
+
+function getCachedProfiles(callback) {
+    var CACHE_KEY = 'rdgr-profiles-cache';
+    var CACHE_TTL = 300000;
+    try {
+        var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+        if (cached.profiles && cached.ts && (Date.now() - cached.ts) < CACHE_TTL) {
+            callback(cached.profiles); return;
+        }
+    } catch(e) {}
+    fetch(`${SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    }).then(r => r.json()).then(profiles => {
+        if (profiles && Array.isArray(profiles) && profiles.length > 0) {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ profiles: profiles, ts: Date.now() }));
+        }
+        callback(profiles);
+    }).catch(() => callback([]));
+}
+
+function loadGateProfiles() {
+    getCachedProfiles(function(profiles) {
+        const container = document.getElementById('gateProfiles');
+        if (!container || !profiles || !profiles.length) return;
+        const saved = localStorage.getItem('rdgr-active-profile');
+        let savedId = null;
+        if (saved) { try { savedId = JSON.parse(saved).id; } catch(e) {} }
+        const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+        container.innerHTML = profiles.map(p => {
+            const name = p.display_name || p.email || '?';
+            const initial = name[0].toUpperCase();
+            const color = colors[name] || '#8A95A9';
+            return `<button type="button" onclick="selectGateProfile('${p.user_id}','${name.replace(/'/g, '&#39;')}',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="if(!this.classList.contains('selected'))this.style.background='rgba(255,255,255,0.02)'">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:${color}20;color:${color};border:2px solid transparent;">${initial}</div>
+                <span class="text-xs" style="color:#8A95A9;">${name}</span>
+            </button>`;
+        }).join('');
+        if (savedId) {
+            const btns = container.querySelectorAll('.gate-profile-btn');
+            btns.forEach(btn => { if (btn.getAttribute('onclick').includes(savedId)) btn.click(); });
+        }
+    });
+}
+
+function selectGateProfile(userId, name, el) {
+    gateSelectedProfile = { id: userId, name: name };
+    document.querySelectorAll('.gate-profile-btn').forEach(btn => {
+        btn.classList.remove('selected');
+        btn.style.background = 'rgba(255,255,255,0.02)';
+        btn.style.borderColor = 'transparent';
+        btn.querySelector('.w-10').style.borderColor = 'transparent';
+    });
+    el.classList.add('selected');
+    el.style.background = 'rgba(255,255,255,0.06)';
+    el.style.borderColor = 'rgba(6,214,160,0.4)';
+    el.querySelector('.w-10').style.borderColor = el.querySelector('.w-10').style.color;
+    const btn = document.getElementById('gateSubmitBtn');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.textContent = 'Sign In as ' + name;
+    document.getElementById('gateInput').focus();
+}
+
+function handleGate(e) {
+    e.preventDefault();
+    const input = document.getElementById('gateInput').value;
+    if (input === 'Advance1!') {
+        localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+        if (gateSelectedProfile) {
+            localStorage.setItem('rdgr-active-profile', JSON.stringify(gateSelectedProfile));
+            activeProfileId = gateSelectedProfile.id;
+        }
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity = '1';
+        loadAllData();
+        return false;
+    }
+    document.getElementById('gateError').classList.add('show');
+    document.getElementById('gateInput').value = '';
+    document.getElementById('gateInput').focus();
+    setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+    return false;
+}
+
+// ═══════════════════════════════════════════
+// PROFILE SWITCHER
+// ═══════════════════════════════════════════
+
+(function initProfileSwitcher() {
+    const saved = localStorage.getItem('rdgr-active-profile');
+    if (saved) {
+        try {
+            const p = JSON.parse(saved);
+            activeProfileId = p.id;
+            const nameEl = document.getElementById('profileName');
+            const avatarEl = document.getElementById('profileAvatar');
+            if (nameEl) nameEl.textContent = p.name;
+            if (avatarEl) avatarEl.textContent = (p.name || 'B')[0].toUpperCase();
+        } catch(e) {}
+    }
+    getCachedProfiles(function(profiles) {
+        const dd = document.getElementById('profileDropdown');
+        if (!dd || !profiles || profiles.length === 0) return;
+        const activeId = saved ? JSON.parse(saved).id : null;
+        dd.innerHTML = profiles.map(p => {
+            const name = p.display_name || p.email || '?';
+            const initial = name[0].toUpperCase();
+            const isActive = p.user_id === activeId;
+            return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, '&#39;')}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div>
+                <span>${name}</span>
+                ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+            </button>`;
+        }).join('');
+        dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+    });
+})();
+
+function toggleProfileDD() {
+    const dd = document.getElementById('profileDropdown');
+    dd.classList.toggle('hidden');
+    if (!dd.classList.contains('hidden')) {
+        setTimeout(() => document.addEventListener('click', function closePDD(e) {
+            if (!document.getElementById('profileSwitcher').contains(e.target)) dd.classList.add('hidden');
+            document.removeEventListener('click', closePDD);
+        }), 0);
+    }
+}
+
+function selectProfileGlobal(userId, name) {
+    localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+    location.reload();
+}
+
+function signOut() {
+    localStorage.removeItem('rdgr-session');
+    localStorage.removeItem('rdgr-active-profile');
+    location.reload();
+}
+
+// ═══════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════
+
+if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('mainContent').style.opacity = '1';
+    loadAllData();
+}
+if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+    loadGateProfiles();
+}
+
+// Prune old history on load
+pruneOldHistory();
+
+// Keyboard shortcut: Enter in chat input sends
+document.getElementById('chatInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendSuggestion();
+    }
+});
+
+</script>
+</body>
+</html>
