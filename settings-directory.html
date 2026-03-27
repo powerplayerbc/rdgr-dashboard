@@ -233,9 +233,12 @@
                         <a href="/org-chart" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Org Map</a>
                         <a href="/our-workflows" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Workflows</a>
                         <a href="/social-dashboard" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Social</a>
-                        <a href="/email-outreach?auth=rdgr" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Email</a>
+                        <a href="/email-outreach" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Email</a>
                         <a href="/crm" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">CRM</a>
                         <a href="/offer-studio" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Offers</a>
+                        <a href="/content" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Publishing</a>
+                        <a href="/media" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Media</a>
+                        <a href="/council" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Council</a>
                         <a href="/deft" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">DEFT</a>
                         <a href="/brain" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">BRAIN</a>
                     </div>
@@ -368,6 +371,26 @@
                     </div>
                 </a>
 
+                <!-- Council Advisors -->
+                <a href="/council-advisors-settings" class="settings-card" style="--card-accent: rgba(139,26,26,0.4);">
+                    <div class="card-icon" style="background: rgba(139,26,26,0.08);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="#8B1A1A" stroke-width="1.5" stroke-linecap="round"/>
+                            <circle cx="9" cy="7" r="4" stroke="#8B1A1A" stroke-width="1.5"/>
+                            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="#8B1A1A" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-heading font-bold text-base mb-1 text-txt">Council Advisors</h3>
+                    <p class="text-xs text-txt-3 leading-relaxed mb-3">Manage your advisory council — edit advisor names, expertise, system prompts, personalities, and add new custom advisors.</p>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider" style="color:#8B1A1A;">Advisors</span>
+                        <span class="text-txt-3">&middot;</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Prompts</span>
+                        <span class="text-txt-3">&middot;</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Personalities</span>
+                    </div>
+                </a>
+
                 <!-- BRAIN Settings -->
                 <a href="/brain" class="settings-card" onclick="event.preventDefault(); window.location.href='/brain'; setTimeout(()=>{ const t=document.getElementById('tab-settings'); if(t) t.click(); }, 500);" style="--card-accent: rgba(245,158,11,0.4);">
                     <div class="card-icon" style="background: rgba(245,158,11,0.08);">
@@ -386,6 +409,28 @@
                         <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Schedule</span>
                         <span class="text-txt-3">·</span>
                         <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Calendar</span>
+                    </div>
+                </a>
+
+                <!-- Knowledge Manager -->
+                <a href="/knowledge-manager" class="settings-card" style="--card-accent: rgba(129,140,248,0.4);">
+                    <div class="card-icon" style="background: rgba(129,140,248,0.08);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="#818CF8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="#818CF8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 7h8M8 11h5" stroke="#818CF8" stroke-width="1.2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-heading font-bold text-base mb-1 text-txt">Knowledge Manager</h3>
+                    <p class="text-xs text-txt-3 leading-relaxed mb-3">Browse and edit AI knowledge entries, system registry, skills, lessons, and prompts — with AI-assisted drafting and version history.</p>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider" style="color:#818CF8;">Knowledge</span>
+                        <span class="text-txt-3">&middot;</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">Registry</span>
+                        <span class="text-txt-3">&middot;</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">AI Drafts</span>
+                        <span class="text-txt-3">&middot;</span>
+                        <span class="text-[0.6rem] font-mono uppercase tracking-wider text-txt-3">History</span>
                     </div>
                 </a>
 
