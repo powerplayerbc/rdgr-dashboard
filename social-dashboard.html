@@ -337,7 +337,28 @@
             transition: background 0.2s, color 0.2s, border-color 0.2s;
         }
         .view-btn:hover { color: #E8ECF1; background: rgba(255,255,255,0.03); }
-        .view-btn.active { color: #06D6A0; background: rgba(6,214,160,0.1); border-color: rgba(6,214,160,0.2); }
+        .view-btn.active { color: var(--deft-accent, #06D6A0); background: color-mix(in srgb, var(--deft-accent, #06D6A0) 10%, transparent); border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 20%, transparent); }
+        .filter-chip {
+            font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.03em;
+            padding: 0.25rem 0.625rem; border-radius: 999px; cursor: pointer;
+            background: transparent; color: var(--deft-txt-3, #525E73);
+            border: 1px solid var(--deft-border, #2A2E3D); transition: all 0.15s;
+        }
+        .filter-chip:hover { color: var(--deft-txt-2, #8A95A9); border-color: var(--deft-txt-3, #525E73); }
+        .filter-chip.active { color: var(--deft-accent, #06D6A0); background: color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent); border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent); }
+        .piece-card {
+            padding: 1rem; border-radius: 0.5rem;
+            background: var(--deft-surface-el, #1A1D28); border: 1px solid var(--deft-border, #2A2E3D); transition: border-color 0.2s;
+        }
+        .piece-card:hover { border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent); }
+        .comp-card {
+            padding: 1rem; border-radius: 0.5rem;
+            background: var(--deft-surface-el, #1A1D28); border: 1px solid var(--deft-border, #2A2E3D);
+            cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .comp-card:hover { border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent); box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+        .var-hl { color: var(--deft-accent, #06D6A0); font-weight: 500; }
+        .prompt-preview { white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--deft-txt-2, #8A95A9); }
 
         .status-btn {
             font-family: 'JetBrains Mono', monospace;
@@ -1079,6 +1100,8 @@
                         <div class="flex items-center gap-1 bg-surface rounded-lg p-1 border border-border/50">
                             <button class="view-btn active" id="outTabDm" onclick="setOutreachType('dm')">DM Queue</button>
                             <button class="view-btn" id="outTabEng" onclick="setOutreachType('engagement')">Engagement Queue</button>
+                            <button class="view-btn" id="outTabTemplates" onclick="setOutreachType('templates')">Templates</button>
+                            <button class="view-btn" id="outTabPrompts" onclick="setOutreachType('prompts')">Prompts</button>
                         </div>
 
                         <!-- Queue Sub-tabs -->
@@ -1126,10 +1149,120 @@
                 </div>
             </div>
 
-            <!-- ── Outreach Cards Container ── -->
-            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8">
+            <!-- ── Outreach Cards Container (DM + Engagement queues) ── -->
+            <div id="outreachQueueSection" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8">
                 <div id="outreachCards" class="space-y-3">
                     <div class="empty-state"><div class="skeleton h-24 w-full mb-2"></div><div class="skeleton h-24 w-full mb-2"></div><div class="skeleton h-24 w-full"></div></div>
+                </div>
+            </div>
+
+            <!-- ── Social Templates Section ── -->
+            <div id="socialTemplatesSection" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;">
+
+                <!-- Sub-tabs: Pieces | Compositions -->
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-1 bg-surface rounded-lg p-1 border border-border/50">
+                        <button class="view-btn active" id="socTplSubPieces" onclick="setSocialTemplateSubTab('pieces')">Pieces</button>
+                        <button class="view-btn" id="socTplSubComps" onclick="setSocialTemplateSubTab('compositions')">Compositions</button>
+                    </div>
+                    <button class="btn btn-primary text-xs py-1.5 px-4" id="socTplAddBtn" onclick="openSocialPieceModal()">+ New Piece</button>
+                </div>
+
+                <!-- Pieces Sub-view -->
+                <div id="socTplViewPieces">
+                    <div class="flex flex-wrap items-center gap-1.5 mb-3">
+                        <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium mr-1">Channel:</span>
+                        <button class="filter-chip active" data-spchan="all" onclick="setSocialPieceChannelFilter('all')">All Social</button>
+                        <button class="filter-chip" data-spchan="social_dm" onclick="setSocialPieceChannelFilter('social_dm')">DM</button>
+                        <button class="filter-chip" data-spchan="social_engagement" onclick="setSocialPieceChannelFilter('social_engagement')">Engagement</button>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5 mb-4">
+                        <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium mr-1">Category:</span>
+                        <button class="filter-chip active" data-spcat="all" onclick="setSocialPieceCategoryFilter('all')">All</button>
+                        <button class="filter-chip" data-spcat="greeting" onclick="setSocialPieceCategoryFilter('greeting')">Greeting</button>
+                        <button class="filter-chip" data-spcat="opening" onclick="setSocialPieceCategoryFilter('opening')">Opening</button>
+                        <button class="filter-chip" data-spcat="body" onclick="setSocialPieceCategoryFilter('body')">Body</button>
+                        <button class="filter-chip" data-spcat="cta" onclick="setSocialPieceCategoryFilter('cta')">CTA</button>
+                    </div>
+                    <div id="socialPiecesContainer" class="space-y-5">
+                        <div class="empty-state text-sm py-8">Loading social pieces...</div>
+                    </div>
+                </div>
+
+                <!-- Compositions Sub-view -->
+                <div id="socTplViewComps" style="display: none;">
+                    <div class="flex flex-wrap items-center gap-1.5 mb-4">
+                        <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium mr-1">System:</span>
+                        <button class="filter-chip active" data-scsys="all" onclick="setSocialCompSystemFilter('all')">All</button>
+                        <button class="filter-chip" data-scsys="social_dm" onclick="setSocialCompSystemFilter('social_dm')">Social DM</button>
+                        <button class="filter-chip" data-scsys="social_engagement" onclick="setSocialCompSystemFilter('social_engagement')">Engagement</button>
+                    </div>
+                    <div id="socialCompsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="empty-state text-sm py-8 lg:col-span-2">Loading compositions...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Social Prompts Section ── -->
+            <div id="socialPromptsSection" class="max-w-[1200px] mx-auto px-4 sm:px-6 pb-8" style="display: none;">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-5">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-heading font-semibold text-sm tracking-wide">Social System Prompt</span>
+                                    <span class="badge badge-info" id="socSystemPromptVersion">v1</span>
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                <textarea class="form-input font-mono text-xs" id="socSystemPromptEditor" rows="18" placeholder="System prompt for social outreach generation..."></textarea>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-header">
+                                <span class="font-heading font-semibold text-sm tracking-wide">Social User Prompt</span>
+                            </div>
+                            <div class="panel-body">
+                                <textarea class="form-input font-mono text-xs" id="socUserPromptEditor" rows="12" placeholder="User prompt template for social outreach..."></textarea>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <button class="btn btn-primary py-2 px-6" onclick="saveSocialPrompts()">Save Social Prompts</button>
+                            <button class="btn btn-ghost py-2 px-4" onclick="resetSocialPrompts()">Reset</button>
+                        </div>
+                    </div>
+                    <div class="space-y-5">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <span class="font-heading font-semibold text-sm tracking-wide">Preview</span>
+                            </div>
+                            <div class="panel-body">
+                                <div class="prompt-preview text-xs" id="socPromptPreview" style="max-height: 400px; overflow-y: auto; white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; color: var(--deft-txt-2, #8A95A9);">
+                                    Social outreach prompts will appear here once configured.
+                                </div>
+                            </div>
+                        </div>
+                        <details class="panel">
+                            <summary class="panel-header cursor-pointer" style="list-style: none;">
+                                <span class="font-heading font-semibold text-sm tracking-wide">Variable Reference</span>
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </summary>
+                            <div class="panel-body text-xs text-txt-2">
+                                <p class="mb-2">Available variables for social prompts:</p>
+                                <div class="font-mono space-y-0.5">
+                                    <div><span class="text-accent">{{identity_block}}</span> - About You</div>
+                                    <div><span class="text-accent">{{keywords_block}}</span> - Keywords</div>
+                                    <div><span class="text-accent">{{value_props_block}}</span> - Value props</div>
+                                    <div><span class="text-accent">{{banned_block}}</span> - Banned phrases</div>
+                                    <div><span class="text-accent">{{opening_templates}}</span> - Opening pieces</div>
+                                    <div><span class="text-accent">{{body_templates}}</span> - Body pieces</div>
+                                    <div><span class="text-accent">{{cta_templates}}</span> - CTA pieces</div>
+                                    <div><span class="text-accent">{{business_name}}</span> - Lead business</div>
+                                    <div><span class="text-accent">{{platform}}</span> - Target platform</div>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
                 </div>
             </div>
 
@@ -2504,9 +2637,41 @@ function setOutreachType(type) {
     outreachType = type;
     document.getElementById('outTabDm').classList.toggle('active', type === 'dm');
     document.getElementById('outTabEng').classList.toggle('active', type === 'engagement');
-    selectedOutreachDrafts.clear();
-    updateOutreachBulkBar();
-    fetchOutreachQueue();
+    document.getElementById('outTabTemplates').classList.toggle('active', type === 'templates');
+    document.getElementById('outTabPrompts').classList.toggle('active', type === 'prompts');
+
+    // Show/hide queue vs templates vs prompts sections
+    const queueSection = document.getElementById('outreachQueueSection');
+    const tplSection = document.getElementById('socialTemplatesSection');
+    const promptsSection = document.getElementById('socialPromptsSection');
+    // Queue-related elements
+    const queueSubTabs = document.querySelector('.flex.items-center.gap-1.bg-surface.rounded-lg.p-1.border.border-border\\/50.ml-2');
+    const platformFilters = document.querySelector('[data-oplatform]')?.closest('.flex.items-center.gap-1.flex-wrap');
+
+    if (type === 'templates') {
+        queueSection.style.display = 'none';
+        tplSection.style.display = '';
+        promptsSection.style.display = 'none';
+        if (queueSubTabs) queueSubTabs.style.display = 'none';
+        if (platformFilters) platformFilters.style.display = 'none';
+        if (!socialPiecesLoaded) { socialPiecesLoaded = true; loadSocialPieces(); loadSocialCompositions(); }
+    } else if (type === 'prompts') {
+        queueSection.style.display = 'none';
+        tplSection.style.display = 'none';
+        promptsSection.style.display = '';
+        if (queueSubTabs) queueSubTabs.style.display = 'none';
+        if (platformFilters) platformFilters.style.display = 'none';
+        if (!socialPromptsLoaded) { socialPromptsLoaded = true; loadSocialPrompts(); }
+    } else {
+        queueSection.style.display = '';
+        tplSection.style.display = 'none';
+        promptsSection.style.display = 'none';
+        if (queueSubTabs) queueSubTabs.style.display = '';
+        if (platformFilters) platformFilters.style.display = '';
+        selectedOutreachDrafts.clear();
+        updateOutreachBulkBar();
+        fetchOutreachQueue();
+    }
 }
 
 function setQueueType(type) {
@@ -3901,6 +4066,199 @@ function signOut() {
     localStorage.removeItem('rdgr-active-profile');
     location.reload();
 }
+
+// ═══════════════════════════════════════════════════
+// SOCIAL TEMPLATES: PIECES & COMPOSITIONS
+// ═══════════════════════════════════════════════════
+
+const PIECE_CATEGORIES = ['greeting', 'opening', 'body', 'question', 'cta', 'subject', 'signoff', 'footer', 'ps'];
+const PIECE_CATEGORY_LABELS = { greeting:'Greeting', opening:'Opening', body:'Body', question:'Question', cta:'CTA', subject:'Subject', signoff:'Signoff', footer:'Footer', ps:'PS' };
+const PIECE_CHANNEL_LABELS = { all:'All', cold_email:'Email', social_dm:'Social DM', social_engagement:'Engagement' };
+const PIECE_SYSTEM_LABELS = { all:'All', cold_outreach:'Cold Outreach', crm_sequence:'CRM Sequence', offer:'Offer', social_dm:'Social DM', social_engagement:'Engagement' };
+const TONE_BADGE_COLORS = { neutral:'badge-info', warm:'badge-warn', direct:'badge-accent', witty:'badge-purple', formal:'badge-info' };
+const CHANNEL_BADGE_COLORS = { all:'badge-accent', cold_email:'badge-info', social_dm:'badge-warn', social_engagement:'badge-purple' };
+
+let socialPieces = [];
+let socialCompositions = [];
+let socialPieceChannelFilter = 'all';
+let socialPieceCategoryFilter = 'all';
+let socialCompSystemFilter = 'all';
+let socialTemplateSubTab = 'pieces';
+let socialPiecesLoaded = false;
+let socialPromptsLoaded = false;
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function highlightVars(text) { return esc(text).replace(/\{(\w+)\}/g, '<span class="var-hl">{$1}</span>'); }
+function detectVariables(text) { const m = text.match(/\{(\w+)\}/g); return m ? [...new Set(m.map(v => v.slice(1, -1)))] : []; }
+
+function setSocialTemplateSubTab(tab) {
+    socialTemplateSubTab = tab;
+    document.getElementById('socTplSubPieces').classList.toggle('active', tab === 'pieces');
+    document.getElementById('socTplSubComps').classList.toggle('active', tab === 'compositions');
+    document.getElementById('socTplViewPieces').style.display = tab === 'pieces' ? '' : 'none';
+    document.getElementById('socTplViewComps').style.display = tab === 'compositions' ? '' : 'none';
+    const addBtn = document.getElementById('socTplAddBtn');
+    if (tab === 'pieces') { addBtn.textContent = '+ New Piece'; addBtn.onclick = () => window.open('/email-outreach?tab=templates', '_self'); }
+    else { addBtn.textContent = '+ New Composition'; addBtn.onclick = () => window.open('/email-outreach?tab=templates', '_self'); }
+}
+
+function setSocialPieceChannelFilter(chan) {
+    socialPieceChannelFilter = chan;
+    document.querySelectorAll('[data-spchan]').forEach(b => b.classList.toggle('active', b.dataset.spchan === chan));
+    renderSocialPieces();
+}
+function setSocialPieceCategoryFilter(cat) {
+    socialPieceCategoryFilter = cat;
+    document.querySelectorAll('[data-spcat]').forEach(b => b.classList.toggle('active', b.dataset.spcat === cat));
+    renderSocialPieces();
+}
+function setSocialCompSystemFilter(sys) {
+    socialCompSystemFilter = sys;
+    document.querySelectorAll('[data-scsys]').forEach(b => b.classList.toggle('active', b.dataset.scsys === sys));
+    renderSocialCompositions();
+}
+
+async function loadSocialPieces() {
+    try {
+        const result = await supabaseRpc('get_template_pieces', { p_brand_id: 'carlton', p_category: null, p_system: null, p_active_only: true });
+        const all = (result && result.pieces) ? result.pieces : (Array.isArray(result) ? result : []);
+        // Filter to social channels only (social_dm, social_engagement, or 'all')
+        socialPieces = all.filter(p => ['social_dm', 'social_engagement', 'all'].includes(p.channel));
+    } catch (err) {
+        console.warn('Failed to load social pieces:', err);
+        socialPieces = [];
+    }
+    renderSocialPieces();
+}
+
+function renderSocialPieces() {
+    const container = document.getElementById('socialPiecesContainer');
+    let filtered = socialPieces;
+    if (socialPieceChannelFilter !== 'all') {
+        filtered = filtered.filter(p => p.channel === socialPieceChannelFilter || p.channel === 'all');
+    }
+    if (socialPieceCategoryFilter !== 'all') {
+        filtered = filtered.filter(p => p.category === socialPieceCategoryFilter);
+    }
+    if (!filtered.length) {
+        container.innerHTML = '<div class="text-center text-txt-3 text-sm py-8">No social pieces match the current filters.</div>';
+        return;
+    }
+    const grouped = {};
+    filtered.forEach(p => { if (!grouped[p.category]) grouped[p.category] = []; grouped[p.category].push(p); });
+    const catOrder = PIECE_CATEGORIES.filter(c => grouped[c]);
+    container.innerHTML = catOrder.map(cat => {
+        const pieces = grouped[cat];
+        return `
+            <div class="panel">
+                <div class="panel-header cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.chev').classList.toggle('rotate-180')">
+                    <div class="flex items-center gap-2">
+                        <span class="font-heading font-semibold text-sm tracking-wide">${PIECE_CATEGORY_LABELS[cat] || cat}</span>
+                        <span class="badge badge-accent">${pieces.length}</span>
+                    </div>
+                    <svg class="chev transition-transform" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="panel-body">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+                        ${pieces.map(p => {
+                            const chanLabel = PIECE_CHANNEL_LABELS[p.channel] || p.channel;
+                            const toneLabel = p.tone || 'neutral';
+                            return `<div class="piece-card">
+                                <div class="text-sm mb-2" style="line-height:1.5;">${highlightVars(p.template_text || '')}</div>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="badge ${CHANNEL_BADGE_COLORS[p.channel] || 'badge-accent'}" style="font-size:0.6rem;">${chanLabel}</span>
+                                    <span class="badge ${TONE_BADGE_COLORS[toneLabel] || 'badge-info'}" style="font-size:0.6rem;">${toneLabel}</span>
+                                </div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function loadSocialCompositions() {
+    try {
+        const result = await supabaseRpc('get_compositions', { p_brand_id: 'carlton', p_system: null });
+        const all = (result && Array.isArray(result.compositions)) ? result.compositions : (Array.isArray(result) ? result : []);
+        socialCompositions = all.filter(c => ['social_dm', 'social_engagement'].includes(c.system));
+    } catch (err) {
+        console.warn('Failed to load social compositions:', err);
+        socialCompositions = [];
+    }
+    renderSocialCompositions();
+}
+
+function renderSocialCompositions() {
+    const container = document.getElementById('socialCompsContainer');
+    const filtered = socialCompSystemFilter === 'all' ? socialCompositions : socialCompositions.filter(c => c.system === socialCompSystemFilter);
+    if (!filtered.length) {
+        container.innerHTML = '<div class="empty-state text-sm py-8 lg:col-span-2">No social compositions match the current filter.</div>';
+        return;
+    }
+    container.innerHTML = filtered.map(c => {
+        const sectionCount = Array.isArray(c.sections) ? c.sections.length : 0;
+        return `<div class="comp-card" onclick="window.open('/email-outreach?tab=templates','_self')">
+            <div class="flex items-start justify-between mb-2">
+                <div>
+                    <div class="font-medium text-sm mb-0.5">${esc(c.name)}</div>
+                    <div class="text-xs text-txt-3">${esc(c.description || '')}</div>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    ${c.is_default ? '<span class="badge badge-warn" style="font-size:0.55rem;">DEFAULT</span>' : ''}
+                    <span class="badge ${c.is_active ? 'badge-accent' : 'badge-alert'}" style="font-size:0.55rem;">${c.is_active ? 'ACTIVE' : 'INACTIVE'}</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 text-xs text-txt-3">
+                <span class="badge badge-info" style="font-size:0.55rem;">${PIECE_SYSTEM_LABELS[c.system] || c.system}</span>
+                <span>${sectionCount} sections</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function openSocialPieceModal() { window.open('/email-outreach?tab=templates', '_self'); }
+
+async function loadSocialPrompts() {
+    // Social prompts can be loaded from outreach_voice_settings or a dedicated table
+    try {
+        const result = await supabaseRpc('get_prompt_templates', { p_brand_id: 'carlton', p_channel: 'social_dm' });
+        if (result) {
+            document.getElementById('socSystemPromptEditor').value = result.system_prompt || '';
+            document.getElementById('socUserPromptEditor').value = result.user_prompt || '';
+            document.getElementById('socPromptPreview').textContent = result.system_prompt || 'No social prompts configured yet.';
+        }
+    } catch (err) {
+        console.warn('Failed to load social prompts:', err);
+    }
+}
+
+async function saveSocialPrompts() {
+    const sysPrompt = document.getElementById('socSystemPromptEditor').value;
+    const userPrompt = document.getElementById('socUserPromptEditor').value;
+    try {
+        await supabaseRpc('update_prompt_templates', {
+            p_brand_id: 'carlton',
+            p_channel: 'social_dm',
+            p_system_prompt: sysPrompt,
+            p_user_prompt: userPrompt
+        });
+        toast('Social prompts saved', 'success');
+        document.getElementById('socPromptPreview').textContent = sysPrompt || 'No social prompts configured.';
+    } catch (err) {
+        console.error('Save social prompts failed:', err);
+        toast('Failed to save social prompts', 'error');
+    }
+}
+
+function resetSocialPrompts() {
+    if (!confirm('Reset social prompts to default?')) return;
+    document.getElementById('socSystemPromptEditor').value = '';
+    document.getElementById('socUserPromptEditor').value = '';
+    document.getElementById('socPromptPreview').textContent = 'Prompts have been reset.';
+}
+
 </script>
 </body>
 </html>

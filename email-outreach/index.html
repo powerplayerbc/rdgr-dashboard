@@ -167,6 +167,61 @@
         }
         select.form-input option { background: var(--deft-surface-el, #1A1D28) !important; color: var(--deft-txt, #E8ECF1) !important; }
         .tone-slider::-webkit-slider-thumb { background: var(--deft-accent, #06D6A0) !important; }
+        /* Sub-tab buttons */
+        .view-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem; font-weight: 500;
+            letter-spacing: 0.04em; text-transform: uppercase;
+            padding: 0.375rem 0.75rem; border-radius: 0.25rem;
+            cursor: pointer; background: transparent;
+            color: var(--deft-txt-2, #8A95A9);
+            border: 1px solid transparent;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .view-btn:hover { color: var(--deft-txt, #E8ECF1); background: rgba(255,255,255,0.03); }
+        .view-btn.active { color: var(--deft-accent, #06D6A0); background: color-mix(in srgb, var(--deft-accent, #06D6A0) 10%, transparent); border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 20%, transparent); }
+        /* Filter chips */
+        .filter-chip {
+            font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.03em;
+            padding: 0.25rem 0.625rem; border-radius: 999px; cursor: pointer;
+            background: transparent; color: var(--deft-txt-3, #525E73);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            transition: all 0.15s;
+        }
+        .filter-chip:hover { color: var(--deft-txt-2, #8A95A9); border-color: var(--deft-txt-3, #525E73); }
+        .filter-chip.active { color: var(--deft-accent, #06D6A0); background: color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent); border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent); }
+        /* Piece card */
+        .piece-card {
+            padding: 1rem; border-radius: 0.5rem;
+            background: var(--deft-surface-el, #1A1D28);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            transition: border-color 0.2s;
+        }
+        .piece-card:hover { border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent); }
+        /* Composition card */
+        .comp-card {
+            padding: 1rem; border-radius: 0.5rem;
+            background: var(--deft-surface-el, #1A1D28);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .comp-card:hover { border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent); box-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+        /* Section row in composition editor */
+        .comp-section-row {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.625rem 0.75rem; border-radius: 0.375rem;
+            background: var(--deft-surface, #11131A);
+            border: 1px solid var(--deft-border, #2A2E3D);
+        }
+        .comp-section-row .section-num {
+            width: 1.5rem; height: 1.5rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.65rem; font-weight: 600;
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 12%, transparent);
+            color: var(--deft-accent, #06D6A0);
+        }
+        /* Variable highlight in template text */
+        .var-hl { color: var(--deft-accent, #06D6A0); font-weight: 500; }
         .tone-slider::-moz-range-thumb { background: var(--deft-accent, #06D6A0) !important; }
         .radio-pill.selected {
             border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent) !important;
@@ -857,8 +912,8 @@
                 <button class="crm-tab" id="tab-templates" onclick="switchView('templates')">Templates</button>
                 <button class="crm-tab" id="tab-prompts" onclick="switchView('prompts')">Prompts</button>
                 <button class="crm-tab" id="tab-sequences" onclick="switchView('sequences')">Sequences</button>
-                <button class="crm-tab" id="tab-feedback" onclick="switchView('feedback')">Optimization</button>
-                <button class="crm-tab" id="tab-settings" onclick="switchView('settings')">Settings</button>
+                <button class="crm-tab" id="tab-performance" onclick="switchView('performance')">Performance</button>
+                <button class="crm-tab" id="tab-routing" onclick="switchView('routing')">Routing</button>
             </div>
         </div>
 
@@ -1030,418 +1085,125 @@
         </div>
 
         <!-- ══════════════════════════════════════════════════ -->
-        <!-- VIEW: SETTINGS                                     -->
+        <!-- VIEW: CHANNEL ROUTING (replaces Settings)          -->
         <!-- ══════════════════════════════════════════════════ -->
-        <div id="view-settings" class="max-w-4xl mx-auto px-4 sm:px-6 pb-24 space-y-5" style="display: none;">
+        <div id="view-routing" class="max-w-[1200px] mx-auto px-4 sm:px-6 pb-8 space-y-5" style="display: none;">
 
-            <!-- Panel 1: About You & Company -->
-            <div class="panel" id="panel-about">
+            <!-- Distribution Summary -->
+            <div class="panel" id="panel-routing-summary">
                 <div class="panel-header">
-                    <span class="font-heading font-semibold text-sm tracking-wide">About You & Company</span>
-                </div>
-                <div class="panel-body space-y-4">
-                    <div>
-                        <label class="form-label">About You</label>
-                        <textarea class="form-input" id="about_you" rows="5" placeholder="Describe what you do, who you help, and what makes your approach unique..."></textarea>
-                        <div class="flex items-center gap-2 mt-2">
-                            <button class="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5" onclick="expandWithAI('about_you', 'brand_guardian')">
-                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6l2.5-3L6 6l2.5-3L11 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                Expand with AI
-                            </button>
-                            <span class="text-xs text-txt-3" id="about_you_ai_status"></span>
-                        </div>
-                        <div id="about_you_ai_result" class="hidden"></div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="form-label">Signature Name</label>
-                            <input type="text" class="form-input" id="signature_name" placeholder="Bradford">
-                        </div>
-                        <div>
-                            <label class="form-label">Company Name</label>
-                            <input type="text" class="form-input" id="company_name" placeholder="Carlton AI">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Panel 2: Voice & Tone -->
-            <div class="panel" id="panel-tone">
-                <div class="panel-header">
-                    <span class="font-heading font-semibold text-sm tracking-wide">Voice & Tone</span>
-                </div>
-                <div class="panel-body space-y-5">
-                    <div class="slider-row" data-field="tone_warmth">
-                        <div class="flex items-center justify-between mb-1.5">
-                            <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Warmth</span>
-                            <span class="badge badge-accent text-xs" id="val_tone_warmth">7</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs text-txt-2 w-12 text-right shrink-0">Direct</span>
-                            <input type="range" class="tone-slider flex-1" id="tone_warmth" min="1" max="10" value="7">
-                            <span class="text-xs text-txt-2 w-12 shrink-0">Warm</span>
-                        </div>
-                        <p class="text-xs text-txt-3 italic mt-1" id="desc_tone_warmth"></p>
-                    </div>
-                    <div class="slider-row" data-field="tone_formality">
-                        <div class="flex items-center justify-between mb-1.5">
-                            <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Formality</span>
-                            <span class="badge badge-accent text-xs" id="val_tone_formality">3</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs text-txt-2 w-12 text-right shrink-0">Casual</span>
-                            <input type="range" class="tone-slider flex-1" id="tone_formality" min="1" max="10" value="3">
-                            <span class="text-xs text-txt-2 w-12 shrink-0">Formal</span>
-                        </div>
-                        <p class="text-xs text-txt-3 italic mt-1" id="desc_tone_formality"></p>
-                    </div>
-                    <div class="slider-row" data-field="tone_confidence">
-                        <div class="flex items-center justify-between mb-1.5">
-                            <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Confidence</span>
-                            <span class="badge badge-accent text-xs" id="val_tone_confidence">8</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs text-txt-2 w-12 text-right shrink-0">Humble</span>
-                            <input type="range" class="tone-slider flex-1" id="tone_confidence" min="1" max="10" value="8">
-                            <span class="text-xs text-txt-2 w-12 shrink-0">Bold</span>
-                        </div>
-                        <p class="text-xs text-txt-3 italic mt-1" id="desc_tone_confidence"></p>
-                    </div>
-                    <div class="slider-row" data-field="tone_humor">
-                        <div class="flex items-center justify-between mb-1.5">
-                            <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Humor</span>
-                            <span class="badge badge-accent text-xs" id="val_tone_humor">4</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs text-txt-2 w-12 text-right shrink-0">Serious</span>
-                            <input type="range" class="tone-slider flex-1" id="tone_humor" min="1" max="10" value="4">
-                            <span class="text-xs text-txt-2 w-12 shrink-0">Witty</span>
-                        </div>
-                        <p class="text-xs text-txt-3 italic mt-1" id="desc_tone_humor"></p>
-                    </div>
-                    <div class="slider-row" data-field="tone_salesiness">
-                        <div class="flex items-center justify-between mb-1.5">
-                            <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Salesiness</span>
-                            <span class="badge badge-accent text-xs" id="val_tone_salesiness">3</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs text-txt-2 w-12 text-right shrink-0">Genuine</span>
-                            <input type="range" class="tone-slider flex-1" id="tone_salesiness" min="1" max="10" value="3">
-                            <span class="text-xs text-txt-2 w-12 shrink-0">Salesy</span>
-                        </div>
-                        <p class="text-xs text-txt-3 italic mt-1" id="desc_tone_salesiness"></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Panel 3: Greeting & Sign-off -->
-            <div class="panel" id="panel-greeting">
-                <div class="panel-header">
-                    <span class="font-heading font-semibold text-sm tracking-wide">Greeting & Sign-off</span>
-                </div>
-                <div class="panel-body space-y-5">
-                    <div>
-                        <label class="form-label">Greeting Style</label>
-                        <div class="pill-group" id="pills_greeting_style">
-                            <button class="radio-pill" data-value="none" onclick="selectPill('greeting_style','none')">None</button>
-                            <button class="radio-pill" data-value="name" onclick="selectPill('greeting_style','name')">Name</button>
-                            <button class="radio-pill" data-value="casual" onclick="selectPill('greeting_style','casual')">Casual</button>
-                            <button class="radio-pill" data-value="formal" onclick="selectPill('greeting_style','formal')">Formal</button>
-                            <button class="radio-pill" data-value="custom" onclick="selectPill('greeting_style','custom')">Custom</button>
-                        </div>
-                        <div id="greeting_custom_wrap" class="mt-3 hidden">
-                            <input type="text" class="form-input" id="greeting_custom" placeholder="e.g., Howdy {name},">
-                        </div>
-                    </div>
-                    <div class="section-divider"></div>
-                    <div>
-                        <label class="form-label">Sign-off Style</label>
-                        <div class="pill-group" id="pills_signoff_style">
-                            <button class="radio-pill" data-value="none" onclick="selectPill('signoff_style','none')">None</button>
-                            <button class="radio-pill" data-value="minimal" onclick="selectPill('signoff_style','minimal')">Minimal</button>
-                            <button class="radio-pill" data-value="warm" onclick="selectPill('signoff_style','warm')">Warm</button>
-                            <button class="radio-pill" data-value="forward" onclick="selectPill('signoff_style','forward')">Forward</button>
-                            <button class="radio-pill" data-value="custom" onclick="selectPill('signoff_style','custom')">Custom</button>
-                        </div>
-                        <div id="signoff_custom_wrap" class="mt-3 hidden">
-                            <textarea class="form-input" id="signoff_custom" rows="2" placeholder="Custom sign-off (multiline supported)"></textarea>
-                        </div>
-                    </div>
-                    <div class="section-divider"></div>
-                    <div>
-                        <label class="form-label">Preview</label>
-                        <div class="preview-box" id="greetingSignoffPreview">
-                            <div class="text-txt-2" id="previewGreeting"></div>
-                            <div class="text-txt-3 my-2">-- email body --</div>
-                            <div class="text-txt-2" id="previewSignoff"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Panel 4: Subject Lines -->
-            <div class="panel" id="panel-subject">
-                <div class="panel-header">
-                    <span class="font-heading font-semibold text-sm tracking-wide">Subject Lines</span>
-                </div>
-                <div class="panel-body space-y-4">
-                    <div>
-                        <label class="form-label">Subject Style</label>
-                        <div class="pill-group" id="pills_subject_style">
-                            <button class="radio-pill" data-value="curiosity" onclick="selectPill('subject_style','curiosity')">Curiosity</button>
-                            <button class="radio-pill" data-value="direct" onclick="selectPill('subject_style','direct')">Direct</button>
-                            <button class="radio-pill" data-value="question" onclick="selectPill('subject_style','question')">Question</button>
-                            <button class="radio-pill" data-value="statistic" onclick="selectPill('subject_style','statistic')">Statistic</button>
-                            <button class="radio-pill" data-value="personalized" onclick="selectPill('subject_style','personalized')">Personalized</button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="form-label">Length Target</label>
-                        <div class="pill-group" id="pills_subject_length_target">
-                            <button class="radio-pill" data-value="short" onclick="selectPill('subject_length_target','short')">Short (&lt;40)</button>
-                            <button class="radio-pill" data-value="medium" onclick="selectPill('subject_length_target','medium')">Medium (40-60)</button>
-                            <button class="radio-pill" data-value="long" onclick="selectPill('subject_length_target','long')">Long (60-80)</button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="form-label">Max Length (hard ceiling)</label>
-                            <input type="number" class="form-input" id="subject_max_length" min="20" max="120" value="60">
-                        </div>
-                        <div class="flex items-center justify-between pt-5">
-                            <span class="text-sm text-txt-2">Use Emoji</span>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="subject_use_emoji">
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Panel 5: Email Structure -->
-            <div class="panel" id="panel-structure">
-                <div class="panel-header">
-                    <span class="font-heading font-semibold text-sm tracking-wide">Email Structure</span>
-                </div>
-                <div class="panel-body space-y-4">
-                    <div>
-                        <label class="form-label">Email Length</label>
-                        <div class="pill-group" id="pills_email_length">
-                            <button class="radio-pill" data-value="short" onclick="selectPill('email_length','short')">Short (2-3 sentences)</button>
-                            <button class="radio-pill" data-value="medium" onclick="selectPill('email_length','medium')">Medium (3-4 para)</button>
-                            <button class="radio-pill" data-value="long" onclick="selectPill('email_length','long')">Long (4-5 para)</button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="form-label">Opening Style</label>
-                        <div class="pill-group" id="pills_opening_style">
-                            <button class="radio-pill" data-value="problem" onclick="selectPill('opening_style','problem')">Problem</button>
-                            <button class="radio-pill" data-value="compliment" onclick="selectPill('opening_style','compliment')">Compliment</button>
-                            <button class="radio-pill" data-value="observation" onclick="selectPill('opening_style','observation')">Observation</button>
-                            <button class="radio-pill" data-value="statistic" onclick="selectPill('opening_style','statistic')">Statistic</button>
-                            <button class="radio-pill" data-value="story" onclick="selectPill('opening_style','story')">Story</button>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="form-label">CTA Style</label>
-                        <div class="pill-group" id="pills_cta_style">
-                            <button class="radio-pill" data-value="soft" onclick="selectPill('cta_style','soft')">Soft</button>
-                            <button class="radio-pill" data-value="direct" onclick="selectPill('cta_style','direct')">Direct</button>
-                            <button class="radio-pill" data-value="question" onclick="selectPill('cta_style','question')">Question</button>
-                            <button class="radio-pill" data-value="none" onclick="selectPill('cta_style','none')">None</button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="form-label">First Person</label>
-                            <div class="pill-group" id="pills_first_person_style">
-                                <button class="radio-pill" data-value="i" onclick="selectPill('first_person_style','i')">I / My</button>
-                                <button class="radio-pill" data-value="we" onclick="selectPill('first_person_style','we')">We / Our</button>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="form-label">Personalization Depth</label>
-                            <div class="pill-group" id="pills_personalization_depth">
-                                <button class="radio-pill" data-value="light" onclick="selectPill('personalization_depth','light')">Light</button>
-                                <button class="radio-pill" data-value="medium" onclick="selectPill('personalization_depth','medium')">Medium</button>
-                                <button class="radio-pill" data-value="deep" onclick="selectPill('personalization_depth','deep')">Deep</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="form-label">Proof Style</label>
-                        <div class="pill-group" id="pills_proof_style">
-                            <button class="radio-pill" data-value="case_study" onclick="selectPill('proof_style','case_study')">Case Study</button>
-                            <button class="radio-pill" data-value="statistic" onclick="selectPill('proof_style','statistic')">Statistic</button>
-                            <button class="radio-pill" data-value="testimonial" onclick="selectPill('proof_style','testimonial')">Testimonial</button>
-                            <button class="radio-pill" data-value="none" onclick="selectPill('proof_style','none')">None</button>
-                        </div>
-                    </div>
-                    <div class="section-divider"></div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="form-label">Max Paragraphs</label>
-                            <input type="number" class="form-input" id="max_paragraphs" min="1" max="8" value="4">
-                        </div>
-                        <div>
-                            <label class="form-label">Max Sentences / Paragraph</label>
-                            <input type="number" class="form-input" id="max_sentences_per_paragraph" min="1" max="6" value="3">
-                        </div>
-                    </div>
-                    <div class="section-divider"></div>
-                    <div class="form-row">
-                        <span class="text-sm text-txt-2">Use recipient's name</span>
-                        <label class="toggle-switch"><input type="checkbox" id="use_recipient_name"><span class="toggle-slider"></span></label>
-                    </div>
-                    <div class="form-row">
-                        <span class="text-sm text-txt-2">Include case studies / proof</span>
-                        <label class="toggle-switch"><input type="checkbox" id="use_case_studies"><span class="toggle-slider"></span></label>
-                    </div>
-                    <div class="form-row">
-                        <span class="text-sm text-txt-2">Use specific numbers & stats</span>
-                        <label class="toggle-switch"><input type="checkbox" id="use_specific_numbers"><span class="toggle-slider"></span></label>
-                    </div>
-                    <div class="form-row">
-                        <span class="text-sm text-txt-2">Include questions in body</span>
-                        <label class="toggle-switch"><input type="checkbox" id="use_questions"><span class="toggle-slider"></span></label>
-                    </div>
-                    <div class="form-row">
-                        <span class="text-sm text-txt-2">Identify as sender ("I'm [Name] from [Company]")</span>
-                        <label class="toggle-switch"><input type="checkbox" id="identify_as_sender"><span class="toggle-slider"></span></label>
-                    </div>
-                    <div class="form-row">
-                        <span class="text-sm text-txt-2">Include value propositions in prompt</span>
-                        <label class="toggle-switch"><input type="checkbox" id="include_value_props"><span class="toggle-slider"></span></label>
-                    </div>
-                    <div class="form-row">
-                        <span class="text-sm text-txt-2">Prefer industry-matched proof entries</span>
-                        <label class="toggle-switch"><input type="checkbox" id="industry_match_proofs"><span class="toggle-slider"></span></label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Panel 5b: Creativity & Advanced -->
-            <div class="panel" id="panel-creativity">
-                <div class="panel-header">
-                    <span class="font-heading font-semibold text-sm tracking-wide">Creativity & Advanced</span>
-                </div>
-                <div class="panel-body space-y-5">
-                    <div class="slider-row" data-field="creativity">
-                        <div class="flex items-center justify-between mb-1.5">
-                            <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Creativity</span>
-                            <span class="badge badge-accent text-xs" id="val_creativity">7</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs text-txt-2 w-16 text-right shrink-0">Predictable</span>
-                            <input type="range" class="tone-slider flex-1" id="creativity" min="1" max="10" value="7">
-                            <span class="text-xs text-txt-2 w-16 shrink-0">Creative</span>
-                        </div>
-                        <p class="text-xs text-txt-3 italic mt-1" id="desc_creativity"></p>
-                        <p class="text-xs text-txt-3 mt-1">Lower = more consistent emails, Higher = more unique approaches</p>
-                    </div>
-                    <div class="section-divider"></div>
-                    <div>
-                        <label class="form-label">Custom Instruction</label>
-                        <textarea class="form-input" id="custom_instruction" rows="3" placeholder="Additional guidance appended to every GPT prompt, e.g. &quot;Always reference the lead's city&quot; or &quot;Focus on how automation reduces hiring needs&quot;"></textarea>
-                        <p class="text-xs text-txt-3 mt-1">Free-text appended to every outreach prompt. Token budget auto-scales with email length.</p>
-                    </div>
-                    <div class="section-divider"></div>
-                    <!-- Example Emails Section -->
-                    <div>
-                        <label class="form-label">Example Emails (Gold Standard)</label>
-                        <p class="text-xs text-txt-3 mb-3">Add 1-3 real emails that exemplify your ideal voice and style</p>
-                        <div id="exampleEmailsList" class="space-y-3"></div>
-                        <button class="btn btn-primary text-xs py-1.5 px-3 mt-3" id="addExampleBtn" onclick="addExampleEmail()">+ Add Example</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Panel 6: Proof Bank -->
-            <div class="panel" id="panel-proof">
-                <div class="panel-header">
-                    <div class="flex items-center gap-2">
-                        <span class="font-heading font-semibold text-sm tracking-wide">Proof Bank</span>
-                        <span class="badge badge-accent" id="proofCount">0</span>
-                    </div>
-                    <button class="btn btn-primary text-xs py-1.5 px-3" onclick="openProofModal()">+ Add Proof</button>
+                    <span class="font-heading font-semibold text-sm tracking-wide">Channel Distribution</span>
+                    <button class="btn btn-ghost text-xs py-1 px-2" onclick="loadRouting()">Refresh</button>
                 </div>
                 <div class="panel-body">
-                    <p class="text-xs text-txt-3 mb-3">Case studies, stats, and testimonials the AI can reference. It will never fabricate proof -- only use what's here.</p>
-                    <div class="space-y-3" id="proofList">
-                        <div class="text-center text-txt-3 text-sm py-6" id="proofEmpty">No proof entries yet</div>
+                    <div class="flex flex-wrap gap-4" id="routingDistribution">
+                        <div class="empty-state text-sm py-4 w-full">Loading distribution...</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Panel 7: Keywords, Value Props & Banned Phrases -->
-            <div class="panel" id="panel-chips">
-                <div class="panel-header">
-                    <span class="font-heading font-semibold text-sm tracking-wide">Keywords, Value Props & Banned Phrases</span>
+            <!-- Filters -->
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium mr-1">Channel:</span>
+                    <button class="filter-chip active" data-rchan="all" onclick="setRoutingChannelFilter('all')">All</button>
+                    <button class="filter-chip" data-rchan="email" onclick="setRoutingChannelFilter('email')">Email</button>
+                    <button class="filter-chip" data-rchan="facebook" onclick="setRoutingChannelFilter('facebook')">Facebook</button>
+                    <button class="filter-chip" data-rchan="linkedin" onclick="setRoutingChannelFilter('linkedin')">LinkedIn</button>
+                    <button class="filter-chip" data-rchan="instagram" onclick="setRoutingChannelFilter('instagram')">Instagram</button>
+                    <button class="filter-chip" data-rchan="twitter" onclick="setRoutingChannelFilter('twitter')">Twitter</button>
                 </div>
-                <div class="panel-body space-y-5">
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <label class="form-label mb-0">Keywords</label>
-                            <span class="badge badge-accent" id="keywordsCount">0</span>
-                        </div>
-                        <div class="flex flex-wrap gap-1.5 mb-2" id="keywordsChips"></div>
-                        <div class="flex gap-2">
-                            <input type="text" class="form-input flex-1" id="keywordsInput" placeholder="Add keyword..." onkeydown="if(event.key==='Enter'){addChip('keywords')}">
-                            <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="addChip('keywords')">Add</button>
-                            <button class="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1" onclick="expandWithAI('keywords', 'content_creator')">
-                                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6l2.5-3L6 6l2.5-3L11 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                AI
-                            </button>
-                        </div>
-                        <div id="keywords_ai_result" class="hidden"></div>
-                    </div>
-                    <div class="section-divider"></div>
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <label class="form-label mb-0">Value Propositions</label>
-                            <span class="badge badge-info" id="valuePropsCount">0</span>
-                        </div>
-                        <div class="flex flex-wrap gap-1.5 mb-2" id="value_propositionsChips"></div>
-                        <div class="flex gap-2">
-                            <input type="text" class="form-input flex-1" id="value_propositionsInput" placeholder="Add value proposition..." onkeydown="if(event.key==='Enter'){addChip('value_propositions')}">
-                            <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="addChip('value_propositions')">Add</button>
-                            <button class="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1" onclick="expandWithAI('value_propositions', 'content_creator')">
-                                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6l2.5-3L6 6l2.5-3L11 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                AI
-                            </button>
-                        </div>
-                        <div id="value_propositions_ai_result" class="hidden"></div>
-                    </div>
-                    <div class="section-divider"></div>
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <label class="form-label mb-0">Banned Phrases</label>
-                            <span class="badge badge-alert" id="bannedCount">0</span>
-                        </div>
-                        <div class="flex flex-wrap gap-1.5 mb-2" id="banned_phrasesChips"></div>
-                        <div class="flex gap-2">
-                            <input type="text" class="form-input flex-1" id="banned_phrasesInput" placeholder="Add banned phrase..." onkeydown="if(event.key==='Enter'){addChip('banned_phrases')}">
-                            <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="addChip('banned_phrases')">Add</button>
-                            <button class="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1" onclick="expandWithAI('banned_phrases', 'growth_hacker')">
-                                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6l2.5-3L6 6l2.5-3L11 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                AI
-                            </button>
-                        </div>
-                        <div id="banned_phrases_ai_result" class="hidden"></div>
-                    </div>
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium mr-1">Status:</span>
+                    <button class="filter-chip active" data-rstat="all" onclick="setRoutingStatusFilter('all')">All</button>
+                    <button class="filter-chip" data-rstat="selected" onclick="setRoutingStatusFilter('selected')">Selected</button>
+                    <button class="filter-chip" data-rstat="attempted" onclick="setRoutingStatusFilter('attempted')">Attempted</button>
+                    <button class="filter-chip" data-rstat="no_response" onclick="setRoutingStatusFilter('no_response')">No Response</button>
                 </div>
             </div>
 
-        </div><!-- end view-settings -->
+            <!-- Contacts Table -->
+            <div class="panel">
+                <div class="panel-body" style="padding: 0; overflow-x: auto;">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-border text-left">
+                                <th class="py-2.5 px-4 text-[0.6rem] text-txt-3 font-medium uppercase tracking-wider">Contact</th>
+                                <th class="py-2.5 px-4 text-[0.6rem] text-txt-3 font-medium uppercase tracking-wider">Channels</th>
+                                <th class="py-2.5 px-4 text-[0.6rem] text-txt-3 font-medium uppercase tracking-wider">Primary</th>
+                                <th class="py-2.5 px-4 text-[0.6rem] text-txt-3 font-medium uppercase tracking-wider">Status</th>
+                                <th class="py-2.5 px-4 text-[0.6rem] text-txt-3 font-medium uppercase tracking-wider">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="routingTableBody">
+                            <tr><td colspan="5" class="py-8 text-center text-txt-3 text-sm">Loading contacts...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
 
         <!-- ══════════════════════════════════════════════════ -->
         <!-- VIEW: TEMPLATES                                    -->
         <!-- ══════════════════════════════════════════════════ -->
-        <div id="view-templates" class="max-w-4xl mx-auto px-4 sm:px-6 pb-8 space-y-3" style="display: none;">
+        <div id="view-templates" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;">
 
-            <div id="templatePanelsContainer" class="space-y-3">
-                <!-- Sub-panels rendered by JS: opening, body, question, subject_line, cta -->
+            <!-- Sub-tabs: Pieces | Compositions -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-1 bg-surface rounded-lg p-1 border border-border/50">
+                    <button class="view-btn active" id="tplSubPieces" onclick="setTemplateSubTab('pieces')">Pieces</button>
+                    <button class="view-btn" id="tplSubComps" onclick="setTemplateSubTab('compositions')">Compositions</button>
+                </div>
+                <button class="btn btn-primary text-xs py-1.5 px-4" id="tplAddBtn" onclick="openPieceModal()">+ New Piece</button>
+            </div>
+
+            <!-- ── PIECES SUB-VIEW ── -->
+            <div id="tplViewPieces">
+                <!-- Channel Filters -->
+                <div class="flex flex-wrap items-center gap-1.5 mb-3">
+                    <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium mr-1">Channel:</span>
+                    <button class="filter-chip active" data-pchan="all" onclick="setPieceChannelFilter('all')">All</button>
+                    <button class="filter-chip" data-pchan="cold_email" onclick="setPieceChannelFilter('cold_email')">Email</button>
+                    <button class="filter-chip" data-pchan="social_dm" onclick="setPieceChannelFilter('social_dm')">Social DM</button>
+                    <button class="filter-chip" data-pchan="social_engagement" onclick="setPieceChannelFilter('social_engagement')">Engagement</button>
+                </div>
+                <!-- Category Filters -->
+                <div class="flex flex-wrap items-center gap-1.5 mb-4">
+                    <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium mr-1">Category:</span>
+                    <button class="filter-chip active" data-pcat="all" onclick="setPieceCategoryFilter('all')">All</button>
+                    <button class="filter-chip" data-pcat="greeting" onclick="setPieceCategoryFilter('greeting')">Greeting</button>
+                    <button class="filter-chip" data-pcat="opening" onclick="setPieceCategoryFilter('opening')">Opening</button>
+                    <button class="filter-chip" data-pcat="body" onclick="setPieceCategoryFilter('body')">Body</button>
+                    <button class="filter-chip" data-pcat="question" onclick="setPieceCategoryFilter('question')">Question</button>
+                    <button class="filter-chip" data-pcat="cta" onclick="setPieceCategoryFilter('cta')">CTA</button>
+                    <button class="filter-chip" data-pcat="subject" onclick="setPieceCategoryFilter('subject')">Subject</button>
+                    <button class="filter-chip" data-pcat="signoff" onclick="setPieceCategoryFilter('signoff')">Signoff</button>
+                    <button class="filter-chip" data-pcat="footer" onclick="setPieceCategoryFilter('footer')">Footer</button>
+                    <button class="filter-chip" data-pcat="ps" onclick="setPieceCategoryFilter('ps')">PS</button>
+                </div>
+                <!-- Pieces Container (grouped by category) -->
+                <div id="piecesContainer" class="space-y-5">
+                    <div class="empty-state text-sm py-8">Loading pieces...</div>
+                </div>
+            </div>
+
+            <!-- ── COMPOSITIONS SUB-VIEW ── -->
+            <div id="tplViewComps" style="display: none;">
+                <!-- System Filters -->
+                <div class="flex flex-wrap items-center gap-1.5 mb-4">
+                    <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium mr-1">System:</span>
+                    <button class="filter-chip active" data-csys="all" onclick="setCompSystemFilter('all')">All</button>
+                    <button class="filter-chip" data-csys="cold_outreach" onclick="setCompSystemFilter('cold_outreach')">Cold Outreach</button>
+                    <button class="filter-chip" data-csys="crm_sequence" onclick="setCompSystemFilter('crm_sequence')">CRM Sequence</button>
+                    <button class="filter-chip" data-csys="offer" onclick="setCompSystemFilter('offer')">Offer</button>
+                    <button class="filter-chip" data-csys="social_dm" onclick="setCompSystemFilter('social_dm')">Social DM</button>
+                    <button class="filter-chip" data-csys="social_engagement" onclick="setCompSystemFilter('social_engagement')">Engagement</button>
+                </div>
+                <!-- Compositions Container -->
+                <div id="compsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="empty-state text-sm py-8 lg:col-span-2">Loading compositions...</div>
+                </div>
             </div>
 
         </div>
@@ -1536,75 +1298,202 @@
                     </details>
                 </div>
             </div>
+
+            <!-- ── Relocated Settings Content ── -->
+            <div class="lg:col-span-2 space-y-5 pt-2 mt-4 border-t border-border">
+
+                <div class="flex items-center gap-3">
+                    <div class="h-px flex-1 bg-border"></div>
+                    <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Prompt Configuration</span>
+                    <div class="h-px flex-1 bg-border"></div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <!-- About You & Company -->
+                    <div class="panel" id="panel-about">
+                        <div class="panel-header">
+                            <span class="font-heading font-semibold text-sm tracking-wide">About You & Company</span>
+                        </div>
+                        <div class="panel-body space-y-4">
+                            <div>
+                                <label class="form-label">About You</label>
+                                <textarea class="form-input" id="about_you" rows="4" placeholder="Describe what you do, who you help, and what makes your approach unique..."></textarea>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <button class="btn btn-primary text-xs py-1.5 px-3 flex items-center gap-1.5" onclick="expandWithAI('about_you', 'brand_guardian')">
+                                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6l2.5-3L6 6l2.5-3L11 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        Expand with AI
+                                    </button>
+                                    <span class="text-xs text-txt-3" id="about_you_ai_status"></span>
+                                </div>
+                                <div id="about_you_ai_result" class="hidden"></div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="form-label">Signature Name</label>
+                                    <input type="text" class="form-input" id="signature_name" placeholder="Bradford">
+                                </div>
+                                <div>
+                                    <label class="form-label">Company Name</label>
+                                    <input type="text" class="form-input" id="company_name" placeholder="Carlton AI">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label">Custom Instruction</label>
+                                <textarea class="form-input text-xs" id="custom_instruction" rows="3" placeholder="Additional guidance for every prompt..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Proof Bank -->
+                    <div class="panel" id="panel-proof">
+                        <div class="panel-header">
+                            <div class="flex items-center gap-2">
+                                <span class="font-heading font-semibold text-sm tracking-wide">Proof Bank</span>
+                                <span class="badge badge-accent" id="proofCount">0</span>
+                            </div>
+                            <button class="btn btn-primary text-xs py-1.5 px-3" onclick="openProofModal()">+ Add Proof</button>
+                        </div>
+                        <div class="panel-body">
+                            <p class="text-xs text-txt-3 mb-3">Case studies, stats, and testimonials the AI can reference.</p>
+                            <div class="space-y-3" id="proofList">
+                                <div class="text-center text-txt-3 text-sm py-6" id="proofEmpty">No proof entries yet</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Keywords, Value Props, Banned Phrases -->
+                <div class="panel" id="panel-chips">
+                    <div class="panel-header">
+                        <span class="font-heading font-semibold text-sm tracking-wide">Keywords, Value Props & Banned Phrases</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <label class="form-label mb-0">Keywords</label>
+                                    <span class="badge badge-accent" id="keywordsCount">0</span>
+                                </div>
+                                <div class="flex flex-wrap gap-1.5 mb-2" id="keywordsChips"></div>
+                                <div class="flex gap-2">
+                                    <input type="text" class="form-input flex-1" id="keywordsInput" placeholder="Add keyword..." onkeydown="if(event.key==='Enter'){addChip('keywords')}">
+                                    <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="addChip('keywords')">Add</button>
+                                </div>
+                                <div id="keywords_ai_result" class="hidden"></div>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <label class="form-label mb-0">Value Propositions</label>
+                                    <span class="badge badge-info" id="valuePropsCount">0</span>
+                                </div>
+                                <div class="flex flex-wrap gap-1.5 mb-2" id="value_propositionsChips"></div>
+                                <div class="flex gap-2">
+                                    <input type="text" class="form-input flex-1" id="value_propositionsInput" placeholder="Add value prop..." onkeydown="if(event.key==='Enter'){addChip('value_propositions')}">
+                                    <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="addChip('value_propositions')">Add</button>
+                                </div>
+                                <div id="value_propositions_ai_result" class="hidden"></div>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <label class="form-label mb-0">Banned Phrases</label>
+                                    <span class="badge badge-alert" id="bannedCount">0</span>
+                                </div>
+                                <div class="flex flex-wrap gap-1.5 mb-2" id="banned_phrasesChips"></div>
+                                <div class="flex gap-2">
+                                    <input type="text" class="form-input flex-1" id="banned_phrasesInput" placeholder="Add banned phrase..." onkeydown="if(event.key==='Enter'){addChip('banned_phrases')}">
+                                    <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="addChip('banned_phrases')">Add</button>
+                                </div>
+                                <div id="banned_phrases_ai_result" class="hidden"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Example Emails -->
+                <div class="panel" id="panel-examples">
+                    <div class="panel-header">
+                        <span class="font-heading font-semibold text-sm tracking-wide">Example Emails (Gold Standard)</span>
+                        <button class="btn btn-primary text-xs py-1.5 px-3" id="addExampleBtn" onclick="addExampleEmail()">+ Add Example</button>
+                    </div>
+                    <div class="panel-body">
+                        <p class="text-xs text-txt-3 mb-3">Add 1-3 real emails that exemplify your ideal voice and style</p>
+                        <div id="exampleEmailsList" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div class="flex gap-3">
+                    <button class="btn btn-primary py-2 px-6" onclick="saveSettings()">Save All Settings</button>
+                    <span class="text-xs text-txt-3 self-center" id="lastSaved"></span>
+                    <span class="badge badge-accent self-center" id="versionBadge">v1</span>
+                </div>
+
+            </div>
         </div>
 
         <!-- ══════════════════════════════════════════════════ -->
-        <!-- VIEW: FEEDBACK                                     -->
+        <!-- VIEW: PERFORMANCE (replaces Optimization)          -->
         <!-- ══════════════════════════════════════════════════ -->
-        <div id="view-feedback" class="max-w-4xl mx-auto px-4 sm:px-6 pb-8 space-y-5" style="display: none;">
+        <div id="view-performance" class="max-w-[1200px] mx-auto px-4 sm:px-6 pb-8 space-y-4" style="display: none;">
+
+            <!-- Filters -->
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium mr-1">Category:</span>
+                    <button class="filter-chip active" data-perfcat="all" onclick="setPerfCategoryFilter('all')">All</button>
+                    <button class="filter-chip" data-perfcat="opening" onclick="setPerfCategoryFilter('opening')">Opening</button>
+                    <button class="filter-chip" data-perfcat="body" onclick="setPerfCategoryFilter('body')">Body</button>
+                    <button class="filter-chip" data-perfcat="question" onclick="setPerfCategoryFilter('question')">Question</button>
+                    <button class="filter-chip" data-perfcat="cta" onclick="setPerfCategoryFilter('cta')">CTA</button>
+                    <button class="filter-chip" data-perfcat="subject" onclick="setPerfCategoryFilter('subject')">Subject</button>
+                    <button class="filter-chip" data-perfcat="greeting" onclick="setPerfCategoryFilter('greeting')">Greeting</button>
+                    <button class="filter-chip" data-perfcat="signoff" onclick="setPerfCategoryFilter('signoff')">Signoff</button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium">Channel:</span>
+                    <select class="form-input text-xs py-1" style="max-width: 140px;" id="perfChannelFilter" onchange="loadPerformance()">
+                        <option value="all">All</option>
+                        <option value="cold_email">Email</option>
+                        <option value="social_dm">Social DM</option>
+                        <option value="social_engagement">Engagement</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium">Min Sends:</span>
+                    <select class="form-input text-xs py-1" style="max-width: 80px;" id="perfMinSends" onchange="loadPerformance()">
+                        <option value="1">1+</option>
+                        <option value="5" selected>5+</option>
+                        <option value="10">10+</option>
+                        <option value="25">25+</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Performance Table -->
             <div class="panel">
-                <div class="panel-header cursor-pointer" onclick="toggleFeedbackCategories()">
-                    <div class="flex items-center gap-2">
-                        <span class="font-heading font-semibold text-sm tracking-wide">Feedback Categories</span>
-                        <span class="badge badge-accent" id="feedbackCatCount">0</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button class="btn btn-primary text-xs py-1.5 px-3" onclick="event.stopPropagation(); addFeedbackCategory()">+ Add Category</button>
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" id="feedbackCategoriesChevron" style="transition: transform 0.2s; transform: rotate(0deg);"><path d="M3 4.5l3 3 3-3" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </div>
-                </div>
-                <div class="panel-body hidden" id="feedbackCategoriesBody">
-                    <div class="empty-state">Loading feedback categories...</div>
-                </div>
-            </div>
-
-            <!-- ── Section Divider ── -->
-            <div class="flex items-center gap-3 pt-2">
-                <div class="h-px flex-1 bg-border"></div>
-                <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">AI Optimization</span>
-                <div class="h-px flex-1 bg-border"></div>
-            </div>
-
-            <!-- Panel: AI Suggested Settings (Snapshot) -->
-            <div class="panel hidden" id="panel-snapshot">
                 <div class="panel-header">
-                    <div class="flex items-center gap-2">
-                        <span class="font-heading font-semibold text-sm tracking-wide">AI Suggested Settings</span>
-                        <span class="badge badge-warn" id="snapshotBadge">NEW</span>
-                    </div>
+                    <span class="font-heading font-semibold text-sm tracking-wide">Piece Performance</span>
+                    <button class="btn btn-ghost text-xs py-1 px-2" onclick="loadPerformance()">Refresh</button>
                 </div>
-                <div class="panel-body" id="snapshotBody"></div>
+                <div class="panel-body" style="padding: 0; overflow-x: auto;">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-border text-left">
+                                <th class="py-2.5 px-4 text-[0.6rem] text-txt-3 font-medium uppercase tracking-wider">Category</th>
+                                <th class="py-2.5 px-4 text-[0.6rem] text-txt-3 font-medium uppercase tracking-wider">Channel</th>
+                                <th class="py-2.5 px-4 text-[0.6rem] text-txt-3 font-medium uppercase tracking-wider" style="min-width: 200px;">Piece Text</th>
+                                <th class="py-2.5 px-4 text-[0.6rem] text-txt-3 font-medium uppercase tracking-wider text-right">Sent</th>
+                                <th class="py-2.5 px-4 text-[0.6rem] text-txt-3 font-medium uppercase tracking-wider text-right">Open %</th>
+                                <th class="py-2.5 px-4 text-[0.6rem] text-txt-3 font-medium uppercase tracking-wider text-right">Reply %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="performanceTableBody">
+                            <tr><td colspan="6" class="py-8 text-center text-txt-3 text-sm">Loading performance data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <!-- Panel: Individual AI Suggestions -->
-            <div class="panel hidden" id="panel-suggestions">
-                <div class="panel-header cursor-pointer" onclick="toggleIndividualSuggestions()">
-                    <div class="flex items-center gap-2">
-                        <span class="font-heading font-semibold text-sm tracking-wide">Individual Suggestions</span>
-                        <span class="badge badge-warn" id="suggestionsCount">0</span>
-                    </div>
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" id="suggestionsChevron" style="transition: transform 0.2s; transform: rotate(0deg);"><path d="M3 4.5l3 3 3-3" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </div>
-                <div class="panel-body hidden" id="suggestionsBody">
-                    <p class="text-xs text-txt-3 mb-3">Accept or dismiss changes individually</p>
-                    <div class="space-y-3" id="suggestionsList"></div>
-                </div>
-            </div>
-
-            <!-- Panel: Recent Patterns -->
-            <div class="panel" id="panel-patterns">
-                <div class="panel-header cursor-pointer" onclick="togglePatterns()">
-                    <div class="flex items-center gap-2">
-                        <span class="font-heading font-semibold text-sm tracking-wide">Recent Patterns</span>
-                        <span class="badge badge-info" id="patternsCount">--</span>
-                    </div>
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" id="patternsChevron" style="transition: transform 0.2s; transform: rotate(0deg);"><path d="M3 4.5l3 3 3-3" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </div>
-                <div class="panel-body hidden" id="patternsBody">
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4" id="patternsStats"></div>
-                    <div id="rejectedList"></div>
-                </div>
-            </div>
         </div>
 
         <!-- ══════════════════════════════════════════════════ -->
@@ -1779,9 +1668,21 @@
                 <div class="email-preview-body" id="epBody" style="max-height: 360px; overflow-y: auto; padding: 1rem; border-radius: 0.375rem; background: rgba(0,0,0,0.25); border: 1px solid #1E2130;">
                     --
                 </div>
-                <!-- Template Attribution -->
+                <!-- Template Pieces Attribution -->
                 <div id="epTemplateAttribution" class="mt-3 hidden">
-                    <div class="flex flex-wrap gap-1.5" id="epTemplateChips"></div>
+                    <div class="panel" style="margin: 0;">
+                        <div class="panel-header" style="padding: 0.5rem 0.75rem;">
+                            <span class="text-[0.6rem] uppercase tracking-wider font-medium text-txt-3">Template Pieces Used</span>
+                            <span class="text-[0.6rem] text-txt-3" id="epCompName">--</span>
+                        </div>
+                        <div class="panel-body" style="padding: 0.5rem 0.75rem;">
+                            <div class="space-y-1" id="epPiecesUsed"></div>
+                            <div id="epVarsFilled" class="mt-2 pt-2 border-t border-border/30 hidden">
+                                <span class="text-[0.55rem] uppercase tracking-wider text-txt-3 font-medium">Variables Filled:</span>
+                                <div class="flex flex-wrap gap-x-3 gap-y-0.5 mt-1" id="epVarsFilledList"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <!-- Structured Feedback Section -->
                 <div id="epFeedbackSection" class="mt-4 hidden">
@@ -1855,6 +1756,192 @@
         </div>
     </div>
 
+    <!-- ── Piece Add/Edit Modal ── -->
+    <div class="modal-backdrop" id="pieceModal">
+        <div class="modal-content" style="max-width: 560px;">
+            <div class="panel-header">
+                <span class="font-heading font-semibold text-sm" id="pieceModalTitle">Add Template Piece</span>
+                <button class="text-txt-3 hover:text-txt transition-colors" onclick="closePieceModal()">&times;</button>
+            </div>
+            <div class="panel-body space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-label">Category</label>
+                        <select class="form-input" id="piece_category">
+                            <option value="greeting">Greeting</option>
+                            <option value="opening">Opening</option>
+                            <option value="body">Body</option>
+                            <option value="question">Question</option>
+                            <option value="cta">CTA</option>
+                            <option value="subject">Subject</option>
+                            <option value="signoff">Signoff</option>
+                            <option value="footer">Footer</option>
+                            <option value="ps">PS</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Channel</label>
+                        <select class="form-input" id="piece_channel">
+                            <option value="all">All Channels</option>
+                            <option value="cold_email">Email</option>
+                            <option value="social_dm">Social DM</option>
+                            <option value="social_engagement">Engagement</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label">Template Text</label>
+                    <textarea class="form-input font-mono text-xs" id="piece_text" rows="4" placeholder="Your {observation} at {company} caught my eye."></textarea>
+                    <div class="flex items-center gap-2 mt-1.5">
+                        <span class="text-[0.6rem] text-txt-3 uppercase tracking-wider">Variables detected:</span>
+                        <span class="text-xs text-accent font-mono" id="pieceVarsDetected">--</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="form-label">Tone</label>
+                        <select class="form-input" id="piece_tone">
+                            <option value="neutral">Neutral</option>
+                            <option value="warm">Warm</option>
+                            <option value="direct">Direct</option>
+                            <option value="witty">Witty</option>
+                            <option value="formal">Formal</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">System</label>
+                        <select class="form-input" id="piece_system">
+                            <option value="all">All Systems</option>
+                            <option value="cold_outreach">Cold Outreach</option>
+                            <option value="crm_sequence">CRM Sequence</option>
+                            <option value="offer">Offer</option>
+                            <option value="social_dm">Social DM</option>
+                            <option value="social_engagement">Engagement</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label">Lead Categories</label>
+                    <div class="flex flex-wrap gap-1.5 mb-2" id="pieceLeadCatsChips"></div>
+                    <div class="flex flex-wrap gap-1">
+                        <button class="lead-category-pill" data-lc="coaching" onclick="togglePieceLeadCat('coaching',this)">coaching</button>
+                        <button class="lead-category-pill" data-lc="consulting" onclick="togglePieceLeadCat('consulting',this)">consulting</button>
+                        <button class="lead-category-pill" data-lc="local_service" onclick="togglePieceLeadCat('local_service',this)">local_service</button>
+                        <button class="lead-category-pill" data-lc="agency" onclick="togglePieceLeadCat('agency',this)">agency</button>
+                        <button class="lead-category-pill" data-lc="saas" onclick="togglePieceLeadCat('saas',this)">saas</button>
+                        <button class="lead-category-pill" data-lc="franchise" onclick="togglePieceLeadCat('franchise',this)">franchise</button>
+                    </div>
+                </div>
+                <!-- Live Preview -->
+                <div>
+                    <label class="form-label">Preview (with example data)</label>
+                    <div class="preview-box text-sm" id="piecePreviewBox" style="min-height: 2.5rem;">--</div>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="closePieceModal()">Cancel</button>
+                    <button class="btn btn-primary text-xs py-1.5 px-3" onclick="savePiece()">Save Piece</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Composition Editor Modal ── -->
+    <div class="modal-backdrop" id="compEditorModal">
+        <div class="modal-content" style="max-width: 960px;">
+            <div class="panel-header">
+                <span class="font-heading font-semibold text-sm" id="compEditorTitle">New Composition</span>
+                <button class="text-txt-3 hover:text-txt transition-colors" onclick="closeCompEditor()">&times;</button>
+            </div>
+            <div class="p-5">
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                    <!-- Left: Config -->
+                    <div class="lg:col-span-3 space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="col-span-2">
+                                <label class="form-label">Name</label>
+                                <input type="text" class="form-input" id="comp_name" placeholder="Default Cold Outreach">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="form-label">Description</label>
+                                <input type="text" class="form-input text-xs" id="comp_desc" placeholder="Standard first-touch email with full structure">
+                            </div>
+                            <div>
+                                <label class="form-label">System</label>
+                                <select class="form-input" id="comp_system">
+                                    <option value="cold_outreach">Cold Outreach</option>
+                                    <option value="crm_sequence">CRM Sequence</option>
+                                    <option value="offer">Offer</option>
+                                    <option value="social_dm">Social DM</option>
+                                    <option value="social_engagement">Engagement</option>
+                                </select>
+                            </div>
+                            <div class="flex items-end gap-4 pb-1">
+                                <label class="flex items-center gap-2 text-sm text-txt-2 cursor-pointer">
+                                    <input type="checkbox" id="comp_is_default" class="accent-accent" style="accent-color: var(--deft-accent, #06D6A0);">
+                                    Default
+                                </label>
+                                <label class="flex items-center gap-2 text-sm text-txt-2 cursor-pointer">
+                                    <input type="checkbox" id="comp_is_active" checked class="accent-accent" style="accent-color: var(--deft-accent, #06D6A0);">
+                                    Active
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Sections -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="form-label mb-0">Sections</label>
+                                <button class="btn btn-primary text-xs py-1 px-3" onclick="addCompSection()">+ Add Section</button>
+                            </div>
+                            <div class="space-y-2" id="compSectionsList">
+                                <!-- Rendered by JS -->
+                            </div>
+                        </div>
+                        <!-- Example Variables -->
+                        <div>
+                            <label class="form-label">Example Variables</label>
+                            <div class="grid grid-cols-2 gap-3" id="compExVarsGrid">
+                                <div>
+                                    <label class="text-[0.6rem] text-txt-3 uppercase tracking-wider">company</label>
+                                    <input type="text" class="form-input text-xs" id="compExVar_company" value="Ace Plumbing" oninput="refreshCompPreview()">
+                                </div>
+                                <div>
+                                    <label class="text-[0.6rem] text-txt-3 uppercase tracking-wider">first_name</label>
+                                    <input type="text" class="form-input text-xs" id="compExVar_first_name" value="John" oninput="refreshCompPreview()">
+                                </div>
+                                <div>
+                                    <label class="text-[0.6rem] text-txt-3 uppercase tracking-wider">observation</label>
+                                    <input type="text" class="form-input text-xs" id="compExVar_observation" value="no online booking" oninput="refreshCompPreview()">
+                                </div>
+                                <div>
+                                    <label class="text-[0.6rem] text-txt-3 uppercase tracking-wider">specific_thing</label>
+                                    <input type="text" class="form-input text-xs" id="compExVar_specific_thing" value="scheduling workflow" oninput="refreshCompPreview()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Right: Live Preview -->
+                    <div class="lg:col-span-2">
+                        <div class="panel sticky top-4">
+                            <div class="panel-header">
+                                <span class="font-heading font-semibold text-xs tracking-wide uppercase">Live Preview</span>
+                                <button class="btn btn-ghost text-xs py-1 px-2" onclick="shuffleCompPreview()">Shuffle</button>
+                            </div>
+                            <div class="panel-body">
+                                <div id="compPreviewContent" class="text-sm text-txt-2 space-y-2" style="min-height: 200px;">
+                                    <div class="empty-state text-xs py-4">Add sections to see preview</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 pt-5 mt-5 border-t border-border">
+                    <button class="btn btn-ghost py-2 px-4" onclick="closeCompEditor()">Cancel</button>
+                    <button class="btn btn-primary py-2 px-6" onclick="saveComposition()">Save Composition</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ── Toast Container ── -->
     <div class="toast-container" id="toastContainer"></div>
 
@@ -1918,9 +2005,21 @@
         creativity:      ['','very consistent, safe, formulaic','reliable with minor variation','reliable with minor variation','good mix of consistency and creativity','good mix of consistency and creativity','good mix of consistency and creativity','more varied language and approaches','more varied language and approaches','maximum creativity, least predictable','maximum creativity, least predictable'],
     };
 
+    // Legacy categories (kept for backward compat with old RPC)
     const TEMPLATE_CATEGORIES = ['opening', 'body', 'question', 'subject_line', 'cta'];
     const TEMPLATE_CATEGORY_LABELS = { opening: 'Opening', body: 'Body', question: 'Question', subject_line: 'Subject Line', cta: 'CTA' };
     const LEAD_CATEGORIES = ['coaching', 'consulting', 'local_service', 'agency', 'saas', 'franchise'];
+
+    // New piece-based constants
+    const PIECE_CATEGORIES = ['greeting', 'opening', 'body', 'question', 'cta', 'subject', 'signoff', 'footer', 'ps'];
+    const PIECE_CATEGORY_LABELS = { greeting:'Greeting', opening:'Opening', body:'Body', question:'Question', cta:'CTA', subject:'Subject', signoff:'Signoff', footer:'Footer', ps:'PS' };
+    const PIECE_CHANNELS = ['all', 'cold_email', 'social_dm', 'social_engagement'];
+    const PIECE_CHANNEL_LABELS = { all:'All', cold_email:'Email', social_dm:'Social DM', social_engagement:'Engagement' };
+    const PIECE_TONES = ['neutral', 'warm', 'direct', 'witty', 'formal'];
+    const PIECE_SYSTEMS = ['all', 'cold_outreach', 'crm_sequence', 'offer', 'social_dm', 'social_engagement'];
+    const PIECE_SYSTEM_LABELS = { all:'All', cold_outreach:'Cold Outreach', crm_sequence:'CRM Sequence', offer:'Offer', social_dm:'Social DM', social_engagement:'Engagement' };
+    const TONE_BADGE_COLORS = { neutral:'badge-info', warm:'badge-warn', direct:'badge-accent', witty:'badge-purple', formal:'badge-info' };
+    const CHANNEL_BADGE_COLORS = { all:'badge-accent', cold_email:'badge-info', social_dm:'badge-warn', social_engagement:'badge-purple' };
 
     const FEEDBACK_MAPS_TO_OPTIONS = [
         'tone_salesiness', 'tone_formality', 'tone_warmth', 'tone_confidence', 'tone_humor',
@@ -1949,9 +2048,24 @@
     let outreachFilter = 'draft';
     let currentPreviewDraft = null;
 
-    // Templates state
+    // Templates state (legacy)
     let emailTemplates = {};
     let templateCache = {};
+
+    // Pieces state (new template system)
+    let allPieces = [];
+    let pieceChannelFilter = 'all';
+    let pieceCategoryFilter = 'all';
+    let templateSubTab = 'pieces';
+    let editingPieceId = null;
+    let pieceModalLeadCats = [];
+
+    // Compositions state
+    let allCompositions = [];
+    let compSystemFilter = 'all';
+    let editingCompId = null;
+    let compSections = [];
+    let compPreviewCache = null;
 
     // Prompts state
     let promptTemplates = {};
@@ -2113,7 +2227,10 @@
     // VIEW SWITCHING
     // ═══════════════════════════════════════════════════
 
-    const ALL_VIEWS = ['drafts', 'compose', 'templates', 'prompts', 'sequences', 'feedback', 'settings'];
+    const ALL_VIEWS = ['drafts', 'compose', 'templates', 'prompts', 'sequences', 'performance', 'routing'];
+
+    let performanceLoaded = false;
+    let routingLoaded = false;
 
     function switchView(viewName) {
         currentView = viewName;
@@ -2123,6 +2240,15 @@
             const tab = document.getElementById(`tab-${v}`);
             if (tab) tab.classList.toggle('active', v === viewName);
         });
+        // Lazy load performance and routing data
+        if (viewName === 'performance' && !performanceLoaded) {
+            performanceLoaded = true;
+            loadPerformance();
+        }
+        if (viewName === 'routing' && !routingLoaded) {
+            routingLoaded = true;
+            loadRouting();
+        }
         // Update URL without reload
         const url = new URL(window.location);
         url.searchParams.set('tab', viewName);
@@ -2132,9 +2258,9 @@
     // Channel/campaign dropdowns removed from UI — these functions kept for internal use if needed
     function onChannelChange(channel) {
         if (channel) currentChannel = channel;
-        loadEmailTemplates();
+        loadPieces();
+        loadCompositions();
         loadPromptTemplates();
-        loadFeedbackCategoriesAdmin();
         fetchOutreachDrafts();
     }
 
@@ -2160,7 +2286,8 @@
             await Promise.all([
                 initSettings(),
                 fetchOutreachDrafts(),
-                loadEmailTemplates(),
+                loadPieces(),
+                loadCompositions(),
                 loadPromptTemplates(),
                 loadFeedbackCategoriesAdmin(),
                 loadSequences()
@@ -3086,6 +3213,15 @@
         renderOutreachDrafts();
     }
 
+    function getChannelBadge(draft) {
+        const channel = draft.context?.outreach_channel || draft.context?.channel || 'email';
+        const labels = { email: 'EMAIL', cold_email: 'EMAIL', linkedin: 'LI DM', facebook: 'FB', instagram: 'IG DM', twitter: 'X DM', social_dm: 'DM', social_engagement: 'ENGAGE' };
+        const colors = { email: 'badge-info', cold_email: 'badge-info', linkedin: 'badge-info', facebook: 'badge-info', instagram: 'badge-warn', twitter: 'badge-info', social_dm: 'badge-warn', social_engagement: 'badge-purple' };
+        const label = labels[channel] || channel.toUpperCase();
+        const color = colors[channel] || 'badge-accent';
+        return `<span class="badge ${color}" style="font-size:0.55rem;">${label}</span>`;
+    }
+
     function getDraftRecipient(draft) {
         const ctx = draft.context || {};
         const content = draft.content || {};
@@ -3176,6 +3312,7 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-1.5 flex-wrap mb-1.5">
                                 <span class="badge" style="background:rgba(${draft.review_status === 'draft' ? '255,217,61' : draft.review_status === 'approved' ? '6,214,160' : draft.review_status === 'rejected' ? '255,107,107' : draft.review_status === 'skipped' ? '107,114,128' : draft.review_status === 'sent' ? '76,201,240' : '107,114,128'},0.15);color:${statusColor};">${esc(draft.review_status || 'draft')}</span>
+                                ${getChannelBadge(draft)}
                                 ${draft.copy_type ? `<span class="badge badge-domain">${esc(draft.copy_type)}</span>` : ''}
                                 ${score ? `<span class="badge eng-${score >= 75 ? 'hot' : score >= 50 ? 'active' : score >= 25 ? 'warm' : 'cold'}">${score}</span>` : ''}
                                 ${draft.revision_count > 0 ? `<span class="text-[0.6rem] text-txt-3">Rev ${draft.revision_count}</span>` : ''}
@@ -3251,29 +3388,46 @@
         document.getElementById('epRejectBtn').style.display = isPending ? '' : 'none';
         document.getElementById('epSkipBtn').style.display = isPending ? '' : 'none';
 
-        // Template attribution
+        // Piece attribution - try assembly log first, fallback to templates_used
         const attrEl = document.getElementById('epTemplateAttribution');
-        const chipsEl = document.getElementById('epTemplateChips');
         attrEl.classList.add('hidden');
-        chipsEl.innerHTML = '';
+        document.getElementById('epPiecesUsed').innerHTML = '';
+        document.getElementById('epVarsFilled').classList.add('hidden');
+        document.getElementById('epCompName').textContent = '--';
 
-        if (draft.templates_used && Array.isArray(draft.templates_used) && draft.templates_used.length) {
-            const missingIds = draft.templates_used.filter(id => !templateCache[id]);
-            if (missingIds.length) {
-                try {
-                    const tpls = await supabaseGet(`outreach_email_templates?id=in.(${missingIds.join(',')})`);
-                    if (Array.isArray(tpls)) {
-                        tpls.forEach(t => { templateCache[t.id] = t; });
-                    }
-                } catch (err) { console.warn('Template fetch for attribution failed:', err); }
+        try {
+            const assembly = await supabaseGet(`email_assembly_log?draft_id=eq.${draftId}&select=id,pieces_used,variables_filled,gpt_role,composition_id&limit=1`);
+            if (Array.isArray(assembly) && assembly.length && assembly[0].pieces_used) {
+                const a = assembly[0];
+                // Show composition name
+                if (a.composition_id) {
+                    const comp = allCompositions.find(c => c.id === a.composition_id);
+                    document.getElementById('epCompName').textContent = comp ? comp.name : `Composition #${a.composition_id}`;
+                }
+                // Show pieces
+                const pieces = a.pieces_used;
+                document.getElementById('epPiecesUsed').innerHTML = Object.entries(pieces).map(([cat, text]) => {
+                    return `<div class="flex items-start gap-2"><span class="badge badge-accent" style="font-size:0.5rem;min-width:50px;text-align:center;">${esc(cat)}</span><span class="text-xs text-txt-2">${esc(typeof text === 'string' ? text.substring(0, 80) : JSON.stringify(text).substring(0, 80))}</span></div>`;
+                }).join('');
+                // Show variables
+                if (a.variables_filled && Object.keys(a.variables_filled).length) {
+                    document.getElementById('epVarsFilled').classList.remove('hidden');
+                    document.getElementById('epVarsFilledList').innerHTML = Object.entries(a.variables_filled).map(([k, v]) =>
+                        `<span class="text-xs"><span class="font-mono text-accent">${esc(k)}:</span> <span class="text-txt-2">${esc(String(v))}</span></span>`
+                    ).join('');
+                }
+                attrEl.classList.remove('hidden');
+            } else if (draft.templates_used && Array.isArray(draft.templates_used) && draft.templates_used.length) {
+                // Fallback to old templates_used field
+                document.getElementById('epPiecesUsed').innerHTML = draft.templates_used.map(id => {
+                    const t = allPieces.find(p => p.id === id) || templateCache[id];
+                    if (!t) return `<div class="text-xs text-txt-3">Piece #${id}</div>`;
+                    return `<div class="flex items-start gap-2"><span class="badge badge-accent" style="font-size:0.5rem;">${esc(t.category)}</span><span class="text-xs text-txt-2">${esc((t.template_text || '').substring(0, 80))}</span></div>`;
+                }).join('');
+                attrEl.classList.remove('hidden');
             }
-            const chips = draft.templates_used.map(id => {
-                const t = templateCache[id];
-                if (!t) return `<span class="variable-chip">Template #${id}</span>`;
-                return `<span class="variable-chip">${esc(t.category || 'template')}: ${esc((t.template_text || '').substring(0, 40))}...</span>`;
-            }).join('');
-            chipsEl.innerHTML = chips;
-            attrEl.classList.remove('hidden');
+        } catch (err) {
+            console.warn('Assembly attribution fetch failed:', err);
         }
 
         // Fetch website
@@ -3599,98 +3753,8 @@
     }
 
     // ═══════════════════════════════════════════════════
-    // TEMPLATES: LOAD & RENDER
+    // PIECES: LOAD, RENDER, CRUD
     // ═══════════════════════════════════════════════════
-
-    async function loadEmailTemplates() {
-        try {
-            const result = await supabaseRPC('get_email_templates', { p_brand_id: BRAND_ID, p_channel: currentChannel });
-            emailTemplates = {};
-            if (Array.isArray(result)) {
-                result.forEach(t => {
-                    if (!emailTemplates[t.category]) emailTemplates[t.category] = [];
-                    emailTemplates[t.category].push(t);
-                    templateCache[t.id] = t;
-                });
-            } else if (result && typeof result === 'object') {
-                emailTemplates = result;
-                Object.values(result).flat().forEach(t => { if (t.id) templateCache[t.id] = t; });
-            }
-        } catch (err) {
-            console.warn('Failed to load templates:', err);
-            emailTemplates = {};
-        }
-        renderEmailTemplates();
-    }
-
-    function renderEmailTemplates() {
-        const container = document.getElementById('templatePanelsContainer');
-        container.innerHTML = TEMPLATE_CATEGORIES.map(cat => {
-            const templates = emailTemplates[cat] || [];
-            const label = TEMPLATE_CATEGORY_LABELS[cat];
-            return `
-                <div class="panel" id="tpl-panel-${cat}">
-                    <div class="sub-panel-header" onclick="toggleTemplateSubpanel('${cat}')">
-                        <div class="flex items-center gap-2">
-                            <span class="font-heading font-semibold text-sm tracking-wide">${label} Templates</span>
-                            <span class="badge badge-accent">${templates.length}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <button class="btn btn-primary text-xs py-1 px-3" onclick="event.stopPropagation();addTemplate('${cat}')">+ Add</button>
-                            <svg class="chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </div>
-                    </div>
-                    <div class="panel-body hidden" id="tpl-body-${cat}">
-                        ${templates.length === 0
-                            ? '<div class="text-center text-txt-3 text-sm py-4">No templates yet. Click + Add to create one.</div>'
-                            : templates.map((t, i) => renderTemplateCard(t, cat, i, templates.length)).join('')
-                        }
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    function renderTemplateCard(template, category, index, total) {
-        const variables = detectVariables(template.template_text || '');
-        const leadCats = template.lead_categories || [];
-        const usageCount = template.usage_count || 0;
-        const approvalRate = template.approval_rate || 0;
-        const isActive = template.is_active !== false;
-
-        return `
-            <div class="template-card" data-id="${template.id}">
-                <div class="flex items-start justify-between gap-3 mb-2">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        ${usageCount > 0 ? `<span class="badge badge-info">Used: ${usageCount}</span>` : ''}
-                        ${approvalRate > 0 ? `<span class="badge badge-accent">${approvalRate}% approved</span>` : ''}
-                    </div>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        ${index > 0 ? `<button class="btn btn-ghost text-xs py-0.5 px-1.5" onclick="moveTemplate('${category}', ${index}, -1)" title="Move up">&uarr;</button>` : ''}
-                        ${index < total - 1 ? `<button class="btn btn-ghost text-xs py-0.5 px-1.5" onclick="moveTemplate('${category}', ${index}, 1)" title="Move down">&darr;</button>` : ''}
-                        <label class="toggle-switch" title="${isActive ? 'Active' : 'Inactive'}">
-                            <input type="checkbox" ${isActive ? 'checked' : ''} onchange="toggleTemplateActive('${category}', ${index}, this.checked)">
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <button class="btn btn-ghost text-xs py-0.5 px-1.5 text-alert" onclick="deleteTemplate('${category}', ${index})" title="Delete">
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M4.5 3V2h3v1M3 3l.5 7h5l.5-7" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </button>
-                    </div>
-                </div>
-                <textarea class="form-input text-xs mb-2" rows="3" onblur="saveTemplateText('${category}', ${index}, this.value)">${esc(template.template_text || '')}</textarea>
-                ${variables.length ? `
-                    <div class="flex flex-wrap gap-1 mb-2">
-                        ${variables.map(v => `<span class="variable-chip">{${esc(v)}}</span>`).join('')}
-                    </div>
-                ` : ''}
-                <div class="flex flex-wrap gap-1">
-                    ${LEAD_CATEGORIES.map(lc => `
-                        <button class="lead-category-pill ${leadCats.includes(lc) ? 'selected' : ''}" onclick="toggleLeadCategory('${category}', ${index}, '${lc}', this)">${lc}</button>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
 
     function detectVariables(text) {
         const matches = text.match(/\{(\w+)\}/g);
@@ -3698,127 +3762,743 @@
         return [...new Set(matches.map(m => m.slice(1, -1)))];
     }
 
-    function toggleTemplateSubpanel(cat) {
-        const body = document.getElementById(`tpl-body-${cat}`);
-        const header = body.previousElementSibling;
-        body.classList.toggle('hidden');
-        header.classList.toggle('expanded');
+    function highlightVars(text) {
+        return esc(text).replace(/\{(\w+)\}/g, '<span class="var-hl">{$1}</span>');
     }
 
-    let templateSaveDebounce = null;
-
-    function saveTemplateText(category, index, value) {
-        const templates = emailTemplates[category] || [];
-        if (!templates[index]) return;
-        templates[index].template_text = value;
-        clearTimeout(templateSaveDebounce);
-        templateSaveDebounce = setTimeout(() => saveTemplate(category, index), 500);
-    }
-
-    async function saveTemplate(category, index) {
-        const templates = emailTemplates[category] || [];
-        const t = templates[index];
-        if (!t || !t.id) return;
-        try {
-            await supabasePatch('outreach_email_templates', `id=eq.${t.id}`, {
-                template_text: t.template_text,
-                lead_categories: t.lead_categories || [],
-                is_active: t.is_active !== false,
-                sort_order: index
-            });
-        } catch (err) {
-            console.error('Save template failed:', err);
-            toast('Failed to save template', 'error');
+    // Sub-tab switching
+    function setTemplateSubTab(tab) {
+        templateSubTab = tab;
+        document.getElementById('tplSubPieces').classList.toggle('active', tab === 'pieces');
+        document.getElementById('tplSubComps').classList.toggle('active', tab === 'compositions');
+        document.getElementById('tplViewPieces').style.display = tab === 'pieces' ? '' : 'none';
+        document.getElementById('tplViewComps').style.display = tab === 'compositions' ? '' : 'none';
+        const addBtn = document.getElementById('tplAddBtn');
+        if (tab === 'pieces') {
+            addBtn.textContent = '+ New Piece';
+            addBtn.onclick = () => openPieceModal();
+        } else {
+            addBtn.textContent = '+ New Composition';
+            addBtn.onclick = () => openCompEditor();
         }
     }
 
-    async function addTemplate(category) {
-        const templates = emailTemplates[category] || [];
-        const newTemplate = {
-            brand_id: BRAND_ID,
-            channel: currentChannel,
-            category: category,
-            template_text: '',
-            lead_categories: [],
-            is_active: true,
-            sort_order: templates.length,
-            usage_count: 0,
-            approval_rate: 0
+    // Filters
+    function setPieceChannelFilter(chan) {
+        pieceChannelFilter = chan;
+        document.querySelectorAll('[data-pchan]').forEach(b => b.classList.toggle('active', b.dataset.pchan === chan));
+        renderPieces();
+    }
+    function setPieceCategoryFilter(cat) {
+        pieceCategoryFilter = cat;
+        document.querySelectorAll('[data-pcat]').forEach(b => b.classList.toggle('active', b.dataset.pcat === cat));
+        renderPieces();
+    }
+    function setCompSystemFilter(sys) {
+        compSystemFilter = sys;
+        document.querySelectorAll('[data-csys]').forEach(b => b.classList.toggle('active', b.dataset.csys === sys));
+        renderCompositions();
+    }
+
+    // Load pieces via RPC
+    async function loadPieces() {
+        try {
+            const result = await supabaseRPC('get_template_pieces', {
+                p_brand_id: BRAND_ID,
+                p_category: null,
+                p_system: null,
+                p_active_only: true
+            });
+            if (result && result.pieces) {
+                allPieces = result.pieces;
+            } else if (Array.isArray(result)) {
+                allPieces = result;
+            } else {
+                allPieces = [];
+            }
+        } catch (err) {
+            console.warn('Failed to load pieces:', err);
+            allPieces = [];
+        }
+        renderPieces();
+    }
+
+    function getFilteredPieces() {
+        return allPieces.filter(p => {
+            if (pieceChannelFilter !== 'all' && p.channel !== pieceChannelFilter && p.channel !== 'all') return false;
+            if (pieceCategoryFilter !== 'all' && p.category !== pieceCategoryFilter) return false;
+            return true;
+        });
+    }
+
+    function renderPieces() {
+        const container = document.getElementById('piecesContainer');
+        const filtered = getFilteredPieces();
+
+        if (!filtered.length) {
+            container.innerHTML = '<div class="text-center text-txt-3 text-sm py-8">No pieces match the current filters.</div>';
+            return;
+        }
+
+        // Group by category
+        const grouped = {};
+        filtered.forEach(p => {
+            if (!grouped[p.category]) grouped[p.category] = [];
+            grouped[p.category].push(p);
+        });
+
+        const catOrder = PIECE_CATEGORIES.filter(c => grouped[c]);
+        container.innerHTML = catOrder.map(cat => {
+            const pieces = grouped[cat];
+            const label = PIECE_CATEGORY_LABELS[cat] || cat;
+            return `
+                <div class="panel">
+                    <div class="panel-header cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.chev').classList.toggle('rotate-180')">
+                        <div class="flex items-center gap-2">
+                            <span class="font-heading font-semibold text-sm tracking-wide">${label}</span>
+                            <span class="badge badge-accent">${pieces.length}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="btn btn-primary text-xs py-1 px-3" onclick="event.stopPropagation(); openPieceModal(null, '${cat}')">+ Add</button>
+                            <svg class="chev transition-transform" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+                            ${pieces.map(p => renderPieceCard(p)).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderPieceCard(p) {
+        const vars = detectVariables(p.template_text || '');
+        const sentCount = p.times_sent || p.usage_count || 0;
+        const openRate = p.open_rate != null ? (p.open_rate * 100).toFixed(0) : null;
+        const replyRate = p.reply_rate != null ? (p.reply_rate * 100).toFixed(0) : null;
+        const channelLabel = PIECE_CHANNEL_LABELS[p.channel] || p.channel;
+        const toneLabel = p.tone || 'neutral';
+        const toneBadge = TONE_BADGE_COLORS[toneLabel] || 'badge-info';
+        const chanBadge = CHANNEL_BADGE_COLORS[p.channel] || 'badge-accent';
+
+        return `
+            <div class="piece-card" data-piece-id="${p.id}">
+                <div class="text-sm mb-2" style="line-height: 1.5;">${highlightVars(p.template_text || '')}</div>
+                <div class="flex flex-wrap gap-1.5 mb-2">
+                    <span class="badge ${chanBadge}" style="font-size: 0.6rem;">${channelLabel}</span>
+                    <span class="badge ${toneBadge}" style="font-size: 0.6rem;">${toneLabel}</span>
+                    ${p.requires_research ? '<span class="badge badge-warn" style="font-size: 0.6rem;">research</span>' : ''}
+                </div>
+                ${sentCount > 0 ? `
+                    <div class="flex items-center gap-3 text-[0.65rem] text-txt-3 mb-2">
+                        <span>Sent: ${sentCount}</span>
+                        ${openRate != null ? `<span>Open: ${openRate}%</span>` : ''}
+                        ${replyRate != null ? `<span>Reply: ${replyRate}%</span>` : ''}
+                    </div>
+                ` : ''}
+                <div class="flex items-center gap-1.5 pt-1 border-t border-border/30">
+                    <button class="btn btn-ghost text-xs py-0.5 px-2" onclick="openPieceModal('${p.id}')">Edit</button>
+                    <button class="btn btn-ghost text-xs py-0.5 px-2 text-alert" onclick="deactivatePiece('${p.id}')">Deactivate</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Piece modal
+    function openPieceModal(pieceId, defaultCategory) {
+        editingPieceId = pieceId || null;
+        pieceModalLeadCats = [];
+        const title = document.getElementById('pieceModalTitle');
+        title.textContent = pieceId ? 'Edit Template Piece' : 'Add Template Piece';
+
+        if (pieceId) {
+            const p = allPieces.find(x => x.id === pieceId);
+            if (p) {
+                document.getElementById('piece_category').value = p.category;
+                document.getElementById('piece_channel').value = p.channel || 'all';
+                document.getElementById('piece_text').value = p.template_text || '';
+                document.getElementById('piece_tone').value = p.tone || 'neutral';
+                document.getElementById('piece_system').value = p.system || 'all';
+                pieceModalLeadCats = [...(p.lead_categories || [])];
+            }
+        } else {
+            document.getElementById('piece_category').value = defaultCategory || 'opening';
+            document.getElementById('piece_channel').value = pieceChannelFilter !== 'all' ? pieceChannelFilter : 'all';
+            document.getElementById('piece_text').value = '';
+            document.getElementById('piece_tone').value = 'neutral';
+            document.getElementById('piece_system').value = 'all';
+            pieceModalLeadCats = [];
+        }
+
+        // Update lead cat pills
+        document.querySelectorAll('#pieceModal .lead-category-pill').forEach(btn => {
+            btn.classList.toggle('selected', pieceModalLeadCats.includes(btn.dataset.lc));
+        });
+
+        updatePiecePreview();
+        openModal('pieceModal');
+    }
+
+    function closePieceModal() { closeModal('pieceModal'); editingPieceId = null; }
+
+    function togglePieceLeadCat(lc, btn) {
+        const idx = pieceModalLeadCats.indexOf(lc);
+        if (idx >= 0) { pieceModalLeadCats.splice(idx, 1); btn.classList.remove('selected'); }
+        else { pieceModalLeadCats.push(lc); btn.classList.add('selected'); }
+    }
+
+    // Auto-detect variables and preview
+    document.addEventListener('DOMContentLoaded', () => {
+        const textEl = document.getElementById('piece_text');
+        if (textEl) textEl.addEventListener('input', updatePiecePreview);
+    });
+
+    function updatePiecePreview() {
+        const text = document.getElementById('piece_text').value;
+        const vars = detectVariables(text);
+        document.getElementById('pieceVarsDetected').textContent = vars.length ? vars.map(v => `{${v}}`).join(', ') : 'none';
+
+        const exVars = { company: 'Ace Plumbing', first_name: 'John', observation: 'no online booking', specific_thing: 'scheduling workflow', category: 'plumbing', topic: 'plumbing services' };
+        let preview = text;
+        vars.forEach(v => { preview = preview.replace(new RegExp(`\\{${v}\\}`, 'g'), exVars[v] || `[${v}]`); });
+        document.getElementById('piecePreviewBox').textContent = preview || '--';
+    }
+
+    async function savePiece() {
+        const text = document.getElementById('piece_text').value.trim();
+        if (!text) { toast('Template text is required', 'error'); return; }
+
+        const vars = detectVariables(text);
+        const pieceData = {
+            id: editingPieceId || null,
+            category: document.getElementById('piece_category').value,
+            template_text: text,
+            channel: document.getElementById('piece_channel').value,
+            tone: document.getElementById('piece_tone').value,
+            system: document.getElementById('piece_system').value,
+            lead_categories: pieceModalLeadCats,
+            variables: vars,
+            requires_research: vars.some(v => ['observation', 'specific_thing'].includes(v)),
+            sort_order: 0
+        };
+
+        try {
+            const result = await supabaseRPC('upsert_template_piece', {
+                p_brand_id: BRAND_ID,
+                p_piece: pieceData
+            });
+            if (result && result.success) {
+                toast(result.action === 'created' ? 'Piece created' : 'Piece updated', 'success');
+                closePieceModal();
+                await loadPieces();
+            } else {
+                toast('Save failed: ' + (result?.error || 'Unknown error'), 'error');
+            }
+        } catch (err) {
+            console.error('Save piece failed:', err);
+            toast('Failed to save piece', 'error');
+        }
+    }
+
+    async function deactivatePiece(pieceId) {
+        if (!confirm('Deactivate this piece? It will no longer be used in compositions.')) return;
+        try {
+            const result = await supabaseRPC('delete_template_piece', {
+                p_brand_id: BRAND_ID,
+                p_piece_id: pieceId
+            });
+            if (result && result.success) {
+                toast('Piece deactivated', 'success');
+                allPieces = allPieces.filter(p => p.id !== pieceId);
+                renderPieces();
+            } else {
+                toast('Deactivation failed', 'error');
+            }
+        } catch (err) {
+            console.error('Deactivate piece failed:', err);
+            toast('Failed to deactivate piece', 'error');
+        }
+    }
+
+    // ═══════════════════════════════════════════════════
+    // COMPOSITIONS: LOAD, RENDER, EDITOR
+    // ═══════════════════════════════════════════════════
+
+    async function loadCompositions() {
+        try {
+            const result = await supabaseRPC('get_compositions', {
+                p_brand_id: BRAND_ID,
+                p_system: null
+            });
+            if (result && Array.isArray(result.compositions)) {
+                allCompositions = result.compositions;
+            } else if (Array.isArray(result)) {
+                allCompositions = result;
+            } else {
+                allCompositions = [];
+            }
+        } catch (err) {
+            console.warn('Failed to load compositions:', err);
+            allCompositions = [];
+        }
+        renderCompositions();
+    }
+
+    function renderCompositions() {
+        const container = document.getElementById('compsContainer');
+        const filtered = compSystemFilter === 'all'
+            ? allCompositions
+            : allCompositions.filter(c => c.system === compSystemFilter);
+
+        if (!filtered.length) {
+            container.innerHTML = '<div class="empty-state text-sm py-8 lg:col-span-2">No compositions match the current filter.</div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(c => {
+            const sectionCount = Array.isArray(c.sections) ? c.sections.length : 0;
+            const sysLabel = PIECE_SYSTEM_LABELS[c.system] || c.system;
+            return `
+                <div class="comp-card" onclick="openCompEditor('${c.id}')">
+                    <div class="flex items-start justify-between mb-2">
+                        <div>
+                            <div class="font-medium text-sm mb-0.5">${esc(c.name)}</div>
+                            <div class="text-xs text-txt-3">${esc(c.description || '')}</div>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            ${c.is_default ? '<span class="badge badge-warn" style="font-size:0.55rem;">DEFAULT</span>' : ''}
+                            <span class="badge ${c.is_active ? 'badge-accent' : 'badge-alert'}" style="font-size:0.55rem;">${c.is_active ? 'ACTIVE' : 'INACTIVE'}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs text-txt-3">
+                        <span class="badge badge-info" style="font-size:0.55rem;">${sysLabel}</span>
+                        <span>${sectionCount} sections</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 mt-3 pt-2 border-t border-border/30">
+                        <button class="btn btn-ghost text-xs py-0.5 px-2" onclick="event.stopPropagation(); openCompEditor('${c.id}')">Edit</button>
+                        <button class="btn btn-ghost text-xs py-0.5 px-2" onclick="event.stopPropagation(); previewComposition('${c.id}')">Preview</button>
+                        <button class="btn btn-ghost text-xs py-0.5 px-2" onclick="event.stopPropagation(); duplicateComposition('${c.id}')">Duplicate</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Composition Editor
+    function openCompEditor(compId) {
+        editingCompId = compId || null;
+        const title = document.getElementById('compEditorTitle');
+
+        if (compId) {
+            const c = allCompositions.find(x => String(x.id) === String(compId));
+            if (c) {
+                title.textContent = 'Edit: ' + (c.name || 'Composition');
+                document.getElementById('comp_name').value = c.name || '';
+                document.getElementById('comp_desc').value = c.description || '';
+                document.getElementById('comp_system').value = c.system || 'cold_outreach';
+                document.getElementById('comp_is_default').checked = !!c.is_default;
+                document.getElementById('comp_is_active').checked = c.is_active !== false;
+                compSections = Array.isArray(c.sections) ? JSON.parse(JSON.stringify(c.sections)) : [];
+                // Load example variables
+                const exVars = c.example_variables || {};
+                ['company', 'first_name', 'observation', 'specific_thing'].forEach(v => {
+                    const el = document.getElementById(`compExVar_${v}`);
+                    if (el) el.value = exVars[v] || '';
+                });
+            }
+        } else {
+            title.textContent = 'New Composition';
+            document.getElementById('comp_name').value = '';
+            document.getElementById('comp_desc').value = '';
+            document.getElementById('comp_system').value = 'cold_outreach';
+            document.getElementById('comp_is_default').checked = false;
+            document.getElementById('comp_is_active').checked = true;
+            compSections = [
+                { category: 'subject', count: 1, required: true, pinned_piece_id: null },
+                { category: 'greeting', count: 1, required: true, pinned_piece_id: null },
+                { category: 'opening', count: 1, required: true, pinned_piece_id: null },
+                { category: 'body', count: 1, required: true, pinned_piece_id: null },
+                { category: 'cta', count: 1, required: true, pinned_piece_id: null },
+                { category: 'signoff', count: 1, required: true, pinned_piece_id: null }
+            ];
+        }
+
+        renderCompSections();
+        refreshCompPreview();
+        openModal('compEditorModal');
+    }
+
+    function closeCompEditor() { closeModal('compEditorModal'); editingCompId = null; compSections = []; }
+
+    function renderCompSections() {
+        const container = document.getElementById('compSectionsList');
+        container.innerHTML = compSections.map((s, i) => {
+            const poolCount = allPieces.filter(p => p.category === s.category && (pieceChannelFilter === 'all' || p.channel === pieceChannelFilter || p.channel === 'all')).length;
+            const pinnedPiece = s.pinned_piece_id ? allPieces.find(p => p.id === s.pinned_piece_id) : null;
+            const pinnedText = pinnedPiece ? esc(pinnedPiece.template_text || '').substring(0, 60) + (pinnedPiece.template_text.length > 60 ? '...' : '') : '';
+
+            return `
+                <div class="comp-section-row">
+                    <span class="section-num">${i + 1}</span>
+                    <select class="form-input text-xs py-1" style="max-width: 120px;" onchange="updateCompSection(${i}, 'category', this.value)">
+                        ${PIECE_CATEGORIES.map(c => `<option value="${c}" ${c === s.category ? 'selected' : ''}>${PIECE_CATEGORY_LABELS[c]}</option>`).join('')}
+                    </select>
+                    <select class="form-input text-xs py-1 flex-1" style="max-width: 200px;" onchange="updateCompSection(${i}, 'pinned_piece_id', this.value || null)">
+                        <option value="">Auto (${poolCount} available)</option>
+                        ${allPieces.filter(p => p.category === s.category).map(p => `<option value="${p.id}" ${s.pinned_piece_id === p.id ? 'selected' : ''}>${esc((p.template_text || '').substring(0, 50))}${p.template_text && p.template_text.length > 50 ? '...' : ''}</option>`).join('')}
+                    </select>
+                    <label class="flex items-center gap-1 text-[0.6rem] text-txt-3 whitespace-nowrap">
+                        <input type="checkbox" ${s.required ? 'checked' : ''} onchange="updateCompSection(${i}, 'required', this.checked)" style="accent-color: var(--deft-accent, #06D6A0);">
+                        Req
+                    </label>
+                    <button class="btn btn-ghost text-xs py-0.5 px-1 text-alert" onclick="removeCompSection(${i})" title="Remove">
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 2.5l5 5M7.5 2.5l-5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function addCompSection() {
+        compSections.push({ category: 'body', count: 1, required: false, pinned_piece_id: null });
+        renderCompSections();
+        refreshCompPreview();
+    }
+
+    function removeCompSection(index) {
+        compSections.splice(index, 1);
+        renderCompSections();
+        refreshCompPreview();
+    }
+
+    function updateCompSection(index, field, value) {
+        if (field === 'required') compSections[index][field] = value;
+        else if (field === 'pinned_piece_id') compSections[index][field] = value || null;
+        else compSections[index][field] = value;
+
+        if (field === 'category') {
+            compSections[index].pinned_piece_id = null;
+            renderCompSections();
+        }
+        refreshCompPreview();
+    }
+
+    async function refreshCompPreview() {
+        const preview = document.getElementById('compPreviewContent');
+        if (!compSections.length) {
+            preview.innerHTML = '<div class="empty-state text-xs py-4">Add sections to see preview</div>';
+            return;
+        }
+
+        const exVars = {};
+        ['company', 'first_name', 'observation', 'specific_thing'].forEach(v => {
+            const el = document.getElementById(`compExVar_${v}`);
+            if (el) exVars[v] = el.value;
+        });
+
+        // Build a client-side preview by picking random pieces for each section
+        let html = '';
+        for (const s of compSections) {
+            const pool = s.pinned_piece_id
+                ? allPieces.filter(p => p.id === s.pinned_piece_id)
+                : allPieces.filter(p => p.category === s.category);
+            const piece = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+            let text = piece ? piece.template_text : `[No ${s.category} pieces available]`;
+            // Fill variables
+            Object.entries(exVars).forEach(([k, v]) => { text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), v || `[${k}]`); });
+
+            const catLabel = PIECE_CATEGORY_LABELS[s.category] || s.category;
+            html += `<div class="mb-1"><span class="text-[0.55rem] uppercase tracking-wider text-txt-3 font-mono">[${catLabel}]</span><div class="text-sm text-txt">${esc(text)}</div></div>`;
+        }
+        preview.innerHTML = html;
+    }
+
+    function shuffleCompPreview() { refreshCompPreview(); }
+
+    async function previewComposition(compId) {
+        const exVars = { company: 'Ace Plumbing', first_name: 'John', observation: 'no online booking', specific_thing: 'scheduling workflow' };
+        try {
+            const result = await supabaseRPC('render_composition_preview', {
+                p_brand_id: BRAND_ID,
+                p_composition_id: parseInt(compId),
+                p_example_variables: exVars
+            });
+            if (result && result.success) {
+                alert('Subject: ' + (result.subject || '--') + '\n\n' + (result.body || '--'));
+            }
+        } catch (err) {
+            console.error('Preview failed:', err);
+            toast('Preview failed', 'error');
+        }
+    }
+
+    async function saveComposition() {
+        const name = document.getElementById('comp_name').value.trim();
+        if (!name) { toast('Name is required', 'error'); return; }
+        if (!compSections.length) { toast('Add at least one section', 'error'); return; }
+
+        const exVars = {};
+        ['company', 'first_name', 'observation', 'specific_thing'].forEach(v => {
+            const el = document.getElementById(`compExVar_${v}`);
+            if (el && el.value) exVars[v] = el.value;
+        });
+
+        const compData = {
+            id: editingCompId ? parseInt(editingCompId) : null,
+            name: name,
+            description: document.getElementById('comp_desc').value.trim(),
+            system: document.getElementById('comp_system').value,
+            sections: compSections,
+            example_variables: exVars,
+            is_default: document.getElementById('comp_is_default').checked,
+            is_active: document.getElementById('comp_is_active').checked
+        };
+
+        try {
+            const result = await supabaseRPC('upsert_email_composition', {
+                p_brand_id: BRAND_ID,
+                p_composition: compData
+            });
+            if (result && result.success) {
+                toast(result.action === 'created' ? 'Composition created' : 'Composition updated', 'success');
+                closeCompEditor();
+                await loadCompositions();
+            } else {
+                toast('Save failed: ' + (result?.error || 'Unknown error'), 'error');
+            }
+        } catch (err) {
+            console.error('Save composition failed:', err);
+            toast('Failed to save composition', 'error');
+        }
+    }
+
+    async function duplicateComposition(compId) {
+        const c = allCompositions.find(x => String(x.id) === String(compId));
+        if (!c) return;
+        const compData = {
+            id: null,
+            name: c.name + ' (Copy)',
+            description: c.description,
+            system: c.system,
+            sections: JSON.parse(JSON.stringify(c.sections || [])),
+            example_variables: c.example_variables || {},
+            is_default: false,
+            is_active: true
         };
         try {
-            const result = await supabasePost('outreach_email_templates', newTemplate);
-            if (Array.isArray(result) && result.length) {
-                if (!emailTemplates[category]) emailTemplates[category] = [];
-                emailTemplates[category].push(result[0]);
-                templateCache[result[0].id] = result[0];
-            } else {
-                if (!emailTemplates[category]) emailTemplates[category] = [];
-                emailTemplates[category].push({ ...newTemplate, id: Date.now() });
+            const result = await supabaseRPC('upsert_email_composition', {
+                p_brand_id: BRAND_ID,
+                p_composition: compData
+            });
+            if (result && result.success) {
+                toast('Composition duplicated', 'success');
+                await loadCompositions();
             }
-            renderEmailTemplates();
-            // Open the sub-panel
-            const body = document.getElementById(`tpl-body-${category}`);
-            if (body && body.classList.contains('hidden')) {
-                body.classList.remove('hidden');
-                body.previousElementSibling.classList.add('expanded');
-            }
-            toast('Template added', 'success');
         } catch (err) {
-            console.error('Add template failed:', err);
-            toast('Failed to add template', 'error');
+            console.error('Duplicate failed:', err);
+            toast('Failed to duplicate', 'error');
         }
     }
 
-    async function deleteTemplate(category, index) {
-        if (!confirm('Delete this template?')) return;
-        const templates = emailTemplates[category] || [];
-        const t = templates[index];
-        if (!t) return;
+    // Legacy wrapper for backward compatibility
+    async function loadEmailTemplates() { await loadPieces(); }
+
+    // ═══════════════════════════════════════════════════
+    // PERFORMANCE: LOAD & RENDER
+    // ═══════════════════════════════════════════════════
+
+    let perfCategoryFilter = 'all';
+    let performanceData = [];
+
+    function setPerfCategoryFilter(cat) {
+        perfCategoryFilter = cat;
+        document.querySelectorAll('[data-perfcat]').forEach(b => b.classList.toggle('active', b.dataset.perfcat === cat));
+        renderPerformance();
+    }
+
+    async function loadPerformance() {
+        const minSends = parseInt(document.getElementById('perfMinSends')?.value || '5');
         try {
-            if (t.id) await supabaseDelete('outreach_email_templates', `id=eq.${t.id}`);
-            templates.splice(index, 1);
-            renderEmailTemplates();
-            toast('Template deleted', 'success');
+            const result = await supabaseRPC('get_piece_performance', {
+                p_brand_id: BRAND_ID,
+                p_category: null,
+                p_min_sends: minSends
+            });
+            performanceData = (result && result.pieces) ? result.pieces : (Array.isArray(result) ? result : []);
         } catch (err) {
-            console.error('Delete template failed:', err);
-            toast('Failed to delete template', 'error');
+            console.warn('Failed to load performance:', err);
+            performanceData = [];
         }
+        renderPerformance();
     }
 
-    function moveTemplate(category, index, dir) {
-        const templates = emailTemplates[category] || [];
-        const swapIdx = index + dir;
-        if (swapIdx < 0 || swapIdx >= templates.length) return;
-        [templates[index], templates[swapIdx]] = [templates[swapIdx], templates[index]];
-        renderEmailTemplates();
-        // Save sort orders
-        Promise.all([
-            saveTemplate(category, index),
-            saveTemplate(category, swapIdx)
-        ]).catch(err => console.error('Reorder save failed:', err));
-    }
+    function renderPerformance() {
+        const tbody = document.getElementById('performanceTableBody');
+        const chanFilter = document.getElementById('perfChannelFilter')?.value || 'all';
+        let filtered = performanceData;
 
-    function toggleLeadCategory(category, index, lc, btn) {
-        const templates = emailTemplates[category] || [];
-        const t = templates[index];
-        if (!t) return;
-        if (!t.lead_categories) t.lead_categories = [];
-        const idx = t.lead_categories.indexOf(lc);
-        if (idx >= 0) {
-            t.lead_categories.splice(idx, 1);
-            btn.classList.remove('selected');
-        } else {
-            t.lead_categories.push(lc);
-            btn.classList.add('selected');
+        if (perfCategoryFilter !== 'all') {
+            filtered = filtered.filter(p => p.category === perfCategoryFilter);
         }
-        saveTemplate(category, index);
+        if (chanFilter !== 'all') {
+            filtered = filtered.filter(p => p.channel === chanFilter || p.channel === 'all');
+        }
+
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-txt-3 text-sm">No performance data matches the current filters.</td></tr>';
+            return;
+        }
+
+        // Sort by reply rate descending
+        filtered.sort((a, b) => (b.reply_rate || 0) - (a.reply_rate || 0));
+
+        tbody.innerHTML = filtered.map(p => {
+            const openPct = p.open_rate != null ? (p.open_rate * 100).toFixed(0) + '%' : '--';
+            const replyPct = p.reply_rate != null ? (p.reply_rate * 100).toFixed(0) + '%' : '--';
+            const replyVal = p.reply_rate || 0;
+            const replyColor = replyVal >= 0.12 ? 'text-accent' : replyVal >= 0.06 ? 'text-warn' : 'text-txt-2';
+            const truncText = esc((p.template_text || '').substring(0, 80)) + (p.template_text && p.template_text.length > 80 ? '...' : '');
+
+            return `
+                <tr class="border-b border-border/30 hover:bg-surface-el/50">
+                    <td class="py-2.5 px-4 text-xs"><span class="badge badge-accent" style="font-size:0.55rem;">${esc(p.category)}</span></td>
+                    <td class="py-2.5 px-4 text-xs"><span class="badge badge-info" style="font-size:0.55rem;">${PIECE_CHANNEL_LABELS[p.channel] || p.channel}</span></td>
+                    <td class="py-2.5 px-4 text-xs text-txt-2">${truncText}</td>
+                    <td class="py-2.5 px-4 text-xs text-right font-mono">${p.times_sent || 0}</td>
+                    <td class="py-2.5 px-4 text-xs text-right font-mono">${openPct}</td>
+                    <td class="py-2.5 px-4 text-xs text-right font-mono ${replyColor}">${replyPct}</td>
+                </tr>
+            `;
+        }).join('');
     }
 
-    function toggleTemplateActive(category, index, checked) {
-        const templates = emailTemplates[category] || [];
-        if (templates[index]) {
-            templates[index].is_active = checked;
-            saveTemplate(category, index);
+    // ═══════════════════════════════════════════════════
+    // CHANNEL ROUTING: LOAD & RENDER
+    // ═══════════════════════════════════════════════════
+
+    let routingContacts = [];
+    let routingChannelFilter = 'all';
+    let routingStatusFilter = 'all';
+
+    function setRoutingChannelFilter(chan) {
+        routingChannelFilter = chan;
+        document.querySelectorAll('[data-rchan]').forEach(b => b.classList.toggle('active', b.dataset.rchan === chan));
+        renderRouting();
+    }
+    function setRoutingStatusFilter(stat) {
+        routingStatusFilter = stat;
+        document.querySelectorAll('[data-rstat]').forEach(b => b.classList.toggle('active', b.dataset.rstat === stat));
+        renderRouting();
+    }
+
+    async function loadRouting() {
+        try {
+            const data = await supabaseGet(`unified_contacts?brand_id=eq.${BRAND_ID}&select=contact_id,business_name,email,available_channels,primary_outreach_channel,outreach_channel_status&order=created_at.desc&limit=100`);
+            routingContacts = data || [];
+        } catch (err) {
+            console.warn('Failed to load routing:', err);
+            routingContacts = [];
+        }
+        renderRoutingDistribution();
+        renderRouting();
+    }
+
+    function renderRoutingDistribution() {
+        const dist = {};
+        let total = 0;
+        routingContacts.forEach(c => {
+            const chan = c.primary_outreach_channel || 'none';
+            dist[chan] = (dist[chan] || 0) + 1;
+            total++;
+        });
+        const container = document.getElementById('routingDistribution');
+        if (!total) {
+            container.innerHTML = '<div class="text-sm text-txt-3">No contacts with channel data</div>';
+            return;
+        }
+        const channels = ['email', 'facebook', 'linkedin', 'instagram', 'twitter', 'none'];
+        const colors = { email: 'badge-info', facebook: 'badge-info', linkedin: 'badge-info', instagram: 'badge-warn', twitter: 'badge-info', none: 'badge-alert' };
+        container.innerHTML = channels.filter(ch => dist[ch]).map(ch => {
+            const count = dist[ch];
+            const pct = ((count / total) * 100).toFixed(0);
+            return `<div class="flex items-center gap-2"><span class="badge ${colors[ch] || 'badge-accent'}" style="font-size:0.6rem;">${ch === 'none' ? 'No Channel' : ch}</span><span class="text-sm font-mono">${count}</span><span class="text-xs text-txt-3">(${pct}%)</span></div>`;
+        }).join('');
+    }
+
+    function renderRouting() {
+        const tbody = document.getElementById('routingTableBody');
+        let filtered = routingContacts;
+
+        if (routingChannelFilter !== 'all') {
+            filtered = filtered.filter(c => c.primary_outreach_channel === routingChannelFilter);
+        }
+        if (routingStatusFilter !== 'all') {
+            filtered = filtered.filter(c => {
+                const status = c.outreach_channel_status || {};
+                const primary = c.primary_outreach_channel;
+                return primary && status[primary] && status[primary].status === routingStatusFilter;
+            });
+        }
+
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-txt-3 text-sm">No contacts match the current filters.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(c => {
+            const channels = Array.isArray(c.available_channels) ? c.available_channels : [];
+            const primary = c.primary_outreach_channel || '--';
+            const status = c.outreach_channel_status || {};
+            const primaryStatus = primary !== '--' && status[primary] ? status[primary].status : '--';
+            const otherChannels = channels.filter(ch => ch !== primary);
+
+            return `
+                <tr class="border-b border-border/30 hover:bg-surface-el/50">
+                    <td class="py-2.5 px-4">
+                        <div class="font-medium text-sm">${esc(c.business_name || '--')}</div>
+                        ${c.email ? `<div class="text-xs text-txt-3">${esc(c.email)}</div>` : ''}
+                    </td>
+                    <td class="py-2.5 px-4">
+                        <div class="flex flex-wrap gap-1">${channels.map(ch => `<span class="badge badge-info" style="font-size:0.55rem;">${ch}</span>`).join('')}</div>
+                    </td>
+                    <td class="py-2.5 px-4"><span class="badge badge-accent" style="font-size:0.6rem;">${primary}</span></td>
+                    <td class="py-2.5 px-4"><span class="text-xs">${primaryStatus}</span></td>
+                    <td class="py-2.5 px-4">
+                        ${otherChannels.length ? `
+                            <div class="flex items-center gap-1">
+                                <select class="form-input text-xs py-0.5" style="max-width: 100px;" id="switch_${c.contact_id}">
+                                    ${otherChannels.map(ch => `<option value="${ch}">${ch}</option>`).join('')}
+                                </select>
+                                <button class="btn btn-primary text-xs py-0.5 px-2" onclick="switchChannel('${c.contact_id}')">Go</button>
+                            </div>
+                        ` : '<span class="text-xs text-txt-3">--</span>'}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function switchChannel(contactId) {
+        const select = document.getElementById(`switch_${contactId}`);
+        if (!select) return;
+        const newChannel = select.value;
+        try {
+            const result = await supabaseRPC('switch_outreach_channel', {
+                p_brand_id: BRAND_ID,
+                p_contact_id: contactId,
+                p_new_channel: newChannel
+            });
+            if (result && result.success) {
+                toast(`Switched to ${newChannel}`, 'success');
+                await loadRouting();
+            } else {
+                toast('Switch failed', 'error');
+            }
+        } catch (err) {
+            console.error('Switch channel failed:', err);
+            toast('Failed to switch channel', 'error');
         }
     }
 
