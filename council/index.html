@@ -328,27 +328,41 @@
     const WEBHOOK_BASE = 'https://n8n.carltonaiservices.com/webhook';
     const BRAND_ID = 'carlton';
 
-    const BUILTIN_ADVISORS = [
-        { name: 'Warren', expertise: 'Finance & Investment', color: '#1E3A5F', builtin: true },
-        { name: 'Steve', expertise: 'Innovation & Product', color: '#7A7A7D', builtin: true },
-        { name: 'Sun Tzu', expertise: 'Strategy & Competition', color: '#8B1A1A', builtin: true },
-        { name: 'Maya', expertise: 'Ethics & Social Impact', color: '#E87461', builtin: true },
-        { name: 'Ada', expertise: 'Technology & Engineering', color: '#7B2D8E', builtin: true },
-        { name: 'Russell', expertise: 'Marketing & Brand', color: '#0D8B7D', builtin: true },
-    ];
+    let advisors = []; // loaded from Supabase council_advisors table
 
-    function getCustomAdvisors() {
-        try { return JSON.parse(localStorage.getItem('rdgr-custom-advisors') || '[]'); } catch(e) { return []; }
+    function getAllAdvisors() { return advisors; }
+
+    async function loadAdvisors() {
+        try {
+            const data = await sbSelect('council_advisors',
+                `brand_id=eq.${BRAND_ID}&is_active=eq.true&select=id,name,expertise,perspective,color,is_builtin,system_prompt&order=is_builtin.desc,name`
+            );
+            advisors = (data || []).map(a => ({
+                ...a,
+                builtin: a.is_builtin
+            }));
+        } catch (e) {
+            console.error('Failed to load advisors:', e);
+            // Fallback so page isn't broken
+            advisors = [
+                { name: 'Warren', expertise: 'Finance & Investment', color: '#1E3A5F', builtin: true },
+                { name: 'Steve', expertise: 'Innovation & Product', color: '#7A7A7D', builtin: true },
+                { name: 'Sun Tzu', expertise: 'Strategy & Competition', color: '#8B1A1A', builtin: true },
+                { name: 'Maya', expertise: 'Ethics & Social Impact', color: '#E87461', builtin: true },
+                { name: 'Ada', expertise: 'Technology & Engineering', color: '#7B2D8E', builtin: true },
+                { name: 'Russell', expertise: 'Marketing & Brand', color: '#0D8B7D', builtin: true },
+            ];
+        }
+        selectedAdvisors = advisors.map(a => a.name);
+        renderAdvisors();
     }
-    function saveCustomAdvisors(list) { localStorage.setItem('rdgr-custom-advisors', JSON.stringify(list)); }
-    function getAllAdvisors() { return [...BUILTIN_ADVISORS, ...getCustomAdvisors()]; }
 
     let activeProfileId = null;
     let sessions = [];
-    let selectedAdvisors = getAllAdvisors().map(a => a.name);
+    let selectedAdvisors = [];
     let pollingInterval = null;
     let currentSessionId = null;
-    let currentSessionData = null; // full session object for handoff
+    let currentSessionData = null;
     let newAdvisorColor = '#2980B9';
 
     function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
@@ -652,31 +666,56 @@
         });
     }
 
-    function saveCustomAdvisor() {
+    async function saveCustomAdvisor() {
         const name = document.getElementById('newAdvisorName').value.trim();
         const expertise = document.getElementById('newAdvisorExpertise').value.trim();
         if (!name) { toast('Enter a name', 'error'); return; }
         if (!expertise) { toast('Enter an expertise', 'error'); return; }
-        const customs = getCustomAdvisors();
-        if (customs.find(a => a.name === name) || BUILTIN_ADVISORS.find(a => a.name === name)) {
+        if (advisors.find(a => a.name === name)) {
             toast('An advisor with that name already exists', 'error'); return;
         }
-        customs.push({ name, expertise, color: newAdvisorColor });
-        saveCustomAdvisors(customs);
-        selectedAdvisors.push(name);
-        renderAdvisors();
-        closeModal('addAdvisorModal');
-        document.getElementById('newAdvisorName').value = '';
-        document.getElementById('newAdvisorExpertise').value = '';
-        toast('Advisor added: ' + name, 'success');
+
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/council_advisors`, {
+                method: 'POST',
+                headers: { ...SB_HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                body: JSON.stringify({
+                    name, expertise, color: newAdvisorColor,
+                    brand_id: BRAND_ID, is_builtin: false, is_active: true,
+                    created_by: activeProfileId,
+                    system_prompt: `You are ${name}, an advisor specializing in ${expertise}. Provide strategic counsel from your area of expertise.`,
+                    perspective: expertise,
+                    personality: 'Knowledgeable, direct, strategic'
+                })
+            });
+            if (!res.ok) throw new Error('Insert failed: ' + res.status);
+            toast('Advisor added: ' + name, 'success');
+            closeModal('addAdvisorModal');
+            document.getElementById('newAdvisorName').value = '';
+            document.getElementById('newAdvisorExpertise').value = '';
+            await loadAdvisors();
+        } catch (e) {
+            console.error('Save advisor error:', e);
+            toast('Failed to save advisor', 'error');
+        }
     }
 
-    function removeCustomAdvisor(name) {
-        const customs = getCustomAdvisors().filter(a => a.name !== name);
-        saveCustomAdvisors(customs);
-        selectedAdvisors = selectedAdvisors.filter(n => n !== name);
-        renderAdvisors();
-        toast('Advisor removed', 'info');
+    async function removeCustomAdvisor(name) {
+        const advisor = advisors.find(a => a.name === name && !a.builtin);
+        if (!advisor || !advisor.id) return;
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/council_advisors?id=eq.${advisor.id}`, {
+                method: 'DELETE',
+                headers: { ...SB_HEADERS, 'Prefer': 'return=minimal' }
+            });
+            if (!res.ok) throw new Error('Delete failed: ' + res.status);
+            selectedAdvisors = selectedAdvisors.filter(n => n !== name);
+            toast('Advisor removed', 'info');
+            await loadAdvisors();
+        } catch (e) {
+            console.error('Remove advisor error:', e);
+            toast('Failed to remove advisor', 'error');
+        }
     }
 
     // ═══════════════════════════════════════
@@ -752,7 +791,7 @@
     async function initDashboard() {
         const saved=localStorage.getItem('rdgr-active-profile');
         if(saved){try{activeProfileId=JSON.parse(saved).id;}catch(e){}}
-        renderAdvisors();
+        await loadAdvisors();
         await refreshAll();
     }
     async function refreshAll() {

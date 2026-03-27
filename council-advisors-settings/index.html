@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Council Advisors | Settings | Carlton AI</title>
+    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <script>
+        try { if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) document.documentElement.classList.add('rdgr-authed'); } catch(e) {}
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _presets = {
+                forest:{accent:'#A8D65B',accentWarm:'#F0A830',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans'},
+                sunrise:{accent:'#F0A830',accentWarm:'#E85D5D',base:'#100D08',surface:'#1C1810',surfaceEl:'#272118',surfaceHi:'#322B20',border:'#3F382C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans'},
+                ocean:{accent:'#38BDF8',accentWarm:'#06D6A0',base:'#080D10',surface:'#10161C',surfaceEl:'#182027',surfaceHi:'#202A32',border:'#2C363F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E0E8EA',txt2:'#8C9BA0',txt3:'#586B6B',headingFont:'Nunito',bodyFont:'DM Sans'},
+                berry:{accent:'#C084FC',accentWarm:'#FB7185',base:'#0D0810',surface:'#16101C',surfaceEl:'#201827',surfaceHi:'#2A2032',border:'#3A2C3F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E0EA',txt2:'#A08CA0',txt3:'#6B586B',headingFont:'Nunito',bodyFont:'DM Sans'},
+                rdgr:{accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans'},
+                monochrome:{accent:'#E8E8E8',accentWarm:'#A0A0A0',base:'#000000',surface:'#0A0A0A',surfaceEl:'#141414',surfaceHi:'#1E1E1E',border:'#2A2A2A',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E8E8',txt2:'#A0A0A0',txt3:'#666666',headingFont:'Nunito',bodyFont:'DM Sans'},
+            };
+            var _t = (_tc.preset==='custom'&&_tc.custom)?_tc.custom:(_presets[_tc.preset]||_presets.rdgr);
+            if(_tc.statusOverrides){if(_tc.statusOverrides.success)_t.success=_tc.statusOverrides.success;if(_tc.statusOverrides.warning)_t.warning=_tc.statusOverrides.warning;if(_tc.statusOverrides.danger)_t.danger=_tc.statusOverrides.danger;}
+            var _r=document.documentElement;
+            _r.style.setProperty('--deft-accent',_t.accent);_r.style.setProperty('--deft-accent-dim',_t.accent+'26');_r.style.setProperty('--deft-accent-warm',_t.accentWarm||_t.accent);
+            _r.style.setProperty('--deft-base',_t.base);_r.style.setProperty('--deft-surface',_t.surface);_r.style.setProperty('--deft-surface-el',_t.surfaceEl||_t.surface);_r.style.setProperty('--deft-surface-hi',_t.surfaceHi||_t.surfaceEl||_t.surface);
+            _r.style.setProperty('--deft-border',_t.border);_r.style.setProperty('--deft-success',_t.success||'#6BCB77');_r.style.setProperty('--deft-success-dim',(_t.success||'#6BCB77')+'26');
+            _r.style.setProperty('--deft-warning',_t.warning||'#F0A830');_r.style.setProperty('--deft-warning-dim',(_t.warning||'#F0A830')+'26');
+            _r.style.setProperty('--deft-danger',_t.danger||'#E85D5D');_r.style.setProperty('--deft-danger-dim',(_t.danger||'#E85D5D')+'26');
+            _r.style.setProperty('--deft-txt',_t.txt);_r.style.setProperty('--deft-txt-2',_t.txt2||'#8A95A9');_r.style.setProperty('--deft-txt-3',_t.txt3||'#525E73');
+            _r.style.setProperty('--deft-heading-font',_t.headingFont||'Chakra Petch');_r.style.setProperty('--deft-body-font',_t.bodyFont||'IBM Plex Sans');
+            _r.style.setProperty('--deft-font-scale',_tc.fontScale||1);
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay{display:none!important;} html.rdgr-authed #mainContent{opacity:1!important;}
+        body{background:var(--deft-base,#08090D)!important;color:var(--deft-txt,#E8ECF1)!important;font-family:var(--deft-body-font,'IBM Plex Sans'),system-ui,sans-serif!important;}
+        .font-heading,h1,h2,h3{font-family:var(--deft-heading-font,'Chakra Petch'),system-ui,sans-serif!important;}
+        nav{background:color-mix(in srgb,var(--deft-base,#08090D) 92%,transparent)!important;border-color:var(--deft-border,#2A2E3D)!important;}
+        .text-accent{color:var(--deft-accent,#06D6A0)!important;} .task-tab.active{background:var(--deft-accent-dim,rgba(6,214,160,0.12))!important;color:var(--deft-accent,#06D6A0)!important;}
+        .btn-primary{background:var(--deft-accent-dim,rgba(6,214,160,0.15))!important;color:var(--deft-accent,#06D6A0)!important;border-color:color-mix(in srgb,var(--deft-accent,#06D6A0) 30%,transparent)!important;}
+        .btn-primary:hover{background:color-mix(in srgb,var(--deft-accent,#06D6A0) 25%,transparent)!important;}
+        .btn-ghost{border-color:var(--deft-border,#2A2E3D)!important;} .text-txt-2{color:var(--deft-txt-2,#8A95A9)!important;} .text-txt-3{color:var(--deft-txt-3,#525E73)!important;}
+        .border-border{border-color:var(--deft-border,#2A2E3D)!important;} ::-webkit-scrollbar-thumb{background:var(--deft-border,#2A2E3D)!important;}
+        .pulse-dot{background:var(--deft-accent,#06D6A0)!important;}
+        .gate-input:focus{border-color:color-mix(in srgb,var(--deft-accent,#06D6A0) 40%,transparent)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--deft-accent,#06D6A0) 8%,transparent)!important;}
+        body{font-size:calc(1rem * var(--deft-font-scale,1))!important;} .text-xs{font-size:calc(0.75rem * var(--deft-font-scale,1))!important;} .text-sm{font-size:calc(0.875rem * var(--deft-font-scale,1))!important;}
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config={theme:{extend:{colors:{base:'#08090D',surface:'#11131A','surface-el':'#1A1D28','surface-hi':'#242836',border:'#2A2E3D',accent:'#06D6A0','accent-dim':'rgba(6,214,160,0.15)',alert:'#FF6B6B',warn:'#FFD93D',info:'#4CC9F0',txt:'#E8ECF1','txt-2':'#8A95A9','txt-3':'#525E73'},fontFamily:{heading:['"Chakra Petch"','system-ui'],body:['"IBM Plex Sans"','system-ui'],mono:['"JetBrains Mono"','monospace']}}}}
+    </script>
+    <style>
+        html{scroll-behavior:smooth;} body{font-family:'IBM Plex Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:#08090D;color:#E8ECF1;}
+        body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;opacity:0.04;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:256px 256px;}
+        ::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-track{background:transparent;} ::-webkit-scrollbar-thumb{background:#2A2E3D;border-radius:3px;}
+        .gate-overlay{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at center,#0D0F16 0%,#08090D 70%);display:flex;align-items:center;justify-content:center;}
+        .gate-overlay.hidden{display:none;}
+        .gate-input{width:100%;padding:0.75rem 1rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.5rem;color:#E8ECF1;font-size:0.875rem;outline:none;}
+        .gate-error{color:#FF6B6B;font-size:0.75rem;margin-top:0.5rem;opacity:0;transition:opacity 0.2s;} .gate-error.show{opacity:1;}
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:0.375rem;font-size:0.75rem;font-weight:500;padding:0.5rem 1rem;border-radius:0.375rem;border:1px solid transparent;cursor:pointer;transition:background 0.15s,transform 0.1s;}
+        .btn:active{transform:scale(0.97);}
+        .btn-primary{background:rgba(6,214,160,0.15);color:#06D6A0;border-color:rgba(6,214,160,0.3);} .btn-primary:hover{background:rgba(6,214,160,0.25);}
+        .btn-ghost{background:transparent;color:#8A95A9;border-color:#2A2E3D;} .btn-ghost:hover{background:rgba(255,255,255,0.03);color:#E8ECF1;}
+        .btn-danger{background:rgba(255,107,107,0.12);color:#FF6B6B;border-color:rgba(255,107,107,0.25);} .btn-danger:hover{background:rgba(255,107,107,0.2);}
+        .pulse-dot{width:8px;height:8px;border-radius:50%;background:#06D6A0;box-shadow:0 0 6px rgba(6,214,160,0.4);animation:pulse 2s ease-in-out infinite;}
+        @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.6;}}
+        .task-tab{padding:0.4rem 0.75rem;font-size:0.75rem;font-weight:500;border-radius:0.375rem;color:#8A95A9;background:transparent;transition:background 0.2s,color 0.2s;cursor:pointer;} .task-tab:hover{color:#E8ECF1;} .task-tab.active{background:rgba(6,214,160,0.12);color:#06D6A0;}
+        .advisor-row{background:var(--deft-surface,#11131A);border:1px solid var(--deft-border,#2A2E3D);border-radius:0.625rem;padding:1.25rem;transition:border-color 0.2s;margin-bottom:0.75rem;}
+        .advisor-row:hover{border-color:color-mix(in srgb,var(--deft-accent,#06D6A0) 20%,var(--deft-border,#2A2E3D));}
+        .advisor-row.editing{border-color:color-mix(in srgb,var(--deft-accent,#06D6A0) 40%,var(--deft-border,#2A2E3D));background:color-mix(in srgb,var(--deft-accent,#06D6A0) 3%,var(--deft-surface,#11131A));}
+        .field-label{display:block;font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--deft-txt-3,#525E73);margin-bottom:0.375rem;}
+        .field-input{width:100%;padding:0.5rem 0.75rem;background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);border-radius:0.375rem;color:var(--deft-txt,#E8ECF1);font-size:0.8rem;outline:none;transition:border-color 0.2s;}
+        .field-input:focus{border-color:var(--deft-accent,#06D6A0);}
+        textarea.field-input{resize:vertical;min-height:80px;line-height:1.5;}
+        .toast-container{position:fixed;top:1rem;right:1rem;z-index:10000;display:flex;flex-direction:column;gap:0.5rem;}
+        .toast{padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.75rem;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,0.4);transition:opacity 0.3s;}
+        .toast-success{background:rgba(107,203,119,0.15);color:#6BCB77;border:1px solid rgba(107,203,119,0.25);}
+        .toast-error{background:rgba(255,107,107,0.15);color:#FF6B6B;border:1px solid rgba(255,107,107,0.25);}
+    </style>
+</head>
+<body>
+    <!-- ═══ PASSWORD GATE ═══ -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4"><div class="w-2 h-2 rounded-full bg-accent opacity-60"></div><span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span></div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+            </div>
+            <div id="gateProfiles" class="flex justify-center gap-3 mb-6"><div class="text-center text-xs text-txt-3">Loading profiles...</div></div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div id="mainContent" style="opacity:0;">
+        <nav class="sticky top-0 z-50 border-b border-border" style="background:rgba(8,9,13,0.92);backdrop-filter:blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background:rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Dashboard</a>
+                        <a href="/chat" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Chat</a>
+                        <a href="/org-chart" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Org Map</a>
+                        <a href="/our-workflows" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Workflows</a>
+                        <a href="/social-dashboard" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Social</a>
+                        <a href="/email-outreach" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Email</a>
+                        <a href="/crm" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">CRM</a>
+                        <a href="/offer-studio" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Offers</a>
+                        <a href="/content" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Publishing</a>
+                        <a href="/media" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Media</a>
+                        <a href="/council" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Council</a>
+                        <a href="/deft" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">DEFT</a>
+                        <a href="/brain" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">BRAIN</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background:rgba(255,255,255,0.04);color:#8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:rgba(6,214,160,0.15);color:#06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background:#1A1D28;border-color:#2A2E3D;min-width:160px;z-index:60;" id="profileDropdown"></div>
+                    </div>
+                    <a href="/settings" class="p-2 relative" style="color:var(--deft-accent,#06D6A0);background:rgba(6,214,160,0.08);border-radius:0.375rem;" title="Settings">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ── Page Header ── -->
+        <div class="max-w-[1000px] mx-auto px-4 sm:px-6">
+            <div class="flex items-center gap-2 pt-5 mb-1">
+                <a href="/settings" class="text-xs text-txt-3 hover:text-accent transition-colors">Settings</a>
+                <span class="text-txt-3 text-xs">/</span>
+                <span class="text-xs text-txt-2">Council Advisors</span>
+            </div>
+            <div class="flex items-center justify-between py-4 mb-2">
+                <div>
+                    <h2 class="font-heading text-xl font-bold tracking-tight">Council Advisors</h2>
+                    <p class="text-txt-3 text-xs mt-1">Manage your advisory council members — edit names, expertise, system prompts, and personality</p>
+                </div>
+                <button class="btn btn-primary" onclick="addNewAdvisor()">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    Add Advisor
+                </button>
+            </div>
+        </div>
+
+        <!-- ── Advisor List ── -->
+        <div class="max-w-[1000px] mx-auto px-4 sm:px-6 pb-8">
+            <div id="advisorList">
+                <div class="text-center py-8 text-txt-3 text-sm">Loading advisors...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toasts" class="toast-container"></div>
+
+    <script>
+    const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    const SB_HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+    const BRAND_ID = 'carlton';
+
+    let activeProfileId = null;
+    let advisors = [];
+    let editingId = null;
+
+    function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+    function toast(msg,type='success') { const c=document.getElementById('toasts'),e=document.createElement('div'); e.className=`toast toast-${type}`; e.textContent=msg; c.appendChild(e); setTimeout(()=>{e.style.opacity='0';setTimeout(()=>e.remove(),300);},4000); }
+
+    async function sbSelect(table, query='') {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, { headers: SB_HEADERS });
+        if (!r.ok) throw new Error(`Supabase: ${r.status}`);
+        return r.json();
+    }
+
+    // ═══════════════════════════════════════
+    // LOAD & RENDER
+    // ═══════════════════════════════════════
+    async function loadAdvisors() {
+        try {
+            advisors = await sbSelect('council_advisors',
+                `brand_id=eq.${BRAND_ID}&select=*&order=is_builtin.desc,name`
+            );
+            renderList();
+        } catch (e) {
+            console.error('Load error:', e);
+            document.getElementById('advisorList').innerHTML = '<div class="text-center py-8 text-txt-3">Failed to load advisors</div>';
+        }
+    }
+
+    function renderList() {
+        if (!advisors.length) {
+            document.getElementById('advisorList').innerHTML = '<div class="text-center py-8 text-txt-3">No advisors found</div>';
+            return;
+        }
+
+        document.getElementById('advisorList').innerHTML = advisors.map(a => {
+            const isEditing = editingId === a.id;
+            const typeBadge = a.is_builtin
+                ? '<span class="text-[0.6rem] font-mono uppercase tracking-wider px-2 py-0.5 rounded" style="background:rgba(6,214,160,0.1);color:var(--deft-accent);">Built-in</span>'
+                : '<span class="text-[0.6rem] font-mono uppercase tracking-wider px-2 py-0.5 rounded" style="background:rgba(76,201,240,0.1);color:#4CC9F0;">Custom</span>';
+            const activeBadge = a.is_active
+                ? '<span class="text-[0.6rem] font-mono uppercase tracking-wider px-2 py-0.5 rounded" style="background:rgba(107,203,119,0.1);color:#6BCB77;">Active</span>'
+                : '<span class="text-[0.6rem] font-mono uppercase tracking-wider px-2 py-0.5 rounded" style="background:rgba(255,107,107,0.1);color:#FF6B6B;">Inactive</span>';
+
+            if (isEditing) {
+                return `<div class="advisor-row editing" id="row-${a.id}">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" style="background:${a.color}30;color:${a.color};">${(a.name||'?')[0]}</div>
+                        <div class="flex-1"><div class="font-heading font-semibold text-base">${esc(a.name)}</div><div class="flex gap-2 mt-1">${typeBadge} ${activeBadge}</div></div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-primary text-xs" onclick="saveAdvisor('${a.id}')">Save</button>
+                            <button class="btn btn-ghost text-xs" onclick="cancelEdit()">Cancel</button>
+                        </div>
+                    </div>
+                    <div class="grid gap-3" style="grid-template-columns: 1fr 1fr;">
+                        <div><label class="field-label">Name</label><input class="field-input" id="edit-name-${a.id}" value="${esc(a.name)}"></div>
+                        <div><label class="field-label">Expertise</label><input class="field-input" id="edit-expertise-${a.id}" value="${esc(a.expertise||'')}"></div>
+                        <div><label class="field-label">Perspective</label><input class="field-input" id="edit-perspective-${a.id}" value="${esc(a.perspective||'')}"></div>
+                        <div><label class="field-label">Personality</label><input class="field-input" id="edit-personality-${a.id}" value="${esc(a.personality||'')}"></div>
+                        <div><label class="field-label">Color (hex)</label><div class="flex gap-2 items-center"><input class="field-input" id="edit-color-${a.id}" value="${esc(a.color||'#06D6A0')}" style="flex:1;"><div class="w-8 h-8 rounded-full flex-shrink-0" id="colorPreview-${a.id}" style="background:${a.color||'#06D6A0'};"></div></div></div>
+                        <div><label class="field-label">Active</label><select class="field-input" id="edit-active-${a.id}"><option value="true" ${a.is_active?'selected':''}>Active</option><option value="false" ${!a.is_active?'selected':''}>Inactive</option></select></div>
+                    </div>
+                    <div class="mt-3"><label class="field-label">System Prompt</label><textarea class="field-input" id="edit-prompt-${a.id}" rows="4">${esc(a.system_prompt||'')}</textarea></div>
+                    ${!a.is_builtin ? `<div class="mt-3 pt-3" style="border-top:1px solid var(--deft-border,#2A2E3D);"><button class="btn btn-danger text-xs" onclick="deleteAdvisor('${a.id}','${esc(a.name)}')"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M4.5 3V2h3v1M3 3l.5 7h5l.5-7" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg> Delete Advisor</button></div>` : ''}
+                </div>`;
+            }
+
+            return `<div class="advisor-row cursor-pointer" onclick="startEdit('${a.id}')">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0" style="background:${a.color}30;color:${a.color};">${(a.name||'?')[0]}</div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-0.5">
+                            <span class="font-heading font-semibold text-sm">${esc(a.name)}</span>
+                            ${typeBadge} ${activeBadge}
+                        </div>
+                        <div class="text-xs text-txt-3">${esc(a.expertise||'')}</div>
+                    </div>
+                    <div class="text-txt-3 flex-shrink-0">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 10l4-3-4-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // EDIT
+    // ═══════════════════════════════════════
+    function startEdit(id) { editingId = id; renderList(); }
+    function cancelEdit() { editingId = null; renderList(); }
+
+    async function saveAdvisor(id) {
+        const name = document.getElementById(`edit-name-${id}`).value.trim();
+        const expertise = document.getElementById(`edit-expertise-${id}`).value.trim();
+        const perspective = document.getElementById(`edit-perspective-${id}`).value.trim();
+        const personality = document.getElementById(`edit-personality-${id}`).value.trim();
+        const color = document.getElementById(`edit-color-${id}`).value.trim();
+        const is_active = document.getElementById(`edit-active-${id}`).value === 'true';
+        const system_prompt = document.getElementById(`edit-prompt-${id}`).value.trim();
+
+        if (!name) { toast('Name is required', 'error'); return; }
+
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/council_advisors?id=eq.${id}`, {
+                method: 'PATCH',
+                headers: { ...SB_HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                body: JSON.stringify({ name, expertise, perspective, personality, color, is_active, system_prompt })
+            });
+            if (!res.ok) throw new Error('Update failed: ' + res.status);
+            toast('Advisor updated', 'success');
+            editingId = null;
+            await loadAdvisors();
+        } catch (e) {
+            console.error('Save error:', e);
+            toast('Failed to save — ' + e.message, 'error');
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // ADD / DELETE
+    // ═══════════════════════════════════════
+    async function addNewAdvisor() {
+        const name = prompt('New advisor name:');
+        if (!name || !name.trim()) return;
+        const expertise = prompt('Area of expertise:') || '';
+
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/council_advisors`, {
+                method: 'POST',
+                headers: { ...SB_HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                body: JSON.stringify({
+                    name: name.trim(), expertise: expertise.trim(), brand_id: BRAND_ID,
+                    is_builtin: false, is_active: true, color: '#2980B9',
+                    created_by: activeProfileId,
+                    system_prompt: `You are ${name.trim()}, an advisor specializing in ${expertise.trim()}. Provide strategic counsel from your area of expertise.`,
+                    perspective: expertise.trim(), personality: 'Knowledgeable, direct, strategic'
+                })
+            });
+            if (!res.ok) throw new Error('Insert failed: ' + res.status);
+            toast('Advisor added — click to customize', 'success');
+            await loadAdvisors();
+        } catch (e) {
+            console.error('Add error:', e);
+            toast('Failed to add advisor', 'error');
+        }
+    }
+
+    async function deleteAdvisor(id, name) {
+        if (!confirm(`Delete advisor "${name}"? This cannot be undone.`)) return;
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/council_advisors?id=eq.${id}`, {
+                method: 'DELETE', headers: { ...SB_HEADERS, 'Prefer': 'return=minimal' }
+            });
+            if (!res.ok) throw new Error('Delete failed: ' + res.status);
+            toast('Advisor deleted', 'success');
+            editingId = null;
+            await loadAdvisors();
+        } catch (e) { console.error('Delete error:', e); toast('Failed to delete', 'error'); }
+    }
+
+    // ═══════════════════════════════════════
+    // AUTH GATE
+    // ═══════════════════════════════════════
+    let gateSelectedProfile = null;
+    function getCachedProfiles(cb) {
+        var CK='rdgr-profiles-cache',CT=300000;
+        try{var c=JSON.parse(localStorage.getItem(CK)||'{}');if(c.profiles&&c.ts&&(Date.now()-c.ts)<CT){cb(c.profiles);return;}}catch(e){}
+        fetch(`${SUPABASE_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`,{
+            headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`}
+        }).then(r=>r.json()).then(p=>{if(p&&Array.isArray(p)&&p.length>0)localStorage.setItem(CK,JSON.stringify({profiles:p,ts:Date.now()}));cb(p);}).catch(()=>cb([]));
+    }
+    function loadGateProfiles(){getCachedProfiles(function(profiles){const c=document.getElementById('gateProfiles');if(!c||!profiles||!profiles.length)return;const saved=localStorage.getItem('rdgr-active-profile');let savedId=null;if(saved){try{savedId=JSON.parse(saved).id;}catch(e){}}c.innerHTML=profiles.map(p=>{const name=p.display_name||p.email||'?',initial=name[0].toUpperCase(),colors={'Bradford':'#06D6A0','Dianna':'#A855F7','Brianna':'#4CC9F0'},color=colors[name]||'#8A95A9';return `<button type="button" onclick="selectGateProfile('${p.user_id}','${name.replace(/'/g,'&#39;')}',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="if(!this.classList.contains('selected'))this.style.background='rgba(255,255,255,0.02)'"><div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:${color}20;color:${color};border:2px solid transparent;">${initial}</div><span class="text-xs" style="color:#8A95A9;">${name}</span></button>`;}).join('');if(savedId){c.querySelectorAll('.gate-profile-btn').forEach(btn=>{if(btn.getAttribute('onclick').includes(savedId))btn.click();});}});}
+    function selectGateProfile(userId,name,el){gateSelectedProfile={id:userId,name:name};document.querySelectorAll('.gate-profile-btn').forEach(b=>{b.classList.remove('selected');b.style.background='rgba(255,255,255,0.02)';b.style.borderColor='transparent';b.querySelector('.w-10').style.borderColor='transparent';});el.classList.add('selected');el.style.background='rgba(255,255,255,0.06)';el.style.borderColor='rgba(6,214,160,0.4)';el.querySelector('.w-10').style.borderColor=el.querySelector('.w-10').style.color;const btn=document.getElementById('gateSubmitBtn');btn.disabled=false;btn.style.opacity='1';btn.textContent='Sign In as '+name;document.getElementById('gateInput').focus();}
+    function handleGate(e){e.preventDefault();if(document.getElementById('gateInput').value==='Advance1!'){localStorage.setItem('rdgr-session',JSON.stringify({authenticated:true,ts:Date.now()}));if(gateSelectedProfile){localStorage.setItem('rdgr-active-profile',JSON.stringify(gateSelectedProfile));activeProfileId=gateSelectedProfile.id;}document.getElementById('gate').classList.add('hidden');document.getElementById('mainContent').style.opacity='1';initPage();return false;}document.getElementById('gateError').classList.add('show');document.getElementById('gateInput').value='';document.getElementById('gateInput').focus();setTimeout(()=>document.getElementById('gateError').classList.remove('show'),2000);return false;}
+
+    async function initPage(){const saved=localStorage.getItem('rdgr-active-profile');if(saved){try{activeProfileId=JSON.parse(saved).id;}catch(e){}}await loadAdvisors();}
+    if(JSON.parse(localStorage.getItem('rdgr-session')||'{}').authenticated===true){document.getElementById('gate').classList.add('hidden');document.getElementById('mainContent').style.opacity='1';initPage();}
+    if(!JSON.parse(localStorage.getItem('rdgr-session')||'{}').authenticated){loadGateProfiles();}
+
+    (function(){const saved=localStorage.getItem('rdgr-active-profile');if(saved){try{const p=JSON.parse(saved);activeProfileId=p.id;const n=document.getElementById('profileName'),a=document.getElementById('profileAvatar');if(n)n.textContent=p.name;if(a)a.textContent=(p.name||'B')[0].toUpperCase();}catch(e){}}getCachedProfiles(function(profiles){const dd=document.getElementById('profileDropdown');if(!dd||!profiles||profiles.length===0)return;const activeId=saved?JSON.parse(saved).id:null;dd.innerHTML=profiles.map(p=>{const name=p.display_name||p.email||'?',initial=name[0].toUpperCase(),isActive=p.user_id===activeId;return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g,'&#39;')}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'"><div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div><span>${name}</span>${isActive?'<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}</button>`;}).join('');dd.innerHTML+='<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';});})();
+    function signOut(){localStorage.removeItem('rdgr-session');localStorage.removeItem('rdgr-active-profile');location.reload();}
+    function toggleProfileDD(){const dd=document.getElementById('profileDropdown');dd.classList.toggle('hidden');if(!dd.classList.contains('hidden')){setTimeout(()=>document.addEventListener('click',function c(e){if(!document.getElementById('profileSwitcher').contains(e.target))dd.classList.add('hidden');document.removeEventListener('click',c);}),0);}}
+    function selectProfileGlobal(userId,name){localStorage.setItem('rdgr-active-profile',JSON.stringify({id:userId,name:name}));location.reload();}
+    </script>
+</body>
+</html>
