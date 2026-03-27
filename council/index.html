@@ -266,8 +266,8 @@
     <div id="toasts" class="toast-container"></div>
 
     <!-- ═══ ADVISOR OPINION MODAL ═══ -->
-    <div id="opinionModal" class="modal-backdrop">
-        <div class="modal-box">
+    <div id="opinionModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('opinionModal')">
+        <div class="modal-box" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                     <div class="advisor-dot" id="modalAdvisorDot" style="width:36px;height:36px;font-size:0.9rem;"></div>
@@ -276,7 +276,7 @@
                         <div class="text-xs text-txt-3" id="modalAdvisorExpertise"></div>
                     </div>
                 </div>
-                <button onclick="closeModal('opinionModal')" class="text-txt-3 hover:text-txt p-1">
+                <button onclick="closeModal('opinionModal')" style="color:var(--deft-txt-2,#8A95A9);background:rgba(255,255,255,0.06);border-radius:0.375rem;padding:0.375rem;border:none;cursor:pointer;transition:background 0.15s;" onmouseenter="this.style.background='rgba(255,255,255,0.12)'" onmouseleave="this.style.background='rgba(255,255,255,0.06)'">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </button>
             </div>
@@ -285,11 +285,11 @@
     </div>
 
     <!-- ═══ ADD ADVISOR MODAL ═══ -->
-    <div id="addAdvisorModal" class="modal-backdrop">
-        <div class="modal-box" style="max-width:400px;">
+    <div id="addAdvisorModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('addAdvisorModal')">
+        <div class="modal-box" style="max-width:400px;" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-heading font-semibold text-base">Add Custom Advisor</h3>
-                <button onclick="closeModal('addAdvisorModal')" class="text-txt-3 hover:text-txt p-1">
+                <button onclick="closeModal('addAdvisorModal')" style="color:var(--deft-txt-2,#8A95A9);background:rgba(255,255,255,0.06);border-radius:0.375rem;padding:0.375rem;border:none;cursor:pointer;transition:background 0.15s;" onmouseenter="this.style.background='rgba(255,255,255,0.12)'" onmouseleave="this.style.background='rgba(255,255,255,0.06)'">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </button>
             </div>

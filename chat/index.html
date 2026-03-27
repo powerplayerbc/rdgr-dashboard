@@ -934,18 +934,19 @@
             const handoff = JSON.parse(localStorage.getItem('rdgr-council-handoff') || 'null');
             if (handoff && handoff.type === 'council_session') {
                 localStorage.removeItem('rdgr-council-handoff');
-                let msg = `[Council Session Handoff]\n\nQuestion: ${handoff.question}\n\n`;
+                let msg = `I just had a conversation with my invisible council. Please see what I asked, what their responses were, and my notes about what to do next.\n\n`;
+                msg += `═══ QUESTION ═══\n${handoff.question}\n\n`;
                 if (handoff.advisorOpinions && handoff.advisorOpinions.length) {
-                    msg += 'Advisor Opinions:\n';
+                    msg += '═══ ADVISOR RESPONSES ═══\n';
                     handoff.advisorOpinions.forEach(a => {
-                        msg += `\n--- ${a.name} ---\n${a.opinion}\n`;
+                        msg += `\n▸ ${a.name}\n${a.opinion}\n`;
                     });
                     msg += '\n';
                 }
-                if (handoff.synthesis) msg += `Synthesis/Recommendation: ${handoff.synthesis}\n\n`;
-                if (handoff.consensus && handoff.consensus.length) msg += `Consensus Points:\n${handoff.consensus.map(c => '• ' + c).join('\n')}\n\n`;
+                if (handoff.synthesis) msg += `═══ SYNTHESIS ═══\n${handoff.synthesis}\n\n`;
+                if (handoff.consensus && handoff.consensus.length) msg += `Consensus:\n${handoff.consensus.map(c => '• ' + c).join('\n')}\n\n`;
                 if (handoff.disagreements && handoff.disagreements.length) msg += `Disagreements:\n${handoff.disagreements.map(d => '• ' + d).join('\n')}\n\n`;
-                if (handoff.userNotes) msg += `My Notes: ${handoff.userNotes}\n\n`;
+                msg += `═══ MY NOTES ═══\n${handoff.userNotes || '(none)'}\n\n`;
                 msg += 'Let\'s discuss how to move forward on this.';
                 const chatInput = document.getElementById('chatInput');
                 if (chatInput) {
