@@ -103,7 +103,11 @@
         .session-card { background:var(--deft-surface,#11131A); border:1px solid var(--deft-border,#2A2E3D); border-radius:0.625rem; padding:1rem; transition:border-color 0.2s, transform 0.15s; cursor:pointer; }
         .session-card:hover { border-color:color-mix(in srgb, var(--deft-accent,#06D6A0) 25%, var(--deft-border,#2A2E3D)); transform:translateY(-1px); }
         .session-card.active-session { border-color:color-mix(in srgb, var(--deft-accent,#06D6A0) 50%, var(--deft-border,#2A2E3D)); background:color-mix(in srgb, var(--deft-accent,#06D6A0) 3%, var(--deft-surface,#11131A)); }
-        .opinion-card { background:var(--deft-surface-el,#1A1D28); border:1px solid var(--deft-border,#2A2E3D); border-radius:0.5rem; padding:1rem; }
+        .opinion-card { background:var(--deft-surface-el,#1A1D28); border:1px solid var(--deft-border,#2A2E3D); border-radius:0.5rem; padding:1rem; cursor:pointer; transition:border-color 0.2s, transform 0.15s; }
+        .opinion-card:hover { border-color:color-mix(in srgb, var(--deft-accent,#06D6A0) 30%, var(--deft-border,#2A2E3D)); transform:translateY(-1px); }
+        .modal-backdrop { position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; }
+        .modal-backdrop.active { display:flex; }
+        .modal-box { background:var(--deft-surface-el,#1A1D28); border:1px solid var(--deft-border,#2A2E3D); border-radius:0.75rem; width:95%; max-width:640px; max-height:80vh; overflow-y:auto; padding:1.5rem; }
         .badge { display:inline-flex; align-items:center; gap:0.25rem; padding:0.2rem 0.625rem; border-radius:9999px; font-size:0.65rem; font-weight:600; text-transform:uppercase; letter-spacing:0.03em; }
         .badge-completed { background:var(--deft-success-dim,rgba(107,203,119,0.15)); color:var(--deft-success,#6BCB77); }
         .badge-pending { background:var(--deft-warning-dim,rgba(255,217,61,0.15)); color:var(--deft-warning,#FFD93D); }
@@ -158,9 +162,10 @@
                         <a href="/org-chart" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Org Map</a>
                         <a href="/our-workflows" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Workflows</a>
                         <a href="/social-dashboard" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Social</a>
+                        <a href="/email-outreach" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Email</a>
                         <a href="/crm" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">CRM</a>
                         <a href="/offer-studio" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Offers</a>
-                        <a href="/content" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Content</a>
+                        <a href="/content" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Publishing</a>
                         <a href="/media" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Media</a>
                         <span class="task-tab active" style="flex:none;padding:0.3rem 0.75rem;">Council</span>
                         <a href="/deft" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">DEFT</a>
@@ -212,6 +217,10 @@
                     <div class="text-xs font-semibold text-txt-3 uppercase tracking-wider mb-2">Advisors</div>
                     <div id="advisorList"><!-- Filled by JS --></div>
                     <div class="mt-3 pt-3" style="border-top:1px solid var(--deft-border,#2A2E3D);">
+                        <button class="btn btn-ghost text-xs w-full mb-2" onclick="openModal('addAdvisorModal')">
+                            <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                            Add Advisor
+                        </button>
                         <label class="flex items-center gap-2 cursor-pointer text-xs text-txt-2">
                             <input type="checkbox" id="researchToggle" class="accent-current" style="accent-color:var(--deft-accent,#06D6A0);">
                             <span>Include Research</span>
@@ -256,6 +265,61 @@
 
     <div id="toasts" class="toast-container"></div>
 
+    <!-- ═══ ADVISOR OPINION MODAL ═══ -->
+    <div id="opinionModal" class="modal-backdrop">
+        <div class="modal-box">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="advisor-dot" id="modalAdvisorDot" style="width:36px;height:36px;font-size:0.9rem;"></div>
+                    <div>
+                        <div class="font-heading font-semibold text-base" id="modalAdvisorName"></div>
+                        <div class="text-xs text-txt-3" id="modalAdvisorExpertise"></div>
+                    </div>
+                </div>
+                <button onclick="closeModal('opinionModal')" class="text-txt-3 hover:text-txt p-1">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div id="modalOpinionBody" class="text-sm text-txt-2" style="line-height:1.7; white-space:pre-wrap;"></div>
+        </div>
+    </div>
+
+    <!-- ═══ ADD ADVISOR MODAL ═══ -->
+    <div id="addAdvisorModal" class="modal-backdrop">
+        <div class="modal-box" style="max-width:400px;">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-heading font-semibold text-base">Add Custom Advisor</h3>
+                <button onclick="closeModal('addAdvisorModal')" class="text-txt-3 hover:text-txt p-1">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium mb-1 text-txt-2">Name</label>
+                    <input id="newAdvisorName" class="w-full px-3 py-2 rounded-lg text-sm outline-none" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);" placeholder="e.g. Elon">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1 text-txt-2">Expertise</label>
+                    <input id="newAdvisorExpertise" class="w-full px-3 py-2 rounded-lg text-sm outline-none" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);" placeholder="e.g. Manufacturing & Scale">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1 text-txt-2">Color</label>
+                    <div class="flex gap-2 flex-wrap" id="colorPicker">
+                        <button onclick="pickColor('#C0392B')" class="w-7 h-7 rounded-full border-2 border-transparent" style="background:#C0392B;" data-color="#C0392B"></button>
+                        <button onclick="pickColor('#2980B9')" class="w-7 h-7 rounded-full border-2 border-transparent" style="background:#2980B9;" data-color="#2980B9"></button>
+                        <button onclick="pickColor('#27AE60')" class="w-7 h-7 rounded-full border-2 border-transparent" style="background:#27AE60;" data-color="#27AE60"></button>
+                        <button onclick="pickColor('#8E44AD')" class="w-7 h-7 rounded-full border-2 border-transparent" style="background:#8E44AD;" data-color="#8E44AD"></button>
+                        <button onclick="pickColor('#D35400')" class="w-7 h-7 rounded-full border-2 border-transparent" style="background:#D35400;" data-color="#D35400"></button>
+                        <button onclick="pickColor('#16A085')" class="w-7 h-7 rounded-full border-2 border-transparent" style="background:#16A085;" data-color="#16A085"></button>
+                        <button onclick="pickColor('#2C3E50')" class="w-7 h-7 rounded-full border-2 border-transparent" style="background:#2C3E50;" data-color="#2C3E50"></button>
+                        <button onclick="pickColor('#E74C8B')" class="w-7 h-7 rounded-full border-2 border-transparent" style="background:#E74C8B;" data-color="#E74C8B"></button>
+                    </div>
+                </div>
+                <button class="btn btn-primary w-full py-2.5 mt-2" onclick="saveCustomAdvisor()">Add Advisor</button>
+            </div>
+        </div>
+    </div>
+
     <script>
 
     const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
@@ -264,20 +328,28 @@
     const WEBHOOK_BASE = 'https://n8n.carltonaiservices.com/webhook';
     const BRAND_ID = 'carlton';
 
-    const ADVISORS = [
-        { name: 'Warren', expertise: 'Finance & Investment', color: '#1E3A5F' },
-        { name: 'Steve', expertise: 'Innovation & Product', color: '#7A7A7D' },
-        { name: 'Sun Tzu', expertise: 'Strategy & Competition', color: '#8B1A1A' },
-        { name: 'Maya', expertise: 'Ethics & Social Impact', color: '#E87461' },
-        { name: 'Ada', expertise: 'Technology & Engineering', color: '#7B2D8E' },
-        { name: 'Russell', expertise: 'Marketing & Brand', color: '#0D8B7D' },
+    const BUILTIN_ADVISORS = [
+        { name: 'Warren', expertise: 'Finance & Investment', color: '#1E3A5F', builtin: true },
+        { name: 'Steve', expertise: 'Innovation & Product', color: '#7A7A7D', builtin: true },
+        { name: 'Sun Tzu', expertise: 'Strategy & Competition', color: '#8B1A1A', builtin: true },
+        { name: 'Maya', expertise: 'Ethics & Social Impact', color: '#E87461', builtin: true },
+        { name: 'Ada', expertise: 'Technology & Engineering', color: '#7B2D8E', builtin: true },
+        { name: 'Russell', expertise: 'Marketing & Brand', color: '#0D8B7D', builtin: true },
     ];
+
+    function getCustomAdvisors() {
+        try { return JSON.parse(localStorage.getItem('rdgr-custom-advisors') || '[]'); } catch(e) { return []; }
+    }
+    function saveCustomAdvisors(list) { localStorage.setItem('rdgr-custom-advisors', JSON.stringify(list)); }
+    function getAllAdvisors() { return [...BUILTIN_ADVISORS, ...getCustomAdvisors()]; }
 
     let activeProfileId = null;
     let sessions = [];
-    let selectedAdvisors = ADVISORS.map(a => a.name); // all selected by default
+    let selectedAdvisors = getAllAdvisors().map(a => a.name);
     let pollingInterval = null;
     let currentSessionId = null;
+    let currentSessionData = null; // full session object for handoff
+    let newAdvisorColor = '#2980B9';
 
     function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
     function toPT(s) { if(!s)return'—'; return new Date(s).toLocaleString('en-US',{timeZone:'America/Los_Angeles',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true}); }
@@ -294,16 +366,19 @@
     // ADVISORS
     // ═══════════════════════════════════════
     function renderAdvisors() {
-        document.getElementById('advisorList').innerHTML = ADVISORS.map(a => {
+        const all = getAllAdvisors();
+        document.getElementById('advisorList').innerHTML = all.map(a => {
             const isSelected = selectedAdvisors.includes(a.name);
             const initial = a.name[0];
-            return `<div class="advisor-chip ${isSelected ? 'selected' : ''}" onclick="toggleAdvisor('${a.name}')">
+            const removeBtn = !a.builtin ? `<button onclick="event.stopPropagation();removeCustomAdvisor('${a.name.replace(/'/g,"\\'")}');" class="text-txt-3 hover:text-danger ml-auto p-0.5" title="Remove advisor" style="color:var(--deft-danger,#FF6B6B);opacity:0.5;"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>` : '';
+            return `<div class="advisor-chip ${isSelected ? 'selected' : ''}" onclick="toggleAdvisor('${a.name.replace(/'/g,"\\'")}')">
                 <div class="advisor-dot" style="background:${a.color}30;color:${a.color};">${initial}</div>
                 <div class="flex-1 min-w-0">
                     <div class="text-xs font-medium truncate">${a.name}</div>
                     <div class="text-[0.6rem] text-txt-3 truncate">${a.expertise}</div>
                 </div>
-                ${isSelected ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--deft-accent,#06D6A0)"/></svg>' : ''}
+                ${isSelected && !removeBtn ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--deft-accent,#06D6A0)"/></svg>' : ''}
+                ${removeBtn}
             </div>`;
         }).join('');
     }
@@ -395,7 +470,7 @@
                 body: JSON.stringify({
                     operation: 'convene_council',
                     question: question,
-                    advisor_names: selectedAdvisors.length === ADVISORS.length ? null : selectedAdvisors,
+                    advisor_names: selectedAdvisors.length === getAllAdvisors().length ? null : selectedAdvisors,
                     research: document.getElementById('researchToggle').checked,
                     brand_id: BRAND_ID,
                     user_id: activeProfileId
@@ -469,10 +544,13 @@
             // Advisor opinions
             if (responses.length) {
                 html += '<div class="grid gap-3 mb-5" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">';
-                responses.forEach(r => {
-                    const advisor = ADVISORS.find(a => a.name === r.advisor_name) || { name: r.advisor_name || '?', color: '#8A95A9', expertise: '' };
-                    const opinion = esc((r.opinion || r.response || '').substring(0, 500));
-                    html += `<div class="opinion-card">
+                responses.forEach((r, idx) => {
+                    const allAdv = getAllAdvisors();
+                    const advisor = allAdv.find(a => a.name === r.advisor_name) || { name: r.advisor_name || '?', color: '#8A95A9', expertise: '' };
+                    const fullOpinion = r.opinion || r.response || '';
+                    const preview = esc(fullOpinion.substring(0, 200));
+                    const hasMore = fullOpinion.length > 200;
+                    html += `<div class="opinion-card" onclick="showOpinionModal(${idx})">
                         <div class="flex items-center gap-2 mb-2.5">
                             <div class="advisor-dot" style="background:${advisor.color}30;color:${advisor.color};width:32px;height:32px;font-size:0.8rem;">${advisor.name[0]}</div>
                             <div>
@@ -480,7 +558,7 @@
                                 <div class="text-[0.65rem] text-txt-3">${esc(advisor.expertise)}</div>
                             </div>
                         </div>
-                        <p class="text-xs text-txt-2" style="line-height:1.6;">${opinion}</p>
+                        <p class="text-xs text-txt-2" style="line-height:1.6;">${preview}${hasMore ? '<span class="text-accent"> ...read more</span>' : ''}</p>
                     </div>`;
                 });
                 html += '</div>';
@@ -508,7 +586,23 @@
                 html += '</div>';
             }
 
+            // Discuss with Agent (only for completed sessions)
+            if (status === 'completed') {
+                html += `<div class="mt-5 pt-5" style="border-top:1px solid var(--deft-border,#2A2E3D);">
+                    <div class="font-heading font-semibold text-sm mb-3">Discuss with Agent</div>
+                    <p class="text-xs text-txt-3 mb-3">Add your thoughts, then send this session to the chat agent for further discussion and action planning.</p>
+                    <textarea id="handoffNotes" rows="3" class="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none mb-3" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);" placeholder="Your notes, context, or questions for the agent..."></textarea>
+                    <button class="btn btn-primary" onclick="sendToChat()">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10.5 1.5l-9 4 3.5 1.5 1.5 3.5 4-9z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Discuss with Agent
+                    </button>
+                </div>`;
+            }
+
             document.getElementById('sessionDetailContent').innerHTML = html;
+
+            // Store session data for potential handoff
+            currentSessionData = session;
 
             // If still in progress, poll
             if (status !== 'completed') startPolling(id);
@@ -525,6 +619,92 @@
         document.getElementById('sessionDetail').style.display = 'none';
         document.getElementById('sessionList').style.display = '';
         renderSessions();
+    }
+
+    // ═══════════════════════════════════════
+    // OPINION MODAL
+    // ═══════════════════════════════════════
+    function showOpinionModal(idx) {
+        if (!currentSessionData || !currentSessionData.responses) return;
+        const r = currentSessionData.responses[idx];
+        if (!r) return;
+        const allAdv = getAllAdvisors();
+        const advisor = allAdv.find(a => a.name === r.advisor_name) || { name: r.advisor_name || '?', color: '#8A95A9', expertise: '' };
+        document.getElementById('modalAdvisorDot').style.background = advisor.color + '30';
+        document.getElementById('modalAdvisorDot').style.color = advisor.color;
+        document.getElementById('modalAdvisorDot').textContent = advisor.name[0];
+        document.getElementById('modalAdvisorName').textContent = advisor.name;
+        document.getElementById('modalAdvisorExpertise').textContent = advisor.expertise;
+        document.getElementById('modalOpinionBody').textContent = r.opinion || r.response || 'No opinion recorded';
+        openModal('opinionModal');
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    // ═══════════════════════════════════════
+    // CUSTOM ADVISORS
+    // ═══════════════════════════════════════
+    function pickColor(color) {
+        newAdvisorColor = color;
+        document.querySelectorAll('#colorPicker button').forEach(b => {
+            b.style.borderColor = b.dataset.color === color ? '#fff' : 'transparent';
+        });
+    }
+
+    function saveCustomAdvisor() {
+        const name = document.getElementById('newAdvisorName').value.trim();
+        const expertise = document.getElementById('newAdvisorExpertise').value.trim();
+        if (!name) { toast('Enter a name', 'error'); return; }
+        if (!expertise) { toast('Enter an expertise', 'error'); return; }
+        const customs = getCustomAdvisors();
+        if (customs.find(a => a.name === name) || BUILTIN_ADVISORS.find(a => a.name === name)) {
+            toast('An advisor with that name already exists', 'error'); return;
+        }
+        customs.push({ name, expertise, color: newAdvisorColor });
+        saveCustomAdvisors(customs);
+        selectedAdvisors.push(name);
+        renderAdvisors();
+        closeModal('addAdvisorModal');
+        document.getElementById('newAdvisorName').value = '';
+        document.getElementById('newAdvisorExpertise').value = '';
+        toast('Advisor added: ' + name, 'success');
+    }
+
+    function removeCustomAdvisor(name) {
+        const customs = getCustomAdvisors().filter(a => a.name !== name);
+        saveCustomAdvisors(customs);
+        selectedAdvisors = selectedAdvisors.filter(n => n !== name);
+        renderAdvisors();
+        toast('Advisor removed', 'info');
+    }
+
+    // ═══════════════════════════════════════
+    // DISCUSS WITH AGENT (HANDOFF TO CHAT)
+    // ═══════════════════════════════════════
+    function sendToChat() {
+        if (!currentSessionData) { toast('No session data', 'error'); return; }
+        const notes = (document.getElementById('handoffNotes') || {}).value || '';
+        const responses = Array.isArray(currentSessionData.responses) ? currentSessionData.responses : [];
+        const synthesis = currentSessionData.synthesis || {};
+
+        const handoff = {
+            type: 'council_session',
+            question: currentSessionData.question,
+            advisorOpinions: responses.map(r => ({
+                name: r.advisor_name,
+                opinion: r.opinion || r.response || ''
+            })),
+            synthesis: synthesis.overall_recommendation || synthesis.summary || '',
+            consensus: synthesis.consensus || [],
+            disagreements: synthesis.disagreements || [],
+            userNotes: notes,
+            sessionId: currentSessionData.id,
+            timestamp: new Date().toISOString()
+        };
+
+        localStorage.setItem('rdgr-council-handoff', JSON.stringify(handoff));
+        window.location.href = '/chat';
     }
 
     // ═══════════════════════════════════════
