@@ -286,7 +286,7 @@
 
     <!-- ═══ ADD ADVISOR MODAL ═══ -->
     <div id="addAdvisorModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('addAdvisorModal')">
-        <div class="modal-box" style="max-width:400px;" onclick="event.stopPropagation()">
+        <div class="modal-box" style="max-width:520px;" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-heading font-semibold text-base">Add Custom Advisor</h3>
                 <button onclick="closeModal('addAdvisorModal')" style="color:var(--deft-txt-2,#8A95A9);background:rgba(255,255,255,0.06);border-radius:0.375rem;padding:0.375rem;border:none;cursor:pointer;transition:background 0.15s;" onmouseenter="this.style.background='rgba(255,255,255,0.12)'" onmouseleave="this.style.background='rgba(255,255,255,0.06)'">
@@ -294,13 +294,27 @@
                 </button>
             </div>
             <div class="space-y-3">
-                <div>
-                    <label class="block text-xs font-medium mb-1 text-txt-2">Name</label>
-                    <input id="newAdvisorName" class="w-full px-3 py-2 rounded-lg text-sm outline-none" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);" placeholder="e.g. Elon">
+                <div class="grid gap-3" style="grid-template-columns:1fr 1fr;">
+                    <div>
+                        <label class="block text-xs font-medium mb-1 text-txt-2">Name *</label>
+                        <input id="newAdvisorName" class="w-full px-3 py-2 rounded-lg text-sm outline-none" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);" placeholder="e.g. Elon">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium mb-1 text-txt-2">Expertise *</label>
+                        <input id="newAdvisorExpertise" class="w-full px-3 py-2 rounded-lg text-sm outline-none" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);" placeholder="e.g. Manufacturing & Scale">
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium mb-1 text-txt-2">Expertise</label>
-                    <input id="newAdvisorExpertise" class="w-full px-3 py-2 rounded-lg text-sm outline-none" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);" placeholder="e.g. Manufacturing & Scale">
+                    <label class="block text-xs font-medium mb-1 text-txt-2">Perspective</label>
+                    <input id="newAdvisorPerspective" class="w-full px-3 py-2 rounded-lg text-sm outline-none" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);" placeholder="e.g. First-principles engineering, vertical integration">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1 text-txt-2">Personality</label>
+                    <input id="newAdvisorPersonality" class="w-full px-3 py-2 rounded-lg text-sm outline-none" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);" placeholder="e.g. Bold, contrarian, thinks in decades">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1 text-txt-2">System Prompt</label>
+                    <textarea id="newAdvisorPrompt" rows="3" class="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);" placeholder="Leave blank for auto-generated default based on name and expertise..."></textarea>
                 </div>
                 <div>
                     <label class="block text-xs font-medium mb-1 text-txt-2">Color</label>
@@ -669,6 +683,9 @@
     async function saveCustomAdvisor() {
         const name = document.getElementById('newAdvisorName').value.trim();
         const expertise = document.getElementById('newAdvisorExpertise').value.trim();
+        const perspective = (document.getElementById('newAdvisorPerspective') || {}).value || '';
+        const personality = (document.getElementById('newAdvisorPersonality') || {}).value || '';
+        const systemPrompt = (document.getElementById('newAdvisorPrompt') || {}).value || '';
         if (!name) { toast('Enter a name', 'error'); return; }
         if (!expertise) { toast('Enter an expertise', 'error'); return; }
         if (advisors.find(a => a.name === name)) {
@@ -683,16 +700,15 @@
                     name, expertise, color: newAdvisorColor,
                     brand_id: BRAND_ID, is_builtin: false, is_active: true,
                     created_by: activeProfileId,
-                    system_prompt: `You are ${name}, an advisor specializing in ${expertise}. Provide strategic counsel from your area of expertise.`,
-                    perspective: expertise,
-                    personality: 'Knowledgeable, direct, strategic'
+                    system_prompt: systemPrompt.trim() || `You are ${name}, an advisor specializing in ${expertise}. Provide strategic counsel from your area of expertise.`,
+                    perspective: perspective.trim() || expertise,
+                    personality: personality.trim() || 'Knowledgeable, direct, strategic'
                 })
             });
             if (!res.ok) throw new Error('Insert failed: ' + res.status);
             toast('Advisor added: ' + name, 'success');
             closeModal('addAdvisorModal');
-            document.getElementById('newAdvisorName').value = '';
-            document.getElementById('newAdvisorExpertise').value = '';
+            ['newAdvisorName','newAdvisorExpertise','newAdvisorPerspective','newAdvisorPersonality','newAdvisorPrompt'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
             await loadAdvisors();
         } catch (e) {
             console.error('Save advisor error:', e);

@@ -204,12 +204,37 @@
     }
 
     function renderList() {
-        if (!advisors.length) {
+        let html = '';
+
+        // Add form (shown at top when adding)
+        if (showingAddForm) {
+            html += `<div class="advisor-row editing" id="new-advisor-form">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-heading font-semibold text-base">New Advisor</h3>
+                    <div class="flex gap-2">
+                        <button class="btn btn-primary text-xs" onclick="submitNewAdvisor()">Create Advisor</button>
+                        <button class="btn btn-ghost text-xs" onclick="cancelAdd()">Cancel</button>
+                    </div>
+                </div>
+                <div class="grid gap-3" style="grid-template-columns: 1fr 1fr;">
+                    <div><label class="field-label">Name *</label><input class="field-input" id="new-name" placeholder="e.g. Elon"></div>
+                    <div><label class="field-label">Expertise *</label><input class="field-input" id="new-expertise" placeholder="e.g. Manufacturing & Scale"></div>
+                    <div><label class="field-label">Perspective</label><input class="field-input" id="new-perspective" placeholder="e.g. First-principles engineering, vertical integration"></div>
+                    <div><label class="field-label">Personality</label><input class="field-input" id="new-personality" placeholder="e.g. Bold, contrarian, thinks in decades"></div>
+                    <div><label class="field-label">Color (hex)</label><input class="field-input" id="new-color" value="#2980B9" placeholder="#2980B9"></div>
+                    <div></div>
+                </div>
+                <div class="mt-3"><label class="field-label">System Prompt</label><textarea class="field-input" id="new-prompt" rows="4" placeholder="You are [Name], an advisor specializing in [expertise]. Provide strategic counsel from your area of expertise..."></textarea></div>
+                <p class="text-[0.65rem] text-txt-3 mt-2">Leave system prompt blank for a sensible default based on name and expertise.</p>
+            </div>`;
+        }
+
+        if (!advisors.length && !showingAddForm) {
             document.getElementById('advisorList').innerHTML = '<div class="text-center py-8 text-txt-3">No advisors found</div>';
             return;
         }
 
-        document.getElementById('advisorList').innerHTML = advisors.map(a => {
+        html += advisors.map(a => {
             const isEditing = editingId === a.id;
             const typeBadge = a.is_builtin
                 ? '<span class="text-[0.6rem] font-mono uppercase tracking-wider px-2 py-0.5 rounded" style="background:rgba(6,214,160,0.1);color:var(--deft-accent);">Built-in</span>'
@@ -257,6 +282,8 @@
                 </div>
             </div>`;
         }).join('');
+
+        document.getElementById('advisorList').innerHTML = html;
     }
 
     // ═══════════════════════════════════════
@@ -295,25 +322,42 @@
     // ═══════════════════════════════════════
     // ADD / DELETE
     // ═══════════════════════════════════════
-    async function addNewAdvisor() {
-        const name = prompt('New advisor name:');
-        if (!name || !name.trim()) return;
-        const expertise = prompt('Area of expertise:') || '';
+    let showingAddForm = false;
+
+    function addNewAdvisor() {
+        showingAddForm = true;
+        renderList();
+        const el = document.getElementById('new-advisor-form');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function cancelAdd() { showingAddForm = false; renderList(); }
+
+    async function submitNewAdvisor() {
+        const name = document.getElementById('new-name').value.trim();
+        const expertise = document.getElementById('new-expertise').value.trim();
+        const perspective = document.getElementById('new-perspective').value.trim();
+        const personality = document.getElementById('new-personality').value.trim();
+        const color = document.getElementById('new-color').value.trim() || '#2980B9';
+        const system_prompt = document.getElementById('new-prompt').value.trim();
+
+        if (!name) { toast('Name is required', 'error'); return; }
+        if (!expertise) { toast('Expertise is required', 'error'); return; }
 
         try {
             const res = await fetch(`${SUPABASE_URL}/rest/v1/council_advisors`, {
                 method: 'POST',
                 headers: { ...SB_HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
                 body: JSON.stringify({
-                    name: name.trim(), expertise: expertise.trim(), brand_id: BRAND_ID,
-                    is_builtin: false, is_active: true, color: '#2980B9',
+                    name, expertise, perspective: perspective || expertise, personality: personality || 'Knowledgeable, direct, strategic',
+                    brand_id: BRAND_ID, is_builtin: false, is_active: true, color,
                     created_by: activeProfileId,
-                    system_prompt: `You are ${name.trim()}, an advisor specializing in ${expertise.trim()}. Provide strategic counsel from your area of expertise.`,
-                    perspective: expertise.trim(), personality: 'Knowledgeable, direct, strategic'
+                    system_prompt: system_prompt || `You are ${name}, an advisor specializing in ${expertise}. Provide strategic counsel from your area of expertise.`
                 })
             });
             if (!res.ok) throw new Error('Insert failed: ' + res.status);
-            toast('Advisor added — click to customize', 'success');
+            toast('Advisor created: ' + name, 'success');
+            showingAddForm = false;
             await loadAdvisors();
         } catch (e) {
             console.error('Add error:', e);
