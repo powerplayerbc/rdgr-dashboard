@@ -1160,13 +1160,18 @@
 
             <!-- ── PIECES SUB-VIEW ── -->
             <div id="tplViewPieces">
-                <!-- Channel Filters -->
+                <!-- Channel Filters + Show Inactive Toggle -->
                 <div class="flex flex-wrap items-center gap-1.5 mb-3">
                     <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium mr-1">Channel:</span>
                     <button class="filter-chip active" data-pchan="all" onclick="setPieceChannelFilter('all')">All</button>
                     <button class="filter-chip" data-pchan="cold_email" onclick="setPieceChannelFilter('cold_email')">Email</button>
                     <button class="filter-chip" data-pchan="social_dm" onclick="setPieceChannelFilter('social_dm')">Social DM</button>
                     <button class="filter-chip" data-pchan="social_engagement" onclick="setPieceChannelFilter('social_engagement')">Engagement</button>
+                    <span class="mx-2 h-4 w-px bg-border inline-block"></span>
+                    <label class="flex items-center gap-1.5 cursor-pointer select-none" title="Show deactivated pieces">
+                        <input type="checkbox" id="showInactivePieces" onchange="toggleShowInactive(this.checked)" style="accent-color: var(--deft-accent, #06D6A0);">
+                        <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium">Show Inactive</span>
+                    </label>
                 </div>
                 <!-- Category Filters -->
                 <div class="flex flex-wrap items-center gap-1.5 mb-4">
@@ -1767,7 +1772,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="form-label">Category</label>
-                        <select class="form-input" id="piece_category">
+                        <select class="form-input" id="piece_category" onchange="onPieceCategoryChange(this.value)">
                             <option value="greeting">Greeting</option>
                             <option value="opening">Opening</option>
                             <option value="body">Body</option>
@@ -1777,7 +1782,12 @@
                             <option value="signoff">Signoff</option>
                             <option value="footer">Footer</option>
                             <option value="ps">PS</option>
+                            <option value="__custom__">+ Custom Category...</option>
                         </select>
+                        <div id="customCategoryWrap" class="mt-2 hidden">
+                            <input type="text" class="form-input text-xs" id="piece_custom_category" placeholder="e.g. hook, disclaimer, intro..." onkeydown="if(event.key==='Enter'){event.preventDefault();confirmCustomCategory();}">
+                            <p class="text-[0.6rem] text-txt-3 mt-1">Lowercase, no spaces (use underscores)</p>
+                        </div>
                     </div>
                     <div>
                         <label class="form-label">Channel</label>
@@ -2010,9 +2020,9 @@
     const TEMPLATE_CATEGORY_LABELS = { opening: 'Opening', body: 'Body', question: 'Question', subject_line: 'Subject Line', cta: 'CTA' };
     const LEAD_CATEGORIES = ['coaching', 'consulting', 'local_service', 'agency', 'saas', 'franchise'];
 
-    // New piece-based constants
-    const PIECE_CATEGORIES = ['greeting', 'opening', 'body', 'question', 'cta', 'subject', 'signoff', 'footer', 'ps'];
-    const PIECE_CATEGORY_LABELS = { greeting:'Greeting', opening:'Opening', body:'Body', question:'Question', cta:'CTA', subject:'Subject', signoff:'Signoff', footer:'Footer', ps:'PS' };
+    // New piece-based constants (mutable — custom categories get pushed)
+    let PIECE_CATEGORIES = ['greeting', 'opening', 'body', 'question', 'cta', 'subject', 'signoff', 'footer', 'ps'];
+    let PIECE_CATEGORY_LABELS = { greeting:'Greeting', opening:'Opening', body:'Body', question:'Question', cta:'CTA', subject:'Subject', signoff:'Signoff', footer:'Footer', ps:'PS' };
     const PIECE_CHANNELS = ['all', 'cold_email', 'social_dm', 'social_engagement'];
     const PIECE_CHANNEL_LABELS = { all:'All', cold_email:'Email', social_dm:'Social DM', social_engagement:'Engagement' };
     const PIECE_TONES = ['neutral', 'warm', 'direct', 'witty', 'formal'];
@@ -2054,11 +2064,14 @@
 
     // Pieces state (new template system)
     let allPieces = [];
+    let inactivePieces = [];
+    let showInactive = false;
     let pieceChannelFilter = 'all';
     let pieceCategoryFilter = 'all';
     let templateSubTab = 'pieces';
     let editingPieceId = null;
     let pieceModalLeadCats = [];
+    let pendingDeactivation = null; // for undo
 
     // Compositions state
     let allCompositions = [];
@@ -3800,6 +3813,12 @@
         renderCompositions();
     }
 
+    // Show/hide inactive pieces
+    function toggleShowInactive(checked) {
+        showInactive = checked;
+        loadPieces();
+    }
+
     // Load pieces via RPC
     async function loadPieces() {
         try {
@@ -3807,24 +3826,58 @@
                 p_brand_id: BRAND_ID,
                 p_category: null,
                 p_system: null,
-                p_active_only: true
+                p_active_only: !showInactive
             });
-            if (result && result.pieces) {
-                allPieces = result.pieces;
-            } else if (Array.isArray(result)) {
-                allPieces = result;
+            const raw = (result && result.pieces) ? result.pieces : (Array.isArray(result) ? result : []);
+            if (showInactive) {
+                allPieces = raw.filter(p => p.is_active !== false);
+                inactivePieces = raw.filter(p => p.is_active === false);
             } else {
-                allPieces = [];
+                allPieces = raw;
+                inactivePieces = [];
             }
+            // Auto-register any custom categories found in the data
+            raw.forEach(p => registerCategory(p.category));
         } catch (err) {
             console.warn('Failed to load pieces:', err);
             allPieces = [];
+            inactivePieces = [];
         }
         renderPieces();
     }
 
+    // Register a custom category if it doesn't exist yet
+    function registerCategory(cat) {
+        if (!cat || PIECE_CATEGORIES.includes(cat)) return;
+        PIECE_CATEGORIES.push(cat);
+        PIECE_CATEGORY_LABELS[cat] = cat.charAt(0).toUpperCase() + cat.slice(1).replace(/_/g, ' ');
+        refreshCategoryFilterChips();
+    }
+
+    function refreshCategoryFilterChips() {
+        const container = document.querySelector('[data-pcat="all"]')?.parentElement;
+        if (!container) return;
+        // Rebuild chips
+        container.innerHTML = `
+            <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium mr-1">Category:</span>
+            <button class="filter-chip ${pieceCategoryFilter === 'all' ? 'active' : ''}" data-pcat="all" onclick="setPieceCategoryFilter('all')">All</button>
+            ${PIECE_CATEGORIES.map(cat => `<button class="filter-chip ${pieceCategoryFilter === cat ? 'active' : ''}" data-pcat="${cat}" onclick="setPieceCategoryFilter('${cat}')">${PIECE_CATEGORY_LABELS[cat] || cat}</button>`).join('')}
+        `;
+    }
+
+    function refreshPieceCategoryDropdown() {
+        const select = document.getElementById('piece_category');
+        if (!select) return;
+        const currentVal = select.value;
+        select.innerHTML = PIECE_CATEGORIES.map(c =>
+            `<option value="${c}">${PIECE_CATEGORY_LABELS[c] || c}</option>`
+        ).join('') + '<option value="__custom__">+ Custom Category...</option>';
+        if (PIECE_CATEGORIES.includes(currentVal)) select.value = currentVal;
+    }
+
     function getFilteredPieces() {
-        return allPieces.filter(p => {
+        const combined = showInactive ? [...allPieces, ...inactivePieces] : allPieces;
+        return combined.filter(p => {
             if (pieceChannelFilter !== 'all' && p.channel !== pieceChannelFilter && p.channel !== 'all') return false;
             if (pieceCategoryFilter !== 'all' && p.category !== pieceCategoryFilter) return false;
             return true;
@@ -3847,16 +3900,21 @@
             grouped[p.category].push(p);
         });
 
-        const catOrder = PIECE_CATEGORIES.filter(c => grouped[c]);
+        // Include custom categories from data that aren't in the standard list
+        const allCats = [...new Set([...PIECE_CATEGORIES, ...Object.keys(grouped)])];
+        const catOrder = allCats.filter(c => grouped[c]);
         container.innerHTML = catOrder.map(cat => {
             const pieces = grouped[cat];
             const label = PIECE_CATEGORY_LABELS[cat] || cat;
+            const activeCount = pieces.filter(p => p.is_active !== false).length;
+            const inactiveCount = pieces.filter(p => p.is_active === false).length;
             return `
                 <div class="panel">
                     <div class="panel-header cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.chev').classList.toggle('rotate-180')">
                         <div class="flex items-center gap-2">
                             <span class="font-heading font-semibold text-sm tracking-wide">${label}</span>
-                            <span class="badge badge-accent">${pieces.length}</span>
+                            <span class="badge badge-accent">${activeCount}</span>
+                            ${inactiveCount > 0 ? `<span class="badge badge-alert" style="font-size:0.55rem;">${inactiveCount} inactive</span>` : ''}
                         </div>
                         <div class="flex items-center gap-2">
                             <button class="btn btn-primary text-xs py-1 px-3" onclick="event.stopPropagation(); openPieceModal(null, '${cat}')">+ Add</button>
@@ -3882,9 +3940,11 @@
         const toneLabel = p.tone || 'neutral';
         const toneBadge = TONE_BADGE_COLORS[toneLabel] || 'badge-info';
         const chanBadge = CHANNEL_BADGE_COLORS[p.channel] || 'badge-accent';
+        const isInactive = p.is_active === false;
 
         return `
-            <div class="piece-card" data-piece-id="${p.id}">
+            <div class="piece-card${isInactive ? ' opacity-50' : ''}" data-piece-id="${p.id}" ${isInactive ? 'style="border-style: dashed;"' : ''}>
+                ${isInactive ? '<div class="flex items-center gap-1.5 mb-2"><span class="badge badge-alert" style="font-size:0.55rem;">INACTIVE</span></div>' : ''}
                 <div class="text-sm mb-2" style="line-height: 1.5;">${highlightVars(p.template_text || '')}</div>
                 <div class="flex flex-wrap gap-1.5 mb-2">
                     <span class="badge ${chanBadge}" style="font-size: 0.6rem;">${channelLabel}</span>
@@ -3899,8 +3959,12 @@
                     </div>
                 ` : ''}
                 <div class="flex items-center gap-1.5 pt-1 border-t border-border/30">
-                    <button class="btn btn-ghost text-xs py-0.5 px-2" onclick="openPieceModal('${p.id}')">Edit</button>
-                    <button class="btn btn-ghost text-xs py-0.5 px-2 text-alert" onclick="deactivatePiece('${p.id}')">Deactivate</button>
+                    ${isInactive ? `
+                        <button class="btn btn-primary text-xs py-0.5 px-2" onclick="reactivatePiece('${p.id}')">Reactivate</button>
+                    ` : `
+                        <button class="btn btn-ghost text-xs py-0.5 px-2" onclick="openPieceModal('${p.id}')">Edit</button>
+                        <button class="btn btn-ghost text-xs py-0.5 px-2 text-alert" onclick="deactivatePiece('${p.id}')">Deactivate</button>
+                    `}
                 </div>
             </div>
         `;
@@ -4003,16 +4067,23 @@
     }
 
     async function deactivatePiece(pieceId) {
-        if (!confirm('Deactivate this piece? It will no longer be used in compositions.')) return;
+        // Save reference before removing from view
+        const piece = allPieces.find(p => p.id === pieceId);
+        if (!piece) return;
+
         try {
             const result = await supabaseRPC('delete_template_piece', {
                 p_brand_id: BRAND_ID,
                 p_piece_id: pieceId
             });
             if (result && result.success) {
-                toast('Piece deactivated', 'success');
+                // Remove from active, add to inactive
                 allPieces = allPieces.filter(p => p.id !== pieceId);
+                piece.is_active = false;
+                inactivePieces.push(piece);
                 renderPieces();
+                // Show undo toast
+                toastWithUndo('Piece deactivated', () => reactivatePiece(pieceId));
             } else {
                 toast('Deactivation failed', 'error');
             }
@@ -4020,6 +4091,94 @@
             console.error('Deactivate piece failed:', err);
             toast('Failed to deactivate piece', 'error');
         }
+    }
+
+    async function reactivatePiece(pieceId) {
+        // Reactivate by upserting with the same data but active
+        const piece = inactivePieces.find(p => p.id === pieceId) || allPieces.find(p => p.id === pieceId);
+        if (!piece) { toast('Piece not found', 'error'); return; }
+
+        try {
+            const result = await supabaseRPC('upsert_template_piece', {
+                p_brand_id: BRAND_ID,
+                p_piece: {
+                    id: pieceId,
+                    category: piece.category,
+                    template_text: piece.template_text,
+                    channel: piece.channel || 'all',
+                    tone: piece.tone || 'neutral',
+                    system: piece.system || 'all',
+                    lead_categories: piece.lead_categories || [],
+                    variables: detectVariables(piece.template_text || ''),
+                    requires_research: piece.requires_research || false,
+                    sort_order: piece.sort_order || 0
+                }
+            });
+            if (result && result.success) {
+                toast('Piece reactivated', 'success');
+                // Move from inactive back to active
+                inactivePieces = inactivePieces.filter(p => p.id !== pieceId);
+                piece.is_active = true;
+                if (!allPieces.find(p => p.id === pieceId)) allPieces.push(piece);
+                renderPieces();
+            } else {
+                toast('Reactivation failed', 'error');
+            }
+        } catch (err) {
+            console.error('Reactivate piece failed:', err);
+            toast('Failed to reactivate piece', 'error');
+        }
+    }
+
+    // Toast with undo action button
+    function toastWithUndo(msg, undoFn) {
+        const container = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = 'toast toast-success';
+        t.style.cssText = 'display:flex;align-items:center;gap:12px;';
+        t.innerHTML = `
+            <span>${esc(msg)}</span>
+            <button style="background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:4px;padding:3px 10px;font-size:0.7rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:0.04em;" class="undo-btn">Undo</button>
+        `;
+        t.querySelector('.undo-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            t.remove();
+            undoFn();
+        });
+        container.appendChild(t);
+        setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(10px)'; t.style.transition = 'all 0.3s'; }, 6000);
+        setTimeout(() => t.remove(), 6500);
+    }
+
+    // Custom category support
+    function onPieceCategoryChange(val) {
+        const customWrap = document.getElementById('customCategoryWrap');
+        if (val === '__custom__') {
+            customWrap.classList.remove('hidden');
+            document.getElementById('piece_custom_category').focus();
+        } else {
+            customWrap.classList.add('hidden');
+        }
+    }
+
+    function confirmCustomCategory() {
+        const input = document.getElementById('piece_custom_category');
+        let val = input.value.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+        if (!val) { toast('Enter a category name', 'error'); return; }
+        if (val.length > 30) val = val.substring(0, 30);
+
+        // Register the new category
+        registerCategory(val);
+
+        // Set the dropdown to the new category
+        const select = document.getElementById('piece_category');
+        refreshPieceCategoryDropdown();
+        select.value = val;
+
+        // Hide custom input
+        document.getElementById('customCategoryWrap').classList.add('hidden');
+        input.value = '';
+        toast(`Category "${PIECE_CATEGORY_LABELS[val]}" added`, 'success');
     }
 
     // ═══════════════════════════════════════════════════
