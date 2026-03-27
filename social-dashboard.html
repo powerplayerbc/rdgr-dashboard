@@ -4120,8 +4120,10 @@ function setSocialCompSystemFilter(sys) {
 
 async function loadSocialPieces() {
     try {
-        const result = await supabaseRpc('get_template_pieces', { p_brand_id: 'carlton', p_category: null, p_system: null, p_active_only: true });
-        const all = (result && result.pieces) ? result.pieces : (Array.isArray(result) ? result : []);
+        // Use direct REST instead of RPC — the RPC omits the channel field
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/outreach_email_templates?brand_id=eq.carlton&is_active=eq.true&order=category,sort_order&select=id,category,channel,tone,system,template_text,lead_categories,variables,requires_research,is_active,usage_count`, { headers });
+        if (!res.ok) throw new Error('Fetch failed: ' + res.status);
+        const all = await res.json();
         // Filter to social channels only (social_dm, social_engagement, or 'all')
         socialPieces = all.filter(p => ['social_dm', 'social_engagement', 'all'].includes(p.channel));
     } catch (err) {

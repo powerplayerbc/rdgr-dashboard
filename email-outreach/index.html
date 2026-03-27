@@ -3819,25 +3819,20 @@
         loadPieces();
     }
 
-    // Load pieces via RPC
+    // Load pieces via direct REST (RPC omits channel field)
     async function loadPieces() {
         try {
-            const result = await supabaseRPC('get_template_pieces', {
-                p_brand_id: BRAND_ID,
-                p_category: null,
-                p_system: null,
-                p_active_only: !showInactive
-            });
-            const raw = (result && result.pieces) ? result.pieces : (Array.isArray(result) ? result : []);
+            const activeFilter = showInactive ? '' : '&is_active=eq.true';
+            const raw = await supabaseGet(`outreach_email_templates?brand_id=eq.${BRAND_ID}${activeFilter}&order=category,sort_order&select=id,category,channel,tone,system,template_text,lead_categories,variables,requires_research,is_active,usage_count,times_sent,times_opened,times_replied,open_rate,reply_rate,sort_order`);
             if (showInactive) {
                 allPieces = raw.filter(p => p.is_active !== false);
                 inactivePieces = raw.filter(p => p.is_active === false);
             } else {
-                allPieces = raw;
+                allPieces = raw || [];
                 inactivePieces = [];
             }
             // Auto-register any custom categories found in the data
-            raw.forEach(p => registerCategory(p.category));
+            (raw || []).forEach(p => registerCategory(p.category));
         } catch (err) {
             console.warn('Failed to load pieces:', err);
             allPieces = [];
