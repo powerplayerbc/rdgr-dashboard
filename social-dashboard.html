@@ -4222,17 +4222,28 @@ function renderSocialCompositions() {
 
 function openSocialPieceModal() { window.open('/email-outreach?tab=templates', '_self'); }
 
+let socialSystemPromptId = null;
+let socialUserPromptId = null;
+
 async function loadSocialPrompts() {
-    // Social prompts can be loaded from outreach_voice_settings or a dedicated table
     try {
         const result = await supabaseRpc('get_prompt_templates', { p_brand_id: 'carlton', p_channel: 'social_dm' });
-        if (result) {
-            document.getElementById('socSystemPromptEditor').value = result.system_prompt || '';
-            document.getElementById('socUserPromptEditor').value = result.user_prompt || '';
-            document.getElementById('socPromptPreview').textContent = result.system_prompt || 'No social prompts configured yet.';
+        if (result && result.system) {
+            socialSystemPromptId = result.system.id;
+            document.getElementById('socSystemPromptEditor').value = result.system.template_text || '';
+            document.getElementById('socSystemPromptVersion').textContent = 'v' + (result.system.version || 1);
+            document.getElementById('socPromptPreview').textContent = result.system.template_text || 'No social system prompt configured.';
+        }
+        if (result && result.user) {
+            socialUserPromptId = result.user.id;
+            document.getElementById('socUserPromptEditor').value = result.user.template_text || '';
+        }
+        if (!result || (!result.system && !result.user)) {
+            document.getElementById('socPromptPreview').textContent = 'No social prompts configured yet. Contact backend developer to set up.';
         }
     } catch (err) {
         console.warn('Failed to load social prompts:', err);
+        document.getElementById('socPromptPreview').textContent = 'Failed to load prompts.';
     }
 }
 
@@ -4240,12 +4251,18 @@ async function saveSocialPrompts() {
     const sysPrompt = document.getElementById('socSystemPromptEditor').value;
     const userPrompt = document.getElementById('socUserPromptEditor').value;
     try {
-        await supabaseRpc('update_prompt_templates', {
-            p_brand_id: 'carlton',
-            p_channel: 'social_dm',
-            p_system_prompt: sysPrompt,
-            p_user_prompt: userPrompt
-        });
+        // Update system prompt
+        if (socialSystemPromptId) {
+            await fetch(`${SUPABASE_URL}/rest/v1/outreach_prompt_templates?id=eq.${socialSystemPromptId}`, {
+                method: 'PATCH', headers, body: JSON.stringify({ template_text: sysPrompt })
+            });
+        }
+        // Update user prompt
+        if (socialUserPromptId) {
+            await fetch(`${SUPABASE_URL}/rest/v1/outreach_prompt_templates?id=eq.${socialUserPromptId}`, {
+                method: 'PATCH', headers, body: JSON.stringify({ template_text: userPrompt })
+            });
+        }
         toast('Social prompts saved', 'success');
         document.getElementById('socPromptPreview').textContent = sysPrompt || 'No social prompts configured.';
     } catch (err) {
@@ -4258,7 +4275,7 @@ function resetSocialPrompts() {
     if (!confirm('Reset social prompts to default?')) return;
     document.getElementById('socSystemPromptEditor').value = '';
     document.getElementById('socUserPromptEditor').value = '';
-    document.getElementById('socPromptPreview').textContent = 'Prompts have been reset.';
+    document.getElementById('socPromptPreview').textContent = 'Prompts have been reset. Click Save to persist.';
 }
 
 </script>
