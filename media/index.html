@@ -375,8 +375,27 @@
     </div>
 
     <!-- ═══ LIGHTBOX ═══ -->
-    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
-        <img id="lightboxImg" src="" alt="">
+    <div id="lightbox" class="lightbox" onclick="if(event.target===this)closeLightbox()">
+        <div style="position:relative;max-width:90vw;max-height:90vh;display:flex;flex-direction:column;align-items:center;" onclick="event.stopPropagation()">
+            <img id="lightboxImg" src="" alt="" style="max-width:90vw;max-height:80vh;object-fit:contain;border-radius:0.5rem;">
+            <div class="flex gap-2 mt-3" id="lightboxActions" style="display:none;">
+                <button class="btn btn-primary text-xs" onclick="downloadImage()">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M3.5 6L6 8.5 8.5 6M2 10h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Download
+                </button>
+                <button class="btn btn-ghost text-xs" onclick="copyImageUrl()">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="4" width="6.5" height="6.5" rx="1" stroke="currentColor" stroke-width="1"/><path d="M8 4V2.5A1 1 0 007 1.5H2.5a1 1 0 00-1 1V7a1 1 0 001 1H4" stroke="currentColor" stroke-width="1"/></svg>
+                    Copy URL
+                </button>
+                <button class="btn btn-ghost text-xs" onclick="openInDrive()">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M9 6.5v3a1 1 0 01-1 1H2.5a1 1 0 01-1-1V4a1 1 0 011-1H5.5M7.5 1.5h3v3M5.5 6.5l5-5" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Open in Drive
+                </button>
+            </div>
+        </div>
+        <button onclick="closeLightbox()" style="position:absolute;top:1rem;right:1rem;color:#fff;background:rgba(255,255,255,0.1);border:none;border-radius:0.375rem;padding:0.5rem;cursor:pointer;" onmouseenter="this.style.background='rgba(255,255,255,0.2)'" onmouseleave="this.style.background='rgba(255,255,255,0.1)'">
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
     </div>
 
     <!-- ═══════════════════════════════════════ -->
@@ -414,7 +433,7 @@
     async function loadGallery() {
         try {
             const data = await sbSelect('image_sessions',
-                `brand_id=eq.${BRAND_ID}&status=eq.complete&select=id,image_type,prompt,image_url,file_id,created_at,metadata&order=created_at.desc&limit=100`
+                `brand_id=eq.${BRAND_ID}&status=eq.complete&select=id,image_type,prompt,aspect_ratio,image_url,thumbnail_url,drive_url,drive_file_id,source,created_at&order=created_at.desc&limit=50`
             );
             images = data || [];
             renderGallery();
@@ -457,13 +476,13 @@
             general: { bg: 'rgba(138,149,169,0.12)', color: '#8A95A9' },
         };
 
-        document.getElementById('galleryGrid').innerHTML = filtered.map(img => {
+        document.getElementById('galleryGrid').innerHTML = filtered.map((img, idx) => {
             const type = img.image_type || 'general';
             const tc = typeColors[type] || typeColors.general;
             const prompt = esc((img.prompt || '').substring(0, 80));
-            const url = img.image_url || '';
-            return `<div class="gallery-card" onclick="openLightbox('${url.replace(/'/g, "\\'")}')">
-                <img src="${esc(url)}" alt="${prompt}" loading="lazy" onerror="this.style.display='none'">
+            const thumb = img.thumbnail_url || img.image_url || '';
+            return `<div class="gallery-card" onclick="openLightbox(${idx})">
+                <img src="${esc(thumb)}" alt="${prompt}" loading="lazy" onerror="this.parentElement.querySelector('.gallery-card-info').insertAdjacentHTML('afterbegin','<div class=\\'text-xs text-txt-3 py-4 text-center\\'>Image unavailable</div>');this.remove();">
                 <div class="gallery-card-info">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="type-badge" style="background:${tc.bg};color:${tc.color};">${type.replace('_', ' ')}</span>
@@ -475,15 +494,49 @@
         }).join('');
     }
 
-    function openLightbox(url) {
-        if (!url) return;
-        document.getElementById('lightboxImg').src = url;
+    let currentLightboxIdx = null;
+
+    function getFilteredImages() {
+        if (currentFilter === 'all') return images;
+        return images.filter(i => i.image_type === currentFilter);
+    }
+
+    function openLightbox(idx) {
+        const filtered = getFilteredImages();
+        const img = filtered[idx];
+        if (!img) return;
+        currentLightboxIdx = idx;
+        document.getElementById('lightboxImg').src = img.image_url || img.thumbnail_url || '';
+        document.getElementById('lightboxActions').style.display = '';
         document.getElementById('lightbox').classList.add('active');
     }
 
     function closeLightbox() {
         document.getElementById('lightbox').classList.remove('active');
         document.getElementById('lightboxImg').src = '';
+        document.getElementById('lightboxActions').style.display = 'none';
+        currentLightboxIdx = null;
+    }
+
+    function downloadImage() {
+        const filtered = getFilteredImages();
+        const img = filtered[currentLightboxIdx];
+        if (!img || !img.drive_file_id) { toast('No download available', 'error'); return; }
+        window.open(`https://drive.google.com/uc?export=download&id=${img.drive_file_id}`, '_blank');
+    }
+
+    function copyImageUrl() {
+        const filtered = getFilteredImages();
+        const img = filtered[currentLightboxIdx];
+        if (!img || !img.image_url) { toast('No URL available', 'error'); return; }
+        navigator.clipboard.writeText(img.image_url).then(() => toast('URL copied to clipboard')).catch(() => toast('Copy failed', 'error'));
+    }
+
+    function openInDrive() {
+        const filtered = getFilteredImages();
+        const img = filtered[currentLightboxIdx];
+        if (!img || !img.drive_url) { toast('No Drive link available', 'error'); return; }
+        window.open(img.drive_url, '_blank');
     }
 
     // ═══════════════════════════════════════
@@ -514,17 +567,17 @@
                     image_type: type,
                     prompt: prompt,
                     aspect_ratio: selectedRatio,
-                    user_id: activeProfileId
+                    source: 'dashboard'
                 })
             });
-            const data = await res.json();
-            if (data.success || data.image_url) {
+            const result = await res.json();
+            if (result.success || result.data?.imageUrl) {
                 toast('Image generated!', 'success');
                 closeModal('generateModal');
                 document.getElementById('genPrompt').value = '';
                 await loadGallery();
             } else {
-                toast(data.error || 'Generation failed', 'error');
+                toast(result.error || 'Generation failed', 'error');
             }
         } catch (e) {
             console.error('Generate error:', e);
