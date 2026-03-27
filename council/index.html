@@ -367,7 +367,10 @@
                 { name: 'Russell', expertise: 'Marketing & Brand', color: '#0D8B7D', builtin: true },
             ];
         }
-        selectedAdvisors = advisors.map(a => a.name);
+        // Restore saved selections from localStorage, default to none selected
+        const saved = JSON.parse(localStorage.getItem('council-selected-advisors') || '[]');
+        const activeNames = advisors.map(a => a.name);
+        selectedAdvisors = saved.filter(n => activeNames.includes(n));
         renderAdvisors();
     }
 
@@ -414,11 +417,11 @@
     function toggleAdvisor(name) {
         const idx = selectedAdvisors.indexOf(name);
         if (idx > -1) {
-            if (selectedAdvisors.length <= 1) { toast('Select at least one advisor', 'error'); return; }
             selectedAdvisors.splice(idx, 1);
         } else {
             selectedAdvisors.push(name);
         }
+        localStorage.setItem('council-selected-advisors', JSON.stringify(selectedAdvisors));
         renderAdvisors();
     }
 
@@ -485,6 +488,7 @@
     async function startSession() {
         const question = document.getElementById('questionInput').value.trim();
         if (!question) { toast('Enter a question', 'error'); return; }
+        if (selectedAdvisors.length === 0) { toast('Select at least one advisor', 'error'); return; }
 
         const btn = document.getElementById('startBtn');
         const status = document.getElementById('sessionStatus');
@@ -726,6 +730,7 @@
             });
             if (!res.ok) throw new Error('Delete failed: ' + res.status);
             selectedAdvisors = selectedAdvisors.filter(n => n !== name);
+            localStorage.setItem('council-selected-advisors', JSON.stringify(selectedAdvisors));
             toast('Advisor removed', 'info');
             await loadAdvisors();
         } catch (e) {
