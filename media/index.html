@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Media Gallery | Carlton AI</title>
+
+    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://yrwrswyjawmgtxrgbnim.supabase.co">
+    <script>
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _presets = {
+                forest:     { accent:'#A8D65B',accentWarm:'#F0A830',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                sunrise:    { accent:'#F0A830',accentWarm:'#E85D5D',base:'#100D08',surface:'#1C1810',surfaceEl:'#272118',surfaceHi:'#322B20',border:'#3F382C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                ocean:      { accent:'#38BDF8',accentWarm:'#06D6A0',base:'#080D10',surface:'#10161C',surfaceEl:'#182027',surfaceHi:'#202A32',border:'#2C363F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E0E8EA',txt2:'#8C9BA0',txt3:'#586B6B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                berry:      { accent:'#C084FC',accentWarm:'#FB7185',base:'#0D0810',surface:'#16101C',surfaceEl:'#201827',surfaceHi:'#2A2032',border:'#3A2C3F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E0EA',txt2:'#A08CA0',txt3:'#6B586B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                rdgr:       { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' },
+                monochrome: { accent:'#E8E8E8',accentWarm:'#A0A0A0',base:'#000000',surface:'#0A0A0A',surfaceEl:'#141414',surfaceHi:'#1E1E1E',border:'#2A2A2A',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E8E8',txt2:'#A0A0A0',txt3:'#666666',headingFont:'Nunito',bodyFont:'DM Sans' },
+            };
+            var _t = (_tc.preset === 'custom' && _tc.custom) ? _tc.custom : (_presets[_tc.preset] || _presets.rdgr);
+            if (_tc.statusOverrides) {
+                if (_tc.statusOverrides.success) _t.success = _tc.statusOverrides.success;
+                if (_tc.statusOverrides.warning) _t.warning = _tc.statusOverrides.warning;
+                if (_tc.statusOverrides.danger) _t.danger = _tc.statusOverrides.danger;
+            }
+            var _r = document.documentElement;
+            _r.style.setProperty('--deft-accent', _t.accent);
+            _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+            _r.style.setProperty('--deft-accent-warm', _t.accentWarm || _t.accent);
+            _r.style.setProperty('--deft-base', _t.base);
+            _r.style.setProperty('--deft-surface', _t.surface);
+            _r.style.setProperty('--deft-surface-el', _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-surface-hi', _t.surfaceHi || _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-border', _t.border);
+            _r.style.setProperty('--deft-success', _t.success || '#6BCB77');
+            _r.style.setProperty('--deft-success-dim', (_t.success || '#6BCB77') + '26');
+            _r.style.setProperty('--deft-warning', _t.warning || '#F0A830');
+            _r.style.setProperty('--deft-warning-dim', (_t.warning || '#F0A830') + '26');
+            _r.style.setProperty('--deft-danger', _t.danger || '#E85D5D');
+            _r.style.setProperty('--deft-danger-dim', (_t.danger || '#E85D5D') + '26');
+            _r.style.setProperty('--deft-txt', _t.txt);
+            _r.style.setProperty('--deft-txt-2', _t.txt2 || '#8A95A9');
+            _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
+            _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
+            _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+            var _fs = _tc.fontScale || 1;
+            _r.style.setProperty('--deft-font-scale', _fs);
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent { opacity: 1 !important; }
+        body {
+            background: var(--deft-base, #08090D) !important;
+            color: var(--deft-txt, #E8ECF1) !important;
+            font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important;
+        }
+        .font-heading, h1, h2, h3 { font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important; }
+        nav { background: color-mix(in srgb, var(--deft-base, #08090D) 92%, transparent) !important; border-color: var(--deft-border, #2A2E3D) !important; }
+        .text-accent { color: var(--deft-accent, #06D6A0) !important; }
+        .bg-accent { background-color: var(--deft-accent, #06D6A0) !important; }
+        .task-tab.active { background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important; color: var(--deft-accent, #06D6A0) !important; }
+        .btn-primary { background: var(--deft-accent-dim, rgba(6,214,160,0.15)) !important; color: var(--deft-accent, #06D6A0) !important; border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent) !important; }
+        .btn-primary:hover { background: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent) !important; }
+        .btn-ghost { border-color: var(--deft-border, #2A2E3D) !important; }
+        .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+        .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+        .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+        ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D) !important; }
+        .pulse-dot { background: var(--deft-accent, #06D6A0) !important; }
+        .gate-input:focus { border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent) !important; }
+        body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
+        .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
+        .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
+        .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
+        .text-3xl { font-size: calc(1.875rem * var(--deft-font-scale, 1)) !important; }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        base: '#08090D', surface: '#11131A', 'surface-el': '#1A1D28', 'surface-hi': '#242836',
+                        border: '#2A2E3D', accent: '#06D6A0', 'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B', 'alert-dim': 'rgba(255,107,107,0.15)',
+                        warn: '#FFD93D', 'warn-dim': 'rgba(255,217,61,0.15)',
+                        info: '#4CC9F0', 'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1', 'txt-2': '#8A95A9', 'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'IBM Plex Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; background: #08090D; color: #E8ECF1; }
+        body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998; opacity: 0.04; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-repeat: repeat; background-size: 256px 256px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3A3E4D; }
+        .gate-overlay { position: fixed; inset: 0; z-index: 9999; background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%); display: flex; align-items: center; justify-content: center; }
+        .gate-overlay.hidden { display: none; }
+        .gate-input { width: 100%; padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid #2A2E3D; border-radius: 0.5rem; color: #E8ECF1; font-size: 0.875rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+        .gate-error { color: #FF6B6B; font-size: 0.75rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; font-size: 0.75rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 0.375rem; border: 1px solid transparent; cursor: pointer; transition: background 0.15s, opacity 0.15s, transform 0.1s; }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: rgba(6,214,160,0.15); color: #06D6A0; border-color: rgba(6,214,160,0.3); }
+        .btn-primary:hover { background: rgba(6,214,160,0.25); }
+        .btn-ghost { background: transparent; color: #8A95A9; border-color: #2A2E3D; }
+        .btn-ghost:hover { background: rgba(255,255,255,0.03); color: #E8ECF1; }
+        .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: #06D6A0; box-shadow: 0 0 6px rgba(6,214,160,0.4); animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(6,214,160,0.4); } 50% { opacity: 0.6; box-shadow: 0 0 12px rgba(6,214,160,0.2); } }
+        .task-tab { flex: 1; padding: 0.4rem 0.75rem; font-size: 0.75rem; font-weight: 500; text-align: center; border-radius: 0.375rem; border: none; cursor: pointer; color: #8A95A9; background: transparent; transition: background 0.2s, color 0.2s; }
+        .task-tab:hover { color: #E8ECF1; }
+        .task-tab.active { background: rgba(6,214,160,0.12); color: #06D6A0; }
+
+        /* ── Gallery ── */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem; }
+        .gallery-card {
+            background: var(--deft-surface, #11131A);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.625rem;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.15s;
+            cursor: pointer;
+        }
+        .gallery-card:hover {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, var(--deft-border, #2A2E3D));
+            transform: translateY(-2px);
+        }
+        .gallery-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            background: var(--deft-surface-el, #1A1D28);
+        }
+        .gallery-card-info { padding: 0.75rem; }
+
+        /* ── Filter tabs ── */
+        .filter-tab {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #8A95A9;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .filter-tab:hover { color: #E8ECF1; background: rgba(255,255,255,0.03); }
+        .filter-tab.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent);
+        }
+
+        /* ── Type badges ── */
+        .type-badge {
+            display: inline-flex; padding: 0.15rem 0.5rem;
+            border-radius: 9999px; font-size: 0.6rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+
+        /* ── Generate modal ── */
+        .modal-backdrop { position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; }
+        .modal-backdrop.active { display: flex; }
+        .modal-box { background: var(--deft-surface-el, #1A1D28); border: 1px solid var(--deft-border, #2A2E3D); border-radius: 0.75rem; width: 95%; max-width: 520px; max-height: 85vh; overflow-y: auto; padding: 1.5rem; }
+
+        /* ── Lightbox ── */
+        .lightbox { position: fixed; inset: 0; z-index: 9500; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; cursor: zoom-out; }
+        .lightbox.active { display: flex; }
+        .lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 0.5rem; }
+
+        /* ── Toast ── */
+        .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 10000; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast { padding: 0.625rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,0.4); transition: opacity 0.3s; }
+        .toast-success { background: rgba(107,203,119,0.15); color: #6BCB77; border: 1px solid rgba(107,203,119,0.25); }
+        .toast-error { background: rgba(255,107,107,0.15); color: #FF6B6B; border: 1px solid rgba(255,107,107,0.25); }
+        .toast-info { background: rgba(76,201,240,0.15); color: #4CC9F0; border: 1px solid rgba(76,201,240,0.25); }
+
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .skeleton { background: linear-gradient(90deg, #1A1D28 25%, #242836 50%, #1A1D28 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 0.25rem; }
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--deft-txt-3, #525E73); }
+
+        /* ── Generating spinner ── */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { width: 20px; height: 20px; border: 2px solid var(--deft-border, #2A2E3D); border-top-color: var(--deft-accent, #06D6A0); border-radius: 50%; animation: spin 0.8s linear infinite; }
+
+        @media (max-width: 640px) { .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ PASSWORD GATE ═══ -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+            </div>
+            <div id="gateProfiles" class="flex justify-center gap-3 mb-6">
+                <div class="text-center text-xs text-txt-3">Loading profiles...</div>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- ── Top Nav ── -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Dashboard</a>
+                        <a href="/chat" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Chat</a>
+                        <a href="/org-chart" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Org Map</a>
+                        <a href="/our-workflows" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Workflows</a>
+                        <a href="/social-dashboard" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Social</a>
+                        <a href="/crm" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">CRM</a>
+                        <a href="/offer-studio" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Offers</a>
+                        <a href="/content" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Content</a>
+                        <span class="task-tab active" style="flex: none; padding: 0.3rem 0.75rem;">Media</span>
+                        <a href="/council" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Council</a>
+                        <a href="/deft" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">DEFT</a>
+                        <a href="/brain" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">BRAIN</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown"></div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2 relative" title="Settings" id="settingsLink">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="hidden" id="settingsBadge" style="position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:#FFD93D;border:1.5px solid #11131A;"></span>
+                    </a>
+                    <span class="text-xs text-txt-3 font-mono hidden sm:block" id="lastRefresh">—</span>
+                    <button onclick="refreshAll()" class="btn btn-ghost text-xs py-2 px-3 flex items-center gap-1.5" id="refreshBtn">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ── Page Header + Filters ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between py-5">
+                <div>
+                    <h2 class="font-heading text-xl font-bold tracking-tight">Media Gallery</h2>
+                    <p class="text-txt-3 text-xs mt-1">Generated images, logos, icons, and visual assets</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('generateModal')">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    Generate Image
+                </button>
+            </div>
+            <div class="flex gap-1.5 flex-wrap mb-5">
+                <button class="filter-tab active" onclick="filterType('all')" data-type="all">All</button>
+                <button class="filter-tab" onclick="filterType('icon')" data-type="icon">Icons</button>
+                <button class="filter-tab" onclick="filterType('logo')" data-type="logo">Logos</button>
+                <button class="filter-tab" onclick="filterType('ugc')" data-type="ugc">UGC</button>
+                <button class="filter-tab" onclick="filterType('product_mockup')" data-type="product_mockup">Product</button>
+                <button class="filter-tab" onclick="filterType('person')" data-type="person">People</button>
+                <button class="filter-tab" onclick="filterType('general')" data-type="general">General</button>
+            </div>
+        </div>
+
+        <!-- ── Gallery Grid ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs text-txt-3 font-mono" id="imageCount">—</span>
+            </div>
+            <div id="galleryGrid" class="gallery-grid">
+                <div class="skeleton" style="aspect-ratio:1;border-radius:0.625rem;"></div>
+                <div class="skeleton" style="aspect-ratio:1;border-radius:0.625rem;"></div>
+                <div class="skeleton" style="aspect-ratio:1;border-radius:0.625rem;"></div>
+                <div class="skeleton" style="aspect-ratio:1;border-radius:0.625rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Toast Container ── -->
+    <div id="toasts" class="toast-container"></div>
+
+    <!-- ═══ GENERATE MODAL ═══ -->
+    <div id="generateModal" class="modal-backdrop">
+        <div class="modal-box">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-heading font-semibold text-base">Generate Image</h3>
+                <button onclick="closeModal('generateModal')" class="text-txt-3 hover:text-txt p-1">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium mb-1.5 text-txt-2">Image Type</label>
+                    <select id="genType" class="w-full px-3 py-2 rounded-lg text-sm outline-none" style="background: var(--deft-surface-hi, #242836); border: 1px solid var(--deft-border, #2A2E3D); color: var(--deft-txt, #E8ECF1);">
+                        <option value="general">General</option>
+                        <option value="icon">Icon</option>
+                        <option value="logo">Logo</option>
+                        <option value="ugc">UGC</option>
+                        <option value="product_mockup">Product Mockup</option>
+                        <option value="person">Person</option>
+                        <option value="bradford">Bradford</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1.5 text-txt-2">Prompt</label>
+                    <textarea id="genPrompt" rows="3" class="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none" style="background: var(--deft-surface-hi, #242836); border: 1px solid var(--deft-border, #2A2E3D); color: var(--deft-txt, #E8ECF1);" placeholder="Describe the image you want to generate..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium mb-1.5 text-txt-2">Aspect Ratio</label>
+                    <div class="flex gap-2">
+                        <button class="btn btn-ghost text-xs aspect-btn active-aspect" data-ratio="1:1" onclick="selectRatio('1:1', this)" style="background:rgba(255,255,255,0.04);">1:1</button>
+                        <button class="btn btn-ghost text-xs aspect-btn" data-ratio="16:9" onclick="selectRatio('16:9', this)">16:9</button>
+                        <button class="btn btn-ghost text-xs aspect-btn" data-ratio="9:16" onclick="selectRatio('9:16', this)">9:16</button>
+                        <button class="btn btn-ghost text-xs aspect-btn" data-ratio="4:3" onclick="selectRatio('4:3', this)">4:3</button>
+                    </div>
+                </div>
+                <button class="btn btn-primary w-full py-3" onclick="generateImage()" id="genSubmitBtn">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M9.5 2.5L5 7 3.5 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Generate
+                </button>
+                <div id="genStatus" class="text-center text-xs text-txt-3" style="display:none;">
+                    <div class="spinner mx-auto mb-2"></div>
+                    Generating image...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ LIGHTBOX ═══ -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <img id="lightboxImg" src="" alt="">
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- SCRIPTS -->
+    <!-- ═══════════════════════════════════════ -->
+    <script>
+
+    const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    const SB_HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+    const WEBHOOK_BASE = 'https://n8n.carltonaiservices.com/webhook';
+    const BRAND_ID = 'carlton';
+
+    let activeProfileId = null;
+    let images = [];
+    let currentFilter = 'all';
+    let selectedRatio = '1:1';
+
+    function esc(str) { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+    function toPTShort(s) { if (!s) return '—'; return new Date(s).toLocaleString('en-US', { timeZone: 'America/Los_Angeles', month: 'short', day: 'numeric' }); }
+    function timeAgo(d) { if (!d) return '—'; const m = Math.floor((Date.now()-new Date(d).getTime())/60000); if (m<1) return 'just now'; if (m<60) return m+'m ago'; const h=Math.floor(m/60); if (h<24) return h+'h ago'; return Math.floor(h/24)+'d ago'; }
+    function toast(msg, type='success') { const c=document.getElementById('toasts'), e=document.createElement('div'); e.className=`toast toast-${type}`; e.textContent=msg; c.appendChild(e); setTimeout(()=>{e.style.opacity='0';setTimeout(()=>e.remove(),300);},4000); }
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    async function sbSelect(table, query='') {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, { headers: SB_HEADERS });
+        if (!r.ok) throw new Error(`Supabase: ${r.status}`);
+        return r.json();
+    }
+
+    // ═══════════════════════════════════════
+    // GALLERY
+    // ═══════════════════════════════════════
+    async function loadGallery() {
+        try {
+            const data = await sbSelect('image_sessions',
+                `brand_id=eq.${BRAND_ID}&status=eq.complete&select=id,image_type,prompt,image_url,file_id,created_at,metadata&order=created_at.desc&limit=100`
+            );
+            images = data || [];
+            renderGallery();
+        } catch (e) {
+            console.error('Gallery load error:', e);
+            document.getElementById('galleryGrid').innerHTML = '<div class="empty-state">Failed to load images</div>';
+        }
+    }
+
+    function filterType(type) {
+        currentFilter = type;
+        document.querySelectorAll('.filter-tab').forEach(el => {
+            el.classList.toggle('active', el.dataset.type === type);
+        });
+        renderGallery();
+    }
+
+    function renderGallery() {
+        let filtered = images;
+        if (currentFilter !== 'all') filtered = images.filter(i => i.image_type === currentFilter);
+
+        document.getElementById('imageCount').textContent = `${filtered.length} image${filtered.length !== 1 ? 's' : ''}`;
+
+        if (!filtered.length) {
+            document.getElementById('galleryGrid').innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/><circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <p class="text-sm mt-2">No images found</p>
+                <p class="text-xs text-txt-3 mt-1">Generate your first image or change the filter</p>
+            </div>`;
+            return;
+        }
+
+        const typeColors = {
+            icon: { bg: 'rgba(76,201,240,0.12)', color: '#4CC9F0' },
+            logo: { bg: 'rgba(168,132,252,0.12)', color: '#A884FC' },
+            ugc: { bg: 'rgba(251,113,133,0.12)', color: '#FB7185' },
+            product_mockup: { bg: 'rgba(240,168,48,0.12)', color: '#F0A830' },
+            person: { bg: 'rgba(6,214,160,0.12)', color: '#06D6A0' },
+            bradford: { bg: 'rgba(6,214,160,0.12)', color: '#06D6A0' },
+            general: { bg: 'rgba(138,149,169,0.12)', color: '#8A95A9' },
+        };
+
+        document.getElementById('galleryGrid').innerHTML = filtered.map(img => {
+            const type = img.image_type || 'general';
+            const tc = typeColors[type] || typeColors.general;
+            const prompt = esc((img.prompt || '').substring(0, 80));
+            const url = img.image_url || '';
+            return `<div class="gallery-card" onclick="openLightbox('${url.replace(/'/g, "\\'")}')">
+                <img src="${esc(url)}" alt="${prompt}" loading="lazy" onerror="this.style.display='none'">
+                <div class="gallery-card-info">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="type-badge" style="background:${tc.bg};color:${tc.color};">${type.replace('_', ' ')}</span>
+                        <span class="text-[0.6rem] text-txt-3 ml-auto">${toPTShort(img.created_at)}</span>
+                    </div>
+                    <p class="text-xs text-txt-3 truncate" title="${prompt}">${prompt || 'No prompt'}</p>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function openLightbox(url) {
+        if (!url) return;
+        document.getElementById('lightboxImg').src = url;
+        document.getElementById('lightbox').classList.add('active');
+    }
+
+    function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('active');
+        document.getElementById('lightboxImg').src = '';
+    }
+
+    // ═══════════════════════════════════════
+    // GENERATE IMAGE
+    // ═══════════════════════════════════════
+    function selectRatio(ratio, el) {
+        selectedRatio = ratio;
+        document.querySelectorAll('.aspect-btn').forEach(b => { b.style.background = 'transparent'; });
+        el.style.background = 'rgba(255,255,255,0.04)';
+    }
+
+    async function generateImage() {
+        const type = document.getElementById('genType').value;
+        const prompt = document.getElementById('genPrompt').value.trim();
+        if (!prompt) { toast('Enter a prompt', 'error'); return; }
+
+        const btn = document.getElementById('genSubmitBtn');
+        const status = document.getElementById('genStatus');
+        btn.style.display = 'none';
+        status.style.display = '';
+
+        try {
+            const res = await fetch(`${WEBHOOK_BASE}/gemini-image`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    brand_id: BRAND_ID,
+                    image_type: type,
+                    prompt: prompt,
+                    aspect_ratio: selectedRatio,
+                    user_id: activeProfileId
+                })
+            });
+            const data = await res.json();
+            if (data.success || data.image_url) {
+                toast('Image generated!', 'success');
+                closeModal('generateModal');
+                document.getElementById('genPrompt').value = '';
+                await loadGallery();
+            } else {
+                toast(data.error || 'Generation failed', 'error');
+            }
+        } catch (e) {
+            console.error('Generate error:', e);
+            toast('Generation failed — try again', 'error');
+        } finally {
+            btn.style.display = '';
+            status.style.display = 'none';
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // AUTH GATE
+    // ═══════════════════════════════════════
+    let gateSelectedProfile = null;
+
+    function getCachedProfiles(callback) {
+        var CACHE_KEY = 'rdgr-profiles-cache', CACHE_TTL = 300000;
+        try { var c = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); if (c.profiles && c.ts && (Date.now()-c.ts)<CACHE_TTL) { callback(c.profiles); return; } } catch(e) {}
+        fetch(`${SUPABASE_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+        }).then(r=>r.json()).then(p=>{ if(p&&Array.isArray(p)&&p.length>0) localStorage.setItem(CACHE_KEY,JSON.stringify({profiles:p,ts:Date.now()})); callback(p); }).catch(()=>callback([]));
+    }
+
+    function loadGateProfiles() {
+        getCachedProfiles(function(profiles) {
+            const container = document.getElementById('gateProfiles');
+            if (!container || !profiles || !profiles.length) return;
+            const saved = localStorage.getItem('rdgr-active-profile');
+            let savedId = null;
+            if (saved) { try { savedId = JSON.parse(saved).id; } catch(e) {} }
+            container.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?';
+                const initial = name[0].toUpperCase();
+                const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+                const color = colors[name] || '#8A95A9';
+                return `<button type="button" onclick="selectGateProfile('${p.user_id}','${name.replace(/'/g,'&#39;')}',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="if(!this.classList.contains('selected'))this.style.background='rgba(255,255,255,0.02)'">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:${color}20;color:${color};border:2px solid transparent;">${initial}</div>
+                    <span class="text-xs" style="color:#8A95A9;">${name}</span>
+                </button>`;
+            }).join('');
+            if (savedId) { container.querySelectorAll('.gate-profile-btn').forEach(btn => { if (btn.getAttribute('onclick').includes(savedId)) btn.click(); }); }
+        });
+    }
+
+    function selectGateProfile(userId, name, el) {
+        gateSelectedProfile = { id: userId, name: name };
+        document.querySelectorAll('.gate-profile-btn').forEach(btn => { btn.classList.remove('selected'); btn.style.background='rgba(255,255,255,0.02)'; btn.style.borderColor='transparent'; btn.querySelector('.w-10').style.borderColor='transparent'; });
+        el.classList.add('selected'); el.style.background='rgba(255,255,255,0.06)'; el.style.borderColor='rgba(6,214,160,0.4)'; el.querySelector('.w-10').style.borderColor=el.querySelector('.w-10').style.color;
+        const btn = document.getElementById('gateSubmitBtn'); btn.disabled=false; btn.style.opacity='1'; btn.textContent='Sign In as '+name;
+        document.getElementById('gateInput').focus();
+    }
+
+    function handleGate(e) {
+        e.preventDefault();
+        if (document.getElementById('gateInput').value === 'Advance1!') {
+            localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+            if (gateSelectedProfile) { localStorage.setItem('rdgr-active-profile', JSON.stringify(gateSelectedProfile)); activeProfileId = gateSelectedProfile.id; }
+            document.getElementById('gate').classList.add('hidden');
+            document.getElementById('mainContent').style.opacity = '1';
+            initDashboard();
+            return false;
+        }
+        document.getElementById('gateError').classList.add('show');
+        document.getElementById('gateInput').value = '';
+        document.getElementById('gateInput').focus();
+        setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+        return false;
+    }
+
+    // ═══════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════
+    async function initDashboard() {
+        const saved = localStorage.getItem('rdgr-active-profile');
+        if (saved) { try { activeProfileId = JSON.parse(saved).id; } catch(e) {} }
+        await refreshAll();
+    }
+
+    async function refreshAll() {
+        document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', minute: '2-digit', hour12: true });
+        await loadGallery();
+    }
+
+    if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity = '1';
+        initDashboard();
+    }
+    if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) { loadGateProfiles(); }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { closeLightbox(); document.querySelectorAll('.modal-backdrop.active').forEach(m => m.classList.remove('active')); }
+    });
+
+    // ── Profile Switcher ──
+    (function initProfileSwitcher() {
+        const saved = localStorage.getItem('rdgr-active-profile');
+        if (saved) { try { const p=JSON.parse(saved); activeProfileId=p.id; const n=document.getElementById('profileName'),a=document.getElementById('profileAvatar'); if(n)n.textContent=p.name; if(a)a.textContent=(p.name||'B')[0].toUpperCase(); } catch(e) {} }
+        getCachedProfiles(function(profiles) {
+            const dd = document.getElementById('profileDropdown');
+            if (!dd || !profiles || profiles.length === 0) return;
+            const activeId = saved ? JSON.parse(saved).id : null;
+            dd.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?', initial = name[0].toUpperCase(), isActive = p.user_id === activeId;
+                return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g,'&#39;')}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                    <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div>
+                    <span>${name}</span>
+                    ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+                </button>`;
+            }).join('');
+            dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+        });
+    })();
+
+    function signOut() { localStorage.removeItem('rdgr-session'); localStorage.removeItem('rdgr-active-profile'); location.reload(); }
+    function toggleProfileDD() { const dd=document.getElementById('profileDropdown'); dd.classList.toggle('hidden'); if(!dd.classList.contains('hidden')){setTimeout(()=>document.addEventListener('click',function c(e){if(!document.getElementById('profileSwitcher').contains(e.target))dd.classList.add('hidden');document.removeEventListener('click',c);}),0);} }
+    function selectProfileGlobal(userId, name) { localStorage.setItem('rdgr-active-profile', JSON.stringify({id:userId,name:name})); location.reload(); }
+
+    </script>
+</body>
+</html>
