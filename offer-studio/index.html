@@ -858,8 +858,12 @@
                 <div>
                     <div class="flex items-baseline justify-between mb-3">
                         <h2 class="font-heading font-semibold text-sm tracking-wide text-txt-2 uppercase">Offer Pipeline</h2>
-                        <span class="text-xs text-txt-3">Click any offer to see build steps</span>
+                        <div class="flex items-center gap-3">
+                            <button class="btn text-xs py-1 px-3" style="background:rgba(76,201,240,0.12);color:#4CC9F0;border:1px solid rgba(76,201,240,0.2);" onclick="fetchOfferIntelligence()">Intelligence Report</button>
+                            <span class="text-xs text-txt-3">Click any offer to see build steps</span>
+                        </div>
                     </div>
+                    <div id="intelligencePanel" style="display:none;" class="mb-4"></div>
                     <div id="offerPipeline" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div class="skeleton h-40 rounded-xl"></div>
                         <div class="skeleton h-40 rounded-xl"></div>
@@ -911,8 +915,24 @@
                     </div>
                     <div class="panel-body form-body" id="testimonialFormBody">
                         <div class="mb-4">
+                            <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wide">Type</label>
+                            <div class="flex gap-2">
+                                <button class="btn text-xs py-1 px-3 testimonial-type-btn active" style="background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.25);" onclick="switchTestimonialType('text')">Text</button>
+                                <button class="btn text-xs py-1 px-3 testimonial-type-btn" onclick="switchTestimonialType('video')">Video</button>
+                                <button class="btn text-xs py-1 px-3 testimonial-type-btn" onclick="switchTestimonialType('image')">Image</button>
+                            </div>
+                        </div>
+                        <div id="testimonialTextField" class="mb-4">
                             <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wide">Raw Text *</label>
                             <textarea id="testimonialRawText" class="form-input" style="min-height: 100px;" placeholder="Paste or type the testimonial..."></textarea>
+                        </div>
+                        <div id="testimonialVideoField" class="mb-4" style="display:none;">
+                            <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wide">Video URL *</label>
+                            <input type="text" id="testimonialVideoUrl" class="form-input" placeholder="https://youtube.com/watch?v=... or Loom link">
+                        </div>
+                        <div id="testimonialImageField" class="mb-4" style="display:none;">
+                            <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wide">Image URL *</label>
+                            <input type="text" id="testimonialImageUrl" class="form-input" placeholder="https://... screenshot of testimonial">
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div>
@@ -949,6 +969,20 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Bulk Import + Suggest -->
+                <div class="flex gap-3 mb-4">
+                    <button class="btn text-xs py-1.5 px-3" style="background:rgba(76,201,240,0.12);color:#4CC9F0;border:1px solid rgba(76,201,240,0.2);" onclick="toggleForm('bulkTestimonialForm')">Bulk Import JSON</button>
+                    <button class="btn text-xs py-1.5 px-3" style="background:rgba(138,149,169,0.12);color:#8A95A9;border:1px solid rgba(138,149,169,0.2);" onclick="suggestTestimonialCandidates()">Suggest Candidates</button>
+                </div>
+                <div class="panel form-body" id="bulkTestimonialFormBody" style="display:none;">
+                    <div class="mb-3">
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wide">JSON Array of Testimonials</label>
+                        <textarea id="bulkTestimonialJson" class="form-input" style="min-height: 80px; font-family: monospace; font-size: 0.75rem;" placeholder='[{"raw_text":"...", "attribution_name":"..."},...]'></textarea>
+                    </div>
+                    <button onclick="bulkImportTestimonials()" id="bulkTestimonialBtn" class="btn btn-primary text-xs py-1.5 px-3">Import</button>
+                </div>
+                <div id="candidatesPanel" style="display:none;" class="panel mb-4 p-3"></div>
 
                 <!-- Testimonial List -->
                 <div>
@@ -1054,6 +1088,61 @@
                             <button onclick="submitCreatePage()" id="pageCreateBtn" class="btn btn-primary flex items-center gap-2">
                                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                                 Create Page
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Generate Landing Page -->
+                <div class="panel">
+                    <div class="panel-header form-toggle" onclick="toggleForm('lpGenerateForm')">
+                        <span class="font-heading font-semibold text-sm tracking-wide">AI Generate Landing Page</span>
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="#8A95A9" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    </div>
+                    <div class="panel-body form-body" id="lpGenerateFormBody">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wide">Linked Offer</label>
+                                <select id="lpGenOfferId" class="form-input">
+                                    <option value="">None (standalone)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wide">Template Type</label>
+                                <select id="lpGenTemplate" class="form-input">
+                                    <option value="generic">Generic</option>
+                                    <option value="scorecard">Scorecard</option>
+                                    <option value="workshop">Workshop</option>
+                                    <option value="live_session">Live Session</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wide">Price (cents)</label>
+                                <input type="number" id="lpGenPrice" class="form-input" placeholder="e.g. 9900 ($99)">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wide">Target Audience *</label>
+                                <input type="text" id="lpGenAudience" class="form-input" placeholder="e.g. Real estate agents struggling with lead gen">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wide">CTA Text</label>
+                                <input type="text" id="lpGenCta" class="form-input" placeholder="Get Started" value="Get Started">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wide">Pain Points (comma-separated)</label>
+                            <input type="text" id="lpGenPainPoints" class="form-input" placeholder="e.g. No time, bad leads, low conversion">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wide">Stripe Payment Link</label>
+                            <input type="text" id="lpGenStripeLink" class="form-input" placeholder="https://buy.stripe.com/...">
+                        </div>
+                        <div class="flex justify-end">
+                            <button onclick="generateLandingPage()" id="lpGenBtn" class="btn flex items-center gap-2" style="background: linear-gradient(135deg, #4CC9F0 0%, #06D6A0 100%); color: #000; font-weight: 600;">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v4M8.5 3.5L6 6M3.5 3.5L6 6M6 6v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                                Generate with AI
                             </button>
                         </div>
                     </div>
@@ -1612,6 +1701,7 @@
         offersData = data || [];
         renderOfferPipeline();
         populateSeqOfferDropdown();
+        populateLpGenOfferDropdown();
     }
 
     async function fetchTasks() {
@@ -1808,6 +1898,17 @@
                 ${links.length ? `<div class="flex gap-3 mt-2">${links.join('')}</div>` : ''}
                 ${o.status === 'building' || o.status === 'in_progress' ? `<div class="flex gap-2 mt-2"><button class="btn btn-approve text-xs py-1.5 px-3" data-label="Continue Build" onclick="event.stopPropagation();triggerOfferBuild('${escHtml(o.offer_id)}','continue_build')">Continue Build</button></div>` : ''}
                 ${o.status === 'ready' || o.status === 'completed' ? `<div class="flex gap-2 mt-2"><button class="btn text-xs py-1.5 px-3" style="background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.25);" data-label="Launch" onclick="event.stopPropagation();triggerOfferBuild('${escHtml(o.offer_id)}','launch')">Launch</button></div>` : ''}
+                ${o.status === 'live' ? `<div class="flex gap-2 mt-2">
+                    <button class="btn text-xs py-1.5 px-3" style="background:rgba(255,165,0,0.15);color:#FFA500;border:1px solid rgba(255,165,0,0.25);" onclick="event.stopPropagation();offerAction('${escHtml(o.offer_id)}','pause_offer')">Pause</button>
+                    <button class="btn text-xs py-1.5 px-3" style="background:rgba(255,107,107,0.15);color:#FF6B6B;border:1px solid rgba(255,107,107,0.25);" onclick="event.stopPropagation();offerAction('${escHtml(o.offer_id)}','retire_offer')">Retire</button>
+                </div>` : ''}
+                ${o.status === 'paused' ? `<div class="flex gap-2 mt-2">
+                    <button class="btn text-xs py-1.5 px-3" style="background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.25);" onclick="event.stopPropagation();offerAction('${escHtml(o.offer_id)}','launch_offer')">Relaunch</button>
+                    <button class="btn text-xs py-1.5 px-3" style="background:rgba(255,107,107,0.15);color:#FF6B6B;border:1px solid rgba(255,107,107,0.25);" onclick="event.stopPropagation();offerAction('${escHtml(o.offer_id)}','retire_offer')">Retire</button>
+                </div>` : ''}
+                ${o.status === 'approved' ? `<div class="flex gap-2 mt-2">
+                    <button class="btn text-xs py-1.5 px-3" style="background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.25);" onclick="event.stopPropagation();offerAction('${escHtml(o.offer_id)}','launch_offer')">Launch</button>
+                </div>` : ''}
                 <div class="offer-detail" id="offer-detail-${idx}">
                     <div class="text-xs text-txt-3 mb-2">Loading build steps...</div>
                 </div>
@@ -2117,16 +2218,15 @@
     // OFFER-BUILD WEBHOOK
     // ═══════════════════════════════════════
     async function triggerOfferBuild(offerId, operation, proposalId) {
-        const payload = { brand_id: 'carlton' };
-        if (offerId) payload.offer_id = offerId;
-        if (operation) payload.operation = operation;
-        if (proposalId) payload.proposal_id = proposalId;
+        const payload = { brand_id: 'carlton', operation: operation || 'build_offer' };
+        if (offerId) payload.parameters = { ...(payload.parameters || {}), offer_id: offerId };
+        if (proposalId) payload.parameters = { ...(payload.parameters || {}), proposal_id: proposalId };
 
         const btn = event?.target;
         if (btn) { btn.disabled = true; btn.textContent = 'Building...'; }
 
         try {
-            const result = await fetchJSON(`${WEBHOOK_BASE}/offer-build`, payload);
+            const result = await fetchJSON(`${WEBHOOK_BASE}/rdgr-offers`, payload);
             if (result?.success) {
                 const status = result.status || 'unknown';
                 const statusMessages = {
@@ -2145,6 +2245,57 @@
             toast(`Build error: ${err.message}`, 'error');
         } finally {
             if (btn) { btn.disabled = false; btn.textContent = btn.dataset.label || 'Build'; }
+        }
+    }
+
+    async function offerAction(offerId, operation) {
+        try {
+            const result = await fetchJSON(`${WEBHOOK_BASE}/rdgr-offers`, {
+                operation,
+                brand_id: 'carlton',
+                parameters: { offer_id: offerId }
+            });
+            if (result?.success) {
+                const labels = { pause_offer: 'paused', retire_offer: 'retired', launch_offer: 'launched', approve_offer: 'approved' };
+                toast(`Offer ${labels[operation] || operation}.`, 'success');
+                buildStepsCache = {};
+                await fetchOffers();
+            } else {
+                toast(result?.error || result?.message || `Failed to ${operation}`, 'error');
+            }
+        } catch (err) {
+            toast(`Error: ${err.message}`, 'error');
+        }
+    }
+
+    async function fetchOfferIntelligence() {
+        try {
+            toast('Fetching intelligence report...', 'info');
+            const result = await fetchJSON(`${WEBHOOK_BASE}/rdgr-offers`, {
+                operation: 'get_intelligence',
+                brand_id: 'carlton'
+            });
+            if (result?.success) {
+                const summary = result.result?.summary || result.summary || 'No summary available';
+                const proposals = result.result?.proposals_count || result.proposals_count || 0;
+                const recs = result.result?.recommendations || result.recommendations || [];
+                let html = `<div class="p-4 rounded-lg" style="background: var(--deft-surface-hi);">
+                    <h3 class="font-heading font-bold text-sm mb-3" style="color: var(--deft-accent);">Intelligence Report</h3>
+                    <p class="text-xs text-txt-2 mb-3 leading-relaxed">${escHtml(summary)}</p>
+                    <div class="text-xs text-txt-3 mb-2">New proposals generated: <strong>${proposals}</strong></div>`;
+                if (recs.length) {
+                    html += `<div class="text-xs font-heading font-semibold text-txt-2 uppercase tracking-wide mt-3 mb-1">Recommendations</div>
+                        <ul class="text-xs text-txt-2 space-y-1">${recs.map(r => `<li>• ${escHtml(typeof r === 'string' ? r : r.text || JSON.stringify(r))}</li>`).join('')}</ul>`;
+                }
+                html += '</div>';
+                const container = document.getElementById('intelligencePanel');
+                if (container) { container.innerHTML = html; container.style.display = 'block'; }
+                else { toast('Intelligence loaded. Check proposals tab for new ideas.', 'success'); }
+            } else {
+                toast(result?.error || 'Failed to fetch intelligence', 'error');
+            }
+        } catch (err) {
+            toast(`Error: ${err.message}`, 'error');
         }
     }
 
@@ -2187,6 +2338,11 @@
                     </div>
                     <span class="text-xs text-txt-3">${formatPacific(t.created_at)}</span>
                 </div>
+                ${t.approval_status === 'pending' ? `<div class="flex gap-2 mt-3 pt-2" style="border-top:1px solid rgba(30,33,48,0.5);">
+                    <button class="btn btn-approve text-xs py-1 px-3 flex-1" onclick="testimonialAction('${escHtml(t.testimonial_id)}','approve')">Approve</button>
+                    <button class="btn text-xs py-1 px-3 flex-1" style="background:rgba(255,217,61,0.12);color:#FFD93D;border:1px solid rgba(255,217,61,0.2);" onclick="testimonialEditApprove('${escHtml(t.testimonial_id)}','${escHtml((t.polished_text || t.raw_text || '').replace(/'/g,'\\x27').replace(/\n/g,' '))}')">Edit & Approve</button>
+                    <button class="btn btn-deny text-xs py-1 px-3 flex-1" onclick="(async()=>{const f=prompt('Rejection reason:');if(f)await testimonialAction('${escHtml(t.testimonial_id)}','reject',{feedback:f})})()">Reject</button>
+                </div>` : ''}
             </div>`;
         }).join('');
     }
@@ -2290,7 +2446,12 @@
                 const pt = lp.page_type || 'landing';
                 const actions = [];
                 if (lp.preview_url) actions.push(`<a href="${escHtml(lp.preview_url)}" target="_blank" class="btn btn-ghost text-xs py-1 px-2">Preview</a>`);
-                if (['approved', 'draft'].includes(lp.status)) {
+                if (lp.approval_status === 'pending') {
+                    actions.push(`<button class="btn btn-approve text-xs py-1 px-2" onclick="lpApprovalAction('${escHtml(lp.page_id)}','approve')">Approve</button>`);
+                    actions.push(`<button class="btn text-xs py-1 px-2" style="background:rgba(255,217,61,0.12);color:#FFD93D;border:1px solid rgba(255,217,61,0.2);" onclick="(async()=>{const f=prompt('Feedback for changes:');if(f)await lpApprovalAction('${escHtml(lp.page_id)}','request_changes',f)})()">Changes</button>`);
+                    actions.push(`<button class="btn btn-deny text-xs py-1 px-2" onclick="(async()=>{const f=prompt('Rejection reason:');if(f)await lpApprovalAction('${escHtml(lp.page_id)}','reject',f)})()">Reject</button>`);
+                }
+                if (['approved', 'draft'].includes(lp.status) || (lp.approval_status === 'approved' && lp.status !== 'published')) {
                     actions.push(`<button class="btn btn-approve text-xs py-1 px-2" onclick="lpAction('${escHtml(lp.page_id)}','publish')">Publish</button>`);
                 }
                 if (lp.status === 'published') {
@@ -2305,7 +2466,10 @@
                         ${lp.category ? `<div class="text-xs text-txt-3 font-mono">${escHtml(lp.category)}</div>` : ''}
                     </td>
                     <td><span class="page-type-pill ${pt}">${pt}</span></td>
-                    <td><span class="badge badge-${lp.status}">${(lp.status || '').replace('_', ' ')}</span></td>
+                    <td>
+                        <span class="badge badge-${lp.status}">${(lp.status || '').replace('_', ' ')}</span>
+                        ${lp.approval_status && lp.approval_status !== lp.status ? `<span class="badge badge-${lp.approval_status === 'pending' ? 'review' : lp.approval_status === 'approved' ? 'approved' : lp.approval_status === 'changes_requested' ? 'paused' : 'retired'}" style="margin-left:4px;font-size:0.6rem;">${(lp.approval_status || '').replace('_', ' ')}</span>` : ''}
+                    </td>
                     <td class="font-mono text-center">${lp.page_views || 0}</td>
                     <td class="font-mono text-center">${lp.conversions || 0}</td>
                     <td class="font-mono text-center">${rate}</td>
@@ -2876,6 +3040,7 @@
                     </div>
                 </div>
                 <div class="flex gap-2 mt-3">
+                    <button class="btn btn-ghost text-xs py-1 px-2" onclick="promoEdit('${escHtml(p.promotion_id)}','${escHtml((p.title || '').replace(/'/g,''))}','${escHtml((p.body_text || '').replace(/'/g,''))}')">Edit</button>
                     ${!isExpired && p.status === 'active' ? `<button class="btn btn-warn text-xs py-1 px-2" onclick="promoAction('${escHtml(p.promotion_id)}','pause')">Pause</button>` : ''}
                     ${!isExpired && p.status !== 'active' ? `<button class="btn btn-approve text-xs py-1 px-2" onclick="promoAction('${escHtml(p.promotion_id)}','activate')">Activate</button>` : ''}
                     <button class="btn btn-deny text-xs py-1 px-2" onclick="promoAction('${escHtml(p.promotion_id)}','delete')">Delete</button>
@@ -2892,7 +3057,7 @@
         if (!title || !bodyText) { toast('Title and body text are required.', 'error'); return; }
 
         const payload = {
-            action: 'create',
+            operation: 'create',
             brand_id: 'carlton',
             title,
             body_text: bodyText,
@@ -2935,7 +3100,7 @@
 
     async function promoAction(promoId, action) {
         const result = await fetchJSON(`${WEBHOOK_BASE}/promo-manage`, {
-            action,
+            operation: action,
             promotion_id: promoId,
             brand_id: 'carlton'
         });
@@ -2944,6 +3109,32 @@
             await fetchPromotions();
         } else {
             toast(result?.message || `Failed to ${action} promotion.`, 'error');
+        }
+    }
+
+    async function promoEdit(promoId, currentTitle, currentBody) {
+        const newTitle = prompt('Edit title:', currentTitle);
+        if (newTitle === null) return;
+        const newBody = prompt('Edit body text:', currentBody);
+        if (newBody === null) return;
+
+        const updates = {};
+        if (newTitle.trim() && newTitle.trim() !== currentTitle) updates.title = newTitle.trim();
+        if (newBody.trim() && newBody.trim() !== currentBody) updates.body_text = newBody.trim();
+
+        if (Object.keys(updates).length === 0) { toast('No changes made.', 'info'); return; }
+
+        const result = await fetchJSON(`${WEBHOOK_BASE}/promo-manage`, {
+            operation: 'update',
+            promotion_id: promoId,
+            updates,
+            brand_id: 'carlton'
+        });
+        if (result?.success) {
+            toast('Promotion updated.', 'success');
+            await fetchPromotions();
+        } else {
+            toast(result?.message || 'Update failed.', 'error');
         }
     }
 
@@ -2965,12 +3156,15 @@
         btn.disabled = true;
         btn.textContent = 'Submitting...';
 
-        const result = await fetchJSON(`${WEBHOOK_BASE}/offer-ideate`, {
+        const result = await fetchJSON(`${WEBHOOK_BASE}/rdgr-offers`, {
+            operation: 'propose_offer',
             brand_id: 'carlton',
-            niche,
-            target_audience: audience,
-            template_key: template,
-            context: context || undefined
+            parameters: {
+                niche,
+                target_audience: audience,
+                template_key: template,
+                context: context || undefined
+            }
         });
 
         btn.disabled = false;
@@ -2991,30 +3185,43 @@
     }
 
     async function submitTestimonial() {
-        const rawText = document.getElementById('testimonialRawText').value.trim();
         const authorName = document.getElementById('testimonialAuthor').value.trim();
         const company = document.getElementById('testimonialCompany').value.trim();
         const industry = document.getElementById('testimonialIndustry').value.trim();
         const source = document.getElementById('testimonialSource').value;
         const consent = document.getElementById('testimonialConsent').checked;
 
-        if (!rawText || !authorName) {
-            toast('Raw text and author name are required.', 'error');
-            return;
+        const payload = {
+            attribution_name: authorName,
+            company: company || undefined,
+            industry: industry || undefined,
+            source,
+            consent,
+            brand_id: 'carlton'
+        };
+
+        if (testimonialType === 'text') {
+            const rawText = document.getElementById('testimonialRawText').value.trim();
+            if (!rawText || !authorName) { toast('Raw text and author name are required.', 'error'); return; }
+            payload.operation = 'ingest_text';
+            payload.raw_text = rawText;
+        } else if (testimonialType === 'video') {
+            const videoUrl = document.getElementById('testimonialVideoUrl').value.trim();
+            if (!videoUrl || !authorName) { toast('Video URL and author name are required.', 'error'); return; }
+            payload.operation = 'ingest_video';
+            payload.video_url = videoUrl;
+        } else if (testimonialType === 'image') {
+            const imageUrl = document.getElementById('testimonialImageUrl').value.trim();
+            if (!imageUrl || !authorName) { toast('Image URL and author name are required.', 'error'); return; }
+            payload.operation = 'ingest_image';
+            payload.image_url = imageUrl;
         }
 
         const btn = document.getElementById('testimonialSubmitBtn');
         btn.disabled = true;
         btn.textContent = 'Submitting...';
 
-        const result = await fetchJSON(`${WEBHOOK_BASE}/testimonial-ingest`, {
-            raw_text: rawText,
-            author_name: authorName,
-            company: company || undefined,
-            industry: industry || undefined,
-            source,
-            consent
-        });
+        const result = await fetchJSON(`${WEBHOOK_BASE}/testimonial-ingest`, payload);
 
         btn.disabled = false;
         btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add Testimonial';
@@ -3028,6 +3235,167 @@
             toggleForm('testimonialForm');
         } else {
             toast(result?.message || 'Failed to submit testimonial.', 'error');
+        }
+    }
+
+    async function testimonialAction(testimonialId, operation, extras = {}) {
+        try {
+            const payload = { operation, testimonial_id: testimonialId, brand_id: 'carlton', ...extras };
+            const result = await fetchJSON(`${WEBHOOK_BASE}/testimonial-approve`, payload);
+            if (result?.success) {
+                const labels = { approve: 'approved', reject: 'rejected', edit_and_approve: 'edited and approved' };
+                toast(`Testimonial ${labels[operation] || operation}.`, 'success');
+                await fetchTestimonials();
+            } else {
+                toast(result?.error || result?.message || `Failed to ${operation}.`, 'error');
+            }
+        } catch (err) {
+            toast(`Error: ${err.message}`, 'error');
+        }
+    }
+
+    function testimonialEditApprove(testimonialId, currentText) {
+        const edited = prompt('Edit the polished text then confirm:', currentText);
+        if (edited !== null && edited.trim()) {
+            testimonialAction(testimonialId, 'edit_and_approve', { edited_text: edited.trim() });
+        }
+    }
+
+    let testimonialType = 'text';
+    function switchTestimonialType(type) {
+        testimonialType = type;
+        document.querySelectorAll('.testimonial-type-btn').forEach(b => {
+            b.classList.toggle('active', false);
+            b.style.background = '';
+            b.style.color = '';
+            b.style.border = '';
+        });
+        event.target.classList.add('active');
+        event.target.style.background = 'rgba(6,214,160,0.15)';
+        event.target.style.color = '#06D6A0';
+        event.target.style.border = '1px solid rgba(6,214,160,0.25)';
+        document.getElementById('testimonialTextField').style.display = type === 'text' ? '' : 'none';
+        document.getElementById('testimonialVideoField').style.display = type === 'video' ? '' : 'none';
+        document.getElementById('testimonialImageField').style.display = type === 'image' ? '' : 'none';
+    }
+
+    async function bulkImportTestimonials() {
+        const raw = document.getElementById('bulkTestimonialJson').value.trim();
+        if (!raw) { toast('Paste a JSON array of testimonials.', 'error'); return; }
+        let data;
+        try { data = JSON.parse(raw); } catch { toast('Invalid JSON.', 'error'); return; }
+        if (!Array.isArray(data)) { toast('Must be an array.', 'error'); return; }
+
+        const btn = document.getElementById('bulkTestimonialBtn');
+        btn.disabled = true; btn.textContent = 'Importing...';
+        try {
+            const result = await fetchJSON(`${WEBHOOK_BASE}/testimonial-ingest`, {
+                operation: 'bulk_import',
+                testimonials: data,
+                brand_id: 'carlton'
+            });
+            if (result?.success) {
+                toast(`Imported ${result.count || data.length} testimonials.`, 'success');
+                document.getElementById('bulkTestimonialJson').value = '';
+                await fetchTestimonials();
+            } else {
+                toast(result?.error || 'Import failed.', 'error');
+            }
+        } catch (err) {
+            toast(`Error: ${err.message}`, 'error');
+        } finally {
+            btn.disabled = false; btn.textContent = 'Import';
+        }
+    }
+
+    async function suggestTestimonialCandidates() {
+        toast('Finding potential testimonial candidates...', 'info');
+        try {
+            const result = await fetchJSON(`${WEBHOOK_BASE}/testimonial-ingest`, {
+                operation: 'suggest_candidates',
+                brand_id: 'carlton'
+            });
+            const panel = document.getElementById('candidatesPanel');
+            if (result?.success && result.candidates?.length) {
+                panel.innerHTML = `<h3 class="font-heading font-bold text-sm mb-2">Suggested Candidates</h3>
+                    <div class="space-y-2">${result.candidates.map(c => `<div class="flex items-center justify-between text-xs p-2 rounded" style="background:rgba(30,33,48,0.5);">
+                        <span>${escHtml(c.name || c.attribution_name || 'Unknown')}${c.company ? ` · ${escHtml(c.company)}` : ''}</span>
+                    </div>`).join('')}</div>`;
+                panel.style.display = 'block';
+            } else {
+                toast('No candidates found.', 'info');
+            }
+        } catch (err) {
+            toast(`Error: ${err.message}`, 'error');
+        }
+    }
+
+    async function generateLandingPage() {
+        const audience = document.getElementById('lpGenAudience').value.trim();
+        if (!audience) { toast('Target Audience is required.', 'error'); return; }
+
+        const painPointsRaw = document.getElementById('lpGenPainPoints').value.trim();
+        const painPoints = painPointsRaw ? painPointsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+        const payload = {
+            operation: 'generate',
+            target_audience: audience,
+            template_type: document.getElementById('lpGenTemplate').value,
+            cta_text: document.getElementById('lpGenCta').value.trim() || 'Get Started',
+        };
+        const offerId = document.getElementById('lpGenOfferId').value;
+        if (offerId) payload.offer_id = offerId;
+        const price = parseInt(document.getElementById('lpGenPrice').value);
+        if (price > 0) payload.price_cents = price;
+        if (painPoints.length) payload.pain_points = painPoints;
+        const stripeLink = document.getElementById('lpGenStripeLink').value.trim();
+        if (stripeLink) payload.stripe_payment_link = stripeLink;
+
+        const btn = document.getElementById('lpGenBtn');
+        btn.disabled = true; btn.textContent = 'Generating...';
+
+        try {
+            const result = await fetchJSON(`${WEBHOOK_BASE}/lp-generate`, payload);
+            if (result?.success) {
+                toast(`Landing page generated! Page ID: ${result.page_id || 'pending'}`, 'success');
+                document.getElementById('lpGenAudience').value = '';
+                document.getElementById('lpGenPainPoints').value = '';
+                document.getElementById('lpGenStripeLink').value = '';
+                await fetchLandingPages();
+            } else {
+                toast(result?.error || result?.message || 'Generation failed.', 'error');
+            }
+        } catch (err) {
+            toast(`Error: ${err.message}`, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v4M8.5 3.5L6 6M3.5 3.5L6 6M6 6v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Generate with AI';
+        }
+    }
+
+    function populateLpGenOfferDropdown() {
+        const sel = document.getElementById('lpGenOfferId');
+        if (!sel) return;
+        const current = sel.value;
+        sel.innerHTML = '<option value="">None (standalone)</option>' +
+            offersData.map(o => `<option value="${escHtml(o.offer_id)}">${escHtml(o.title)} (${o.status})</option>`).join('');
+        if (current) sel.value = current;
+    }
+
+    async function lpApprovalAction(pageId, operation, feedback) {
+        const payload = { operation, page_id: pageId, brand_id: 'carlton' };
+        if (feedback) payload.feedback = feedback;
+        try {
+            const result = await fetchJSON(`${WEBHOOK_BASE}/lp-approve`, payload);
+            if (result?.success) {
+                const labels = { approve: 'approved', request_changes: 'sent back for changes', reject: 'rejected' };
+                toast(`Landing page ${labels[operation] || operation}.`, 'success');
+                await fetchLandingPages();
+            } else {
+                toast(result?.error || result?.message || `Failed to ${operation}.`, 'error');
+            }
+        } catch (err) {
+            toast(`Error: ${err.message}`, 'error');
         }
     }
 

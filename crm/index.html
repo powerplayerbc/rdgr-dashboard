@@ -3231,8 +3231,8 @@
         const btn = document.getElementById('importSheetsBtn');
         btn.disabled = true; btn.textContent = 'Importing...';
         try {
-            const result = await fetchJSON('https://n8n.carltonaiservices.com/webhook/prosp-lead-import', {
-                sheets_url: url, sheet_name: tab, source: 'google_sheets', source_type: 'sheets', brand_id: 'carlton'
+            const result = await fetchJSON('https://n8n.carltonaiservices.com/webhook/contact-import', {
+                sheets_url: url, sheet_name: tab, source: 'google_sheets', brand_id: 'carlton'
             });
             if (result?.success) {
                 toast(`Import started: ${result.import_id || 'processing'}`, 'success');
@@ -3256,8 +3256,8 @@
         const btn = document.getElementById('importJsonBtn');
         btn.disabled = true; btn.textContent = `Importing ${leads.length} leads...`;
         try {
-            const result = await fetchJSON('https://n8n.carltonaiservices.com/webhook/prosp-lead-import', {
-                leads, source: 'manual_import', source_type: 'json', brand_id: 'carlton'
+            const result = await fetchJSON('https://n8n.carltonaiservices.com/webhook/contact-import', {
+                leads, source: 'manual_import', brand_id: 'carlton'
             });
             if (result?.success) {
                 toast(`Import started: ${leads.length} leads queued`, 'success');

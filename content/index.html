@@ -558,6 +558,15 @@
                 <div class="skeleton h-24 rounded-lg"></div>
                 <div class="skeleton h-24 rounded-lg"></div>
             </div>
+
+            <!-- Voice Learned Rules -->
+            <div class="mt-6">
+                <div class="flex items-center justify-between cursor-pointer py-2" onclick="toggleVoiceRules()">
+                    <h3 class="font-heading font-semibold text-xs tracking-wide text-txt-3 uppercase">Graduated Voice Rules</h3>
+                    <svg id="voiceRulesChevron" width="10" height="10" viewBox="0 0 12 12" fill="none" style="opacity:0.4;transition:transform 0.2s;"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                </div>
+                <div id="voiceRulesPanel" style="display:none;" class="space-y-2"></div>
+            </div>
         </div>
 
         <!-- ═══ CALENDAR TAB ═══ -->
@@ -942,9 +951,20 @@
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     Approve
                 </button>
+                <button class="btn flex-1" style="background: var(--deft-warning); color: #000;" onclick="handleCopyAction('${id}', 'request_edits')">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2L4 10H2v-2l6.5-6.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Request Edits
+                </button>
                 <button class="btn btn-deny flex-1" onclick="handleCopyAction('${id}', 'reject')">
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                     Reject
+                </button>
+            `;
+        } else if (status === 'draft') {
+            actions.innerHTML = `
+                <button class="btn flex-1" style="background: var(--deft-accent); color: #fff;" onclick="triggerAIReview('${id}')">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v4M6 7v4M1 6h4M7 6h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    Trigger AI Review
                 </button>
             `;
         } else {
@@ -964,12 +984,73 @@
                 brand_id: BRAND_ID,
                 user_id: activeProfileId
             });
-            toast(`Copy ${action === 'approve' ? 'approved' : 'rejected'}`, 'success');
+            const labels = { approve: 'approved', reject: 'rejected', request_edits: 'sent back for edits' };
+            toast(`Copy ${labels[action] || action}`, 'success');
             closeModal('copyDetailModal');
             await loadCopy();
         } catch (e) {
             console.error('Copy action error:', e);
             toast('Action failed — try again', 'error');
+        }
+    }
+
+    async function triggerAIReview(draftId) {
+        try {
+            toast('Triggering AI compliance review...', 'info');
+            await webhookPost('copywrite-review', {
+                draft_id: draftId,
+                brand_id: BRAND_ID
+            });
+            toast('AI review started. Status will update shortly.', 'success');
+            closeModal('copyDetailModal');
+            await loadCopy();
+        } catch (e) {
+            console.error('AI review error:', e);
+            toast('AI review failed — try again', 'error');
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // VOICE LEARNED RULES
+    // ═══════════════════════════════════════
+    let voiceRulesLoaded = false;
+
+    async function toggleVoiceRules() {
+        const panel = document.getElementById('voiceRulesPanel');
+        const chevron = document.getElementById('voiceRulesChevron');
+        if (panel.style.display === 'none') {
+            panel.style.display = '';
+            if (chevron) chevron.style.transform = 'rotate(180deg)';
+            if (!voiceRulesLoaded) await loadVoiceRules();
+        } else {
+            panel.style.display = 'none';
+            if (chevron) chevron.style.transform = '';
+        }
+    }
+
+    async function loadVoiceRules() {
+        const panel = document.getElementById('voiceRulesPanel');
+        panel.innerHTML = '<div class="skeleton h-12 rounded-lg"></div>';
+        try {
+            const rules = await sbSelect('voice_learned_rules', 'confidence=gte.0.9&order=category,confidence.desc&select=id,category,rule_text,confidence,times_reinforced,graduated_at');
+            voiceRulesLoaded = true;
+            if (!rules || rules.length === 0) {
+                panel.innerHTML = '<div class="text-xs text-txt-3 py-2">No graduated rules yet. Rules graduate when confidence reaches 0.9+ with 3+ reinforcements.</div>';
+                return;
+            }
+            panel.innerHTML = rules.map(r => `
+                <div class="p-2.5 rounded-lg" style="background: var(--deft-surface-hi, #242836); border: 1px solid rgba(6,214,160,0.1);">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-medium uppercase tracking-wide" style="color: var(--deft-accent, #06D6A0);">${r.category || 'general'}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[0.6rem] text-txt-3 font-mono">${(r.confidence * 100).toFixed(0)}% · ${r.times_reinforced || 0}x</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-txt-2 leading-relaxed">${r.rule_text || ''}</p>
+                </div>
+            `).join('');
+        } catch (e) {
+            panel.innerHTML = '<div class="text-xs text-txt-3 py-2">Failed to load voice rules.</div>';
         }
     }
 

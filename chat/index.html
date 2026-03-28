@@ -613,6 +613,7 @@
                             <span id="chatThreadMeta" class="text-[0.65rem] text-txt-3 font-mono"></span>
                         </div>
                         <div class="flex gap-2" id="chatHeaderActions" style="display: none;">
+                            <button onclick="summarizeCurrentThread()" class="btn btn-ghost text-xs py-1.5 px-2.5" style="color: #4CC9F0; border-color: rgba(76,201,240,0.2);">Summarize</button>
                             <button onclick="renameCurrentThread()" class="btn btn-ghost text-xs py-1.5 px-2.5">Rename</button>
                             <button onclick="archiveCurrentThread()" class="btn btn-ghost text-xs py-1.5 px-2.5" style="color: #FF6B6B; border-color: rgba(255,107,107,0.2);">Archive</button>
                         </div>
@@ -1134,6 +1135,26 @@
         }
     }
 
+    async function summarizeCurrentThread() {
+        if (!chatActiveThreadId) return;
+        toast('Summarizing thread...', 'info');
+        try {
+            const result = await fetchJSON(API.chat, {
+                operation: 'summarize_thread',
+                thread_id: chatActiveThreadId,
+                brand_id: 'carlton'
+            });
+            if (result?.success) {
+                toast('Thread summarized. Memory updated.', 'success');
+                await fetchThreadMemory(chatActiveThreadId);
+            } else {
+                toast(result?.error || 'Summarize failed.', 'error');
+            }
+        } catch (err) {
+            toast(`Error: ${err.message}`, 'error');
+        }
+    }
+
     // ── Messages ──
 
     async function fetchMessages(threadId) {
@@ -1313,7 +1334,7 @@
                 thread_id: requestThreadId,
                 brand_id: 'carlton',
                 domain: 'chat',
-                operation: 'send_message',
+                operation: 'chat_message',
                 sender: requestUser,
                 parameters: {
                     content: content,
