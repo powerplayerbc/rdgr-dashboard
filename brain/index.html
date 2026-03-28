@@ -422,6 +422,27 @@
         .badge-warm { background: var(--brain-warm-dim); color: var(--brain-warm); }
         .badge-ghost { background: rgba(255,255,255,0.04); color: var(--brain-txt-2); }
 
+        /* AI feature styling */
+        .ai-badge { background: var(--brain-accent-2-dim); color: var(--brain-accent-2); }
+        .ai-panel {
+            background: linear-gradient(135deg, rgba(139,92,246,0.05), rgba(139,92,246,0.01));
+            border: 1px solid rgba(139,92,246,0.12);
+            border-radius: var(--brain-radius); padding: 1rem 1.25rem;
+        }
+        .ai-insight-banner {
+            background: linear-gradient(135deg, rgba(139,92,246,0.06), rgba(76,201,240,0.04));
+            border: 1px solid rgba(139,92,246,0.15);
+            border-radius: var(--brain-radius);
+        }
+        .ai-suggestion-row {
+            display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem;
+            border-radius: 0.5rem; cursor: pointer; transition: background 0.15s;
+        }
+        .ai-suggestion-row:hover { background: rgba(139,92,246,0.08); }
+        .ai-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        @keyframes aiPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .ai-loading { animation: aiPulse 1.5s ease-in-out infinite; }
+
         /* ═══════════════════════════════════════
            MODAL
            ═══════════════════════════════════════ */
@@ -881,6 +902,8 @@
                     <a href="/content" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Publishing</a>
                     <a href="/media" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Media</a>
                     <a href="/council" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Council</a>
+                    <a href="/hub" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">HUB</a>
+                    <a href="/meetings" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Meetings</a>
                     <a href="/deft" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">DEFT</a>
                     <span class="task-tab active" style="flex:none;padding:0.3rem 0.75rem;">BRAIN</span>
                 </div>
@@ -914,6 +937,8 @@
             <a href="/content" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Publishing</a>
             <a href="/media" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Media</a>
             <a href="/council" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Council</a>
+            <a href="/hub" class="task-tab" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">HUB</a>
+            <a href="/meetings" class="task-tab" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">Meetings</a>
             <a href="/deft" class="task-tab" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">DEFT</a>
             <span class="task-tab active" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;">BRAIN</span>
         </div>
@@ -938,6 +963,20 @@
          VIEW: DASHBOARD (Home)
          ═══════════════════════════════════════ -->
     <div id="view-dashboard" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" role="tabpanel" aria-labelledby="tab-dashboard">
+
+        <!-- AI Daily Insight Banner -->
+        <div id="dailyInsightBanner" class="ai-insight-banner mb-4 brain-reveal brain-reveal-1" style="display: none;">
+            <div class="py-3 px-5">
+                <div class="flex items-start gap-3">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--brain-accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 mt-0.5"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg>
+                    <div class="flex-1">
+                        <p class="text-sm" style="color: var(--brain-txt); line-height: 1.6;" id="dailyInsightText">Loading insight...</p>
+                        <p class="text-xs mt-1 font-mono" style="color: var(--brain-txt-3);" id="dailyInsightMeta"></p>
+                    </div>
+                    <button class="btn btn-ghost btn-sm flex-shrink-0" onclick="dismissDailyInsight()">Dismiss</button>
+                </div>
+            </div>
+        </div>
 
         <!-- Active Timer Banner (shown when timer is running) -->
         <div id="dashTimerBanner" class="timer-banner mb-4 brain-reveal brain-reveal-1" style="display: none;">
@@ -1077,9 +1116,25 @@
                 </div>
             </div>
 
-            <!-- Right column: Quick Actions -->
+            <!-- Right column: Quick Actions + AI -->
             <div class="space-y-4">
+                <!-- Smart Log -->
                 <div class="panel brain-reveal brain-reveal-2">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Smart Log</span>
+                        <span class="badge badge-violet">AI</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="flex gap-2">
+                            <input type="text" class="form-input text-sm" id="smartLogInput" placeholder="e.g. Worked on project for 2 hours" onkeydown="if(event.key==='Enter')submitSmartLog()">
+                            <button class="btn btn-primary flex-shrink-0" onclick="submitSmartLog()" id="smartLogBtn">Log</button>
+                        </div>
+                        <div id="smartLogResult" class="mt-2" style="display:none;"></div>
+                    </div>
+                </div>
+
+                <!-- Quick Start Timer -->
+                <div class="panel brain-reveal brain-reveal-3">
                     <div class="panel-header">
                         <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Quick Start Timer</span>
                     </div>
@@ -1090,8 +1145,21 @@
                     </div>
                 </div>
 
+                <!-- AI Activity Suggestions -->
+                <div class="panel brain-reveal brain-reveal-4" id="aiSuggestionsPanel">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Suggested Next</span>
+                        <button class="btn btn-ghost btn-sm" onclick="loadActivitySuggestions()">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+                        </button>
+                    </div>
+                    <div class="panel-body p-0" id="aiSuggestionsContent">
+                        <div class="px-4 py-4 text-center text-xs" style="color: var(--brain-txt-3);">Loading suggestions...</div>
+                    </div>
+                </div>
+
                 <!-- Directive Points Summary -->
-                <div class="panel brain-reveal brain-reveal-3">
+                <div class="panel brain-reveal brain-reveal-5">
                     <div class="panel-header">
                         <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Directive Points</span>
                         <span class="badge badge-violet" id="directivePointsTotal">0 pts</span>
@@ -1166,6 +1234,9 @@
             <div class="flex gap-2">
                 <button class="btn btn-primary" onclick="openModal('logActivityModal')">Log Activity</button>
                 <button class="btn btn-ghost" onclick="openModal('logChainModal')">Log Chain</button>
+                <button class="btn btn-ghost" onclick="openModal('smartLogModal')" title="AI Smart Log">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brain-accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg>
+                </button>
             </div>
         </div>
 
@@ -1326,6 +1397,7 @@
                 </button>
             </div>
             <div class="flex gap-2">
+                <button class="btn btn-primary btn-sm" onclick="openModal('createEventModal')">+ Event</button>
                 <button class="btn btn-ghost btn-sm" onclick="loadCalendarEvents()" id="calRefreshBtn">Refresh</button>
             </div>
         </div>
@@ -1517,6 +1589,19 @@
                 </div>
 
                 <button class="btn btn-primary w-full" onclick="saveProfileSettings()">Save BRAIN Settings</button>
+
+                <!-- Admin Tools -->
+                <div class="panel brain-reveal brain-reveal-2">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Admin Tools</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="grid grid-cols-2 gap-3">
+                            <button class="btn btn-ghost text-xs" onclick="recalculateDay()">Recalculate Today</button>
+                            <button class="btn btn-ghost text-xs" onclick="checkAchievements()">Check Achievements</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Categories & Directive Points -->
@@ -2017,10 +2102,12 @@
                 <label class="form-label">Description (optional)</label>
                 <textarea class="form-input" id="addTaskDescription" rows="2" placeholder="Additional context or notes..."></textarea>
             </div>
-            <div class="flex items-center gap-2 p-2.5 rounded-lg" style="background: rgba(139, 92, 246, 0.06); border: 1px solid rgba(139, 92, 246, 0.12);">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;"><path d="M7 1.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM7 4.5v3M7 9.5h.01" stroke="var(--brain-accent-2)" stroke-width="1.2" stroke-linecap="round"/></svg>
-                <span class="text-xs" style="color: var(--brain-txt-2);">Leave fields blank for AI auto-fill based on your scoring rules.</span>
-            </div>
+            <button class="btn btn-ghost w-full text-xs" onclick="aiFillTask()" id="aiFillBtn" type="button">
+                <span class="flex items-center justify-center gap-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brain-accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg>
+                    Auto-Fill with AI
+                </span>
+            </button>
         </div>
         <div class="modal-footer">
             <button class="btn btn-ghost" onclick="closeModal('addTaskModal')">Cancel</button>
@@ -2114,6 +2201,70 @@
         <div class="modal-footer">
             <button class="btn btn-ghost" onclick="closeModal('closeDayModal')">Not Yet</button>
             <button class="btn btn-primary" onclick="confirmCloseDay()">Close Day</button>
+        </div>
+    </div>
+</div>
+
+<!-- Smart Log Modal -->
+<div class="modal-backdrop" id="smartLogModal" onclick="if(event.target===this)closeModal('smartLogModal')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="flex items-center gap-2">
+                <h3 class="font-heading font-bold text-base">Smart Log</h3>
+                <span class="badge badge-violet">AI</span>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('smartLogModal')">&times;</button>
+        </div>
+        <div class="modal-body space-y-3">
+            <div>
+                <label class="form-label">Describe your activity</label>
+                <textarea class="form-input" id="smartLogModalInput" rows="3" placeholder="e.g. Just finished a 45 minute run with Dianna at the park"></textarea>
+            </div>
+            <div id="smartLogModalPreview" style="display:none;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('smartLogModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="parseSmartLog()" id="smartLogParseBtn">
+                <span class="flex items-center gap-1.5">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg>
+                    Parse with AI
+                </span>
+            </button>
+            <button class="btn btn-primary" onclick="confirmSmartLog()" id="smartLogConfirmBtn" style="display:none;">Confirm &amp; Log</button>
+        </div>
+    </div>
+</div>
+
+<!-- Create Calendar Event Modal -->
+<div class="modal-backdrop" id="createEventModal" onclick="if(event.target===this)closeModal('createEventModal')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="font-heading font-bold text-base">Create Calendar Event</h3>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('createEventModal')">&times;</button>
+        </div>
+        <div class="modal-body space-y-3">
+            <div>
+                <label class="form-label">Title</label>
+                <input type="text" class="form-input" id="createEventTitle" placeholder="Event title">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Start</label>
+                    <input type="datetime-local" class="form-input" id="createEventStart">
+                </div>
+                <div>
+                    <label class="form-label">End</label>
+                    <input type="datetime-local" class="form-input" id="createEventEnd">
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Description (optional)</label>
+                <textarea class="form-input" id="createEventDesc" rows="2" placeholder="Event details..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('createEventModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitCreateEvent()">Create Event</button>
         </div>
     </div>
 </div>
@@ -4661,7 +4812,7 @@ async function toggleHabitCompletion(habitId, date) {
         // Complete
         const pts = habit.points_value || 15;
         if (webhookAvailable) {
-            await brainApi('complete_habit', { habit_id: habitId, date, points: pts });
+            await brainApi('complete_habit', { habit_id: habitId, date });
         } else {
             const comp = {
                 habit_id: habitId,
@@ -4906,21 +5057,24 @@ async function submitAddTask() {
     const title = document.getElementById('addTaskTitle').value.trim();
     if (!title) { toast('Task title required', 'error'); return; }
 
+    const scheduledDate = document.getElementById('addTaskDate').value || habitViewDate;
     const body = {
         user_id: activeProfileId,
         title,
         category_id: document.getElementById('addTaskCategory').value || null,
         estimated_minutes: parseInt(document.getElementById('addTaskMinutes').value) || null,
-        scheduled_date: document.getElementById('addTaskDate').value || habitViewDate,
+        scheduled_date: scheduledDate,
         deadline: document.getElementById('addTaskDeadline').value || null,
         description: document.getElementById('addTaskDescription').value.trim() || null,
         status: 'pending',
         heat_level: 0,
-        original_date: document.getElementById('addTaskDate').value || habitViewDate
+        original_date: scheduledDate
     };
 
     if (webhookAvailable) {
-        await brainApi('add_task', body);
+        // Send only fields the backend expects; user_id/status/heat_level are handled server-side
+        const { user_id, status, heat_level, ...taskData } = body;
+        await brainApi('add_task', taskData);
     } else {
         await supabaseWrite('brain_tasks', 'POST', body);
     }
@@ -5035,7 +5189,7 @@ async function confirmCloseDay() {
     const pendingTasks = tasks.filter(t => t.status === 'pending');
 
     if (webhookAvailable) {
-        await brainApi('close_day', { date, user_id: activeProfileId });
+        await brainApi('close_day', { date });
     } else {
         // Fallback: push tasks to tomorrow directly
         const tomorrow = new Date(date + 'T12:00:00');
@@ -5255,6 +5409,250 @@ if (_origLoadSettings) {
     };
 }
 
+// ═══════════════════════════════════════
+// AI FEATURES (smart_log, suggest_activities, daily_insight, calendar CRUD, ai_fill_task, admin)
+// ═══════════════════════════════════════
+
+// --- Smart Log (Dashboard quick input) ---
+async function submitSmartLog() {
+    const input = document.getElementById('smartLogInput');
+    const btn = document.getElementById('smartLogBtn');
+    const text = input.value.trim();
+    if (!text) return;
+
+    btn.disabled = true; btn.textContent = '...';
+    const result = await brainApi('smart_log', { text });
+    btn.disabled = false; btn.textContent = 'Log';
+
+    if (result && result.data) {
+        const pts = result.data.points_earned || result.data.points || 0;
+        toast(`Logged! ${pts ? '+' + pts + ' pts' : ''}`, 'success');
+        input.value = '';
+        document.getElementById('smartLogResult').style.display = 'none';
+        loadDashboardData();
+    }
+}
+
+// --- Smart Log Modal (parse → preview → confirm) ---
+let smartLogParsed = null;
+async function parseSmartLog() {
+    const input = document.getElementById('smartLogModalInput');
+    const preview = document.getElementById('smartLogModalPreview');
+    const parseBtn = document.getElementById('smartLogParseBtn');
+    const confirmBtn = document.getElementById('smartLogConfirmBtn');
+    const text = input.value.trim();
+    if (!text) { toast('Describe an activity first', 'error'); return; }
+
+    parseBtn.disabled = true;
+    parseBtn.innerHTML = '<span class="ai-loading">Parsing...</span>';
+
+    const result = await brainApi('smart_log', { text, preview_only: true });
+
+    parseBtn.disabled = false;
+    parseBtn.innerHTML = '<span class="flex items-center gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg> Parse with AI</span>';
+
+    if (result && result.data) {
+        smartLogParsed = result.data;
+        const d = result.data.parsed || result.data;
+        const cat = d.category || d.category_name || '—';
+        const dur = d.duration_minutes || d.duration || '—';
+        const title = d.title || d.activity_name || text;
+        const pts = d.estimated_points || d.points || '—';
+
+        preview.style.display = 'block';
+        preview.innerHTML = `<div class="ai-panel">
+            <p class="text-xs font-heading font-bold uppercase tracking-wide mb-2" style="color: var(--brain-accent-2);">Parsed Result</p>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <div><span style="color: var(--brain-txt-3);">Title:</span> <span style="color: var(--brain-txt);">${esc(title)}</span></div>
+                <div><span style="color: var(--brain-txt-3);">Category:</span> <span style="color: var(--brain-txt);">${esc(cat)}</span></div>
+                <div><span style="color: var(--brain-txt-3);">Duration:</span> <span style="color: var(--brain-txt);">${dur} min</span></div>
+                <div><span style="color: var(--brain-txt-3);">Points:</span> <span style="color: var(--brain-accent);">~${pts}</span></div>
+            </div>
+        </div>`;
+
+        parseBtn.style.display = 'none';
+        confirmBtn.style.display = '';
+    }
+}
+
+async function confirmSmartLog() {
+    const confirmBtn = document.getElementById('smartLogConfirmBtn');
+    const input = document.getElementById('smartLogModalInput');
+    confirmBtn.disabled = true; confirmBtn.textContent = 'Logging...';
+
+    const result = await brainApi('smart_log', { text: input.value.trim() });
+
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Confirm & Log';
+
+    if (result && result.data) {
+        const pts = result.data.points_earned || result.data.points || 0;
+        toast(`Logged! ${pts ? '+' + pts + ' pts' : ''}`, 'success');
+        closeModal('smartLogModal');
+        // Reset modal state
+        input.value = '';
+        document.getElementById('smartLogModalPreview').style.display = 'none';
+        document.getElementById('smartLogParseBtn').style.display = '';
+        confirmBtn.style.display = 'none';
+        smartLogParsed = null;
+        loadDashboardData();
+    }
+}
+
+// --- Activity Suggestions ---
+async function loadActivitySuggestions() {
+    const content = document.getElementById('aiSuggestionsContent');
+    content.innerHTML = '<div class="px-4 py-4 text-center text-xs ai-loading" style="color: var(--brain-txt-3);">Loading suggestions...</div>';
+
+    const result = await brainApi('suggest_activities', {}, { silent: true });
+    if (!result || !result.data) {
+        content.innerHTML = '<div class="px-4 py-4 text-center text-xs" style="color: var(--brain-txt-3);">No suggestions right now</div>';
+        return;
+    }
+
+    const suggestions = result.data.suggestions || (Array.isArray(result.data) ? result.data : []);
+    if (!suggestions.length) {
+        content.innerHTML = '<div class="px-4 py-4 text-center text-xs" style="color: var(--brain-txt-3);">Start your day to get suggestions</div>';
+        return;
+    }
+
+    content.innerHTML = suggestions.slice(0, 5).map(s => {
+        const name = esc(s.activity || s.name || s.category || 'Activity');
+        const reason = esc(s.reason || s.description || '');
+        const color = s.color || 'var(--brain-accent-2)';
+        const catSlug = esc(s.category_slug || s.category || '');
+        return `<div class="ai-suggestion-row" onclick="startSuggestedActivity('${catSlug}', '${esc(name)}')">
+            <div class="ai-dot" style="background: ${color};"></div>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-medium truncate" style="color: var(--brain-txt);">${name}</p>
+                ${reason ? `<p class="text-xs truncate" style="color: var(--brain-txt-3);">${reason}</p>` : ''}
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brain-txt-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </div>`;
+    }).join('');
+}
+
+function startSuggestedActivity(catSlug, name) {
+    // Find the matching category and start a timer
+    const cat = categories.find(c => (c.slug === catSlug || c.name === catSlug || c.category_name === catSlug));
+    if (cat) {
+        startTimer(cat.id || cat.category_id, name);
+    } else {
+        toast('Starting timer for: ' + name, 'info');
+        switchView('timer');
+    }
+}
+
+// --- Daily Insight ---
+async function loadDailyInsight() {
+    const banner = document.getElementById('dailyInsightBanner');
+    const today = new Date().toLocaleDateString('en-CA');
+    const dismissKey = 'brain-insight-dismissed-' + today;
+    if (localStorage.getItem(dismissKey)) return;
+
+    const result = await brainApi('daily_insight', {}, { silent: true });
+    if (!result || !result.data) return;
+
+    const insight = result.data.insight || result.data.text || result.data.message || '';
+    if (!insight) return;
+
+    document.getElementById('dailyInsightText').textContent = insight;
+    const meta = result.data.summary || result.data.based_on || '';
+    if (meta) document.getElementById('dailyInsightMeta').textContent = meta;
+    banner.style.display = '';
+}
+
+function dismissDailyInsight() {
+    document.getElementById('dailyInsightBanner').style.display = 'none';
+    const today = new Date().toLocaleDateString('en-CA');
+    localStorage.setItem('brain-insight-dismissed-' + today, '1');
+}
+
+// --- Calendar CRUD ---
+async function submitCreateEvent() {
+    const title = document.getElementById('createEventTitle').value.trim();
+    const start = document.getElementById('createEventStart').value;
+    const end = document.getElementById('createEventEnd').value;
+    const description = document.getElementById('createEventDesc').value.trim();
+
+    if (!title) { toast('Title is required', 'error'); return; }
+    if (!start) { toast('Start time is required', 'error'); return; }
+
+    const result = await brainApi('create_event', {
+        title, start, end: end || undefined, description: description || undefined
+    });
+
+    if (result) {
+        toast('Event created', 'success');
+        closeModal('createEventModal');
+        document.getElementById('createEventTitle').value = '';
+        document.getElementById('createEventStart').value = '';
+        document.getElementById('createEventEnd').value = '';
+        document.getElementById('createEventDesc').value = '';
+        loadCalendarEvents();
+    }
+}
+
+async function deleteCalendarEvent(eventId) {
+    if (!confirm('Delete this calendar event?')) return;
+    const result = await brainApi('delete_event', { event_id: eventId });
+    if (result) {
+        toast('Event deleted', 'success');
+        loadCalendarEvents();
+    }
+}
+
+// --- AI Auto-Fill Task ---
+async function aiFillTask() {
+    const title = document.getElementById('addTaskTitle').value.trim();
+    if (!title) { toast('Enter a task title first', 'error'); return; }
+
+    const btn = document.getElementById('aiFillBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="ai-loading text-xs">Filling...</span>';
+
+    const result = await brainApi('ai_fill_task', { title });
+
+    btn.disabled = false;
+    btn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brain-accent-2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg> Auto-Fill with AI</span>';
+
+    if (result && result.data) {
+        const d = result.data;
+        if (d.estimated_minutes || d.minutes) document.getElementById('addTaskMinutes').value = d.estimated_minutes || d.minutes;
+        if (d.category || d.category_slug) {
+            const sel = document.getElementById('addTaskCategory');
+            for (let opt of sel.options) {
+                if (opt.value === (d.category_slug || d.category) || opt.textContent === (d.category || d.category_slug)) {
+                    sel.value = opt.value; break;
+                }
+            }
+        }
+        if (d.scheduled_date || d.date) document.getElementById('addTaskDate').value = d.scheduled_date || d.date;
+        if (d.description) document.getElementById('addTaskDescription').value = d.description;
+        toast('Auto-filled by AI', 'success');
+    }
+}
+
+// --- Admin Tools ---
+async function recalculateDay() {
+    const today = new Date().toLocaleDateString('en-CA');
+    toast('Recalculating...', 'info');
+    const result = await brainApi('recalculate_day', { date: today });
+    if (result) {
+        toast('Day recalculated', 'success');
+        loadDashboardData();
+    }
+}
+
+async function checkAchievements() {
+    toast('Checking achievements...', 'info');
+    const result = await brainApi('check_achievements', {});
+    if (result && result.data) {
+        const newCount = result.data.new_achievements?.length || result.data.newly_earned || 0;
+        toast(newCount > 0 ? `${newCount} new achievement(s) earned!` : 'No new achievements', newCount > 0 ? 'success' : 'info');
+    }
+}
+
 // When dashboard loads, also load habits widget data
 const _origLoadDashboard = typeof loadDashboardData === 'function' ? loadDashboardData : null;
 if (_origLoadDashboard) {
@@ -5280,6 +5678,9 @@ if (_origLoadDashboard) {
         );
         tasks = t || [];
         renderDashboardHabitWidget();
+        // Non-blocking AI feature loads
+        loadActivitySuggestions();
+        loadDailyInsight();
     };
 }
 
