@@ -3854,7 +3854,7 @@
     async function loadPieces() {
         try {
             const activeFilter = showInactive ? '' : '&is_active=eq.true';
-            const raw = await supabaseGet(`outreach_email_templates?brand_id=eq.${BRAND_ID}${activeFilter}&order=category,sort_order&select=id,category,channel,tone,system,template_text,lead_categories,variables,requires_research,is_active,usage_count,times_sent,times_opened,times_replied,open_rate,reply_rate,sort_order`);
+            const raw = await supabaseGet(`outreach_email_templates?brand_id=eq.${BRAND_ID}${activeFilter}&order=category,sort_order&select=id,category,channel,tone,system,template_text,lead_categories,variables,requires_research,is_active,usage_count,sort_order`);
             if (showInactive) {
                 allPieces = raw.filter(p => p.is_active !== false);
                 inactivePieces = raw.filter(p => p.is_active === false);
@@ -3959,9 +3959,7 @@
 
     function renderPieceCard(p) {
         const vars = detectVariables(p.template_text || '');
-        const sentCount = p.times_sent || p.usage_count || 0;
-        const openRate = p.open_rate != null ? (p.open_rate * 100).toFixed(0) : null;
-        const replyRate = p.reply_rate != null ? (p.reply_rate * 100).toFixed(0) : null;
+        const sentCount = p.usage_count || 0;
         const channelLabel = PIECE_CHANNEL_LABELS[p.channel] || p.channel;
         const toneLabel = p.tone || 'neutral';
         const toneBadge = TONE_BADGE_COLORS[toneLabel] || 'badge-info';
@@ -3979,9 +3977,7 @@
                 </div>
                 ${sentCount > 0 ? `
                     <div class="flex items-center gap-3 text-[0.65rem] text-txt-3 mb-2">
-                        <span>Sent: ${sentCount}</span>
-                        ${openRate != null ? `<span>Open: ${openRate}%</span>` : ''}
-                        ${replyRate != null ? `<span>Reply: ${replyRate}%</span>` : ''}
+                        <span>Used: ${sentCount}x</span>
                     </div>
                 ` : ''}
                 <div class="flex items-center gap-1.5 pt-1 border-t border-border/30">
