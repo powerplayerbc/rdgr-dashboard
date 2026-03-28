@@ -2440,7 +2440,7 @@ function openDetail(id) {
                 <div class="flex justify-between"><span class="text-txt-3">Scheduled</span><span class="text-txt-2">${post.scheduled_at ? formatDateTime(post.scheduled_at) : '—'}</span></div>
                 ${post.approved_at ? `<div class="flex justify-between"><span class="text-txt-3">Approved</span><span class="text-txt-2">${formatDateTime(post.approved_at)}</span></div>` : ''}
                 ${post.posted_at ? `<div class="flex justify-between"><span class="text-txt-3">Posted</span><span class="text-txt-2">${formatDateTime(post.posted_at)}</span></div>` : ''}
-                ${post.error_message ? `<div class="mt-2 p-2 rounded border border-alert/20 bg-alert-dim text-alert text-xs">${escapeHtml(post.error_message)}</div>` : ''}
+                ${post.error_message ? `<div class="mt-2 p-2 rounded border border-alert/20 bg-alert-dim text-alert text-xs">${escapeHtml(typeof post.error_message === 'object' ? JSON.stringify(post.error_message) : post.error_message)}</div>` : ''}
             </div>
         </div>
         <div class="flex flex-wrap gap-2 pt-2 border-t border-border">

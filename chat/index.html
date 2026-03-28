@@ -727,22 +727,24 @@
         } catch (err) { console.error('Supabase write error:', table, err); return null; }
     }
 
-    async function fetchJSON(url, body, { retries = 0, backoff = 2000 } = {}) {
+    async function fetchJSON(url, body, { retries = 0, backoff = 2000, signal = null } = {}) {
         try {
             const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
+                ...(signal ? { signal } : {}),
             });
             if (res.status >= 500 && retries < 2) {
                 await new Promise(r => setTimeout(r, backoff));
-                return fetchJSON(url, body, { retries: retries + 1, backoff: backoff * 2 });
+                return fetchJSON(url, body, { retries: retries + 1, backoff: backoff * 2, signal });
             }
             return await res.json();
         } catch (err) {
+            if (err.name === 'AbortError') throw err;
             if (retries < 1) {
                 await new Promise(r => setTimeout(r, 2000));
-                return fetchJSON(url, body, { retries: retries + 1, backoff });
+                return fetchJSON(url, body, { retries: retries + 1, backoff, signal });
             }
             console.error('Fetch error:', url, err);
             return null;
@@ -1324,7 +1326,7 @@
                         recent_messages: recentMsgs,
                     },
                 },
-            });
+            }, { signal: controller.signal });
             clearTimeout(timeout);
             clearInterval(localTimer);
             chatPendingThreads.delete(requestThreadId);
