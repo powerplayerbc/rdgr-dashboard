@@ -1061,14 +1061,15 @@
                         <div>
                             <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Domain</label>
                             <select id="taskDomain" class="form-input">
+                                <option value="thinking" selected>Thinking</option>
                                 <option value="research">Research</option>
-                                <option value="email">Email</option>
                                 <option value="writing">Writing</option>
+                                <option value="email">Email</option>
                                 <option value="sales">Sales</option>
+                                <option value="outbound">Outbound</option>
                                 <option value="calendar">Calendar</option>
                                 <option value="finance">Finance</option>
-                                <option value="thinking">Thinking</option>
-                                <option value="toolbuild">Toolbuild</option>
+                                <option value="hub">Hub</option>
                             </select>
                         </div>
                         <div>
@@ -1083,8 +1084,16 @@
                         </div>
                     </div>
                     <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Deadline (optional)</label>
+                        <input type="datetime-local" id="taskDeadline" class="form-input">
+                    </div>
+                    <div>
                         <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Notes (optional)</label>
                         <textarea id="taskNotes" class="form-input" rows="2" placeholder="Additional context..."></textarea>
+                    </div>
+                    <div class="flex items-center gap-2 pt-1">
+                        <input type="checkbox" id="taskIntegratePlan" checked class="accent-[var(--deft-accent)]" style="width:14px;height:14px;">
+                        <label for="taskIntegratePlan" class="text-xs text-txt-2">Integrate with daily plan</label>
                     </div>
                     <div class="flex gap-3 pt-2">
                         <button type="submit" class="btn btn-primary flex-1 py-2.5" id="submitTaskBtn">Submit Task</button>
@@ -2692,29 +2701,37 @@ ${esc(content)}
         btn.textContent = 'Submitting...';
 
         const payload = {
-            task_type: document.getElementById('taskDomain').value,
             title: document.getElementById('taskTitle').value.trim(),
             description: document.getElementById('taskDesc').value.trim(),
+            brand_id: 'carlton',
+            domain: document.getElementById('taskDomain').value,
             priority: parseInt(document.getElementById('taskPriority').value),
-            dependencies: [],
-            metadata: {},
-            user_id: activeProfileId,
+            integrate_with_plan: document.getElementById('taskIntegratePlan').checked,
         };
 
         const notes = document.getElementById('taskNotes').value.trim();
-        if (notes) payload.metadata = { notes };
+        if (notes) payload.context = { notes };
+
+        const deadline = document.getElementById('taskDeadline').value;
+        if (deadline) payload.deadline = new Date(deadline).toISOString();
 
         try {
             const result = await fetchJSON(API.intake, payload);
+            if (result?.success === false) {
+                throw new Error(result.error || 'Intake failed');
+            }
             const taskId = result?.task_id || 'submitted';
-            toast(`Task created: ${taskId}`, 'success');
+            const planMsg = result?.integrate_with_plan ? ' — queued for planning' : '';
+            toast(`Task created: ${taskId}${planMsg}`, 'success');
 
             // Reset form
             document.getElementById('taskTitle').value = '';
             document.getElementById('taskDesc').value = '';
             document.getElementById('taskNotes').value = '';
-            document.getElementById('taskDomain').value = 'research';
+            document.getElementById('taskDeadline').value = '';
+            document.getElementById('taskDomain').value = 'thinking';
             document.getElementById('taskPriority').value = '3';
+            document.getElementById('taskIntegratePlan').checked = true;
 
             closeModal('taskModal');
             setTimeout(fetchTaskQueue, 2000);
