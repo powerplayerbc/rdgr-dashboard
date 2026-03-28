@@ -2725,10 +2725,11 @@ async function triggerDiscovery() {
     const btn = document.getElementById('runDiscoveryBtn');
     btn.disabled = true; btn.textContent = 'Starting...';
     try {
-        await fetch(`${N8N_BASE}/social-orchestrator`, {
+        const platforms = platform ? [platform] : ['instagram', 'facebook', 'twitter', 'linkedin', 'reddit'];
+        await fetch(`${N8N_BASE}/social-discover`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ brand_id: 'carlton', platform, user_id: activeProfileId }),
+            body: JSON.stringify({ brand_id: 'carlton', platforms, discovery_type: 'wave', user_id: activeProfileId }),
         });
         const label = platform ? PLATFORMS[platform]?.label || platform : 'all platforms';
         showToast(`Discovery started for ${label} (may take 1-10 min)`, 'success');
