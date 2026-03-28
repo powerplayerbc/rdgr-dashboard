@@ -362,6 +362,13 @@
                         <button class="btn btn-ghost text-xs aspect-btn" data-ratio="4:3" onclick="selectRatio('4:3', this)">4:3</button>
                     </div>
                 </div>
+                <div class="flex items-center justify-between mt-1">
+                    <span class="text-xs font-medium text-txt-2">AI Enhance Prompt</span>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" id="genEnhance" checked class="accent-accent">
+                        <span class="text-xs text-txt-3">On</span>
+                    </label>
+                </div>
                 <button class="btn btn-primary w-full py-3" onclick="generateImage()" id="genSubmitBtn">
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M9.5 2.5L5 7 3.5 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     Generate
@@ -567,11 +574,13 @@
                     image_type: type,
                     prompt: prompt,
                     aspect_ratio: selectedRatio,
+                    aspectRatio: selectedRatio,
+                    enhance: document.getElementById('genEnhance').checked,
                     source: 'dashboard'
                 })
             });
             const result = await res.json();
-            if (result.success || result.data?.imageUrl) {
+            if (result.success || result.data?.imageUrl || result.image_url) {
                 toast('Image generated!', 'success');
                 closeModal('generateModal');
                 document.getElementById('genPrompt').value = '';

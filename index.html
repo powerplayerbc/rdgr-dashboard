@@ -1207,6 +1207,7 @@
         humanAction: 'https://n8n.carltonaiservices.com/webhook/human-action',
         crm: 'https://n8n.carltonaiservices.com/webhook/rdgr-crm',
         social: 'https://n8n.carltonaiservices.com/webhook/rdgr-tool-social',
+        revenue: 'https://n8n.carltonaiservices.com/webhook/rdgr-revenue',
     };
     // Direct Supabase PostgREST
     const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
@@ -1532,8 +1533,18 @@
     }
 
     async function fetchRevenue() {
+        try {
+            const webhook = await fetchJSON(API.revenue, { brand_id: 'carlton' });
+            if (webhook && webhook.success && webhook.metrics) {
+                renderRevenue(webhook, 'webhook');
+                return;
+            }
+        } catch (e) {
+            console.warn('Revenue webhook failed, falling back to Supabase:', e);
+        }
+        // Fallback: direct Supabase read (original behavior)
         const result = await supabaseSelect('autonomous_financial_snapshots', 'order=snapshot_date.desc&limit=1');
-        renderRevenue((Array.isArray(result) && result[0]) ? result[0] : null);
+        renderRevenue((Array.isArray(result) && result[0]) ? result[0] : null, 'supabase');
     }
 
     // ═══════════════════════════════════════
@@ -2522,19 +2533,103 @@ ${esc(content)}
     // ═══════════════════════════════════════
     // RENDER: REVENUE
     // ═══════════════════════════════════════
-    function renderRevenue(snapshot) {
+    function renderRevenue(data, source) {
         const panel = document.getElementById('revenuePanel');
 
-        if (!snapshot) {
+        if (!data) {
             panel.innerHTML = '<div class="empty-state">No financial data available</div>';
             return;
         }
 
+        // Webhook shape: { metrics, pipeline, alerts }
+        if (source === 'webhook' && data.metrics) {
+            const m = data.metrics;
+            const p = data.pipeline || {};
+            const alerts = data.alerts || [];
+            const target = m.target || 100000;
+            const actual = parseFloat(m.total_revenue) || 0;
+            const progress = Math.min(parseFloat(m.progress_percent) || (actual / target) * 100, 100);
+            const daysRemaining = parseInt(m.days_remaining) || 0;
+            const dailyVel = parseFloat(m.daily_velocity) || 0;
+            const reqDaily = parseFloat(m.required_daily_velocity) || 0;
+            const velTrend = parseFloat(m.velocity_trend_percent) || 0;
+            const projected = parseFloat(m.projected_total) || 0;
+
+            const velColor = dailyVel >= reqDaily ? 'var(--deft-success, #6BCB77)' : dailyVel >= reqDaily * 0.8 ? 'var(--deft-warning, #FFD93D)' : 'var(--deft-danger, #FF6B6B)';
+            const trendArrow = velTrend > 0 ? `<span style="color:var(--deft-success);">&#9650; ${velTrend.toFixed(1)}%</span>` : velTrend < 0 ? `<span style="color:var(--deft-danger);">&#9660; ${Math.abs(velTrend).toFixed(1)}%</span>` : '';
+
+            panel.innerHTML = `
+                <div class="mb-4">
+                    <div class="flex items-baseline gap-2 mb-1">
+                        <span class="font-heading font-bold text-2xl text-accent">$${formatNum(actual)}</span>
+                        <span class="text-xs text-txt-3">/ $${formatNum(target)}</span>
+                        <span class="text-xs font-semibold px-1.5 py-0.5 rounded" style="background:${m.on_track ? 'rgba(107,203,119,0.12)' : 'rgba(255,107,107,0.12)'};color:${m.on_track ? 'var(--deft-success)' : 'var(--deft-danger)'};">${m.on_track ? 'On Track' : 'Off Track'}</span>
+                    </div>
+                    <div class="progress-bar mb-2">
+                        <div class="progress-fill" style="width: ${progress}%;"></div>
+                    </div>
+                    <span class="text-xs text-txt-3">${progress.toFixed(1)}% of target</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <div>
+                        <div class="text-xs text-txt-3 mb-0.5">Pipeline</div>
+                        <div class="font-heading font-semibold text-sm text-txt">$${formatNum(p.pipeline_value || 0)}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-txt-3 mb-0.5">Days Left</div>
+                        <div class="font-heading font-semibold text-sm" style="color: ${daysRemaining < 14 ? 'var(--deft-danger)' : daysRemaining < 30 ? 'var(--deft-warning)' : 'var(--deft-txt)'};">${daysRemaining}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-txt-3 mb-0.5">Projected</div>
+                        <div class="font-heading font-semibold text-sm" style="color:${projected >= target ? 'var(--deft-success)' : 'var(--deft-warning)'};">$${formatNum(projected)}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-txt-3 mb-0.5">Deals Active</div>
+                        <div class="font-heading font-semibold text-sm text-txt">${p.deals_in_progress || 0}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-txt-3 mb-0.5">Won</div>
+                        <div class="font-heading font-semibold text-sm" style="color:var(--deft-success);">${p.deals_closed_won || 0}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-txt-3 mb-0.5">Lost</div>
+                        <div class="font-heading font-semibold text-sm" style="color:var(--deft-danger);">${p.deals_closed_lost || 0}</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 mb-3 py-2 px-3 rounded-lg" style="background:rgba(255,255,255,0.02);border:1px solid var(--deft-border);">
+                    <div class="flex-1">
+                        <div class="text-xs text-txt-3 mb-0.5">Daily Velocity ${trendArrow}</div>
+                        <div class="font-heading font-semibold text-sm" style="color:${velColor};">$${formatNum(dailyVel)}</div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-xs text-txt-3 mb-0.5">Required Daily</div>
+                        <div class="font-heading font-semibold text-sm text-txt">$${formatNum(reqDaily)}</div>
+                    </div>
+                </div>
+
+                ${alerts.length ? `
+                <div class="space-y-1.5">
+                    ${alerts.slice(0, 3).map(a => {
+                        const sev = (a.severity || '').toLowerCase();
+                        const bg = sev === 'high' || sev === 'critical' ? 'rgba(255,107,107,0.06)' : sev === 'medium' || sev === 'warning' ? 'rgba(255,217,61,0.06)' : 'rgba(255,255,255,0.02)';
+                        const bc = sev === 'high' || sev === 'critical' ? 'rgba(255,107,107,0.15)' : sev === 'medium' || sev === 'warning' ? 'rgba(255,217,61,0.15)' : 'var(--deft-border)';
+                        const tc = sev === 'high' || sev === 'critical' ? 'var(--deft-danger)' : sev === 'medium' || sev === 'warning' ? 'var(--deft-warning)' : 'var(--deft-txt-2)';
+                        return `<div class="text-xs py-1.5 px-2.5 rounded" style="background:${bg};border:1px solid ${bc};color:${tc};">${esc(a.message || '')}</div>`;
+                    }).join('')}
+                </div>
+                ` : ''}
+            `;
+            return;
+        }
+
+        // Supabase fallback shape (original behavior)
         const target = 100000;
-        const actual = parseFloat(snapshot.actual_revenue) || 0;
-        const pipeline = parseFloat(snapshot.total_pipeline) || 0;
-        const weighted = parseFloat(snapshot.weighted_pipeline) || 0;
-        const daysRemaining = parseInt(snapshot.days_remaining) || 0;
+        const actual = parseFloat(data.actual_revenue) || 0;
+        const pipeline = parseFloat(data.total_pipeline) || 0;
+        const weighted = parseFloat(data.weighted_pipeline) || 0;
+        const daysRemaining = parseInt(data.days_remaining) || 0;
         const progress = Math.min((actual / target) * 100, 100);
 
         panel.innerHTML = `
@@ -2564,7 +2659,7 @@ ${esc(content)}
                 </div>
                 <div>
                     <div class="text-xs text-txt-3 mb-0.5">Deals Active</div>
-                    <div class="font-heading font-semibold text-sm text-txt">${snapshot.deals_in_progress || 0}</div>
+                    <div class="font-heading font-semibold text-sm text-txt">${data.deals_in_progress || 0}</div>
                 </div>
             </div>
         `;
