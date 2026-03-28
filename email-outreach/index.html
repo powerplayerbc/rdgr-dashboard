@@ -1689,9 +1689,15 @@
                         </div>
                     </div>
                 </div>
+                <!-- Inline Edit Section -->
+                <div id="epEditSection" class="mt-4 hidden">
+                    <label class="block text-xs text-txt-2 mb-2 font-medium uppercase tracking-wider">Edit Email Content</label>
+                    <textarea id="epEditContent" class="form-input text-xs" rows="6" placeholder="Edit the email content directly..."></textarea>
+                    <button onclick="submitInlineEdit()" class="btn btn-approve mt-2 text-xs py-2 px-4" id="epSubmitEditBtn">Save Edit & Approve</button>
+                </div>
                 <!-- Structured Feedback Section -->
                 <div id="epFeedbackSection" class="mt-4 hidden">
-                    <label class="block text-xs text-txt-2 mb-2 font-medium uppercase tracking-wider">Rejection Feedback</label>
+                    <label class="block text-xs text-txt-2 mb-2 font-medium uppercase tracking-wider">Redraft Feedback</label>
                     <div class="feedback-grid" id="epFeedbackGrid">
                         <!-- Populated dynamically -->
                     </div>
@@ -1706,7 +1712,8 @@
                 <!-- Action buttons -->
                 <div class="flex gap-3 pt-4" id="epActions">
                     <button onclick="approveOutreach()" class="btn btn-approve flex-1 py-2.5" id="epApproveBtn">Approve & Queue</button>
-                    <button onclick="rejectOutreach()" class="btn btn-deny flex-1 py-2.5" id="epRejectBtn">Reject</button>
+                    <button onclick="toggleInlineEdit()" class="btn btn-ghost flex-1 py-2.5" id="epEditToggleBtn" style="border-color:var(--deft-info);color:var(--deft-info);">Edit</button>
+                    <button onclick="editOutreach()" class="btn btn-deny flex-1 py-2.5" id="epRejectBtn">Redraft</button>
                     <button onclick="skipOutreach()" class="btn btn-ghost flex-1 py-2.5" id="epSkipBtn">Skip</button>
                     <button onclick="closeModal('emailPreviewModal')" class="btn btn-ghost py-2.5 px-4">Close</button>
                 </div>
@@ -3346,7 +3353,7 @@
                         <div class="flex flex-col gap-1.5 flex-shrink-0">
                             ${isPending ? `
                                 <button class="btn btn-approve text-xs py-1.5 px-3" onclick="event.stopPropagation();quickApprove('${esc(draft.id)}')">Approve</button>
-                                <button class="btn btn-deny text-xs py-1.5 px-3" onclick="event.stopPropagation();quickReject('${esc(draft.id)}')">Reject</button>
+                                <button class="btn btn-deny text-xs py-1.5 px-3" onclick="event.stopPropagation();quickRedraft('${esc(draft.id)}')">Redraft</button>
                                 <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="event.stopPropagation();quickSkip('${esc(draft.id)}')">Skip</button>
                             ` : ''}
                         </div>
@@ -3398,8 +3405,10 @@
 
         // Show/hide action buttons
         document.getElementById('epApproveBtn').style.display = isPending ? '' : 'none';
+        document.getElementById('epEditToggleBtn').style.display = isPending ? '' : 'none';
         document.getElementById('epRejectBtn').style.display = isPending ? '' : 'none';
         document.getElementById('epSkipBtn').style.display = isPending ? '' : 'none';
+        document.getElementById('epEditSection').classList.add('hidden');
 
         // Piece attribution - try assembly log first, fallback to templates_used
         const attrEl = document.getElementById('epTemplateAttribution');
@@ -3497,7 +3506,7 @@
         await updateDraftStatus(currentPreviewDraft, 'approved', notes);
     }
 
-    async function rejectOutreach() {
+    async function editOutreach() {
         if (!currentPreviewDraft) return;
         const checkedBoxes = document.querySelectorAll('#epFeedbackGrid .feedback-chip input:checked');
         const categories = Array.from(checkedBoxes).map(cb => cb.value);
@@ -3513,11 +3522,27 @@
             free_text: freeText
         };
 
-        // Build backward-compat reviewer_notes
-        let reviewerNotes = categories.join(', ');
-        if (freeText) reviewerNotes += (reviewerNotes ? ' -- ' : '') + freeText;
+        let feedback = categories.join(', ');
+        if (freeText) feedback += (feedback ? ' -- ' : '') + freeText;
 
-        await updateDraftStatus(currentPreviewDraft, 'rejected', reviewerNotes, structuredFeedback);
+        await updateDraftStatus(currentPreviewDraft, 'edited', feedback, structuredFeedback);
+    }
+
+    function toggleInlineEdit() {
+        const section = document.getElementById('epEditSection');
+        const isHidden = section.classList.contains('hidden');
+        section.classList.toggle('hidden');
+        if (isHidden && currentPreviewDraft) {
+            const body = currentPreviewDraft.content || currentPreviewDraft.body || '';
+            document.getElementById('epEditContent').value = body;
+        }
+    }
+
+    async function submitInlineEdit() {
+        if (!currentPreviewDraft) return;
+        const editedContent = document.getElementById('epEditContent').value.trim();
+        if (!editedContent) { toast('Content cannot be empty', 'error'); return; }
+        await updateDraftStatus(currentPreviewDraft, 'edited', '', null, editedContent);
     }
 
     async function skipOutreach() {
@@ -3532,12 +3557,12 @@
         await updateDraftStatus(draft, 'approved', '');
     }
 
-    async function quickReject(draftId) {
+    async function quickRedraft(draftId) {
         const draft = outreachDrafts.find(d => d.id === draftId);
         if (!draft) return;
         currentPreviewDraft = draft;
         openEmailPreview(draftId);
-        toast('Please review and add feedback before rejecting.', 'error');
+        toast('Please review and add feedback before redrafting.', 'error');
     }
 
     async function quickSkip(draftId) {
@@ -3547,8 +3572,8 @@
         await updateDraftStatus(draft, 'skip', '');
     }
 
-    async function updateDraftStatus(draft, newStatus, notes, structuredFeedback) {
-        const btnMap = { approved: 'epApproveBtn', rejected: 'epRejectBtn', skip: 'epSkipBtn' };
+    async function updateDraftStatus(draft, newStatus, notes, structuredFeedback, editedContent) {
+        const btnMap = { approved: 'epApproveBtn', edited: 'epRejectBtn', skip: 'epSkipBtn' };
         const btn = document.getElementById(btnMap[newStatus]);
         if (btn) { btn.disabled = true; btn.textContent = 'Processing...'; }
 
@@ -3556,21 +3581,27 @@
             const ctx = draft.context || {};
             const contactId = ctx.contact_id || '';
 
+            // Map internal status to contract action names
+            const actionMap = { approved: 'approve', edited: 'edit', skip: 'skip' };
             const payload = {
                 draft_id: draft.id,
-                contact_id: contactId,
-                action: newStatus === 'approved' ? 'approve' : 'reject',
-                reviewer_notes: notes || '',
+                entity_id: contactId,
+                action: actionMap[newStatus] || newStatus,
+                feedback: notes || '',
                 acted_by: 'bradford'
             };
             if (structuredFeedback) {
                 payload.structured_feedback = structuredFeedback;
             }
+            if (editedContent) {
+                payload.edited_content = editedContent;
+            }
 
             const result = await fetchJSON(API.outreachApproved, payload);
 
             if (result?.success !== false && !result?.error) {
-                toast(`Draft ${newStatus}: ${getDraftSubject(draft)}`, 'success');
+                const actionLabel = result?.action || newStatus;
+                toast(`Draft ${actionLabel}: ${getDraftSubject(draft)}`, 'success');
             } else {
                 throw new Error(result?.message || result?.error || 'Action failed');
             }
@@ -3581,7 +3612,7 @@
         } catch (err) {
             toast(`Failed: ${err.message}`, 'error');
         } finally {
-            const btnLabels = { approved: 'Approve & Queue', rejected: 'Reject', skip: 'Skip' };
+            const btnLabels = { approved: 'Approve & Queue', edited: 'Redraft', skip: 'Skip' };
             if (btn) { btn.disabled = false; btn.textContent = btnLabels[newStatus] || newStatus; }
         }
     }

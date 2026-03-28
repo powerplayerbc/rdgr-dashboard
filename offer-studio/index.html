@@ -1802,6 +1802,8 @@
                     <span class="text-xs text-txt-3">${formatPacific(o.created_at)}</span>
                 </div>
                 ${links.length ? `<div class="flex gap-3 mt-2">${links.join('')}</div>` : ''}
+                ${o.status === 'building' || o.status === 'in_progress' ? `<div class="flex gap-2 mt-2"><button class="btn btn-approve text-xs py-1.5 px-3" data-label="Continue Build" onclick="event.stopPropagation();triggerOfferBuild('${escHtml(o.offer_id)}','continue_build')">Continue Build</button></div>` : ''}
+                ${o.status === 'ready' || o.status === 'completed' ? `<div class="flex gap-2 mt-2"><button class="btn text-xs py-1.5 px-3" style="background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.25);" data-label="Launch" onclick="event.stopPropagation();triggerOfferBuild('${escHtml(o.offer_id)}','launch')">Launch</button></div>` : ''}
                 <div class="offer-detail" id="offer-detail-${idx}">
                     <div class="text-xs text-txt-3 mb-2">Loading build steps...</div>
                 </div>
@@ -2098,8 +2100,47 @@
         if (result?.success) {
             toast(`Proposal ${action === 'approve' ? 'approved' : 'rejected'}.`, 'success');
             await fetchProposals();
+            // After approval, kick off offer build from the proposal
+            if (action === 'approve') {
+                triggerOfferBuild(null, 'create_from_proposal', proposalId);
+            }
         } else {
             toast(result?.message || `Failed to ${action} proposal.`, 'error');
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // OFFER-BUILD WEBHOOK
+    // ═══════════════════════════════════════
+    async function triggerOfferBuild(offerId, operation, proposalId) {
+        const payload = { brand_id: 'carlton' };
+        if (offerId) payload.offer_id = offerId;
+        if (operation) payload.operation = operation;
+        if (proposalId) payload.proposal_id = proposalId;
+
+        const btn = event?.target;
+        if (btn) { btn.disabled = true; btn.textContent = 'Building...'; }
+
+        try {
+            const result = await fetchJSON(`${WEBHOOK_BASE}/offer-build`, payload);
+            if (result?.success) {
+                const status = result.status || 'unknown';
+                const statusMessages = {
+                    step_completed: `Step completed: ${result.step_completed || ''}`,
+                    all_completed: 'All build steps completed!',
+                    awaiting_human: result.message || 'Awaiting human review',
+                    blocked: result.message || 'Build is blocked — check steps',
+                };
+                toast(statusMessages[status] || result.message || 'Build triggered', status === 'blocked' ? 'warning' : 'success');
+                buildStepsCache = {};
+                await fetchOffers();
+            } else {
+                toast(result?.message || 'Build failed', 'error');
+            }
+        } catch (err) {
+            toast(`Build error: ${err.message}`, 'error');
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = btn.dataset.label || 'Build'; }
         }
     }
 

@@ -1930,20 +1930,27 @@
                 }
             }
 
+            // Check for edited_content from any inline edit textarea
+            const editedContent = document.getElementById(`ht-edited-content-${idx}`)?.value?.trim() || undefined;
+
             // Send to human-action webhook
-            const result = await fetchJSON(API.humanAction, {
+            const payload = {
                 task_id: task.task_id,
                 action: action,
                 feedback: feedback || undefined,
                 acted_by: 'bradford'
-            });
+            };
+            if (editedContent) payload.edited_content = editedContent;
+
+            const result = await fetchJSON(API.humanAction, payload);
 
             if (result?.success) {
                 humanTasksData.splice(idx, 1);
                 renderHumanTasks();
                 updateStatusBar();
                 const cbMsg = result.callback_fired ? ' — workflow continuing' : '';
-                toast(`${formatActionLabel(action)}: ${task.title || task.task_id}${cbMsg}`, 'success');
+                const statusMsg = result.task_status ? ` (${result.task_status})` : '';
+                toast(`${formatActionLabel(action)}: ${task.title || task.task_id}${statusMsg}${cbMsg}`, 'success');
             } else {
                 toast(`Failed: ${result?.message || result?.error || 'Unknown error'}`, 'error');
                 document.querySelectorAll(`#ht-buttons-${idx} .btn`).forEach(b => { b.disabled = false; b.style.opacity = '1'; });
@@ -2078,7 +2085,7 @@
                                 <textarea id="dir-notes-${i}" placeholder="Add notes for the system..." rows="2"></textarea>
                                 <div class="flex flex-col gap-1.5">
                                     <button class="btn btn-approve text-xs py-1.5 px-3 whitespace-nowrap" onclick="approveDirective('${esc(d.directive_id)}', ${i})">Approve</button>
-                                    <button class="btn btn-deny text-xs py-1.5 px-3 whitespace-nowrap" onclick="rejectDirective('${esc(d.directive_id)}', ${i})">Reject</button>
+                                    <button class="btn btn-deny text-xs py-1.5 px-3 whitespace-nowrap" onclick="denyDirective('${esc(d.directive_id)}', ${i})">Deny</button>
                                 </div>
                             </div>
                         </div>
@@ -2164,17 +2171,17 @@
         });
 
         if (result?.success) {
-            toast(`Approved: ${directiveData[idx]?.title || directiveId}`, 'success');
+            const status = result.new_status ? ` → ${result.new_status}` : '';
+            toast(`Approved: ${directiveData[idx]?.title || directiveId}${status}`, 'success');
             directiveData.splice(idx, 1);
             renderDirectives();
             updateStatusBar();
         } else {
-            toast(`Failed to approve: ${result?.error || 'Unknown error'}`, 'error');
-            if (btn) btn.disabled = false;
+            handleDirectiveError(result, 'approve', btn);
         }
     }
 
-    async function rejectDirective(directiveId, idx) {
+    async function denyDirective(directiveId, idx) {
         const notes = document.getElementById(`dir-notes-${idx}`)?.value?.trim() || '';
         const btn = event?.target; if (btn) btn.disabled = true;
 
@@ -2186,14 +2193,28 @@
         });
 
         if (result?.success) {
-            toast(`Rejected: ${directiveData[idx]?.title || directiveId}`, 'success');
+            let msg = `Denied: ${directiveData[idx]?.title || directiveId}`;
+            if (result.escalation_triggered && result.escalation_decision) {
+                msg += ` — escalation: ${result.escalation_decision}`;
+            }
+            toast(msg, 'success');
             directiveData.splice(idx, 1);
             renderDirectives();
             updateStatusBar();
         } else {
-            toast(`Failed to reject: ${result?.error || 'Unknown error'}`, 'error');
-            if (btn) btn.disabled = false;
+            handleDirectiveError(result, 'deny', btn);
         }
+    }
+
+    function handleDirectiveError(result, action, btn) {
+        const code = result?.statusCode;
+        let msg;
+        if (code === 400) msg = `Invalid request: ${result?.error || 'bad action or missing directive_id'}`;
+        else if (code === 404) msg = 'Directive not found in database';
+        else if (code === 409) msg = 'Directive already processed (not pending_approval)';
+        else msg = `Failed to ${action}: ${result?.error || 'Unknown error'}`;
+        toast(msg, 'error');
+        if (btn) btn.disabled = false;
     }
 
     // ═══════════════════════════════════════

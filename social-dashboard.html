@@ -3407,10 +3407,11 @@ async function submitRedraft() {
             p_edited_content: null,
             p_override_type: null,
         });
+        const draft = socialDrafts.find(d => d.id === parseInt(draftId)) || {};
         await fetch(`${N8N_BASE}/social-approved`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'reject', draft_id: parseInt(draftId), feedback, brand_id: 'carlton', user_id: activeProfileId }),
+            body: JSON.stringify({ action: 'reject', draft_id: parseInt(draftId), feedback, brand_id: 'carlton', platform: draft.platform || '', contact_id: draft.contact_id || '', acted_by: activeProfileId || 'bradford' }),
         });
         socialDrafts = socialDrafts.filter(d => d.id !== parseInt(draftId));
         closeRedraftModal();
