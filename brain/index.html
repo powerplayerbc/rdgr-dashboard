@@ -600,6 +600,173 @@
         }
 
         /* ═══════════════════════════════════════
+           HABITS & TASKS
+           ═══════════════════════════════════════ */
+        .habit-view-toggle {
+            font-family: 'Rajdhani', system-ui, sans-serif;
+            padding: 0.3rem 0.75rem; font-size: 0.7rem; font-weight: 600;
+            letter-spacing: 0.04em; text-transform: uppercase;
+            color: var(--brain-txt-3); background: transparent;
+            border: none; border-radius: 0.375rem; cursor: pointer;
+            transition: color 0.15s, background 0.15s;
+        }
+        .habit-view-toggle:hover { color: var(--brain-txt-2); }
+        .habit-view-toggle.active {
+            background: var(--brain-accent-dim); color: var(--brain-accent);
+        }
+
+        .day-progress-track {
+            height: 8px; border-radius: 4px;
+            background: var(--brain-border); overflow: hidden;
+        }
+        .day-progress-fill {
+            height: 100%; border-radius: 4px;
+            background: linear-gradient(90deg, var(--brain-accent), var(--brain-accent-2));
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Habit Row */
+        .habit-row {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.625rem 0.75rem; border-radius: 0.5rem;
+            background: var(--brain-surface);
+            border: 1px solid var(--brain-border);
+            transition: border-color 0.15s, background 0.15s;
+            cursor: pointer;
+        }
+        .habit-row:hover {
+            border-color: color-mix(in srgb, var(--brain-accent) 20%, var(--brain-border));
+        }
+        .habit-row.completed {
+            border-color: color-mix(in srgb, var(--brain-success) 25%, var(--brain-border));
+            background: color-mix(in srgb, var(--brain-success) 3%, var(--brain-surface));
+        }
+        .habit-checkbox {
+            width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+            border: 2px solid var(--brain-border); background: transparent;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .habit-checkbox:hover { border-color: var(--brain-accent); }
+        .habit-checkbox.checked {
+            background: var(--brain-success); border-color: var(--brain-success);
+        }
+        .habit-checkbox.checked svg { opacity: 1; }
+        .habit-checkbox svg { opacity: 0; transition: opacity 0.15s; }
+
+        .habit-dots {
+            display: flex; gap: 3px; align-items: center;
+        }
+        .habit-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--brain-border); transition: background 0.2s;
+        }
+        .habit-dot.done { background: var(--brain-success); }
+        .habit-dot.missed { background: var(--brain-danger); opacity: 0.5; }
+        .habit-dot.future { background: var(--brain-border); opacity: 0.3; }
+        .habit-dot.today { box-shadow: 0 0 0 2px var(--brain-accent-dim); }
+
+        /* Habit expand detail row */
+        .habit-expand {
+            display: none; padding: 0.5rem 0.75rem 0.5rem 3rem;
+            gap: 0.5rem; align-items: center;
+        }
+        .habit-expand.open { display: flex; }
+        .habit-expand .form-input {
+            padding: 0.375rem 0.5rem; font-size: 0.75rem;
+        }
+
+        .habit-expand-chevron {
+            width: 16px; height: 16px; flex-shrink: 0;
+            color: var(--brain-txt-3); cursor: pointer;
+            transition: transform 0.2s, color 0.15s;
+        }
+        .habit-expand-chevron:hover { color: var(--brain-txt-2); }
+        .habit-expand-chevron.open { transform: rotate(180deg); }
+
+        /* Task Row */
+        .task-row {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.625rem 0.75rem; border-radius: 0.5rem;
+            background: var(--brain-surface);
+            border: 1px solid var(--brain-border);
+            transition: border-color 0.15s, background 0.15s;
+            cursor: pointer;
+        }
+        .task-row:hover {
+            border-color: color-mix(in srgb, var(--brain-accent) 20%, var(--brain-border));
+        }
+        .task-row.completed {
+            border-color: color-mix(in srgb, var(--brain-success) 25%, var(--brain-border));
+            background: color-mix(in srgb, var(--brain-success) 3%, var(--brain-surface));
+        }
+        .task-row.completed .task-title { text-decoration: line-through; opacity: 0.6; }
+
+        /* Heat Level Indicators */
+        .heat-dot {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+        }
+        .heat-0 { display: none; }
+        .heat-1, .heat-2 { background: var(--brain-warm, #FB923C); opacity: 0.7; }
+        .heat-3, .heat-4 { background: #F97316; }
+        .heat-5 { background: var(--brain-danger); }
+        .heat-critical {
+            background: var(--brain-danger);
+            animation: heatPulse 1.2s ease-in-out infinite;
+        }
+        @keyframes heatPulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
+        }
+
+        .deadline-badge {
+            font-size: 0.6rem; font-weight: 600; padding: 0.1rem 0.4rem;
+            border-radius: 9999px; white-space: nowrap;
+            text-transform: uppercase; letter-spacing: 0.03em;
+        }
+        .deadline-today {
+            background: rgba(245, 158, 11, 0.12); color: var(--brain-accent);
+        }
+        .deadline-upcoming {
+            background: rgba(139, 92, 246, 0.1); color: var(--brain-accent-2);
+        }
+        .deadline-overdue {
+            background: rgba(239, 68, 68, 0.12); color: var(--brain-danger);
+        }
+
+        /* Weekly Habit Grid */
+        .habit-weekly-grid {
+            width: 100%; border-collapse: collapse;
+        }
+        .habit-weekly-grid th, .habit-weekly-grid td {
+            padding: 0.625rem 0.5rem; text-align: center;
+            font-size: 0.75rem; border-bottom: 1px solid var(--brain-border);
+        }
+        .habit-weekly-grid thead th {
+            font-family: 'Rajdhani', system-ui, sans-serif;
+            font-weight: 600; font-size: 0.7rem; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--brain-txt-3);
+        }
+        .habit-grid-label {
+            text-align: left !important; padding-left: 1rem !important;
+            font-weight: 500; color: var(--brain-txt);
+            min-width: 120px; white-space: nowrap;
+        }
+        .habit-grid-day { min-width: 48px; }
+        .habit-weekly-grid tfoot td {
+            border-bottom: none; font-weight: 600; font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem; color: var(--brain-txt-2);
+        }
+        .wk-check {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 24px; height: 24px; border-radius: 6px; font-size: 0.7rem;
+        }
+        .wk-check.done { background: rgba(16, 185, 129, 0.12); color: var(--brain-success); }
+        .wk-check.missed { background: rgba(239, 68, 68, 0.08); color: var(--brain-danger); opacity: 0.5; }
+        .wk-check.future { color: var(--brain-txt-3); opacity: 0.3; }
+        .wk-check.today { box-shadow: 0 0 0 2px var(--brain-accent-dim); }
+
+        /* ═══════════════════════════════════════
            LEADERBOARD
            ═══════════════════════════════════════ */
         .rank-gold { color: #FFD700; }
@@ -758,6 +925,7 @@
             <button class="brain-tab active" id="tab-dashboard" onclick="switchView('dashboard')" role="tab" aria-selected="true" aria-controls="view-dashboard">Dashboard</button>
             <button class="brain-tab" id="tab-timer" onclick="switchView('timer')" role="tab" aria-selected="false" aria-controls="view-timer">Timer</button>
             <button class="brain-tab" id="tab-activities" onclick="switchView('activities')" role="tab" aria-selected="false" aria-controls="view-activities">Activities</button>
+            <button class="brain-tab" id="tab-habits" onclick="switchView('habits')" role="tab" aria-selected="false" aria-controls="view-habits">Habits</button>
             <button class="brain-tab" id="tab-calendar" onclick="switchView('calendar')" role="tab" aria-selected="false" aria-controls="view-calendar">Calendar</button>
             <button class="brain-tab" id="tab-leaderboard" onclick="switchView('leaderboard')" role="tab" aria-selected="false" aria-controls="view-leaderboard">Leaderboard</button>
             <button class="brain-tab" id="tab-achievements" onclick="switchView('achievements')" role="tab" aria-selected="false" aria-controls="view-achievements">Achievements</button>
@@ -845,6 +1013,24 @@
                             </div>
                             <p class="text-xs mt-1 font-mono" style="color: var(--brain-txt-3);" id="xpLabel">0 / 100 XP</p>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Habits & Tasks Progress Widget -->
+                <div class="panel brain-reveal brain-reveal-3" id="dashHabitWidget">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Habits & Tasks</span>
+                        <button class="badge badge-accent" style="cursor: pointer; border: none;" onclick="switchView('habits')">View All</button>
+                    </div>
+                    <div class="panel-body py-3">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-xs" style="color: var(--brain-txt-3);" id="dashHabitLabel">0 done</span>
+                            <span class="font-mono text-xs font-bold" style="color: var(--brain-accent);" id="dashHabitPct">0%</span>
+                        </div>
+                        <div class="day-progress-track">
+                            <div class="day-progress-fill" id="dashHabitFill" style="width: 0%;"></div>
+                        </div>
+                        <p class="text-xs mt-1.5 font-mono" style="color: var(--brain-txt-3);" id="dashHabitDetail">0 habits &middot; 0 tasks &middot; 0 remaining</p>
                     </div>
                 </div>
 
@@ -986,6 +1172,140 @@
         <!-- Activity List -->
         <div class="space-y-2" id="activityLogList">
             <div class="text-center py-8 text-xs" style="color: var(--brain-txt-3);">Loading activities...</div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: HABITS & TASKS
+         ═══════════════════════════════════════ -->
+    <div id="view-habits" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-habits">
+
+        <!-- Habits Header -->
+        <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+            <div class="flex items-center gap-3">
+                <div class="date-nav">
+                    <button class="date-nav-btn" onclick="navHabitDate(-1)" aria-label="Previous day">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8.5 3.5L5 7l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </button>
+                    <button class="px-3 py-1.5 rounded-lg text-sm font-medium" style="background: rgba(255,255,255,0.04); color: var(--brain-txt);" onclick="openHabitDatePicker()" id="habitDateLabel">Today</button>
+                    <button class="date-nav-btn" onclick="navHabitDate(1)" aria-label="Next day">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.5 3.5L9 7l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </button>
+                    <input type="date" id="habitDateInput" class="sr-only" onchange="setHabitDateFromPicker(this.value)">
+                </div>
+                <!-- Daily / Weekly Toggle -->
+                <div class="flex gap-0.5 p-0.5 rounded-md" style="background: rgba(255,255,255,0.04);">
+                    <button class="habit-view-toggle active" id="toggleDaily" onclick="setHabitViewMode('daily')">Daily</button>
+                    <button class="habit-view-toggle" id="toggleWeekly" onclick="setHabitViewMode('weekly')">Weekly</button>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button class="btn btn-primary" onclick="openAddHabitModal()">+ Habit</button>
+                <button class="btn btn-ghost" onclick="openAddTaskModal()">+ Task</button>
+            </div>
+        </div>
+
+        <!-- ── DAILY VIEW ── -->
+        <div id="habitsDaily" class="space-y-4">
+
+            <!-- Day Progress Bar -->
+            <div class="panel brain-reveal brain-reveal-1">
+                <div class="panel-body py-4 px-5">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-heading font-bold text-xs uppercase tracking-widest" style="color: var(--brain-txt-2);">Day Progress</span>
+                        <span class="font-mono text-sm font-bold" style="color: var(--brain-accent);" id="dayProgressPct">0%</span>
+                    </div>
+                    <div class="day-progress-track">
+                        <div class="day-progress-fill" id="dayProgressFill" style="width: 0%;"></div>
+                    </div>
+                    <p class="text-xs mt-2 font-mono" style="color: var(--brain-txt-3);" id="dayProgressLabel">0 habits &middot; 0 tasks &middot; 0 remaining</p>
+                </div>
+            </div>
+
+            <!-- Habits Section -->
+            <div class="brain-reveal brain-reveal-2">
+                <div class="flex items-center gap-2 mb-2 px-1">
+                    <span class="font-heading font-bold text-xs uppercase tracking-widest" style="color: var(--brain-txt-2);">Habits</span>
+                    <div style="flex: 1; height: 1px; background: var(--brain-border);"></div>
+                </div>
+                <div class="space-y-1" id="habitsList">
+                    <div class="text-center py-6 text-xs" style="color: var(--brain-txt-3);">No habits configured yet. <button class="underline" style="color: var(--brain-accent);" onclick="openAddHabitModal()">Add your first habit</button></div>
+                </div>
+            </div>
+
+            <!-- Tasks Section -->
+            <div class="brain-reveal brain-reveal-3">
+                <div class="flex items-center gap-2 mb-2 px-1">
+                    <span class="font-heading font-bold text-xs uppercase tracking-widest" style="color: var(--brain-txt-2);">Tasks</span>
+                    <div style="flex: 1; height: 1px; background: var(--brain-border);"></div>
+                    <span class="font-mono text-xs" style="color: var(--brain-txt-3);" id="taskCount">0 tasks</span>
+                </div>
+                <div class="space-y-1" id="tasksList">
+                    <div class="text-center py-6 text-xs" style="color: var(--brain-txt-3);">No tasks for today. <button class="underline" style="color: var(--brain-accent);" onclick="openAddTaskModal()">Add a task</button></div>
+                </div>
+            </div>
+
+            <!-- Close Day Panel -->
+            <div class="brain-reveal brain-reveal-4" id="closeDayPanel" style="display: none;">
+                <div class="panel" style="border-color: color-mix(in srgb, var(--brain-accent) 20%, var(--brain-border));">
+                    <div class="panel-body py-3 px-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium" style="color: var(--brain-txt);">Ready to close the day?</p>
+                            <p class="text-xs" style="color: var(--brain-txt-3);" id="closeDaySubtext">Push 0 remaining items to tomorrow</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="openModal('closeDayModal')">Close Day</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── WEEKLY VIEW ── -->
+        <div id="habitsWeekly" style="display: none;">
+
+            <!-- Weekly Grid -->
+            <div class="panel brain-reveal brain-reveal-1">
+                <div class="panel-body p-0 overflow-x-auto">
+                    <table class="habit-weekly-grid" id="weeklyHabitGrid">
+                        <thead>
+                            <tr>
+                                <th class="habit-grid-label">Habit</th>
+                                <th class="habit-grid-day" id="wkDay0">Mon</th>
+                                <th class="habit-grid-day" id="wkDay1">Tue</th>
+                                <th class="habit-grid-day" id="wkDay2">Wed</th>
+                                <th class="habit-grid-day" id="wkDay3">Thu</th>
+                                <th class="habit-grid-day" id="wkDay4">Fri</th>
+                                <th class="habit-grid-day" id="wkDay5">Sat</th>
+                                <th class="habit-grid-day" id="wkDay6">Sun</th>
+                            </tr>
+                        </thead>
+                        <tbody id="weeklyHabitBody">
+                            <tr><td colspan="8" class="text-center py-8 text-xs" style="color: var(--brain-txt-3);">Loading weekly view...</td></tr>
+                        </tbody>
+                        <tfoot id="weeklyHabitFoot">
+                            <tr>
+                                <td class="habit-grid-label font-heading font-bold text-xs" style="color: var(--brain-txt-2);">Completion</td>
+                                <td class="habit-grid-day" id="wkPct0">--</td>
+                                <td class="habit-grid-day" id="wkPct1">--</td>
+                                <td class="habit-grid-day" id="wkPct2">--</td>
+                                <td class="habit-grid-day" id="wkPct3">--</td>
+                                <td class="habit-grid-day" id="wkPct4">--</td>
+                                <td class="habit-grid-day" id="wkPct5">--</td>
+                                <td class="habit-grid-day" id="wkPct6">--</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Streak Summary -->
+            <div class="panel brain-reveal brain-reveal-2 mt-4">
+                <div class="panel-header">
+                    <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Habit Streaks</span>
+                </div>
+                <div class="panel-body" id="habitStreakSummary">
+                    <p class="text-xs" style="color: var(--brain-txt-3);">Loading streaks...</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1221,6 +1541,46 @@
                     <div class="panel-body" id="settDirectivePoints">
                         <div class="text-xs" style="color: var(--brain-txt-3);">Loading...</div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Habits & Tasks Settings (full-width below main grid) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+            <!-- Habits Management -->
+            <div class="panel brain-reveal brain-reveal-3">
+                <div class="panel-header">
+                    <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Manage Habits</span>
+                    <button class="btn btn-primary btn-sm" onclick="openAddHabitModal()">+ Add</button>
+                </div>
+                <div class="panel-body p-0" id="settHabitList">
+                    <div class="px-4 py-6 text-center text-xs" style="color: var(--brain-txt-3);">Loading habits...</div>
+                </div>
+            </div>
+
+            <!-- Task Scoring Rules -->
+            <div class="panel brain-reveal brain-reveal-3">
+                <div class="panel-header">
+                    <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Task Scoring Rules</span>
+                    <span class="badge badge-ghost">Per-user</span>
+                </div>
+                <div class="panel-body space-y-3">
+                    <div>
+                        <label class="form-label">Default time estimate (minutes)</label>
+                        <input type="number" class="form-input" id="settDefaultEstimate" value="30" min="5" max="240" step="5" style="max-width: 120px;">
+                    </div>
+                    <div>
+                        <label class="form-label">Category time defaults</label>
+                        <div class="space-y-1.5" id="settCategoryDefaults">
+                            <div class="text-xs" style="color: var(--brain-txt-3);">Loading...</div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">AI auto-fill instructions</label>
+                        <textarea class="form-input" id="settAiPrompt" rows="3" placeholder="Custom instructions for how AI should estimate task time and categorize tasks..."></textarea>
+                        <p class="text-xs mt-1" style="color: var(--brain-txt-3);">These override the system defaults from Knowledge Manager.</p>
+                    </div>
+                    <button class="btn btn-primary w-full" onclick="saveTaskRules()">Save Task Rules</button>
                 </div>
             </div>
         </div>
@@ -1519,6 +1879,245 @@
     </div>
 </div>
 
+<!-- ═══════════════════════════════════════
+     HABITS & TASKS MODALS
+     ═══════════════════════════════════════ -->
+
+<!-- Add Habit Modal -->
+<div class="modal-backdrop" id="addHabitModal" onclick="if(event.target===this)closeModal('addHabitModal')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="font-heading font-bold text-base">Add Habit</h3>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('addHabitModal')">&times;</button>
+        </div>
+        <div class="modal-body space-y-3">
+            <div>
+                <label class="form-label">Habit Name</label>
+                <input type="text" class="form-input" id="addHabitName" placeholder="e.g., Meditate, Exercise, Read...">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Category</label>
+                    <select class="form-input" id="addHabitCategory">
+                        <option value="">None (standalone)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Points per completion</label>
+                    <input type="number" class="form-input" id="addHabitPoints" value="15" min="1" max="500" step="1">
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Icon</label>
+                <div class="flex flex-wrap gap-2 mt-1" id="addHabitIconGrid">
+                    <!-- Populated by JS -->
+                </div>
+                <input type="hidden" id="addHabitIcon" value="star">
+            </div>
+            <div>
+                <label class="form-label">Frequency</label>
+                <select class="form-input" id="addHabitFrequency">
+                    <option value="daily" selected>Daily</option>
+                    <option value="weekdays">Weekdays (Mon-Fri)</option>
+                    <option value="weekends">Weekends (Sat-Sun)</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('addHabitModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitAddHabit()">Add Habit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Habit Modal -->
+<div class="modal-backdrop" id="editHabitModal" onclick="if(event.target===this)closeModal('editHabitModal')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="font-heading font-bold text-base">Edit Habit</h3>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('editHabitModal')">&times;</button>
+        </div>
+        <div class="modal-body space-y-3">
+            <input type="hidden" id="editHabitId">
+            <div>
+                <label class="form-label">Habit Name</label>
+                <input type="text" class="form-input" id="editHabitName">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Category</label>
+                    <select class="form-input" id="editHabitCategory">
+                        <option value="">None (standalone)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Points per completion</label>
+                    <input type="number" class="form-input" id="editHabitPoints" value="15" min="1" max="500" step="1">
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Icon</label>
+                <div class="flex flex-wrap gap-2 mt-1" id="editHabitIconGrid">
+                    <!-- Populated by JS -->
+                </div>
+                <input type="hidden" id="editHabitIcon" value="star">
+            </div>
+            <div>
+                <label class="form-label">Frequency</label>
+                <select class="form-input" id="editHabitFrequency">
+                    <option value="daily">Daily</option>
+                    <option value="weekdays">Weekdays (Mon-Fri)</option>
+                    <option value="weekends">Weekends (Sat-Sun)</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-danger" onclick="deleteHabit()" style="margin-right: auto;">Delete</button>
+            <button class="btn btn-ghost" onclick="closeModal('editHabitModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitEditHabit()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal-backdrop" id="addTaskModal" onclick="if(event.target===this)closeModal('addTaskModal')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="font-heading font-bold text-base">Add Task</h3>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('addTaskModal')">&times;</button>
+        </div>
+        <div class="modal-body space-y-3">
+            <div>
+                <label class="form-label">Task Title</label>
+                <input type="text" class="form-input" id="addTaskTitle" placeholder="What needs to get done?">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Category</label>
+                    <select class="form-input" id="addTaskCategory">
+                        <option value="">Auto-detect</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Estimated time (min)</label>
+                    <input type="number" class="form-input" id="addTaskMinutes" placeholder="30" min="1" max="480" step="5">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Scheduled date</label>
+                    <input type="date" class="form-input" id="addTaskDate">
+                </div>
+                <div>
+                    <label class="form-label">Deadline (optional)</label>
+                    <input type="date" class="form-input" id="addTaskDeadline">
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Description (optional)</label>
+                <textarea class="form-input" id="addTaskDescription" rows="2" placeholder="Additional context or notes..."></textarea>
+            </div>
+            <div class="flex items-center gap-2 p-2.5 rounded-lg" style="background: rgba(139, 92, 246, 0.06); border: 1px solid rgba(139, 92, 246, 0.12);">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;"><path d="M7 1.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM7 4.5v3M7 9.5h.01" stroke="var(--brain-accent-2)" stroke-width="1.2" stroke-linecap="round"/></svg>
+                <span class="text-xs" style="color: var(--brain-txt-2);">Leave fields blank for AI auto-fill based on your scoring rules.</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('addTaskModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitAddTask()">Add Task</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal-backdrop" id="editTaskModal" onclick="if(event.target===this)closeModal('editTaskModal')">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="font-heading font-bold text-base">Edit Task</h3>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('editTaskModal')">&times;</button>
+        </div>
+        <div class="modal-body space-y-3">
+            <input type="hidden" id="editTaskId">
+            <div>
+                <label class="form-label">Task Title</label>
+                <input type="text" class="form-input" id="editTaskTitle">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Category</label>
+                    <select class="form-input" id="editTaskCategory">
+                        <option value="">None</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Estimated time (min)</label>
+                    <input type="number" class="form-input" id="editTaskMinutes" min="1" max="480" step="5">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Scheduled date</label>
+                    <input type="date" class="form-input" id="editTaskDate">
+                </div>
+                <div>
+                    <label class="form-label">Deadline</label>
+                    <input type="date" class="form-input" id="editTaskDeadline">
+                </div>
+            </div>
+            <div>
+                <label class="form-label">Notes</label>
+                <textarea class="form-input" id="editTaskNotes" rows="2"></textarea>
+            </div>
+            <div class="flex items-center gap-3 p-2.5 rounded-lg" style="background: var(--brain-surface-el);">
+                <div class="text-xs" style="color: var(--brain-txt-2);">
+                    <span>Status: <strong id="editTaskStatus">pending</strong></span>
+                    <span class="ml-3">Heat: <strong id="editTaskHeat">0</strong></span>
+                    <span class="ml-3">Created: <strong id="editTaskCreated">--</strong></span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-danger" onclick="deleteTask()" style="margin-right: auto;">Delete</button>
+            <button class="btn btn-ghost" onclick="closeModal('editTaskModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitEditTask()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<!-- Close Day Modal -->
+<div class="modal-backdrop" id="closeDayModal" onclick="if(event.target===this)closeModal('closeDayModal')">
+    <div class="modal-content" style="max-width: 480px;">
+        <div class="modal-header">
+            <h3 class="font-heading font-bold text-base">Close Day</h3>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal('closeDayModal')">&times;</button>
+        </div>
+        <div class="modal-body space-y-3">
+            <div class="p-3 rounded-lg" style="background: var(--brain-surface-el);">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium" style="color: var(--brain-txt);">Day Summary</span>
+                    <span class="font-mono text-sm font-bold" style="color: var(--brain-accent);" id="closeDayPct">0%</span>
+                </div>
+                <div class="day-progress-track mb-2">
+                    <div class="day-progress-fill" id="closeDayProgressFill" style="width: 0%;"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs" style="color: var(--brain-txt-2);">
+                    <div><span class="font-mono font-bold" style="color: var(--brain-success);" id="closeDayCompleted">0</span> completed</div>
+                    <div><span class="font-mono font-bold" style="color: var(--brain-warm, #FB923C);" id="closeDayPushing">0</span> pushing</div>
+                    <div><span class="font-mono font-bold" style="color: var(--brain-txt);" id="closeDayTotal">0</span> total</div>
+                </div>
+            </div>
+            <div id="closeDayPushList" class="space-y-1 max-h-[200px] overflow-y-auto">
+                <!-- Items being pushed listed here -->
+            </div>
+            <p class="text-xs" style="color: var(--brain-txt-3);">Incomplete tasks will be pushed to tomorrow with increased priority. Unchecked habits will remain as missed for today.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('closeDayModal')">Not Yet</button>
+            <button class="btn btn-primary" onclick="confirmCloseDay()">Close Day</button>
+        </div>
+    </div>
+</div>
+
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
@@ -1553,6 +2152,16 @@ let realtimeChannels = [];
 let activityLogDate = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
 let webhookAvailable = false; // checked on init
 let settingsLoaded = false;
+
+// Habits & Tasks state
+let habits = [];
+let habitCompletions = {};    // { habitId: { date: completionObj } }
+let tasks = [];
+let habitViewDate = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+let habitViewMode = 'daily';  // 'daily' or 'weekly'
+let habitsLoaded = false;
+let selectedHabitIcon = 'star';
+let editSelectedHabitIcon = 'star';
 
 // Category icons fallback
 const CAT_ICONS = {
@@ -2051,7 +2660,7 @@ async function loadDashboardData() {
 // ═══════════════════════════════════════
 function switchView(view) {
     currentView = view;
-    const views = ['dashboard', 'timer', 'activities', 'calendar', 'leaderboard', 'achievements', 'analytics', 'settings'];
+    const views = ['dashboard', 'timer', 'activities', 'habits', 'calendar', 'leaderboard', 'achievements', 'analytics', 'settings'];
     views.forEach(v => {
         const el = document.getElementById(`view-${v}`);
         if (el) el.style.display = v === view ? '' : 'none';
@@ -2080,6 +2689,7 @@ function switchView(view) {
     if (view === 'leaderboard') loadLeaderboard('week');
     if (view === 'achievements') loadAchievements();
     if (view === 'analytics') loadAnalytics('7');
+    if (view === 'habits') loadHabitsView();
 }
 
 // ═══════════════════════════════════════
@@ -3635,6 +4245,1042 @@ function renderWeeklyReport(result) {
             ${data.insight ? `<div class="mt-3 p-3 rounded-lg text-xs" style="background: var(--brain-accent-2-dim); color: var(--brain-txt);">${data.insight}</div>` : ''}
         </div>
     `;
+}
+
+// ═══════════════════════════════════════
+// HABITS & TASKS — ICON GRID
+// ═══════════════════════════════════════
+const HABIT_ICON_OPTIONS = [
+    'meditation','exercise','book','heart','brain','star','fire','music',
+    'palette','run','yoga','cook','code','write','read','pray','walk',
+    'briefcase','home','clock','dumbbell','chat','sparkle','target',
+    'rocket','plant','coffee','phone','memo','trophy','gem'
+];
+
+function buildIconGrid(containerId, hiddenInputId, selectedIcon) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = HABIT_ICON_OPTIONS.map(icon => {
+        const emoji = CAT_ICONS[icon] || '\u2B50';
+        const sel = icon === selectedIcon ? 'background: var(--brain-accent-dim); border-color: var(--brain-accent);' : '';
+        return `<button type="button" class="flex items-center justify-center w-8 h-8 rounded-md text-base border cursor-pointer transition-all"
+            style="border-color: var(--brain-border); ${sel}"
+            data-icon="${icon}" onclick="selectHabitIcon('${containerId}','${hiddenInputId}','${icon}')">${emoji}</button>`;
+    }).join('');
+}
+
+function selectHabitIcon(containerId, hiddenInputId, icon) {
+    document.getElementById(hiddenInputId).value = icon;
+    if (containerId === 'addHabitIconGrid') selectedHabitIcon = icon;
+    else editSelectedHabitIcon = icon;
+    buildIconGrid(containerId, hiddenInputId, icon);
+}
+
+// ═══════════════════════════════════════
+// HABITS & TASKS — DATA LOADING
+// ═══════════════════════════════════════
+async function loadHabitsView() {
+    habitsLoaded = true;
+    updateHabitDateLabel();
+    if (habitViewMode === 'daily') {
+        await loadHabitsDaily(habitViewDate);
+    } else {
+        await loadHabitsWeekly();
+    }
+}
+
+async function loadHabitsDaily(date) {
+    // Load habits
+    const h = await supabaseSelect('brain_habits',
+        `user_id=eq.${activeProfileId}&is_active=eq.true&select=*&order=sort_order,created_at`
+    );
+    habits = h || [];
+
+    // Load completions for past 7 days (for dot history)
+    const weekAgo = new Date(date);
+    weekAgo.setDate(weekAgo.getDate() - 6);
+    const weekAgoStr = weekAgo.toLocaleDateString('en-CA');
+    const hc = await supabaseSelect('brain_habit_completions',
+        `user_id=eq.${activeProfileId}&completion_date=gte.${weekAgoStr}&completion_date=lte.${date}&select=*`
+    );
+    // Build completions map: { habitId: { date: completionObj } }
+    habitCompletions = {};
+    (hc || []).forEach(c => {
+        if (!habitCompletions[c.habit_id]) habitCompletions[c.habit_id] = {};
+        habitCompletions[c.habit_id][c.completion_date] = c;
+    });
+
+    // Load tasks for the date
+    const t = await supabaseSelect('brain_tasks',
+        `user_id=eq.${activeProfileId}&scheduled_date=eq.${date}&status=neq.pushed&select=*&order=heat_level.desc,deadline.asc.nullslast,created_at`
+    );
+    tasks = t || [];
+
+    renderHabitsDaily(date);
+    renderDayProgress();
+    renderDashboardHabitWidget();
+}
+
+async function loadHabitsWeekly() {
+    // Determine the Monday of the current week based on habitViewDate
+    const d = new Date(habitViewDate + 'T12:00:00');
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday
+    const monday = new Date(d);
+    monday.setDate(diff);
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    const monStr = monday.toLocaleDateString('en-CA');
+    const sunStr = sunday.toLocaleDateString('en-CA');
+
+    // Load habits
+    const h = await supabaseSelect('brain_habits',
+        `user_id=eq.${activeProfileId}&is_active=eq.true&select=*&order=sort_order,created_at`
+    );
+    habits = h || [];
+
+    // Load completions for the week
+    const hc = await supabaseSelect('brain_habit_completions',
+        `user_id=eq.${activeProfileId}&completion_date=gte.${monStr}&completion_date=lte.${sunStr}&select=*`
+    );
+    habitCompletions = {};
+    (hc || []).forEach(c => {
+        if (!habitCompletions[c.habit_id]) habitCompletions[c.habit_id] = {};
+        habitCompletions[c.habit_id][c.completion_date] = c;
+    });
+
+    renderHabitsWeekly(monday);
+}
+
+// ═══════════════════════════════════════
+// HABITS & TASKS — DAILY RENDERING
+// ═══════════════════════════════════════
+function renderHabitsDaily(date) {
+    const today = new Date().toLocaleDateString('en-CA');
+    const isToday = date === today;
+
+    // Build 7-day date array ending on `date`
+    const dotDates = [];
+    for (let i = 6; i >= 0; i--) {
+        const dd = new Date(date + 'T12:00:00');
+        dd.setDate(dd.getDate() - i);
+        dotDates.push(dd.toLocaleDateString('en-CA'));
+    }
+
+    // Render habits
+    const habitsList = document.getElementById('habitsList');
+    if (habits.length === 0) {
+        habitsList.innerHTML = `<div class="text-center py-6 text-xs" style="color: var(--brain-txt-3);">No habits configured yet. <button class="underline" style="color: var(--brain-accent);" onclick="openAddHabitModal()">Add your first habit</button></div>`;
+    } else {
+        habitsList.innerHTML = habits.map(h => {
+            const comp = habitCompletions[h.habit_id]?.[date];
+            const isChecked = !!comp;
+            const icon = getCatIcon(h);
+            const dots = dotDates.map(dd => {
+                const done = !!habitCompletions[h.habit_id]?.[dd];
+                const isFuture = dd > today;
+                const isDotToday = dd === today;
+                let cls = 'habit-dot';
+                if (isFuture) cls += ' future';
+                else if (done) cls += ' done';
+                else cls += ' missed';
+                if (isDotToday) cls += ' today';
+                return `<div class="${cls}" title="${dd}"></div>`;
+            }).join('');
+
+            return `
+            <div class="habit-row ${isChecked ? 'completed' : ''}" id="habit-row-${h.habit_id}">
+                <button class="habit-checkbox ${isChecked ? 'checked' : ''}" onclick="event.stopPropagation(); toggleHabitCompletion('${h.habit_id}', '${date}')" aria-label="Toggle ${h.name}">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <span class="text-base flex-shrink-0">${icon}</span>
+                <span class="text-sm font-medium flex-1" style="color: var(--brain-txt);">${h.name}</span>
+                <span class="badge badge-ghost font-mono">${h.points_value} pts</span>
+                <div class="habit-dots hidden sm:flex">${dots}</div>
+                <button class="habit-expand-chevron" onclick="event.stopPropagation(); toggleHabitExpand('${h.habit_id}')" title="Log details" id="chevron-${h.habit_id}">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="habit-expand" id="expand-${h.habit_id}">
+                <input type="number" class="form-input" placeholder="Minutes" min="1" max="480" style="max-width: 80px;" id="expandMin-${h.habit_id}" value="${comp?.actual_minutes || ''}">
+                <input type="text" class="form-input flex-1" placeholder="Notes..." id="expandNote-${h.habit_id}" value="${comp?.notes || ''}">
+                <button class="btn btn-primary btn-sm" onclick="saveHabitExpand('${h.habit_id}', '${date}')">Save</button>
+            </div>`;
+        }).join('');
+    }
+
+    // Render tasks
+    const tasksList = document.getElementById('tasksList');
+    const taskCountEl = document.getElementById('taskCount');
+    taskCountEl.textContent = `${tasks.length} task${tasks.length !== 1 ? 's' : ''}`;
+
+    if (tasks.length === 0) {
+        tasksList.innerHTML = `<div class="text-center py-6 text-xs" style="color: var(--brain-txt-3);">No tasks for this day. <button class="underline" style="color: var(--brain-accent);" onclick="openAddTaskModal()">Add a task</button></div>`;
+    } else {
+        tasksList.innerHTML = tasks.map(t => {
+            const isDone = t.status === 'completed';
+            const heat = getEffectiveHeat(t);
+            const heatCls = getHeatClass(heat);
+            const deadlineBadge = renderDeadlineBadge(t, date);
+            const estBadge = t.estimated_minutes ? `<span class="badge badge-ghost font-mono">${t.estimated_minutes}min</span>` : '';
+            const cat = categories.find(c => c.category_id === t.category_id);
+            const catDot = cat ? `<div class="w-2 h-2 rounded-full flex-shrink-0" style="background: ${cat.color};"></div>` : '';
+
+            return `
+            <div class="task-row ${isDone ? 'completed' : ''}" onclick="openEditTaskModal('${t.task_id}')">
+                <button class="habit-checkbox ${isDone ? 'checked' : ''}" onclick="event.stopPropagation(); toggleTaskCompletion('${t.task_id}')" aria-label="Toggle ${t.title}">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                ${catDot}
+                <div class="heat-dot ${heatCls}"></div>
+                <span class="task-title text-sm font-medium flex-1" style="color: var(--brain-txt);">${t.title}</span>
+                ${estBadge}
+                ${deadlineBadge}
+            </div>`;
+        }).join('');
+    }
+
+    // Show/hide close day panel
+    const panel = document.getElementById('closeDayPanel');
+    const pendingTasks = tasks.filter(t => t.status === 'pending');
+    const uncheckedHabits = habits.filter(h => !habitCompletions[h.habit_id]?.[date]);
+    const remaining = pendingTasks.length + uncheckedHabits.length;
+    if (isToday && remaining > 0) {
+        panel.style.display = '';
+        document.getElementById('closeDaySubtext').textContent = `Push ${pendingTasks.length} task${pendingTasks.length !== 1 ? 's' : ''} to tomorrow (${uncheckedHabits.length} habit${uncheckedHabits.length !== 1 ? 's' : ''} will be marked missed)`;
+    } else {
+        panel.style.display = 'none';
+    }
+}
+
+function renderDayProgress() {
+    const date = habitViewDate;
+    const totalHabits = habits.length;
+    const doneHabits = habits.filter(h => !!habitCompletions[h.habit_id]?.[date]).length;
+    const totalTasks = tasks.length;
+    const doneTasks = tasks.filter(t => t.status === 'completed').length;
+    const total = totalHabits + totalTasks;
+    const done = doneHabits + doneTasks;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    const remaining = total - done;
+
+    document.getElementById('dayProgressPct').textContent = `${pct}%`;
+    document.getElementById('dayProgressFill').style.width = `${pct}%`;
+    document.getElementById('dayProgressLabel').textContent =
+        `${doneHabits} habit${doneHabits !== 1 ? 's' : ''} \u00B7 ${doneTasks} task${doneTasks !== 1 ? 's' : ''} done \u00B7 ${remaining} remaining`;
+}
+
+function renderDashboardHabitWidget() {
+    const date = new Date().toLocaleDateString('en-CA');
+    const totalHabits = habits.length;
+    const doneHabits = habits.filter(h => !!habitCompletions[h.habit_id]?.[date]).length;
+    const totalTasks = tasks.length;
+    const doneTasks = tasks.filter(t => t.status === 'completed').length;
+    const total = totalHabits + totalTasks;
+    const done = doneHabits + doneTasks;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+    const labelEl = document.getElementById('dashHabitLabel');
+    const pctEl = document.getElementById('dashHabitPct');
+    const fillEl = document.getElementById('dashHabitFill');
+    const detailEl = document.getElementById('dashHabitDetail');
+    if (labelEl) labelEl.textContent = `${done}/${total} done`;
+    if (pctEl) pctEl.textContent = `${pct}%`;
+    if (fillEl) fillEl.style.width = `${pct}%`;
+    if (detailEl) detailEl.textContent = `${doneHabits} habit${doneHabits !== 1 ? 's' : ''} \u00B7 ${doneTasks} task${doneTasks !== 1 ? 's' : ''} \u00B7 ${total - done} remaining`;
+}
+
+// ═══════════════════════════════════════
+// HABITS & TASKS — WEEKLY RENDERING
+// ═══════════════════════════════════════
+function renderHabitsWeekly(monday) {
+    const today = new Date().toLocaleDateString('en-CA');
+    const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        dates.push(d.toLocaleDateString('en-CA'));
+    }
+
+    // Update column headers with dates
+    dates.forEach((d, i) => {
+        const th = document.getElementById(`wkDay${i}`);
+        if (th) {
+            const isToday = d === today;
+            const dayNum = new Date(d + 'T12:00:00').getDate();
+            th.innerHTML = `<div${isToday ? ' style="color: var(--brain-accent);"' : ''}>${dayNames[i]}<br><span class="font-mono text-xs">${dayNum}</span></div>`;
+        }
+    });
+
+    // Build habit rows
+    const tbody = document.getElementById('weeklyHabitBody');
+    if (habits.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-xs" style="color: var(--brain-txt-3);">No habits configured</td></tr>';
+    } else {
+        tbody.innerHTML = habits.map(h => {
+            const icon = getCatIcon(h);
+            const cells = dates.map((d, i) => {
+                const isFuture = d > today;
+                const done = !!habitCompletions[h.habit_id]?.[d];
+                const isToday = d === today;
+                let cls = 'wk-check';
+                let content = '\u00B7';
+                if (isFuture) { cls += ' future'; }
+                else if (done) { cls += ' done'; content = '\u2713'; }
+                else { cls += ' missed'; content = '\u2717'; }
+                if (isToday) cls += ' today';
+                return `<td class="habit-grid-day"><span class="${cls}">${content}</span></td>`;
+            }).join('');
+            return `<tr><td class="habit-grid-label"><span class="mr-1.5">${icon}</span>${h.name}</td>${cells}</tr>`;
+        }).join('');
+    }
+
+    // Completion percentages per day
+    dates.forEach((d, i) => {
+        const el = document.getElementById(`wkPct${i}`);
+        if (!el) return;
+        if (d > today) { el.textContent = '--'; return; }
+        const total = habits.length;
+        const done = habits.filter(h => !!habitCompletions[h.habit_id]?.[d]).length;
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+        el.textContent = `${pct}%`;
+        el.style.color = pct >= 80 ? 'var(--brain-success)' : pct >= 50 ? 'var(--brain-accent)' : 'var(--brain-txt-3)';
+    });
+
+    // Streak summary
+    renderHabitStreaks();
+}
+
+function renderHabitStreaks() {
+    const container = document.getElementById('habitStreakSummary');
+    if (!container) return;
+    if (habits.length === 0) {
+        container.innerHTML = '<p class="text-xs" style="color: var(--brain-txt-3);">No habits yet</p>';
+        return;
+    }
+
+    // Calculate streaks per habit (count back from today)
+    const today = new Date();
+    const streaks = habits.map(h => {
+        let streak = 0;
+        for (let i = 0; i < 365; i++) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            const ds = d.toLocaleDateString('en-CA');
+            if (habitCompletions[h.habit_id]?.[ds]) streak++;
+            else break;
+        }
+        return { name: h.name, icon: getCatIcon(h), streak };
+    }).filter(s => s.streak > 0).sort((a, b) => b.streak - a.streak);
+
+    if (streaks.length === 0) {
+        container.innerHTML = '<p class="text-xs" style="color: var(--brain-txt-3);">No active streaks yet. Start checking off habits!</p>';
+        return;
+    }
+
+    container.innerHTML = `<div class="flex flex-wrap gap-3">
+        ${streaks.map(s => `
+            <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg" style="background: var(--brain-surface-el);">
+                <span class="text-sm">${s.icon}</span>
+                <span class="text-xs font-medium" style="color: var(--brain-txt);">${s.name}</span>
+                <span class="font-mono text-xs font-bold" style="color: var(--brain-accent);">${s.streak}d</span>
+                ${s.streak >= 3 ? '<span class="text-xs">\uD83D\uDD25</span>' : ''}
+            </div>
+        `).join('')}
+    </div>`;
+}
+
+// ═══════════════════════════════════════
+// HABITS & TASKS — HEAT / DEADLINE HELPERS
+// ═══════════════════════════════════════
+function getEffectiveHeat(task) {
+    let heat = task.heat_level || 0;
+    if (task.deadline) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const dl = new Date(task.deadline + 'T00:00:00');
+        const daysUntil = Math.round((dl - today) / 86400000);
+        if (daysUntil < 0) heat += 3;
+        else if (daysUntil <= 1) heat += 2;
+        else if (daysUntil <= 3) heat += 1;
+    }
+    return heat;
+}
+
+function getHeatClass(heat) {
+    if (heat <= 0) return 'heat-0';
+    if (heat <= 2) return 'heat-1';
+    if (heat <= 4) return 'heat-3';
+    return 'heat-critical';
+}
+
+function renderDeadlineBadge(task, viewDate) {
+    if (!task.deadline) return '';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dl = new Date(task.deadline + 'T00:00:00');
+    const daysUntil = Math.round((dl - today) / 86400000);
+
+    if (daysUntil < 0) {
+        return `<span class="deadline-badge deadline-overdue">OVERDUE (${Math.abs(daysUntil)}d)</span>`;
+    } else if (daysUntil === 0) {
+        return `<span class="deadline-badge deadline-today">Due Today</span>`;
+    } else if (daysUntil <= 3) {
+        const dlDate = new Date(task.deadline + 'T12:00:00');
+        const label = dlDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return `<span class="deadline-badge deadline-upcoming">${label}</span>`;
+    } else {
+        const dlDate = new Date(task.deadline + 'T12:00:00');
+        const label = dlDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return `<span class="deadline-badge deadline-upcoming">${label}</span>`;
+    }
+}
+
+// ═══════════════════════════════════════
+// HABITS & TASKS — INTERACTIONS
+// ═══════════════════════════════════════
+async function toggleHabitCompletion(habitId, date) {
+    const existing = habitCompletions[habitId]?.[date];
+    const habit = habits.find(h => h.habit_id === habitId);
+    if (!habit) return;
+
+    if (existing) {
+        // Uncomplete
+        if (webhookAvailable) {
+            await brainApi('uncomplete_habit', { habit_id: habitId, date });
+        } else {
+            await supabaseWrite('brain_habit_completions', 'DELETE', {},
+                `habit_id=eq.${habitId}&completion_date=eq.${date}`);
+        }
+        if (habitCompletions[habitId]) delete habitCompletions[habitId][date];
+        toast(`${habit.name} unchecked`, 'info');
+    } else {
+        // Complete
+        const pts = habit.points_value || 15;
+        if (webhookAvailable) {
+            await brainApi('complete_habit', { habit_id: habitId, date, points: pts });
+        } else {
+            const comp = {
+                habit_id: habitId,
+                user_id: activeProfileId,
+                completion_date: date,
+                completed_at: new Date().toISOString(),
+                points_earned: pts
+            };
+            await supabaseWrite('brain_habit_completions', 'POST', comp);
+        }
+        if (!habitCompletions[habitId]) habitCompletions[habitId] = {};
+        habitCompletions[habitId][date] = { completed_at: new Date().toISOString(), points_earned: habit.points_value };
+        toast(`${habit.name} \u2713 +${pts} pts`, 'success');
+    }
+
+    renderHabitsDaily(date);
+    renderDayProgress();
+    renderDashboardHabitWidget();
+}
+
+async function toggleTaskCompletion(taskId) {
+    const task = tasks.find(t => t.task_id === taskId);
+    if (!task) return;
+
+    if (task.status === 'completed') {
+        // Uncomplete
+        if (webhookAvailable) {
+            await brainApi('uncomplete_task', { task_id: taskId });
+        } else {
+            await supabaseWrite('brain_tasks', 'PATCH', { status: 'pending', completed_at: null, points_earned: null },
+                `task_id=eq.${taskId}`);
+        }
+        task.status = 'pending';
+        task.completed_at = null;
+        toast(`"${task.title}" reopened`, 'info');
+    } else {
+        // Complete
+        const est = task.estimated_minutes || 30;
+        const cat = categories.find(c => c.category_id === task.category_id);
+        const pts = cat ? est * (cat.points_per_minute || 1) * (cat.bonus_multiplier || 1) : est;
+        if (webhookAvailable) {
+            await brainApi('complete_task', { task_id: taskId, actual_minutes: est });
+        } else {
+            await supabaseWrite('brain_tasks', 'PATCH', {
+                status: 'completed',
+                completed_at: new Date().toISOString(),
+                points_earned: pts,
+                actual_minutes: est
+            }, `task_id=eq.${taskId}`);
+        }
+        task.status = 'completed';
+        task.completed_at = new Date().toISOString();
+        task.points_earned = pts;
+        toast(`"${task.title}" \u2713 +${Math.round(pts)} pts`, 'success');
+    }
+
+    renderHabitsDaily(habitViewDate);
+    renderDayProgress();
+    renderDashboardHabitWidget();
+}
+
+function toggleHabitExpand(habitId) {
+    const el = document.getElementById(`expand-${habitId}`);
+    const chev = document.getElementById(`chevron-${habitId}`);
+    if (!el) return;
+    const isOpen = el.classList.contains('open');
+    el.classList.toggle('open', !isOpen);
+    if (chev) chev.classList.toggle('open', !isOpen);
+}
+
+async function saveHabitExpand(habitId, date) {
+    const mins = parseInt(document.getElementById(`expandMin-${habitId}`)?.value) || null;
+    const notes = document.getElementById(`expandNote-${habitId}`)?.value || null;
+    const habit = habits.find(h => h.habit_id === habitId);
+
+    if (webhookAvailable) {
+        await brainApi('update_habit_completion', { habit_id: habitId, date, actual_minutes: mins, notes });
+    } else {
+        await supabaseWrite('brain_habit_completions', 'PATCH',
+            { actual_minutes: mins, notes },
+            `habit_id=eq.${habitId}&completion_date=eq.${date}`);
+    }
+
+    // Update local state
+    if (habitCompletions[habitId]?.[date]) {
+        habitCompletions[habitId][date].actual_minutes = mins;
+        habitCompletions[habitId][date].notes = notes;
+    }
+    toast(`${habit?.name || 'Habit'} details saved`, 'success');
+    toggleHabitExpand(habitId);
+}
+
+// ═══════════════════════════════════════
+// HABITS & TASKS — DATE NAVIGATION
+// ═══════════════════════════════════════
+function navHabitDate(delta) {
+    const d = new Date(habitViewDate + 'T12:00:00');
+    d.setDate(d.getDate() + delta);
+    habitViewDate = d.toLocaleDateString('en-CA');
+    updateHabitDateLabel();
+    loadHabitsView();
+}
+
+function openHabitDatePicker() {
+    const input = document.getElementById('habitDateInput');
+    input.value = habitViewDate;
+    input.showPicker ? input.showPicker() : input.click();
+}
+
+function setHabitDateFromPicker(val) {
+    if (val) {
+        habitViewDate = val;
+        updateHabitDateLabel();
+        loadHabitsView();
+    }
+}
+
+function updateHabitDateLabel() {
+    const el = document.getElementById('habitDateLabel');
+    if (!el) return;
+    const today = new Date().toLocaleDateString('en-CA');
+    if (habitViewDate === today) {
+        el.textContent = 'Today';
+    } else {
+        const d = new Date(habitViewDate + 'T12:00:00');
+        el.textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+}
+
+function setHabitViewMode(mode) {
+    habitViewMode = mode;
+    document.getElementById('toggleDaily').classList.toggle('active', mode === 'daily');
+    document.getElementById('toggleWeekly').classList.toggle('active', mode === 'weekly');
+    document.getElementById('habitsDaily').style.display = mode === 'daily' ? '' : 'none';
+    document.getElementById('habitsWeekly').style.display = mode === 'weekly' ? '' : 'none';
+    loadHabitsView();
+}
+
+// ═══════════════════════════════════════
+// HABITS & TASKS — CRUD (Add/Edit/Delete)
+// ═══════════════════════════════════════
+function openAddHabitModal() {
+    document.getElementById('addHabitName').value = '';
+    document.getElementById('addHabitPoints').value = '15';
+    document.getElementById('addHabitFrequency').value = 'daily';
+    selectedHabitIcon = 'star';
+    populateHabitCategoryDropdown('addHabitCategory');
+    buildIconGrid('addHabitIconGrid', 'addHabitIcon', 'star');
+    openModal('addHabitModal');
+}
+
+async function submitAddHabit() {
+    const name = document.getElementById('addHabitName').value.trim();
+    if (!name) { toast('Habit name required', 'error'); return; }
+    const catId = document.getElementById('addHabitCategory').value || null;
+    const points = parseFloat(document.getElementById('addHabitPoints').value) || 15;
+    const icon = document.getElementById('addHabitIcon').value || 'star';
+    const freq = document.getElementById('addHabitFrequency').value || 'daily';
+
+    const body = {
+        user_id: activeProfileId,
+        name, category_id: catId, icon,
+        points_value: points, frequency: freq,
+        sort_order: habits.length, is_active: true
+    };
+
+    if (webhookAvailable) {
+        await brainApi('add_habit', body);
+    } else {
+        await supabaseWrite('brain_habits', 'POST', body);
+    }
+
+    closeModal('addHabitModal');
+    toast(`Habit "${name}" added`, 'success');
+    loadHabitsView();
+}
+
+function openEditHabitModal(habitId) {
+    const h = habits.find(x => x.habit_id === habitId);
+    if (!h) return;
+    document.getElementById('editHabitId').value = h.habit_id;
+    document.getElementById('editHabitName').value = h.name;
+    document.getElementById('editHabitPoints').value = h.points_value || 15;
+    document.getElementById('editHabitFrequency').value = h.frequency || 'daily';
+    editSelectedHabitIcon = h.icon || 'star';
+    populateHabitCategoryDropdown('editHabitCategory');
+    document.getElementById('editHabitCategory').value = h.category_id || '';
+    buildIconGrid('editHabitIconGrid', 'editHabitIcon', editSelectedHabitIcon);
+    openModal('editHabitModal');
+}
+
+async function submitEditHabit() {
+    const id = document.getElementById('editHabitId').value;
+    const name = document.getElementById('editHabitName').value.trim();
+    if (!name) { toast('Habit name required', 'error'); return; }
+
+    const body = {
+        name,
+        category_id: document.getElementById('editHabitCategory').value || null,
+        icon: document.getElementById('editHabitIcon').value || 'star',
+        points_value: parseFloat(document.getElementById('editHabitPoints').value) || 15,
+        frequency: document.getElementById('editHabitFrequency').value || 'daily'
+    };
+
+    if (webhookAvailable) {
+        await brainApi('update_habit', { habit_id: id, ...body });
+    } else {
+        await supabaseWrite('brain_habits', 'PATCH', body, `habit_id=eq.${id}`);
+    }
+
+    closeModal('editHabitModal');
+    toast(`Habit updated`, 'success');
+    loadHabitsView();
+}
+
+async function deleteHabit() {
+    const id = document.getElementById('editHabitId').value;
+    if (!confirm('Delete this habit? This cannot be undone.')) return;
+
+    if (webhookAvailable) {
+        await brainApi('delete_habit', { habit_id: id });
+    } else {
+        await supabaseWrite('brain_habits', 'PATCH', { is_active: false }, `habit_id=eq.${id}`);
+    }
+
+    closeModal('editHabitModal');
+    toast('Habit deleted', 'info');
+    loadHabitsView();
+}
+
+function openAddTaskModal() {
+    document.getElementById('addTaskTitle').value = '';
+    document.getElementById('addTaskMinutes').value = '';
+    document.getElementById('addTaskDate').value = habitViewDate || new Date().toLocaleDateString('en-CA');
+    document.getElementById('addTaskDeadline').value = '';
+    document.getElementById('addTaskDescription').value = '';
+    populateHabitCategoryDropdown('addTaskCategory');
+    openModal('addTaskModal');
+}
+
+async function submitAddTask() {
+    const title = document.getElementById('addTaskTitle').value.trim();
+    if (!title) { toast('Task title required', 'error'); return; }
+
+    const body = {
+        user_id: activeProfileId,
+        title,
+        category_id: document.getElementById('addTaskCategory').value || null,
+        estimated_minutes: parseInt(document.getElementById('addTaskMinutes').value) || null,
+        scheduled_date: document.getElementById('addTaskDate').value || habitViewDate,
+        deadline: document.getElementById('addTaskDeadline').value || null,
+        description: document.getElementById('addTaskDescription').value.trim() || null,
+        status: 'pending',
+        heat_level: 0,
+        original_date: document.getElementById('addTaskDate').value || habitViewDate
+    };
+
+    if (webhookAvailable) {
+        await brainApi('add_task', body);
+    } else {
+        await supabaseWrite('brain_tasks', 'POST', body);
+    }
+
+    closeModal('addTaskModal');
+    toast(`Task "${title}" added`, 'success');
+    // Reset form
+    document.getElementById('addTaskTitle').value = '';
+    document.getElementById('addTaskMinutes').value = '';
+    document.getElementById('addTaskDeadline').value = '';
+    document.getElementById('addTaskDescription').value = '';
+    loadHabitsView();
+}
+
+function openEditTaskModal(taskId) {
+    const t = tasks.find(x => x.task_id === taskId);
+    if (!t) return;
+    document.getElementById('editTaskId').value = t.task_id;
+    document.getElementById('editTaskTitle').value = t.title;
+    document.getElementById('editTaskMinutes').value = t.estimated_minutes || '';
+    document.getElementById('editTaskDate').value = t.scheduled_date || '';
+    document.getElementById('editTaskDeadline').value = t.deadline || '';
+    document.getElementById('editTaskNotes').value = t.notes || '';
+    document.getElementById('editTaskStatus').textContent = t.status;
+    document.getElementById('editTaskHeat').textContent = t.heat_level || 0;
+    document.getElementById('editTaskCreated').textContent = t.created_at ? new Date(t.created_at).toLocaleDateString() : '--';
+    populateHabitCategoryDropdown('editTaskCategory');
+    document.getElementById('editTaskCategory').value = t.category_id || '';
+    openModal('editTaskModal');
+}
+
+async function submitEditTask() {
+    const id = document.getElementById('editTaskId').value;
+    const title = document.getElementById('editTaskTitle').value.trim();
+    if (!title) { toast('Task title required', 'error'); return; }
+
+    const body = {
+        title,
+        category_id: document.getElementById('editTaskCategory').value || null,
+        estimated_minutes: parseInt(document.getElementById('editTaskMinutes').value) || null,
+        scheduled_date: document.getElementById('editTaskDate').value || habitViewDate,
+        deadline: document.getElementById('editTaskDeadline').value || null,
+        notes: document.getElementById('editTaskNotes').value.trim() || null
+    };
+
+    if (webhookAvailable) {
+        await brainApi('update_task', { task_id: id, ...body });
+    } else {
+        await supabaseWrite('brain_tasks', 'PATCH', body, `task_id=eq.${id}`);
+    }
+
+    closeModal('editTaskModal');
+    toast('Task updated', 'success');
+    loadHabitsView();
+}
+
+async function deleteTask() {
+    const id = document.getElementById('editTaskId').value;
+    if (!confirm('Delete this task?')) return;
+
+    if (webhookAvailable) {
+        await brainApi('delete_task', { task_id: id });
+    } else {
+        await supabaseWrite('brain_tasks', 'DELETE', {}, `task_id=eq.${id}`);
+    }
+
+    closeModal('editTaskModal');
+    toast('Task deleted', 'info');
+    loadHabitsView();
+}
+
+// ═══════════════════════════════════════
+// HABITS & TASKS — CLOSE DAY
+// ═══════════════════════════════════════
+function openCloseDayModal() {
+    const date = habitViewDate;
+    const pendingTasks = tasks.filter(t => t.status === 'pending');
+    const totalH = habits.length;
+    const doneH = habits.filter(h => !!habitCompletions[h.habit_id]?.[date]).length;
+    const totalT = tasks.length;
+    const doneT = tasks.filter(t => t.status === 'completed').length;
+    const total = totalH + totalT;
+    const done = doneH + doneT;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+    document.getElementById('closeDayPct').textContent = `${pct}%`;
+    document.getElementById('closeDayProgressFill').style.width = `${pct}%`;
+    document.getElementById('closeDayCompleted').textContent = done;
+    document.getElementById('closeDayPushing').textContent = pendingTasks.length;
+    document.getElementById('closeDayTotal').textContent = total;
+
+    const pushList = document.getElementById('closeDayPushList');
+    if (pendingTasks.length === 0) {
+        pushList.innerHTML = '<p class="text-xs py-2" style="color: var(--brain-txt-3);">All tasks completed! No items to push.</p>';
+    } else {
+        pushList.innerHTML = pendingTasks.map(t => {
+            const heat = getEffectiveHeat(t);
+            const heatCls = getHeatClass(heat);
+            return `<div class="flex items-center gap-2 px-3 py-2 rounded-md" style="background: var(--brain-surface-el);">
+                <div class="heat-dot ${heatCls}"></div>
+                <span class="text-xs flex-1" style="color: var(--brain-txt);">${t.title}</span>
+                <span class="text-xs font-mono" style="color: var(--brain-txt-3);">heat ${t.heat_level || 0} → ${(t.heat_level || 0) + 1}</span>
+            </div>`;
+        }).join('');
+    }
+
+    openModal('closeDayModal');
+}
+
+async function confirmCloseDay() {
+    const date = habitViewDate;
+    const pendingTasks = tasks.filter(t => t.status === 'pending');
+
+    if (webhookAvailable) {
+        await brainApi('close_day', { date, user_id: activeProfileId });
+    } else {
+        // Fallback: push tasks to tomorrow directly
+        const tomorrow = new Date(date + 'T12:00:00');
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toLocaleDateString('en-CA');
+
+        for (const t of pendingTasks) {
+            await supabaseWrite('brain_tasks', 'PATCH', {
+                scheduled_date: tomorrowStr,
+                heat_level: (t.heat_level || 0) + 1,
+                updated_at: new Date().toISOString()
+            }, `task_id=eq.${t.task_id}`);
+        }
+
+        // Record closure
+        const totalH = habits.length;
+        const doneH = habits.filter(h => !!habitCompletions[h.habit_id]?.[date]).length;
+        const totalT = tasks.length;
+        const doneT = tasks.filter(t => t.status === 'completed').length;
+        const total = totalH + totalT;
+        const done = doneH + doneT;
+
+        await supabaseWrite('brain_day_closures', 'POST', {
+            user_id: activeProfileId,
+            closure_date: date,
+            total_items: total,
+            completed_items: done,
+            completion_pct: total > 0 ? Math.round((done / total) * 100) : 0,
+            tasks_pushed: pendingTasks.length,
+            closed_at: new Date().toISOString()
+        });
+    }
+
+    closeModal('closeDayModal');
+    toast(`Day closed \u2014 ${pendingTasks.length} task${pendingTasks.length !== 1 ? 's' : ''} pushed to tomorrow`, 'success');
+    loadHabitsView();
+}
+
+// ═══════════════════════════════════════
+// HABITS & TASKS — SETTINGS RENDERING
+// ═══════════════════════════════════════
+async function loadHabitSettings() {
+    const h = await supabaseSelect('brain_habits',
+        `user_id=eq.${activeProfileId}&is_active=eq.true&select=*&order=sort_order,created_at`
+    );
+    habits = h || [];
+    renderSettingsHabitList();
+    loadTaskRules();
+}
+
+function renderSettingsHabitList() {
+    const container = document.getElementById('settHabitList');
+    if (!container) return;
+    if (habits.length === 0) {
+        container.innerHTML = '<div class="px-4 py-6 text-center text-xs" style="color: var(--brain-txt-3);">No habits yet</div>';
+        return;
+    }
+    container.innerHTML = habits.map(h => {
+        const icon = getCatIcon(h);
+        return `
+        <div class="setting-row px-4" style="cursor: pointer;" onclick="openEditHabitModal('${h.habit_id}')">
+            <div class="flex items-center gap-2">
+                <span class="text-base">${icon}</span>
+                <span class="text-sm font-medium" style="color: var(--brain-txt);">${h.name}</span>
+                <span class="badge badge-ghost font-mono">${h.points_value} pts</span>
+                <span class="text-xs" style="color: var(--brain-txt-3);">${h.frequency}</span>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.5 3.5L9 7l-3.5 3.5" stroke="var(--brain-txt-3)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>`;
+    }).join('');
+}
+
+async function loadTaskRules() {
+    const rules = await supabaseSelect('brain_task_rules',
+        `or=(user_id.eq.${activeProfileId},user_id.is.null)&select=*&order=user_id.nullsfirst`
+    );
+    if (!rules) return;
+
+    // Merge: user-specific overrides system defaults
+    const merged = {};
+    rules.forEach(r => {
+        if (!merged[r.rule_key] || r.user_id) merged[r.rule_key] = r;
+    });
+
+    const defEst = merged['default_estimate_minutes'];
+    if (defEst) {
+        document.getElementById('settDefaultEstimate').value = defEst.rule_value?.value || 30;
+    }
+
+    const aiPrompt = merged['ai_fill_prompt'];
+    if (aiPrompt) {
+        document.getElementById('settAiPrompt').value = aiPrompt.rule_value?.prompt || '';
+    }
+
+    // Category defaults
+    const catDefaults = merged['category_defaults']?.rule_value || {};
+    const catDefaultsContainer = document.getElementById('settCategoryDefaults');
+    if (catDefaultsContainer && categories.length > 0) {
+        catDefaultsContainer.innerHTML = categories.filter(c => c.is_active).map(c => `
+            <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background: ${c.color};"></div>
+                <span class="text-xs flex-1" style="color: var(--brain-txt-2);">${c.name}</span>
+                <input type="number" class="form-input" style="max-width: 70px; padding: 0.25rem 0.5rem; font-size: 0.75rem;"
+                    data-cat-slug="${c.slug}" value="${catDefaults[c.name] || catDefaults[c.slug] || ''}" placeholder="min" min="5" max="240" step="5">
+            </div>
+        `).join('');
+    }
+}
+
+async function saveTaskRules() {
+    const defaultEst = parseInt(document.getElementById('settDefaultEstimate').value) || 30;
+    const aiPrompt = document.getElementById('settAiPrompt').value.trim();
+
+    // Gather category defaults
+    const catDefaults = {};
+    document.querySelectorAll('#settCategoryDefaults input[data-cat-slug]').forEach(inp => {
+        const val = parseInt(inp.value);
+        if (val) catDefaults[inp.dataset.catSlug] = val;
+    });
+
+    const upsertRule = async (key, value) => {
+        const existing = await supabaseSelect('brain_task_rules',
+            `user_id=eq.${activeProfileId}&rule_key=eq.${key}&select=rule_id`);
+        if (existing && existing.length > 0) {
+            await supabaseWrite('brain_task_rules', 'PATCH',
+                { rule_value: value, updated_at: new Date().toISOString() },
+                `rule_id=eq.${existing[0].rule_id}`);
+        } else {
+            await supabaseWrite('brain_task_rules', 'POST', {
+                user_id: activeProfileId,
+                rule_key: key,
+                rule_value: value,
+                is_active: true,
+                updated_at: new Date().toISOString()
+            });
+        }
+    };
+
+    await upsertRule('default_estimate_minutes', { value: defaultEst });
+    if (aiPrompt) await upsertRule('ai_fill_prompt', { prompt: aiPrompt });
+    if (Object.keys(catDefaults).length > 0) await upsertRule('category_defaults', catDefaults);
+
+    toast('Task scoring rules saved', 'success');
+}
+
+// ═══════════════════════════════════════
+// HABITS & TASKS — CATEGORY DROPDOWN HELPER
+// ═══════════════════════════════════════
+function populateHabitCategoryDropdown(selectId) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    const current = sel.value;
+    sel.innerHTML = '<option value="">None</option>' +
+        categories.filter(c => c.is_active).map(c =>
+            `<option value="${c.category_id}">${getCatIcon(c)} ${c.name}</option>`
+        ).join('');
+    sel.value = current;
+}
+
+// ═══════════════════════════════════════
+// HABITS & TASKS — REAL-TIME SUBSCRIPTIONS
+// ═══════════════════════════════════════
+function setupHabitRealtimeSubscriptions() {
+    // Listen for habit completion changes
+    const habitCompChannel = supabaseClient.channel('brain-habit-completions-' + activeProfileId)
+        .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'brain_habit_completions',
+            filter: `user_id=eq.${activeProfileId}`
+        }, () => {
+            if (currentView === 'habits') loadHabitsView();
+        })
+        .subscribe();
+    realtimeChannels.push(habitCompChannel);
+
+    // Listen for task changes
+    const taskChannel = supabaseClient.channel('brain-tasks-' + activeProfileId)
+        .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'brain_tasks',
+            filter: `user_id=eq.${activeProfileId}`
+        }, () => {
+            if (currentView === 'habits') loadHabitsView();
+        })
+        .subscribe();
+    realtimeChannels.push(taskChannel);
+}
+
+// Hook into existing init to also set up habits real-time
+const _origSetupRealtime = typeof setupRealtimeSubscriptions === 'function' ? setupRealtimeSubscriptions : null;
+if (_origSetupRealtime) {
+    const _wrapped = setupRealtimeSubscriptions;
+    setupRealtimeSubscriptions = function() {
+        _wrapped();
+        setupHabitRealtimeSubscriptions();
+    };
+}
+
+// ═══════════════════════════════════════
+// HABITS & TASKS — INIT HOOKS
+// ═══════════════════════════════════════
+// Populate add task date with today by default
+document.addEventListener('DOMContentLoaded', () => {
+    const addTaskDate = document.getElementById('addTaskDate');
+    if (addTaskDate) addTaskDate.value = new Date().toLocaleDateString('en-CA');
+});
+
+// When settings view loads, also load habit settings
+const _origLoadSettings = typeof loadSettings === 'function' ? loadSettings : null;
+if (_origLoadSettings) {
+    const _wrappedSettings = loadSettings;
+    loadSettings = function() {
+        _wrappedSettings();
+        loadHabitSettings();
+    };
+}
+
+// When dashboard loads, also load habits widget data
+const _origLoadDashboard = typeof loadDashboardData === 'function' ? loadDashboardData : null;
+if (_origLoadDashboard) {
+    const _wrappedDashboard = loadDashboardData;
+    loadDashboardData = async function() {
+        await _wrappedDashboard();
+        // Load today's habits/tasks for the dashboard widget
+        const today = new Date().toLocaleDateString('en-CA');
+        const h = await supabaseSelect('brain_habits',
+            `user_id=eq.${activeProfileId}&is_active=eq.true&select=*&order=sort_order,created_at`
+        );
+        habits = h || [];
+        const hc = await supabaseSelect('brain_habit_completions',
+            `user_id=eq.${activeProfileId}&completion_date=eq.${today}&select=*`
+        );
+        habitCompletions = {};
+        (hc || []).forEach(c => {
+            if (!habitCompletions[c.habit_id]) habitCompletions[c.habit_id] = {};
+            habitCompletions[c.habit_id][c.completion_date] = c;
+        });
+        const t = await supabaseSelect('brain_tasks',
+            `user_id=eq.${activeProfileId}&scheduled_date=eq.${today}&status=neq.pushed&select=*`
+        );
+        tasks = t || [];
+        renderDashboardHabitWidget();
+    };
 }
 
 </script>
