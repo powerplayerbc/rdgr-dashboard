@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>User Profile | RDGR Command Center</title>
+
+    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://yrwrswyjawmgtxrgbnim.supabase.co">
+    <script>
+        // Instant auth check + theme application — runs before body renders
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _presets = {
+                forest:     { accent:'#A8D65B',accentWarm:'#F0A830',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                sunrise:    { accent:'#F0A830',accentWarm:'#E85D5D',base:'#100D08',surface:'#1C1810',surfaceEl:'#272118',surfaceHi:'#322B20',border:'#3F382C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                ocean:      { accent:'#38BDF8',accentWarm:'#06D6A0',base:'#080D10',surface:'#10161C',surfaceEl:'#182027',surfaceHi:'#202A32',border:'#2C363F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E0E8EA',txt2:'#8C9BA0',txt3:'#586B6B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                berry:      { accent:'#C084FC',accentWarm:'#FB7185',base:'#0D0810',surface:'#16101C',surfaceEl:'#201827',surfaceHi:'#2A2032',border:'#3A2C3F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E0EA',txt2:'#A08CA0',txt3:'#6B586B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                rdgr:       { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' },
+                monochrome: { accent:'#E8E8E8',accentWarm:'#A0A0A0',base:'#000000',surface:'#0A0A0A',surfaceEl:'#141414',surfaceHi:'#1E1E1E',border:'#2A2A2A',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E8E8',txt2:'#A0A0A0',txt3:'#666666',headingFont:'Nunito',bodyFont:'DM Sans' },
+            };
+            var _t = (_tc.preset === 'custom' && _tc.custom) ? _tc.custom : (_presets[_tc.preset] || _presets.rdgr);
+            // Apply status color overrides if present
+            if (_tc.statusOverrides) {
+                if (_tc.statusOverrides.success) _t.success = _tc.statusOverrides.success;
+                if (_tc.statusOverrides.warning) _t.warning = _tc.statusOverrides.warning;
+                if (_tc.statusOverrides.danger) _t.danger = _tc.statusOverrides.danger;
+            }
+            var _r = document.documentElement;
+            _r.style.setProperty('--deft-accent', _t.accent);
+            _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+            _r.style.setProperty('--deft-accent-warm', _t.accentWarm || _t.accent);
+            _r.style.setProperty('--deft-base', _t.base);
+            _r.style.setProperty('--deft-surface', _t.surface);
+            _r.style.setProperty('--deft-surface-el', _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-surface-hi', _t.surfaceHi || _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-border', _t.border);
+            _r.style.setProperty('--deft-success', _t.success || '#6BCB77');
+            _r.style.setProperty('--deft-success-dim', (_t.success || '#6BCB77') + '26');
+            _r.style.setProperty('--deft-warning', _t.warning || '#F0A830');
+            _r.style.setProperty('--deft-warning-dim', (_t.warning || '#F0A830') + '26');
+            _r.style.setProperty('--deft-danger', _t.danger || '#E85D5D');
+            _r.style.setProperty('--deft-danger-dim', (_t.danger || '#E85D5D') + '26');
+            _r.style.setProperty('--deft-txt', _t.txt);
+            _r.style.setProperty('--deft-txt-2', _t.txt2 || '#8A95A9');
+            _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
+            _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
+            _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+            var _fs = _tc.fontScale || 1;
+            _r.style.setProperty('--deft-font-scale', _fs);
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent,
+        html.rdgr-authed #deftApp,
+        html.rdgr-authed #brainApp,
+        html.rdgr-authed #settingsApp { opacity: 1 !important; }
+
+        /* Universal theme */
+        body {
+            background: var(--deft-base, #08090D) !important;
+            color: var(--deft-txt, #E8ECF1) !important;
+            font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important;
+        }
+        .font-heading, h1, h2, h3 {
+            font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important;
+        }
+        nav {
+            background: color-mix(in srgb, var(--deft-base, #08090D) 92%, transparent) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel, .stat-chip {
+            background: var(--deft-surface, #11131A) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel-header { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input:focus {
+            border-color: var(--deft-accent, #06D6A0) !important;
+            box-shadow: 0 0 0 2px var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+        }
+        /* Accent color */
+        .text-accent { color: var(--deft-accent, #06D6A0) !important; }
+        .bg-accent { background-color: var(--deft-accent, #06D6A0) !important; }
+        .task-tab.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+        .btn-primary {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent) !important;
+        }
+        .btn-primary:hover {
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent) !important;
+        }
+        .btn-ghost { border-color: var(--deft-border, #2A2E3D) !important; }
+        /* Status colors */
+        .text-info { color: var(--deft-accent, #06D6A0) !important; }
+        .badge-in_progress, .badge-approve-type { background: var(--deft-accent-dim) !important; color: var(--deft-accent) !important; }
+        .badge-completed { background: var(--deft-success-dim, rgba(34,197,94,0.15)) !important; color: var(--deft-success, #22C55E) !important; }
+        .badge-failed, .badge-risk-high { background: var(--deft-danger-dim, rgba(255,107,107,0.15)) !important; color: var(--deft-danger, #FF6B6B) !important; }
+        .badge-blocked, .badge-review { background: var(--deft-warning-dim, rgba(255,217,61,0.15)) !important; color: var(--deft-warning, #FFD93D) !important; }
+        .btn-approve { background: var(--deft-success-dim) !important; color: var(--deft-success) !important; border-color: color-mix(in srgb, var(--deft-success) 25%, transparent) !important; }
+        .btn-deny { background: var(--deft-danger-dim) !important; color: var(--deft-danger) !important; border-color: color-mix(in srgb, var(--deft-danger) 25%, transparent) !important; }
+        .text-alert { color: var(--deft-danger, #FF6B6B) !important; }
+        .text-warn { color: var(--deft-warning, #FFD93D) !important; }
+        /* Secondary text */
+        .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+        .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+        .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+        ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D) !important; }
+        .pulse-dot { background: var(--deft-accent, #06D6A0) !important; }
+        .gate-input:focus {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent) !important;
+        }
+        /* Surface elevation */
+        .review-card, .directive-card, .human-task-card, .wf-card, .thread-item {
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        select.form-input option { background: var(--deft-surface-el, #1A1D28) !important; color: var(--deft-txt, #E8ECF1) !important; }
+        /* Font scale */
+        body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
+        .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
+        .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
+        .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
+        .text-3xl { font-size: calc(1.875rem * var(--deft-font-scale, 1)) !important; }
+    
+        /* ── Nav Dropdown System ── */
+        .nav-group { position: relative; }
+        .nav-group-btn {
+            display: flex; align-items: center; gap: 0.25rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem; font-weight: 500;
+            color: #8A95A9;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+            border: none; background: transparent;
+        }
+        .nav-group-btn:hover { color: #E8ECF1; }
+        .nav-group-btn.active {
+            background: rgba(6,214,160,0.12);
+            color: #06D6A0;
+        }
+        .nav-group-btn .chevron {
+            transition: transform 0.2s;
+            opacity: 0.5;
+        }
+        .nav-group:hover .nav-group-btn .chevron { transform: rotate(180deg); opacity: 0.8; }
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 150px;
+            padding: 0.375rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: opacity 0.15s, visibility 0.15s, transform 0.15s;
+            z-index: 70;
+        }
+        .nav-group:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .nav-dropdown a {
+            display: block;
+            padding: 0.4rem 0.625rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+        .nav-dropdown a:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--deft-txt, #E8ECF1);
+        }
+        .nav-dropdown a.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        /* Theme overrides for nav */
+        .nav-group-btn.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        base: '#08090D',
+                        surface: '#11131A',
+                        'surface-el': '#1A1D28',
+                        'surface-hi': '#242836',
+                        border: '#2A2E3D',
+                        accent: '#06D6A0',
+                        'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B',
+                        'alert-dim': 'rgba(255,107,107,0.15)',
+                        warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)',
+                        info: '#4CC9F0',
+                        'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1',
+                        'txt-2': '#8A95A9',
+                        'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #08090D;
+            color: #E8ECF1;
+        }
+
+        /* -- Grain -- */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* -- Scrollbar -- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3A3E4D; }
+
+        /* -- Gate -- */
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: #E8ECF1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            width: 100%;
+        }
+        .gate-input:focus {
+            border-color: rgba(6,214,160,0.4);
+            box-shadow: 0 0 0 3px rgba(6,214,160,0.08);
+        }
+        .gate-input::placeholder { color: #525E73; }
+        .gate-error { color: #FF6B6B; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        /* -- Pulse -- */
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #06D6A0;
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+
+        /* -- Nav Tabs -- */
+        .task-tab {
+            flex: 1; padding: 0.4rem 0.75rem; font-size: 0.75rem; font-weight: 500;
+            text-align: center; border-radius: 0.375rem; cursor: pointer;
+            color: rgba(255,255,255,0.45); background: transparent; border: none;
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+        .task-tab:hover { color: #E8ECF1; }
+        .task-tab.active { background: rgba(6,214,160,0.12); color: #06D6A0; }
+
+        /* -- Cards -- */
+        .panel {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid #1E2130;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel-body { padding: 1rem 1.25rem; }
+
+        /* -- Badges -- */
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem; font-weight: 500;
+            letter-spacing: 0.05em; text-transform: uppercase;
+            padding: 0.2rem 0.5rem; border-radius: 0.25rem;
+            line-height: 1; white-space: nowrap;
+        }
+        .badge-accent { background: rgba(6,214,160,0.15); color: #06D6A0; }
+
+        /* -- Buttons -- */
+        .btn {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 600; font-size: 0.8rem;
+            letter-spacing: 0.03em; padding: 0.5rem 1rem;
+            border-radius: 0.375rem; cursor: pointer;
+            transition: all 0.2s ease; border: none;
+            text-transform: uppercase;
+        }
+        .btn-primary { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.3); }
+        .btn-primary:hover { background: rgba(6,214,160,0.25); }
+        .btn-ghost { background: transparent; color: #8A95A9; border: 1px solid #2A2E3D; }
+        .btn-ghost:hover { background: rgba(255,255,255,0.03); color: #E8ECF1; }
+        .btn-deny { background: rgba(255,107,107,0.15); color: #FF6B6B; border: 1px solid rgba(255,107,107,0.25); }
+        .btn-deny:hover { background: rgba(255,107,107,0.25); box-shadow: 0 0 12px rgba(255,107,107,0.15); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* -- Form inputs -- */
+        .form-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2A2E3D;
+            border-radius: 0.375rem;
+            padding: 0.625rem 0.75rem;
+            color: #E8ECF1;
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.875rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            border-color: rgba(6,214,160,0.4);
+            box-shadow: 0 0 0 2px rgba(6,214,160,0.08);
+        }
+        .form-input::placeholder { color: #525E73; }
+        select.form-input { cursor: pointer; }
+        select.form-input option { background: #1A1D28; color: #E8ECF1; }
+        textarea.form-input { resize: vertical; min-height: 80px; }
+
+        /* -- Form label -- */
+        .form-label {
+            font-size: 0.75rem; font-weight: 500; color: #8A95A9;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            margin-bottom: 0.375rem; display: block;
+        }
+
+        /* -- Toast -- */
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            padding: 0.75rem 1rem; border-radius: 0.5rem;
+            font-size: 0.8rem; font-family: 'IBM Plex Sans', system-ui;
+            animation: toast-in 0.3s ease forwards; max-width: 380px;
+        }
+        .toast-success { background: rgba(6,214,160,0.15); border: 1px solid rgba(6,214,160,0.3); color: #06D6A0; }
+        .toast-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #FF6B6B; }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* -- Save bar -- */
+        .save-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+            background: rgba(17,19,26,0.95); backdrop-filter: blur(12px);
+            border-top: 1px solid #1E2130;
+            padding: 0.75rem 1.5rem;
+            display: flex; align-items: center; justify-content: flex-end; gap: 1rem;
+            transform: translateY(100%); transition: transform 0.3s ease;
+        }
+        .save-bar.has-changes { transform: translateY(0); }
+
+        /* -- Multi-entry cards -- */
+        .entry-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(42,46,61,0.6);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            transition: border-color 0.2s;
+        }
+        .entry-card:hover { border-color: rgba(42,46,61,0.9); }
+
+        /* -- Spinner -- */
+        .spinner {
+            display: inline-block; width: 14px; height: 14px;
+            border: 2px solid rgba(6,214,160,0.3); border-top-color: #06D6A0;
+            border-radius: 50%; animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* -- Section divider -- */
+        .section-divider { border-top: 1px solid #1E2130; margin: 1rem 0; }
+    </style>
+</head>
+<body>
+
+    <!-- -- Auth Gate -- -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+            </div>
+            <div id="gateProfiles" class="flex justify-center gap-3 mb-6">
+                <div class="text-center text-xs text-txt-3">Loading profiles...</div>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- -- Main Content -- -->
+    <div id="mainContent" style="display: none; opacity: 0; transition: opacity 0.4s;">
+
+        <!-- -- Top Nav -- -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">User Profile</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="nav-group-btn">Dashboard</a>
+                        <div class="nav-group">
+                            <a href="/chat" class="nav-group-btn">Chat <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/chat">Chat</a>
+                                <a href="/council">Council</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/crm" class="nav-group-btn">Outreach <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/crm">CRM</a>
+                                <a href="/email-outreach">Email</a>
+                                <a href="/social-dashboard">Social</a>
+                                <a href="/offer-studio">Offers</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brand-discovery" class="nav-group-btn">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brand-discovery">Discovery</a>
+                                <a href="/template-studio">Templates</a>
+                                <a href="/brand-documents">Docs</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/bsi-discovery" class="nav-group-btn">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/bsi-discovery">Discovery</a>
+                                <a href="/compliance">Compliance</a>
+                                <a href="/bsi-documents">Documents</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/content" class="nav-group-btn">Content <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/content">Publishing</a>
+                                <a href="/media">Media</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brain">BRAIN</a>
+                                <a href="/deft">DEFT</a>
+                            </div>
+                        </div>
+                        <a href="/meetings" class="nav-group-btn">Meetings</a>
+                        <div class="nav-group">
+                            <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/our-workflows">Workflows</a>
+                                <a href="/org-chart">Org Map</a>
+                                <a href="/hub">HUB</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Profile Switcher -->
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown">
+                        </div>
+                    </div>
+                    <a href="/settings" class="flex items-center justify-center p-2 rounded-md text-accent transition-colors" title="Voice & Style Settings" style="background: rgba(6,214,160,0.08);">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+            </div>
+        </nav>
+        <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
+
+        <!-- -- Page Header -- -->
+        <div class="max-w-[900px] mx-auto px-4 sm:px-6 pt-6 pb-4">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                    <h2 class="font-heading font-bold text-xl tracking-wide">User Profile</h2>
+                    <p class="text-txt-3 text-sm mt-1">Your personal information, background, and AI context</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-txt-3 font-mono" id="lastSaved"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- -- Panels Container -- -->
+        <div class="max-w-[900px] mx-auto px-4 sm:px-6 pb-24 space-y-5" id="panelsContainer">
+
+            <!-- == Section 1: Identity & Basics == -->
+            <div class="panel" id="panel-identity">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">Identity & Basics</span>
+                    <span class="badge badge-accent">Personal</span>
+                </div>
+                <div class="panel-body space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-input" id="fullName" placeholder="Your full legal name">
+                        </div>
+                        <div>
+                            <label class="form-label">Preferred Name</label>
+                            <input type="text" class="form-input" id="preferredName" placeholder="What people call you">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" id="email" placeholder="your@email.com">
+                        </div>
+                        <div>
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-input" id="phone" placeholder="+1 (555) 000-0000">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-input" id="location" placeholder="City, State">
+                        </div>
+                        <div>
+                            <label class="form-label">Timezone</label>
+                            <select class="form-input" id="timezone">
+                                <option value="">Select timezone...</option>
+                                <optgroup label="United States">
+                                    <option value="America/New_York">Eastern (ET)</option>
+                                    <option value="America/Chicago">Central (CT)</option>
+                                    <option value="America/Denver">Mountain (MT)</option>
+                                    <option value="America/Los_Angeles">Pacific (PT)</option>
+                                    <option value="America/Anchorage">Alaska (AKT)</option>
+                                    <option value="Pacific/Honolulu">Hawaii (HT)</option>
+                                    <option value="America/Phoenix">Arizona (MST, no DST)</option>
+                                </optgroup>
+                                <optgroup label="International">
+                                    <option value="Europe/London">London (GMT/BST)</option>
+                                    <option value="Europe/Paris">Paris / Berlin (CET)</option>
+                                    <option value="Europe/Moscow">Moscow (MSK)</option>
+                                    <option value="Asia/Dubai">Dubai (GST)</option>
+                                    <option value="Asia/Kolkata">India (IST)</option>
+                                    <option value="Asia/Shanghai">China (CST)</option>
+                                    <option value="Asia/Tokyo">Tokyo (JST)</option>
+                                    <option value="Australia/Sydney">Sydney (AEST)</option>
+                                    <option value="Pacific/Auckland">Auckland (NZST)</option>
+                                    <option value="America/Toronto">Toronto (ET)</option>
+                                    <option value="America/Vancouver">Vancouver (PT)</option>
+                                    <option value="America/Mexico_City">Mexico City (CST)</option>
+                                    <option value="America/Sao_Paulo">Sao Paulo (BRT)</option>
+                                    <option value="America/Argentina/Buenos_Aires">Buenos Aires (ART)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" class="form-input" id="dateOfBirth">
+                        </div>
+                        <div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- == Section 2: Professional Background == -->
+            <div class="panel" id="panel-professional">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">Professional Background</span>
+                    <span class="badge badge-accent">Career</span>
+                </div>
+                <div class="panel-body space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Current Title</label>
+                            <input type="text" class="form-input" id="proTitle" placeholder="CEO, Developer, Consultant...">
+                        </div>
+                        <div>
+                            <label class="form-label">Company / Org</label>
+                            <input type="text" class="form-input" id="proCompany" placeholder="Your company or organization">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Industry</label>
+                            <input type="text" class="form-input" id="proIndustry" placeholder="Technology, Finance, Healthcare...">
+                        </div>
+                        <div>
+                            <label class="form-label">Years of Experience</label>
+                            <input type="number" class="form-input" id="proYears" placeholder="0" min="0" max="60">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">LinkedIn URL</label>
+                        <input type="url" class="form-input" id="proLinkedin" placeholder="https://linkedin.com/in/yourname">
+                    </div>
+                    <div>
+                        <label class="form-label">Bio / About</label>
+                        <textarea class="form-input" id="proBio" rows="4" placeholder="A paragraph about yourself -- used by AI systems for context about who you are and what you do..."></textarea>
+                    </div>
+                    <div>
+                        <label class="form-label">Key Skills</label>
+                        <input type="text" class="form-input" id="proSkills" placeholder="Leadership, Python, Sales, Marketing... (comma-separated)">
+                    </div>
+                    <div>
+                        <label class="form-label">Certifications</label>
+                        <input type="text" class="form-input" id="proCerts" placeholder="PMP, AWS Solutions Architect... (comma-separated)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- == Section 3: Work History == -->
+            <div class="panel" id="panel-work">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">Work History</span>
+                    <button class="btn btn-primary text-xs py-1.5 px-3" onclick="addWorkEntry()">+ Add Position</button>
+                </div>
+                <div class="panel-body space-y-3" id="workContainer">
+                    <p class="text-xs text-txt-3 italic" id="workEmpty">No work history entries yet. Click "+ Add Position" to add one.</p>
+                </div>
+            </div>
+
+            <!-- == Section 4: Education == -->
+            <div class="panel" id="panel-education">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">Education</span>
+                    <button class="btn btn-primary text-xs py-1.5 px-3" onclick="addEducationEntry()">+ Add Education</button>
+                </div>
+                <div class="panel-body space-y-3" id="eduContainer">
+                    <p class="text-xs text-txt-3 italic" id="eduEmpty">No education entries yet. Click "+ Add Education" to add one.</p>
+                </div>
+            </div>
+
+            <!-- == Section 5: Personal Interests & Affiliations == -->
+            <div class="panel" id="panel-personal">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">Personal Interests & Affiliations</span>
+                    <span class="badge badge-accent">Personal</span>
+                </div>
+                <div class="panel-body space-y-4">
+                    <div>
+                        <label class="form-label">Hobbies & Interests</label>
+                        <textarea class="form-input" id="hobbies" rows="2" placeholder="Golf, reading sci-fi, woodworking, travel... (comma-separated or freeform)"></textarea>
+                    </div>
+                    <div>
+                        <label class="form-label">Group Affiliations</label>
+                        <textarea class="form-input" id="affiliations" rows="2" placeholder="Clubs, boards, organizations, professional associations..."></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Political Leaning</label>
+                            <select class="form-input" id="politicalLeaning">
+                                <option value="">Prefer not to say</option>
+                                <option value="far-left">Far Left</option>
+                                <option value="left">Left</option>
+                                <option value="center-left">Center-Left</option>
+                                <option value="center">Center</option>
+                                <option value="center-right">Center-Right</option>
+                                <option value="right">Right</option>
+                                <option value="far-right">Far Right</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Religious Affiliation</label>
+                            <input type="text" class="form-input" id="religiousAffiliation" placeholder="Christian, Buddhist, None, etc.">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- == Section 6: Calendar & Scheduling == -->
+            <div class="panel" id="panel-scheduling">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">Calendar & Scheduling</span>
+                    <span class="badge badge-accent">Schedule</span>
+                </div>
+                <div class="panel-body space-y-4">
+                    <div>
+                        <label class="form-label">Google Calendar ID</label>
+                        <input type="text" class="form-input" id="googleCalendarId" placeholder="your-calendar-id@group.calendar.google.com">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Working Hours Start</label>
+                            <input type="time" class="form-input" id="workStart" value="09:00">
+                        </div>
+                        <div>
+                            <label class="form-label">Working Hours End</label>
+                            <input type="time" class="form-input" id="workEnd" value="17:00">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Wake Time</label>
+                            <input type="time" class="form-input" id="wakeTime">
+                        </div>
+                        <div>
+                            <label class="form-label">Sleep Time</label>
+                            <input type="time" class="form-input" id="sleepTime">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- == Section 7: AI Context Notes == -->
+            <div class="panel" id="panel-ai">
+                <div class="panel-header">
+                    <span class="font-heading font-semibold text-sm tracking-wide">AI Context Notes</span>
+                    <span class="badge badge-accent">AI</span>
+                </div>
+                <div class="panel-body space-y-4">
+                    <div>
+                        <label class="form-label">Key Facts</label>
+                        <textarea class="form-input" id="keyFacts" rows="4" placeholder="Things AI agents should know about you -- communication style, pet peeves, preferences, important context..."></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Communication Style</label>
+                            <select class="form-input" id="communicationStyle">
+                                <option value="">Select...</option>
+                                <option value="direct">Direct</option>
+                                <option value="diplomatic">Diplomatic</option>
+                                <option value="casual">Casual</option>
+                                <option value="formal">Formal</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Preferred Tone</label>
+                            <select class="form-input" id="preferredTone">
+                                <option value="">Select...</option>
+                                <option value="professional">Professional</option>
+                                <option value="friendly">Friendly</option>
+                                <option value="technical">Technical</option>
+                                <option value="conversational">Conversational</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Languages</label>
+                        <input type="text" class="form-input" id="languages" placeholder="English, Spanish, French... (comma-separated)">
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end panelsContainer -->
+
+        <!-- -- Save Bar -- -->
+        <div class="save-bar" id="saveBar">
+            <span class="text-xs text-txt-3" id="saveStatus"></span>
+            <button class="btn btn-ghost" onclick="discardChanges()">Discard Changes</button>
+            <button class="btn btn-primary" onclick="saveProfile()" id="saveBtn">Save Profile</button>
+        </div>
+
+    </div><!-- end mainContent -->
+
+    <!-- -- Toast Container -- -->
+    <div class="toast-container" id="toastContainer"></div>
+
+<script>
+
+// ===============================================
+// CONSTANTS
+// ===============================================
+
+let activeProfileId = null;
+
+const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+const AUTH_CODE = 'Advance1!';
+
+// ===============================================
+// STATE
+// ===============================================
+
+let originalProfile = null; // snapshot at load for dirty detection
+let hasUnsavedChanges = false;
+let workEntries = [];
+let eduEntries = [];
+let workIdCounter = 0;
+let eduIdCounter = 0;
+
+// ===============================================
+// AUTH GATE
+// ===============================================
+
+const gate = document.getElementById('gate');
+const mainContent = document.getElementById('mainContent');
+
+let gateSelectedProfile = null;
+
+function getCachedProfiles(callback) {
+    var CACHE_KEY = 'rdgr-profiles-cache';
+    var CACHE_TTL = 300000; // 5 minutes
+    try {
+        var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+        if (cached.profiles && cached.ts && (Date.now() - cached.ts) < CACHE_TTL) {
+            callback(cached.profiles);
+            return;
+        }
+    } catch(e) {}
+    var _SB_URL = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    var _SB_KEY = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    fetch(`${_SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+        headers: { 'apikey': _SB_KEY, 'Authorization': `Bearer ${_SB_KEY}` }
+    }).then(r => r.json()).then(profiles => {
+        if (profiles && Array.isArray(profiles) && profiles.length > 0) {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ profiles: profiles, ts: Date.now() }));
+        }
+        callback(profiles);
+    }).catch(() => callback([]));
+}
+
+function loadGateProfiles() {
+    getCachedProfiles(function(profiles) {
+        const container = document.getElementById('gateProfiles');
+                if (!container || !profiles || !profiles.length) return;
+                const saved = localStorage.getItem('rdgr-active-profile');
+                let savedId = null;
+                if (saved) { try { savedId = JSON.parse(saved).id; } catch(e) {} }
+                container.innerHTML = profiles.map(p => {
+                    const name = p.display_name || p.email || '?';
+                    const initial = name[0].toUpperCase();
+                    const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+                    const color = colors[name] || '#8A95A9';
+                    return `<button type="button" onclick="selectGateProfile('${p.user_id}','${name.replace(/'/g, '&#39;')}',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="if(!this.classList.contains('selected'))this.style.background='rgba(255,255,255,0.02)'">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:${color}20;color:${color};border:2px solid transparent;">${initial}</div>
+                        <span class="text-xs" style="color:#8A95A9;">${name}</span>
+                    </button>`;
+                }).join('');
+                if (savedId) {
+                    const btns = container.querySelectorAll('.gate-profile-btn');
+                    btns.forEach(btn => {
+                        if (btn.getAttribute('onclick').includes(savedId)) {
+                            btn.click();
+                        }
+                    });
+                }
+    });
+}
+
+function selectGateProfile(userId, name, el) {
+    gateSelectedProfile = { id: userId, name: name };
+    document.querySelectorAll('.gate-profile-btn').forEach(btn => {
+        btn.classList.remove('selected');
+        btn.style.background = 'rgba(255,255,255,0.02)';
+        btn.style.borderColor = 'transparent';
+        btn.querySelector('.w-10').style.borderColor = 'transparent';
+    });
+    el.classList.add('selected');
+    el.style.background = 'rgba(255,255,255,0.06)';
+    el.style.borderColor = 'rgba(6,214,160,0.4)';
+    el.querySelector('.w-10').style.borderColor = el.querySelector('.w-10').style.color;
+    const btn = document.getElementById('gateSubmitBtn');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.textContent = 'Sign In as ' + name;
+    document.getElementById('gateInput').focus();
+}
+
+function handleGate(e) {
+    e.preventDefault();
+    const input = document.getElementById('gateInput').value;
+    if (input === AUTH_CODE) {
+        localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+        if (gateSelectedProfile) {
+            localStorage.setItem('rdgr-active-profile', JSON.stringify(gateSelectedProfile));
+            activeProfileId = gateSelectedProfile.id;
+        }
+        gate.classList.add('hidden');
+        mainContent.style.display = '';
+        requestAnimationFrame(() => { mainContent.style.opacity = '1'; });
+        initProfile();
+        return false;
+    }
+    document.getElementById('gateError').classList.add('show');
+    document.getElementById('gateInput').value = '';
+    document.getElementById('gateInput').focus();
+    setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+    return false;
+}
+
+function checkAuth() {
+    if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+        gate.classList.add('hidden');
+        mainContent.style.display = '';
+        requestAnimationFrame(() => { mainContent.style.opacity = '1'; });
+        initProfile();
+        return;
+    }
+}
+
+// ===============================================
+// SUPABASE HELPERS
+// ===============================================
+
+async function supabaseSelect(table, query = '') {
+    const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
+    try {
+        const res = await fetch(url, {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+        });
+        if (!res.ok) { console.error('Supabase error:', res.status, await res.text()); return null; }
+        return await res.json();
+    } catch (err) { console.error('Supabase fetch error:', table, err); return null; }
+}
+
+async function supabaseWrite(table, method, body, matchQuery = '') {
+    const url = `${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`;
+    try {
+        const res = await fetch(url, {
+            method,
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            },
+            body: method === 'DELETE' ? undefined : JSON.stringify(body)
+        });
+        if (!res.ok) { console.error('Supabase write error:', res.status, await res.text()); return null; }
+        const text = await res.text();
+        return text ? JSON.parse(text) : true;
+    } catch (err) { console.error('Supabase write error:', err); return null; }
+}
+
+// ===============================================
+// TOAST
+// ===============================================
+
+function toast(msg, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = `toast toast-${type}`;
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(10px)'; setTimeout(() => el.remove(), 300); }, 3000);
+}
+
+// ===============================================
+// DIRTY TRACKING
+// ===============================================
+
+function markDirty() {
+    hasUnsavedChanges = true;
+    document.getElementById('saveBar').classList.add('has-changes');
+}
+
+function markClean() {
+    hasUnsavedChanges = false;
+    document.getElementById('saveBar').classList.remove('has-changes');
+}
+
+// Attach change listeners to all form fields
+function attachDirtyListeners() {
+    document.querySelectorAll('#panelsContainer .form-input').forEach(el => {
+        el.addEventListener('input', markDirty);
+        el.addEventListener('change', markDirty);
+    });
+}
+
+// ===============================================
+// WORK HISTORY (multi-entry)
+// ===============================================
+
+function addWorkEntry(data = {}) {
+    const id = ++workIdCounter;
+    workEntries.push(id);
+
+    const container = document.getElementById('workContainer');
+    const emptyMsg = document.getElementById('workEmpty');
+    if (emptyMsg) emptyMsg.style.display = 'none';
+
+    const card = document.createElement('div');
+    card.className = 'entry-card space-y-3';
+    card.id = `work-${id}`;
+    card.innerHTML = `
+        <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-txt-2 font-medium uppercase tracking-wider">Position</span>
+            <button class="btn btn-deny text-xs py-1 px-2" onclick="removeWorkEntry(${id})">Remove</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+                <label class="form-label">Title</label>
+                <input type="text" class="form-input work-field" data-work-id="${id}" data-field="title" value="${esc(data.title || '')}" placeholder="Job Title">
+            </div>
+            <div>
+                <label class="form-label">Company</label>
+                <input type="text" class="form-input work-field" data-work-id="${id}" data-field="company" value="${esc(data.company || '')}" placeholder="Company Name">
+            </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+            <div>
+                <label class="form-label">Start Date</label>
+                <input type="month" class="form-input work-field" data-work-id="${id}" data-field="startDate" value="${data.startDate || ''}">
+            </div>
+            <div>
+                <label class="form-label">End Date</label>
+                <input type="month" class="form-input work-field" data-work-id="${id}" data-field="endDate" value="${data.endDate || ''}" ${data.isCurrent ? 'disabled' : ''}>
+            </div>
+            <div class="flex items-center gap-2 pb-1">
+                <input type="checkbox" id="work-current-${id}" class="work-field" data-work-id="${id}" data-field="isCurrent" ${data.isCurrent ? 'checked' : ''} onchange="toggleCurrentJob(${id}, this.checked)">
+                <label for="work-current-${id}" class="text-xs text-txt-2 cursor-pointer">Present</label>
+            </div>
+        </div>
+        <div>
+            <label class="form-label">Description</label>
+            <textarea class="form-input work-field" data-work-id="${id}" data-field="description" rows="2" placeholder="Brief description of your role...">${esc(data.description || '')}</textarea>
+        </div>
+    `;
+    container.appendChild(card);
+
+    // Attach dirty listeners to new fields
+    card.querySelectorAll('.form-input').forEach(el => {
+        el.addEventListener('input', markDirty);
+        el.addEventListener('change', markDirty);
+    });
+    card.querySelector(`#work-current-${id}`).addEventListener('change', markDirty);
+
+    markDirty();
+}
+
+function removeWorkEntry(id) {
+    const el = document.getElementById(`work-${id}`);
+    if (el) el.remove();
+    workEntries = workEntries.filter(i => i !== id);
+    if (workEntries.length === 0) {
+        const emptyMsg = document.getElementById('workEmpty');
+        if (emptyMsg) emptyMsg.style.display = '';
+    }
+    markDirty();
+}
+
+function toggleCurrentJob(id, checked) {
+    const endInput = document.querySelector(`[data-work-id="${id}"][data-field="endDate"]`);
+    if (endInput) {
+        endInput.disabled = checked;
+        if (checked) endInput.value = '';
+    }
+}
+
+function collectWorkHistory() {
+    return workEntries.map(id => {
+        const el = document.getElementById(`work-${id}`);
+        if (!el) return null;
+        const get = field => {
+            const input = el.querySelector(`[data-field="${field}"]`);
+            if (!input) return '';
+            if (input.type === 'checkbox') return input.checked;
+            return input.value.trim();
+        };
+        return {
+            title: get('title'),
+            company: get('company'),
+            startDate: get('startDate'),
+            endDate: get('endDate'),
+            isCurrent: get('isCurrent'),
+            description: get('description')
+        };
+    }).filter(Boolean);
+}
+
+// ===============================================
+// EDUCATION (multi-entry)
+// ===============================================
+
+function addEducationEntry(data = {}) {
+    const id = ++eduIdCounter;
+    eduEntries.push(id);
+
+    const container = document.getElementById('eduContainer');
+    const emptyMsg = document.getElementById('eduEmpty');
+    if (emptyMsg) emptyMsg.style.display = 'none';
+
+    const card = document.createElement('div');
+    card.className = 'entry-card space-y-3';
+    card.id = `edu-${id}`;
+    card.innerHTML = `
+        <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-txt-2 font-medium uppercase tracking-wider">Education</span>
+            <button class="btn btn-deny text-xs py-1 px-2" onclick="removeEducationEntry(${id})">Remove</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+                <label class="form-label">Degree</label>
+                <input type="text" class="form-input edu-field" data-edu-id="${id}" data-field="degree" value="${esc(data.degree || '')}" placeholder="B.S., M.A., Ph.D., etc.">
+            </div>
+            <div>
+                <label class="form-label">School / University</label>
+                <input type="text" class="form-input edu-field" data-edu-id="${id}" data-field="school" value="${esc(data.school || '')}" placeholder="University Name">
+            </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+                <label class="form-label">Field of Study</label>
+                <input type="text" class="form-input edu-field" data-edu-id="${id}" data-field="fieldOfStudy" value="${esc(data.fieldOfStudy || '')}" placeholder="Computer Science, Business...">
+            </div>
+            <div>
+                <label class="form-label">Year Completed</label>
+                <input type="number" class="form-input edu-field" data-edu-id="${id}" data-field="yearCompleted" value="${data.yearCompleted || ''}" placeholder="2020" min="1950" max="2040">
+            </div>
+        </div>
+    `;
+    container.appendChild(card);
+
+    card.querySelectorAll('.form-input').forEach(el => {
+        el.addEventListener('input', markDirty);
+        el.addEventListener('change', markDirty);
+    });
+
+    markDirty();
+}
+
+function removeEducationEntry(id) {
+    const el = document.getElementById(`edu-${id}`);
+    if (el) el.remove();
+    eduEntries = eduEntries.filter(i => i !== id);
+    if (eduEntries.length === 0) {
+        const emptyMsg = document.getElementById('eduEmpty');
+        if (emptyMsg) emptyMsg.style.display = '';
+    }
+    markDirty();
+}
+
+function collectEducation() {
+    return eduEntries.map(id => {
+        const el = document.getElementById(`edu-${id}`);
+        if (!el) return null;
+        const get = field => {
+            const input = el.querySelector(`[data-field="${field}"]`);
+            return input ? input.value.trim() : '';
+        };
+        return {
+            degree: get('degree'),
+            school: get('school'),
+            fieldOfStudy: get('fieldOfStudy'),
+            yearCompleted: get('yearCompleted') ? parseInt(get('yearCompleted')) : null
+        };
+    }).filter(Boolean);
+}
+
+// ===============================================
+// ESCAPE HELPER
+// ===============================================
+
+function esc(str) {
+    if (!str) return '';
+    const el = document.createElement('span');
+    el.textContent = str;
+    return el.innerHTML;
+}
+
+// ===============================================
+// COMMA-SEPARATED -> ARRAY HELPERS
+// ===============================================
+
+function csvToArray(str) {
+    if (!str) return [];
+    return str.split(',').map(s => s.trim()).filter(Boolean);
+}
+
+function arrayToCsv(arr) {
+    if (!arr || !Array.isArray(arr)) return '';
+    return arr.join(', ');
+}
+
+// ===============================================
+// POPULATE FORM FROM DATA
+// ===============================================
+
+function populateForm(profile) {
+    if (!profile) return;
+
+    // Identity
+    const id = profile.identity || {};
+    setValue('fullName', id.fullName);
+    setValue('preferredName', id.preferredName);
+    setValue('email', id.email);
+    setValue('phone', id.phone);
+    setValue('location', id.location);
+    setValue('timezone', id.timezone);
+    setValue('dateOfBirth', id.dateOfBirth);
+
+    // Professional
+    const pro = profile.professional || {};
+    setValue('proTitle', pro.title);
+    setValue('proCompany', pro.company);
+    setValue('proIndustry', pro.industry);
+    setValue('proYears', pro.yearsExperience);
+    setValue('proLinkedin', pro.linkedinUrl);
+    setValue('proBio', pro.bio);
+    setValue('proSkills', arrayToCsv(pro.skills));
+    setValue('proCerts', arrayToCsv(pro.certifications));
+
+    // Work History
+    workEntries = [];
+    workIdCounter = 0;
+    document.getElementById('workContainer').querySelectorAll('.entry-card').forEach(el => el.remove());
+    const emptyWork = document.getElementById('workEmpty');
+    if (profile.workHistory && profile.workHistory.length > 0) {
+        if (emptyWork) emptyWork.style.display = 'none';
+        profile.workHistory.forEach(w => addWorkEntry(w));
+    } else {
+        if (emptyWork) emptyWork.style.display = '';
+    }
+
+    // Education
+    eduEntries = [];
+    eduIdCounter = 0;
+    document.getElementById('eduContainer').querySelectorAll('.entry-card').forEach(el => el.remove());
+    const emptyEdu = document.getElementById('eduEmpty');
+    if (profile.education && profile.education.length > 0) {
+        if (emptyEdu) emptyEdu.style.display = 'none';
+        profile.education.forEach(e => addEducationEntry(e));
+    } else {
+        if (emptyEdu) emptyEdu.style.display = '';
+    }
+
+    // Personal
+    const personal = profile.personal || {};
+    setValue('hobbies', personal.hobbies);
+    setValue('affiliations', personal.affiliations);
+    setValue('politicalLeaning', personal.politicalLeaning);
+    setValue('religiousAffiliation', personal.religiousAffiliation);
+
+    // Scheduling
+    const sched = profile.scheduling || {};
+    setValue('googleCalendarId', sched.googleCalendarId);
+    setValue('workStart', sched.workStart || '09:00');
+    setValue('workEnd', sched.workEnd || '17:00');
+    setValue('wakeTime', sched.wakeTime);
+    setValue('sleepTime', sched.sleepTime);
+
+    // AI Context
+    const ai = profile.aiContext || {};
+    setValue('keyFacts', ai.keyFacts);
+    setValue('communicationStyle', ai.communicationStyle);
+    setValue('preferredTone', ai.preferredTone);
+    setValue('languages', arrayToCsv(ai.languages));
+}
+
+function setValue(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (val !== undefined && val !== null) {
+        el.value = val;
+    }
+}
+
+// ===============================================
+// COLLECT FORM DATA
+// ===============================================
+
+function collectFormData() {
+    return {
+        identity: {
+            fullName: val('fullName'),
+            preferredName: val('preferredName'),
+            email: val('email'),
+            phone: val('phone'),
+            location: val('location'),
+            timezone: val('timezone'),
+            dateOfBirth: val('dateOfBirth'),
+        },
+        professional: {
+            title: val('proTitle'),
+            company: val('proCompany'),
+            industry: val('proIndustry'),
+            linkedinUrl: val('proLinkedin'),
+            yearsExperience: val('proYears') ? parseInt(val('proYears')) : null,
+            bio: val('proBio'),
+            skills: csvToArray(val('proSkills')),
+            certifications: csvToArray(val('proCerts')),
+        },
+        workHistory: collectWorkHistory(),
+        education: collectEducation(),
+        personal: {
+            hobbies: val('hobbies'),
+            affiliations: val('affiliations'),
+            politicalLeaning: val('politicalLeaning'),
+            religiousAffiliation: val('religiousAffiliation'),
+        },
+        scheduling: {
+            googleCalendarId: val('googleCalendarId'),
+            workStart: val('workStart'),
+            workEnd: val('workEnd'),
+            wakeTime: val('wakeTime'),
+            sleepTime: val('sleepTime'),
+        },
+        aiContext: {
+            keyFacts: val('keyFacts'),
+            communicationStyle: val('communicationStyle'),
+            preferredTone: val('preferredTone'),
+            languages: csvToArray(val('languages')),
+        },
+        updatedAt: new Date().toISOString()
+    };
+}
+
+function val(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+}
+
+// ===============================================
+// LOAD PROFILE
+// ===============================================
+
+async function initProfile() {
+    // Read active profile from localStorage
+    const saved = localStorage.getItem('rdgr-active-profile');
+    if (saved) {
+        try {
+            const p = JSON.parse(saved);
+            activeProfileId = p.id;
+        } catch(e) {}
+    }
+
+    if (!activeProfileId) {
+        toast('No profile selected. Please select a profile.', 'error');
+        return;
+    }
+
+    try {
+        // Fetch the profile from Supabase
+        const profiles = await supabaseSelect('deft_user_profiles', `user_id=eq.${activeProfileId}&select=user_id,preferences`);
+        if (!profiles || profiles.length === 0) {
+            toast('Profile not found in database.', 'error');
+            return;
+        }
+
+        const row = profiles[0];
+        const prefs = row.preferences || {};
+        const userProfile = prefs.userProfile || {};
+
+        // userProfile is the single source of truth — no backward compat fallbacks.
+        // If userProfile doesn't exist yet, fields will be empty for the user to fill in.
+
+        populateForm(userProfile);
+        originalProfile = JSON.parse(JSON.stringify(userProfile));
+
+        // Show last saved
+        if (userProfile.updatedAt) {
+            const d = new Date(userProfile.updatedAt);
+            document.getElementById('lastSaved').textContent = 'Last saved: ' + d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Attach dirty listeners after populating
+        attachDirtyListeners();
+        markClean();
+
+    } catch (err) {
+        console.error('Failed to load profile:', err);
+        toast('Failed to load profile data.', 'error');
+    }
+}
+
+// ===============================================
+// SAVE PROFILE
+// ===============================================
+
+async function saveProfile() {
+    if (!activeProfileId) {
+        toast('No profile selected.', 'error');
+        return;
+    }
+
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span class="spinner"></span> Saving...';
+
+    try {
+        const userProfile = collectFormData();
+
+        // Read current preferences so we merge, not overwrite
+        const profiles = await supabaseSelect('deft_user_profiles', `user_id=eq.${activeProfileId}&select=preferences`);
+        const currentPrefs = (profiles && profiles[0]) ? (profiles[0].preferences || {}) : {};
+
+        // Merge userProfile into preferences
+        currentPrefs.userProfile = userProfile;
+
+        // Build a flat profileSummary for easy cross-page access
+        currentPrefs.profileSummary = {
+            name: userProfile.identity?.preferredName || userProfile.identity?.fullName || '',
+            timezone: userProfile.identity?.timezone || '',
+            googleCalendarId: userProfile.scheduling?.googleCalendarId || '',
+            workStart: userProfile.scheduling?.workStart || '',
+            workEnd: userProfile.scheduling?.workEnd || '',
+            wakeTime: userProfile.scheduling?.wakeTime || '',
+            sleepTime: userProfile.scheduling?.sleepTime || '',
+        };
+
+        // PATCH preferences only — userProfile is the single source of truth
+        const result = await supabaseWrite(
+            'deft_user_profiles',
+            'PATCH',
+            { preferences: currentPrefs },
+            `user_id=eq.${activeProfileId}`
+        );
+
+        if (!result) {
+            toast('Failed to save profile. Check console for details.', 'error');
+            return;
+        }
+
+        // Update localStorage and nav display with preferred name
+        const preferredName = val('preferredName');
+        if (preferredName) {
+            const savedProfile = localStorage.getItem('rdgr-active-profile');
+            if (savedProfile) {
+                try {
+                    const p = JSON.parse(savedProfile);
+                    p.name = preferredName;
+                    localStorage.setItem('rdgr-active-profile', JSON.stringify(p));
+                    const nameEl = document.getElementById('profileName');
+                    const avatarEl = document.getElementById('profileAvatar');
+                    if (nameEl) nameEl.textContent = preferredName;
+                    if (avatarEl) avatarEl.textContent = preferredName[0].toUpperCase();
+                } catch(e) {}
+            }
+        }
+
+        originalProfile = JSON.parse(JSON.stringify(userProfile));
+        markClean();
+
+        // Update last saved display
+        const d = new Date(userProfile.updatedAt);
+        document.getElementById('lastSaved').textContent = 'Last saved: ' + d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        toast('Profile saved successfully.');
+
+    } catch (err) {
+        console.error('Save error:', err);
+        toast('Error saving profile: ' + err.message, 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = 'Save Profile';
+    }
+}
+
+// ===============================================
+// DISCARD CHANGES
+// ===============================================
+
+function discardChanges() {
+    if (originalProfile) {
+        populateForm(originalProfile);
+    } else {
+        // Clear all fields
+        document.querySelectorAll('#panelsContainer .form-input').forEach(el => {
+            if (el.tagName === 'SELECT') {
+                el.selectedIndex = 0;
+            } else {
+                el.value = '';
+            }
+        });
+        // Clear work/edu entries
+        workEntries = [];
+        eduEntries = [];
+        workIdCounter = 0;
+        eduIdCounter = 0;
+        document.getElementById('workContainer').querySelectorAll('.entry-card').forEach(el => el.remove());
+        document.getElementById('eduContainer').querySelectorAll('.entry-card').forEach(el => el.remove());
+        const emptyWork = document.getElementById('workEmpty');
+        const emptyEdu = document.getElementById('eduEmpty');
+        if (emptyWork) emptyWork.style.display = '';
+        if (emptyEdu) emptyEdu.style.display = '';
+    }
+    markClean();
+    toast('Changes discarded.');
+}
+
+// ===============================================
+// BOOT
+// ===============================================
+
+checkAuth();
+
+// Load gate profiles on page load (only if gate is visible)
+if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+    loadGateProfiles();
+}
+
+// -- Profile Switcher --
+(function initProfileSwitcher() {
+
+    const saved = localStorage.getItem('rdgr-active-profile');
+    if (saved) {
+        try {
+            const p = JSON.parse(saved);
+            activeProfileId = p.id;
+            const nameEl = document.getElementById('profileName');
+            const avatarEl = document.getElementById('profileAvatar');
+            if (nameEl) nameEl.textContent = p.name;
+            if (avatarEl) avatarEl.textContent = (p.name || 'B')[0].toUpperCase();
+        } catch(e) {}
+    }
+    getCachedProfiles(function(profiles) {
+        const dd = document.getElementById('profileDropdown');
+                if (!dd || !profiles || profiles.length === 0) return;
+                const activeId = saved ? JSON.parse(saved).id : null;
+                dd.innerHTML = profiles.map(p => {
+                    const name = p.display_name || p.email || '?';
+                    const initial = name[0].toUpperCase();
+                    const isActive = p.user_id === activeId;
+                    return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, '&#39;')}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                        <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div>
+                        <span>${name}</span>
+                        ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+                    </button>`;
+                }).join('');
+                dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+    });
+})();
+
+function signOut() {
+    localStorage.removeItem('rdgr-session');
+    localStorage.removeItem('rdgr-active-profile');
+    location.reload();
+}
+
+function toggleProfileDD() {
+    const dd = document.getElementById('profileDropdown');
+    dd.classList.toggle('hidden');
+    if (!dd.classList.contains('hidden')) {
+        setTimeout(() => document.addEventListener('click', function closePDD(e) {
+            if (!document.getElementById('profileSwitcher').contains(e.target)) {
+                dd.classList.add('hidden');
+            }
+            document.removeEventListener('click', closePDD);
+        }), 0);
+    }
+}
+
+function selectProfileGlobal(userId, name) {
+    localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+    location.reload();
+}
+
+</script>
+</body>
+</html>

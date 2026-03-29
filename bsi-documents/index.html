@@ -7,7 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Brand Documents | Carlton AI</title>
+    <title>Policy Documents | Carlton AI</title>
 
     <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
     <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
@@ -84,7 +84,7 @@
         .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
         .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
         .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
-    
+
         /* ── Nav Dropdown System ── */
         .nav-group { position: relative; }
         .nav-group-btn {
@@ -268,19 +268,19 @@
                             </div>
                         </div>
                         <div class="nav-group">
-                            <a href="/brand-discovery" class="nav-group-btn active">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <a href="/brand-discovery" class="nav-group-btn">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
                                 <a href="/brand-discovery">Discovery</a>
                                 <a href="/template-studio">Templates</a>
-                                <a href="/brand-documents" class="active">Docs</a>
+                                <a href="/brand-documents">Docs</a>
                             </div>
                         </div>
                         <div class="nav-group">
-                            <a href="/bsi-discovery" class="nav-group-btn">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <a href="/bsi-discovery" class="nav-group-btn active">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
                                 <a href="/bsi-discovery">Discovery</a>
                                 <a href="/compliance">Compliance</a>
-                                <a href="/bsi-documents">Documents</a>
+                                <a href="/bsi-documents" class="active">Documents</a>
                             </div>
                         </div>
                         <div class="nav-group">
@@ -331,13 +331,15 @@
                 <div>
                     <h2 class="font-heading font-bold text-xl tracking-wide flex items-center gap-2">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 2h8l4 4v12a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M12 2v4h4M7 10h6M7 13h6M7 16h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-                        Brand Documents
+                        Policy Documents
                     </h2>
-                    <p class="text-sm text-txt-2 mt-1">Generate formatted brand documents saved as Google Docs</p>
+                    <p class="text-sm text-txt-2 mt-1">Generate formatted policy documents saved as Google Docs</p>
                 </div>
             </div>
 
-            <div id="docGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div id="docGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="skeleton h-48 rounded-lg"></div>
+                <div class="skeleton h-48 rounded-lg"></div>
                 <div class="skeleton h-48 rounded-lg"></div>
                 <div class="skeleton h-48 rounded-lg"></div>
                 <div class="skeleton h-48 rounded-lg"></div>
@@ -352,23 +354,25 @@
 
     <script>
     const BRAND_ID = 'carlton';
-    const WEBHOOK_URL = 'https://n8n.carltonaiservices.com/webhook/brand-doc-gen';
+    const WEBHOOK_URL = 'https://n8n.carltonaiservices.com/webhook/bsi-doc-gen';
     const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
 
     const DOC_TYPES = [
-        { type: 'positioning_doc', title: 'Brand Positioning Document', icon: '🎯', desc: 'Purpose, mission, core values, customer avatars, emotional hooks, personality, differentiators, and positioning statement.' },
-        { type: 'voice_guide', title: 'Brand Voice & Style Guide', icon: '🎙️', desc: 'Voice overview, tone variations by context, messaging pillars, words to use/avoid, dos/don\'ts with examples.' },
-        { type: 'culture_playbook', title: 'Community-Driven Brand Playbook', icon: '✊', desc: 'Community philosophy, shared values, audience-to-advocate journey, rituals, engagement tactics, ambassador strategy.' },
-        { type: 'one_pager', title: 'Brand One-Pager', icon: '📄', desc: 'Positioning statement, headline stats, unique mechanism, value ladder summary, key differentiators, compelling CTA.' },
-        { type: 'email_playbook', title: 'Email Communication Playbook', icon: '📧', desc: 'Soap Opera Sequence, Seinfeld-style emails, Hook-Story-Offer patterns, cold email best practices, follow-up templates.' },
-        { type: 'content_strategy', title: 'Content Strategy Document', icon: '📝', desc: 'Content pillars with topic lists, core stories, content calendar framework, platform guidelines, thought leadership angles.' },
+        { type: 'operations_manual', title: 'Operations Manual', icon: '\u{1F4CB}', desc: 'Service boundaries, methods and processes, quality SLAs, and operational procedures.' },
+        { type: 'client_contract_template', title: 'Client Contract Template', icon: '\u{1F4DD}', desc: 'Contract terms, pricing structures, non-negotiable clauses, and IP ownership provisions.' },
+        { type: 'pricing_guide', title: 'Pricing Guide & Policy', icon: '\u{1F4B0}', desc: 'Pricing philosophy, rate structures, discount policies, and service scope boundaries.' },
+        { type: 'client_onboarding_guide', title: 'Client Onboarding Guide', icon: '\u{1F91D}', desc: 'Client engagement protocols, communication standards, quality SLA expectations.' },
+        { type: 'employee_handbook', title: 'Employee & Contractor Handbook', icon: '\u{1F465}', desc: 'HR policies, communication protocols, non-negotiable conduct standards.' },
+        { type: 'compliance_overview', title: 'Legal & Compliance Overview', icon: '\u2696\uFE0F', desc: 'Legal compliance requirements, data handling procedures, risk management policies.' },
+        { type: 'sla_document', title: 'SLA Template', icon: '\u{1F4CA}', desc: 'Quality standards, communication SLAs, client engagement commitments.' },
+        { type: 'risk_policy', title: 'Risk Management Policy', icon: '\u{1F6E1}\uFE0F', desc: 'Risk assessment procedures, data handling safeguards, legal compliance measures.' },
     ];
 
     let docState = {};
     // Hydrate from localStorage
-    try { docState = JSON.parse(localStorage.getItem('rdgr-brand-docs-state') || '{}'); } catch(e) {}
-    function saveDocState() { localStorage.setItem('rdgr-brand-docs-state', JSON.stringify(docState)); }
+    try { docState = JSON.parse(localStorage.getItem('rdgr-bsi-docs-state') || '{}'); } catch(e) {}
+    function saveDocState() { localStorage.setItem('rdgr-bsi-docs-state', JSON.stringify(docState)); }
 
     let activeProfileId = null;
     try { activeProfileId = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}').id; } catch(e) {}

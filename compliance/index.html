@@ -7,7 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Brand Discovery | Carlton AI</title>
+    <title>Compliance Dashboard | Carlton AI</title>
 
     <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
     <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
@@ -98,7 +98,7 @@
             color: var(--deft-accent, #06D6A0) !important;
             border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent) !important;
         }
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             background: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent) !important;
         }
         .btn-ghost { border-color: var(--deft-border, #2A2E3D) !important; }
@@ -130,8 +130,8 @@
         .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
         .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
         .text-3xl { font-size: calc(1.875rem * var(--deft-font-scale, 1)) !important; }
-    
-        /* ── Nav Dropdown System ── */
+
+        /* Nav Dropdown System */
         .nav-group { position: relative; }
         .nav-group-btn {
             display: flex; align-items: center; gap: 0.25rem;
@@ -399,20 +399,6 @@
         .stat-value { font-family: 'Chakra Petch', system-ui; font-weight: 700; font-size: 1.4rem; line-height: 1; }
         .stat-label { font-size: 0.7rem; color: #8A95A9; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
 
-        /* Progress bar */
-        .progress-bar {
-            background: rgba(255,255,255,0.05);
-            border-radius: 4px;
-            height: 6px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            border-radius: 4px;
-            background: linear-gradient(90deg, var(--deft-accent, #06D6A0), var(--deft-accent-warm, #4CC9F0));
-            transition: width 0.6s ease;
-        }
-
         /* Form input */
         .form-input {
             width: 100%;
@@ -445,63 +431,48 @@
             100% { background-position: -200% 0; }
         }
 
-        /* ═══ DISCOVERY-SPECIFIC ═══ */
+        /* ═══ COMPLIANCE-SPECIFIC ═══ */
 
-        /* Category cards */
-        .discovery-card {
-            background: var(--deft-surface, #11131A);
-            border: 1px solid var(--deft-border, #2A2E3D);
-            border-radius: 0.75rem;
-            padding: 1.25rem;
-            cursor: pointer;
-            transition: border-color 0.2s, background 0.2s, transform 0.15s;
-            position: relative;
-            overflow: hidden;
+        /* Table styles */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th {
+            text-align: left; padding: 0.625rem 0.75rem;
+            font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--deft-txt-3, #525E73);
+            border-bottom: 1px solid var(--deft-border, #2A2E3D);
         }
-        .discovery-card:hover {
-            background: var(--deft-surface-el, #1A1D28);
-            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, var(--deft-border, #2A2E3D));
+        .data-table td {
+            padding: 0.625rem 0.75rem; font-size: 0.8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            color: var(--deft-txt-2, #8A95A9);
         }
-        .discovery-card:active { transform: scale(0.98); }
-        .discovery-card.complete {
-            border-left: 3px solid var(--deft-success, #22C55E);
-        }
-        .discovery-card.in-progress {
-            border-left: 3px solid var(--deft-accent, #06D6A0);
-        }
-        .discovery-card .card-icon {
-            font-size: 1.5rem;
-            line-height: 1;
+        .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .data-table .expandable-row { cursor: pointer; }
+        .data-table .detail-row { display: none; }
+        .data-table .detail-row.open { display: table-row; }
+        .data-table .detail-row td {
+            padding: 0.75rem 1rem; background: var(--deft-surface-el, #1A1D28);
+            border-bottom: 1px solid var(--deft-border, #2A2E3D);
         }
 
-        /* Depth bar */
-        .depth-bar {
-            height: 4px;
-            background: rgba(255,255,255,0.06);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-top: 0.75rem;
+        /* Filter bar */
+        .filter-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .filter-select {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.375rem; padding: 0.4rem 0.625rem; color: var(--deft-txt, #E8ECF1);
+            font-size: 0.75rem; outline: none; cursor: pointer;
         }
-        .depth-bar-fill {
-            height: 100%;
-            border-radius: 2px;
-            transition: width 0.5s ease, background 0.3s;
+        .filter-select:focus { border-color: var(--deft-accent, #06D6A0); }
+        .filter-select option { background: var(--deft-surface-el, #1A1D28); color: var(--deft-txt, #E8ECF1); }
+        .filter-search {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.375rem; padding: 0.4rem 0.625rem; color: var(--deft-txt, #E8ECF1);
+            font-size: 0.75rem; outline: none; flex: 1; min-width: 150px;
         }
+        .filter-search:focus { border-color: var(--deft-accent, #06D6A0); }
+        .filter-search::placeholder { color: var(--deft-txt-3, #525E73); }
 
-        /* Question card */
-        .question-card {
-            animation: fadeSlideIn 0.35s ease forwards;
-        }
-        @keyframes fadeSlideIn {
-            from { opacity: 0; transform: translateY(16px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeSlideOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-12px); }
-        }
-
-        /* Option cards (this_or_that) */
+        /* Question renderers (for pending preferences) */
         .option-card {
             background: var(--deft-surface-el, #1A1D28);
             border: 2px solid var(--deft-border, #2A2E3D);
@@ -529,7 +500,6 @@
             box-shadow: 0 0 20px color-mix(in srgb, var(--deft-accent, #06D6A0) 10%, transparent);
         }
 
-        /* Verdict buttons (approve_deny) */
         .verdict-btn {
             padding: 0.625rem 1.25rem;
             border-radius: 0.5rem;
@@ -564,7 +534,6 @@
         .verdict-wrong:hover { background: rgba(255,107,107,0.2); }
         .verdict-wrong.selected { background: rgba(255,107,107,0.25); border-color: var(--deft-danger, #FF6B6B); }
 
-        /* Ranking items */
         .rank-item {
             background: var(--deft-surface-el, #1A1D28);
             border: 1px solid var(--deft-border, #2A2E3D);
@@ -578,49 +547,10 @@
             user-select: none;
         }
         .rank-item:active { cursor: grabbing; }
-        .rank-item:hover {
-            background: var(--deft-surface-hi, #242836);
-        }
-        .rank-item.sortable-ghost {
-            opacity: 0.5;
-            border-color: var(--deft-accent, #06D6A0);
-        }
-        .rank-item.sortable-chosen {
-            background: var(--deft-surface-hi, #242836);
-            border-color: var(--deft-accent, #06D6A0);
-        }
+        .rank-item:hover { background: var(--deft-surface-hi, #242836); }
+        .rank-item.sortable-ghost { opacity: 0.5; border-color: var(--deft-accent, #06D6A0); }
+        .rank-item.sortable-chosen { background: var(--deft-surface-hi, #242836); border-color: var(--deft-accent, #06D6A0); }
 
-        /* Depth feedback */
-        .depth-feedback {
-            animation: fadeSlideIn 0.3s ease forwards;
-            background: var(--deft-surface, #11131A);
-            border: 1px solid var(--deft-border, #2A2E3D);
-            border-radius: 0.75rem;
-            padding: 1.25rem;
-        }
-
-        /* Synthesis pulse */
-        @keyframes synthPulse {
-            0%, 100% { opacity: 0.4; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.08); }
-        }
-        .synth-icon {
-            animation: synthPulse 2s ease-in-out infinite;
-        }
-
-        /* Radar chart */
-        .radar-label {
-            font-family: 'IBM Plex Sans', system-ui;
-            font-size: 10px;
-            fill: var(--deft-txt-2, #8A95A9);
-        }
-
-        /* Session progress */
-        .session-progress-ring {
-            transition: stroke-dashoffset 0.6s ease;
-        }
-
-        /* Adjustment textarea slide */
         .adjustment-area {
             max-height: 0;
             overflow: hidden;
@@ -631,10 +561,43 @@
             margin-top: 0.75rem;
         }
 
+        /* Question card animation */
+        .question-card {
+            animation: fadeSlideIn 0.35s ease forwards;
+        }
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Collapsible panel */
+        .collapsible-toggle {
+            cursor: pointer;
+            user-select: none;
+        }
+        .collapsible-toggle .chevron-icon {
+            transition: transform 0.2s;
+        }
+        .collapsible-toggle.collapsed .chevron-icon {
+            transform: rotate(-90deg);
+        }
+        .collapsible-body {
+            transition: max-height 0.3s ease, opacity 0.2s ease;
+            overflow: hidden;
+        }
+        .collapsible-body.collapsed {
+            max-height: 0 !important;
+            opacity: 0;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
         /* Responsive */
         @media (max-width: 767px) {
             .option-cards-row { flex-direction: column !important; }
             .verdict-row { flex-direction: column !important; }
+            .data-table { font-size: 0.7rem; }
+            .data-table th, .data-table td { padding: 0.4rem 0.5rem; }
         }
     </style>
 </head>
@@ -669,7 +632,7 @@
         <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
             <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="pulse-dot" id="systemPulse"></div>
+                    <div class="pulse-dot"></div>
                     <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
                     <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
                         <a href="/rdgr" class="nav-group-btn">Dashboard</a>
@@ -690,18 +653,18 @@
                             </div>
                         </div>
                         <div class="nav-group">
-                            <a href="/brand-discovery" class="nav-group-btn active">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <a href="/brand-discovery" class="nav-group-btn">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
-                                <a href="/brand-discovery" class="active">Discovery</a>
+                                <a href="/brand-discovery">Discovery</a>
                                 <a href="/template-studio">Templates</a>
                                 <a href="/brand-documents">Docs</a>
                             </div>
                         </div>
                         <div class="nav-group">
-                            <a href="/bsi-discovery" class="nav-group-btn">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <a href="/bsi-discovery" class="nav-group-btn active">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
                                 <a href="/bsi-discovery">Discovery</a>
-                                <a href="/compliance">Compliance</a>
+                                <a href="/compliance" class="active">Compliance</a>
                                 <a href="/bsi-documents">Documents</a>
                             </div>
                         </div>
@@ -747,166 +710,193 @@
         </nav>
         <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
 
-        <!-- ═══ VIEW: PROGRESS DASHBOARD ═══ -->
-        <div id="view-progress">
-            <!-- Stat bar -->
-            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
-                <div class="flex gap-3 overflow-x-auto pb-1">
-                    <div class="stat-chip flex-1 min-w-[130px]">
-                        <div>
-                            <div class="stat-value text-accent" id="statCompleted">--</div>
-                            <div class="stat-label">Completed</div>
-                        </div>
+        <!-- Page Content -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
+
+            <!-- Page Heading -->
+            <div class="mb-6">
+                <h2 class="font-heading font-bold text-xl tracking-wide flex items-center gap-2">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1l2.5 1.5V5L10 6.5 7.5 5V2.5L10 1z" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M3 8v6a1 1 0 001 1h12a1 1 0 001-1V8" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M6 11h8M6 14h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M10 6.5V8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    Compliance Dashboard
+                </h2>
+                <p class="text-sm text-txt-2 mt-1">Policy enforcement, content checks, and business rule management</p>
+            </div>
+
+            <!-- Section 1: Status Bar -->
+            <div class="flex gap-3 overflow-x-auto pb-1 mb-6">
+                <div class="stat-chip flex-1 min-w-[130px]">
+                    <div>
+                        <div class="stat-value text-accent" id="statTotalChecks">--</div>
+                        <div class="stat-label">Total Checks</div>
                     </div>
-                    <div class="stat-chip flex-1 min-w-[130px]">
-                        <div>
-                            <div class="stat-value text-info" id="statInProgress">--</div>
-                            <div class="stat-label">In Progress</div>
-                        </div>
+                </div>
+                <div class="stat-chip flex-1 min-w-[130px]">
+                    <div>
+                        <div class="stat-value" style="color: var(--deft-success, #22C55E);" id="statPassRate">--</div>
+                        <div class="stat-label">Pass Rate %</div>
                     </div>
-                    <div class="stat-chip flex-1 min-w-[130px]">
-                        <div>
-                            <div class="stat-value text-txt-2" id="statNotStarted">--</div>
-                            <div class="stat-label">Not Started</div>
-                        </div>
+                </div>
+                <div class="stat-chip flex-1 min-w-[130px]">
+                    <div>
+                        <div class="stat-value" style="color: var(--deft-danger, #FF6B6B);" id="statViolations">--</div>
+                        <div class="stat-label">Violations (7d)</div>
                     </div>
-                    <div class="stat-chip flex-1 min-w-[130px]">
-                        <div>
-                            <div class="stat-value" style="color: var(--deft-accent-warm, #4CC9F0);" id="statOverall">--</div>
-                            <div class="stat-label">Overall %</div>
-                        </div>
+                </div>
+                <div class="stat-chip flex-1 min-w-[130px]">
+                    <div>
+                        <div class="stat-value" style="color: var(--deft-accent-warm, #4CC9F0);" id="statActiveRules">--</div>
+                        <div class="stat-label">Active Rules</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Voice Radar Chart (hidden until voice_calibration data exists) -->
-            <div id="voiceRadarSection" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-4" style="display:none;">
-                <div class="panel">
-                    <div class="panel-header">
-                        <div class="flex items-center gap-2">
-                            <span>🎙️</span>
-                            <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Voice Calibration</h2>
-                        </div>
+            <!-- Section 2: Needs Your Input -->
+            <div class="panel mb-6" id="pendingPanel" style="display:none;">
+                <div class="panel-header collapsible-toggle" onclick="togglePendingPanel()">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1a7 7 0 100 14A7 7 0 008 1z" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M8 5v3M8 10.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span class="font-heading font-semibold text-sm">Needs Your Input</span>
+                        <span class="badge" style="background: var(--deft-warning-dim); color: var(--deft-warning);" id="pendingBadge">0</span>
                     </div>
-                    <div class="panel-body flex justify-center">
-                        <div id="radarChartContainer"></div>
-                    </div>
+                    <svg class="chevron-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                </div>
+                <div class="panel-body" id="pendingBody">
+                    <div id="pendingQuestions"></div>
                 </div>
             </div>
 
-            <!-- Category Grid -->
-            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="font-heading font-semibold text-sm tracking-wide uppercase flex items-center gap-2">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1l2.47 5.01L16 6.73l-4 3.9.94 5.5L8 13.27 3.06 16.13l.94-5.5-4-3.9 5.53-.72L8 1z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" fill="none"/></svg>
-                        Discovery Categories
-                    </h2>
-                    <button onclick="loadProgress()" class="btn btn-ghost text-xs py-1.5 px-2.5">
+            <!-- Empty state for no pending questions -->
+            <div class="panel mb-6" id="pendingEmptyPanel" style="display:none;">
+                <div class="panel-body text-center py-6">
+                    <div class="text-2xl mb-2" style="color: var(--deft-success, #22C55E);">&#10003;</div>
+                    <p class="text-sm text-txt-2">No pending questions</p>
+                    <p class="text-xs text-txt-3 mt-1">All preference questions have been answered</p>
+                </div>
+            </div>
+
+            <!-- Section 3: Active Rules -->
+            <div class="panel mb-6">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.1" fill="none"/><path d="M5 6h6M5 8.5h6M5 11h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+                        <span class="font-heading font-semibold text-sm">Active Rules</span>
+                        <span class="text-xs text-txt-3" id="rulesCount"></span>
+                    </div>
+                    <button onclick="loadRules()" class="btn btn-ghost text-xs py-1.5 px-2.5">
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         Refresh
                     </button>
                 </div>
-                <div id="categoryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <!-- Skeleton loading -->
-                    <div class="skeleton h-32 rounded-lg"></div>
-                    <div class="skeleton h-32 rounded-lg"></div>
-                    <div class="skeleton h-32 rounded-lg"></div>
-                    <div class="skeleton h-32 rounded-lg"></div>
-                    <div class="skeleton h-32 rounded-lg"></div>
-                    <div class="skeleton h-32 rounded-lg"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ═══ VIEW: ACTIVE SESSION ═══ -->
-        <div id="view-session" style="display:none;">
-            <div class="max-w-[800px] mx-auto px-4 sm:px-6 py-6">
-                <!-- Session header -->
-                <div class="flex items-center gap-3 mb-6">
-                    <button onclick="goBackToProgress()" class="btn btn-ghost py-2 px-2.5" title="Back to categories">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 4L6 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </button>
-                    <div class="flex-1">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span id="sessionIcon" class="text-lg"></span>
-                            <h2 class="font-heading font-semibold text-lg" id="sessionTitle">—</h2>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs text-txt-3" id="sessionQuestionCount">0 / 0 questions</span>
-                            <div class="flex-1 max-w-[200px]">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" id="sessionProgressBar" style="width: 0%;"></div>
-                                </div>
-                            </div>
-                            <span class="text-xs font-mono" id="sessionDepthLabel" style="color: var(--deft-accent-warm, #4CC9F0);">Depth: 0.00</span>
-                        </div>
+                <div class="panel-body">
+                    <!-- Filter bar -->
+                    <div class="filter-bar">
+                        <select class="filter-select" id="filterCategory" onchange="applyRuleFilters()">
+                            <option value="">All Categories</option>
+                            <option value="service_scope">Service Scope</option>
+                            <option value="non_negotiables">Non-Negotiables</option>
+                            <option value="contract_terms">Contract Terms</option>
+                            <option value="pricing_philosophy">Pricing Philosophy</option>
+                            <option value="client_engagement">Client Engagement</option>
+                            <option value="communication_protocols">Communication Protocols</option>
+                            <option value="quality_standards">Quality Standards</option>
+                            <option value="hr_policies">HR Policies</option>
+                            <option value="legal_compliance">Legal Compliance</option>
+                            <option value="business_methods">Business Methods</option>
+                            <option value="data_handling">Data Handling</option>
+                            <option value="risk_management">Risk Management</option>
+                        </select>
+                        <select class="filter-select" id="filterType" onchange="applyRuleFilters()">
+                            <option value="">All Types</option>
+                            <option value="must_do">Must Do</option>
+                            <option value="must_not_do">Must Not Do</option>
+                            <option value="conditional">Conditional</option>
+                            <option value="preference">Preference</option>
+                        </select>
+                        <select class="filter-select" id="filterSeverity" onchange="applyRuleFilters()">
+                            <option value="">All Severities</option>
+                            <option value="critical">Critical</option>
+                            <option value="standard">Standard</option>
+                            <option value="advisory">Advisory</option>
+                        </select>
+                        <input type="text" class="filter-search" id="filterSearch" placeholder="Search rules..." oninput="applyRuleFilters()">
                     </div>
-                </div>
-
-                <!-- Question container -->
-                <div id="questionContainer"></div>
-
-                <!-- Depth feedback (shown after answer submission) -->
-                <div id="depthFeedback" style="display:none;"></div>
-            </div>
-        </div>
-
-        <!-- ═══ VIEW: SYNTHESIS ═══ -->
-        <div id="view-synthesis" style="display:none;">
-            <div class="max-w-[800px] mx-auto px-4 sm:px-6 py-6">
-                <!-- Synthesizing state -->
-                <div id="synthesizingState" class="text-center py-16">
-                    <div class="synth-icon text-5xl mb-6">🧬</div>
-                    <h2 class="font-heading font-bold text-2xl mb-3" id="synthTitle">Synthesizing Brand Identity...</h2>
-                    <p class="text-txt-2 text-sm mb-6" id="synthSubtitle">Analyzing your responses and building your identity profile</p>
-                    <div class="progress-bar max-w-xs mx-auto">
-                        <div class="progress-fill" style="width: 60%; animation: synthProgress 3s ease-in-out infinite alternate;"></div>
-                    </div>
-                </div>
-
-                <!-- Synthesis results -->
-                <div id="synthesisResults" style="display:none;">
-                    <div class="flex items-center gap-3 mb-6">
-                        <button onclick="goBackToProgress()" class="btn btn-ghost py-2 px-2.5">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 4L6 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </button>
-                        <div>
-                            <h2 class="font-heading font-semibold text-lg flex items-center gap-2">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--deft-success);"/></svg>
-                                <span id="synthResultTitle">Category Synthesized</span>
-                            </h2>
-                            <p class="text-xs text-txt-3">Identity data has been written to your brand profile</p>
-                        </div>
-                    </div>
-                    <div id="synthResultContent" class="panel">
-                        <div class="panel-body"></div>
-                    </div>
-                    <div class="mt-4 flex justify-end">
-                        <button onclick="goBackToProgress()" class="btn btn-primary">Back to Categories</button>
+                    <!-- Table -->
+                    <div style="overflow-x:auto;">
+                        <table class="data-table" id="rulesTable">
+                            <thead>
+                                <tr>
+                                    <th style="min-width:280px;">Rule</th>
+                                    <th>Category</th>
+                                    <th>Type</th>
+                                    <th>Severity</th>
+                                    <th>Enforcement</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rulesTableBody">
+                                <tr><td colspan="5" class="text-center text-txt-3 py-8"><div class="skeleton h-6 w-48 mx-auto rounded"></div></td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- ═══ VIEW: COMPLETION ═══ -->
-        <div id="view-complete" style="display:none;">
-            <div class="max-w-[800px] mx-auto px-4 sm:px-6 py-6 text-center">
-                <div class="py-12">
-                    <div class="text-5xl mb-6">🎉</div>
-                    <h2 class="font-heading font-bold text-2xl mb-3" id="completeTitle">Category Complete!</h2>
-                    <p class="text-txt-2 text-sm mb-2" id="completeSubtitle">All questions answered with sufficient depth.</p>
-                    <p class="text-xs text-txt-3 mb-8" id="completeStats"></p>
-                    <div class="flex justify-center gap-3">
-                        <button onclick="handleSynthesis()" class="btn btn-primary text-sm py-2.5 px-5" id="synthesizeBtn">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                            Synthesize Identity
-                        </button>
-                        <button onclick="goBackToProgress()" class="btn btn-ghost text-sm py-2.5 px-5">Back to Grid</button>
+            <!-- Section 4: Recent Compliance Checks -->
+            <div class="panel mb-6">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 8a6 6 0 11-12 0 6 6 0 0112 0z" stroke="currentColor" stroke-width="1.1" fill="none"/></svg>
+                        <span class="font-heading font-semibold text-sm">Recent Compliance Checks</span>
+                    </div>
+                </div>
+                <div class="panel-body" style="padding:0;">
+                    <div style="overflow-x:auto;">
+                        <table class="data-table" id="checksTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Content Type</th>
+                                    <th>Entity ID</th>
+                                    <th>Verdict</th>
+                                    <th>Checked</th>
+                                    <th>Failed</th>
+                                </tr>
+                            </thead>
+                            <tbody id="checksTableBody">
+                                <tr><td colspan="6" class="text-center text-txt-3 py-8"><div class="skeleton h-6 w-48 mx-auto rounded"></div></td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-        </div>
 
+            <!-- Section 5: Compliance Queue -->
+            <div class="panel mb-6">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        <span class="font-heading font-semibold text-sm">Compliance Queue</span>
+                    </div>
+                </div>
+                <div class="panel-body" style="padding:0;">
+                    <div style="overflow-x:auto;">
+                        <table class="data-table" id="queueTable">
+                            <thead>
+                                <tr>
+                                    <th>Submitted</th>
+                                    <th>Content Type</th>
+                                    <th>Status</th>
+                                    <th>Source Workflow</th>
+                                </tr>
+                            </thead>
+                            <tbody id="queueTableBody">
+                                <tr><td colspan="4" class="text-center text-txt-3 py-8"><div class="skeleton h-6 w-48 mx-auto rounded"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
     <!-- Toast container -->
@@ -917,48 +907,19 @@
     // CONSTANTS
     // ═══════════════════════════════════════
     const BRAND_ID = 'carlton';
-    const WEBHOOK_URL = 'https://n8n.carltonaiservices.com/webhook/brand-discovery';
+    const BSI_WEBHOOK = 'https://n8n.carltonaiservices.com/webhook/bsi-discovery';
     const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
-
-    const CATEGORIES = [
-        { key: 'origin_story', label: 'Origin Story', icon: '📖', group: 'Attractive Character' },
-        { key: 'identity_type', label: 'Identity Type', icon: '🎭', group: 'Attractive Character' },
-        { key: 'epiphany_bridge', label: 'Epiphany Bridge', icon: '💡', group: 'Core Story' },
-        { key: 'new_opportunity', label: 'New Opportunity', icon: '🚀', group: 'Core Story' },
-        { key: 'beliefs', label: 'Beliefs', icon: '🎯', group: 'Belief Systems' },
-        { key: 'big_domino', label: 'Big Domino', icon: '🁡', group: 'Belief Systems' },
-        { key: 'mass_movement', label: 'Mass Movement', icon: '✊', group: 'Community' },
-        { key: 'frameworks', label: 'Frameworks', icon: '🔧', group: 'Systems' },
-        { key: 'value_ladder', label: 'Value Ladder', icon: '📈', group: 'Offers' },
-        { key: 'audience_deep_profile', label: 'Audience Profile', icon: '👥', group: 'Audience' },
-        { key: 'competitive_positioning', label: 'Positioning', icon: '⚔️', group: 'Market' },
-        { key: 'content_pillars', label: 'Content Pillars', icon: '📝', group: 'Content' },
-        { key: 'ppp_framework', label: 'PPP Framework', icon: '💰', group: 'Systems' },
-        { key: 'communication_sequences', label: 'Comm Sequences', icon: '📧', group: 'Communication' },
-        { key: 'voice_calibration', label: 'Voice Calibration', icon: '🎙️', group: 'Voice' },
-    ];
-
-    const VOICE_DIMENSIONS = ['specificity', 'emotional_depth', 'uniqueness', 'actionability', 'warmth', 'formality', 'confidence', 'humor'];
-    const VOICE_LABELS = ['Specificity', 'Emotional Depth', 'Uniqueness', 'Actionability', 'Warmth', 'Formality', 'Confidence', 'Humor'];
 
     // ═══════════════════════════════════════
     // STATE
     // ═══════════════════════════════════════
-    let state = {
-        progressData: null,
-        categoryMap: {},
-        currentView: 'progress',
-        activeCategory: null,
-        sessionId: null,
-        currentQuestion: null,
-        sessionProgress: null,
-        isSubmitting: false,
+    let allRules = [];
+    let pendingState = {
         selectedVerdict: null,
         selectedOption: null,
         rankingOrder: [],
         sortableInstance: null,
-        voiceDimensions: null,
     };
 
     let activeProfileId = null;
@@ -980,6 +941,11 @@
         el.textContent = message;
         container.appendChild(el);
         setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 4000);
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '--';
+        return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     }
 
     async function fetchJSON(url, body, { retries = 0, backoff = 2000 } = {}) {
@@ -1018,617 +984,536 @@
         } catch (err) { console.error('Supabase fetch error:', table, err); return null; }
     }
 
-    // ═══════════════════════════════════════
-    // API LAYER
-    // ═══════════════════════════════════════
-    async function apiGetProgress() {
-        return await fetchJSON(WEBHOOK_URL, { operation: 'get_progress', brand_id: BRAND_ID });
-    }
-
-    async function apiStartSession(category) {
-        return await fetchJSON(WEBHOOK_URL, { operation: 'start_session', brand_id: BRAND_ID, category });
-    }
-
-    async function apiSubmitAnswer(sessionId, payload) {
-        return await fetchJSON(WEBHOOK_URL, { operation: 'submit_answer', brand_id: BRAND_ID, session_id: sessionId, ...payload });
-    }
-
-    async function apiGetNextQuestion(sessionId) {
-        return await fetchJSON(WEBHOOK_URL, { operation: 'get_next_question', brand_id: BRAND_ID, session_id: sessionId });
-    }
-
-    async function apiSynthesizeCategory(sessionId) {
-        return await fetchJSON(WEBHOOK_URL, { operation: 'synthesize_category', brand_id: BRAND_ID, session_id: sessionId });
-    }
-
-    // ═══════════════════════════════════════
-    // VIEW SWITCHING
-    // ═══════════════════════════════════════
-    function switchView(view) {
-        state.currentView = view;
-        document.getElementById('view-progress').style.display = view === 'progress' ? '' : 'none';
-        document.getElementById('view-session').style.display = view === 'session' ? '' : 'none';
-        document.getElementById('view-synthesis').style.display = view === 'synthesis' ? '' : 'none';
-        document.getElementById('view-complete').style.display = view === 'complete' ? '' : 'none';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function goBackToProgress() {
-        if (state.sortableInstance) { state.sortableInstance.destroy(); state.sortableInstance = null; }
-        state.activeCategory = null;
-        state.sessionId = null;
-        state.currentQuestion = null;
-        switchView('progress');
-        loadProgress();
-    }
-
-    // ═══════════════════════════════════════
-    // PROGRESS DASHBOARD
-    // ═══════════════════════════════════════
-    async function loadProgress() {
-        const result = await apiGetProgress();
-        if (!result || !result.success) {
-            // Show empty state — all categories as "not started" so user can begin
-            console.warn('Brand discovery progress unavailable:', result?.error || 'no response');
-            state.progressData = null;
-            state.categoryMap = {};
-            renderStats({ completed: 0, in_progress: 0, not_started: 15, total: 15 }, 0);
-            renderCategoryCards();
-            return;
-        }
-        state.progressData = result;
-        state.categoryMap = {};
-        if (result.categories) {
-            result.categories.forEach(c => { state.categoryMap[c.category] = c; });
-        }
-        renderStats(result.summary, result.overall_completion);
-        renderCategoryCards();
-        loadVoiceData();
-    }
-
-    function renderStats(summary, overall) {
-        if (!summary) return;
-        document.getElementById('statCompleted').textContent = summary.completed || 0;
-        document.getElementById('statInProgress').textContent = summary.in_progress || 0;
-        document.getElementById('statNotStarted').textContent = summary.not_started || 0;
-        document.getElementById('statOverall').textContent = (overall || 0) + '%';
-    }
-
-    function renderCategoryCards() {
-        const grid = document.getElementById('categoryGrid');
-        grid.innerHTML = CATEGORIES.map(cat => {
-            const data = state.categoryMap[cat.key] || { status: 'not_started', answered: 0, total: 0, avg_depth: 0, target: 0.85 };
-            const status = data.status || 'not_started';
-            const depthPct = data.target > 0 ? Math.min((data.avg_depth / data.target) * 100, 100) : 0;
-            const depthColor = depthPct >= 100 ? 'var(--deft-success, #22C55E)' : depthPct >= 50 ? 'var(--deft-accent, #06D6A0)' : 'var(--deft-warning, #FFD93D)';
-
-            const statusClass = status === 'complete' ? 'complete' : status === 'in_progress' ? 'in-progress' : '';
-            const badgeClass = status === 'complete' ? 'badge-complete' : status === 'in_progress' ? 'badge-in_progress' : 'badge-not_started';
-            const badgeText = status === 'complete' ? 'Complete' : status === 'in_progress' ? 'In Progress' : 'Not Started';
-            const actionText = status === 'complete' ? 'View' : status === 'in_progress' ? 'Resume' : 'Start';
-
-            return `
-                <div class="discovery-card ${statusClass}" onclick="startCategory('${cat.key}')">
-                    <div class="flex items-start justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="card-icon">${cat.icon}</span>
-                            <div>
-                                <div class="font-heading font-semibold text-sm">${esc(cat.label)}</div>
-                                <div class="text-xs text-txt-3">${esc(cat.group)}</div>
-                            </div>
-                        </div>
-                        <span class="badge ${badgeClass}">${badgeText}</span>
-                    </div>
-                    ${status !== 'not_started' ? `
-                        <div class="flex items-center justify-between text-xs text-txt-2 mt-3">
-                            <span>${data.answered} / ${data.total} questions</span>
-                            <span class="font-mono" style="color: ${depthColor};">Depth: ${(data.avg_depth || 0).toFixed(2)}</span>
-                        </div>
-                        <div class="depth-bar">
-                            <div class="depth-bar-fill" style="width: ${depthPct}%; background: ${depthColor};"></div>
-                        </div>
-                    ` : `
-                        <div class="text-xs text-txt-3 mt-3">Click to begin discovery</div>
-                    `}
-                    <div class="flex justify-end mt-3">
-                        <span class="text-xs font-medium" style="color: var(--deft-accent);">${actionText} →</span>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    // ═══════════════════════════════════════
-    // VOICE RADAR CHART
-    // ═══════════════════════════════════════
-    async function loadVoiceData() {
-        const rows = await supabaseSelect('brand_discovery_sessions',
-            `brand_id=eq.${BRAND_ID}&category=eq.voice_calibration&select=voice_dimensions,status&limit=1`
-        );
-        if (!rows || !rows.length || !rows[0].voice_dimensions) {
-            document.getElementById('voiceRadarSection').style.display = 'none';
-            return;
-        }
-        state.voiceDimensions = rows[0].voice_dimensions;
-        document.getElementById('voiceRadarSection').style.display = '';
-        renderRadarChart(state.voiceDimensions);
-    }
-
-    function renderRadarChart(dims) {
-        const size = 300;
-        const cx = size / 2, cy = size / 2;
-        const radius = 110;
-        const levels = 4;
-        const n = VOICE_DIMENSIONS.length;
-
-        function getPoint(i, value) {
-            const angle = (2 * Math.PI * i / n) - Math.PI / 2;
-            return {
-                x: cx + value * radius * Math.cos(angle),
-                y: cy + value * radius * Math.sin(angle),
-            };
-        }
-
-        // Grid rings
-        let gridSvg = '';
-        for (let l = 1; l <= levels; l++) {
-            const scale = l / levels;
-            const points = [];
-            for (let i = 0; i < n; i++) {
-                const p = getPoint(i, scale);
-                points.push(`${p.x},${p.y}`);
-            }
-            gridSvg += `<polygon points="${points.join(' ')}" fill="none" stroke="var(--deft-border, #2A2E3D)" stroke-width="0.5" opacity="0.6"/>`;
-        }
-
-        // Axis lines
-        let axisSvg = '';
-        for (let i = 0; i < n; i++) {
-            const p = getPoint(i, 1);
-            axisSvg += `<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="var(--deft-border, #2A2E3D)" stroke-width="0.5" opacity="0.4"/>`;
-        }
-
-        // Labels
-        let labelSvg = '';
-        for (let i = 0; i < n; i++) {
-            const p = getPoint(i, 1.2);
-            const anchor = p.x < cx - 10 ? 'end' : p.x > cx + 10 ? 'start' : 'middle';
-            const dy = p.y < cy - 10 ? '-0.3em' : p.y > cy + 10 ? '1em' : '0.35em';
-            labelSvg += `<text x="${p.x}" y="${p.y}" text-anchor="${anchor}" dy="${dy}" class="radar-label">${VOICE_LABELS[i]}</text>`;
-        }
-
-        // Data polygon
-        const dataPoints = [];
-        for (let i = 0; i < n; i++) {
-            const val = dims[VOICE_DIMENSIONS[i]] || 0;
-            const p = getPoint(i, val);
-            dataPoints.push(`${p.x},${p.y}`);
-        }
-        const dataSvg = `
-            <polygon points="${dataPoints.join(' ')}" fill="var(--deft-accent, #06D6A0)" fill-opacity="0.15" stroke="var(--deft-accent, #06D6A0)" stroke-width="2"/>
-        `;
-
-        // Data dots
-        let dotsSvg = '';
-        for (let i = 0; i < n; i++) {
-            const val = dims[VOICE_DIMENSIONS[i]] || 0;
-            const p = getPoint(i, val);
-            dotsSvg += `<circle cx="${p.x}" cy="${p.y}" r="4" fill="var(--deft-accent, #06D6A0)" stroke="var(--deft-base, #08090D)" stroke-width="2"/>`;
-        }
-
-        document.getElementById('radarChartContainer').innerHTML = `
-            <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="max-width: 100%;">
-                ${gridSvg}
-                ${axisSvg}
-                ${dataSvg}
-                ${dotsSvg}
-                ${labelSvg}
-            </svg>
-        `;
-    }
-
-    // ═══════════════════════════════════════
-    // SESSION MANAGEMENT
-    // ═══════════════════════════════════════
-    async function startCategory(categoryKey) {
-        const catInfo = CATEGORIES.find(c => c.key === categoryKey);
-        if (!catInfo) return;
-
-        // Check if already complete — show results
-        const catData = state.categoryMap[categoryKey];
-        if (catData && catData.status === 'complete') {
-            toast('This category is already complete', 'success');
-            return;
-        }
-
-        // Update session header
-        document.getElementById('sessionIcon').textContent = catInfo.icon;
-        document.getElementById('sessionTitle').textContent = catInfo.label;
-        state.activeCategory = categoryKey;
-
-        switchView('session');
-        document.getElementById('questionContainer').innerHTML = '<div class="text-center py-8"><div class="skeleton h-32 w-full rounded-lg"></div></div>';
-        document.getElementById('depthFeedback').style.display = 'none';
-
-        const result = await apiStartSession(categoryKey);
-        if (!result || !result.success) {
-            toast('Failed to start session: ' + (result?.error || 'Connection error'), 'error');
-            goBackToProgress();
-            return;
-        }
-
-        state.sessionId = result.session_id;
-
-        if (result.action === 'created' && result.first_question) {
-            state.currentQuestion = result.first_question;
-            state.sessionProgress = { answered: 0, total: result.total_questions, avg_depth: 0, target: result.depth_target || 0.85 };
-            updateSessionHeader();
-            renderQuestion(result.first_question);
-        } else if (result.action === 'resumed') {
-            state.sessionProgress = result.progress || { answered: 0, total: 0, avg_depth: 0, target: 0.85 };
-            updateSessionHeader();
-            const qResult = await apiGetNextQuestion(state.sessionId);
-            if (qResult && qResult.success) {
-                if (qResult.is_complete) {
-                    showCategoryComplete();
-                    return;
+    async function supabaseCount(table, query = '') {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?${query}&select=id`;
+        try {
+            const res = await fetch(url, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Prefer': 'count=exact',
+                    'Range-Unit': 'items',
+                    'Range': '0-0',
                 }
-                state.currentQuestion = qResult.current_question;
-                state.sessionProgress = qResult.progress || state.sessionProgress;
-                updateSessionHeader();
-                renderQuestion(qResult.current_question);
-            } else {
-                toast('Failed to get question', 'error');
-                goBackToProgress();
+            });
+            if (!res.ok) { console.error('Supabase count error:', res.status); return 0; }
+            const range = res.headers.get('content-range');
+            if (range) {
+                const total = range.split('/')[1];
+                return total === '*' ? 0 : parseInt(total, 10);
             }
+            return 0;
+        } catch (err) { console.error('Supabase count error:', table, err); return 0; }
+    }
+
+    // ═══════════════════════════════════════
+    // SECTION 1: STATUS BAR
+    // ═══════════════════════════════════════
+    async function loadStats() {
+        const [totalChecks, activeRulesCount, allChecks] = await Promise.all([
+            supabaseCount('compliance_checks', 'brand_id=eq.carlton'),
+            supabaseCount('bsi_policy_rules', 'brand_id=eq.carlton&is_active=eq.true'),
+            supabaseSelect('compliance_checks', 'brand_id=eq.carlton&select=verdict,created_at'),
+        ]);
+
+        document.getElementById('statTotalChecks').textContent = totalChecks || 0;
+        document.getElementById('statActiveRules').textContent = activeRulesCount || 0;
+
+        if (allChecks && allChecks.length > 0) {
+            const compliant = allChecks.filter(c => c.verdict === 'compliant').length;
+            const passRate = Math.round((compliant / allChecks.length) * 100);
+            document.getElementById('statPassRate').textContent = passRate + '%';
+
+            // Violations in last 7 days
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            const violations = allChecks.filter(c => c.verdict !== 'compliant' && new Date(c.created_at) >= weekAgo).length;
+            document.getElementById('statViolations').textContent = violations;
+        } else {
+            document.getElementById('statPassRate').textContent = '--';
+            document.getElementById('statViolations').textContent = '0';
         }
     }
 
-    function updateSessionHeader() {
-        const p = state.sessionProgress;
-        if (!p) return;
-        document.getElementById('sessionQuestionCount').textContent = `${p.answered} / ${p.total} questions`;
-        const pct = p.total > 0 ? (p.answered / p.total) * 100 : 0;
-        document.getElementById('sessionProgressBar').style.width = pct + '%';
-        document.getElementById('sessionDepthLabel').textContent = `Depth: ${(p.avg_depth || 0).toFixed(2)}`;
+    // ═══════════════════════════════════════
+    // SECTION 2: NEEDS YOUR INPUT
+    // ═══════════════════════════════════════
+    async function loadPendingPreferences() {
+        const result = await fetchJSON(BSI_WEBHOOK, { operation: 'pending_preferences', brand_id: BRAND_ID });
+
+        if (!result || !result.total_pending || result.total_pending === 0) {
+            document.getElementById('pendingPanel').style.display = 'none';
+            document.getElementById('pendingEmptyPanel').style.display = '';
+            return;
+        }
+
+        document.getElementById('pendingPanel').style.display = '';
+        document.getElementById('pendingEmptyPanel').style.display = 'none';
+        document.getElementById('pendingBadge').textContent = result.total_pending;
+
+        const container = document.getElementById('pendingQuestions');
+        const questions = result.pending_questions || [];
+
+        if (questions.length === 0) {
+            container.innerHTML = '<p class="text-sm text-txt-3 text-center py-4">No pending questions</p>';
+            return;
+        }
+
+        container.innerHTML = questions.map((q, idx) => renderPendingQuestion(q, idx)).join('');
+
+        // Init sortable for any ranking questions
+        questions.forEach((q, idx) => {
+            if (q.type === 'ranking') {
+                initPendingSortable(idx);
+            }
+        });
     }
 
-    // ═══════════════════════════════════════
-    // QUESTION RENDERERS
-    // ═══════════════════════════════════════
-    function renderQuestion(question) {
-        if (!question) return;
-        state.selectedVerdict = null;
-        state.selectedOption = null;
-        state.rankingOrder = [];
-        document.getElementById('depthFeedback').style.display = 'none';
-
-        const container = document.getElementById('questionContainer');
+    function renderPendingQuestion(question, idx) {
+        if (!question) return '';
         const contextHtml = question.context ? `<p class="text-xs text-txt-3 mt-1 mb-4">${esc(question.context)}</p>` : '<div class="mb-4"></div>';
+        const sessionId = question.session_id || '';
 
         switch (question.type) {
             case 'open':
-                container.innerHTML = `
-                    <div class="question-card">
+                return `
+                    <div class="question-card mb-4" id="pendingQ${idx}">
                         <div class="panel">
                             <div class="panel-body">
                                 <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
                                 ${contextHtml}
-                                <textarea class="form-input" id="answerText" rows="5" placeholder="Share your thoughts... (2-3 sentences minimum for best results)"></textarea>
-                                <div class="flex justify-end mt-4">
-                                    <button onclick="handleSubmitAnswer()" class="btn btn-primary" id="submitBtn">Submit Answer</button>
+                                <textarea class="form-input" id="pendingAnswer${idx}" rows="4" placeholder="Share your thoughts..."></textarea>
+                                <div class="flex justify-end mt-3">
+                                    <button onclick="submitPendingAnswer(${idx}, '${esc(sessionId)}', 'open')" class="btn btn-primary" id="pendingSubmit${idx}">Submit Answer</button>
                                 </div>
                             </div>
                         </div>
                     </div>`;
-                document.getElementById('answerText').focus();
-                break;
 
-            case 'this_or_that':
+            case 'this_or_that': {
                 const opts = question.options || {};
-                container.innerHTML = `
-                    <div class="question-card">
+                return `
+                    <div class="question-card mb-4" id="pendingQ${idx}">
                         <div class="panel">
                             <div class="panel-body">
                                 <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
                                 ${contextHtml}
                                 <div class="flex gap-4 option-cards-row">
-                                    <div class="option-card" onclick="selectOption('a', this)" id="optA">
+                                    <div class="option-card" onclick="selectPendingOption(${idx}, 'a', this)">
                                         <span class="text-xs font-mono text-txt-3 mb-1">A</span>
                                         <span class="text-sm font-medium">${esc(opts.a || 'Option A')}</span>
                                     </div>
-                                    <div class="option-card" onclick="selectOption('b', this)" id="optB">
+                                    <div class="option-card" onclick="selectPendingOption(${idx}, 'b', this)">
                                         <span class="text-xs font-mono text-txt-3 mb-1">B</span>
                                         <span class="text-sm font-medium">${esc(opts.b || 'Option B')}</span>
                                     </div>
                                 </div>
-                                <div class="flex justify-end mt-4">
-                                    <button onclick="handleSubmitAnswer()" class="btn btn-primary" id="submitBtn" disabled>Select an option</button>
+                                <div class="flex justify-end mt-3">
+                                    <button onclick="submitPendingAnswer(${idx}, '${esc(sessionId)}', 'this_or_that')" class="btn btn-primary" id="pendingSubmit${idx}" disabled>Select an option</button>
                                 </div>
                             </div>
                         </div>
                     </div>`;
-                break;
+            }
 
             case 'approve_deny':
-                container.innerHTML = `
-                    <div class="question-card">
+                return `
+                    <div class="question-card mb-4" id="pendingQ${idx}">
                         <div class="panel">
                             <div class="panel-body">
                                 <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
                                 ${contextHtml}
                                 <div class="flex gap-3 verdict-row">
-                                    <button class="verdict-btn verdict-approve" onclick="selectVerdict('approve', this)">Approve</button>
-                                    <button class="verdict-btn verdict-close" onclick="selectVerdict('close_but', this)">Close, But...</button>
-                                    <button class="verdict-btn verdict-wrong" onclick="selectVerdict('wrong_direction', this)">Wrong Direction</button>
+                                    <button class="verdict-btn verdict-approve" onclick="selectPendingVerdict(${idx}, 'approve', this)">Approve</button>
+                                    <button class="verdict-btn verdict-close" onclick="selectPendingVerdict(${idx}, 'close_but', this)">Close, But...</button>
+                                    <button class="verdict-btn verdict-wrong" onclick="selectPendingVerdict(${idx}, 'wrong_direction', this)">Wrong Direction</button>
                                 </div>
-                                <div class="adjustment-area" id="adjustmentArea">
-                                    <textarea class="form-input" id="adjustmentText" rows="3" placeholder="What would you adjust?"></textarea>
+                                <div class="adjustment-area" id="pendingAdjustment${idx}">
+                                    <textarea class="form-input" id="pendingAdjText${idx}" rows="3" placeholder="What would you adjust?"></textarea>
                                 </div>
-                                <div class="flex justify-end mt-4">
-                                    <button onclick="handleSubmitAnswer()" class="btn btn-primary" id="submitBtn" disabled>Select a verdict</button>
+                                <div class="flex justify-end mt-3">
+                                    <button onclick="submitPendingAnswer(${idx}, '${esc(sessionId)}', 'approve_deny')" class="btn btn-primary" id="pendingSubmit${idx}" disabled>Select a verdict</button>
                                 </div>
                             </div>
                         </div>
                     </div>`;
-                break;
 
-            case 'ranking':
+            case 'ranking': {
                 const items = question.options || [];
-                state.rankingOrder = [...items];
-                container.innerHTML = `
-                    <div class="question-card">
+                return `
+                    <div class="question-card mb-4" id="pendingQ${idx}">
                         <div class="panel">
                             <div class="panel-body">
                                 <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
                                 ${contextHtml}
                                 <p class="text-xs text-txt-2 mb-3">Drag to reorder from most to least important:</p>
-                                <div id="rankingList" class="space-y-2">
+                                <div id="pendingRankList${idx}" class="space-y-2">
                                     ${items.map((item, i) => `
                                         <div class="rank-item" data-value="${esc(item)}">
-                                            <span class="text-txt-3 text-sm select-none" style="min-width:18px;">☰</span>
+                                            <span class="text-txt-3 text-sm select-none" style="min-width:18px;">&#9776;</span>
                                             <span class="rank-number text-xs font-mono text-accent" style="min-width:22px;">${i + 1}.</span>
                                             <span class="text-sm">${esc(item)}</span>
                                         </div>
                                     `).join('')}
                                 </div>
-                                <div class="flex justify-end mt-4">
-                                    <button onclick="handleSubmitAnswer()" class="btn btn-primary" id="submitBtn">Submit Rankings</button>
+                                <div class="flex justify-end mt-3">
+                                    <button onclick="submitPendingAnswer(${idx}, '${esc(sessionId)}', 'ranking')" class="btn btn-primary" id="pendingSubmit${idx}">Submit Rankings</button>
                                 </div>
                             </div>
                         </div>
                     </div>`;
-                initSortable();
-                break;
+            }
 
             default:
-                container.innerHTML = `<div class="panel"><div class="panel-body text-txt-2 text-sm">Unknown question type: ${esc(question.type)}</div></div>`;
+                return `<div class="panel mb-4"><div class="panel-body text-txt-2 text-sm">Unknown question type: ${esc(question.type)}</div></div>`;
         }
     }
 
-    // ═══════════════════════════════════════
-    // INTERACTION HANDLERS
-    // ═══════════════════════════════════════
-    function selectOption(opt, el) {
-        state.selectedOption = opt;
-        document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+    // Pending question interaction state (per-question)
+    const pendingSelections = {};
+
+    function selectPendingOption(idx, opt, el) {
+        pendingSelections[idx] = { type: 'option', value: opt };
+        const card = document.getElementById(`pendingQ${idx}`);
+        card.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
         el.classList.add('selected');
-        const btn = document.getElementById('submitBtn');
+        const btn = document.getElementById(`pendingSubmit${idx}`);
         btn.disabled = false;
         btn.textContent = 'Submit Answer';
     }
 
-    function selectVerdict(verdict, el) {
-        state.selectedVerdict = verdict;
-        document.querySelectorAll('.verdict-btn').forEach(b => b.classList.remove('selected'));
+    function selectPendingVerdict(idx, verdict, el) {
+        pendingSelections[idx] = { type: 'verdict', value: verdict };
+        const card = document.getElementById(`pendingQ${idx}`);
+        card.querySelectorAll('.verdict-btn').forEach(b => b.classList.remove('selected'));
         el.classList.add('selected');
 
-        const area = document.getElementById('adjustmentArea');
+        const area = document.getElementById(`pendingAdjustment${idx}`);
         if (verdict === 'close_but' || verdict === 'wrong_direction') {
             area.classList.add('open');
-            setTimeout(() => document.getElementById('adjustmentText')?.focus(), 300);
+            setTimeout(() => document.getElementById(`pendingAdjText${idx}`)?.focus(), 300);
         } else {
             area.classList.remove('open');
         }
 
-        const btn = document.getElementById('submitBtn');
+        const btn = document.getElementById(`pendingSubmit${idx}`);
         btn.disabled = false;
         btn.textContent = verdict === 'approve' ? 'Submit Approval' : 'Submit Answer';
     }
 
-    function initSortable() {
-        if (state.sortableInstance) state.sortableInstance.destroy();
-        const el = document.getElementById('rankingList');
-        if (!el) return;
-        if (typeof Sortable === 'undefined') {
-            // Fallback if CDN failed
-            toast('Drag-and-drop unavailable. Submit in current order.', 'error');
-            return;
-        }
-        state.sortableInstance = new Sortable(el, {
+    function initPendingSortable(idx) {
+        const el = document.getElementById(`pendingRankList${idx}`);
+        if (!el || typeof Sortable === 'undefined') return;
+        new Sortable(el, {
             animation: 150,
             ghostClass: 'sortable-ghost',
             chosenClass: 'sortable-chosen',
             onEnd: () => {
                 const items = el.querySelectorAll('.rank-item');
-                state.rankingOrder = [];
+                const order = [];
                 items.forEach((item, i) => {
                     item.querySelector('.rank-number').textContent = (i + 1) + '.';
-                    state.rankingOrder.push(item.getAttribute('data-value'));
+                    order.push(item.getAttribute('data-value'));
                 });
+                pendingSelections[idx] = { type: 'ranking', value: order };
             }
         });
     }
 
-    // ═══════════════════════════════════════
-    // ANSWER SUBMISSION
-    // ═══════════════════════════════════════
-    async function handleSubmitAnswer() {
-        if (state.isSubmitting) return;
-        const question = state.currentQuestion;
-        if (!question) return;
+    async function submitPendingAnswer(idx, sessionId, questionType) {
+        const btn = document.getElementById(`pendingSubmit${idx}`);
+        if (!btn || btn.disabled) return;
 
-        let payload = {};
-        switch (question.type) {
+        let payload = { operation: 'submit_answer', brand_id: BRAND_ID, session_id: sessionId };
+
+        switch (questionType) {
             case 'open': {
-                const text = document.getElementById('answerText')?.value?.trim();
+                const text = document.getElementById(`pendingAnswer${idx}`)?.value?.trim();
                 if (!text) { toast('Please enter an answer', 'error'); return; }
-                payload = { answer: text };
+                payload.answer = text;
                 break;
             }
             case 'this_or_that': {
-                if (!state.selectedOption) { toast('Please select an option', 'error'); return; }
-                payload = { selected: state.selectedOption };
+                const sel = pendingSelections[idx];
+                if (!sel || sel.type !== 'option') { toast('Please select an option', 'error'); return; }
+                payload.selected = sel.value;
                 break;
             }
             case 'approve_deny': {
-                if (!state.selectedVerdict) { toast('Please select a verdict', 'error'); return; }
-                payload = { verdict: state.selectedVerdict };
-                if (state.selectedVerdict !== 'approve') {
-                    const adj = document.getElementById('adjustmentText')?.value?.trim();
+                const sel = pendingSelections[idx];
+                if (!sel || sel.type !== 'verdict') { toast('Please select a verdict', 'error'); return; }
+                payload.verdict = sel.value;
+                if (sel.value !== 'approve') {
+                    const adj = document.getElementById(`pendingAdjText${idx}`)?.value?.trim();
                     if (adj) payload.adjustment = adj;
                 }
                 break;
             }
             case 'ranking': {
-                payload = { rankings: state.rankingOrder };
+                const sel = pendingSelections[idx];
+                const rankEl = document.getElementById(`pendingRankList${idx}`);
+                if (sel && sel.type === 'ranking') {
+                    payload.rankings = sel.value;
+                } else if (rankEl) {
+                    // Use current DOM order
+                    const items = rankEl.querySelectorAll('.rank-item');
+                    payload.rankings = Array.from(items).map(item => item.getAttribute('data-value'));
+                }
                 break;
             }
         }
 
-        state.isSubmitting = true;
-        const btn = document.getElementById('submitBtn');
-        if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
 
-        const result = await apiSubmitAnswer(state.sessionId, payload);
-
-        state.isSubmitting = false;
-        if (btn) { btn.disabled = false; btn.textContent = 'Submit Answer'; }
+        const result = await fetchJSON(BSI_WEBHOOK, payload);
 
         if (!result || !result.success) {
-            toast('Failed to submit: ' + (result?.error || 'Connection error. Your progress is saved — try again.'), 'error');
+            toast('Failed to submit: ' + (result?.error || 'Connection error'), 'error');
+            btn.disabled = false;
+            btn.textContent = 'Submit Answer';
             return;
         }
 
-        // Show depth feedback
-        if (result.depth_analysis) {
-            showDepthFeedback(result.depth_analysis);
+        toast('Answer submitted successfully');
+
+        // Fade out the question card
+        const card = document.getElementById(`pendingQ${idx}`);
+        if (card) {
+            card.style.transition = 'opacity 0.3s, transform 0.3s';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-12px)';
+            setTimeout(() => {
+                card.remove();
+                // Reload pending to update badge/state
+                loadPendingPreferences();
+            }, 300);
         }
-
-        // Update progress
-        if (result.progress) {
-            state.sessionProgress = result.progress;
-            updateSessionHeader();
-        }
-
-        // Wait for user to see feedback, then advance
-        const delay = result.depth_analysis ? 2500 : 500;
-        setTimeout(() => {
-            document.getElementById('depthFeedback').style.display = 'none';
-
-            if (result.is_complete) {
-                showCategoryComplete();
-            } else if (result.next_question) {
-                state.currentQuestion = result.next_question;
-                renderQuestion(result.next_question);
-            }
-        }, delay);
     }
 
-    function showDepthFeedback(analysis) {
-        const container = document.getElementById('depthFeedback');
-        const score = analysis.score || 0;
-        const pct = Math.min(score * 100, 100);
-        const color = score >= 0.7 ? 'var(--deft-success, #22C55E)' : score >= 0.5 ? 'var(--deft-accent, #06D6A0)' : 'var(--deft-warning, #FFD93D)';
-
-        let html = `
-            <div class="depth-feedback">
-                <div class="flex items-center gap-3 mb-2">
-                    <span class="text-xs font-mono" style="color: ${color};">Depth: ${score.toFixed(2)}</span>
-                    <div class="flex-1 progress-bar" style="height: 4px;">
-                        <div style="width: ${pct}%; height: 100%; border-radius: 2px; background: ${color}; transition: width 0.5s;"></div>
-                    </div>
-                </div>
-        `;
-
-        if (analysis.feedback) {
-            html += `<p class="text-sm text-txt-2">${esc(analysis.feedback)}</p>`;
-        }
-        if (analysis.insight) {
-            html += `<div class="mt-2 p-3 rounded-lg" style="background: var(--deft-accent-dim); border: 1px solid color-mix(in srgb, var(--deft-accent) 20%, transparent);">
-                <p class="text-xs font-medium text-accent mb-0.5">Insight</p>
-                <p class="text-sm">${esc(analysis.insight)}</p>
-            </div>`;
-        }
-
-        html += '</div>';
-        container.innerHTML = html;
-        container.style.display = '';
-    }
-
-    function showCategoryComplete() {
-        const catInfo = CATEGORIES.find(c => c.key === state.activeCategory);
-        document.getElementById('completeTitle').textContent = `${catInfo?.icon || ''} ${catInfo?.label || 'Category'} Complete!`;
-        const p = state.sessionProgress;
-        if (p) {
-            document.getElementById('completeStats').textContent = `${p.answered} questions answered | Average depth: ${(p.avg_depth || 0).toFixed(2)} / ${(p.target || 0.85).toFixed(2)}`;
-        }
-        switchView('complete');
+    function togglePendingPanel() {
+        const toggle = document.querySelector('#pendingPanel .collapsible-toggle');
+        const body = document.getElementById('pendingBody');
+        toggle.classList.toggle('collapsed');
+        body.classList.toggle('collapsed');
     }
 
     // ═══════════════════════════════════════
-    // SYNTHESIS
+    // SECTION 3: ACTIVE RULES
     // ═══════════════════════════════════════
-    async function handleSynthesis() {
-        const catInfo = CATEGORIES.find(c => c.key === state.activeCategory);
-        document.getElementById('synthTitle').textContent = `Synthesizing ${catInfo?.label || 'Category'}...`;
-        document.getElementById('synthSubtitle').textContent = 'Analyzing your responses and building your identity profile';
-        document.getElementById('synthesizingState').style.display = '';
-        document.getElementById('synthesisResults').style.display = 'none';
-        switchView('synthesis');
-
-        const result = await apiSynthesizeCategory(state.sessionId);
-
-        if (!result || !result.success) {
-            toast('Synthesis failed: ' + (result?.error || 'Connection error'), 'error');
-            goBackToProgress();
+    async function loadRules() {
+        const rules = await supabaseSelect('bsi_policy_rules', 'brand_id=eq.carlton&is_active=eq.true&order=severity&select=id,rule_text,category,rule_type,severity,enforcement');
+        if (!rules) {
+            document.getElementById('rulesTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-txt-3 py-6">Failed to load rules</td></tr>';
             return;
         }
 
-        // Show results
-        document.getElementById('synthesizingState').style.display = 'none';
-        document.getElementById('synthesisResults').style.display = '';
-        document.getElementById('synthResultTitle').textContent = `${catInfo?.icon || ''} ${catInfo?.label || 'Category'} — Synthesized`;
-
-        const content = document.querySelector('#synthResultContent .panel-body');
-        if (result.synthesized_data) {
-            content.innerHTML = renderSynthData(result.synthesized_data);
-        } else {
-            content.innerHTML = '<p class="text-sm text-txt-2">Synthesis complete. Identity data has been saved to your brand profile.</p>';
-        }
+        allRules = rules;
+        document.getElementById('rulesCount').textContent = `(${rules.length})`;
+        renderRulesTable(rules);
     }
 
-    function renderSynthData(data, depth = 0) {
-        if (!data || typeof data !== 'object') {
-            return `<span class="text-sm">${esc(String(data))}</span>`;
+    function applyRuleFilters() {
+        const category = document.getElementById('filterCategory').value;
+        const type = document.getElementById('filterType').value;
+        const severity = document.getElementById('filterSeverity').value;
+        const search = document.getElementById('filterSearch').value.toLowerCase().trim();
+
+        let filtered = allRules;
+        if (category) filtered = filtered.filter(r => r.category === category);
+        if (type) filtered = filtered.filter(r => r.rule_type === type);
+        if (severity) filtered = filtered.filter(r => r.severity === severity);
+        if (search) filtered = filtered.filter(r => (r.rule_text || '').toLowerCase().includes(search));
+
+        renderRulesTable(filtered);
+    }
+
+    function renderRulesTable(rules) {
+        const tbody = document.getElementById('rulesTableBody');
+        if (!rules || rules.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-txt-3 py-6">No rules match your filters</td></tr>';
+            return;
         }
-        if (Array.isArray(data)) {
-            return `<ul class="space-y-1 ml-4">${data.map(item => `<li class="text-sm text-txt-2 flex items-start gap-2"><span class="text-txt-3 mt-0.5">•</span><span>${typeof item === 'object' ? renderSynthData(item, depth + 1) : esc(String(item))}</span></li>`).join('')}</ul>`;
-        }
-        return Object.entries(data).map(([key, val]) => {
-            const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            if (typeof val === 'object' && val !== null) {
-                return `<div class="${depth > 0 ? 'ml-4 mt-2' : 'mb-4'}">
-                    <h4 class="font-heading font-semibold text-xs uppercase tracking-wide text-accent mb-1.5">${esc(label)}</h4>
-                    ${renderSynthData(val, depth + 1)}
-                </div>`;
+
+        tbody.innerHTML = rules.map(rule => {
+            const ruleText = (rule.rule_text || '').length > 100 ? rule.rule_text.substring(0, 100) + '...' : (rule.rule_text || '');
+            const categoryLabel = (rule.category || '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const typeLabel = (rule.rule_type || '').replace(/_/g, ' ');
+
+            // Type badge colors
+            let typeBadge = '';
+            switch (rule.rule_type) {
+                case 'must_do':
+                    typeBadge = `<span class="badge" style="background: var(--deft-success-dim); color: var(--deft-success);">${esc(typeLabel)}</span>`;
+                    break;
+                case 'must_not_do':
+                    typeBadge = `<span class="badge" style="background: var(--deft-danger-dim); color: var(--deft-danger);">${esc(typeLabel)}</span>`;
+                    break;
+                case 'conditional':
+                    typeBadge = `<span class="badge" style="background: var(--deft-warning-dim); color: var(--deft-warning);">${esc(typeLabel)}</span>`;
+                    break;
+                case 'preference':
+                    typeBadge = `<span class="badge" style="background: rgba(76,201,240,0.15); color: #4CC9F0;">${esc(typeLabel)}</span>`;
+                    break;
+                default:
+                    typeBadge = `<span class="badge badge-not_started">${esc(typeLabel)}</span>`;
             }
-            return `<div class="flex items-start gap-2 mb-1.5 ${depth > 0 ? 'ml-4' : ''}">
-                <span class="text-xs text-txt-3 font-mono min-w-[120px]">${esc(label)}</span>
-                <span class="text-sm">${esc(String(val))}</span>
-            </div>`;
+
+            // Severity badge colors
+            let severityBadge = '';
+            switch (rule.severity) {
+                case 'critical':
+                    severityBadge = `<span class="badge" style="background: var(--deft-danger-dim); color: var(--deft-danger);">critical</span>`;
+                    break;
+                case 'standard':
+                    severityBadge = `<span class="badge badge-not_started">standard</span>`;
+                    break;
+                case 'advisory':
+                    severityBadge = `<span class="badge" style="background: rgba(82,94,115,0.15); color: var(--deft-txt-3);">advisory</span>`;
+                    break;
+                default:
+                    severityBadge = `<span class="badge badge-not_started">${esc(rule.severity || '--')}</span>`;
+            }
+
+            const enforcement = (rule.enforcement || '--').replace(/_/g, ' ');
+
+            return `<tr>
+                <td style="color: var(--deft-txt);" title="${esc(rule.rule_text)}">${esc(ruleText)}</td>
+                <td><span class="text-xs">${esc(categoryLabel)}</span></td>
+                <td>${typeBadge}</td>
+                <td>${severityBadge}</td>
+                <td><span class="text-xs">${esc(enforcement)}</span></td>
+            </tr>`;
         }).join('');
     }
+
+    // ═══════════════════════════════════════
+    // SECTION 4: RECENT COMPLIANCE CHECKS
+    // ═══════════════════════════════════════
+    async function loadChecks() {
+        const checks = await supabaseSelect('compliance_checks', 'brand_id=eq.carlton&order=created_at.desc&limit=50&select=id,created_at,content_type,entity_id,verdict,rules_checked,rules_failed,overall_assessment,violations');
+        const tbody = document.getElementById('checksTableBody');
+
+        if (!checks || checks.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-txt-3 py-6">No compliance checks yet</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = checks.map((check, idx) => {
+            // Verdict badge
+            let verdictBadge = '';
+            switch (check.verdict) {
+                case 'compliant':
+                    verdictBadge = `<span class="badge" style="background: var(--deft-success-dim); color: var(--deft-success);">compliant</span>`;
+                    break;
+                case 'minor_issues':
+                    verdictBadge = `<span class="badge" style="background: var(--deft-warning-dim); color: var(--deft-warning);">minor issues</span>`;
+                    break;
+                case 'major_issues':
+                case 'legal_concern':
+                case 'financial_concern':
+                    verdictBadge = `<span class="badge" style="background: var(--deft-danger-dim); color: var(--deft-danger);">${esc((check.verdict || '').replace(/_/g, ' '))}</span>`;
+                    break;
+                default:
+                    verdictBadge = `<span class="badge badge-not_started">${esc(check.verdict || '--')}</span>`;
+            }
+
+            const rulesChecked = check.rules_checked ?? '--';
+            const rulesFailed = check.rules_failed ?? 0;
+            const failedStyle = rulesFailed > 0 ? 'color: var(--deft-danger);' : '';
+
+            const hasDetails = check.overall_assessment || (check.violations && check.violations.length > 0);
+
+            return `
+                <tr class="${hasDetails ? 'expandable-row' : ''}" ${hasDetails ? `onclick="toggleCheckDetail('checkDetail${idx}')"` : ''}>
+                    <td>${formatDate(check.created_at)}</td>
+                    <td>${esc(check.content_type || '--')}</td>
+                    <td><span class="font-mono text-xs">${esc((check.entity_id || '--').substring(0, 12))}</span></td>
+                    <td>${verdictBadge}</td>
+                    <td>${rulesChecked}</td>
+                    <td style="${failedStyle}">${rulesFailed}</td>
+                </tr>
+                ${hasDetails ? `
+                <tr class="detail-row" id="checkDetail${idx}">
+                    <td colspan="6">
+                        ${check.overall_assessment ? `<p class="text-sm mb-2"><strong class="text-xs text-txt-3 uppercase">Assessment:</strong> ${esc(check.overall_assessment)}</p>` : ''}
+                        ${check.violations && check.violations.length > 0 ? `
+                            <div class="mt-2">
+                                <strong class="text-xs text-txt-3 uppercase">Violations:</strong>
+                                <ul class="mt-1 space-y-1">
+                                    ${check.violations.map(v => `<li class="text-xs flex items-start gap-2">
+                                        <span style="color: var(--deft-danger);">&#8226;</span>
+                                        <span>${esc(typeof v === 'string' ? v : (v.rule_text || v.description || JSON.stringify(v)))}</span>
+                                    </li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                    </td>
+                </tr>
+                ` : ''}
+            `;
+        }).join('');
+    }
+
+    function toggleCheckDetail(id) {
+        const row = document.getElementById(id);
+        if (row) row.classList.toggle('open');
+    }
+
+    // ═══════════════════════════════════════
+    // SECTION 5: COMPLIANCE QUEUE
+    // ═══════════════════════════════════════
+    async function loadQueue() {
+        const queue = await supabaseSelect('compliance_queue', 'brand_id=eq.carlton&order=submitted_at.desc&limit=50&select=id,submitted_at,content_type,status,source_workflow');
+        const tbody = document.getElementById('queueTableBody');
+
+        if (!queue || queue.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-txt-3 py-6">No items in compliance queue</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = queue.map(item => {
+            // Status badge
+            let statusBadge = '';
+            switch (item.status) {
+                case 'pending_review':
+                    statusBadge = `<span class="badge badge-not_started">pending review</span>`;
+                    break;
+                case 'processing':
+                    statusBadge = `<span class="badge" style="background: var(--deft-accent-dim); color: var(--deft-accent);">processing</span>`;
+                    break;
+                case 'compliant':
+                    statusBadge = `<span class="badge" style="background: var(--deft-success-dim); color: var(--deft-success);">compliant</span>`;
+                    break;
+                case 'non_compliant':
+                    statusBadge = `<span class="badge" style="background: var(--deft-danger-dim); color: var(--deft-danger);">non compliant</span>`;
+                    break;
+                case 'redrafting':
+                case 'routed_to_human':
+                    statusBadge = `<span class="badge" style="background: var(--deft-warning-dim); color: var(--deft-warning);">${esc((item.status || '').replace(/_/g, ' '))}</span>`;
+                    break;
+                case 'routed_to_attorney':
+                case 'routed_to_accountant':
+                case 'failed':
+                    statusBadge = `<span class="badge" style="background: var(--deft-danger-dim); color: var(--deft-danger);">${esc((item.status || '').replace(/_/g, ' '))}</span>`;
+                    break;
+                default:
+                    statusBadge = `<span class="badge badge-not_started">${esc((item.status || '--').replace(/_/g, ' '))}</span>`;
+            }
+
+            return `<tr>
+                <td>${formatDate(item.submitted_at)}</td>
+                <td>${esc(item.content_type || '--')}</td>
+                <td>${statusBadge}</td>
+                <td><span class="text-xs">${esc(item.source_workflow || '--')}</span></td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // POLLING
+    // ═══════════════════════════════════════
+    setInterval(() => { loadChecks(); loadQueue(); }, 30000);
 
     // ═══════════════════════════════════════
     // AUTH GATE
@@ -1771,7 +1656,11 @@
     // INIT
     // ═══════════════════════════════════════
     function initPage() {
-        loadProgress();
+        loadStats();
+        loadPendingPreferences();
+        loadRules();
+        loadChecks();
+        loadQueue();
     }
 
     if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
