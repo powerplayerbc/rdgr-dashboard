@@ -1046,6 +1046,7 @@
             <a href="/brain" class="task-tab active" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">BRAIN</a>
         </div>
     </nav>
+        <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
 
     <!-- BRAIN SUB-TAB BAR -->
     <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pt-4 pb-4">
