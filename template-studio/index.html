@@ -450,10 +450,13 @@
             </div>
 
             <!-- Audit summary -->
-            <div id="auditSummary" style="display:none;" class="flex gap-3 mb-4">
-                <div class="stat-chip flex-1 min-w-[100px]"><div><div class="stat-value text-accent" id="auditTotal">—</div><div class="stat-label">Total Audited</div></div></div>
-                <div class="stat-chip flex-1 min-w-[100px]"><div><div class="stat-value" style="color:var(--deft-success);" id="auditOnBrand">—</div><div class="stat-label">On Brand</div></div></div>
-                <div class="stat-chip flex-1 min-w-[100px]"><div><div class="stat-value" style="color:var(--deft-danger);" id="auditOffBrand">—</div><div class="stat-label">Off Brand</div></div></div>
+            <div id="auditSummary" style="display:none;">
+                <div class="flex gap-3 mb-2">
+                    <div class="stat-chip flex-1 min-w-[100px]"><div><div class="stat-value text-accent" id="auditTotal">—</div><div class="stat-label">Total Audited</div></div></div>
+                    <div class="stat-chip flex-1 min-w-[100px]"><div><div class="stat-value" style="color:var(--deft-success);" id="auditOnBrand">—</div><div class="stat-label">On Brand</div></div></div>
+                    <div class="stat-chip flex-1 min-w-[100px]"><div><div class="stat-value" style="color:var(--deft-danger);" id="auditOffBrand">—</div><div class="stat-label">Off Brand</div></div></div>
+                </div>
+                <p class="text-xs text-txt-3 mb-4" id="auditTimestamp"></p>
             </div>
 
             <!-- Audit results -->
@@ -524,6 +527,7 @@
             document.getElementById('tab-'+t).classList.toggle('active', t === tab);
         });
         if (tab === 'pieces') loadPieces();
+        if (tab === 'audit') loadSavedAudit();
     }
 
     // Generate estimate
@@ -616,7 +620,14 @@
         }).join('');
     }
 
-    // Audit
+    // Audit — persists results to localStorage
+    let lastAuditData = null;
+    try { lastAuditData = JSON.parse(localStorage.getItem('rdgr-audit-results') || 'null'); } catch(e) {}
+
+    function loadSavedAudit() {
+        if (lastAuditData) renderAuditResults(lastAuditData);
+    }
+
     async function runAudit() {
         const btn = document.getElementById('auditBtn');
         btn.disabled = true; btn.textContent = 'Auditing...';
@@ -634,13 +645,50 @@
             return;
         }
 
+        // Save with timestamp
+        const auditPayload = {
+            total_audited: result.total_audited,
+            on_brand: result.on_brand,
+            off_brand: result.off_brand,
+            all_results: result.all_results || [],
+            system: document.getElementById('auditSystem').value,
+            timestamp: new Date().toISOString(),
+        };
+        lastAuditData = auditPayload;
+        localStorage.setItem('rdgr-audit-results', JSON.stringify(auditPayload));
+
+        // Batch-fetch template texts for all piece IDs
+        const ids = (result.all_results || []).map(r => r.id).filter(Boolean);
+        if (ids.length) {
+            const pieces = await supabaseSelect('outreach_email_templates',
+                `id=in.(${ids.join(',')})&select=id,template_text`);
+            if (pieces && pieces.length) {
+                const textMap = {};
+                pieces.forEach(p => { textMap[p.id] = p.template_text; });
+                auditPayload.all_results.forEach(r => {
+                    if (r.id && textMap[r.id]) r._template_text = textMap[r.id];
+                });
+                localStorage.setItem('rdgr-audit-results', JSON.stringify(auditPayload));
+            }
+        }
+
+        renderAuditResults(auditPayload);
+        toast(`Audit complete: ${result.on_brand} on-brand, ${result.off_brand} off-brand`);
+    }
+
+    function renderAuditResults(data) {
         document.getElementById('auditSummary').style.display = '';
-        document.getElementById('auditTotal').textContent = result.total_audited || 0;
-        document.getElementById('auditOnBrand').textContent = result.on_brand || 0;
-        document.getElementById('auditOffBrand').textContent = result.off_brand || 0;
+        document.getElementById('auditTotal').textContent = data.total_audited || 0;
+        document.getElementById('auditOnBrand').textContent = data.on_brand || 0;
+        document.getElementById('auditOffBrand').textContent = data.off_brand || 0;
+
+        const ts = data.timestamp ? new Date(data.timestamp) : null;
+        document.getElementById('auditTimestamp').textContent = ts
+            ? 'Last audited: ' + ts.toLocaleDateString() + ' ' + ts.toLocaleTimeString() + (data.system && data.system !== 'all' ? ' — System: ' + data.system : '')
+            : '';
 
         const container = document.getElementById('auditResults');
-        const items = result.all_results || [];
+        const items = data.all_results || [];
         if (!items.length) {
             container.innerHTML = '<div class="text-sm text-txt-3 py-8 text-center">No pieces to audit</div>';
             return;
@@ -653,10 +701,12 @@
             const score = item.alignment_score || 0;
             const pct = Math.min(score * 100, 100);
             const color = item.is_off_brand ? 'var(--deft-danger)' : 'var(--deft-success)';
-            const pieceId = item.id || '';
-            const templateText = item.template_text || item.text || '';
+            const templateText = item._template_text || item.template_text || item.text || '';
             return `
-                <div class="audit-row ${item.is_off_brand ? 'off-brand' : 'on-brand'}" style="cursor:pointer;" onclick="toggleAuditDetail(this,'${pieceId}')">
+                <div class="audit-row ${item.is_off_brand ? 'off-brand' : 'on-brand'}" style="margin-bottom:0.75rem;">
+                    ${templateText ? `
+                        <div class="p-3 rounded-lg text-sm leading-relaxed mb-3" style="background:var(--deft-surface-hi,#242836);white-space:pre-wrap;">${esc(templateText)}</div>
+                    ` : ''}
                     <div class="flex items-center justify-between gap-3">
                         <div class="flex items-center gap-2">
                             <span class="badge" style="background:rgba(255,255,255,0.06);color:var(--deft-txt-2);">${esc(item.category || '—')}</span>
@@ -665,37 +715,12 @@
                             </div>
                             <span class="text-xs font-mono" style="color:${color};">${score.toFixed(2)}</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            ${item.is_off_brand ? `<span class="badge" style="background:var(--deft-danger-dim);color:var(--deft-danger);">Off Brand</span>` : ''}
-                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="opacity:0.4;"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-                        </div>
+                        ${item.is_off_brand ? `<span class="badge" style="background:var(--deft-danger-dim);color:var(--deft-danger);">Off Brand</span>` : ''}
                     </div>
-                    ${item.reason ? `<p class="text-xs text-txt-2 mt-1.5">${esc(item.reason)}</p>` : ''}
-                    <div class="audit-detail" style="display:none;">
-                        ${templateText ? `<div class="mt-2 p-3 rounded-lg text-sm leading-relaxed" style="background:var(--deft-surface-hi,#242836);white-space:pre-wrap;">${esc(templateText)}</div>` : `<div class="mt-2 text-xs text-txt-3 audit-detail-loader">Click to load template text...</div>`}
-                    </div>
+                    ${item.reason ? `<p class="text-xs text-txt-2 mt-2" style="border-top:1px solid rgba(255,255,255,0.04);padding-top:0.5rem;">${esc(item.reason)}</p>` : ''}
                 </div>
             `;
         }).join('');
-        toast(`Audit complete: ${result.on_brand} on-brand, ${result.off_brand} off-brand`);
-    }
-
-    // Audit detail toggle
-    async function toggleAuditDetail(row, pieceId) {
-        const detail = row.querySelector('.audit-detail');
-        if (!detail) return;
-        const isVisible = detail.style.display !== 'none';
-        detail.style.display = isVisible ? 'none' : '';
-        // If no text loaded yet, fetch from Supabase
-        if (!isVisible && pieceId && detail.querySelector('.audit-detail-loader')) {
-            detail.querySelector('.audit-detail-loader').textContent = 'Loading...';
-            const rows = await supabaseSelect('outreach_email_templates', `id=eq.${pieceId}&select=template_text`);
-            if (rows && rows.length && rows[0].template_text) {
-                detail.innerHTML = `<div class="mt-2 p-3 rounded-lg text-sm leading-relaxed" style="background:var(--deft-surface-hi,#242836);white-space:pre-wrap;">${esc(rows[0].template_text)}</div>`;
-            } else {
-                detail.querySelector('.audit-detail-loader').textContent = 'Template text not available';
-            }
-        }
     }
 
     // Compositions
