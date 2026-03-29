@@ -358,6 +358,10 @@
     ];
 
     let docState = {};
+    // Hydrate from localStorage
+    try { docState = JSON.parse(localStorage.getItem('rdgr-brand-docs-state') || '{}'); } catch(e) {}
+    function saveDocState() { localStorage.setItem('rdgr-brand-docs-state', JSON.stringify(docState)); }
+
     let activeProfileId = null;
     try { activeProfileId = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}').id; } catch(e) {}
 
@@ -399,12 +403,22 @@
                     </div>
                     <p class="text-xs text-txt-2 mb-4 leading-relaxed">${esc(doc.desc)}</p>
                     ${hasDoc ? `
-                        <div class="flex items-center gap-2">
-                            <a href="${esc(s.document_url)}" target="_blank" rel="noopener" class="btn btn-primary text-xs py-1.5 px-3 flex-1 justify-center">
-                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 7v3a1 1 0 01-1 1H2a1 1 0 01-1-1V7M6 1v7M3.5 5.5L6 8l2.5-2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <div class="space-y-2">
+                            <a href="${esc(s.document_url)}" target="_blank" rel="noopener" class="btn btn-primary text-xs py-2 px-3 w-full justify-center">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 1h6v6M11 1L5.5 6.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                 Open in Google Docs
                             </a>
-                            <button onclick="generateDoc('${doc.type}')" class="btn btn-ghost text-xs py-1.5 px-3" ${isGenerating ? 'disabled' : ''}>Regenerate</button>
+                            <div class="flex gap-2">
+                                <button onclick="generateDoc('${doc.type}')" class="btn btn-ghost text-xs py-1.5 px-3 flex-1 justify-center" ${isGenerating ? 'disabled' : ''}>
+                                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                                    Regenerate
+                                </button>
+                                <button onclick="generateDoc('${doc.type}')" class="btn btn-ghost text-xs py-1.5 px-3 flex-1 justify-center" ${isGenerating ? 'disabled' : ''} title="Regenerate with latest brand identity data">
+                                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                                    Update
+                                </button>
+                            </div>
+                            ${s.generated_at ? '<p class="text-xs text-txt-3 text-center">Generated ' + new Date(s.generated_at).toLocaleDateString() + '</p>' : ''}
                         </div>
                     ` : `
                         <button onclick="generateDoc('${doc.type}')" class="btn btn-primary text-xs py-2 px-4 w-full justify-center" ${isGenerating ? 'disabled' : ''}>
@@ -422,10 +436,15 @@
         toast(`Generating ${DOC_TYPES.find(d => d.type === docType)?.title || docType}...`);
 
         const result = await fetchJSON(WEBHOOK_URL, { operation: 'generate_document', brand_id: BRAND_ID, document_type: docType });
+        console.log('Brand doc response:', docType, result);
 
         if (result && result.success) {
-            docState[docType] = { document_url: result.document_url, document_id: result.document_id, generating: false };
-            toast('Document generated successfully!');
+            // Handle various response shapes — backend may return url in different fields
+            const url = result.document_url || result.url || result.doc_url || (result.document && result.document.url) || null;
+            const id = result.document_id || result.id || null;
+            docState[docType] = { document_url: url, document_id: id, generating: false, generated_at: new Date().toISOString() };
+            saveDocState();
+            toast(url ? 'Document generated successfully!' : 'Document generated, but no link returned. Check Google Drive.');
         } else {
             docState[docType] = { ...docState[docType], generating: false };
             toast('Generation failed: ' + (result?.error || 'Connection error'), 'error');

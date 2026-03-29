@@ -9,6 +9,14 @@
     <meta http-equiv="Expires" content="0">
     <title>Email Outreach | Carlton AI</title>
 
+    <script>
+        // Instant auth check — runs before body renders
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -98,6 +106,78 @@
     </script>
 
     <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent { display: block !important; opacity: 1 !important; }
+
+        /* ── Nav Dropdown System ── */
+        .nav-group { position: relative; }
+        .nav-group-btn {
+            display: flex; align-items: center; gap: 0.25rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem; font-weight: 500;
+            color: #8A95A9;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+            border: none; background: transparent;
+        }
+        .nav-group-btn:hover { color: #E8ECF1; }
+        .nav-group-btn.active {
+            background: rgba(6,214,160,0.12);
+            color: #06D6A0;
+        }
+        .nav-group-btn .chevron {
+            transition: transform 0.2s;
+            opacity: 0.5;
+        }
+        .nav-group:hover .nav-group-btn .chevron { transform: rotate(180deg); opacity: 0.8; }
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 150px;
+            padding: 0.375rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: opacity 0.15s, visibility 0.15s, transform 0.15s;
+            z-index: 70;
+        }
+        .nav-group:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .nav-dropdown a {
+            display: block;
+            padding: 0.4rem 0.625rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+        .nav-dropdown a:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--deft-txt, #E8ECF1);
+        }
+        .nav-dropdown a.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        /* Theme overrides for nav */
+        .nav-group-btn.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
         /* ── Theme variable overrides ── */
         body {
             background: var(--deft-base, #08090D) !important;
@@ -2146,6 +2226,8 @@
     const mainContent = document.getElementById('mainContent');
 
     function checkAuth() {
+        // Check both auth systems (rdgr-session in localStorage, and legacy registry-auth in sessionStorage)
+        try { if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) { passGate(); return; } } catch(e) {}
         if (sessionStorage.getItem('registry-auth') === 'true') { passGate(); return; }
         const params = new URLSearchParams(window.location.search);
         if (params.get('auth') === 'rdgr') { passGate(); return; }
@@ -2161,6 +2243,7 @@
 
     function passGate() {
         sessionStorage.setItem('registry-auth', 'true');
+        localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
         gate.classList.add('hidden');
         mainContent.style.display = '';
         requestAnimationFrame(() => { mainContent.style.opacity = '1'; });

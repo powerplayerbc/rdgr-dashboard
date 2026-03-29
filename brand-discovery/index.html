@@ -1060,7 +1060,12 @@
     async function loadProgress() {
         const result = await apiGetProgress();
         if (!result || !result.success) {
-            toast('Failed to load progress', 'error');
+            // Show empty state — all categories as "not started" so user can begin
+            console.warn('Brand discovery progress unavailable:', result?.error || 'no response');
+            state.progressData = null;
+            state.categoryMap = {};
+            renderStats({ completed: 0, in_progress: 0, not_started: 15, total: 15 }, 0);
+            renderCategoryCards();
             return;
         }
         state.progressData = result;
