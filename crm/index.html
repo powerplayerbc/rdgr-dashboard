@@ -141,6 +141,76 @@
         .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
         .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
         .text-3xl { font-size: calc(1.875rem * var(--deft-font-scale, 1)) !important; }
+    
+        /* ── Nav Dropdown System ── */
+        .nav-group { position: relative; }
+        .nav-group-btn {
+            display: flex; align-items: center; gap: 0.25rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem; font-weight: 500;
+            color: #8A95A9;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+            border: none; background: transparent;
+        }
+        .nav-group-btn:hover { color: #E8ECF1; }
+        .nav-group-btn.active {
+            background: rgba(6,214,160,0.12);
+            color: #06D6A0;
+        }
+        .nav-group-btn .chevron {
+            transition: transform 0.2s;
+            opacity: 0.5;
+        }
+        .nav-group:hover .nav-group-btn .chevron { transform: rotate(180deg); opacity: 0.8; }
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 150px;
+            padding: 0.375rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: opacity 0.15s, visibility 0.15s, transform 0.15s;
+            z-index: 70;
+        }
+        .nav-group:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .nav-dropdown a {
+            display: block;
+            padding: 0.4rem 0.625rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+        .nav-dropdown a:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--deft-txt, #E8ECF1);
+        }
+        .nav-dropdown a.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        /* Theme overrides for nav */
+        .nav-group-btn.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -807,24 +877,54 @@
                     <div class="pulse-dot"></div>
                     <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
                     <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
-                        <a href="/rdgr" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Dashboard</a>
-                        <a href="/chat" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Chat</a>
-                        <a href="/org-chart" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Org Map</a>
-                        <a href="/our-workflows" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Workflows</a>
-                        <a href="/social-dashboard" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Social</a>
-                        <a href="/email-outreach" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Email</a>
-                        <a href="/crm" class="task-tab active" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">CRM</a>
-                        <a href="/offer-studio" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Offers</a>
-                        <a href="/content" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Publishing</a>
-                        <a href="/media" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Media</a>
-                        <a href="/council" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">Council</a>
-                        <a href="/hub" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">HUB</a>
-                        <a href="/meetings" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Meetings</a>
-                        <a href="/deft" class="task-tab" style="flex: none; padding: 0.3rem 0.75rem; text-decoration: none;">DEFT</a>
-                        <a href="/brain" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">BRAIN</a>
-                        <a href="/brand-discovery" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Brand</a>
-                        <a href="/template-studio" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Templates</a>
-                        <a href="/brand-documents" class="task-tab" style="flex:none;padding:0.3rem 0.75rem;text-decoration:none;">Docs</a>
+                        <a href="/rdgr" class="nav-group-btn">Dashboard</a>
+                        <div class="nav-group">
+                            <a href="/chat" class="nav-group-btn">Chat <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/chat">Chat</a>
+                                <a href="/council">Council</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/crm" class="nav-group-btn active">Outreach <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/crm" class="active">CRM</a>
+                                <a href="/email-outreach">Email</a>
+                                <a href="/social-dashboard">Social</a>
+                                <a href="/offer-studio">Offers</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brand-discovery" class="nav-group-btn">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brand-discovery">Discovery</a>
+                                <a href="/template-studio">Templates</a>
+                                <a href="/brand-documents">Docs</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/content" class="nav-group-btn">Content <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/content">Publishing</a>
+                                <a href="/media">Media</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brain">BRAIN</a>
+                                <a href="/deft">DEFT</a>
+                            </div>
+                        </div>
+                        <a href="/meetings" class="nav-group-btn">Meetings</a>
+                        <div class="nav-group">
+                            <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/our-workflows">Workflows</a>
+                                <a href="/org-chart">Org Map</a>
+                                <a href="/hub">HUB</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="flex items-center gap-2 sm:gap-3">
