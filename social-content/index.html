@@ -1683,14 +1683,41 @@ function renderPillarDetailContent(id) {
 
     const formatsHtml = (p.content_formats || []).map(f => `<span class="format-pill selected" style="pointer-events:none;">${f}</span>`).join('') || '<span class="text-txt-3 text-xs">—</span>';
 
-    container.innerHTML = `
-        <div class="flex items-center justify-between mb-3">
-            <span class="text-xs text-txt-2">Target: ${esc(p.target_audience || '—')}</span>
-            <div class="flex items-center gap-2">
-                ${p.suggested_action ? `<button onclick="acceptSuggestion(${p.id})" class="btn btn-approve text-xs py-1 px-2">Accept</button><button onclick="dismissSuggestion(${p.id})" class="btn btn-ghost text-xs py-1 px-2">Dismiss</button>` : ''}
-                <button onclick="startEditPillar(${p.id})" class="btn btn-primary text-xs py-1 px-2">Edit Instructions</button>
-                <button onclick="deletePillar(${p.id})" class="btn btn-deny text-xs py-1 px-2">Delete</button>
+    // Build suggestion callout if present
+    let suggestionHtml = '';
+    if (p.suggested_action) {
+        const isDeactivate = p.suggested_action === 'deactivate';
+        const borderColor = isDeactivate ? 'var(--deft-danger, #FF6B6B)' : 'var(--deft-success, #06D6A0)';
+        const bgColor = isDeactivate ? 'rgba(255,107,107,0.06)' : 'rgba(6,214,160,0.06)';
+        const icon = isDeactivate ? '⚠' : '★';
+        const actionLabel = isDeactivate ? 'Deactivate this pillar' : 'Boost this pillar';
+        suggestionHtml = `
+        <div class="mb-4 p-3 rounded-lg" style="background:${bgColor};border:1px solid ${borderColor}30;">
+            <div class="flex items-center gap-2 mb-1.5">
+                <span style="font-size:1rem;">${icon}</span>
+                <span class="font-heading font-bold text-sm" style="color:${borderColor};">System Suggestion: ${actionLabel}</span>
             </div>
+            <p class="text-xs text-txt-2 mb-2.5">${esc(p.suggestion_reason || 'Based on recent performance analysis.')}</p>
+            <div class="flex items-center gap-2">
+                <button onclick="acceptSuggestion(${p.id})" class="btn ${isDeactivate ? 'btn-deny' : 'btn-approve'} text-xs py-1 px-3">Accept Suggestion</button>
+                <button onclick="dismissSuggestion(${p.id})" class="btn btn-ghost text-xs py-1 px-2">Dismiss</button>
+            </div>
+        </div>`;
+    }
+
+    container.innerHTML = `
+        ${suggestionHtml}
+        <div class="mb-3">
+            <div class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1">Description</div>
+            <div class="text-sm">${esc(p.description || '—')}</div>
+        </div>
+        <div class="mb-3">
+            <div class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1">Target Audience</div>
+            <div class="text-sm">${esc(p.target_audience || '—')}</div>
+        </div>
+        <div class="flex items-center gap-2 mb-4">
+            <button onclick="startEditPillar(${p.id})" class="btn btn-primary text-xs py-1 px-2">Edit Instructions</button>
+            <button onclick="deletePillar(${p.id})" class="btn btn-deny text-xs py-1 px-2">Delete Pillar</button>
         </div>
         ${renderSection('Content Strategy', `
             ${readonlyField('Approach', gi.approach)}
