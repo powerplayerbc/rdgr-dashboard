@@ -1,0 +1,2587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Social Content | Carlton AI</title>
+
+    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://yrwrswyjawmgtxrgbnim.supabase.co">
+    <script>
+        // Instant auth check + theme application — runs before body renders
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _presets = {
+                forest:     { accent:'#A8D65B',accentWarm:'#F0A830',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                sunrise:    { accent:'#F0A830',accentWarm:'#E85D5D',base:'#100D08',surface:'#1C1810',surfaceEl:'#272118',surfaceHi:'#322B20',border:'#3F382C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                ocean:      { accent:'#38BDF8',accentWarm:'#06D6A0',base:'#080D10',surface:'#10161C',surfaceEl:'#182027',surfaceHi:'#202A32',border:'#2C363F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E0E8EA',txt2:'#8C9BA0',txt3:'#586B6B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                berry:      { accent:'#C084FC',accentWarm:'#FB7185',base:'#0D0810',surface:'#16101C',surfaceEl:'#201827',surfaceHi:'#2A2032',border:'#3A2C3F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E0EA',txt2:'#A08CA0',txt3:'#6B586B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                rdgr:       { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' },
+                monochrome: { accent:'#E8E8E8',accentWarm:'#A0A0A0',base:'#000000',surface:'#0A0A0A',surfaceEl:'#141414',surfaceHi:'#1E1E1E',border:'#2A2A2A',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E8E8',txt2:'#A0A0A0',txt3:'#666666',headingFont:'Nunito',bodyFont:'DM Sans' },
+            };
+            var _t = (_tc.preset === 'custom' && _tc.custom) ? _tc.custom : (_presets[_tc.preset] || _presets.rdgr);
+            if (_tc.statusOverrides) {
+                if (_tc.statusOverrides.success) _t.success = _tc.statusOverrides.success;
+                if (_tc.statusOverrides.warning) _t.warning = _tc.statusOverrides.warning;
+                if (_tc.statusOverrides.danger) _t.danger = _tc.statusOverrides.danger;
+            }
+            var _r = document.documentElement;
+            _r.style.setProperty('--deft-accent', _t.accent);
+            _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+            _r.style.setProperty('--deft-accent-warm', _t.accentWarm || _t.accent);
+            _r.style.setProperty('--deft-base', _t.base);
+            _r.style.setProperty('--deft-surface', _t.surface);
+            _r.style.setProperty('--deft-surface-el', _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-surface-hi', _t.surfaceHi || _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-border', _t.border);
+            _r.style.setProperty('--deft-success', _t.success || '#6BCB77');
+            _r.style.setProperty('--deft-success-dim', (_t.success || '#6BCB77') + '26');
+            _r.style.setProperty('--deft-warning', _t.warning || '#F0A830');
+            _r.style.setProperty('--deft-warning-dim', (_t.warning || '#F0A830') + '26');
+            _r.style.setProperty('--deft-danger', _t.danger || '#E85D5D');
+            _r.style.setProperty('--deft-danger-dim', (_t.danger || '#E85D5D') + '26');
+            _r.style.setProperty('--deft-txt', _t.txt);
+            _r.style.setProperty('--deft-txt-2', _t.txt2 || '#8A95A9');
+            _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
+            _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
+            _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+            var _fs = _tc.fontScale || 1;
+            _r.style.setProperty('--deft-font-scale', _fs);
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent { opacity: 1 !important; }
+
+        /* Universal theme */
+        body {
+            background: var(--deft-base, #08090D) !important;
+            color: var(--deft-txt, #E8ECF1) !important;
+            font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important;
+        }
+        .font-heading, h1, h2, h3 {
+            font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important;
+        }
+        nav {
+            background: color-mix(in srgb, var(--deft-base, #08090D) 92%, transparent) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel, .stat-chip {
+            background: var(--deft-surface, #11131A) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel-header { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input:focus {
+            border-color: var(--deft-accent, #06D6A0) !important;
+            box-shadow: 0 0 0 2px var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+        }
+        .text-accent { color: var(--deft-accent, #06D6A0) !important; }
+        .bg-accent { background-color: var(--deft-accent, #06D6A0) !important; }
+        .task-tab.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+        .btn-primary {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent) !important;
+        }
+        .btn-primary:hover {
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent) !important;
+        }
+        .btn-ghost { border-color: var(--deft-border, #2A2E3D) !important; }
+        .text-info { color: var(--deft-accent, #06D6A0) !important; }
+        .badge-in_progress { background: var(--deft-accent-dim) !important; color: var(--deft-accent) !important; }
+        .badge-completed { background: var(--deft-success-dim, rgba(34,197,94,0.15)) !important; color: var(--deft-success, #22C55E) !important; }
+        .badge-failed { background: var(--deft-danger-dim, rgba(255,107,107,0.15)) !important; color: var(--deft-danger, #FF6B6B) !important; }
+        .badge-blocked { background: var(--deft-warning-dim, rgba(255,217,61,0.15)) !important; color: var(--deft-warning, #FFD93D) !important; }
+        .btn-approve { background: var(--deft-success-dim) !important; color: var(--deft-success) !important; border-color: color-mix(in srgb, var(--deft-success) 25%, transparent) !important; }
+        .btn-deny { background: var(--deft-danger-dim) !important; color: var(--deft-danger) !important; border-color: color-mix(in srgb, var(--deft-danger) 25%, transparent) !important; }
+        .text-alert { color: var(--deft-danger, #FF6B6B) !important; }
+        .text-warn { color: var(--deft-warning, #FFD93D) !important; }
+        .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+        .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+        .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+        ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D) !important; }
+        .pulse-dot { background: var(--deft-accent, #06D6A0) !important; }
+        .gate-input:focus {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent) !important;
+        }
+        select.form-input option { background: var(--deft-surface-el, #1A1D28) !important; color: var(--deft-txt, #E8ECF1) !important; }
+        body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
+        .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
+        .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
+        .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
+        .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
+
+        /* ── Nav Dropdown System ── */
+        .nav-group { position: relative; }
+        .nav-group-btn {
+            display: flex; align-items: center; gap: 0.25rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem; font-weight: 500;
+            color: #8A95A9;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+            border: none; background: transparent;
+        }
+        .nav-group-btn:hover { color: #E8ECF1; }
+        .nav-group-btn.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+        .nav-group-btn .chevron {
+            transition: transform 0.2s;
+            opacity: 0.5;
+        }
+        .nav-group:hover .nav-group-btn .chevron { transform: rotate(180deg); opacity: 0.8; }
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 150px;
+            padding: 0.375rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: opacity 0.15s, visibility 0.15s, transform 0.15s;
+            z-index: 70;
+        }
+        .nav-group:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .nav-dropdown a {
+            display: block;
+            padding: 0.4rem 0.625rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+        .nav-dropdown a:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--deft-txt, #E8ECF1);
+        }
+        .nav-dropdown a.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deft-base': '#08090D',
+                        surface: '#11131A',
+                        'surface-el': '#1A1D28',
+                        'surface-hi': '#242836',
+                        border: '#2A2E3D',
+                        accent: '#06D6A0',
+                        'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B',
+                        'alert-dim': 'rgba(255,107,107,0.15)',
+                        warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)',
+                        info: '#4CC9F0',
+                        'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1',
+                        'txt-2': '#8A95A9',
+                        'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- ═══ PAGE-SPECIFIC STYLES ═══ -->
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #08090D;
+            color: #E8ECF1;
+        }
+
+        /* ── Grain ── */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3A3E4D; }
+
+        /* ── Gate ── */
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: #E8ECF1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            width: 100%;
+        }
+        .gate-input::placeholder { color: #525E73; }
+        .gate-error { color: #FF6B6B; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        /* ── Pulse ── */
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #06D6A0;
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+
+        /* ── Top-Level Section Tabs ── */
+        .top-tab {
+            flex: 1;
+            padding: 0.6rem 1.25rem;
+            font-family: 'Chakra Petch', system-ui;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            color: #525E73;
+            background: transparent;
+            border: 1px solid transparent;
+            transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .top-tab:hover { color: #8A95A9; }
+        .top-tab.active {
+            background: rgba(6,214,160,0.1);
+            color: #06D6A0;
+            border-color: rgba(6,214,160,0.2);
+        }
+
+        /* ── Stat chip ── */
+        .stat-chip {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.5rem;
+            padding: 0.625rem 1rem;
+            display: flex; flex-direction: column; gap: 0.25rem;
+        }
+        .stat-value { font-family: 'Chakra Petch', system-ui; font-weight: 700; font-size: 1.4rem; line-height: 1; }
+        .stat-label { font-size: 0.7rem; color: #8A95A9; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+
+        /* ── Buttons ── */
+        .btn {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.03em;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+            border: none;
+            text-transform: uppercase;
+        }
+        .btn-primary { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.3); }
+        .btn-primary:hover { background: rgba(6,214,160,0.25); }
+        .btn-ghost { background: transparent; color: #8A95A9; border: 1px solid #2A2E3D; }
+        .btn-ghost:hover { background: rgba(255,255,255,0.03); color: #E8ECF1; }
+        .btn-ghost.active { background: rgba(6,214,160,0.1); color: #06D6A0; border-color: rgba(6,214,160,0.3); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-approve { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.25); }
+        .btn-approve:hover { background: rgba(6,214,160,0.25); box-shadow: 0 0 12px rgba(6,214,160,0.1); }
+        .btn-deny { background: rgba(255,107,107,0.15); color: #FF6B6B; border: 1px solid rgba(255,107,107,0.25); }
+        .btn-deny:hover { background: rgba(255,107,107,0.25); box-shadow: 0 0 12px rgba(255,107,107,0.1); }
+        .btn-schedule { background: rgba(76,201,240,0.15); color: #4CC9F0; border: 1px solid rgba(76,201,240,0.25); }
+        .btn-schedule:hover { background: rgba(76,201,240,0.25); }
+        .btn-warn { background: rgba(255,217,61,0.12); color: #FFD93D; border: 1px solid rgba(255,217,61,0.2); }
+        .btn-warn:hover { background: rgba(255,217,61,0.2); }
+
+        /* ── Filter / view buttons ── */
+        .view-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem; font-weight: 500;
+            letter-spacing: 0.04em; text-transform: uppercase;
+            padding: 0.375rem 0.75rem; border-radius: 0.25rem;
+            cursor: pointer; background: transparent; color: #8A95A9;
+            border: 1px solid transparent;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .view-btn:hover { color: #E8ECF1; background: rgba(255,255,255,0.03); }
+        .view-btn.active { color: var(--deft-accent, #06D6A0); background: color-mix(in srgb, var(--deft-accent, #06D6A0) 10%, transparent); border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 20%, transparent); }
+
+        .filter-chip {
+            font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.03em;
+            padding: 0.25rem 0.625rem; border-radius: 999px; cursor: pointer;
+            background: transparent; color: var(--deft-txt-3, #525E73);
+            border: 1px solid var(--deft-border, #2A2E3D); transition: all 0.15s;
+        }
+        .filter-chip:hover { color: var(--deft-txt-2, #8A95A9); border-color: var(--deft-txt-3, #525E73); }
+        .filter-chip.active { color: var(--deft-accent, #06D6A0); background: color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent); border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent); }
+
+        .status-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem; font-weight: 500;
+            letter-spacing: 0.04em; text-transform: uppercase;
+            padding: 0.3rem 0.625rem; border-radius: 0.25rem;
+            cursor: pointer; background: transparent; color: #525E73;
+            border: 1px solid transparent;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+        .status-btn:hover { color: #8A95A9; }
+        .status-btn.active { color: #E8ECF1; background: rgba(255,255,255,0.05); border-color: #2A2E3D; }
+
+        /* ── Badges ── */
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+            padding: 0.2rem 0.5rem; border-radius: 0.25rem;
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            white-space: nowrap;
+        }
+        .badge-pending_approval { background: rgba(255,217,61,0.15); color: #FFD93D; }
+        .badge-scheduled { background: rgba(76,201,240,0.15); color: #4CC9F0; }
+        .badge-approved { background: rgba(6,214,160,0.15); color: #06D6A0; }
+        .badge-posted { background: rgba(16,185,129,0.15); color: #10B981; }
+        .badge-rejected { background: rgba(255,107,107,0.15); color: #FF6B6B; }
+        .badge-revision_requested { background: rgba(251,146,60,0.15); color: #FB923C; }
+        .badge-draft { background: rgba(138,149,169,0.1); color: #8A95A9; }
+        .badge-failed { background: rgba(255,107,107,0.15); color: #FF6B6B; }
+        .badge-pending_review { background: rgba(255,217,61,0.15); color: #FFD93D; }
+
+        .badge-source-manual { background: rgba(76,201,240,0.12); color: #4CC9F0; }
+        .badge-source-system { background: rgba(168,85,247,0.12); color: #A855F7; }
+        .badge-source-brand_discovery { background: rgba(255,217,61,0.12); color: #FFD93D; }
+
+        .badge-suggest-deactivate { background: rgba(255,107,107,0.12); color: #FF6B6B; }
+        .badge-suggest-boost { background: rgba(6,214,160,0.12); color: #06D6A0; }
+
+        .badge-p1 { background: rgba(255,107,107,0.15); color: #FF6B6B; }
+        .badge-p2 { background: rgba(255,217,61,0.12); color: #FFD93D; }
+        .badge-p3 { background: rgba(138,149,169,0.1); color: #8A95A9; }
+
+        /* ── Data table ── */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem; font-weight: 600;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            color: #525E73;
+            padding: 0.625rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #1E2130;
+            cursor: pointer;
+            user-select: none;
+        }
+        .data-table th:hover { color: #8A95A9; }
+        .data-table td {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+            border-bottom: 1px solid rgba(42,46,61,0.3);
+            vertical-align: middle;
+        }
+        .data-table tr:hover td { background: rgba(255,255,255,0.015); }
+        .data-table tr.expanded td { background: rgba(6,214,160,0.02); border-bottom-color: transparent; }
+        .sort-arrow { font-size: 0.55rem; opacity: 0.5; }
+        .sort-arrow.asc::after { content: ' ▲'; }
+        .sort-arrow.desc::after { content: ' ▼'; }
+
+        /* ── Pillar card grid ── */
+        .pillar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 1rem;
+        }
+        .pillar-card {
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.75rem;
+            background: var(--deft-surface, #11131A);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+        }
+        .pillar-card:hover { border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 20%, transparent); }
+        .pillar-card.inactive { opacity: 0.55; }
+        .pillar-card-header {
+            padding: 1rem 1.25rem;
+            display: flex; align-items: center; gap: 0.75rem;
+            border-bottom: 1px solid rgba(42,46,61,0.4);
+            cursor: pointer;
+        }
+        .pillar-card-body { padding: 1rem 1.25rem; }
+        .pillar-card-detail {
+            max-height: 0; overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            border-top: 1px solid rgba(42,46,61,0.3);
+        }
+        .pillar-card-detail.expanded { max-height: 3000px; }
+        .pillar-card-detail-inner { padding: 1.25rem; }
+
+        /* ── Performance bar ── */
+        .perf-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); overflow: hidden; flex: 1; }
+        .perf-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+        .perf-bar-fill.low { background: var(--deft-danger, #FF6B6B); }
+        .perf-bar-fill.mid { background: var(--deft-warning, #FFD93D); }
+        .perf-bar-fill.high { background: var(--deft-success, #06D6A0); }
+
+        /* ── Toggle switch ── */
+        .toggle-switch {
+            position: relative;
+            width: 36px; height: 20px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: none;
+            flex-shrink: 0;
+        }
+        .toggle-switch.on { background: rgba(6,214,160,0.3); }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px;
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            background: #8A95A9;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .toggle-switch.on::after { transform: translateX(16px); background: #06D6A0; }
+
+        /* ── Tag input ── */
+        .tag-input-wrap {
+            display: flex; flex-wrap: wrap; gap: 0.375rem;
+            padding: 0.5rem 0.625rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.375rem;
+            min-height: 38px;
+            transition: border-color 0.2s;
+        }
+        .tag-input-wrap:focus-within {
+            border-color: var(--deft-accent, #06D6A0);
+            box-shadow: 0 0 0 2px var(--deft-accent-dim, rgba(6,214,160,0.15));
+        }
+        .tag-chip {
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            padding: 0.15rem 0.5rem;
+            background: rgba(6,214,160,0.1);
+            border: 1px solid rgba(6,214,160,0.2);
+            border-radius: 999px;
+            font-size: 0.7rem; color: var(--deft-accent, #06D6A0);
+        }
+        .tag-chip button {
+            background: none; border: none; color: inherit; cursor: pointer;
+            font-size: 0.8rem; line-height: 1; opacity: 0.6; padding: 0;
+        }
+        .tag-chip button:hover { opacity: 1; }
+        .tag-field {
+            flex: 1; min-width: 100px; border: none; background: transparent;
+            color: var(--deft-txt, #E8ECF1); outline: none;
+            font-size: 0.8rem; font-family: inherit;
+        }
+        .tag-field::placeholder { color: var(--deft-txt-3, #525E73); }
+
+        /* ── Checklist items ── */
+        .checklist-item {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.375rem 0;
+        }
+        .checklist-item input[type="text"] {
+            flex: 1;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(42,46,61,0.5);
+            border-radius: 0.25rem;
+            padding: 0.375rem 0.5rem;
+            color: var(--deft-txt, #E8ECF1);
+            font-size: 0.8rem;
+            outline: none;
+            font-family: inherit;
+        }
+        .checklist-item input[type="text"]:focus { border-color: var(--deft-accent, #06D6A0); }
+        .checklist-item .remove-btn {
+            background: none; border: none; cursor: pointer;
+            color: var(--deft-txt-3, #525E73); font-size: 1rem; padding: 0 0.25rem;
+            transition: color 0.15s;
+        }
+        .checklist-item .remove-btn:hover { color: var(--deft-danger, #FF6B6B); }
+
+        /* ── Tone sliders ── */
+        .tone-slider-row {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.375rem 0;
+        }
+        .tone-slider-row label {
+            font-size: 0.7rem; color: var(--deft-txt-2, #8A95A9);
+            min-width: 80px; text-transform: capitalize;
+        }
+        .tone-slider-row input[type="range"] {
+            flex: 1; height: 4px;
+            -webkit-appearance: none; appearance: none;
+            background: rgba(255,255,255,0.08); border-radius: 2px;
+            outline: none;
+        }
+        .tone-slider-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 14px; height: 14px; border-radius: 50%;
+            background: var(--deft-accent, #06D6A0); cursor: pointer;
+            border: 2px solid var(--deft-base, #08090D);
+        }
+        .tone-slider-row .tone-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem; color: var(--deft-txt-3, #525E73);
+            min-width: 28px; text-align: right;
+        }
+
+        /* ── Multi-select pills ── */
+        .format-pill {
+            padding: 0.25rem 0.625rem;
+            border-radius: 999px;
+            font-size: 0.65rem; font-weight: 500; text-transform: uppercase;
+            letter-spacing: 0.03em;
+            background: transparent;
+            color: var(--deft-txt-3, #525E73);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .format-pill.selected {
+            color: var(--deft-accent, #06D6A0);
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent);
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent);
+        }
+
+        /* ── Section group (collapsible within pillar detail) ── */
+        .detail-section { margin-bottom: 1rem; }
+        .detail-section-header {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 0;
+            cursor: pointer;
+            user-select: none;
+        }
+        .detail-section-header h4 {
+            font-size: 0.7rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--deft-txt-2, #8A95A9);
+        }
+        .detail-section-header .arrow { color: var(--deft-txt-3, #525E73); font-size: 0.6rem; transition: transform 0.2s; }
+        .detail-section-header .arrow.open { transform: rotate(90deg); }
+        .detail-section-body { display: none; padding: 0.5rem 0; }
+        .detail-section-body.open { display: block; }
+
+        /* ── Calendar grid ── */
+        .cal-header-cell {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase;
+            color: #525E73; padding: 0.5rem; text-align: center;
+            border-bottom: 1px solid #1E2130; font-size: 0.65rem;
+        }
+        .cal-cell {
+            min-height: 100px;
+            border: 1px solid #1E2130;
+            padding: 0.375rem;
+            vertical-align: top;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+        .cal-cell:hover { background: rgba(255,255,255,0.015); }
+        .cal-cell.today { background: rgba(6,214,160,0.03); border-color: rgba(6,214,160,0.15); }
+        .cal-cell.other-month { opacity: 0.3; }
+        .cal-day-num {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 600; font-size: 0.75rem; color: #8A95A9;
+            margin-bottom: 0.25rem;
+        }
+        .cal-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            display: inline-block; margin: 1px;
+        }
+
+        /* ── Detail slide-out panel ── */
+        .detail-backdrop {
+            position: fixed; inset: 0; z-index: 80;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .detail-backdrop.active { opacity: 1; visibility: visible; }
+        .detail-panel {
+            position: fixed; top: 0; right: 0; bottom: 0;
+            width: 520px; max-width: 90vw;
+            background: var(--deft-surface, #11131A);
+            border-left: 1px solid var(--deft-border, #2A2E3D);
+            z-index: 81;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow-y: auto;
+        }
+        .detail-backdrop.active .detail-panel { transform: translateX(0); }
+
+        /* ── Modal ── */
+        .modal-backdrop {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+        .modal-backdrop.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: var(--deft-surface, #11131A);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.75rem;
+            width: 90%; max-width: 640px; max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-backdrop.active .modal-content { transform: translateY(0); }
+
+        /* ── Form input ── */
+        .form-input {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2A2E3D;
+            border-radius: 0.375rem;
+            padding: 0.625rem 0.75rem;
+            color: #E8ECF1;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+        .form-input:focus {
+            border-color: #06D6A0;
+            box-shadow: 0 0 0 2px rgba(6,214,160,0.15);
+        }
+        .form-input::placeholder { color: #525E73; }
+        textarea.form-input { resize: vertical; min-height: 60px; }
+
+        /* ── Toast ── */
+        @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            padding: 0.625rem 1rem; border-radius: 0.375rem;
+            font-size: 0.8rem; font-weight: 500;
+            animation: toast-in 0.3s ease;
+            max-width: 360px;
+        }
+        .toast-success { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.25); }
+        .toast-error { background: rgba(255,107,107,0.15); color: #FF6B6B; border: 1px solid rgba(255,107,107,0.25); }
+        .toast-info { background: rgba(76,201,240,0.15); color: #4CC9F0; border: 1px solid rgba(76,201,240,0.25); }
+
+        /* ── Skeleton ── */
+        @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
+        .skeleton {
+            background: linear-gradient(90deg, #11131A 25%, #1A1D28 50%, #11131A 75%);
+            background-size: 400px 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 0.25rem;
+        }
+
+        /* ── Search input ── */
+        .search-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 0.375rem;
+            padding: 0.4rem 0.75rem 0.4rem 2rem;
+            color: #E8ECF1;
+            font-size: 0.8rem;
+            outline: none;
+            transition: border-color 0.2s;
+            max-width: 260px; width: 100%;
+        }
+        .search-input:focus { border-color: rgba(6,214,160,0.3); }
+        .search-input::placeholder { color: #525E73; }
+
+        /* ── Editorial day card ── */
+        .editorial-card {
+            background: var(--deft-surface-el, #1A1D28);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            transition: border-color 0.2s;
+        }
+        .editorial-card:hover { border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 20%, transparent); }
+
+        /* ── Collapsible section ── */
+        .collapse-header {
+            display: flex; align-items: center; gap: 0.5rem;
+            cursor: pointer; padding: 0.75rem 1rem;
+            user-select: none;
+        }
+        .collapse-header .arrow { color: var(--deft-txt-3); font-size: 0.65rem; transition: transform 0.2s; }
+        .collapse-header .arrow.open { transform: rotate(90deg); }
+
+        /* ── Platform colors ── */
+        .platform-linkedin { color: #0A66C2; }
+        .platform-twitter { color: #1DA1F2; }
+        .platform-facebook { color: #1877F2; }
+        .platform-instagram { color: #E1306C; }
+        .platform-reddit { color: #FF4500; }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .pillar-grid { grid-template-columns: 1fr; }
+            .editorial-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .stat-bar { flex-wrap: wrap; }
+            .filter-row { flex-direction: column; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ PASSWORD GATE ═══ -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+            </div>
+            <div id="gateProfiles" class="flex justify-center gap-3 mb-6">
+                <div class="text-center text-xs text-txt-3">Loading profiles...</div>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- ── Top Nav ── -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="nav-group-btn">Dashboard</a>
+                        <div class="nav-group">
+                            <a href="/chat" class="nav-group-btn">Chat <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/chat">Chat</a>
+                                <a href="/council">Council</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/crm" class="nav-group-btn active">Outreach <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/crm">CRM</a>
+                                <a href="/email-outreach">Email</a>
+                                <a href="/social-dashboard">Social</a>
+                                <a href="/social-content" class="active">Social Content</a>
+                                <a href="/offer-studio">Offers</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brand-discovery" class="nav-group-btn">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brand-discovery">Discovery</a>
+                                <a href="/template-studio">Templates</a>
+                                <a href="/brand-documents">Docs</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/bsi-discovery" class="nav-group-btn">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/bsi-discovery">Discovery</a>
+                                <a href="/compliance">Compliance</a>
+                                <a href="/bsi-documents">Documents</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/content" class="nav-group-btn">Content <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/content">Publishing</a>
+                                <a href="/media">Media</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brain">BRAIN</a>
+                                <a href="/deft">DEFT</a>
+                            </div>
+                        </div>
+                        <a href="/meetings" class="nav-group-btn">Meetings</a>
+                        <div class="nav-group">
+                            <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/our-workflows">Workflows</a>
+                                <a href="/org-chart">Org Map</a>
+                                <a href="/hub">HUB</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown"></div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2" title="Settings">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                    <button onclick="refreshAll()" class="btn btn-ghost text-xs py-2 px-3 flex items-center gap-1.5" id="refreshBtn">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
+
+        <!-- ═══ 4 SUB-TABS ═══ -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pt-4">
+            <div class="flex gap-1 p-0.5 rounded-lg" style="background: rgba(255,255,255,0.04); max-width: 620px;">
+                <button class="top-tab" id="tabBtnPillars" onclick="switchTab('pillars')">Pillars</button>
+                <button class="top-tab active" id="tabBtnQueue" onclick="switchTab('queue')">Content Queue</button>
+                <button class="top-tab" id="tabBtnCalendar" onclick="switchTab('calendar')">Calendar</button>
+                <button class="top-tab" id="tabBtnStrategy" onclick="switchTab('strategy')">Strategy</button>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- TAB 1: CONTENT PILLARS                  -->
+        <!-- ═══════════════════════════════════════ -->
+        <div id="tabPillars" class="tab-content" style="display:none;">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <h2 class="font-heading font-bold text-lg">Content Pillars</h2>
+                        <span class="text-xs text-txt-3 font-mono" id="pillarCount">—</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="refreshPillarPerformance()" class="btn btn-ghost text-xs py-1.5 px-3">Refresh Stats</button>
+                        <button onclick="triggerPillarAlign()" class="btn btn-ghost text-xs py-1.5 px-3">Force Align</button>
+                        <button onclick="triggerContentGeneration()" class="btn btn-schedule text-xs py-1.5 px-3">Generate Content</button>
+                        <button onclick="triggerWeeklyStrategy()" class="btn btn-warn text-xs py-1.5 px-3">Weekly Strategy</button>
+                        <button onclick="openAddPillarModal()" class="btn btn-primary text-xs py-1.5 px-3">+ Add Pillar</button>
+                    </div>
+                </div>
+                <div id="pillarGrid" class="pillar-grid">
+                    <div class="skeleton h-48 rounded-lg"></div>
+                    <div class="skeleton h-48 rounded-lg"></div>
+                    <div class="skeleton h-48 rounded-lg"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- TAB 2: CONTENT QUEUE                    -->
+        <!-- ═══════════════════════════════════════ -->
+        <div id="tabQueue" class="tab-content">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
+                <!-- Filters -->
+                <div class="filter-row flex flex-wrap items-center gap-3 mb-4">
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs text-txt-3 font-mono uppercase tracking-wider">From</label>
+                        <input type="date" class="form-input text-xs py-1.5" style="max-width:150px;" id="queueDateStart">
+                        <label class="text-xs text-txt-3 font-mono uppercase tracking-wider">To</label>
+                        <input type="date" class="form-input text-xs py-1.5" style="max-width:150px;" id="queueDateEnd">
+                    </div>
+                    <div class="flex items-center gap-1 flex-wrap" id="queuePlatformFilters">
+                        <button class="filter-chip active" data-platform="all" onclick="toggleQueuePlatform('all')">All</button>
+                        <button class="filter-chip" data-platform="linkedin" onclick="toggleQueuePlatform('linkedin')">LinkedIn</button>
+                        <button class="filter-chip" data-platform="twitter" onclick="toggleQueuePlatform('twitter')">Twitter</button>
+                        <button class="filter-chip" data-platform="facebook" onclick="toggleQueuePlatform('facebook')">Facebook</button>
+                        <button class="filter-chip" data-platform="instagram" onclick="toggleQueuePlatform('instagram')">Instagram</button>
+                    </div>
+                    <div class="flex items-center gap-1 flex-wrap" id="queueStatusFilters">
+                        <button class="status-btn active" data-status="all" onclick="toggleQueueStatus('all')">All</button>
+                        <button class="status-btn" data-status="pending_approval" onclick="toggleQueueStatus('pending_approval')">Pending</button>
+                        <button class="status-btn" data-status="approved" onclick="toggleQueueStatus('approved')">Approved</button>
+                        <button class="status-btn" data-status="scheduled" onclick="toggleQueueStatus('scheduled')">Scheduled</button>
+                        <button class="status-btn" data-status="posted" onclick="toggleQueueStatus('posted')">Posted</button>
+                        <button class="status-btn" data-status="rejected" onclick="toggleQueueStatus('rejected')">Rejected</button>
+                    </div>
+                    <div class="relative ml-auto">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-txt-3">
+                            <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/>
+                            <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                        </svg>
+                        <input type="text" class="search-input" placeholder="Search content..." id="queueSearch" onkeydown="if(event.key==='Enter')loadQueue()">
+                    </div>
+                </div>
+
+                <!-- Pillar filter chips (populated dynamically) -->
+                <div class="flex items-center gap-1 flex-wrap mb-4" id="queuePillarFilters" style="display:none;">
+                    <span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium mr-1">Pillar:</span>
+                </div>
+
+                <!-- Data table -->
+                <div class="panel overflow-x-auto">
+                    <table class="data-table" id="queueTable">
+                        <thead>
+                            <tr>
+                                <th onclick="sortQueue('status')" data-col="status" style="width:90px;">Status <span class="sort-arrow"></span></th>
+                                <th onclick="sortQueue('scheduled_at')" data-col="scheduled_at" style="width:130px;">Date <span class="sort-arrow"></span></th>
+                                <th onclick="sortQueue('platform')" data-col="platform" style="width:100px;">Platform <span class="sort-arrow"></span></th>
+                                <th onclick="sortQueue('content_category')" data-col="content_category" style="width:120px;">Pillar <span class="sort-arrow"></span></th>
+                                <th>Title</th>
+                                <th onclick="sortQueue('priority')" data-col="priority" style="width:70px;">Priority <span class="sort-arrow"></span></th>
+                                <th style="width:60px;">Bump</th>
+                                <th style="width:180px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queueBody">
+                            <tr><td colspan="8" class="text-center py-8"><div class="skeleton w-48 h-4 mx-auto"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex items-center justify-between mt-3 px-1">
+                    <span class="text-xs text-txt-3 font-mono" id="queueInfo">—</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- TAB 3: CALENDAR VIEW                    -->
+        <!-- ═══════════════════════════════════════ -->
+        <div id="tabCalendar" class="tab-content" style="display:none;">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
+                <!-- Stat Widgets -->
+                <div class="stat-bar grid grid-cols-2 md:grid-cols-4 gap-3 mb-4" id="calStats">
+                    <div class="stat-chip"><div class="stat-label">Posts</div><div class="stat-value" id="calStatPosts">—</div></div>
+                    <div class="stat-chip"><div class="stat-label">Approval Rate</div><div class="stat-value" id="calStatApproval">—</div></div>
+                    <div class="stat-chip"><div class="stat-label">Platforms</div><div id="calStatPlatforms" class="flex items-center gap-1 mt-1">—</div></div>
+                    <div class="stat-chip"><div class="stat-label">Bumps</div><div class="stat-value" id="calStatBumps">—</div></div>
+                </div>
+
+                <!-- Calendar Nav -->
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <button onclick="calNav(-1)" class="btn btn-ghost text-xs py-1.5 px-2.5">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 2L4 6l4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <span id="calTitle" class="font-heading font-bold text-sm sm:text-base tracking-wide min-w-[180px] text-center"></span>
+                        <button onclick="calNav(1)" class="btn btn-ghost text-xs py-1.5 px-2.5">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <button onclick="calToday()" class="btn btn-ghost text-xs py-1.5 px-2.5">Today</button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="view-btn" data-cal="week" onclick="setCalView('week')">Week</button>
+                        <button class="view-btn active" data-cal="month" onclick="setCalView('month')">Month</button>
+                    </div>
+                </div>
+
+                <!-- Calendar Grid -->
+                <div id="calendarGrid" class="panel overflow-hidden"></div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- TAB 4: EDITORIAL CALENDAR & STRATEGY    -->
+        <!-- ═══════════════════════════════════════ -->
+        <div id="tabStrategy" class="tab-content" style="display:none;">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-heading font-bold text-lg">Editorial Calendar & Strategy</h2>
+                    <button onclick="triggerWeeklyStrategy()" class="btn btn-warn text-xs py-1.5 px-3">Regenerate Strategy</button>
+                </div>
+
+                <!-- 7-Day Plan -->
+                <div id="editorialGrid" class="editorial-grid grid grid-cols-7 gap-3 mb-6" style="grid-template-columns: repeat(7, 1fr);">
+                    <div class="skeleton h-40 rounded-lg"></div>
+                    <div class="skeleton h-40 rounded-lg"></div>
+                    <div class="skeleton h-40 rounded-lg"></div>
+                    <div class="skeleton h-40 rounded-lg"></div>
+                    <div class="skeleton h-40 rounded-lg"></div>
+                    <div class="skeleton h-40 rounded-lg"></div>
+                    <div class="skeleton h-40 rounded-lg"></div>
+                </div>
+
+                <!-- Bump Log -->
+                <div class="panel">
+                    <div class="collapse-header" onclick="toggleBumpLog()">
+                        <span class="arrow" id="bumpLogArrow">▸</span>
+                        <span class="text-[0.65rem] font-mono text-txt-3 uppercase tracking-wider">Bump History</span>
+                        <span class="text-[0.6rem] font-mono text-txt-3 ml-auto" id="bumpLogCount">—</span>
+                    </div>
+                    <div id="bumpLogBody" style="display:none; padding: 0.75rem 1rem;">
+                        <div class="text-xs text-txt-3">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /mainContent -->
+
+    <!-- ═══ DETAIL SLIDE-OUT PANEL ═══ -->
+    <div class="detail-backdrop" id="detailBackdrop" onclick="if(event.target===this)closeDetail()">
+        <div class="detail-panel" id="detailPanel">
+            <div class="flex items-center justify-between p-4 border-b border-border">
+                <h3 class="font-heading font-bold text-sm" id="detailTitle">Post Detail</h3>
+                <button onclick="closeDetail()" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div id="detailBody" class="p-4"></div>
+        </div>
+    </div>
+
+    <!-- ═══ ADD PILLAR MODAL ═══ -->
+    <div class="modal-backdrop" id="addPillarModal">
+        <div class="modal-content" style="max-width:720px;">
+            <div class="flex items-center justify-between p-4 border-b border-border">
+                <h3 class="font-heading font-bold text-base">Add Content Pillar</h3>
+                <button onclick="closeModal('addPillarModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Pillar Name *</label>
+                        <input type="text" class="form-input" id="addPillarName" placeholder="e.g. Revenue Recovery Stories">
+                    </div>
+                    <div>
+                        <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Target Audience *</label>
+                        <input type="text" class="form-input" id="addPillarAudience" placeholder="e.g. B2B SaaS founders">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Description *</label>
+                    <textarea class="form-input" id="addPillarDesc" rows="2" placeholder="What this pillar covers..."></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Approach *</label>
+                        <textarea class="form-input" id="addPillarApproach" rows="2" placeholder="How to structure the post..."></textarea>
+                    </div>
+                    <div>
+                        <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Angle *</label>
+                        <textarea class="form-input" id="addPillarAngle" rows="2" placeholder="The perspective to write from..."></textarea>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Story Type *</label>
+                        <select class="form-input" id="addPillarStoryType">
+                            <option value="">Select...</option>
+                            <option value="client_transformation">Client Transformation</option>
+                            <option value="revenue_recovery">Revenue Recovery</option>
+                            <option value="problem_solution">Problem Solution</option>
+                            <option value="personal_transformation">Personal Transformation</option>
+                            <option value="contrarian_insight">Contrarian Insight</option>
+                            <option value="industry_war_story">Industry War Story</option>
+                            <option value="efficiency_gain">Efficiency Gain</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">CTA Style *</label>
+                        <textarea class="form-input" id="addPillarCTA" rows="2" placeholder="What kind of CTA to use..."></textarea>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Do List (min 2)</label>
+                        <div id="addPillarDoList" class="space-y-1">
+                            <div class="checklist-item"><input type="text" placeholder="Must do..."><button class="remove-btn" onclick="this.parentElement.remove()">×</button></div>
+                            <div class="checklist-item"><input type="text" placeholder="Must do..."><button class="remove-btn" onclick="this.parentElement.remove()">×</button></div>
+                        </div>
+                        <button onclick="addChecklistItem('addPillarDoList')" class="text-xs text-accent mt-1 cursor-pointer hover:underline">+ Add item</button>
+                    </div>
+                    <div>
+                        <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Don't List (min 2)</label>
+                        <div id="addPillarDontList" class="space-y-1">
+                            <div class="checklist-item"><input type="text" placeholder="Never do..."><button class="remove-btn" onclick="this.parentElement.remove()">×</button></div>
+                            <div class="checklist-item"><input type="text" placeholder="Never do..."><button class="remove-btn" onclick="this.parentElement.remove()">×</button></div>
+                        </div>
+                        <button onclick="addChecklistItem('addPillarDontList')" class="text-xs text-accent mt-1 cursor-pointer hover:underline">+ Add item</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Example Hooks (2-3 opening lines)</label>
+                    <textarea class="form-input" id="addPillarHooks" rows="3" placeholder="One hook per line..."></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Primary Keywords</label>
+                        <input type="text" class="form-input" id="addPillarKeywords" placeholder="Comma-separated keywords">
+                    </div>
+                    <div>
+                        <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Banned Angles</label>
+                        <input type="text" class="form-input" id="addPillarBanned" placeholder="Comma-separated angles to avoid">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Content Formats</label>
+                    <div class="flex flex-wrap gap-2" id="addPillarFormats">
+                        <button class="format-pill selected" data-fmt="post" onclick="this.classList.toggle('selected')">Post</button>
+                        <button class="format-pill" data-fmt="thread" onclick="this.classList.toggle('selected')">Thread</button>
+                        <button class="format-pill" data-fmt="how_to" onclick="this.classList.toggle('selected')">How-To</button>
+                        <button class="format-pill" data-fmt="case_study" onclick="this.classList.toggle('selected')">Case Study</button>
+                        <button class="format-pill" data-fmt="story" onclick="this.classList.toggle('selected')">Story</button>
+                        <button class="format-pill" data-fmt="comparison" onclick="this.classList.toggle('selected')">Comparison</button>
+                        <button class="format-pill" data-fmt="listicle" onclick="this.classList.toggle('selected')">Listicle</button>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-2 border-t border-border">
+                    <button onclick="closeModal('addPillarModal')" class="btn btn-ghost text-xs">Cancel</button>
+                    <button onclick="submitAddPillar()" class="btn btn-primary text-xs" id="addPillarSubmitBtn">Create Pillar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ REJECT/FEEDBACK MODAL ═══ -->
+    <div class="modal-backdrop" id="rejectModal">
+        <div class="modal-content" style="max-width:480px;">
+            <div class="flex items-center justify-between p-4 border-b border-border">
+                <h3 class="font-heading font-bold text-base" id="rejectModalTitle">Reject Post</h3>
+                <button onclick="closeModal('rejectModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div>
+                    <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Reason / Feedback</label>
+                    <textarea class="form-input" id="rejectReason" rows="3" placeholder="Why is this being rejected or what changes are needed?"></textarea>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button onclick="closeModal('rejectModal')" class="btn btn-ghost text-xs">Cancel</button>
+                    <button onclick="submitReject()" class="btn btn-deny text-xs" id="rejectSubmitBtn">Reject</button>
+                    <button onclick="submitRequestEdits()" class="btn btn-warn text-xs">Request Edits</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ SCHEDULE MODAL ═══ -->
+    <div class="modal-backdrop" id="scheduleModal">
+        <div class="modal-content" style="max-width:400px;">
+            <div class="flex items-center justify-between p-4 border-b border-border">
+                <h3 class="font-heading font-bold text-base">Schedule Post</h3>
+                <button onclick="closeModal('scheduleModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div>
+                    <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Date & Time</label>
+                    <input type="datetime-local" class="form-input" id="scheduleDateTime">
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button onclick="closeModal('scheduleModal')" class="btn btn-ghost text-xs">Cancel</button>
+                    <button onclick="submitSchedule()" class="btn btn-schedule text-xs">Approve & Schedule</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ NEWS FLASH BUMP MODAL ═══ -->
+    <div class="modal-backdrop" id="bumpModal">
+        <div class="modal-content" style="max-width:560px;">
+            <div class="flex items-center justify-between p-4 border-b border-border">
+                <h3 class="font-heading font-bold text-base">News Flash Bump</h3>
+                <button onclick="closeModal('bumpModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Platform</label>
+                        <select class="form-input" id="bumpPlatform">
+                            <option value="linkedin">LinkedIn</option>
+                            <option value="twitter">Twitter / X</option>
+                            <option value="facebook">Facebook</option>
+                            <option value="instagram">Instagram</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Scheduled At</label>
+                        <input type="datetime-local" class="form-input" id="bumpScheduleAt">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Title</label>
+                    <input type="text" class="form-input" id="bumpTitle" placeholder="Breaking news title...">
+                </div>
+                <div>
+                    <label class="text-xs text-txt-3 font-mono uppercase tracking-wider mb-1 block">Content</label>
+                    <textarea class="form-input" id="bumpContent" rows="4" placeholder="Post content..."></textarea>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button onclick="closeModal('bumpModal')" class="btn btn-ghost text-xs">Cancel</button>
+                    <button onclick="submitBump()" class="btn btn-deny text-xs">Bump & Insert</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TOAST CONTAINER ═══ -->
+    <div id="toastContainer" class="toast-container"></div>
+
+<script>
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+const SB_HEADERS = { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' };
+const N8N_BASE = 'https://n8n.carltonaiservices.com/webhook';
+const BRAND_ID = 'carlton';
+
+const PLATFORMS = {
+    linkedin:  { label: 'LinkedIn',    color: '#0A66C2', icon: 'in' },
+    twitter:   { label: 'Twitter / X', color: '#1DA1F2', icon: '𝕏' },
+    facebook:  { label: 'Facebook',    color: '#1877F2', icon: 'f' },
+    instagram: { label: 'Instagram',   color: '#E1306C', icon: '◎' },
+    reddit:    { label: 'Reddit',      color: '#FF4500', icon: 'r' },
+    blog:      { label: 'Blog',        color: '#8B5CF6', icon: 'B' },
+    newsletter:{ label: 'Newsletter',  color: '#06B6D4', icon: '✉' },
+};
+
+const STATUS_LABELS = {
+    pending_approval: 'Pending', scheduled: 'Scheduled', approved: 'Approved',
+    posted: 'Posted', rejected: 'Rejected', revision_requested: 'Revision', draft: 'Draft', failed: 'Failed',
+};
+
+const PRIORITY_MAP = {
+    1: { label: 'Breaking', cls: 'badge-p1' },
+    2: { label: 'High',     cls: 'badge-p2' },
+    3: { label: 'Normal',   cls: 'badge-p3' },
+};
+
+const STORY_TYPES = ['client_transformation','revenue_recovery','problem_solution','personal_transformation','contrarian_insight','industry_war_story','efficiency_gain'];
+const CONTENT_FORMATS = ['post','thread','how_to','case_study','story','comparison','listicle'];
+const TONE_KEYS = ['confidence','empathy','warmth','humor','formality'];
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let activeProfileId = null;
+let currentTab = 'queue';
+let pillarsData = [];
+let queuePosts = [];
+let calendarPosts = [];
+let calendarStats = {};
+let editorialPlans = [];
+let bumpLog = [];
+
+// Queue state
+let queueSort = { col: 'scheduled_at', dir: 'desc' };
+let queuePlatformFilter = 'all';
+let queueStatusFilter = 'all';
+let queuePillarFilter = 'all';
+let expandedRowId = null;
+
+// Calendar state
+let calViewMode = 'month';
+let calDate = new Date();
+
+// Modal state
+let rejectTargetId = null;
+let scheduleTargetId = null;
+let rejectAction = 'reject'; // 'reject' or 'request_edits'
+
+// ═══════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+function toPT(utcStr) {
+    if (!utcStr) return '—';
+    return new Date(utcStr).toLocaleString('en-US', {
+        timeZone: 'America/Los_Angeles',
+        month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit', hour12: true
+    });
+}
+
+function toPTDate(utcStr) {
+    if (!utcStr) return '—';
+    return new Date(utcStr).toLocaleDateString('en-US', {
+        timeZone: 'America/Los_Angeles',
+        month: 'short', day: 'numeric', year: 'numeric'
+    });
+}
+
+function timeAgo(dateStr) {
+    if (!dateStr) return '—';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+}
+
+function truncate(s, len = 80) { return (s && s.length > len) ? s.substring(0, len) + '…' : (s || ''); }
+
+function showToast(msg, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function platformBadge(p) {
+    const pl = PLATFORMS[p] || { label: p, color: '#8A95A9', icon: '?' };
+    return `<span class="inline-flex items-center gap-1" style="color:${pl.color};"><span class="font-mono text-[0.7rem] font-bold">${pl.icon}</span> <span class="text-xs">${pl.label}</span></span>`;
+}
+
+function statusBadge(s) {
+    return `<span class="badge badge-${s}">${STATUS_LABELS[s] || s}</span>`;
+}
+
+function priorityBadge(p) {
+    const pr = PRIORITY_MAP[p] || PRIORITY_MAP[3];
+    return `<span class="badge ${pr.cls}">${pr.label}</span>`;
+}
+
+// ═══════════════════════════════════════
+// SUPABASE HELPERS
+// ═══════════════════════════════════════
+async function supabaseRPC(fn, params = {}) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+        method: 'POST', headers: SB_HEADERS, body: JSON.stringify(params)
+    });
+    if (!res.ok) throw new Error(`RPC ${fn} failed: ${res.status}`);
+    return res.json();
+}
+
+async function supabaseGet(table, query = '') {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, { headers: SB_HEADERS });
+    if (!res.ok) throw new Error(`GET ${table} failed: ${res.status}`);
+    return res.json();
+}
+
+async function supabasePatch(table, matchQuery, body) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`, {
+        method: 'PATCH',
+        headers: { ...SB_HEADERS, 'Prefer': 'return=representation' },
+        body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(`PATCH ${table} failed: ${res.status}`);
+    return res.json();
+}
+
+async function webhookPost(endpoint, payload) {
+    const res = await fetch(`${N8N_BASE}/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(`Webhook ${endpoint} failed: ${res.status}`);
+    return res.json();
+}
+
+// ═══════════════════════════════════════
+// AUTH GATE
+// ═══════════════════════════════════════
+let gateSelectedProfile = null;
+
+function getCachedProfiles(callback) {
+    const CACHE_KEY = 'rdgr-profiles-cache';
+    const CACHE_TTL = 300000;
+    try {
+        const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+        if (cached.profiles && cached.ts && (Date.now() - cached.ts) < CACHE_TTL) { callback(cached.profiles); return; }
+    } catch(e) {}
+    fetch(`${SUPABASE_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+        headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
+    }).then(r => r.json()).then(profiles => {
+        if (profiles && Array.isArray(profiles) && profiles.length > 0) {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ profiles, ts: Date.now() }));
+        }
+        callback(profiles);
+    }).catch(() => callback([]));
+}
+
+function loadGateProfiles() {
+    getCachedProfiles(function(profiles) {
+        const container = document.getElementById('gateProfiles');
+        if (!container || !profiles || !profiles.length) return;
+        const saved = localStorage.getItem('rdgr-active-profile');
+        let savedId = null;
+        if (saved) { try { savedId = JSON.parse(saved).id; } catch(e) {} }
+        const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+        container.innerHTML = profiles.map(p => {
+            const name = p.display_name || p.email || '?';
+            const initial = name[0].toUpperCase();
+            const color = colors[name] || '#8A95A9';
+            return `<button type="button" onclick="selectGateProfile('${p.user_id}','${name.replace(/'/g, '&#39;')}',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="if(!this.classList.contains('selected'))this.style.background='rgba(255,255,255,0.02)'">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:${color}20;color:${color};border:2px solid transparent;">${initial}</div>
+                <span class="text-xs" style="color:#8A95A9;">${name}</span>
+            </button>`;
+        }).join('');
+        if (savedId) {
+            const btns = container.querySelectorAll('.gate-profile-btn');
+            btns.forEach(btn => { if (btn.getAttribute('onclick').includes(savedId)) btn.click(); });
+        }
+    });
+}
+
+function selectGateProfile(userId, name, el) {
+    gateSelectedProfile = { id: userId, name };
+    document.querySelectorAll('.gate-profile-btn').forEach(btn => {
+        btn.classList.remove('selected');
+        btn.style.background = 'rgba(255,255,255,0.02)'; btn.style.borderColor = 'transparent';
+        btn.querySelector('.w-10').style.borderColor = 'transparent';
+    });
+    el.classList.add('selected'); el.style.background = 'rgba(255,255,255,0.06)';
+    el.style.borderColor = 'rgba(6,214,160,0.4)';
+    el.querySelector('.w-10').style.borderColor = el.querySelector('.w-10').style.color;
+    const btn = document.getElementById('gateSubmitBtn');
+    btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Sign In as ' + name;
+    document.getElementById('gateInput').focus();
+}
+
+function handleGate(e) {
+    e.preventDefault();
+    if (document.getElementById('gateInput').value === 'Advance1!') {
+        localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+        if (gateSelectedProfile) {
+            localStorage.setItem('rdgr-active-profile', JSON.stringify(gateSelectedProfile));
+            activeProfileId = gateSelectedProfile.id;
+        }
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity = '1';
+        initDashboard();
+        return false;
+    }
+    document.getElementById('gateError').classList.add('show');
+    document.getElementById('gateInput').value = '';
+    document.getElementById('gateInput').focus();
+    setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+    return false;
+}
+
+if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('mainContent').style.opacity = '1';
+    initDashboard();
+}
+if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+    loadGateProfiles();
+}
+
+// ═══════════════════════════════════════
+// INIT & TAB SWITCHING
+// ═══════════════════════════════════════
+function initDashboard() {
+    // Set default date range (this week)
+    const now = new Date();
+    const monday = new Date(now); monday.setDate(now.getDate() - now.getDay() + 1);
+    const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+    document.getElementById('queueDateStart').value = monday.toISOString().split('T')[0];
+    document.getElementById('queueDateEnd').value = sunday.toISOString().split('T')[0];
+
+    // Load pillars first (shared across tabs), then load current tab
+    loadPillars().then(() => {
+        loadQueue();
+    });
+
+    // Restore last tab from session
+    const savedTab = sessionStorage.getItem('social-content-tab');
+    if (savedTab) switchTab(savedTab);
+}
+
+function refreshAll() {
+    loadPillars().then(() => {
+        if (currentTab === 'queue') loadQueue();
+        else if (currentTab === 'calendar') loadCalendar();
+        else if (currentTab === 'pillars') renderPillars();
+        else if (currentTab === 'strategy') loadEditorial();
+    });
+    showToast('Refreshing...', 'info');
+}
+
+function switchTab(tab) {
+    currentTab = tab;
+    sessionStorage.setItem('social-content-tab', tab);
+    ['pillars','queue','calendar','strategy'].forEach(t => {
+        document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`).style.display = t === tab ? '' : 'none';
+        document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.toggle('active', t === tab);
+    });
+    // Lazy-load tab data
+    if (tab === 'calendar' && calendarPosts.length === 0) loadCalendar();
+    if (tab === 'strategy' && editorialPlans.length === 0) loadEditorial();
+}
+
+// ═══════════════════════════════════════
+// TAB 1: CONTENT PILLARS
+// ═══════════════════════════════════════
+async function loadPillars() {
+    try {
+        const result = await supabaseRPC('get_content_pillars', { p_brand_id: BRAND_ID, p_active_only: false });
+        pillarsData = result.pillars || result || [];
+        document.getElementById('pillarCount').textContent = `${pillarsData.length} pillars (${pillarsData.filter(p => p.active).length} active)`;
+        renderPillars();
+        renderPillarFilterChips();
+    } catch (err) {
+        showToast('Failed to load pillars: ' + err.message, 'error');
+    }
+}
+
+function renderPillars() {
+    const grid = document.getElementById('pillarGrid');
+    if (!pillarsData.length) {
+        grid.innerHTML = '<div class="col-span-full text-center py-12 text-txt-3">No content pillars found. Click "Add Pillar" to create one.</div>';
+        return;
+    }
+    grid.innerHTML = pillarsData.map(p => {
+        const gi = p.generation_instructions || {};
+        const rate = p.approval_rate || 0;
+        const perfClass = rate < 20 ? 'low' : rate < 60 ? 'mid' : 'high';
+        const sourceCls = `badge-source-${p.source || 'manual'}`;
+        const sourceLabel = p.source === 'brand_discovery' ? 'Brand' : (p.source || 'manual');
+        const suggestHtml = p.suggested_action ? `<span class="badge badge-suggest-${p.suggested_action}" title="${esc(p.suggestion_reason || '')}">${p.suggested_action === 'deactivate' ? '⚠ Deactivate' : '★ Boost'}</span>` : '';
+
+        return `<div class="pillar-card ${p.active ? '' : 'inactive'}" data-id="${p.id}">
+            <div class="pillar-card-header" onclick="togglePillarDetail(${p.id})">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <h3 class="font-heading font-bold text-sm truncate">${esc(p.pillar_name)}</h3>
+                        <span class="badge ${sourceCls}">${sourceLabel}</span>
+                        ${suggestHtml}
+                    </div>
+                    <p class="text-xs text-txt-3 truncate">${esc(p.description || '')}</p>
+                </div>
+                <button class="toggle-switch ${p.active ? 'on' : ''}" onclick="event.stopPropagation(); togglePillarActive(${p.id}, ${!p.active})" title="${p.active ? 'Active' : 'Inactive'}"></button>
+            </div>
+            <div class="pillar-card-body">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="perf-bar"><div class="perf-bar-fill ${perfClass}" style="width:${Math.min(rate, 100)}%"></div></div>
+                    <span class="text-xs font-mono text-txt-3">${rate.toFixed(0)}%</span>
+                </div>
+                <div class="flex items-center gap-4 text-[0.65rem] font-mono text-txt-3">
+                    <span title="Generated">${p.total_generated || 0} gen</span>
+                    <span title="Approved" style="color:var(--deft-success);">${p.total_approved || 0} ✓</span>
+                    <span title="Rejected" style="color:var(--deft-danger);">${p.total_rejected || 0} ✗</span>
+                    <span title="Last used">${timeAgo(p.last_used_at)}</span>
+                    <span class="ml-auto" title="Instruction version">v${p.instruction_version || 1}</span>
+                </div>
+                ${p.last_aligned_at ? `<div class="text-[0.6rem] text-txt-3 mt-1">Aligned ${timeAgo(p.last_aligned_at)} via ${esc(p.alignment_source || '—')}</div>` : ''}
+            </div>
+            <div class="pillar-card-detail" id="pillarDetail-${p.id}">
+                <div class="pillar-card-detail-inner" id="pillarDetailInner-${p.id}"></div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function togglePillarDetail(id) {
+    const detail = document.getElementById(`pillarDetail-${id}`);
+    const isExpanded = detail.classList.contains('expanded');
+    // Collapse all others
+    document.querySelectorAll('.pillar-card-detail.expanded').forEach(el => el.classList.remove('expanded'));
+    if (!isExpanded) {
+        detail.classList.add('expanded');
+        renderPillarDetailContent(id);
+    }
+}
+
+function renderPillarDetailContent(id) {
+    const p = pillarsData.find(x => x.id === id);
+    if (!p) return;
+    const gi = p.generation_instructions || {};
+    const container = document.getElementById(`pillarDetailInner-${id}`);
+    const isEditing = container.dataset.editing === 'true';
+
+    const renderSection = (title, contentHtml, defaultOpen = false) => `
+        <div class="detail-section">
+            <div class="detail-section-header" onclick="this.querySelector('.arrow').classList.toggle('open'); this.nextElementSibling.classList.toggle('open');">
+                <span class="arrow ${defaultOpen ? 'open' : ''}">▸</span>
+                <h4>${title}</h4>
+            </div>
+            <div class="detail-section-body ${defaultOpen ? 'open' : ''}">${contentHtml}</div>
+        </div>`;
+
+    const readonlyField = (label, value) => `<div class="mb-3"><div class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1">${label}</div><div class="text-sm">${esc(value || '—')}</div></div>`;
+    const readonlyList = (label, items) => `<div class="mb-3"><div class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1">${label}</div><div class="text-sm">${(items || []).map(i => `<div class="py-0.5">• ${esc(i)}</div>`).join('') || '—'}</div></div>`;
+    const readonlyTags = (label, items) => `<div class="mb-3"><div class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1">${label}</div><div class="flex flex-wrap gap-1">${(items || []).map(t => `<span class="tag-chip">${esc(t)}</span>`).join('') || '<span class="text-txt-3 text-xs">—</span>'}</div></div>`;
+
+    const toneOverrides = p.tone_overrides || {};
+    const toneHtml = TONE_KEYS.map(k => {
+        const val = toneOverrides[k] || 50;
+        return `<div class="tone-slider-row">
+            <label>${k}</label>
+            <input type="range" min="0" max="100" value="${val}" disabled>
+            <span class="tone-val">${val}</span>
+        </div>`;
+    }).join('');
+
+    const formatsHtml = (p.content_formats || []).map(f => `<span class="format-pill selected" style="pointer-events:none;">${f}</span>`).join('') || '<span class="text-txt-3 text-xs">—</span>';
+
+    container.innerHTML = `
+        <div class="flex items-center justify-between mb-3">
+            <span class="text-xs text-txt-2">Target: ${esc(p.target_audience || '—')}</span>
+            <div class="flex items-center gap-2">
+                ${p.suggested_action ? `<button onclick="acceptSuggestion(${p.id})" class="btn btn-approve text-xs py-1 px-2">Accept</button><button onclick="dismissSuggestion(${p.id})" class="btn btn-ghost text-xs py-1 px-2">Dismiss</button>` : ''}
+                <button onclick="startEditPillar(${p.id})" class="btn btn-primary text-xs py-1 px-2">Edit Instructions</button>
+                <button onclick="deletePillar(${p.id})" class="btn btn-deny text-xs py-1 px-2">Delete</button>
+            </div>
+        </div>
+        ${renderSection('Content Strategy', `
+            ${readonlyField('Approach', gi.approach)}
+            ${readonlyField('Angle', gi.angle)}
+            ${readonlyField('Story Type', gi.story_type)}
+            ${readonlyField('CTA Style', gi.cta_style)}
+        `, true)}
+        ${renderSection('Quality Controls', `
+            ${readonlyList('Do List', gi.do_list)}
+            ${readonlyList("Don't List", gi.dont_list)}
+            ${readonlyTags('Proof Points', gi.proof_points)}
+            ${readonlyTags('Banned Angles', p.banned_angles)}
+        `)}
+        ${renderSection('Tone & Style', `
+            <div class="mb-3">${toneHtml}</div>
+            <div class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1">Content Formats</div>
+            <div class="flex flex-wrap gap-1">${formatsHtml}</div>
+        `)}
+        ${renderSection('Topics & Keywords', `
+            ${readonlyTags('Primary Keywords', p.primary_keywords)}
+            ${readonlyTags('Sub Topics', p.sub_topics)}
+            ${readonlyList('Example Hooks', p.example_hooks)}
+        `)}
+        ${renderSection('Frequency', `
+            <div class="flex items-center gap-4 text-sm">
+                <span>Min: <strong>${p.min_frequency || '—'}</strong> / week</span>
+                <span>Max: <strong>${p.max_frequency || '—'}</strong> / week</span>
+            </div>
+        `)}
+    `;
+}
+
+function startEditPillar(id) {
+    const p = pillarsData.find(x => x.id === id);
+    if (!p) return;
+    const gi = p.generation_instructions || {};
+    const container = document.getElementById(`pillarDetailInner-${id}`);
+    container.dataset.editing = 'true';
+
+    const textField = (label, fieldId, value, rows = 2) => `<div class="mb-3"><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">${label}</label><textarea class="form-input text-sm" id="${fieldId}" rows="${rows}">${esc(value || '')}</textarea></div>`;
+    const selectField = (label, fieldId, value, options) => `<div class="mb-3"><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">${label}</label><select class="form-input text-sm" id="${fieldId}">${options.map(o => `<option value="${o}" ${o===value?'selected':''}>${o.replace(/_/g,' ')}</option>`).join('')}</select></div>`;
+
+    const buildChecklist = (containerId, items) => {
+        return `<div id="${containerId}" class="space-y-1">${(items || []).map(item => `<div class="checklist-item"><input type="text" value="${esc(item)}"><button class="remove-btn" onclick="this.parentElement.remove()">×</button></div>`).join('')}</div><button onclick="addChecklistItem('${containerId}')" class="text-xs text-accent mt-1 cursor-pointer hover:underline">+ Add item</button>`;
+    };
+
+    const buildTagInput = (fieldId, items) => {
+        return `<div class="tag-input-wrap" id="${fieldId}"><div class="flex flex-wrap gap-1" id="${fieldId}-chips">${(items || []).map(t => `<span class="tag-chip">${esc(t)} <button onclick="this.parentElement.remove()">×</button></span>`).join('')}</div><input class="tag-field" placeholder="Type and press Enter" onkeydown="handleTagInput(event, '${fieldId}')"></div>`;
+    };
+
+    const toneOverrides = p.tone_overrides || {};
+    const toneHtml = TONE_KEYS.map(k => {
+        const val = toneOverrides[k] || 50;
+        return `<div class="tone-slider-row">
+            <label>${k}</label>
+            <input type="range" min="0" max="100" value="${val}" id="tone-${id}-${k}" oninput="this.nextElementSibling.textContent=this.value">
+            <span class="tone-val">${val}</span>
+        </div>`;
+    }).join('');
+
+    const formatsHtml = CONTENT_FORMATS.map(f => {
+        const sel = (p.content_formats || []).includes(f) ? 'selected' : '';
+        return `<button class="format-pill ${sel}" data-fmt="${f}" onclick="this.classList.toggle('selected')">${f.replace(/_/g,' ')}</button>`;
+    }).join('');
+
+    container.innerHTML = `
+        <div class="flex items-center justify-between mb-3">
+            <span class="text-xs text-accent font-mono uppercase tracking-wider">Editing Instructions</span>
+            <div class="flex items-center gap-2">
+                <button onclick="cancelEditPillar(${id})" class="btn btn-ghost text-xs py-1 px-2">Cancel</button>
+                <button onclick="savePillarInstructions(${id})" class="btn btn-approve text-xs py-1 px-2">Save</button>
+            </div>
+        </div>
+        <div class="mb-3"><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">Pillar Name</label><input type="text" class="form-input text-sm" id="edit-name-${id}" value="${esc(p.pillar_name)}"></div>
+        <div class="mb-3"><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">Description</label><textarea class="form-input text-sm" id="edit-desc-${id}" rows="2">${esc(p.description || '')}</textarea></div>
+        <div class="mb-3"><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">Target Audience</label><input type="text" class="form-input text-sm" id="edit-audience-${id}" value="${esc(p.target_audience || '')}"></div>
+        ${textField('Approach', `edit-approach-${id}`, gi.approach)}
+        ${textField('Angle', `edit-angle-${id}`, gi.angle)}
+        ${selectField('Story Type', `edit-story-${id}`, gi.story_type, STORY_TYPES)}
+        ${textField('CTA Style', `edit-cta-${id}`, gi.cta_style)}
+        <div class="grid grid-cols-2 gap-4 mb-3">
+            <div><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">Do List</label>${buildChecklist(`edit-do-${id}`, gi.do_list)}</div>
+            <div><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">Don't List</label>${buildChecklist(`edit-dont-${id}`, gi.dont_list)}</div>
+        </div>
+        <div class="mb-3"><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">Proof Points</label>${buildTagInput(`edit-proof-${id}`, gi.proof_points)}</div>
+        <div class="mb-3"><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">Banned Angles</label>${buildTagInput(`edit-banned-${id}`, p.banned_angles)}</div>
+        <div class="mb-3"><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">Tone Overrides</label>${toneHtml}</div>
+        <div class="mb-3"><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">Content Formats</label><div class="flex flex-wrap gap-2" id="edit-formats-${id}">${formatsHtml}</div></div>
+        <div class="mb-3"><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">Primary Keywords</label>${buildTagInput(`edit-keywords-${id}`, p.primary_keywords)}</div>
+        <div class="mb-3"><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">Sub Topics</label>${buildTagInput(`edit-subtopics-${id}`, p.sub_topics)}</div>
+        <div class="mb-3"><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">Example Hooks (one per line)</label><textarea class="form-input text-sm" id="edit-hooks-${id}" rows="3">${(p.example_hooks || []).join('\n')}</textarea></div>
+        <div class="grid grid-cols-2 gap-4 mb-3">
+            <div><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">Min Frequency / week</label><input type="number" class="form-input text-sm" id="edit-minfreq-${id}" value="${p.min_frequency || ''}" min="0" max="20"></div>
+            <div><label class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1 block">Max Frequency / week</label><input type="number" class="form-input text-sm" id="edit-maxfreq-${id}" value="${p.max_frequency || ''}" min="0" max="20"></div>
+        </div>
+    `;
+}
+
+function cancelEditPillar(id) {
+    const container = document.getElementById(`pillarDetailInner-${id}`);
+    container.dataset.editing = 'false';
+    renderPillarDetailContent(id);
+}
+
+function getTagValues(containerId) {
+    const chips = document.querySelectorAll(`#${containerId}-chips .tag-chip`);
+    return Array.from(chips).map(c => c.textContent.replace('×', '').trim()).filter(Boolean);
+}
+
+function getChecklistValues(containerId) {
+    const inputs = document.querySelectorAll(`#${containerId} .checklist-item input[type="text"]`);
+    return Array.from(inputs).map(i => i.value.trim()).filter(Boolean);
+}
+
+function handleTagInput(e, containerId) {
+    if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const val = e.target.value.replace(',', '').trim();
+        if (!val) return;
+        const chipsContainer = document.getElementById(`${containerId}-chips`);
+        const chip = document.createElement('span');
+        chip.className = 'tag-chip';
+        chip.innerHTML = `${esc(val)} <button onclick="this.parentElement.remove()">×</button>`;
+        chipsContainer.appendChild(chip);
+        e.target.value = '';
+    }
+}
+
+function addChecklistItem(containerId) {
+    const container = document.getElementById(containerId);
+    const item = document.createElement('div');
+    item.className = 'checklist-item';
+    item.innerHTML = `<input type="text" placeholder="Add item..."><button class="remove-btn" onclick="this.parentElement.remove()">×</button>`;
+    container.appendChild(item);
+    item.querySelector('input').focus();
+}
+
+async function savePillarInstructions(id) {
+    try {
+        const instructions = {
+            approach: document.getElementById(`edit-approach-${id}`).value,
+            angle: document.getElementById(`edit-angle-${id}`).value,
+            story_type: document.getElementById(`edit-story-${id}`).value,
+            cta_style: document.getElementById(`edit-cta-${id}`).value,
+            do_list: getChecklistValues(`edit-do-${id}`),
+            dont_list: getChecklistValues(`edit-dont-${id}`),
+            proof_points: getTagValues(`edit-proof-${id}`),
+        };
+        const toneOverrides = {};
+        TONE_KEYS.forEach(k => {
+            const el = document.getElementById(`tone-${id}-${k}`);
+            if (el) toneOverrides[k] = parseInt(el.value);
+        });
+        const formats = Array.from(document.querySelectorAll(`#edit-formats-${id} .format-pill.selected`)).map(b => b.dataset.fmt);
+
+        await supabasePatch('content_pillars', `id=eq.${id}`, {
+            pillar_name: document.getElementById(`edit-name-${id}`).value,
+            description: document.getElementById(`edit-desc-${id}`).value,
+            target_audience: document.getElementById(`edit-audience-${id}`).value,
+            generation_instructions: instructions,
+            tone_overrides: toneOverrides,
+            content_formats: formats,
+            banned_angles: getTagValues(`edit-banned-${id}`),
+            primary_keywords: getTagValues(`edit-keywords-${id}`),
+            sub_topics: getTagValues(`edit-subtopics-${id}`),
+            example_hooks: document.getElementById(`edit-hooks-${id}`).value.split('\n').map(s => s.trim()).filter(Boolean),
+            min_frequency: parseInt(document.getElementById(`edit-minfreq-${id}`).value) || null,
+            max_frequency: parseInt(document.getElementById(`edit-maxfreq-${id}`).value) || null,
+            updated_by: 'bradford',
+        });
+        showToast('Pillar instructions saved', 'success');
+        await loadPillars();
+        togglePillarDetail(id);
+    } catch (err) {
+        showToast('Failed to save: ' + err.message, 'error');
+    }
+}
+
+async function togglePillarActive(id, active) {
+    try {
+        await supabaseRPC('toggle_content_pillar', { p_brand_id: BRAND_ID, p_pillar_id: id, p_active: active, p_updated_by: 'bradford' });
+        showToast(`Pillar ${active ? 'activated' : 'deactivated'}`, 'success');
+        await loadPillars();
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+async function deletePillar(id) {
+    if (!confirm('Delete this pillar? This cannot be undone.')) return;
+    try {
+        await supabaseRPC('delete_content_pillar', { p_brand_id: BRAND_ID, p_pillar_id: id, p_hard_delete: false });
+        showToast('Pillar deleted', 'success');
+        await loadPillars();
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+async function acceptSuggestion(id) {
+    try {
+        await supabaseRPC('toggle_content_pillar', { p_brand_id: BRAND_ID, p_pillar_id: id, p_active: false, p_updated_by: 'bradford' });
+        showToast('Suggestion accepted — pillar deactivated', 'success');
+        await loadPillars();
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+async function dismissSuggestion(id) {
+    try {
+        await supabasePatch('content_pillars', `id=eq.${id}`, { suggested_action: null, suggestion_reason: null });
+        showToast('Suggestion dismissed', 'success');
+        await loadPillars();
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+async function refreshPillarPerformance() {
+    try {
+        showToast('Computing pillar performance...', 'info');
+        await supabaseRPC('compute_pillar_performance', { p_brand_id: BRAND_ID, p_days: 30, p_min_posts: 1 });
+        showToast('Performance refreshed', 'success');
+        await loadPillars();
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+async function triggerPillarAlign() {
+    try {
+        await webhookPost('content-pillar-align', { brand_id: BRAND_ID });
+        showToast('Brand re-alignment triggered', 'success');
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+async function triggerContentGeneration() {
+    try {
+        await webhookPost('content-daily-engine-v2', { brand_id: BRAND_ID });
+        showToast('Content generation triggered — check back in a few minutes', 'success');
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+async function triggerWeeklyStrategy() {
+    try {
+        await webhookPost('content-strategist-v2', { brand_id: BRAND_ID, force: true });
+        showToast('Weekly strategy triggered', 'success');
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+function openAddPillarModal() { openModal('addPillarModal'); }
+
+async function submitAddPillar() {
+    const name = document.getElementById('addPillarName').value.trim();
+    const desc = document.getElementById('addPillarDesc').value.trim();
+    const audience = document.getElementById('addPillarAudience').value.trim();
+    const approach = document.getElementById('addPillarApproach').value.trim();
+    const angle = document.getElementById('addPillarAngle').value.trim();
+    const storyType = document.getElementById('addPillarStoryType').value;
+    const ctaStyle = document.getElementById('addPillarCTA').value.trim();
+
+    if (!name || !desc || !audience || !approach || !angle || !storyType || !ctaStyle) {
+        showToast('Please fill in all required fields', 'error'); return;
+    }
+
+    const doList = getChecklistValues('addPillarDoList');
+    const dontList = getChecklistValues('addPillarDontList');
+    if (doList.length < 2 || dontList.length < 2) {
+        showToast('Do and Don\'t lists need at least 2 items each', 'error'); return;
+    }
+
+    try {
+        await supabaseRPC('upsert_content_pillar', {
+            p_brand_id: BRAND_ID,
+            p_pillar_name: name,
+            p_description: desc,
+            p_target_audience: audience,
+            p_primary_keywords: document.getElementById('addPillarKeywords').value.split(',').map(s => s.trim()).filter(Boolean),
+            p_sub_topics: [],
+            p_source: 'manual',
+            p_updated_by: 'bradford'
+        });
+        // Now patch the generation instructions
+        const pillars = await supabaseGet('content_pillars', `brand_id=eq.${BRAND_ID}&pillar_name=eq.${encodeURIComponent(name)}&select=id`);
+        if (pillars.length) {
+            const hooks = document.getElementById('addPillarHooks').value.split('\n').map(s => s.trim()).filter(Boolean);
+            const banned = document.getElementById('addPillarBanned').value.split(',').map(s => s.trim()).filter(Boolean);
+            const formats = Array.from(document.querySelectorAll('#addPillarFormats .format-pill.selected')).map(b => b.dataset.fmt);
+            await supabasePatch('content_pillars', `id=eq.${pillars[0].id}`, {
+                generation_instructions: { approach, angle, story_type: storyType, cta_style: ctaStyle, do_list: doList, dont_list: dontList, proof_points: [] },
+                example_hooks: hooks,
+                banned_angles: banned,
+                content_formats: formats,
+            });
+        }
+        showToast('Pillar created', 'success');
+        closeModal('addPillarModal');
+        await loadPillars();
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+// ═══════════════════════════════════════
+// TAB 2: CONTENT QUEUE
+// ═══════════════════════════════════════
+async function loadQueue() {
+    const startDate = document.getElementById('queueDateStart').value;
+    const endDate = document.getElementById('queueDateEnd').value;
+    const params = { p_brand_id: BRAND_ID };
+    if (startDate) params.p_start_date = startDate;
+    if (endDate) params.p_end_date = endDate;
+    if (queuePlatformFilter !== 'all') params.p_platforms = [queuePlatformFilter];
+    if (queueStatusFilter !== 'all') params.p_statuses = [queueStatusFilter];
+
+    try {
+        const result = await supabaseRPC('get_content_calendar', params);
+        queuePosts = result.posts || result || [];
+        renderQueue();
+    } catch (err) {
+        showToast('Failed to load queue: ' + err.message, 'error');
+    }
+}
+
+function renderQueue() {
+    let posts = [...queuePosts];
+    // Client-side pillar filter
+    if (queuePillarFilter !== 'all') {
+        posts = posts.filter(p => p.content_category === queuePillarFilter);
+    }
+    // Client-side search
+    const search = (document.getElementById('queueSearch').value || '').toLowerCase();
+    if (search) {
+        posts = posts.filter(p => (p.content_text || '').toLowerCase().includes(search) || (p.content_category || '').toLowerCase().includes(search));
+    }
+    // Sort
+    posts.sort((a, b) => {
+        let va = a[queueSort.col] || '', vb = b[queueSort.col] || '';
+        if (queueSort.col === 'priority') { va = a.priority || 3; vb = b.priority || 3; }
+        if (va < vb) return queueSort.dir === 'asc' ? -1 : 1;
+        if (va > vb) return queueSort.dir === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const tbody = document.getElementById('queueBody');
+    if (!posts.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-txt-3">No posts found for this period.</td></tr>';
+        document.getElementById('queueInfo').textContent = '0 posts';
+        return;
+    }
+
+    document.getElementById('queueInfo').textContent = `${posts.length} posts`;
+    tbody.innerHTML = posts.map(p => {
+        const isExpanded = expandedRowId === p.id;
+        return `<tr class="${isExpanded ? 'expanded' : ''}" onclick="toggleQueueRow(${p.id})" style="cursor:pointer;">
+            <td>${statusBadge(p.status)}</td>
+            <td class="text-xs text-txt-2 font-mono">${toPT(p.scheduled_at || p.created_at)}</td>
+            <td>${platformBadge(p.platform)}</td>
+            <td><span class="badge" style="background:rgba(138,149,169,0.1);color:#8A95A9;">${esc(p.content_category || '—')}</span></td>
+            <td class="text-sm">${esc(truncate(p.content_text, 60))}</td>
+            <td>${priorityBadge(p.priority)}</td>
+            <td>${p.bumped_by ? '<span class="badge badge-revision_requested" title="Bumped">↕</span>' : ''}</td>
+            <td onclick="event.stopPropagation();">
+                <div class="flex items-center gap-1">
+                    ${p.status === 'pending_approval' ? `
+                        <button onclick="approvePost(${p.id})" class="btn btn-approve text-xs py-1 px-2">Approve</button>
+                        <button onclick="openScheduleModal(${p.id})" class="btn btn-schedule text-xs py-1 px-2">Schedule</button>
+                        <button onclick="openRejectModal(${p.id})" class="btn btn-deny text-xs py-1 px-2">Reject</button>
+                    ` : ''}
+                    ${p.status === 'scheduled' || p.status === 'approved' ? `
+                        <button onclick="openRescheduleModal(${p.id})" class="btn btn-schedule text-xs py-1 px-2">Reschedule</button>
+                    ` : ''}
+                </div>
+            </td>
+        </tr>
+        ${isExpanded ? `<tr class="expanded"><td colspan="8" style="padding:1rem 1.5rem; background: rgba(6,214,160,0.02);">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <div class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1">Full Content</div>
+                    <div class="text-sm whitespace-pre-wrap" style="max-height:200px;overflow-y:auto;background:rgba(0,0,0,0.15);padding:0.75rem;border-radius:0.375rem;">${esc(p.content_text || '—')}</div>
+                </div>
+                <div>
+                    ${p.hashtags ? `<div class="mb-3"><div class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1">Hashtags</div><div class="flex flex-wrap gap-1">${(Array.isArray(p.hashtags) ? p.hashtags : [p.hashtags]).map(h => `<span class="tag-chip">${esc(h)}</span>`).join('')}</div></div>` : ''}
+                    ${p.image_prompt ? `<div class="mb-3"><div class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1">Image Prompt</div><div class="text-xs text-txt-2 font-mono" style="background:rgba(0,0,0,0.15);padding:0.5rem;border-radius:0.25rem;">${esc(p.image_prompt)}</div></div>` : ''}
+                    ${p.suggested_cta ? `<div class="mb-3"><div class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1">Suggested CTA</div><div class="text-sm">${esc(p.suggested_cta)}</div></div>` : ''}
+                    <div class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-1">Metadata</div>
+                    <div class="text-xs text-txt-3 space-y-1">
+                        ${p.generation_batch_id ? `<div>Batch: <span class="font-mono">${esc(p.generation_batch_id)}</span></div>` : ''}
+                        ${p.approved_by ? `<div>Approved by: ${esc(p.approved_by)} at ${toPT(p.approved_at)}</div>` : ''}
+                        ${p.bumped_by ? `<div>Bumped by: ${esc(p.bumped_by)} (originally ${toPT(p.original_scheduled_at)}, ${p.bump_count || 1}x)</div>` : ''}
+                    </div>
+                </div>
+            </div>
+        </td></tr>` : ''}`;
+    }).join('');
+
+    // Update sort arrows
+    document.querySelectorAll('#queueTable .sort-arrow').forEach(el => { el.className = 'sort-arrow'; });
+    const activeArrow = document.querySelector(`#queueTable th[data-col="${queueSort.col}"] .sort-arrow`);
+    if (activeArrow) activeArrow.classList.add(queueSort.dir);
+}
+
+function toggleQueueRow(id) {
+    expandedRowId = expandedRowId === id ? null : id;
+    renderQueue();
+}
+
+function sortQueue(col) {
+    if (queueSort.col === col) { queueSort.dir = queueSort.dir === 'asc' ? 'desc' : 'asc'; }
+    else { queueSort = { col, dir: 'desc' }; }
+    renderQueue();
+}
+
+function toggleQueuePlatform(platform) {
+    queuePlatformFilter = platform;
+    document.querySelectorAll('#queuePlatformFilters .filter-chip').forEach(b => b.classList.toggle('active', b.dataset.platform === platform));
+    loadQueue();
+}
+
+function toggleQueueStatus(status) {
+    queueStatusFilter = status;
+    document.querySelectorAll('#queueStatusFilters .status-btn').forEach(b => b.classList.toggle('active', b.dataset.status === status));
+    loadQueue();
+}
+
+function renderPillarFilterChips() {
+    const container = document.getElementById('queuePillarFilters');
+    if (!pillarsData.length) { container.style.display = 'none'; return; }
+    container.style.display = 'flex';
+    const chips = [`<span class="text-[0.6rem] uppercase tracking-wider text-txt-3 font-medium mr-1">Pillar:</span>`,
+        `<button class="filter-chip ${queuePillarFilter === 'all' ? 'active' : ''}" onclick="setQueuePillarFilter('all')">All</button>`];
+    pillarsData.filter(p => p.active).forEach(p => {
+        chips.push(`<button class="filter-chip ${queuePillarFilter === p.pillar_name ? 'active' : ''}" onclick="setQueuePillarFilter('${esc(p.pillar_name)}')">${esc(p.pillar_name)}</button>`);
+    });
+    container.innerHTML = chips.join('');
+}
+
+function setQueuePillarFilter(name) {
+    queuePillarFilter = name;
+    renderPillarFilterChips();
+    renderQueue();
+}
+
+// Queue actions
+async function approvePost(id) {
+    try {
+        await webhookPost('content-approve-v2', { action: 'approve', queue_ids: [id] });
+        showToast('Post approved', 'success');
+        await loadQueue();
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+function openRejectModal(id) {
+    rejectTargetId = id;
+    rejectAction = 'reject';
+    document.getElementById('rejectModalTitle').textContent = 'Reject Post';
+    document.getElementById('rejectReason').value = '';
+    openModal('rejectModal');
+}
+
+async function submitReject() {
+    if (!rejectTargetId) return;
+    const reason = document.getElementById('rejectReason').value.trim();
+    try {
+        await webhookPost('content-approve-v2', { action: 'reject', queue_ids: [rejectTargetId], rejection_reason: reason });
+        showToast('Post rejected', 'success');
+        closeModal('rejectModal');
+        await loadQueue();
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+async function submitRequestEdits() {
+    if (!rejectTargetId) return;
+    const reason = document.getElementById('rejectReason').value.trim();
+    if (!reason) { showToast('Please provide feedback for edits', 'error'); return; }
+    try {
+        await webhookPost('content-approve-v2', { action: 'request_edits', queue_ids: [rejectTargetId], rejection_reason: reason });
+        showToast('Edit request sent', 'success');
+        closeModal('rejectModal');
+        await loadQueue();
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+function openScheduleModal(id) {
+    scheduleTargetId = id;
+    document.getElementById('scheduleDateTime').value = '';
+    openModal('scheduleModal');
+}
+
+function openRescheduleModal(id) {
+    scheduleTargetId = id;
+    const post = queuePosts.find(p => p.id === id);
+    if (post && post.scheduled_at) {
+        const d = new Date(post.scheduled_at);
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        document.getElementById('scheduleDateTime').value = d.toISOString().slice(0, 16);
+    }
+    openModal('scheduleModal');
+}
+
+async function submitSchedule() {
+    if (!scheduleTargetId) return;
+    const dt = document.getElementById('scheduleDateTime').value;
+    if (!dt) { showToast('Please select a date and time', 'error'); return; }
+    const isoDate = new Date(dt).toISOString();
+    try {
+        // Check if this is a reschedule or approve+schedule
+        const post = queuePosts.find(p => p.id === scheduleTargetId);
+        if (post && (post.status === 'scheduled' || post.status === 'approved')) {
+            await webhookPost('content-bump', { operation: 'reschedule', queue_id: scheduleTargetId, scheduled_at: isoDate });
+            showToast('Post rescheduled', 'success');
+        } else {
+            await webhookPost('content-approve-v2', { action: 'approve', queue_ids: [scheduleTargetId], scheduled_at: isoDate });
+            showToast('Post approved & scheduled', 'success');
+        }
+        closeModal('scheduleModal');
+        await loadQueue();
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+function openBumpModal() { openModal('bumpModal'); }
+
+async function submitBump() {
+    const platform = document.getElementById('bumpPlatform').value;
+    const title = document.getElementById('bumpTitle').value.trim();
+    const content = document.getElementById('bumpContent').value.trim();
+    const scheduledAt = document.getElementById('bumpScheduleAt').value;
+    if (!title || !content || !scheduledAt) { showToast('All fields are required', 'error'); return; }
+    try {
+        await webhookPost('content-bump', {
+            operation: 'insert_and_bump',
+            brand_id: BRAND_ID,
+            platform, title, content_text: content,
+            scheduled_at: new Date(scheduledAt).toISOString(),
+            bump_strategy: 'cascade'
+        });
+        showToast('News flash inserted & bumped', 'success');
+        closeModal('bumpModal');
+        await loadQueue();
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+// ═══════════════════════════════════════
+// TAB 3: CALENDAR VIEW
+// ═══════════════════════════════════════
+async function loadCalendar() {
+    const range = getCalendarRange();
+    try {
+        const [postsResult, statsResult] = await Promise.all([
+            supabaseRPC('get_content_calendar', { p_brand_id: BRAND_ID, p_start_date: range.start, p_end_date: range.end }),
+            supabaseRPC('get_content_calendar_stats', { p_brand_id: BRAND_ID, p_start_date: range.start, p_end_date: range.end })
+        ]);
+        calendarPosts = postsResult.posts || postsResult || [];
+        calendarStats = statsResult || {};
+        renderCalendarStats();
+        renderCalendar();
+    } catch (err) { showToast('Failed to load calendar: ' + err.message, 'error'); }
+}
+
+function getCalendarRange() {
+    const d = new Date(calDate);
+    if (calViewMode === 'month') {
+        const start = new Date(d.getFullYear(), d.getMonth(), 1);
+        const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+        return { start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0] };
+    } else {
+        const day = d.getDay();
+        const monday = new Date(d); monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+        const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+        return { start: monday.toISOString().split('T')[0], end: sunday.toISOString().split('T')[0] };
+    }
+}
+
+function renderCalendarStats() {
+    document.getElementById('calStatPosts').textContent = calendarStats.total_posts || 0;
+    const rate = calendarStats.approval_rate;
+    document.getElementById('calStatApproval').textContent = rate != null ? `${Number(rate).toFixed(0)}%` : '—';
+    document.getElementById('calStatBumps').textContent = calendarStats.bump_count || 0;
+    const byPlatform = calendarStats.by_platform || [];
+    document.getElementById('calStatPlatforms').innerHTML = byPlatform.map(p => {
+        const pl = PLATFORMS[p.platform] || { color: '#8A95A9', label: p.platform };
+        return `<span class="inline-flex items-center gap-0.5 text-[0.6rem] font-mono" style="color:${pl.color};">${pl.label}: ${p.count}</span>`;
+    }).join('<span class="text-txt-3 mx-1">·</span>') || '—';
+}
+
+function renderCalendar() {
+    const grid = document.getElementById('calendarGrid');
+    const range = getCalendarRange();
+    if (calViewMode === 'month') {
+        renderMonthView(grid);
+    } else {
+        renderWeekView(grid);
+    }
+    updateCalTitle();
+}
+
+function renderMonthView(grid) {
+    const year = calDate.getFullYear();
+    const month = calDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startOffset = (firstDay.getDay() + 6) % 7; // Monday start
+    const totalDays = lastDay.getDate();
+    const today = new Date().toISOString().split('T')[0];
+
+    let html = '<table style="width:100%;border-collapse:collapse;"><thead><tr>';
+    ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d => { html += `<th class="cal-header-cell">${d}</th>`; });
+    html += '</tr></thead><tbody><tr>';
+
+    // Build day-to-posts map
+    const dayMap = {};
+    calendarPosts.forEach(p => {
+        const day = (p.scheduled_at || p.created_at || '').split('T')[0];
+        if (!dayMap[day]) dayMap[day] = [];
+        dayMap[day].push(p);
+    });
+
+    // Empty cells before first day
+    for (let i = 0; i < startOffset; i++) html += '<td class="cal-cell other-month"></td>';
+
+    for (let d = 1; d <= totalDays; d++) {
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const isToday = dateStr === today;
+        const posts = dayMap[dateStr] || [];
+        const dots = posts.slice(0, 8).map(p => {
+            const pl = PLATFORMS[p.platform] || { color: '#8A95A9' };
+            return `<span class="cal-dot" style="background:${pl.color};" title="${esc(p.platform)}: ${truncate(p.content_text, 30)}"></span>`;
+        }).join('');
+
+        html += `<td class="cal-cell ${isToday ? 'today' : ''}" onclick="openDayDetail('${dateStr}')">
+            <div class="cal-day-num">${d}</div>
+            <div class="flex flex-wrap gap-0.5">${dots}</div>
+            ${posts.length > 8 ? `<div class="text-[0.55rem] text-txt-3 mt-0.5">+${posts.length - 8} more</div>` : ''}
+        </td>`;
+
+        if ((startOffset + d) % 7 === 0 && d < totalDays) html += '</tr><tr>';
+    }
+
+    // Empty cells after last day
+    const remaining = (7 - (startOffset + totalDays) % 7) % 7;
+    for (let i = 0; i < remaining; i++) html += '<td class="cal-cell other-month"></td>';
+
+    html += '</tr></tbody></table>';
+    grid.innerHTML = html;
+}
+
+function renderWeekView(grid) {
+    const range = getCalendarRange();
+    const startDate = new Date(range.start);
+    const today = new Date().toISOString().split('T')[0];
+
+    const dayMap = {};
+    calendarPosts.forEach(p => {
+        const day = (p.scheduled_at || p.created_at || '').split('T')[0];
+        if (!dayMap[day]) dayMap[day] = [];
+        dayMap[day].push(p);
+    });
+
+    let html = '<div class="grid grid-cols-7 gap-px" style="background:rgba(42,46,61,0.3);border-radius:0.5rem;overflow:hidden;">';
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(startDate);
+        d.setDate(startDate.getDate() + i);
+        const dateStr = d.toISOString().split('T')[0];
+        const isToday = dateStr === today;
+        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+        const dayNum = d.getDate();
+        const posts = dayMap[dateStr] || [];
+
+        html += `<div class="p-3 min-h-[200px] cursor-pointer ${isToday ? 'bg-accent/5' : 'bg-surface'}" onclick="openDayDetail('${dateStr}')">
+            <div class="flex items-center gap-1 mb-2">
+                <span class="text-[0.6rem] font-mono text-txt-3 uppercase">${dayName}</span>
+                <span class="font-heading font-bold text-sm ${isToday ? 'text-accent' : 'text-txt-2'}">${dayNum}</span>
+            </div>
+            ${posts.map(p => {
+                const pl = PLATFORMS[p.platform] || { color: '#8A95A9' };
+                return `<div class="mb-1 p-1.5 rounded text-[0.65rem]" style="background:${pl.color}10;border-left:2px solid ${pl.color};">
+                    <div style="color:${pl.color};" class="font-mono text-[0.55rem] uppercase">${p.platform}</div>
+                    <div class="text-txt-2 truncate">${esc(truncate(p.content_text, 40))}</div>
+                    <div class="text-txt-3 text-[0.55rem] mt-0.5">${statusBadge(p.status)}</div>
+                </div>`;
+            }).join('')}
+        </div>`;
+    }
+    html += '</div>';
+    grid.innerHTML = html;
+}
+
+function updateCalTitle() {
+    const title = document.getElementById('calTitle');
+    if (calViewMode === 'month') {
+        title.textContent = calDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } else {
+        const range = getCalendarRange();
+        const start = new Date(range.start);
+        const end = new Date(range.end);
+        title.textContent = `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+    }
+}
+
+function calNav(dir) {
+    if (calViewMode === 'month') {
+        calDate.setMonth(calDate.getMonth() + dir);
+    } else {
+        calDate.setDate(calDate.getDate() + (dir * 7));
+    }
+    loadCalendar();
+}
+
+function calToday() {
+    calDate = new Date();
+    loadCalendar();
+}
+
+function setCalView(mode) {
+    calViewMode = mode;
+    document.querySelectorAll('[data-cal]').forEach(b => b.classList.toggle('active', b.dataset.cal === mode));
+    loadCalendar();
+}
+
+function openDayDetail(dateStr) {
+    const posts = calendarPosts.filter(p => (p.scheduled_at || p.created_at || '').startsWith(dateStr));
+    const dateLabel = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    document.getElementById('detailTitle').textContent = dateLabel;
+    document.getElementById('detailBody').innerHTML = posts.length ? posts.map(p => {
+        const pl = PLATFORMS[p.platform] || { color: '#8A95A9', label: p.platform };
+        return `<div class="mb-3 p-3 rounded-lg" style="background:rgba(255,255,255,0.02);border:1px solid rgba(42,46,61,0.4);">
+            <div class="flex items-center justify-between mb-2">
+                ${platformBadge(p.platform)}
+                ${statusBadge(p.status)}
+            </div>
+            <div class="text-sm mb-2" style="white-space:pre-wrap;">${esc(truncate(p.content_text, 200))}</div>
+            <div class="flex items-center gap-2 text-[0.6rem] text-txt-3">
+                <span>${toPT(p.scheduled_at || p.created_at)}</span>
+                <span>·</span>
+                <span>${esc(p.content_category || '')}</span>
+            </div>
+            ${p.status === 'pending_approval' ? `<div class="flex items-center gap-1 mt-2">
+                <button onclick="approvePost(${p.id}); closeDetail();" class="btn btn-approve text-xs py-1 px-2">Approve</button>
+                <button onclick="openRejectModal(${p.id}); closeDetail();" class="btn btn-deny text-xs py-1 px-2">Reject</button>
+            </div>` : ''}
+        </div>`;
+    }).join('') : '<div class="text-center text-txt-3 py-8">No posts scheduled for this day.</div>';
+    document.getElementById('detailBackdrop').classList.add('active');
+}
+
+function closeDetail() {
+    document.getElementById('detailBackdrop').classList.remove('active');
+}
+
+// ═══════════════════════════════════════
+// TAB 4: EDITORIAL CALENDAR & STRATEGY
+// ═══════════════════════════════════════
+async function loadEditorial() {
+    try {
+        const [plans, bumps] = await Promise.all([
+            supabaseGet('editorial_calendar', `brand_id=eq.${BRAND_ID}&order=id.desc&limit=5`),
+            supabaseRPC('get_bump_log', { p_brand_id: BRAND_ID, p_limit: 50 })
+        ]);
+        editorialPlans = plans || [];
+        bumpLog = bumps.bumps || bumps || [];
+        renderEditorial();
+        renderBumpLog();
+    } catch (err) { showToast('Failed to load editorial: ' + err.message, 'error'); }
+}
+
+function renderEditorial() {
+    const grid = document.getElementById('editorialGrid');
+    if (!editorialPlans.length) {
+        grid.innerHTML = '<div class="col-span-7 text-center py-12 text-txt-3">No editorial plans found. Click "Regenerate Strategy" to create one.</div>';
+        return;
+    }
+    const plan = editorialPlans[0]; // Latest plan
+    const weeklyPlan = plan.weekly_plan || plan.plan || [];
+
+    if (Array.isArray(weeklyPlan) && weeklyPlan.length) {
+        grid.innerHTML = weeklyPlan.map(day => {
+            const statusCls = day.status === 'approved' ? 'badge-approved' : day.status === 'rejected' ? 'badge-rejected' : 'badge-pending_review';
+            return `<div class="editorial-card">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="font-heading font-bold text-xs">${esc(day.date || day.day || '—')}</span>
+                    <span class="badge ${statusCls}">${esc(day.status || 'pending_review')}</span>
+                </div>
+                ${day.theme ? `<div class="text-sm font-medium mb-1">${esc(day.theme)}</div>` : ''}
+                ${day.platform ? `<div class="mb-1">${platformBadge(day.platform)}</div>` : ''}
+                ${day.pillar ? `<span class="badge" style="background:rgba(138,149,169,0.1);color:#8A95A9;margin-bottom:0.25rem;">${esc(day.pillar)}</span>` : ''}
+                ${day.content_format ? `<span class="badge badge-scheduled ml-1">${esc(day.content_format)}</span>` : ''}
+                ${day.priority ? `<div class="text-[0.6rem] text-txt-3 mt-1">Priority: ${day.priority}</div>` : ''}
+                ${day.brief ? `<div class="text-xs text-txt-2 mt-2">${esc(truncate(day.brief, 100))}</div>` : ''}
+            </div>`;
+        }).join('');
+    } else {
+        // If plan is a JSON object with different structure, show raw
+        grid.innerHTML = `<div class="col-span-7 editorial-card">
+            <div class="text-[0.6rem] text-txt-3 uppercase tracking-wider mb-2">Latest Strategy Plan</div>
+            <pre class="text-xs text-txt-2 font-mono whitespace-pre-wrap" style="max-height:400px;overflow-y:auto;">${esc(JSON.stringify(plan, null, 2))}</pre>
+        </div>`;
+    }
+}
+
+function renderBumpLog() {
+    document.getElementById('bumpLogCount').textContent = `${bumpLog.length} events`;
+    const body = document.getElementById('bumpLogBody');
+    if (!bumpLog.length) {
+        body.innerHTML = '<div class="text-xs text-txt-3">No bump events recorded.</div>';
+        return;
+    }
+    body.innerHTML = `<div class="space-y-2">${bumpLog.map(b => `
+        <div class="flex items-center gap-3 text-xs py-1 border-b border-border/30">
+            <span class="text-txt-3 font-mono text-[0.6rem] min-w-[100px]">${toPT(b.created_at || b.bumped_at)}</span>
+            ${b.platform ? platformBadge(b.platform) : ''}
+            <span class="text-txt-2">${esc(b.original_scheduled_at ? `${toPTDate(b.original_scheduled_at)} → ${toPTDate(b.new_scheduled_at)}` : (b.reason || b.description || '—'))}</span>
+            ${b.displaced_count ? `<span class="badge badge-revision_requested">${b.displaced_count} displaced</span>` : ''}
+        </div>
+    `).join('')}</div>`;
+}
+
+function toggleBumpLog() {
+    const body = document.getElementById('bumpLogBody');
+    const arrow = document.getElementById('bumpLogArrow');
+    const isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : '';
+    arrow.textContent = isOpen ? '▸' : '▾';
+}
+
+// ═══════════════════════════════════════
+// KEYBOARD SHORTCUTS & EVENT LISTENERS
+// ═══════════════════════════════════════
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        closeDetail();
+        closeModal('addPillarModal');
+        closeModal('rejectModal');
+        closeModal('scheduleModal');
+        closeModal('bumpModal');
+    }
+});
+
+document.querySelectorAll('.modal-backdrop').forEach(el => {
+    el.addEventListener('click', (e) => {
+        if (e.target === el) el.classList.remove('active');
+    });
+});
+
+// Date filter change triggers reload
+document.getElementById('queueDateStart').addEventListener('change', loadQueue);
+document.getElementById('queueDateEnd').addEventListener('change', loadQueue);
+
+// ═══════════════════════════════════════
+// PROFILE SWITCHER
+// ═══════════════════════════════════════
+(function initProfileSwitcher() {
+    const saved = localStorage.getItem('rdgr-active-profile');
+    if (saved) {
+        try {
+            const p = JSON.parse(saved);
+            activeProfileId = p.id || null;
+            const nameEl = document.getElementById('profileName');
+            const avatarEl = document.getElementById('profileAvatar');
+            if (nameEl) nameEl.textContent = p.name;
+            if (avatarEl) avatarEl.textContent = (p.name || 'B')[0].toUpperCase();
+        } catch(e) {}
+    }
+    getCachedProfiles(function(profiles) {
+        const dd = document.getElementById('profileDropdown');
+        if (!dd || !profiles || profiles.length === 0) return;
+        const activeId = saved ? JSON.parse(saved).id : null;
+        dd.innerHTML = profiles.map(p => {
+            const name = p.display_name || p.email || '?';
+            const initial = name[0].toUpperCase();
+            const isActive = p.user_id === activeId;
+            return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, '&#39;')}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div>
+                <span>${name}</span>
+                ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+            </button>`;
+        }).join('');
+        dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+    });
+})();
+
+function toggleProfileDD() {
+    const dd = document.getElementById('profileDropdown');
+    dd.classList.toggle('hidden');
+    if (!dd.classList.contains('hidden')) {
+        setTimeout(() => document.addEventListener('click', function closePDD(e) {
+            if (!document.getElementById('profileSwitcher').contains(e.target)) dd.classList.add('hidden');
+            document.removeEventListener('click', closePDD);
+        }), 0);
+    }
+}
+
+function selectProfileGlobal(userId, name) {
+    localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name }));
+    location.reload();
+}
+
+function signOut() {
+    localStorage.removeItem('rdgr-session');
+    localStorage.removeItem('rdgr-active-profile');
+    location.reload();
+}
+</script>
+
+</body>
+</html>
