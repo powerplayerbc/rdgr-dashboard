@@ -81,6 +81,7 @@
         body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
         .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
         .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
         .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
         .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
         .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
@@ -161,7 +162,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
-        tailwind.config = { theme: { extend: { colors: { base:'#08090D', surface:'#11131A', 'surface-el':'#1A1D28', 'surface-hi':'#242836', border:'#2A2E3D', accent:'#06D6A0', 'accent-dim':'rgba(6,214,160,0.15)', alert:'#FF6B6B', warn:'#FFD93D', info:'#4CC9F0', txt:'#E8ECF1', 'txt-2':'#8A95A9', 'txt-3':'#525E73' }, fontFamily: { heading:['"Chakra Petch"','system-ui','sans-serif'], body:['"IBM Plex Sans"','system-ui','sans-serif'], mono:['"JetBrains Mono"','monospace'] } } } }
+        tailwind.config = { theme: { extend: { colors: { 'deft-base':'#08090D', surface:'#11131A', 'surface-el':'#1A1D28', 'surface-hi':'#242836', border:'#2A2E3D', accent:'#06D6A0', 'accent-dim':'rgba(6,214,160,0.15)', alert:'#FF6B6B', warn:'#FFD93D', info:'#4CC9F0', txt:'#E8ECF1', 'txt-2':'#8A95A9', 'txt-3':'#525E73' }, fontFamily: { heading:['"Chakra Petch"','system-ui','sans-serif'], body:['"IBM Plex Sans"','system-ui','sans-serif'], mono:['"JetBrains Mono"','monospace'] } } } }
     </script>
     <style>
         html { scroll-behavior: smooth; }

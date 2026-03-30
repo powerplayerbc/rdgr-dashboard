@@ -96,6 +96,7 @@
             background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
             color: var(--deft-accent, #06D6A0) !important;
         }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -108,7 +109,7 @@
             theme: {
                 extend: {
                     colors: {
-                        base: 'var(--deft-base)',
+                        'deft-base': 'var(--deft-base)',
                         surface: 'var(--deft-surface)',
                         'surface-el': 'var(--deft-surface-el)',
                         'surface-hi': 'var(--deft-surface-hi)',
@@ -2411,7 +2412,7 @@
     <div id="addRecipeModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('addRecipeModal')">
         <div class="modal-content" style="max-width: 640px;">
             <div class="p-5 border-b flex items-center justify-between" style="border-color: var(--deft-border);">
-                <h2 class="font-heading font-bold text-base" style="color: var(--deft-txt);">New Recipe</h2>
+                <h2 class="font-heading font-bold text-base">New Recipe</h2>
                 <button onclick="closeModal('addRecipeModal')" class="p-1 rounded transition-colors" style="color: var(--deft-txt-3);" aria-label="Close">
                     <svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </button>

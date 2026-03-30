@@ -136,7 +136,7 @@
         body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
         .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
         .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
-        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
         .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
         .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
         .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
@@ -225,7 +225,7 @@
             theme: {
                 extend: {
                     colors: {
-                        base: 'var(--brain-base)',
+                        'deft-base': 'var(--brain-base)',
                         surface: 'var(--brain-surface)',
                         'surface-el': 'var(--brain-surface-el)',
                         'surface-hi': 'var(--brain-surface-hi)',
