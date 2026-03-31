@@ -1,0 +1,2268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Finance Dashboard | Carlton AI</title>
+
+    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://yrwrswyjawmgtxrgbnim.supabase.co">
+    <script>
+        // Instant auth check + theme application -- runs before body renders
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _presets = {
+                forest:     { accent:'#A8D65B',accentWarm:'#F0A830',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                sunrise:    { accent:'#F0A830',accentWarm:'#E85D5D',base:'#100D08',surface:'#1C1810',surfaceEl:'#272118',surfaceHi:'#322B20',border:'#3F382C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                ocean:      { accent:'#38BDF8',accentWarm:'#06D6A0',base:'#080D10',surface:'#10161C',surfaceEl:'#182027',surfaceHi:'#202A32',border:'#2C363F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E0E8EA',txt2:'#8C9BA0',txt3:'#586B6B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                berry:      { accent:'#C084FC',accentWarm:'#FB7185',base:'#0D0810',surface:'#16101C',surfaceEl:'#201827',surfaceHi:'#2A2032',border:'#3A2C3F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E0EA',txt2:'#A08CA0',txt3:'#6B586B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                rdgr:       { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' },
+                monochrome: { accent:'#E8E8E8',accentWarm:'#A0A0A0',base:'#000000',surface:'#0A0A0A',surfaceEl:'#141414',surfaceHi:'#1E1E1E',border:'#2A2A2A',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E8E8',txt2:'#A0A0A0',txt3:'#666666',headingFont:'Nunito',bodyFont:'DM Sans' },
+            };
+            var _t = (_tc.preset === 'custom' && _tc.custom) ? _tc.custom : (_presets[_tc.preset] || _presets.rdgr);
+            if (_tc.statusOverrides) {
+                if (_tc.statusOverrides.success) _t.success = _tc.statusOverrides.success;
+                if (_tc.statusOverrides.warning) _t.warning = _tc.statusOverrides.warning;
+                if (_tc.statusOverrides.danger) _t.danger = _tc.statusOverrides.danger;
+            }
+            var _r = document.documentElement;
+            _r.style.setProperty('--deft-accent', _t.accent);
+            _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+            _r.style.setProperty('--deft-accent-warm', _t.accentWarm || _t.accent);
+            _r.style.setProperty('--deft-base', _t.base);
+            _r.style.setProperty('--deft-surface', _t.surface);
+            _r.style.setProperty('--deft-surface-el', _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-surface-hi', _t.surfaceHi || _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-border', _t.border);
+            _r.style.setProperty('--deft-success', _t.success || '#6BCB77');
+            _r.style.setProperty('--deft-success-dim', (_t.success || '#6BCB77') + '26');
+            _r.style.setProperty('--deft-warning', _t.warning || '#F0A830');
+            _r.style.setProperty('--deft-warning-dim', (_t.warning || '#F0A830') + '26');
+            _r.style.setProperty('--deft-danger', _t.danger || '#E85D5D');
+            _r.style.setProperty('--deft-danger-dim', (_t.danger || '#E85D5D') + '26');
+            _r.style.setProperty('--deft-txt', _t.txt);
+            _r.style.setProperty('--deft-txt-2', _t.txt2 || '#8A95A9');
+            _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
+            _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
+            _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+            var _fs = _tc.fontScale || 1;
+            _r.style.setProperty('--deft-font-scale', _fs);
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent { opacity: 1 !important; }
+
+        /* Universal theme */
+        body {
+            background: var(--deft-base, #08090D) !important;
+            color: var(--deft-txt, #E8ECF1) !important;
+            font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important;
+        }
+        .font-heading, h1, h2, h3 {
+            font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important;
+        }
+        nav {
+            background: color-mix(in srgb, var(--deft-base, #08090D) 92%, transparent) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel, .stat-chip {
+            background: var(--deft-surface, #11131A) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel-header { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input:focus {
+            border-color: var(--deft-accent, #06D6A0) !important;
+            box-shadow: 0 0 0 2px var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+        }
+        .text-accent { color: var(--deft-accent, #06D6A0) !important; }
+        .bg-accent { background-color: var(--deft-accent, #06D6A0) !important; }
+        .btn-primary {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent) !important;
+        }
+        .btn-primary:hover {
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent) !important;
+        }
+        .btn-ghost { border-color: var(--deft-border, #2A2E3D) !important; }
+        .text-info { color: var(--deft-accent, #06D6A0) !important; }
+        .text-alert { color: var(--deft-danger, #FF6B6B) !important; }
+        .text-warn { color: var(--deft-warning, #FFD93D) !important; }
+        .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+        .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+        .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+        ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D) !important; }
+        .pulse-dot { background: var(--deft-accent, #06D6A0) !important; }
+        .gate-input:focus {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent) !important;
+        }
+        select.form-input option { background: var(--deft-surface-el, #1A1D28) !important; color: var(--deft-txt, #E8ECF1) !important; }
+        /* Font scale */
+        body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
+        .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
+        .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
+        .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
+        .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
+        .text-3xl { font-size: calc(1.875rem * var(--deft-font-scale, 1)) !important; }
+
+        /* Nav Dropdown System */
+        .nav-group { position: relative; }
+        .nav-group-btn {
+            display: flex; align-items: center; gap: 0.25rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem; font-weight: 500;
+            color: #8A95A9;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+            border: none; background: transparent;
+        }
+        .nav-group-btn:hover { color: #E8ECF1; }
+        .nav-group-btn.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+        .nav-group-btn .chevron {
+            transition: transform 0.2s;
+            opacity: 0.5;
+        }
+        .nav-group:hover .nav-group-btn .chevron { transform: rotate(180deg); opacity: 0.8; }
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 150px;
+            padding: 0.375rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: opacity 0.15s, visibility 0.15s, transform 0.15s;
+            z-index: 70;
+        }
+        .nav-group:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .nav-dropdown a {
+            display: block;
+            padding: 0.4rem 0.625rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+        .nav-dropdown a:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--deft-txt, #E8ECF1);
+        }
+        .nav-dropdown a.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deft-base': '#08090D',
+                        surface: '#11131A',
+                        'surface-el': '#1A1D28',
+                        'surface-hi': '#242836',
+                        border: '#2A2E3D',
+                        accent: '#06D6A0',
+                        'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B',
+                        'alert-dim': 'rgba(255,107,107,0.15)',
+                        warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)',
+                        info: '#4CC9F0',
+                        'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1',
+                        'txt-2': '#8A95A9',
+                        'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #08090D;
+            color: #E8ECF1;
+        }
+
+        /* Grain */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3A3E4D; }
+
+        /* Gate */
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: #E8ECF1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            width: 100%;
+        }
+        .gate-input::placeholder { color: #525E73; }
+        .gate-error { color: #FF6B6B; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        /* Pulse */
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #06D6A0;
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+
+        /* Top-Level Section Tabs */
+        .top-tab {
+            padding: 0.6rem 1.25rem;
+            font-family: 'Chakra Petch', system-ui;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            color: #525E73;
+            background: transparent;
+            border: 1px solid transparent;
+            transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+        }
+        .top-tab:hover { color: #8A95A9; }
+        .top-tab.active {
+            background: rgba(6,214,160,0.1);
+            color: #06D6A0;
+            border-color: rgba(6,214,160,0.2);
+        }
+        .top-tab.active {
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 10%, transparent) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 20%, transparent) !important;
+        }
+
+        /* Stat chip */
+        .stat-chip {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            min-width: 140px;
+        }
+        .stat-value { font-family: 'Chakra Petch', system-ui; font-weight: 700; font-size: 1.3rem; line-height: 1; }
+        .stat-label { font-size: 0.65rem; color: #8A95A9; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; margin-top: 0.25rem; }
+
+        /* Panels */
+        .panel {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid #1E2130;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel-header h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--deft-txt, #E8ECF1);
+            font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui;
+        }
+        .panel-body { padding: 1rem 1.25rem; }
+
+        /* Badges */
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            line-height: 1;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+        }
+        .badge-success { background: var(--deft-success-dim, rgba(107,203,119,0.15)); color: var(--deft-success, #6BCB77); }
+        .badge-warning { background: var(--deft-warning-dim, rgba(255,217,61,0.15)); color: var(--deft-warning, #FFD93D); }
+        .badge-danger { background: var(--deft-danger-dim, rgba(255,107,107,0.15)); color: var(--deft-danger, #FF6B6B); }
+        .badge-accent { background: var(--deft-accent-dim, rgba(6,214,160,0.15)); color: var(--deft-accent, #06D6A0); }
+        .badge-accent-dim { background: rgba(76,201,240,0.12); color: #4CC9F0; }
+        .badge-neutral { background: var(--deft-surface-hi, #242836); color: var(--deft-txt-3, #525E73); }
+        .badge-info { background: rgba(76,201,240,0.12); color: #4CC9F0; }
+
+        /* Buttons */
+        .btn {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.03em;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            text-transform: uppercase;
+        }
+        .btn-primary { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.3); }
+        .btn-primary:hover { background: rgba(6,214,160,0.25); }
+        .btn-ghost { background: transparent; color: #8A95A9; border: 1px solid #2A2E3D; }
+        .btn-ghost:hover { background: rgba(255,255,255,0.03); color: #E8ECF1; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.65rem; }
+
+        /* Form inputs */
+        .form-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2A2E3D;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            color: #E8ECF1;
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.8rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus { border-color: rgba(6,214,160,0.4); box-shadow: 0 0 0 2px rgba(6,214,160,0.08); }
+        .form-input::placeholder { color: #525E73; }
+        select.form-input { cursor: pointer; }
+        select.form-input option { background: #1A1D28; color: #E8ECF1; }
+        textarea.form-input { resize: vertical; min-height: 80px; font-family: 'IBM Plex Sans', system-ui; }
+
+        /* Modal */
+        .modal-backdrop {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.25s, visibility 0.25s;
+        }
+        .modal-backdrop.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: #11131A; border: 1px solid #2A2E3D; border-radius: 0.75rem;
+            width: 90%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+            transform: translateY(20px); transition: transform 0.25s ease;
+        }
+        .modal-backdrop.active .modal-content { transform: translateY(0); }
+
+        /* Toast */
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-family: 'IBM Plex Sans', system-ui;
+            animation: toast-in 0.3s ease forwards;
+            max-width: 380px;
+        }
+        .toast-success { background: rgba(6,214,160,0.15); border: 1px solid rgba(6,214,160,0.3); color: #06D6A0; }
+        .toast-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #FF6B6B; }
+        .toast-info { background: rgba(76,201,240,0.15); border: 1px solid rgba(76,201,240,0.3); color: #4CC9F0; }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Data table */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .data-table th {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem; font-weight: 500;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            color: #525E73; text-align: left;
+            padding: 0.625rem 0.75rem;
+            border-bottom: 1px solid #1E2130;
+            white-space: nowrap;
+        }
+        .data-table td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid rgba(30,33,48,0.5);
+            vertical-align: middle;
+        }
+        .data-table tbody tr { transition: background 0.15s; }
+        .data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+        /* CSS bar charts */
+        .bar-h {
+            height: 20px;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+            min-width: 2px;
+        }
+        .bar-v {
+            border-radius: 3px 3px 0 0;
+            transition: height 0.6s ease;
+            min-height: 2px;
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            height: 6px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+
+        /* Aging bar */
+        .aging-segment {
+            height: 28px;
+            display: inline-block;
+            transition: width 0.4s ease;
+            min-width: 2px;
+        }
+        .aging-segment:first-child { border-radius: 4px 0 0 4px; }
+        .aging-segment:last-child { border-radius: 0 4px 4px 0; }
+
+        /* Action card */
+        .action-card {
+            background: var(--deft-surface, #11131A);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.15s;
+        }
+        .action-card:hover {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent);
+            background: var(--deft-surface-el, #1A1D28);
+        }
+
+        /* Drag drop zone */
+        .drop-zone {
+            border: 2px dashed var(--deft-border, #2A2E3D);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .drop-zone.dragover {
+            border-color: var(--deft-accent, #06D6A0);
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 5%, transparent);
+        }
+
+        /* Loading shimmer */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .loading-bar {
+            height: 16px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        /* Invoice sub-tabs */
+        .inv-tab {
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #525E73;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: none;
+            background: transparent;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .inv-tab:hover { color: #8A95A9; }
+        .inv-tab.active {
+            color: var(--deft-accent, #06D6A0);
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 10%, transparent);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid-2col { grid-template-columns: 1fr !important; }
+            .stat-row { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.5rem; }
+            .stat-chip { min-width: 130px; flex-shrink: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PASSWORD GATE -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+            </div>
+            <div id="gateProfiles" class="flex justify-center gap-3 mb-6">
+                <div class="text-center text-xs text-txt-3">Loading profiles...</div>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- Top Nav -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="nav-group-btn">Dashboard</a>
+                        <div class="nav-group">
+                            <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/chat">Rodger</a>
+                                <a href="/council">Council</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/crm" class="nav-group-btn">Outreach <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/crm">CRM</a>
+                                <a href="/email-outreach">Email</a>
+                                <a href="/social-dashboard">Social</a>
+                                <a href="/social-content">Social Content</a>
+                                <a href="/offer-studio">Offers</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/finance" class="nav-group-btn active">Finance <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/finance" class="active">Dashboard</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brand-discovery" class="nav-group-btn">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brand-discovery">Discovery</a>
+                                <a href="/template-studio">Templates</a>
+                                <a href="/brand-documents">Docs</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/bsi-discovery" class="nav-group-btn">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/bsi-discovery">Discovery</a>
+                                <a href="/compliance">Compliance</a>
+                                <a href="/bsi-documents">Documents</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/content" class="nav-group-btn">Content <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/content">Publishing</a>
+                                <a href="/media">Media</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brain">BRAIN</a>
+                                <a href="/deft">DEFT</a>
+                            </div>
+                        </div>
+                        <a href="/trading-research" class="nav-group-btn">Trading</a>
+                        <a href="/meetings" class="nav-group-btn">Meetings</a>
+                        <div class="nav-group">
+                            <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/our-workflows">Workflows</a>
+                                <a href="/org-chart">Org Map</a>
+                                <a href="/hub">HUB</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown"></div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2" title="Settings">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="8" r="2.33" stroke="currentColor" stroke-width="1.1"/></svg>
+                    </a>
+                    <button onclick="refreshCurrentTab()" class="btn btn-ghost text-xs py-2 px-3 flex items-center gap-1.5" id="refreshBtn">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
+
+        <!-- Top-Level Tabs -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pt-4">
+            <div class="flex gap-1 p-0.5 rounded-lg overflow-x-auto" style="background: rgba(255,255,255,0.04);">
+                <button class="top-tab active" id="tabOverview" onclick="switchTab('overview')">Overview</button>
+                <button class="top-tab" id="tabRevenue" onclick="switchTab('revenue')">Revenue</button>
+                <button class="top-tab" id="tabExpenses" onclick="switchTab('expenses')">Expenses</button>
+                <button class="top-tab" id="tabInvoices" onclick="switchTab('invoices')">Invoices</button>
+                <button class="top-tab" id="tabReconciliation" onclick="switchTab('reconciliation')">Reconciliation</button>
+                <button class="top-tab" id="tabActions" onclick="switchTab('actions')">Actions</button>
+            </div>
+        </div>
+
+        <!-- TAB SECTIONS -->
+
+        <!-- OVERVIEW -->
+        <div id="sectionOverview" class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 space-y-4">
+            <div class="stat-row flex gap-3 overflow-x-auto pb-1" id="overviewStats">
+                <div class="stat-chip"><div><div class="stat-value text-accent" id="ovRevenueMTD">--</div><div class="stat-label">Revenue MTD</div></div></div>
+                <div class="stat-chip"><div><div class="stat-value text-warn" id="ovExpensesMTD">--</div><div class="stat-label">Expenses MTD</div></div></div>
+                <div class="stat-chip"><div><div class="stat-value" id="ovNetIncome">--</div><div class="stat-label">Net Income MTD</div></div></div>
+                <div class="stat-chip"><div><div class="stat-value" id="ovOutstandingAR" style="color: var(--deft-txt-2);">--</div><div class="stat-label">Outstanding AR</div></div></div>
+                <div class="stat-chip"><div><div class="stat-value" id="ovOutstandingAP" style="color: var(--deft-txt-2);">--</div><div class="stat-label">Outstanding AP</div></div></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 grid-2col">
+                <!-- P&L Card -->
+                <div class="panel">
+                    <div class="panel-header"><h3>Profit & Loss</h3></div>
+                    <div class="panel-body" id="ovPnlPanel">
+                        <div class="loading-bar w-full mb-3"></div>
+                        <div class="loading-bar w-3/4"></div>
+                    </div>
+                </div>
+                <!-- Cash Flow Chart -->
+                <div class="panel">
+                    <div class="panel-header"><h3>Cash Flow (6 Months)</h3></div>
+                    <div class="panel-body" id="ovCashFlowPanel">
+                        <div class="loading-bar w-full mb-3"></div>
+                        <div class="loading-bar w-3/4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REVENUE -->
+        <div id="sectionRevenue" class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 space-y-4" style="display:none;">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 grid-2col">
+                <div class="panel">
+                    <div class="panel-header"><h3>Revenue by Source</h3></div>
+                    <div class="panel-body" id="revSourcePanel">
+                        <div class="loading-bar w-full mb-3"></div>
+                        <div class="loading-bar w-3/4"></div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><h3>Monthly Trend (12 Mo)</h3></div>
+                    <div class="panel-body" id="revTrendPanel">
+                        <div class="loading-bar w-full mb-3"></div>
+                        <div class="loading-bar w-3/4"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><h3>Revenue Pipeline</h3></div>
+                <div class="panel-body" id="revPipelinePanel">
+                    <div class="loading-bar w-full mb-3"></div>
+                    <div class="loading-bar w-3/4 mb-3"></div>
+                    <div class="loading-bar w-1/2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EXPENSES -->
+        <div id="sectionExpenses" class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 space-y-4" style="display:none;">
+            <div class="stat-row flex gap-3 overflow-x-auto pb-1" id="expenseStats">
+                <div class="stat-chip"><div><div class="stat-value text-warn" id="exTotalExp">--</div><div class="stat-label">Total Expenses</div></div></div>
+                <div class="stat-chip"><div><div class="stat-value" id="exTxnCount" style="color: var(--deft-txt-2);">--</div><div class="stat-label"># Transactions</div></div></div>
+                <div class="stat-chip"><div><div class="stat-value" id="exAvgTxn" style="color: var(--deft-txt-2);">--</div><div class="stat-label">Avg Transaction</div></div></div>
+                <div class="stat-chip"><div><div class="stat-value text-alert" id="exLargest">--</div><div class="stat-label">Largest Expense</div></div></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 grid-2col">
+                <div class="panel">
+                    <div class="panel-header"><h3>By Category</h3></div>
+                    <div class="panel-body" id="exCategoryPanel">
+                        <div class="loading-bar w-full mb-3"></div>
+                        <div class="loading-bar w-3/4"></div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><h3>Monthly Trend</h3></div>
+                    <div class="panel-body" id="exTrendPanel">
+                        <div class="loading-bar w-full mb-3"></div>
+                        <div class="loading-bar w-3/4"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>Recent Transactions</h3>
+                    <div class="flex items-center gap-2">
+                        <select class="form-input" id="exCatFilter" style="max-width:160px;font-size:0.7rem;padding:0.3rem 0.5rem;" onchange="filterExpenses()">
+                            <option value="">All Categories</option>
+                        </select>
+                        <input type="text" class="form-input" id="exSearch" placeholder="Search..." style="max-width:160px;font-size:0.7rem;padding:0.3rem 0.5rem;" oninput="filterExpenses()">
+                    </div>
+                </div>
+                <div class="panel-body overflow-x-auto" id="exTablePanel">
+                    <div class="loading-bar w-full mb-3"></div>
+                    <div class="loading-bar w-3/4 mb-3"></div>
+                    <div class="loading-bar w-1/2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INVOICES -->
+        <div id="sectionInvoices" class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 space-y-4" style="display:none;">
+            <div class="stat-row flex gap-3 overflow-x-auto pb-1" id="invoiceStats">
+                <div class="stat-chip"><div><div class="stat-value text-accent" id="invAR">--</div><div class="stat-label">Outstanding AR</div></div></div>
+                <div class="stat-chip"><div><div class="stat-value text-warn" id="invAP">--</div><div class="stat-label">Outstanding AP</div></div></div>
+                <div class="stat-chip"><div><div class="stat-value text-alert" id="invOverdue">--</div><div class="stat-label">Overdue Count</div></div></div>
+                <div class="stat-chip"><div><div class="stat-value" id="invAvgDays" style="color: var(--deft-txt-2);">--</div><div class="stat-label">Avg Days to Pay</div></div></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 grid-2col">
+                <div class="panel">
+                    <div class="panel-header"><h3>AR Aging</h3></div>
+                    <div class="panel-body" id="invARPanel">
+                        <div class="loading-bar w-full mb-3"></div>
+                        <div class="loading-bar w-3/4"></div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><h3>AP Aging</h3></div>
+                    <div class="panel-body" id="invAPPanel">
+                        <div class="loading-bar w-full mb-3"></div>
+                        <div class="loading-bar w-3/4"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>Invoice List</h3>
+                    <div class="flex items-center gap-2">
+                        <div class="flex gap-1">
+                            <button class="inv-tab active" data-invfilter="all" onclick="setInvFilter('all')">All</button>
+                            <button class="inv-tab" data-invfilter="ar" onclick="setInvFilter('ar')">AR</button>
+                            <button class="inv-tab" data-invfilter="ap" onclick="setInvFilter('ap')">AP</button>
+                            <button class="inv-tab" data-invfilter="overdue" onclick="setInvFilter('overdue')">Overdue</button>
+                        </div>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('createInvoiceModal')">+ Invoice</button>
+                    </div>
+                </div>
+                <div class="panel-body overflow-x-auto" id="invTablePanel">
+                    <div class="loading-bar w-full mb-3"></div>
+                    <div class="loading-bar w-3/4 mb-3"></div>
+                    <div class="loading-bar w-1/2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RECONCILIATION -->
+        <div id="sectionReconciliation" class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 space-y-4" style="display:none;">
+            <div class="stat-row flex gap-3 overflow-x-auto pb-1" id="reconStats">
+                <div class="stat-chip"><div><div class="stat-value text-warn" id="rcUnmatched">--</div><div class="stat-label">Unmatched Count</div></div></div>
+                <div class="stat-chip"><div><div class="stat-value text-accent" id="rcCoverage">--</div><div class="stat-label">Reconciliation %</div></div></div>
+                <div class="stat-chip"><div><div class="stat-value" id="rcRecurring" style="color: var(--deft-txt-2);">--</div><div class="stat-label">Recurring Active</div></div></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 grid-2col">
+                <div class="panel">
+                    <div class="panel-header"><h3>Unmatched Transactions</h3></div>
+                    <div class="panel-body" id="rcUnmatchedPanel">
+                        <div class="loading-bar w-full mb-3"></div>
+                        <div class="loading-bar w-3/4"></div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><h3>Recent Matches</h3></div>
+                    <div class="panel-body" id="rcMatchesPanel">
+                        <div class="loading-bar w-full mb-3"></div>
+                        <div class="loading-bar w-3/4"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><h3>Upcoming Recurring Payments</h3></div>
+                <div class="panel-body" id="rcRecurringPanel">
+                    <div class="loading-bar w-full mb-3"></div>
+                    <div class="loading-bar w-3/4"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div id="sectionActions" class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4" style="display:none;">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Record Expense -->
+                <div class="action-card" onclick="openModal('recordExpenseModal')">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--deft-warning-dim); color: var(--deft-warning);">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M10 4v12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-heading font-semibold text-sm">Record Expense</h3>
+                            <p class="text-xs text-txt-3">Log a new business expense</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Create Invoice -->
+                <div class="action-card" onclick="openModal('createInvoiceModal')">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--deft-accent-dim); color: var(--deft-accent);">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M7 6h6M7 9h6M7 12h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-heading font-semibold text-sm">Create Invoice</h3>
+                            <p class="text-xs text-txt-3">Generate and send a new invoice</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Import Bank Statement -->
+                <div class="action-card" onclick="openModal('importBankModal')">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(76,201,240,0.12); color: #4CC9F0;">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3v10M6 9l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15v2h14v-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-heading font-semibold text-sm">Import Bank Statement</h3>
+                            <p class="text-xs text-txt-3">Upload a CSV for reconciliation</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Generate Report -->
+                <div class="action-card" onclick="openModal('generateReportModal')">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(168,85,247,0.12); color: #A855F7;">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 17V7l4-4h6l4 4v10a1 1 0 01-1 1H4a1 1 0 01-1-1z" stroke="currentColor" stroke-width="1.3"/><path d="M7 11h6M7 14h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-heading font-semibold text-sm">Generate Report</h3>
+                            <p class="text-xs text-txt-3">P&L, Cash Flow, Tax Summary</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /mainContent -->
+
+    <!-- MODALS -->
+
+    <!-- Record Expense Modal -->
+    <div class="modal-backdrop" id="recordExpenseModal">
+        <div class="modal-content">
+            <div class="panel-header">
+                <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Record Expense</h3>
+                <button onclick="closeModal('recordExpenseModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Date <span class="text-alert">*</span></label>
+                        <input type="date" id="reDate" class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Amount <span class="text-alert">*</span></label>
+                        <input type="number" step="0.01" id="reAmount" class="form-input" placeholder="0.00">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Description <span class="text-alert">*</span></label>
+                    <input type="text" id="reDescription" class="form-input" placeholder="What was this expense for?">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Category</label>
+                        <select id="reCategory" class="form-input">
+                            <option value="">Select category...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Vendor</label>
+                        <input type="text" id="reVendor" class="form-input" placeholder="Vendor name">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Payment Method</label>
+                    <select id="rePaymentMethod" class="form-input">
+                        <option value="credit_card">Credit Card</option>
+                        <option value="debit_card">Debit Card</option>
+                        <option value="bank_transfer">Bank Transfer</option>
+                        <option value="cash">Cash</option>
+                        <option value="check">Check</option>
+                        <option value="paypal">PayPal</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Notes</label>
+                    <textarea id="reNotes" class="form-input" rows="2" placeholder="Additional notes (optional)"></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="submitRecordExpense()" class="btn btn-primary flex-1 py-2.5" id="reSubmitBtn">Record Expense</button>
+                    <button onclick="closeModal('recordExpenseModal')" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Invoice Modal -->
+    <div class="modal-backdrop" id="createInvoiceModal">
+        <div class="modal-content">
+            <div class="panel-header">
+                <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Create Invoice</h3>
+                <button onclick="closeModal('createInvoiceModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Customer Name <span class="text-alert">*</span></label>
+                    <input type="text" id="ciCustomer" class="form-input" placeholder="Customer or company name">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Amount <span class="text-alert">*</span></label>
+                        <input type="number" step="0.01" id="ciAmount" class="form-input" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Due Date <span class="text-alert">*</span></label>
+                        <input type="date" id="ciDueDate" class="form-input">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Description</label>
+                    <textarea id="ciDescription" class="form-input" rows="2" placeholder="Invoice description or line items"></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="submitCreateInvoice()" class="btn btn-primary flex-1 py-2.5" id="ciSubmitBtn">Create Invoice</button>
+                    <button onclick="closeModal('createInvoiceModal')" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Payment Modal -->
+    <div class="modal-backdrop" id="recordPaymentModal">
+        <div class="modal-content">
+            <div class="panel-header">
+                <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Record Payment</h3>
+                <button onclick="closeModal('recordPaymentModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Invoice <span class="text-alert">*</span></label>
+                    <select id="rpInvoice" class="form-input"></select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Amount <span class="text-alert">*</span></label>
+                        <input type="number" step="0.01" id="rpAmount" class="form-input" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Payment Date</label>
+                        <input type="date" id="rpDate" class="form-input">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Payment Method</label>
+                    <select id="rpMethod" class="form-input">
+                        <option value="bank_transfer">Bank Transfer</option>
+                        <option value="credit_card">Credit Card</option>
+                        <option value="check">Check</option>
+                        <option value="cash">Cash</option>
+                        <option value="paypal">PayPal</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="submitRecordPayment()" class="btn btn-primary flex-1 py-2.5" id="rpSubmitBtn">Record Payment</button>
+                    <button onclick="closeModal('recordPaymentModal')" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Bank Statement Modal -->
+    <div class="modal-backdrop" id="importBankModal">
+        <div class="modal-content" style="max-width:640px;">
+            <div class="panel-header">
+                <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Import Bank Statement</h3>
+                <button onclick="closeModal('importBankModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="drop-zone" id="csvDropZone">
+                    <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="handleCSVFile(this.files[0])">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" class="mx-auto mb-2 opacity-40"><path d="M16 4v18M10 14l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 24v4h24v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <p class="text-sm text-txt-2">Drop a CSV file here, or <span class="text-accent cursor-pointer" onclick="document.getElementById('csvFileInput').click()">browse</span></p>
+                    <p class="text-xs text-txt-3 mt-1">Expected columns: date, description, amount</p>
+                </div>
+                <div id="csvPreview" style="display:none;">
+                    <p class="text-xs text-txt-2 mb-2 font-mono uppercase tracking-wider">Preview (<span id="csvRowCount">0</span> rows)</p>
+                    <div class="overflow-x-auto" style="max-height:200px;overflow-y:auto;">
+                        <table class="data-table" id="csvPreviewTable"><thead></thead><tbody></tbody></table>
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="submitImportCSV()" class="btn btn-primary flex-1 py-2.5" id="csvSubmitBtn" disabled>Import Rows</button>
+                    <button onclick="closeModal('importBankModal');resetCSVImport()" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate Report Modal -->
+    <div class="modal-backdrop" id="generateReportModal">
+        <div class="modal-content">
+            <div class="panel-header">
+                <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Generate Report</h3>
+                <button onclick="closeModal('generateReportModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Report Type</label>
+                    <select id="grReportType" class="form-input">
+                        <option value="pnl_summary">P&L Summary</option>
+                        <option value="cash_flow">Cash Flow</option>
+                        <option value="tax_summary">Tax Summary</option>
+                        <option value="ar_aging">AR Aging</option>
+                        <option value="ap_aging">AP Aging</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Year</label>
+                        <select id="grYear" class="form-input"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Quarter (optional)</label>
+                        <select id="grQuarter" class="form-input">
+                            <option value="">Full Year</option>
+                            <option value="Q1">Q1 (Jan-Mar)</option>
+                            <option value="Q2">Q2 (Apr-Jun)</option>
+                            <option value="Q3">Q3 (Jul-Sep)</option>
+                            <option value="Q4">Q4 (Oct-Dec)</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="grResult" style="display:none;" class="p-3 rounded-lg" style="background:rgba(255,255,255,0.02);border:1px solid var(--deft-border);"></div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="submitGenerateReport()" class="btn btn-primary flex-1 py-2.5" id="grSubmitBtn">Generate</button>
+                    <button onclick="closeModal('generateReportModal')" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toasts"></div>
+
+    <!-- SCRIPT -->
+    <script>
+    // =======================================
+    // CONFIG
+    // =======================================
+    const SB_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    const N8N_BASE = 'https://n8n.carltonaiservices.com/webhook';
+    const BRAND_ID = 'carlton';
+    const headers = { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY };
+
+    let activeProfileId = null;
+    let activeTab = 'overview';
+    const tabLoaded = { overview: false, revenue: false, expenses: false, invoices: false, reconciliation: false, actions: true };
+
+    // Cached data
+    let expenseTransactions = [];
+    let invoiceList = [];
+    let invoiceFilter = 'all';
+    let parsedCSVRows = [];
+    let expenseCategories = [];
+
+    // =======================================
+    // HELPERS
+    // =======================================
+    function esc(str) { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+    function fmtMoney(n) { const sign = n < 0 ? '-' : ''; return sign + '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function fmtMoneyShort(n) { if (Math.abs(n) >= 1000) return (n < 0 ? '-' : '') + '$' + (Math.abs(n) / 1000).toFixed(1) + 'k'; return fmtMoney(n); }
+    function fmtDate(d) { if (!d) return '--'; return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+    function fmtPct(n) { return (n * 100).toFixed(1) + '%'; }
+    function getActiveProfile() { try { return JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}'); } catch(e) { return {}; } }
+
+    function toast(message, type = 'success') {
+        const container = document.getElementById('toasts');
+        const el = document.createElement('div');
+        el.className = 'toast toast-' + type;
+        el.textContent = message;
+        container.appendChild(el);
+        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 4000);
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    // =======================================
+    // DATA LAYER
+    // =======================================
+    async function rpc(fn, params = {}) {
+        try {
+            const r = await fetch(SB_URL + '/rest/v1/rpc/' + fn, {
+                method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' },
+                body: JSON.stringify(params)
+            });
+            if (!r.ok) { console.error('RPC error:', fn, r.status, await r.text()); return null; }
+            return await r.json();
+        } catch (err) { console.error('RPC error:', fn, err); return null; }
+    }
+
+    async function sbSelect(table, query = '') {
+        try {
+            const r = await fetch(SB_URL + '/rest/v1/' + table + '?' + query, { headers });
+            if (!r.ok) { console.error('sbSelect error:', table, r.status); return []; }
+            return await r.json();
+        } catch (err) { console.error('sbSelect error:', table, err); return []; }
+    }
+
+    async function bkaiBridge(operation, parameters = {}) {
+        try {
+            const r = await fetch(N8N_BASE + '/rdgr-bookkeeper', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    task_id: 'ui-' + operation + '-' + Date.now(),
+                    brand_id: BRAND_ID,
+                    domain: 'bookkeeper',
+                    operation: operation,
+                    parameters: parameters,
+                    user_id: getActiveProfile().id || null
+                })
+            });
+            return await r.json();
+        } catch (err) { console.error('bkaiBridge error:', operation, err); return null; }
+    }
+
+    // =======================================
+    // TAB SWITCHING
+    // =======================================
+    const TABS = ['overview', 'revenue', 'expenses', 'invoices', 'reconciliation', 'actions'];
+
+    function switchTab(tab) {
+        activeTab = tab;
+        sessionStorage.setItem('finance-active-tab', tab);
+        TABS.forEach(t => {
+            const section = document.getElementById('section' + t.charAt(0).toUpperCase() + t.slice(1));
+            const btn = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+            if (section) section.style.display = t === tab ? '' : 'none';
+            if (btn) btn.classList.toggle('active', t === tab);
+        });
+        if (!tabLoaded[tab]) {
+            tabLoaded[tab] = true;
+            loadTabData(tab);
+        }
+    }
+
+    function refreshCurrentTab() {
+        tabLoaded[activeTab] = false;
+        tabLoaded[activeTab] = true;
+        loadTabData(activeTab);
+    }
+
+    async function loadTabData(tab) {
+        switch(tab) {
+            case 'overview': return loadOverview();
+            case 'revenue': return loadRevenue();
+            case 'expenses': return loadExpenses();
+            case 'invoices': return loadInvoices();
+            case 'reconciliation': return loadReconciliation();
+        }
+    }
+
+    // =======================================
+    // OVERVIEW TAB
+    // =======================================
+    async function loadOverview() {
+        const [summary, ytd, cashFlow] = await Promise.all([
+            rpc('bkai_dashboard_summary', { p_brand_id: BRAND_ID, p_period: 'month' }),
+            rpc('bkai_dashboard_summary', { p_brand_id: BRAND_ID, p_period: 'ytd' }),
+            rpc('bkai_cash_flow', { p_brand_id: BRAND_ID, p_months: 6 })
+        ]);
+        renderOverview(summary, ytd, cashFlow);
+    }
+
+    function renderOverview(summary, ytd, cashFlow) {
+        const s = summary || {};
+        const y = ytd || {};
+
+        const revenue = parseFloat(s.revenue) || 0;
+        const expenses = Math.abs(parseFloat(s.expenses) || 0);
+        const net = revenue - expenses;
+        const ar = parseFloat(s.outstanding_ar) || 0;
+        const ap = parseFloat(s.outstanding_ap) || 0;
+
+        document.getElementById('ovRevenueMTD').textContent = fmtMoneyShort(revenue);
+        document.getElementById('ovExpensesMTD').textContent = fmtMoneyShort(expenses);
+        const netEl = document.getElementById('ovNetIncome');
+        netEl.textContent = fmtMoneyShort(net);
+        netEl.style.color = net >= 0 ? 'var(--deft-success, #6BCB77)' : 'var(--deft-danger, #FF6B6B)';
+        document.getElementById('ovOutstandingAR').textContent = fmtMoneyShort(ar);
+        document.getElementById('ovOutstandingAP').textContent = fmtMoneyShort(ap);
+
+        // P&L card
+        const yRevenue = parseFloat(y.revenue) || 0;
+        const yExpenses = Math.abs(parseFloat(y.expenses) || 0);
+        const yNet = yRevenue - yExpenses;
+        const now = new Date();
+        const monthName = now.toLocaleString('en-US', { month: 'long' });
+        const year = now.getFullYear();
+
+        document.getElementById('ovPnlPanel').innerHTML = `
+            <div class="mb-4">
+                <div class="text-xs text-txt-3 uppercase tracking-wider font-mono mb-3">${esc(monthName)} ${year}</div>
+                <div class="flex justify-between items-center py-1.5">
+                    <span class="text-sm text-txt-2">Revenue</span>
+                    <span class="font-heading font-semibold text-sm text-accent">${fmtMoney(revenue)}</span>
+                </div>
+                <div class="flex justify-between items-center py-1.5">
+                    <span class="text-sm text-txt-2">Expenses</span>
+                    <span class="font-heading font-semibold text-sm text-warn">${fmtMoney(expenses)}</span>
+                </div>
+                <hr style="border-color: var(--deft-border); margin: 0.5rem 0;">
+                <div class="flex justify-between items-center py-1.5">
+                    <span class="text-sm font-semibold">Net Income</span>
+                    <span class="font-heading font-bold text-base" style="color: ${net >= 0 ? 'var(--deft-success)' : 'var(--deft-danger)'};">${fmtMoney(net)}</span>
+                </div>
+            </div>
+            <div>
+                <div class="text-xs text-txt-3 uppercase tracking-wider font-mono mb-3">Year to Date (${year})</div>
+                <div class="flex justify-between items-center py-1.5">
+                    <span class="text-sm text-txt-2">Revenue</span>
+                    <span class="font-heading font-semibold text-sm text-accent">${fmtMoney(yRevenue)}</span>
+                </div>
+                <div class="flex justify-between items-center py-1.5">
+                    <span class="text-sm text-txt-2">Expenses</span>
+                    <span class="font-heading font-semibold text-sm text-warn">${fmtMoney(yExpenses)}</span>
+                </div>
+                <hr style="border-color: var(--deft-border); margin: 0.5rem 0;">
+                <div class="flex justify-between items-center py-1.5">
+                    <span class="text-sm font-semibold">Net Income</span>
+                    <span class="font-heading font-bold text-base" style="color: ${yNet >= 0 ? 'var(--deft-success)' : 'var(--deft-danger)'};">${fmtMoney(yNet)}</span>
+                </div>
+            </div>
+        `;
+
+        // Cash flow chart
+        const cf = Array.isArray(cashFlow) ? cashFlow : [];
+        if (cf.length === 0) {
+            document.getElementById('ovCashFlowPanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No cash flow data available</div>';
+            return;
+        }
+        const maxVal = Math.max(...cf.map(m => Math.max(Math.abs(parseFloat(m.inflow) || 0), Math.abs(parseFloat(m.outflow) || 0))), 1);
+        document.getElementById('ovCashFlowPanel').innerHTML = `
+            <div class="flex items-end gap-3 justify-between" style="height: 180px;">
+                ${cf.map(m => {
+                    const inf = Math.abs(parseFloat(m.inflow) || 0);
+                    const out = Math.abs(parseFloat(m.outflow) || 0);
+                    const infH = Math.max((inf / maxVal) * 150, 2);
+                    const outH = Math.max((out / maxVal) * 150, 2);
+                    const label = m.month ? new Date(m.month + '-01T00:00:00').toLocaleString('en-US', { month: 'short' }) : '?';
+                    return `
+                        <div class="flex-1 flex flex-col items-center gap-1">
+                            <div class="flex items-end gap-1 w-full justify-center" style="height:155px;">
+                                <div class="bar-v flex-1" style="height:${infH}px;background:var(--deft-accent, #06D6A0);max-width:24px;" title="Revenue: ${fmtMoney(inf)}"></div>
+                                <div class="bar-v flex-1" style="height:${outH}px;background:var(--deft-warning, #FFD93D);opacity:0.5;max-width:24px;" title="Expenses: ${fmtMoney(out)}"></div>
+                            </div>
+                            <span class="text-xs text-txt-3 font-mono">${label}</span>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+            <div class="flex items-center gap-4 mt-3 justify-center">
+                <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm" style="background:var(--deft-accent);"></div><span class="text-xs text-txt-3">Revenue</span></div>
+                <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm" style="background:var(--deft-warning);opacity:0.5;"></div><span class="text-xs text-txt-3">Expenses</span></div>
+            </div>
+        `;
+    }
+
+    // =======================================
+    // REVENUE TAB
+    // =======================================
+    async function loadRevenue() {
+        const [transactions, cashFlow, pipeline] = await Promise.all([
+            sbSelect('bkai_transactions', 'brand_id=eq.carlton&amount=gt.0&select=counterparty,amount&order=amount.desc'),
+            rpc('bkai_cash_flow', { p_brand_id: BRAND_ID, p_months: 12 }),
+            sbSelect('autonomous_revenue_pipeline', 'brand_id=eq.carlton&order=expected_value.desc&limit=20')
+        ]);
+        renderRevenue(transactions, cashFlow, pipeline);
+    }
+
+    function renderRevenue(transactions, cashFlow, pipeline) {
+        // Revenue by source
+        const txns = Array.isArray(transactions) ? transactions : [];
+        const bySource = {};
+        txns.forEach(t => {
+            const name = t.counterparty || 'Unknown';
+            bySource[name] = (bySource[name] || 0) + parseFloat(t.amount || 0);
+        });
+        const sorted = Object.entries(bySource).sort((a, b) => b[1] - a[1]).slice(0, 10);
+        const maxSource = sorted.length ? sorted[0][1] : 1;
+
+        if (sorted.length === 0) {
+            document.getElementById('revSourcePanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No revenue data available</div>';
+        } else {
+            document.getElementById('revSourcePanel').innerHTML = `
+                <div class="space-y-2">
+                    ${sorted.map(([name, amt]) => `
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-txt-2 truncate" style="min-width:100px;max-width:120px;">${esc(name)}</span>
+                            <div class="flex-1"><div class="bar-h" style="width:${(amt / maxSource * 100).toFixed(1)}%;background:var(--deft-accent);"></div></div>
+                            <span class="text-xs font-heading font-semibold text-txt" style="min-width:70px;text-align:right;">${fmtMoney(amt)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Monthly trend
+        const cf = Array.isArray(cashFlow) ? cashFlow : [];
+        if (cf.length === 0) {
+            document.getElementById('revTrendPanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No trend data available</div>';
+        } else {
+            const maxInflow = Math.max(...cf.map(m => Math.abs(parseFloat(m.inflow) || 0)), 1);
+            document.getElementById('revTrendPanel').innerHTML = `
+                <div class="flex items-end gap-1 justify-between" style="height: 180px;">
+                    ${cf.map(m => {
+                        const inf = Math.abs(parseFloat(m.inflow) || 0);
+                        const h = Math.max((inf / maxInflow) * 155, 2);
+                        const label = m.month ? new Date(m.month + '-01T00:00:00').toLocaleString('en-US', { month: 'short' }) : '?';
+                        return `
+                            <div class="flex-1 flex flex-col items-center gap-1">
+                                <div class="w-full flex justify-center" style="height:160px;display:flex;align-items:flex-end;">
+                                    <div class="bar-v" style="height:${h}px;background:var(--deft-accent);width:80%;max-width:28px;" title="${fmtMoney(inf)}"></div>
+                                </div>
+                                <span class="text-[0.55rem] text-txt-3 font-mono">${label}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        // Pipeline
+        const pl = Array.isArray(pipeline) ? pipeline : [];
+        if (pl.length === 0) {
+            document.getElementById('revPipelinePanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No pipeline data available</div>';
+        } else {
+            const stageColors = { lead:'badge-neutral', qualified:'badge-accent-dim', proposal:'badge-warning', negotiation:'badge-accent', closed_won:'badge-success', closed_lost:'badge-danger' };
+            document.getElementById('revPipelinePanel').innerHTML = `
+                <table class="data-table">
+                    <thead><tr>
+                        <th>Lead</th><th>Company</th><th>Stage</th><th>Value</th><th>Probability</th>
+                    </tr></thead>
+                    <tbody>
+                        ${pl.map(d => `
+                            <tr>
+                                <td class="text-txt">${esc(d.lead_name || d.contact_name || '--')}</td>
+                                <td class="text-txt-2">${esc(d.company_name || '--')}</td>
+                                <td><span class="badge ${stageColors[d.stage] || 'badge-neutral'}">${esc(d.stage || '--')}</span></td>
+                                <td class="font-heading font-semibold">${fmtMoney(parseFloat(d.expected_value) || 0)}</td>
+                                <td class="text-txt-2">${d.probability ? (parseFloat(d.probability) * 100).toFixed(0) + '%' : '--'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+    }
+
+    // =======================================
+    // EXPENSES TAB
+    // =======================================
+    async function loadExpenses() {
+        const [txns, categories, cashFlow] = await Promise.all([
+            sbSelect('bkai_transactions', 'brand_id=eq.carlton&amount=lt.0&order=transaction_date.desc&limit=200'),
+            rpc('bkai_expense_by_category', { p_brand_id: BRAND_ID }),
+            rpc('bkai_cash_flow', { p_brand_id: BRAND_ID, p_months: 12 })
+        ]);
+
+        expenseTransactions = Array.isArray(txns) ? txns : [];
+        const cats = Array.isArray(categories) ? categories : [];
+
+        // Load categories for filter
+        const catAccounts = await sbSelect('bkai_chart_of_accounts', 'brand_id=eq.carlton&account_type=eq.expense&select=account_code,account_name&order=account_name');
+        expenseCategories = Array.isArray(catAccounts) ? catAccounts : [];
+        const catSelect = document.getElementById('exCatFilter');
+        const reCatSelect = document.getElementById('reCategory');
+        catSelect.innerHTML = '<option value="">All Categories</option>' + expenseCategories.map(c => `<option value="${esc(c.account_name)}">${esc(c.account_name)}</option>`).join('');
+        reCatSelect.innerHTML = '<option value="">Select category...</option>' + expenseCategories.map(c => `<option value="${c.account_code}">${esc(c.account_name)} (${c.account_code})</option>`).join('');
+
+        renderExpenseStats(expenseTransactions);
+        renderExpenseCategories(cats);
+        renderExpenseTrend(cashFlow);
+        renderExpenseTable(expenseTransactions);
+    }
+
+    function renderExpenseStats(txns) {
+        const total = txns.reduce((s, t) => s + Math.abs(parseFloat(t.amount) || 0), 0);
+        const count = txns.length;
+        const avg = count > 0 ? total / count : 0;
+        const largest = txns.length > 0 ? Math.max(...txns.map(t => Math.abs(parseFloat(t.amount) || 0))) : 0;
+
+        document.getElementById('exTotalExp').textContent = fmtMoneyShort(total);
+        document.getElementById('exTxnCount').textContent = count;
+        document.getElementById('exAvgTxn').textContent = fmtMoneyShort(avg);
+        document.getElementById('exLargest').textContent = fmtMoneyShort(largest);
+    }
+
+    function renderExpenseCategories(cats) {
+        if (!cats || cats.length === 0) {
+            document.getElementById('exCategoryPanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No category data available</div>';
+            return;
+        }
+        const total = cats.reduce((s, c) => s + Math.abs(parseFloat(c.total) || parseFloat(c.amount) || 0), 0) || 1;
+        const maxCat = Math.max(...cats.map(c => Math.abs(parseFloat(c.total) || parseFloat(c.amount) || 0)));
+        document.getElementById('exCategoryPanel').innerHTML = `
+            <div class="space-y-2">
+                ${cats.slice(0, 12).map(c => {
+                    const amt = Math.abs(parseFloat(c.total) || parseFloat(c.amount) || 0);
+                    const name = c.category || c.account_name || 'Other';
+                    return `
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-txt-2 truncate" style="min-width:100px;max-width:140px;">${esc(name)}</span>
+                            <div class="flex-1"><div class="bar-h" style="width:${(amt / maxCat * 100).toFixed(1)}%;background:var(--deft-warning);opacity:0.7;"></div></div>
+                            <span class="text-xs font-heading font-semibold text-txt" style="min-width:70px;text-align:right;">${fmtMoney(amt)}</span>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    function renderExpenseTrend(cashFlow) {
+        const cf = Array.isArray(cashFlow) ? cashFlow : [];
+        if (cf.length === 0) {
+            document.getElementById('exTrendPanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No trend data available</div>';
+            return;
+        }
+        const maxOut = Math.max(...cf.map(m => Math.abs(parseFloat(m.outflow) || 0)), 1);
+        document.getElementById('exTrendPanel').innerHTML = `
+            <div class="flex items-end gap-1 justify-between" style="height: 180px;">
+                ${cf.map(m => {
+                    const out = Math.abs(parseFloat(m.outflow) || 0);
+                    const h = Math.max((out / maxOut) * 155, 2);
+                    const label = m.month ? new Date(m.month + '-01T00:00:00').toLocaleString('en-US', { month: 'short' }) : '?';
+                    return `
+                        <div class="flex-1 flex flex-col items-center gap-1">
+                            <div class="w-full flex justify-center" style="height:160px;display:flex;align-items:flex-end;">
+                                <div class="bar-v" style="height:${h}px;background:var(--deft-warning);opacity:0.7;width:80%;max-width:28px;" title="${fmtMoney(out)}"></div>
+                            </div>
+                            <span class="text-[0.55rem] text-txt-3 font-mono">${label}</span>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    function renderExpenseTable(txns) {
+        if (txns.length === 0) {
+            document.getElementById('exTablePanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No expense transactions found</div>';
+            return;
+        }
+        document.getElementById('exTablePanel').innerHTML = `
+            <table class="data-table">
+                <thead><tr>
+                    <th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th>Payment</th>
+                </tr></thead>
+                <tbody>
+                    ${txns.slice(0, 50).map(t => `
+                        <tr>
+                            <td class="text-txt-2 whitespace-nowrap">${fmtDate(t.transaction_date)}</td>
+                            <td class="text-txt">${esc(t.description || t.counterparty || '--')}</td>
+                            <td class="text-txt-2"><span class="badge badge-neutral">${esc(t.category || t.account_name || '--')}</span></td>
+                            <td class="font-heading font-semibold text-warn">${fmtMoney(Math.abs(parseFloat(t.amount) || 0))}</td>
+                            <td class="text-txt-3 text-xs">${esc(t.payment_method || '--')}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    function filterExpenses() {
+        const catFilter = document.getElementById('exCatFilter').value.toLowerCase();
+        const searchVal = document.getElementById('exSearch').value.toLowerCase();
+        const filtered = expenseTransactions.filter(t => {
+            const matchCat = !catFilter || (t.category || t.account_name || '').toLowerCase().includes(catFilter);
+            const matchSearch = !searchVal || (t.description || t.counterparty || '').toLowerCase().includes(searchVal);
+            return matchCat && matchSearch;
+        });
+        renderExpenseTable(filtered);
+    }
+
+    // =======================================
+    // INVOICES TAB
+    // =======================================
+    async function loadInvoices() {
+        const [arAging, apAging, invoices] = await Promise.all([
+            rpc('bkai_aging_report', { p_brand_id: BRAND_ID, p_report_type: 'ar' }),
+            rpc('bkai_aging_report', { p_brand_id: BRAND_ID, p_report_type: 'ap' }),
+            sbSelect('bkai_invoices', 'brand_id=eq.carlton&order=created_at.desc&limit=100')
+        ]);
+
+        invoiceList = Array.isArray(invoices) ? invoices : [];
+        renderInvoiceStats(arAging, apAging, invoiceList);
+        renderAgingPanel('invARPanel', arAging, 'AR');
+        renderAgingPanel('invAPPanel', apAging, 'AP');
+        renderInvoiceTable(invoiceList);
+        populatePaymentInvoiceSelect(invoiceList);
+    }
+
+    function renderInvoiceStats(ar, ap, invoices) {
+        const arTotal = ar ? (parseFloat(ar.total) || Object.values(ar.buckets || {}).reduce((s, v) => s + v, 0) || 0) : 0;
+        const apTotal = ap ? (parseFloat(ap.total) || Object.values(ap.buckets || {}).reduce((s, v) => s + v, 0) || 0) : 0;
+        const overdue = invoices.filter(i => i.status === 'overdue' || (i.due_date && new Date(i.due_date) < new Date() && i.status !== 'paid')).length;
+        const paidInvoices = invoices.filter(i => i.status === 'paid' && i.paid_date && i.created_at);
+        const avgDays = paidInvoices.length > 0 ? Math.round(paidInvoices.reduce((s, i) => {
+            return s + (new Date(i.paid_date) - new Date(i.created_at)) / (1000 * 60 * 60 * 24);
+        }, 0) / paidInvoices.length) : 0;
+
+        document.getElementById('invAR').textContent = fmtMoneyShort(arTotal);
+        document.getElementById('invAP').textContent = fmtMoneyShort(apTotal);
+        document.getElementById('invOverdue').textContent = overdue;
+        document.getElementById('invAvgDays').textContent = avgDays + 'd';
+    }
+
+    function renderAgingPanel(panelId, aging, label) {
+        const panel = document.getElementById(panelId);
+        if (!aging || (!aging.buckets && !aging.current)) {
+            panel.innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No ' + label + ' aging data available</div>';
+            return;
+        }
+
+        const buckets = aging.buckets || { current: aging.current || 0, '1_30': aging['1_30'] || 0, '31_60': aging['31_60'] || 0, '60_plus': aging['60_plus'] || 0 };
+        const current = parseFloat(buckets.current) || 0;
+        const b1_30 = parseFloat(buckets['1_30'] || buckets.days_1_30) || 0;
+        const b31_60 = parseFloat(buckets['31_60'] || buckets.days_31_60) || 0;
+        const b60plus = parseFloat(buckets['60_plus'] || buckets.days_60_plus || buckets.over_60) || 0;
+        const total = current + b1_30 + b31_60 + b60plus || 1;
+
+        const segments = [
+            { label: 'Current', value: current, color: 'var(--deft-success, #6BCB77)' },
+            { label: '1-30 days', value: b1_30, color: 'var(--deft-warning, #FFD93D)' },
+            { label: '31-60 days', value: b31_60, color: 'var(--deft-accent-warm, #F0A830)' },
+            { label: '60+ days', value: b60plus, color: 'var(--deft-danger, #FF6B6B)' },
+        ];
+
+        panel.innerHTML = `
+            <div class="mb-3">
+                <div class="flex w-full rounded overflow-hidden" style="height:28px;">
+                    ${segments.map(s => s.value > 0 ? `<div class="aging-segment" style="width:${(s.value / total * 100).toFixed(1)}%;background:${s.color};" title="${s.label}: ${fmtMoney(s.value)}"></div>` : '').join('')}
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                ${segments.map(s => `
+                    <div class="flex items-center gap-2">
+                        <div class="w-2.5 h-2.5 rounded-sm" style="background:${s.color};"></div>
+                        <span class="text-xs text-txt-3">${s.label}</span>
+                        <span class="text-xs font-heading font-semibold text-txt ml-auto">${fmtMoney(s.value)}</span>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="mt-3 pt-3" style="border-top:1px solid var(--deft-border);">
+                <div class="flex justify-between">
+                    <span class="text-sm font-semibold">Total ${label}</span>
+                    <span class="font-heading font-bold text-base text-txt">${fmtMoney(total)}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function setInvFilter(filter) {
+        invoiceFilter = filter;
+        document.querySelectorAll('[data-invfilter]').forEach(b => b.classList.toggle('active', b.dataset.invfilter === filter));
+        const filtered = invoiceList.filter(i => {
+            if (filter === 'all') return true;
+            if (filter === 'ar') return i.type === 'ar' || i.direction === 'receivable';
+            if (filter === 'ap') return i.type === 'ap' || i.direction === 'payable';
+            if (filter === 'overdue') return i.status === 'overdue' || (i.due_date && new Date(i.due_date) < new Date() && i.status !== 'paid');
+            return true;
+        });
+        renderInvoiceTable(filtered);
+    }
+
+    function renderInvoiceTable(invoices) {
+        if (invoices.length === 0) {
+            document.getElementById('invTablePanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No invoices found</div>';
+            return;
+        }
+        const statusColors = { draft:'badge-neutral', sent:'badge-accent-dim', paid:'badge-success', overdue:'badge-danger', partial:'badge-warning', pending:'badge-info' };
+        document.getElementById('invTablePanel').innerHTML = `
+            <table class="data-table">
+                <thead><tr>
+                    <th>Invoice #</th><th>Client/Vendor</th><th>Date</th><th>Due Date</th><th>Amount</th><th>Status</th><th>Actions</th>
+                </tr></thead>
+                <tbody>
+                    ${invoices.map(i => {
+                        const isOverdue = i.due_date && new Date(i.due_date) < new Date() && i.status !== 'paid';
+                        const status = isOverdue ? 'overdue' : (i.status || 'draft');
+                        return `
+                            <tr>
+                                <td class="font-mono text-xs text-accent">${esc(i.invoice_number || i.id?.slice(0,8) || '--')}</td>
+                                <td class="text-txt">${esc(i.customer_name || i.vendor_name || i.counterparty || '--')}</td>
+                                <td class="text-txt-2 whitespace-nowrap">${fmtDate(i.invoice_date || i.created_at?.slice(0,10))}</td>
+                                <td class="text-txt-2 whitespace-nowrap" style="${isOverdue ? 'color:var(--deft-danger);' : ''}">${fmtDate(i.due_date)}</td>
+                                <td class="font-heading font-semibold">${fmtMoney(parseFloat(i.amount || i.total) || 0)}</td>
+                                <td><span class="badge ${statusColors[status] || 'badge-neutral'}">${esc(status)}</span></td>
+                                <td>
+                                    ${(i.type === 'ar' || i.direction === 'receivable') && status !== 'paid' ? `<button class="btn btn-sm btn-primary" onclick="markInvoicePaid('${i.id}')">Mark Paid</button>` : ''}
+                                </td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    function populatePaymentInvoiceSelect(invoices) {
+        const arInvoices = invoices.filter(i => (i.type === 'ar' || i.direction === 'receivable') && i.status !== 'paid');
+        const sel = document.getElementById('rpInvoice');
+        sel.innerHTML = '<option value="">Select invoice...</option>' + arInvoices.map(i => `<option value="${i.id}">${esc(i.invoice_number || i.id?.slice(0,8))} - ${esc(i.customer_name || '--')} (${fmtMoney(parseFloat(i.amount || i.total) || 0)})</option>`).join('');
+    }
+
+    async function markInvoicePaid(invoiceId) {
+        toast('Recording payment...', 'info');
+        const res = await bkaiBridge('payment_check', { invoice_id: invoiceId, payment_date: new Date().toISOString().slice(0,10), payment_method: 'bank_transfer' });
+        if (res && !res.error) {
+            toast('Invoice marked as paid', 'success');
+            tabLoaded.invoices = false;
+            switchTab('invoices');
+        } else {
+            toast('Failed to record payment: ' + (res?.error || 'Unknown error'), 'error');
+        }
+    }
+
+    // =======================================
+    // RECONCILIATION TAB
+    // =======================================
+    async function loadReconciliation() {
+        const [reconStatus, reconLog] = await Promise.all([
+            rpc('bkai_reconciliation_status', { p_brand_id: BRAND_ID }),
+            sbSelect('bkai_reconciliation_log', 'brand_id=eq.carlton&order=created_at.desc&limit=10')
+        ]);
+        renderReconciliation(reconStatus, reconLog);
+    }
+
+    function renderReconciliation(status, log) {
+        const s = status || {};
+        const unmatchedCount = parseInt(s.unmatched_count) || (Array.isArray(s.recent_unmatched) ? s.recent_unmatched.length : 0);
+        const coverage = parseFloat(s.reconciliation_coverage) || parseFloat(s.coverage_percent) || 0;
+        const recurringCount = parseInt(s.recurring_count) || (Array.isArray(s.recurring_upcoming) ? s.recurring_upcoming.length : 0);
+
+        document.getElementById('rcUnmatched').textContent = unmatchedCount;
+        document.getElementById('rcCoverage').textContent = (coverage * (coverage < 2 ? 100 : 1)).toFixed(1) + '%';
+        document.getElementById('rcRecurring').textContent = recurringCount;
+
+        // Unmatched transactions
+        const unmatched = Array.isArray(s.recent_unmatched) ? s.recent_unmatched : [];
+        if (unmatched.length === 0) {
+            document.getElementById('rcUnmatchedPanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">All transactions matched</div>';
+        } else {
+            document.getElementById('rcUnmatchedPanel').innerHTML = `
+                <div class="space-y-2">
+                    ${unmatched.slice(0, 10).map(t => `
+                        <div class="flex items-center gap-3 py-2 px-3 rounded" style="background:rgba(255,255,255,0.02);border:1px solid var(--deft-border);">
+                            <div class="flex-1">
+                                <div class="text-xs text-txt">${esc(t.description || '--')}</div>
+                                <div class="text-[0.65rem] text-txt-3">${fmtDate(t.transaction_date || t.date)} ${t.confidence ? '| Confidence: ' + (parseFloat(t.confidence) * 100).toFixed(0) + '%' : ''}</div>
+                            </div>
+                            <span class="font-heading font-semibold text-sm ${parseFloat(t.amount) >= 0 ? 'text-accent' : 'text-warn'}">${fmtMoney(parseFloat(t.amount) || 0)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Recent matches
+        const matches = Array.isArray(log) ? log : [];
+        if (matches.length === 0) {
+            document.getElementById('rcMatchesPanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No recent matches</div>';
+        } else {
+            document.getElementById('rcMatchesPanel').innerHTML = `
+                <div class="space-y-2">
+                    ${matches.map(m => `
+                        <div class="flex items-center gap-3 py-2 px-3 rounded" style="background:rgba(255,255,255,0.02);border:1px solid var(--deft-border);">
+                            <div class="flex-1">
+                                <div class="text-xs text-txt">${esc(m.bank_description || m.description || '--')}</div>
+                                <div class="text-[0.65rem] text-txt-3">${esc(m.matched_item || m.matched_to || '--')}</div>
+                            </div>
+                            <span class="badge ${m.match_method === 'auto' ? 'badge-accent' : 'badge-info'}">${esc(m.match_method || 'manual')}</span>
+                            ${m.confidence ? `<div class="w-12"><div class="progress-bar"><div class="progress-fill" style="width:${(parseFloat(m.confidence) * 100).toFixed(0)}%;background:var(--deft-accent);"></div></div></div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Recurring upcoming
+        const recurring = Array.isArray(s.recurring_upcoming) ? s.recurring_upcoming : [];
+        if (recurring.length === 0) {
+            document.getElementById('rcRecurringPanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No upcoming recurring payments</div>';
+        } else {
+            document.getElementById('rcRecurringPanel').innerHTML = `
+                <table class="data-table">
+                    <thead><tr><th>Vendor</th><th>Amount</th><th>Frequency</th><th>Next Expected</th></tr></thead>
+                    <tbody>
+                        ${recurring.map(r => `
+                            <tr>
+                                <td class="text-txt">${esc(r.vendor || r.counterparty || '--')}</td>
+                                <td class="font-heading font-semibold text-warn">${fmtMoney(Math.abs(parseFloat(r.amount) || 0))}</td>
+                                <td class="text-txt-2"><span class="badge badge-neutral">${esc(r.frequency || '--')}</span></td>
+                                <td class="text-txt-2 whitespace-nowrap">${fmtDate(r.next_expected || r.next_date)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+    }
+
+    // =======================================
+    // ACTION HANDLERS
+    // =======================================
+
+    // Record Expense
+    async function submitRecordExpense() {
+        const btn = document.getElementById('reSubmitBtn');
+        const date = document.getElementById('reDate').value;
+        const amount = parseFloat(document.getElementById('reAmount').value);
+        const description = document.getElementById('reDescription').value.trim();
+        const accountCode = document.getElementById('reCategory').value;
+        const vendor = document.getElementById('reVendor').value.trim();
+        const paymentMethod = document.getElementById('rePaymentMethod').value;
+        const notes = document.getElementById('reNotes').value.trim();
+
+        if (!date || !amount || !description) {
+            toast('Please fill in Date, Amount, and Description', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Recording...';
+        try {
+            const res = await bkaiBridge('expense_record', {
+                date, description, account_code: accountCode || undefined,
+                amount: Math.abs(amount), counterparty: vendor || undefined,
+                payment_method: paymentMethod, notes: notes || undefined
+            });
+            if (res && !res.error) {
+                toast('Expense recorded successfully', 'success');
+                closeModal('recordExpenseModal');
+                document.getElementById('reDate').value = '';
+                document.getElementById('reAmount').value = '';
+                document.getElementById('reDescription').value = '';
+                document.getElementById('reVendor').value = '';
+                document.getElementById('reNotes').value = '';
+                tabLoaded.expenses = false;
+                tabLoaded.overview = false;
+            } else {
+                toast('Failed to record: ' + (res?.error || res?.message || 'Unknown error'), 'error');
+            }
+        } catch (err) {
+            toast('Error: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Record Expense';
+        }
+    }
+
+    // Create Invoice
+    async function submitCreateInvoice() {
+        const btn = document.getElementById('ciSubmitBtn');
+        const customer = document.getElementById('ciCustomer').value.trim();
+        const amount = parseFloat(document.getElementById('ciAmount').value);
+        const dueDate = document.getElementById('ciDueDate').value;
+        const description = document.getElementById('ciDescription').value.trim();
+
+        if (!customer || !amount || !dueDate) {
+            toast('Please fill in Customer, Amount, and Due Date', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Creating...';
+        try {
+            const res = await bkaiBridge('invoice_create', {
+                customer_name: customer, amount, due_date: dueDate,
+                description: description || undefined
+            });
+            if (res && !res.error) {
+                toast('Invoice created successfully', 'success');
+                closeModal('createInvoiceModal');
+                document.getElementById('ciCustomer').value = '';
+                document.getElementById('ciAmount').value = '';
+                document.getElementById('ciDueDate').value = '';
+                document.getElementById('ciDescription').value = '';
+                tabLoaded.invoices = false;
+                tabLoaded.overview = false;
+            } else {
+                toast('Failed to create: ' + (res?.error || res?.message || 'Unknown error'), 'error');
+            }
+        } catch (err) {
+            toast('Error: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Create Invoice';
+        }
+    }
+
+    // Record Payment
+    async function submitRecordPayment() {
+        const btn = document.getElementById('rpSubmitBtn');
+        const invoiceId = document.getElementById('rpInvoice').value;
+        const amount = parseFloat(document.getElementById('rpAmount').value);
+        const paymentDate = document.getElementById('rpDate').value || new Date().toISOString().slice(0, 10);
+        const paymentMethod = document.getElementById('rpMethod').value;
+
+        if (!invoiceId || !amount) {
+            toast('Please select an invoice and enter the amount', 'error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Recording...';
+        try {
+            const res = await bkaiBridge('payment_check', {
+                invoice_id: invoiceId, amount, payment_date: paymentDate, payment_method: paymentMethod
+            });
+            if (res && !res.error) {
+                toast('Payment recorded successfully', 'success');
+                closeModal('recordPaymentModal');
+                tabLoaded.invoices = false;
+                tabLoaded.overview = false;
+            } else {
+                toast('Failed to record: ' + (res?.error || res?.message || 'Unknown error'), 'error');
+            }
+        } catch (err) {
+            toast('Error: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Record Payment';
+        }
+    }
+
+    // CSV Import
+    let csvDropZone = null;
+    function initCSVDrop() {
+        csvDropZone = document.getElementById('csvDropZone');
+        if (!csvDropZone) return;
+        csvDropZone.addEventListener('dragover', e => { e.preventDefault(); csvDropZone.classList.add('dragover'); });
+        csvDropZone.addEventListener('dragleave', () => csvDropZone.classList.remove('dragover'));
+        csvDropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            csvDropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) handleCSVFile(e.dataTransfer.files[0]);
+        });
+        csvDropZone.addEventListener('click', () => document.getElementById('csvFileInput').click());
+    }
+
+    function handleCSVFile(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+            if (lines.length < 2) { toast('CSV file is empty or has no data rows', 'error'); return; }
+
+            const headerLine = lines[0].toLowerCase();
+            const delim = headerLine.includes('\t') ? '\t' : ',';
+            const colHeaders = lines[0].split(delim).map(h => h.replace(/"/g, '').trim());
+
+            parsedCSVRows = [];
+            for (let i = 1; i < lines.length; i++) {
+                const cols = lines[i].split(delim).map(c => c.replace(/"/g, '').trim());
+                if (cols.length < 2) continue;
+
+                const dateIdx = colHeaders.findIndex(h => /date/i.test(h));
+                const descIdx = colHeaders.findIndex(h => /desc|memo|narr/i.test(h));
+                const amtIdx = colHeaders.findIndex(h => /amount|amt|value/i.test(h));
+
+                parsedCSVRows.push({
+                    date: cols[dateIdx >= 0 ? dateIdx : 0] || '',
+                    description: cols[descIdx >= 0 ? descIdx : 1] || '',
+                    amount: parseFloat((cols[amtIdx >= 0 ? amtIdx : 2] || '0').replace(/[,$]/g, '')) || 0
+                });
+            }
+
+            // Show preview
+            document.getElementById('csvPreview').style.display = '';
+            document.getElementById('csvRowCount').textContent = parsedCSVRows.length;
+            const tbody = document.querySelector('#csvPreviewTable tbody');
+            const thead = document.querySelector('#csvPreviewTable thead');
+            thead.innerHTML = '<tr><th>Date</th><th>Description</th><th>Amount</th></tr>';
+            tbody.innerHTML = parsedCSVRows.slice(0, 10).map(r => `
+                <tr>
+                    <td class="text-txt-2">${esc(r.date)}</td>
+                    <td class="text-txt">${esc(r.description)}</td>
+                    <td class="font-heading font-semibold ${r.amount >= 0 ? 'text-accent' : 'text-warn'}">${fmtMoney(r.amount)}</td>
+                </tr>
+            `).join('');
+            if (parsedCSVRows.length > 10) {
+                tbody.innerHTML += '<tr><td colspan="3" class="text-txt-3 text-center text-xs">...and ' + (parsedCSVRows.length - 10) + ' more rows</td></tr>';
+            }
+            document.getElementById('csvSubmitBtn').disabled = false;
+        };
+        reader.readAsText(file);
+    }
+
+    function resetCSVImport() {
+        parsedCSVRows = [];
+        document.getElementById('csvPreview').style.display = 'none';
+        document.getElementById('csvSubmitBtn').disabled = true;
+        document.getElementById('csvFileInput').value = '';
+    }
+
+    async function submitImportCSV() {
+        if (parsedCSVRows.length === 0) { toast('No data to import', 'error'); return; }
+        const btn = document.getElementById('csvSubmitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Importing...';
+        try {
+            const res = await bkaiBridge('reconcile', { mode: 'import', csv_data: parsedCSVRows });
+            if (res && !res.error) {
+                toast('Imported ' + parsedCSVRows.length + ' transactions', 'success');
+                closeModal('importBankModal');
+                resetCSVImport();
+                tabLoaded.reconciliation = false;
+                tabLoaded.overview = false;
+            } else {
+                toast('Import failed: ' + (res?.error || res?.message || 'Unknown error'), 'error');
+            }
+        } catch (err) {
+            toast('Error: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Import Rows';
+        }
+    }
+
+    // Generate Report
+    async function submitGenerateReport() {
+        const btn = document.getElementById('grSubmitBtn');
+        const reportType = document.getElementById('grReportType').value;
+        const year = document.getElementById('grYear').value;
+        const quarter = document.getElementById('grQuarter').value;
+
+        btn.disabled = true;
+        btn.textContent = 'Generating...';
+        const resultDiv = document.getElementById('grResult');
+        resultDiv.style.display = 'none';
+
+        try {
+            let res;
+            if (reportType === 'tax_summary') {
+                res = await bkaiBridge('tax_export', { year: parseInt(year), quarter: quarter || undefined });
+            } else {
+                res = await bkaiBridge('finance_report', { report_type: reportType, year: parseInt(year), quarter: quarter || undefined });
+            }
+            if (res && !res.error) {
+                toast('Report generated', 'success');
+                resultDiv.style.display = '';
+                resultDiv.innerHTML = '<div class="text-xs text-txt-3 uppercase font-mono mb-2">Report Result</div><pre class="text-xs text-txt-2 whitespace-pre-wrap overflow-x-auto" style="max-height:300px;overflow-y:auto;">' + esc(typeof res === 'string' ? res : JSON.stringify(res, null, 2)) + '</pre>';
+            } else {
+                toast('Report generation failed: ' + (res?.error || res?.message || 'Unknown error'), 'error');
+            }
+        } catch (err) {
+            toast('Error: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Generate';
+        }
+    }
+
+    // =======================================
+    // AUTH GATE
+    // =======================================
+    let gateSelectedProfile = null;
+
+    function getCachedProfiles(callback) {
+        var CACHE_KEY = 'rdgr-profiles-cache';
+        var CACHE_TTL = 300000;
+        try {
+            var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+            if (cached.profiles && cached.ts && (Date.now() - cached.ts) < CACHE_TTL) {
+                callback(cached.profiles);
+                return;
+            }
+        } catch(e) {}
+        fetch(SB_URL + '/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name', {
+            headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + ANON_KEY }
+        }).then(r => r.json()).then(profiles => {
+            if (profiles && Array.isArray(profiles) && profiles.length > 0) {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ profiles: profiles, ts: Date.now() }));
+            }
+            callback(profiles);
+        }).catch(() => callback([]));
+    }
+
+    function loadGateProfiles() {
+        getCachedProfiles(function(profiles) {
+            const container = document.getElementById('gateProfiles');
+            if (!container || !profiles || !profiles.length) return;
+            const saved = localStorage.getItem('rdgr-active-profile');
+            let savedId = null;
+            if (saved) { try { savedId = JSON.parse(saved).id; } catch(e) {} }
+            const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+            container.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?';
+                const initial = name[0].toUpperCase();
+                const color = colors[name] || '#8A95A9';
+                return '<button type="button" onclick="selectGateProfile(\'' + p.user_id + '\',\'' + name.replace(/'/g, '&#39;') + '\',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;" onmouseenter="this.style.background=\'rgba(255,255,255,0.04)\'" onmouseleave="if(!this.classList.contains(\'selected\'))this.style.background=\'rgba(255,255,255,0.02)\'">' +
+                    '<div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:' + color + '20;color:' + color + ';border:2px solid transparent;">' + initial + '</div>' +
+                    '<span class="text-xs" style="color:#8A95A9;">' + name + '</span></button>';
+            }).join('');
+            if (savedId) {
+                const btns = container.querySelectorAll('.gate-profile-btn');
+                btns.forEach(btn => { if (btn.getAttribute('onclick').includes(savedId)) btn.click(); });
+            }
+        });
+    }
+
+    function selectGateProfile(userId, name, el) {
+        gateSelectedProfile = { id: userId, name: name };
+        document.querySelectorAll('.gate-profile-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            btn.style.background = 'rgba(255,255,255,0.02)';
+            btn.style.borderColor = 'transparent';
+            btn.querySelector('.w-10').style.borderColor = 'transparent';
+        });
+        el.classList.add('selected');
+        el.style.background = 'rgba(255,255,255,0.06)';
+        el.style.borderColor = 'rgba(6,214,160,0.4)';
+        el.querySelector('.w-10').style.borderColor = el.querySelector('.w-10').style.color;
+        const btn = document.getElementById('gateSubmitBtn');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.textContent = 'Sign In as ' + name;
+        document.getElementById('gateInput').focus();
+    }
+
+    function handleGate(e) {
+        e.preventDefault();
+        const input = document.getElementById('gateInput').value;
+        if (input === 'Advance1!') {
+            localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+            if (gateSelectedProfile) {
+                localStorage.setItem('rdgr-active-profile', JSON.stringify(gateSelectedProfile));
+                activeProfileId = gateSelectedProfile.id;
+            }
+            document.getElementById('gate').classList.add('hidden');
+            document.getElementById('mainContent').style.opacity = '1';
+            initDashboard();
+            return false;
+        }
+        document.getElementById('gateError').classList.add('show');
+        document.getElementById('gateInput').value = '';
+        document.getElementById('gateInput').focus();
+        setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+        return false;
+    }
+
+    // =======================================
+    // PROFILE SWITCHER
+    // =======================================
+    function toggleProfileDD() {
+        const dd = document.getElementById('profileDropdown');
+        dd.classList.toggle('hidden');
+        if (!dd.classList.contains('hidden')) {
+            setTimeout(() => document.addEventListener('click', function closePDD(e) {
+                if (!document.getElementById('profileSwitcher').contains(e.target)) {
+                    dd.classList.add('hidden');
+                }
+                document.removeEventListener('click', closePDD);
+            }), 0);
+        }
+    }
+
+    function selectProfileGlobal(userId, name) {
+        localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+        location.reload();
+    }
+
+    function signOut() {
+        localStorage.removeItem('rdgr-session');
+        localStorage.removeItem('rdgr-active-profile');
+        location.reload();
+    }
+
+    function loadProfileSwitcher() {
+        getCachedProfiles(function(profiles) {
+            if (!profiles || !profiles.length) return;
+            const dd = document.getElementById('profileDropdown');
+            const active = getActiveProfile();
+            const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+            dd.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?';
+                const color = colors[name] || '#8A95A9';
+                const isCurrent = active.id === p.user_id;
+                return '<button onclick="selectProfileGlobal(\'' + p.user_id + '\',\'' + name.replace(/'/g, '&#39;') + '\')" class="flex items-center gap-2 w-full px-3 py-2 text-left text-xs hover:bg-white/5 transition-colors" style="border:none;background:transparent;cursor:pointer;color:' + (isCurrent ? 'var(--deft-accent)' : '#8A95A9') + ';">' +
+                    '<div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.55rem] font-bold" style="background:' + color + '20;color:' + color + ';">' + name[0] + '</div>' +
+                    name + (isCurrent ? ' *' : '') + '</button>';
+            }).join('') + '<div style="border-top:1px solid #2A2E3D;margin:0.25rem 0;"></div>' +
+                '<button onclick="signOut()" class="flex items-center gap-2 w-full px-3 py-2 text-left text-xs hover:bg-white/5 transition-colors" style="border:none;background:transparent;cursor:pointer;color:#FF6B6B;">Sign Out</button>';
+
+            // Update avatar
+            if (active.name) {
+                const name = active.name;
+                const color = colors[name] || '#8A95A9';
+                document.getElementById('profileAvatar').textContent = name[0];
+                document.getElementById('profileAvatar').style.background = color + '20';
+                document.getElementById('profileAvatar').style.color = color;
+                document.getElementById('profileName').textContent = name;
+            }
+        });
+    }
+
+    // =======================================
+    // INIT
+    // =======================================
+    function initDashboard() {
+        // Set default date fields
+        const today = new Date().toISOString().slice(0, 10);
+        if (document.getElementById('reDate')) document.getElementById('reDate').value = today;
+        if (document.getElementById('rpDate')) document.getElementById('rpDate').value = today;
+
+        // Populate year selector
+        const yearSel = document.getElementById('grYear');
+        const currentYear = new Date().getFullYear();
+        for (let y = currentYear; y >= currentYear - 5; y--) {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = y;
+            yearSel.appendChild(opt);
+        }
+
+        // Set default due date to 30 days out
+        const due = new Date();
+        due.setDate(due.getDate() + 30);
+        if (document.getElementById('ciDueDate')) document.getElementById('ciDueDate').value = due.toISOString().slice(0, 10);
+
+        // Init CSV drop zone
+        initCSVDrop();
+
+        // Load profile switcher
+        loadProfileSwitcher();
+
+        // Restore tab or default to overview
+        const savedTab = sessionStorage.getItem('finance-active-tab');
+        const initialTab = TABS.includes(savedTab) ? savedTab : 'overview';
+        switchTab(initialTab);
+    }
+
+    // Auto-init if authenticated
+    if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity = '1';
+        const profile = getActiveProfile();
+        if (profile.id) activeProfileId = profile.id;
+        initDashboard();
+    }
+
+    // Load gate profiles if gate is visible
+    if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+        loadGateProfiles();
+    }
+    </script>
+</body>
+</html>
