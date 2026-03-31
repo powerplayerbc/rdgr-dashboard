@@ -1078,6 +1078,11 @@
         return await fetchJSON(WEBHOOK_URL, { operation: 're_answer', brand_id: BRAND_ID, session_id: sessionId, question_index: questionIndex });
     }
 
+    function getCategoryLabel(key) {
+        const cat = CATEGORIES.find(c => c.key === key);
+        return cat ? cat.label : 'Category';
+    }
+
     // ═══════════════════════════════════════
     // VIEW SWITCHING
     // ═══════════════════════════════════════
@@ -1314,7 +1319,7 @@
             const qResult = await apiGetNextQuestion(state.sessionId);
             if (qResult && qResult.success) {
                 if (qResult.is_complete) {
-                    showCategoryComplete();
+                    handleCategoryCompletion();
                     return;
                 }
                 state.currentQuestion = qResult.current_question;
@@ -1550,6 +1555,19 @@
         if (btn) { btn.disabled = false; btn.textContent = 'Submit Answer'; }
 
         if (!result || !result.success) {
+            // Verify if answer was saved despite error response
+            const verify = await apiGetNextQuestion(state.sessionId);
+            if (verify && verify.success) {
+                if (verify.is_complete) {
+                    handleCategoryCompletion();
+                } else if (verify.current_question) {
+                    toast('Answer saved!', 'success');
+                    state.currentQuestion = verify.current_question;
+                    if (verify.progress) { state.sessionProgress = verify.progress; updateSessionHeader(); }
+                    renderQuestion(verify.current_question);
+                }
+                return;
+            }
             toast('Failed to submit: ' + (result?.error || 'Connection error. Your progress is saved — try again.'), 'error');
             return;
         }
@@ -1590,7 +1608,7 @@
                 return;
             }
             if (result.is_complete) {
-                showCategoryComplete();
+                handleCategoryCompletion();
             } else if (result.next_question) {
                 state.currentQuestion = result.next_question;
                 renderQuestion(result.next_question);
@@ -1795,7 +1813,7 @@
             return;
         }
         if (result.is_complete) {
-            showCategoryComplete();
+            handleCategoryCompletion();
         } else if (result.current_question) {
             state.currentQuestion = result.current_question;
             if (result.progress) { state.sessionProgress = result.progress; updateSessionHeader(); }
@@ -1832,6 +1850,26 @@
         html += '</div>';
         container.innerHTML = html;
         container.style.display = '';
+    }
+
+    function handleCategoryCompletion() {
+        const label = getCategoryLabel(state.activeCategory);
+        toast(label + ' complete!', 'success');
+        triggerBackgroundSynthesis(state.sessionId);
+        setTimeout(() => goBackToProgress(), 2000);
+    }
+
+    function triggerBackgroundSynthesis(sessionId) {
+        if (!sessionId) return;
+        apiSynthesizeCategory(sessionId).then(result => {
+            if (result && result.success) {
+                console.log('Background synthesis complete for session:', sessionId);
+            } else {
+                console.warn('Background synthesis failed:', result?.error || 'unknown error');
+            }
+        }).catch(err => {
+            console.warn('Background synthesis error:', err);
+        });
     }
 
     function showCategoryComplete() {
