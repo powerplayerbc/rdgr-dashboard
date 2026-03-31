@@ -1720,11 +1720,15 @@
         renderReviewProgress(result.progress);
         renderReviewCards(result.questions);
 
-        // Hide continue button if complete
+        // Set button based on session state
         const btn = document.getElementById('reviewContinueBtn');
         if (result.status === 'complete') {
             btn.textContent = 'Synthesize Identity';
             btn.onclick = () => handleSynthesis();
+        } else if (result.progress && result.progress.answered >= result.progress.total) {
+            // All answered but depth not met - offer holistic gap analysis
+            btn.textContent = 'Deepen Understanding →';
+            btn.onclick = () => deepenSession();
         } else {
             btn.textContent = 'Continue Session →';
             btn.onclick = () => continueSession();
@@ -1831,6 +1835,45 @@
             renderQuestion(result.current_question);
         } else {
             // All questions answered but depth not met - show review
+            openReviewMode(state.activeCategory, state.sessionId);
+        }
+    }
+
+    async function deepenSession() {
+        if (!state.sessionId) return;
+        const catInfo = CATEGORIES.find(c => c.key === state.activeCategory);
+        if (catInfo) {
+            document.getElementById('sessionIcon').textContent = catInfo.icon;
+            document.getElementById('sessionTitle').textContent = catInfo.label;
+        }
+        switchView('session');
+        document.getElementById('questionContainer').innerHTML = `
+            <div class="text-center py-12 animate-fade-in">
+                <div class="text-3xl mb-4">&#128270;</div>
+                <h3 class="font-heading font-semibold text-base mb-2">Analyzing your answers...</h3>
+                <p class="text-sm text-txt-2">Looking for gaps in your brand narrative</p>
+            </div>`;
+
+        // Call submit_answer with empty payload to trigger holistic gap analysis
+        const result = await apiSubmitAnswer(state.sessionId, {});
+        if (!result || !result.success) {
+            toast('Failed to analyze: ' + (result?.error || 'Connection error'), 'error');
+            openReviewMode(state.activeCategory, state.sessionId);
+            return;
+        }
+
+        if (result.next_question) {
+            // Gap analysis generated a new targeted question
+            state.currentQuestion = result.next_question;
+            if (result.progress) { state.sessionProgress = result.progress; updateSessionHeader(); }
+            if (result.depth_analysis?.insight) {
+                showDepthFeedback({ score: result.depth_analysis.score, feedback: result.depth_analysis.insight });
+            }
+            renderQuestion(result.next_question);
+        } else if (result.is_complete) {
+            handleCategoryCompletion();
+        } else {
+            toast('No additional gaps identified', 'success');
             openReviewMode(state.activeCategory, state.sessionId);
         }
     }
