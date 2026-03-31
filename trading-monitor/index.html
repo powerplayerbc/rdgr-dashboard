@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Trading Monitor | Carlton AI</title>
+
+    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://yrwrswyjawmgtxrgbnim.supabase.co">
+    <script>
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _presets = {
+                forest:     { accent:'#A8D65B',accentWarm:'#F0A830',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                sunrise:    { accent:'#F0A830',accentWarm:'#E85D5D',base:'#100D08',surface:'#1C1810',surfaceEl:'#272118',surfaceHi:'#322B20',border:'#3F382C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                ocean:      { accent:'#38BDF8',accentWarm:'#06D6A0',base:'#080D10',surface:'#10161C',surfaceEl:'#182027',surfaceHi:'#202A32',border:'#2C363F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E0E8EA',txt2:'#8C9BA0',txt3:'#586B6B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                berry:      { accent:'#C084FC',accentWarm:'#FB7185',base:'#0D0810',surface:'#16101C',surfaceEl:'#201827',surfaceHi:'#2A2032',border:'#3A2C3F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E0EA',txt2:'#A08CA0',txt3:'#6B586B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                rdgr:       { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' },
+                monochrome: { accent:'#E8E8E8',accentWarm:'#A0A0A0',base:'#000000',surface:'#0A0A0A',surfaceEl:'#141414',surfaceHi:'#1E1E1E',border:'#2A2A2A',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E8E8',txt2:'#A0A0A0',txt3:'#666666',headingFont:'Nunito',bodyFont:'DM Sans' },
+            };
+            var _t = (_tc.preset === 'custom' && _tc.custom) ? _tc.custom : (_presets[_tc.preset] || _presets.rdgr);
+            if (_tc.statusOverrides) {
+                if (_tc.statusOverrides.success) _t.success = _tc.statusOverrides.success;
+                if (_tc.statusOverrides.warning) _t.warning = _tc.statusOverrides.warning;
+                if (_tc.statusOverrides.danger) _t.danger = _tc.statusOverrides.danger;
+            }
+            var _r = document.documentElement;
+            _r.style.setProperty('--deft-accent', _t.accent);
+            _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+            _r.style.setProperty('--deft-accent-warm', _t.accentWarm || _t.accent);
+            _r.style.setProperty('--deft-base', _t.base);
+            _r.style.setProperty('--deft-surface', _t.surface);
+            _r.style.setProperty('--deft-surface-el', _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-surface-hi', _t.surfaceHi || _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-border', _t.border);
+            _r.style.setProperty('--deft-success', _t.success || '#6BCB77');
+            _r.style.setProperty('--deft-success-dim', (_t.success || '#6BCB77') + '26');
+            _r.style.setProperty('--deft-warning', _t.warning || '#F0A830');
+            _r.style.setProperty('--deft-warning-dim', (_t.warning || '#F0A830') + '26');
+            _r.style.setProperty('--deft-danger', _t.danger || '#E85D5D');
+            _r.style.setProperty('--deft-danger-dim', (_t.danger || '#E85D5D') + '26');
+            _r.style.setProperty('--deft-txt', _t.txt);
+            _r.style.setProperty('--deft-txt-2', _t.txt2 || '#8A95A9');
+            _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
+            _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
+            _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+            var _fs = _tc.fontScale || 1;
+            _r.style.setProperty('--deft-font-scale', _fs);
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent { opacity: 1 !important; }
+
+        body {
+            background: var(--deft-base, #08090D) !important;
+            color: var(--deft-txt, #E8ECF1) !important;
+            font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important;
+        }
+        .font-heading, h1, h2, h3 {
+            font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important;
+        }
+        nav {
+            background: color-mix(in srgb, var(--deft-base, #08090D) 92%, transparent) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel, .stat-chip {
+            background: var(--deft-surface, #11131A) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel-header { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input:focus {
+            border-color: var(--deft-accent, #06D6A0) !important;
+            box-shadow: 0 0 0 2px var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+        }
+        .text-accent { color: var(--deft-accent, #06D6A0) !important; }
+        .bg-accent { background-color: var(--deft-accent, #06D6A0) !important; }
+        .top-tab.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+        .btn-primary {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent) !important;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent) !important;
+        }
+        .btn-ghost { border-color: var(--deft-border, #2A2E3D) !important; }
+        .badge-qualified { background: var(--deft-success-dim, rgba(34,197,94,0.15)) !important; color: var(--deft-success, #22C55E) !important; }
+        .badge-paper_trading { background: rgba(76,201,240,0.15) !important; color: #4CC9F0 !important; }
+        .badge-live { background: var(--deft-danger-dim, rgba(255,107,107,0.15)) !important; color: var(--deft-danger, #FF6B6B) !important; }
+        .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+        .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+        .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+        ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D) !important; }
+        .pulse-dot { background: var(--deft-accent, #06D6A0) !important; }
+        .gate-input:focus {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent) !important;
+        }
+        select.form-input option, .filter-select option { background: var(--deft-surface-el, #1A1D28) !important; color: var(--deft-txt, #E8ECF1) !important; }
+        body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
+        .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
+        .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
+        .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
+        .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
+
+        /* Nav Dropdown System */
+        .nav-group { position: relative; }
+        .nav-group-btn {
+            display: flex; align-items: center; gap: 0.25rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem; font-weight: 500;
+            color: #8A95A9;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+            border: none; background: transparent;
+        }
+        .nav-group-btn:hover { color: #E8ECF1; }
+        .nav-group-btn.active {
+            background: rgba(6,214,160,0.12);
+            color: #06D6A0;
+        }
+        .nav-group-btn .chevron {
+            transition: transform 0.2s;
+            opacity: 0.5;
+        }
+        .nav-group:hover .nav-group-btn .chevron { transform: rotate(180deg); opacity: 0.8; }
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 150px;
+            padding: 0.375rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: opacity 0.15s, visibility 0.15s, transform 0.15s;
+            z-index: 70;
+        }
+        .nav-group:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .nav-dropdown a {
+            display: block;
+            padding: 0.4rem 0.625rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+        .nav-dropdown a:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--deft-txt, #E8ECF1);
+        }
+        .nav-dropdown a.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        .nav-group-btn.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deft-base': '#08090D',
+                        surface: '#11131A',
+                        'surface-el': '#1A1D28',
+                        'surface-hi': '#242836',
+                        border: '#2A2E3D',
+                        accent: '#06D6A0',
+                        'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B',
+                        'alert-dim': 'rgba(255,107,107,0.15)',
+                        warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)',
+                        info: '#4CC9F0',
+                        'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1',
+                        'txt-2': '#8A95A9',
+                        'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #08090D;
+            color: #E8ECF1;
+        }
+
+        /* Grain */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3A3E4D; }
+
+        /* Gate */
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: #E8ECF1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            width: 100%;
+        }
+        .gate-input::placeholder { color: #525E73; }
+        .gate-error { color: #FF6B6B; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #06D6A0;
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+
+        /* Panels */
+        .panel {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid #1E2130;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel-body { padding: 1rem 1.25rem; }
+
+        /* Badges */
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        .badge-paper { background: rgba(76,201,240,0.15); color: #4CC9F0; }
+        .badge-live-mode { background: rgba(255,107,107,0.15); color: #FF6B6B; }
+        .badge-healthy { background: rgba(6,214,160,0.15); color: #06D6A0; }
+        .badge-degraded { background: rgba(255,217,61,0.15); color: #FFD93D; }
+        .badge-down { background: rgba(255,107,107,0.15); color: #FF6B6B; }
+
+        /* Buttons */
+        .btn {
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s, opacity 0.15s;
+            display: inline-flex; align-items: center; gap: 0.375rem;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .btn-primary {
+            background: rgba(6,214,160,0.15);
+            color: #06D6A0;
+            border-color: rgba(6,214,160,0.3);
+        }
+        .btn-primary:hover:not(:disabled) { background: rgba(6,214,160,0.25); }
+        .btn-ghost {
+            background: transparent;
+            color: #8A95A9;
+            border-color: #2A2E3D;
+        }
+        .btn-ghost:hover { background: rgba(255,255,255,0.04); color: #E8ECF1; }
+        .btn-danger {
+            background: rgba(255,107,107,0.1);
+            color: #FF6B6B;
+            border-color: rgba(255,107,107,0.25);
+        }
+        .btn-danger:hover:not(:disabled) { background: rgba(255,107,107,0.2); }
+
+        /* Toast */
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-family: 'IBM Plex Sans', system-ui;
+            animation: toast-in 0.3s ease forwards;
+            max-width: 380px;
+        }
+        .toast-success { background: rgba(6,214,160,0.15); border: 1px solid rgba(6,214,160,0.3); color: #06D6A0; }
+        .toast-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #FF6B6B; }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Stat chips */
+        .stat-chip {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.5rem;
+            padding: 0.625rem 1rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .stat-value { font-family: 'Chakra Petch', system-ui; font-weight: 700; font-size: 1.4rem; line-height: 1; }
+        .stat-label { font-size: 0.7rem; color: #8A95A9; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+
+        /* Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.5s ease-in-out infinite;
+            border-radius: 0.5rem;
+        }
+        @keyframes skeleton-shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Data table */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th {
+            text-align: left; padding: 0.625rem 0.75rem;
+            font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--deft-txt-3, #525E73);
+            border-bottom: 1px solid var(--deft-border, #2A2E3D);
+        }
+        .data-table td {
+            padding: 0.625rem 0.75rem; font-size: 0.8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            color: var(--deft-txt-2, #8A95A9);
+        }
+        .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+        /* PnL coloring */
+        .pnl-positive { color: var(--deft-success, #06D6A0); }
+        .pnl-negative { color: var(--deft-danger, #FF6B6B); }
+
+        /* Trade entry animation */
+        @keyframes trade-slide-in {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .trade-new { animation: trade-slide-in 0.3s ease forwards; }
+
+        /* ═══ MONITOR PAGE SPECIFIC ═══ */
+
+        /* Top tabs */
+        .top-tab {
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--deft-txt-3, #525E73);
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        .top-tab:hover { color: var(--deft-txt-2, #8A95A9); }
+        .top-tab.active {
+            background: rgba(6,214,160,0.12);
+            color: #06D6A0;
+        }
+
+        /* Instance cards */
+        .instance-card {
+            background: var(--deft-surface-el, #1A1D28);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            transition: border-color 0.15s;
+        }
+        .instance-card:hover {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent);
+        }
+        .instance-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .instance-dot.active {
+            background: var(--deft-success, #06D6A0);
+            box-shadow: 0 0 6px rgba(6,214,160,0.4);
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+        .instance-dot.idle {
+            background: var(--deft-txt-3, #525E73);
+        }
+
+        /* Gauge */
+        .gauge-track { width: 100%; height: 12px; border-radius: 6px; background: rgba(255,255,255,0.06); overflow: hidden; position: relative; }
+        .gauge-fill { height: 100%; border-radius: 6px; transition: width 0.5s; }
+        .gauge-thresholds { position: absolute; top: 0; height: 100%; width: 100%; }
+        .gauge-mark { position: absolute; top: -4px; width: 2px; height: 20px; background: rgba(255,255,255,0.2); }
+
+        /* Threshold progress bars */
+        .threshold-bar {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.06);
+            overflow: hidden;
+            position: relative;
+        }
+        .threshold-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+
+        /* Circuit breaker level indicator */
+        .cb-level-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid;
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .cb-level-indicator.normal {
+            border-color: var(--deft-success, #06D6A0);
+            color: var(--deft-success, #06D6A0);
+            background: rgba(6,214,160,0.08);
+        }
+        .cb-level-indicator.reduced {
+            border-color: var(--deft-warning, #FFD93D);
+            color: var(--deft-warning, #FFD93D);
+            background: rgba(255,217,61,0.08);
+        }
+        .cb-level-indicator.halted {
+            border-color: var(--deft-danger, #FF6B6B);
+            color: var(--deft-danger, #FF6B6B);
+            background: rgba(255,107,107,0.08);
+        }
+        .cb-level-indicator.observation {
+            border-color: #4CC9F0;
+            color: #4CC9F0;
+            background: rgba(76,201,240,0.08);
+        }
+
+        /* P&L Chart */
+        .pnl-chart-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+        }
+        .pnl-chart-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Trade feed */
+        .trade-feed-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.625rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            animation: trade-slide-in 0.3s ease forwards;
+        }
+        .trade-feed-item:last-child { border-bottom: none; }
+
+        /* Responsive */
+        @media (max-width: 767px) {
+            .data-table { font-size: 0.7rem; }
+            .data-table th, .data-table td { padding: 0.4rem 0.5rem; }
+            .stat-value { font-size: 1.1rem; }
+            .pnl-chart-container { height: 220px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PASSWORD GATE -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+            </div>
+            <div id="gateProfiles" class="flex justify-center gap-3 mb-6">
+                <div class="text-center text-xs text-txt-3">Loading profiles...</div>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- Top Nav -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="nav-group-btn">Dashboard</a>
+                        <div class="nav-group">
+                            <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/chat">Rodger</a>
+                                <a href="/council">Council</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/crm" class="nav-group-btn">Outreach <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/crm">CRM</a>
+                                <a href="/email-outreach">Email</a>
+                                <a href="/social-dashboard">Social</a>
+                                <a href="/social-content">Social Content</a>
+                                <a href="/offer-studio">Offers</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brand-discovery" class="nav-group-btn">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brand-discovery">Discovery</a>
+                                <a href="/template-studio">Templates</a>
+                                <a href="/brand-documents">Docs</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/bsi-discovery" class="nav-group-btn">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/bsi-discovery">Discovery</a>
+                                <a href="/compliance">Compliance</a>
+                                <a href="/bsi-documents">Documents</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/content" class="nav-group-btn">Content <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/content">Publishing</a>
+                                <a href="/media">Media</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brain">BRAIN</a>
+                                <a href="/deft">DEFT</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/trading-bot" class="nav-group-btn active">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/trading-bot">Bot Dashboard</a>
+                                <a href="/trading-strategies">Strategies</a>
+                                <a href="/trading-monitor" class="active">Monitor</a>
+                                <a href="/trading-research">Research</a>
+                                <a href="/trading-config">Config</a>
+                                <a href="/trading-reports">Reports</a>
+                            </div>
+                        </div>
+                        <a href="/meetings" class="nav-group-btn">Meetings</a>
+                        <div class="nav-group">
+                            <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/our-workflows">Workflows</a>
+                                <a href="/org-chart">Org Map</a>
+                                <a href="/hub">HUB</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown"></div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2" title="Settings">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+            </div>
+        </nav>
+        <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
+
+        <!-- PAGE CONTENT -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 pb-24">
+
+            <!-- Page Heading -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                <div>
+                    <h2 class="font-heading font-bold text-xl tracking-wide flex items-center gap-2">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M2 7h16" stroke="currentColor" stroke-width="1.4"/><circle cx="5" cy="5" r="0.8" fill="currentColor" opacity="0.4"/><circle cx="7.5" cy="5" r="0.8" fill="currentColor" opacity="0.4"/><path d="M5 11l3 -2.5 2 2 3 -3.5 2.5 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/></svg>
+                        Trading Monitor
+                    </h2>
+                    <p class="text-sm text-txt-2 mt-1">Live position monitoring, risk management, and bot controls</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="refreshAll()" class="btn btn-ghost text-xs py-1.5 px-2.5">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-2 mb-5 p-1 rounded-lg" style="background: rgba(255,255,255,0.03); display: inline-flex;">
+                <button class="top-tab active" onclick="switchTab('liveMonitor')" id="tabLiveMonitor">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M6 3.5V6l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    Live Monitor
+                </button>
+                <button class="top-tab" onclick="switchTab('riskControls')" id="tabRiskControls">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l5 3v4c0 2.5-2.2 4.3-5 5-2.8-.7-5-2.5-5-5V4l5-3z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Risk &amp; Controls
+                </button>
+            </div>
+
+            <!-- ═══ TAB 1: LIVE MONITOR ═══ -->
+            <div id="panelLiveMonitor">
+
+                <!-- Active Strategy Instances -->
+                <div class="panel mb-6">
+                    <div class="panel-header">
+                        <div class="flex items-center gap-2">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/></svg>
+                            <span class="font-heading font-semibold text-sm">Active Strategy Instances</span>
+                            <span class="text-xs text-txt-3 font-mono" id="instanceCount"></span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="instanceGrid">
+                            <div class="instance-card">
+                                <div class="skeleton h-4 w-32 rounded mb-2"></div>
+                                <div class="skeleton h-3 w-24 rounded mb-2"></div>
+                                <div class="skeleton h-3 w-20 rounded"></div>
+                            </div>
+                            <div class="instance-card">
+                                <div class="skeleton h-4 w-28 rounded mb-2"></div>
+                                <div class="skeleton h-3 w-20 rounded mb-2"></div>
+                                <div class="skeleton h-3 w-24 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Open Positions -->
+                <div class="panel mb-6">
+                    <div class="panel-header">
+                        <div class="flex items-center gap-2">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 10l3-4 2.5 2.5L10 4l3 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <span class="font-heading font-semibold text-sm">Open Positions</span>
+                            <span class="text-xs text-txt-3 font-mono" id="positionCount"></span>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table" id="positionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Pair</th>
+                                    <th>Side</th>
+                                    <th>Entry Price</th>
+                                    <th>Current Price</th>
+                                    <th>Unrealized P&L</th>
+                                    <th class="hidden sm:table-cell">Strategy</th>
+                                </tr>
+                            </thead>
+                            <tbody id="positionsBody">
+                                <tr><td colspan="6" class="text-center py-8 text-txt-3 text-sm">
+                                    <div class="skeleton h-4 w-48 mx-auto rounded mb-2"></div>
+                                    <div class="skeleton h-4 w-32 mx-auto rounded"></div>
+                                </td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Real-time Trade Feed -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="flex items-center gap-2">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h7M2 11h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            <span class="font-heading font-semibold text-sm">Real-time Trade Feed</span>
+                            <span class="text-xs text-txt-3 font-mono" id="feedCount"></span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <div class="pulse-dot" style="width:6px;height:6px;"></div>
+                            <span class="text-xs text-txt-3">Live</span>
+                        </div>
+                    </div>
+                    <div class="panel-body" id="tradeFeedContainer" style="max-height: 480px; overflow-y: auto;">
+                        <div class="text-center py-8">
+                            <div class="skeleton h-4 w-48 mx-auto rounded mb-3"></div>
+                            <div class="skeleton h-4 w-36 mx-auto rounded mb-3"></div>
+                            <div class="skeleton h-4 w-40 mx-auto rounded"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ═══ TAB 2: RISK & CONTROLS ═══ -->
+            <div id="panelRiskControls" style="display: none;">
+
+                <!-- Risk Dashboard Metrics -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                    <div class="stat-chip">
+                        <div class="w-full">
+                            <div class="stat-label">Drawdown</div>
+                            <div class="stat-value" id="riskDrawdown">--</div>
+                            <div class="gauge-track mt-2" style="position:relative;">
+                                <div class="gauge-fill" id="drawdownGaugeFill" style="width:0%;background:linear-gradient(90deg,#06D6A0,#06D6A0);"></div>
+                                <div class="gauge-thresholds">
+                                    <div class="gauge-mark" style="left:50%;" title="10%"></div>
+                                    <div class="gauge-mark" style="left:75%;" title="15%"></div>
+                                    <div class="gauge-mark" style="left:100%;display:none;" title="20%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-chip">
+                        <div class="w-full">
+                            <div class="stat-label">Daily P&L</div>
+                            <div class="stat-value" id="riskDailyPnl">--</div>
+                        </div>
+                    </div>
+                    <div class="stat-chip">
+                        <div class="w-full">
+                            <div class="stat-label">Consecutive Losses</div>
+                            <div class="stat-value" id="riskConsecLosses">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-chip">
+                        <div class="w-full">
+                            <div class="stat-label">Position Scale</div>
+                            <div class="stat-value" id="riskPositionScale">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily P&L Bar Chart -->
+                <div class="panel mb-6">
+                    <div class="panel-header">
+                        <div class="flex items-center gap-2">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="6" width="2.5" height="7" rx="0.5" fill="currentColor" opacity="0.3"/><rect x="4.5" y="3" width="2.5" height="10" rx="0.5" fill="currentColor" opacity="0.5"/><rect x="8" y="5" width="2.5" height="8" rx="0.5" fill="currentColor" opacity="0.4"/><rect x="11.5" y="1" width="2.5" height="12" rx="0.5" fill="currentColor" opacity="0.6"/></svg>
+                            <span class="font-heading font-semibold text-sm">Daily P&L (Last 30 Days)</span>
+                        </div>
+                    </div>
+                    <div class="panel-body p-0">
+                        <div class="pnl-chart-container" id="pnlChartWrap">
+                            <canvas id="pnlChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Circuit Breaker Panel -->
+                <div class="panel mb-6">
+                    <div class="panel-header">
+                        <div class="flex items-center gap-2">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L1 13h12L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 5v3M7 10v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            <span class="font-heading font-semibold text-sm">Circuit Breaker</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Current Level -->
+                            <div class="flex flex-col items-center gap-3">
+                                <div class="cb-level-indicator normal" id="cbLevelIndicator">Normal</div>
+                                <span class="text-xs text-txt-3">Current Level</span>
+                            </div>
+
+                            <!-- Threshold Bars -->
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <span class="text-xs font-medium" style="color: var(--deft-txt-2);">Drawdown</span>
+                                        <span class="text-xs font-mono text-txt-3" id="cbDrawdownLabel">0% / 10% / 15% / 20%</span>
+                                    </div>
+                                    <div class="threshold-bar">
+                                        <div class="threshold-fill" id="cbDrawdownFill" style="width:0%; background: var(--deft-success, #06D6A0);"></div>
+                                    </div>
+                                    <div class="flex justify-between mt-1">
+                                        <span class="text-[0.6rem] text-txt-3">0%</span>
+                                        <span class="text-[0.6rem] text-txt-3">10%</span>
+                                        <span class="text-[0.6rem] text-txt-3">15%</span>
+                                        <span class="text-[0.6rem] text-txt-3">20%</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <span class="text-xs font-medium" style="color: var(--deft-txt-2);">Daily Loss</span>
+                                        <span class="text-xs font-mono text-txt-3" id="cbDailyLossLabel">0% / 5%</span>
+                                    </div>
+                                    <div class="threshold-bar">
+                                        <div class="threshold-fill" id="cbDailyLossFill" style="width:0%; background: var(--deft-success, #06D6A0);"></div>
+                                    </div>
+                                    <div class="flex justify-between mt-1">
+                                        <span class="text-[0.6rem] text-txt-3">0%</span>
+                                        <span class="text-[0.6rem] text-txt-3">5%</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <span class="text-xs font-medium" style="color: var(--deft-txt-2);">Consecutive Losses</span>
+                                        <span class="text-xs font-mono text-txt-3" id="cbConsecLabel">0 / 3</span>
+                                    </div>
+                                    <div class="threshold-bar">
+                                        <div class="threshold-fill" id="cbConsecFill" style="width:0%; background: var(--deft-success, #06D6A0);"></div>
+                                    </div>
+                                    <div class="flex justify-between mt-1">
+                                        <span class="text-[0.6rem] text-txt-3">0</span>
+                                        <span class="text-[0.6rem] text-txt-3">3</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CB History -->
+                        <div class="mt-6 pt-4" style="border-top: 1px solid var(--deft-border, #2A2E3D);">
+                            <h4 class="text-xs font-semibold text-txt-3 uppercase tracking-wider mb-3">Circuit Breaker History</h4>
+                            <div id="cbHistory" class="space-y-2">
+                                <div class="text-center py-4 text-txt-3 text-xs">Loading history...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Control Buttons -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="flex items-center gap-2">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v5M4.17 2.78A5 5 0 107 12a5 5 0 004.83-3.78" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            <span class="font-heading font-semibold text-sm">Bot Controls</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="flex flex-wrap gap-3">
+                            <button class="btn btn-primary" onclick="sendControl('start')" id="btnStart">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 2l7 4-7 4V2z" fill="currentColor"/></svg>
+                                Start Trading
+                            </button>
+                            <button class="btn btn-ghost" onclick="sendControl('stop')" id="btnStop">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="2" width="8" height="8" rx="1" fill="currentColor"/></svg>
+                                Stop Trading
+                            </button>
+                            <button class="btn btn-primary" onclick="sendControl('resume')" id="btnResume">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                Resume Trading
+                            </button>
+                            <button class="btn btn-danger" onclick="openEmergencyModal()" id="btnEmergency">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1L1 11h10L6 1z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 4.5v2.5M6 9v.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                                Emergency Close All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Emergency Close Modal -->
+    <div id="emergencyModal" style="display:none; position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+        <div class="panel" style="max-width:400px; width:90%;">
+            <div class="panel-body" style="text-align:center;">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" style="margin:0 auto 1rem;">
+                    <path d="M20 4L4 36h32L20 4z" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M20 15v8M20 27v1" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <h3 class="font-heading font-bold text-lg mb-2" style="color: #FF6B6B;">Emergency Close All Positions</h3>
+                <p class="text-sm text-txt-2 mb-4">This will close all open positions at market price immediately. This action cannot be undone.</p>
+                <div class="flex gap-3 justify-center mt-4">
+                    <button class="btn btn-ghost" onclick="closeEmergencyModal()">Cancel</button>
+                    <button class="btn btn-danger" onclick="confirmEmergencyClose()">Close All Positions</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toasts"></div>
+
+    <script>
+    // ═══════════════════════════════════════
+    // CONSTANTS
+    // ═══════════════════════════════════════
+    const BRAND_ID = 'carlton';
+    const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    const BOT_API = localStorage.getItem('rdgr-bot-api') || 'http://localhost:8420';
+    const CACHE_KEY = 'rdgr-profiles-cache';
+
+    // ═══════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════
+    let strategiesData = null;
+    let metricsData = null;
+    let recentTrades = [];
+    let pnlChartData = [];
+    let cbEvents = [];
+    let previousFeedTradeIds = new Set();
+
+    let strategiesTimer = null;
+    let metricsTimer = null;
+    let tradesFeedTimer = null;
+    let cbEventsTimer = null;
+    let pnlChartTimer = null;
+
+    let activeProfileId = null;
+    let gateSelectedProfile = null;
+    try { activeProfileId = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}').id; } catch(e) {}
+
+    // ═══════════════════════════════════════
+    // UTILITIES
+    // ═══════════════════════════════════════
+    function esc(str) {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+
+    function toast(message, type = 'success') {
+        const container = document.getElementById('toasts');
+        const el = document.createElement('div');
+        el.className = `toast toast-${type}`;
+        el.textContent = message;
+        container.appendChild(el);
+        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 4000);
+    }
+
+    function formatPacific(dateStr) {
+        if (!dateStr) return '--';
+        try {
+            return new Date(dateStr).toLocaleString('en-US', {
+                timeZone: 'America/Los_Angeles',
+                month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit',
+            });
+        } catch { return new Date(dateStr).toLocaleDateString(); }
+    }
+
+    function formatUSD(val) {
+        if (val == null) return '--';
+        return '$' + Number(val).toFixed(2);
+    }
+
+    function formatPct(val) {
+        if (val == null) return '--';
+        return (Number(val) * 100).toFixed(1) + '%';
+    }
+
+    // ═══════════════════════════════════════
+    // SUPABASE HELPERS
+    // ═══════════════════════════════════════
+    async function supabaseSelect(table, query = '') {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
+        try {
+            const res = await fetch(url, {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+            });
+            if (!res.ok) { console.error('Supabase error:', res.status, await res.text()); return null; }
+            return await res.json();
+        } catch (err) { console.error('Supabase fetch error:', table, err); return null; }
+    }
+
+    async function supabaseWrite(table, method, body, matchQuery = '') {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`;
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation',
+                },
+                body: method === 'DELETE' ? undefined : JSON.stringify(body),
+            });
+            if (!res.ok) { console.error('Supabase write error:', res.status, await res.text()); return null; }
+            const text = await res.text();
+            return text ? JSON.parse(text) : true;
+        } catch (err) { console.error('Supabase write error:', err); return null; }
+    }
+
+    // ═══════════════════════════════════════
+    // BOT API HELPERS
+    // ═══════════════════════════════════════
+    async function botFetch(path) {
+        try {
+            const res = await fetch(`${BOT_API}${path}`);
+            if (!res.ok) throw new Error(`${res.status}`);
+            return await res.json();
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function botPost(path, body) {
+        try {
+            const res = await fetch(`${BOT_API}${path}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            if (!res.ok) throw new Error(`${res.status}`);
+            return await res.json();
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // TAB SYSTEM
+    // ═══════════════════════════════════════
+    function switchTab(tab) {
+        document.getElementById('panelLiveMonitor').style.display = tab === 'liveMonitor' ? '' : 'none';
+        document.getElementById('panelRiskControls').style.display = tab === 'riskControls' ? '' : 'none';
+        document.getElementById('tabLiveMonitor').classList.toggle('active', tab === 'liveMonitor');
+        document.getElementById('tabRiskControls').classList.toggle('active', tab === 'riskControls');
+
+        if (tab === 'riskControls') {
+            loadPnlChart();
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // ACTIVE STRATEGY INSTANCES (every 10s)
+    // ═══════════════════════════════════════
+    async function loadStrategies() {
+        const data = await botFetch('/strategies');
+        strategiesData = data;
+        renderInstances(data);
+    }
+
+    function renderInstances(data) {
+        const grid = document.getElementById('instanceGrid');
+        const countEl = document.getElementById('instanceCount');
+
+        if (!data || (!data.strategies && !Array.isArray(data))) {
+            grid.innerHTML = '<div class="text-center py-6 text-txt-3 text-sm col-span-full">Unable to connect to bot API. Check connection.</div>';
+            countEl.textContent = '';
+            return;
+        }
+
+        const strategies = Array.isArray(data) ? data : (data.strategies || []);
+        if (strategies.length === 0) {
+            grid.innerHTML = '<div class="text-center py-6 text-txt-3 text-sm col-span-full">No strategy instances configured.</div>';
+            countEl.textContent = '(0)';
+            return;
+        }
+
+        const activeCount = strategies.filter(s => s.status === 'active' || s.active).length;
+        countEl.textContent = `(${activeCount} active / ${strategies.length} total)`;
+
+        grid.innerHTML = strategies.map(s => {
+            const isActive = s.status === 'active' || s.active;
+            const pair = s.pair || s.symbol || '--';
+            const name = s.strategy_name || s.name || 'Unnamed';
+            const timeframe = s.timeframe || s.interval || '--';
+            const position = s.current_position || s.position || 'flat';
+            const bars = s.bars_processed != null ? s.bars_processed : '--';
+
+            return `<div class="instance-card">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="instance-dot ${isActive ? 'active' : 'idle'}"></div>
+                    <span class="font-heading font-semibold text-sm" style="color: var(--deft-txt);">${esc(name)}</span>
+                </div>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                    <div>
+                        <span class="text-txt-3">Pair</span>
+                        <div class="font-mono font-medium" style="color: var(--deft-txt);">${esc(pair)}</div>
+                    </div>
+                    <div>
+                        <span class="text-txt-3">Timeframe</span>
+                        <div class="font-mono" style="color: var(--deft-txt-2);">${esc(timeframe)}</div>
+                    </div>
+                    <div>
+                        <span class="text-txt-3">Position</span>
+                        <div class="font-mono" style="color: ${position === 'long' ? 'var(--deft-success)' : position === 'short' ? 'var(--deft-danger)' : 'var(--deft-txt-3)'};">${esc(position)}</div>
+                    </div>
+                    <div>
+                        <span class="text-txt-3">Bars</span>
+                        <div class="font-mono" style="color: var(--deft-txt-2);">${bars}</div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // OPEN POSITIONS
+    // ═══════════════════════════════════════
+    function renderPositions(data) {
+        const tbody = document.getElementById('positionsBody');
+        const countEl = document.getElementById('positionCount');
+
+        if (!data) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-txt-3 text-sm">Unable to load positions.</td></tr>';
+            countEl.textContent = '';
+            return;
+        }
+
+        const strategies = Array.isArray(data) ? data : (data.strategies || []);
+        const positions = [];
+
+        strategies.forEach(s => {
+            if (s.current_position && s.current_position !== 'flat' && s.current_position !== 'none') {
+                positions.push({
+                    pair: s.pair || s.symbol || '--',
+                    side: s.current_position,
+                    entry_price: s.entry_price,
+                    current_price: s.current_price || s.last_price,
+                    unrealized_pnl: s.unrealized_pnl,
+                    strategy: s.strategy_name || s.name || '--',
+                });
+            }
+        });
+
+        if (positions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-txt-3 text-sm">No open positions</td></tr>';
+            countEl.textContent = '(0)';
+            return;
+        }
+
+        countEl.textContent = `(${positions.length})`;
+
+        tbody.innerHTML = positions.map(p => {
+            const pnl = p.unrealized_pnl != null ? Number(p.unrealized_pnl) : null;
+            const pnlClass = pnl != null ? (pnl >= 0 ? 'pnl-positive' : 'pnl-negative') : '';
+            const pnlStr = pnl != null ? ((pnl >= 0 ? '+' : '') + '$' + pnl.toFixed(4)) : '--';
+
+            return `<tr>
+                <td class="font-mono font-medium" style="color:var(--deft-txt);">${esc(p.pair)}</td>
+                <td><span class="badge ${p.side === 'long' || p.side === 'buy' ? 'badge-healthy' : 'badge-down'}">${esc(p.side)}</span></td>
+                <td class="font-mono">${p.entry_price != null ? Number(p.entry_price).toFixed(2) : '--'}</td>
+                <td class="font-mono">${p.current_price != null ? Number(p.current_price).toFixed(2) : '--'}</td>
+                <td class="font-mono font-medium ${pnlClass}">${pnlStr}</td>
+                <td class="hidden sm:table-cell">${esc(p.strategy)}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // REAL-TIME TRADE FEED (every 10s)
+    // ═══════════════════════════════════════
+    async function loadTradeFeed() {
+        const data = await botFetch('/trades/recent?limit=20');
+        if (!data || !data.trades) {
+            const sbTrades = await supabaseSelect('bot_trades', 'select=*&order=closed_at.desc&limit=20');
+            if (sbTrades) renderTradeFeed(sbTrades);
+            else renderTradeFeedEmpty();
+            return;
+        }
+        renderTradeFeed(data.trades);
+    }
+
+    function renderTradeFeed(trades) {
+        const container = document.getElementById('tradeFeedContainer');
+        const countEl = document.getElementById('feedCount');
+
+        if (!trades || trades.length === 0) {
+            renderTradeFeedEmpty();
+            return;
+        }
+
+        countEl.textContent = `(${trades.length})`;
+        const newTradeIds = new Set(trades.map(t => t.trade_id || t.id));
+
+        container.innerHTML = trades.map(t => {
+            const isNew = !previousFeedTradeIds.has(t.trade_id || t.id) && previousFeedTradeIds.size > 0;
+            const pnl = t.pnl != null ? Number(t.pnl) : null;
+            const pnlClass = pnl != null ? (pnl >= 0 ? 'pnl-positive' : 'pnl-negative') : '';
+            const pnlStr = pnl != null ? ((pnl >= 0 ? '+' : '') + '$' + pnl.toFixed(4)) : '--';
+
+            return `<div class="trade-feed-item ${isNew ? 'trade-new' : ''}">
+                <div class="text-xs font-mono text-txt-3" style="min-width: 100px;">${formatPacific(t.closed_at)}</div>
+                <div class="font-mono font-medium text-sm" style="color: var(--deft-txt); min-width: 80px;">${esc(t.pair)}</div>
+                <span class="badge ${t.side === 'buy' ? 'badge-paper' : 'badge-down'}">${esc(t.side)}</span>
+                <div class="font-mono text-sm font-medium ${pnlClass} ml-auto">${pnlStr}</div>
+            </div>`;
+        }).join('');
+
+        previousFeedTradeIds = newTradeIds;
+    }
+
+    function renderTradeFeedEmpty() {
+        const container = document.getElementById('tradeFeedContainer');
+        const countEl = document.getElementById('feedCount');
+        countEl.textContent = '';
+        container.innerHTML = '<div class="text-center py-8 text-txt-3 text-sm">No trades yet. The bot will populate this as it executes trades.</div>';
+    }
+
+    // ═══════════════════════════════════════
+    // RISK METRICS (every 60s)
+    // ═══════════════════════════════════════
+    async function loadMetrics() {
+        const data = await botFetch('/metrics');
+        metricsData = data;
+        updateRiskMetrics(data);
+    }
+
+    function updateRiskMetrics(data) {
+        const ddEl = document.getElementById('riskDrawdown');
+        const pnlEl = document.getElementById('riskDailyPnl');
+        const clEl = document.getElementById('riskConsecLosses');
+        const psEl = document.getElementById('riskPositionScale');
+        const gaugeFill = document.getElementById('drawdownGaugeFill');
+
+        if (!data) {
+            ddEl.textContent = '--';
+            pnlEl.textContent = '--';
+            clEl.textContent = '--';
+            psEl.textContent = '--';
+            return;
+        }
+
+        // Drawdown
+        const dd = data.drawdown_pct != null ? data.drawdown_pct : 0;
+        const ddPct = (dd * 100).toFixed(1);
+        ddEl.textContent = ddPct + '%';
+        if (dd > 0.15) {
+            ddEl.style.color = 'var(--deft-danger)';
+        } else if (dd > 0.10) {
+            ddEl.style.color = 'var(--deft-warning)';
+        } else {
+            ddEl.style.color = '';
+        }
+
+        // Gauge fill: map 0-20% to 0-100%
+        const gaugePct = Math.min((dd / 0.20) * 100, 100);
+        gaugeFill.style.width = gaugePct + '%';
+        if (dd <= 0.05) {
+            gaugeFill.style.background = 'linear-gradient(90deg, #06D6A0, #06D6A0)';
+        } else if (dd <= 0.10) {
+            gaugeFill.style.background = 'linear-gradient(90deg, #06D6A0, #FFD93D)';
+        } else if (dd <= 0.15) {
+            gaugeFill.style.background = 'linear-gradient(90deg, #06D6A0, #FFD93D, #F0A830)';
+        } else {
+            gaugeFill.style.background = 'linear-gradient(90deg, #06D6A0, #FFD93D, #F0A830, #FF6B6B)';
+        }
+
+        // Daily P&L
+        const pnl = data.daily_pnl != null ? data.daily_pnl : (data.today?.total_pnl ?? null);
+        if (pnl != null) {
+            pnlEl.textContent = (pnl >= 0 ? '+' : '') + formatUSD(pnl);
+            pnlEl.className = 'stat-value ' + (pnl >= 0 ? 'pnl-positive' : 'pnl-negative');
+        } else {
+            pnlEl.textContent = '--';
+            pnlEl.className = 'stat-value';
+        }
+
+        // Consecutive losses
+        const cl = data.consecutive_losses != null ? data.consecutive_losses : (data.today?.consecutive_losses ?? 0);
+        clEl.textContent = cl;
+        if (cl >= 3) clEl.style.color = 'var(--deft-danger)';
+        else if (cl >= 2) clEl.style.color = 'var(--deft-warning)';
+        else clEl.style.color = '';
+
+        // Position scale
+        const ps = data.circuit_breaker?.position_scale ?? data.position_scale ?? null;
+        if (ps != null) {
+            psEl.textContent = (ps * 100).toFixed(0) + '%';
+            if (ps < 0.5) psEl.style.color = 'var(--deft-danger)';
+            else if (ps < 1) psEl.style.color = 'var(--deft-warning)';
+            else psEl.style.color = 'var(--deft-success)';
+        } else {
+            psEl.textContent = '100%';
+            psEl.style.color = 'var(--deft-success)';
+        }
+
+        // Update circuit breaker threshold bars
+        updateCBThresholds(data);
+    }
+
+    function updateCBThresholds(data) {
+        const dd = data.drawdown_pct != null ? data.drawdown_pct : 0;
+        const dailyLoss = data.daily_loss_pct != null ? data.daily_loss_pct : (data.daily_pnl != null && data.daily_pnl < 0 ? Math.abs(data.daily_pnl / (data.equity || 1)) : 0);
+        const cl = data.consecutive_losses != null ? data.consecutive_losses : (data.today?.consecutive_losses ?? 0);
+        const cbLevel = data.circuit_breaker?.level || 'normal';
+
+        // Drawdown bar: 0-20%
+        const ddFill = document.getElementById('cbDrawdownFill');
+        const ddLabel = document.getElementById('cbDrawdownLabel');
+        const ddPct = Math.min((dd / 0.20) * 100, 100);
+        ddFill.style.width = ddPct + '%';
+        ddFill.style.background = dd > 0.15 ? 'var(--deft-danger)' : dd > 0.10 ? 'var(--deft-warning)' : 'var(--deft-success)';
+        ddLabel.textContent = (dd * 100).toFixed(1) + '% / 10% / 15% / 20%';
+
+        // Daily loss bar: 0-5%
+        const dlFill = document.getElementById('cbDailyLossFill');
+        const dlLabel = document.getElementById('cbDailyLossLabel');
+        const dlPct = Math.min((dailyLoss / 0.05) * 100, 100);
+        dlFill.style.width = dlPct + '%';
+        dlFill.style.background = dailyLoss > 0.04 ? 'var(--deft-danger)' : dailyLoss > 0.03 ? 'var(--deft-warning)' : 'var(--deft-success)';
+        dlLabel.textContent = (dailyLoss * 100).toFixed(1) + '% / 5%';
+
+        // Consecutive losses bar: 0-3
+        const clFill = document.getElementById('cbConsecFill');
+        const clLabel = document.getElementById('cbConsecLabel');
+        const clPct = Math.min((cl / 3) * 100, 100);
+        clFill.style.width = clPct + '%';
+        clFill.style.background = cl >= 3 ? 'var(--deft-danger)' : cl >= 2 ? 'var(--deft-warning)' : 'var(--deft-success)';
+        clLabel.textContent = cl + ' / 3';
+
+        // Level indicator
+        const indicator = document.getElementById('cbLevelIndicator');
+        indicator.className = 'cb-level-indicator ' + cbLevel;
+        indicator.textContent = cbLevel.charAt(0).toUpperCase() + cbLevel.slice(1);
+    }
+
+    // ═══════════════════════════════════════
+    // DAILY P&L BAR CHART (Canvas)
+    // ═══════════════════════════════════════
+    async function loadPnlChart() {
+        const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const data = await supabaseSelect('bot_metrics', `select=daily_pnl,recorded_at&order=recorded_at.asc&recorded_at=gte.${since}`);
+
+        if (!data || data.length === 0) {
+            drawEmptyPnlChart();
+            return;
+        }
+
+        // Aggregate by day
+        const dayMap = {};
+        data.forEach(d => {
+            if (d.daily_pnl == null) return;
+            const day = new Date(d.recorded_at).toISOString().split('T')[0];
+            dayMap[day] = d.daily_pnl;
+        });
+
+        pnlChartData = Object.entries(dayMap).sort((a, b) => a[0].localeCompare(b[0])).slice(-30);
+        drawPnlChart(pnlChartData);
+    }
+
+    function drawPnlChart(data) {
+        const canvas = document.getElementById('pnlChart');
+        const wrap = document.getElementById('pnlChartWrap');
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+
+        canvas.width = wrap.clientWidth * dpr;
+        canvas.height = wrap.clientHeight * dpr;
+        ctx.scale(dpr, dpr);
+
+        const W = wrap.clientWidth;
+        const H = wrap.clientHeight;
+        const pad = { top: 20, right: 16, bottom: 40, left: 60 };
+        const chartW = W - pad.left - pad.right;
+        const chartH = H - pad.top - pad.bottom;
+
+        ctx.clearRect(0, 0, W, H);
+
+        if (data.length === 0) {
+            drawEmptyPnlChart();
+            return;
+        }
+
+        const values = data.map(d => Number(d[1]));
+        const maxVal = Math.max(...values.map(Math.abs), 1);
+        const yRange = maxVal * 1.15;
+        const barW = Math.max(2, (chartW / data.length) - 3);
+        const gap = (chartW - barW * data.length) / (data.length + 1);
+
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--deft-accent').trim() || '#06D6A0';
+        const dangerColor = getComputedStyle(document.documentElement).getPropertyValue('--deft-danger').trim() || '#FF6B6B';
+
+        // Zero line
+        const zeroY = pad.top + chartH / 2;
+
+        // Grid lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const y = pad.top + (i / 4) * chartH;
+            ctx.beginPath();
+            ctx.moveTo(pad.left, y);
+            ctx.lineTo(W - pad.right, y);
+            ctx.stroke();
+
+            const val = yRange - (i / 4) * (yRange * 2);
+            ctx.fillStyle = 'rgba(138,149,169,0.5)';
+            ctx.font = '10px "JetBrains Mono", monospace';
+            ctx.textAlign = 'right';
+            ctx.fillText('$' + val.toFixed(0), pad.left - 6, y + 3);
+        }
+
+        // Zero line (thicker)
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(pad.left, zeroY);
+        ctx.lineTo(W - pad.right, zeroY);
+        ctx.stroke();
+
+        // Bars
+        data.forEach((d, i) => {
+            const val = Number(d[1]);
+            const x = pad.left + gap + i * (barW + gap);
+            const barH = (Math.abs(val) / yRange) * (chartH / 2);
+            const isPositive = val >= 0;
+
+            ctx.fillStyle = isPositive ? accentColor : dangerColor;
+            ctx.globalAlpha = 0.8;
+
+            if (isPositive) {
+                ctx.beginPath();
+                const r = Math.min(2, barW / 2);
+                const bx = x;
+                const by = zeroY - barH;
+                const bw = barW;
+                const bh = barH;
+                ctx.moveTo(bx + r, by);
+                ctx.lineTo(bx + bw - r, by);
+                ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + r);
+                ctx.lineTo(bx + bw, by + bh);
+                ctx.lineTo(bx, by + bh);
+                ctx.lineTo(bx, by + r);
+                ctx.quadraticCurveTo(bx, by, bx + r, by);
+                ctx.closePath();
+                ctx.fill();
+            } else {
+                ctx.beginPath();
+                const r = Math.min(2, barW / 2);
+                const bx = x;
+                const by = zeroY;
+                const bw = barW;
+                const bh = barH;
+                ctx.moveTo(bx, by);
+                ctx.lineTo(bx + bw, by);
+                ctx.lineTo(bx + bw, by + bh - r);
+                ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - r, by + bh);
+                ctx.lineTo(bx + r, by + bh);
+                ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - r);
+                ctx.lineTo(bx, by);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            ctx.globalAlpha = 1;
+
+            // X-axis labels (show every few)
+            if (data.length <= 10 || i % Math.ceil(data.length / 10) === 0 || i === data.length - 1) {
+                const dateStr = d[0];
+                const dt = new Date(dateStr + 'T00:00:00');
+                const label = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                ctx.fillStyle = 'rgba(138,149,169,0.5)';
+                ctx.font = '9px "JetBrains Mono", monospace';
+                ctx.textAlign = 'center';
+                ctx.save();
+                ctx.translate(x + barW / 2, H - pad.bottom + 14);
+                ctx.rotate(-0.4);
+                ctx.fillText(label, 0, 0);
+                ctx.restore();
+            }
+        });
+    }
+
+    function drawEmptyPnlChart() {
+        const canvas = document.getElementById('pnlChart');
+        const wrap = document.getElementById('pnlChartWrap');
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = wrap.clientWidth * dpr;
+        canvas.height = wrap.clientHeight * dpr;
+        ctx.scale(dpr, dpr);
+
+        const W = wrap.clientWidth;
+        const H = wrap.clientHeight;
+        ctx.clearRect(0, 0, W, H);
+
+        ctx.fillStyle = 'rgba(138,149,169,0.3)';
+        ctx.font = '13px "IBM Plex Sans", system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('No daily P&L data available yet', W / 2, H / 2 - 8);
+        ctx.font = '11px "IBM Plex Sans", system-ui';
+        ctx.fillStyle = 'rgba(138,149,169,0.2)';
+        ctx.fillText('Data will appear once the bot records daily metrics', W / 2, H / 2 + 12);
+    }
+
+    // ═══════════════════════════════════════
+    // CIRCUIT BREAKER EVENTS (every 30s)
+    // ═══════════════════════════════════════
+    async function loadCBEvents() {
+        const data = await supabaseSelect('bot_events', 'select=*&event_type=like.%25circuit_breaker%25&order=created_at.desc&limit=10');
+        cbEvents = data || [];
+        renderCBHistory(cbEvents);
+    }
+
+    function renderCBHistory(events) {
+        const container = document.getElementById('cbHistory');
+
+        if (!events || events.length === 0) {
+            container.innerHTML = '<div class="text-center py-4 text-txt-3 text-xs">No circuit breaker events recorded.</div>';
+            return;
+        }
+
+        container.innerHTML = events.map(e => {
+            const levelClass = (e.event_data?.level === 'halted' || e.event_type?.includes('halted')) ? 'badge-down' :
+                              (e.event_data?.level === 'reduced' || e.event_type?.includes('reduced')) ? 'badge-degraded' :
+                              'badge-paper';
+            const level = e.event_data?.level || e.event_type?.replace('circuit_breaker_', '') || 'triggered';
+            const reason = e.event_data?.reason || e.message || '--';
+
+            return `<div class="flex items-center gap-3 py-2" style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+                <span class="text-xs font-mono text-txt-3" style="min-width: 100px;">${formatPacific(e.created_at)}</span>
+                <span class="badge ${levelClass}">${esc(level)}</span>
+                <span class="text-xs text-txt-2 flex-1">${esc(reason)}</span>
+            </div>`;
+        }).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // BOT CONTROLS
+    // ═══════════════════════════════════════
+    async function sendControl(action) {
+        const btn = document.getElementById('btn' + action.charAt(0).toUpperCase() + action.slice(1));
+        if (btn) { btn.disabled = true; }
+
+        const result = await botPost('/control', { action: action, confirm: false });
+
+        if (btn) { btn.disabled = false; }
+
+        if (result) {
+            toast(`Bot control: ${action} sent successfully`, 'success');
+            setTimeout(() => { loadStrategies(); loadMetrics(); }, 1000);
+        } else {
+            toast(`Failed to send ${action} command. Check bot connection.`, 'error');
+        }
+    }
+
+    function openEmergencyModal() {
+        const modal = document.getElementById('emergencyModal');
+        modal.style.display = 'flex';
+    }
+
+    function closeEmergencyModal() {
+        const modal = document.getElementById('emergencyModal');
+        modal.style.display = 'none';
+    }
+
+    async function confirmEmergencyClose() {
+        closeEmergencyModal();
+        const btnEmergency = document.getElementById('btnEmergency');
+        if (btnEmergency) btnEmergency.disabled = true;
+
+        const result = await botPost('/control', { action: 'emergency_close', confirm: true });
+
+        if (btnEmergency) btnEmergency.disabled = false;
+
+        if (result) {
+            toast('Emergency close all positions sent. Positions closing at market price.', 'success');
+            setTimeout(() => { loadStrategies(); loadMetrics(); loadTradeFeed(); }, 2000);
+        } else {
+            toast('Failed to send emergency close command. Check bot connection.', 'error');
+        }
+    }
+
+    // Close modal on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeEmergencyModal();
+    });
+
+    // Close modal on backdrop click
+    document.getElementById('emergencyModal').addEventListener('click', function(e) {
+        if (e.target === this) closeEmergencyModal();
+    });
+
+    // ═══════════════════════════════════════
+    // REFRESH ALL
+    // ═══════════════════════════════════════
+    async function refreshAll() {
+        await Promise.all([loadStrategies(), loadMetrics(), loadTradeFeed(), loadCBEvents(), loadPnlChart()]);
+    }
+
+    function startPolling() {
+        loadStrategies();
+        loadMetrics();
+        loadTradeFeed();
+        loadCBEvents();
+        loadPnlChart();
+
+        strategiesTimer = setInterval(() => {
+            loadStrategies();
+            if (strategiesData) renderPositions(strategiesData);
+        }, 10000);
+        metricsTimer = setInterval(loadMetrics, 60000);
+        tradesFeedTimer = setInterval(loadTradeFeed, 10000);
+        cbEventsTimer = setInterval(loadCBEvents, 30000);
+        pnlChartTimer = setInterval(loadPnlChart, 300000);
+    }
+
+    // Resize charts on window resize
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (pnlChartData.length > 0) drawPnlChart(pnlChartData);
+            else drawEmptyPnlChart();
+        }, 200);
+    });
+
+    // ═══════════════════════════════════════
+    // GATE & PROFILE SYSTEM
+    // ═══════════════════════════════════════
+    function getCachedProfiles(callback) {
+        try {
+            const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+            if (cached.profiles && (Date.now() - cached.ts) < 300000) {
+                callback(cached.profiles);
+                return;
+            }
+        } catch(e) {}
+        fetch(`${SUPABASE_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+        }).then(r => r.json()).then(profiles => {
+            if (profiles && Array.isArray(profiles) && profiles.length > 0) {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ profiles: profiles, ts: Date.now() }));
+            }
+            callback(profiles);
+        }).catch(() => callback([]));
+    }
+
+    function loadGateProfiles() {
+        getCachedProfiles(function(profiles) {
+            const container = document.getElementById('gateProfiles');
+            if (!container || !profiles || !profiles.length) return;
+            const saved = localStorage.getItem('rdgr-active-profile');
+            let savedId = null;
+            if (saved) { try { savedId = JSON.parse(saved).id; } catch(e) {} }
+            container.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?';
+                const initial = name[0].toUpperCase();
+                const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+                const color = colors[name] || '#8A95A9';
+                return `<button type="button" onclick="selectGateProfile('${p.user_id}','${name.replace(/'/g, '&#39;')}',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="if(!this.classList.contains('selected'))this.style.background='rgba(255,255,255,0.02)'">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:${color}20;color:${color};border:2px solid transparent;">${initial}</div>
+                    <span class="text-xs" style="color:#8A95A9;">${name}</span>
+                </button>`;
+            }).join('');
+            if (savedId) {
+                const btns = container.querySelectorAll('.gate-profile-btn');
+                btns.forEach(btn => { if (btn.getAttribute('onclick').includes(savedId)) btn.click(); });
+            }
+        });
+    }
+
+    function selectGateProfile(userId, name, el) {
+        gateSelectedProfile = { id: userId, name: name };
+        document.querySelectorAll('.gate-profile-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            btn.style.background = 'rgba(255,255,255,0.02)';
+            btn.style.borderColor = 'transparent';
+            btn.querySelector('.w-10').style.borderColor = 'transparent';
+        });
+        el.classList.add('selected');
+        el.style.background = 'rgba(255,255,255,0.06)';
+        el.style.borderColor = 'rgba(6,214,160,0.4)';
+        el.querySelector('.w-10').style.borderColor = el.querySelector('.w-10').style.color;
+        const btn = document.getElementById('gateSubmitBtn');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.textContent = 'Sign In as ' + name;
+        document.getElementById('gateInput').focus();
+    }
+
+    function handleGate(e) {
+        e.preventDefault();
+        const input = document.getElementById('gateInput').value;
+        if (input === 'Advance1!') {
+            localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+            if (gateSelectedProfile) {
+                localStorage.setItem('rdgr-active-profile', JSON.stringify(gateSelectedProfile));
+                activeProfileId = gateSelectedProfile.id;
+            }
+            document.getElementById('gate').classList.add('hidden');
+            document.getElementById('mainContent').style.opacity = '1';
+            initPage();
+            return false;
+        }
+        document.getElementById('gateError').classList.add('show');
+        document.getElementById('gateInput').value = '';
+        document.getElementById('gateInput').focus();
+        setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+        return false;
+    }
+
+    // Profile dropdown
+    (function populateProfileDD() {
+        getCachedProfiles(function(profiles) {
+            const dd = document.getElementById('profileDropdown');
+            if (!dd || !profiles || !profiles.length) return;
+            const activeId = activeProfileId;
+            dd.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?';
+                const initial = name[0].toUpperCase();
+                const isActive = p.user_id === activeId;
+                return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, '&#39;')}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                    <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive ? 'rgba(6,214,160,0.15)' : 'rgba(255,255,255,0.06)'};color:${isActive ? '#06D6A0' : '#8A95A9'};">${initial}</div>
+                    <span>${name}</span>
+                    ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+                </button>`;
+            }).join('');
+            dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+        });
+    })();
+
+    function toggleProfileDD() {
+        const dd = document.getElementById('profileDropdown');
+        dd.classList.toggle('hidden');
+        if (!dd.classList.contains('hidden')) {
+            setTimeout(() => document.addEventListener('click', function closePDD(e) {
+                if (!document.getElementById('profileSwitcher').contains(e.target)) {
+                    dd.classList.add('hidden');
+                }
+                document.removeEventListener('click', closePDD);
+            }), 0);
+        }
+    }
+
+    function selectProfileGlobal(userId, name) {
+        localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+        location.reload();
+    }
+
+    function signOut() {
+        localStorage.removeItem('rdgr-session');
+        localStorage.removeItem('rdgr-active-profile');
+        location.reload();
+    }
+
+    // ═══════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════
+    function initPage() {
+        startPolling();
+        // Also render positions from strategies data on first load
+        setTimeout(() => {
+            if (strategiesData) renderPositions(strategiesData);
+        }, 1500);
+    }
+
+    if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity = '1';
+        initPage();
+    }
+
+    if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+        loadGateProfiles();
+    }
+
+    // Update profile display
+    try {
+        const _ap = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+        if (_ap.name) {
+            document.getElementById('profileName').textContent = _ap.name;
+            document.getElementById('profileAvatar').textContent = _ap.name[0].toUpperCase();
+            const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+            const c = colors[_ap.name] || '#8A95A9';
+            document.getElementById('profileAvatar').style.background = c + '26';
+            document.getElementById('profileAvatar').style.color = c;
+        }
+    } catch(e) {}
+
+    </script>
+</body>
+</html>
