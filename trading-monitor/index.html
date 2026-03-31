@@ -639,6 +639,9 @@
                                 <a href="/trading-strategies">Strategies</a>
                                 <a href="/trading-monitor" class="active">Monitor</a>
                                 <a href="/trading-research">Research</a>
+                                <a href="/trading-discovery">Discovery</a>
+                                <a href="/trading-cross-pairs">Cross-Pairs</a>
+                                <a href="/trading-exchanges">Exchanges</a>
                                 <a href="/trading-config">Config</a>
                                 <a href="/trading-reports">Reports</a>
                             </div>
@@ -788,6 +791,18 @@
 
             <!-- ═══ TAB 2: RISK & CONTROLS ═══ -->
             <div id="panelRiskControls" style="display: none;">
+
+                <!-- Observation Mode Banner -->
+                <div id="observationBanner" style="display:none; padding:0.75rem 1rem; border-radius:0.5rem; background:rgba(76,201,240,0.08); border:1px solid rgba(76,201,240,0.2); color:#4CC9F0; margin-bottom:1.25rem; font-size:0.8rem;">
+                    <div class="flex items-center gap-2 mb-1">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.2"/><path d="M8 4.5v4M8 10.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        <span class="font-heading font-bold text-sm" style="color:#4CC9F0;">OBSERVATION MODE</span>
+                    </div>
+                    <div class="text-xs" style="color:#8A95A9;">
+                        No strategies currently meet profitability thresholds. The system is monitoring and backtesting but not trading.
+                        <span id="observationStats"></span>
+                    </div>
+                </div>
 
                 <!-- Risk Dashboard Metrics -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
@@ -1358,6 +1373,37 @@
 
         // Update circuit breaker threshold bars
         updateCBThresholds(data);
+
+        // Check for observation mode
+        const cbLevel = data.circuit_breaker?.level || 'normal';
+        const banner = document.getElementById('observationBanner');
+        if (cbLevel === 'observation' || (data.open_positions === 0 && cbLevel === 'normal' && data.circuit_breaker?.can_trade === false)) {
+            banner.style.display = '';
+            // Load combo stats for the banner
+            loadObservationStats();
+        } else {
+            banner.style.display = 'none';
+        }
+    }
+
+    async function loadObservationStats() {
+        try {
+            const countRes = await fetch(`${SUPABASE_URL}/rest/v1/bot_combinations?select=id`, {
+                method: 'HEAD',
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Prefer': 'count=exact' }
+            });
+            const total = countRes.headers.get('content-range');
+            const passRes = await fetch(`${SUPABASE_URL}/rest/v1/bot_combinations?select=id&status=eq.qualified`, {
+                method: 'HEAD',
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Prefer': 'count=exact' }
+            });
+            const passTotal = passRes.headers.get('content-range');
+            if (total && passTotal) {
+                const totalCount = total.split('/')[1];
+                const passCount = passTotal.split('/')[1];
+                document.getElementById('observationStats').textContent = `Last sweep: ${Number(totalCount).toLocaleString()} combinations tested, ${passCount} passing.`;
+            }
+        } catch(e) {}
     }
 
     function updateCBThresholds(data) {

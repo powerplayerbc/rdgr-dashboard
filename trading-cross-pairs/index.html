@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Bot Configuration | Carlton AI</title>
+    <title>Cross-Pair Analysis | Carlton AI</title>
 
     <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
     <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
@@ -317,8 +317,6 @@
         .badge-healthy { background: rgba(6,214,160,0.15); color: #06D6A0; }
         .badge-degraded { background: rgba(255,217,61,0.15); color: #FFD93D; }
         .badge-down { background: rgba(255,107,107,0.15); color: #FF6B6B; }
-        .badge-yes { background: rgba(6,214,160,0.15); color: var(--deft-success, #06D6A0); }
-        .badge-no { background: rgba(255,107,107,0.1); color: var(--deft-txt-3, #525E73); }
 
         /* Buttons */
         .btn {
@@ -389,6 +387,8 @@
             100% { background-position: -200% 0; }
         }
 
+        /* ═══ CROSS-PAIR ANALYSIS SPECIFIC ═══ */
+
         /* Data table */
         .data-table { width: 100%; border-collapse: collapse; }
         .data-table th {
@@ -404,63 +404,66 @@
         }
         .data-table tr:hover td { background: rgba(255,255,255,0.02); }
 
-        /* Filter */
-        .filter-bar {
-            display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
-            padding: 0.75rem 1.25rem;
-            border-bottom: 1px solid var(--deft-border, #2A2E3D);
-        }
-        .filter-checkbox {
-            display: flex; align-items: center; gap: 0.375rem;
-            font-size: 0.75rem; color: var(--deft-txt-2, #8A95A9);
-            cursor: pointer; user-select: none;
-        }
-        .filter-checkbox input[type="checkbox"] {
-            width: 14px; height: 14px; accent-color: var(--deft-accent, #06D6A0);
-            cursor: pointer;
-        }
+        /* Correlation color gradient */
+        .corr-high { color: var(--deft-success, #06D6A0); }
+        .corr-mid { color: var(--deft-warning, #FFD93D); }
+        .corr-low { color: var(--deft-txt-2, #8A95A9); }
 
-        /* Top tab system */
-        .top-tabs {
-            display: flex; gap: 0.25rem;
-            padding: 0.25rem;
-            border-radius: 0.5rem;
-            background: rgba(255,255,255,0.03);
+        /* Edge detail cards */
+        .edge-card {
+            background: var(--deft-surface, #11131A);
             border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            transition: border-color 0.2s;
         }
-        .top-tab {
-            padding: 0.4rem 1rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--deft-txt-3, #525E73);
-            border-radius: 0.375rem;
-            cursor: pointer;
-            transition: background 0.15s, color 0.15s;
-            border: none;
-            background: transparent;
-            white-space: nowrap;
-        }
-        .top-tab:hover { color: var(--deft-txt-2, #8A95A9); }
-        .top-tab.active {
-            background: rgba(6,214,160,0.12);
-            color: #06D6A0;
+        .edge-card:hover {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent);
         }
 
-        /* Config form */
-        .config-row { display: flex; align-items: flex-start; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .config-key { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 500; color: var(--deft-txt); min-width: 200px; padding-top: 0.5rem; }
-        .config-value { flex: 1; }
-        .config-desc { font-size: 0.7rem; color: var(--deft-txt-3); margin-top: 0.25rem; }
-        .config-input { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--deft-border); border-radius: 0.375rem; padding: 0.5rem 0.75rem; color: var(--deft-txt); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; outline: none; }
-        .config-input:focus { border-color: var(--deft-accent); }
-        .config-input:disabled { opacity: 0.4; cursor: not-allowed; }
+        /* Correlation bar */
+        .corr-bar-track {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .corr-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+
+        /* Canvas visualization */
+        .viz-container {
+            position: relative;
+            width: 100%;
+            height: 360px;
+        }
+        .viz-container canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Arrow animation */
+        @keyframes arrow-pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        .arrow-icon {
+            color: var(--deft-accent, #06D6A0);
+            font-weight: 700;
+            font-size: 1rem;
+            animation: arrow-pulse 2s ease-in-out infinite;
+        }
 
         /* Responsive */
         @media (max-width: 767px) {
             .data-table { font-size: 0.7rem; }
             .data-table th, .data-table td { padding: 0.4rem 0.5rem; }
-            .config-row { flex-direction: column; gap: 0.375rem; }
-            .config-key { min-width: unset; padding-top: 0; }
+            .stat-value { font-size: 1.1rem; }
+            .viz-container { height: 260px; }
         }
     </style>
 </head>
@@ -546,20 +549,7 @@
                                 <a href="/deft">DEFT</a>
                             </div>
                         </div>
-                        <div class="nav-group">
-                            <a href="/trading-bot" class="nav-group-btn active">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
-                            <div class="nav-dropdown">
-                                <a href="/trading-bot">Bot Dashboard</a>
-                                <a href="/trading-strategies">Strategies</a>
-                                <a href="/trading-monitor">Monitor</a>
-                                <a href="/trading-research">Research</a>
-                                <a href="/trading-discovery">Discovery</a>
-                                <a href="/trading-cross-pairs">Cross-Pairs</a>
-                                <a href="/trading-exchanges">Exchanges</a>
-                                <a href="/trading-config" class="active">Config</a>
-                                <a href="/trading-reports">Reports</a>
-                            </div>
-                        </div>
+                        <div class="nav-group"><a href="/trading-bot" class="nav-group-btn active">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a><div class="nav-dropdown"><a href="/trading-bot">Bot Dashboard</a><a href="/trading-strategies">Strategies</a><a href="/trading-monitor">Monitor</a><a href="/trading-research">Research</a><a href="/trading-discovery">Discovery</a><a href="/trading-cross-pairs" class="active">Cross-Pairs</a><a href="/trading-exchanges">Exchanges</a><a href="/trading-config">Config</a><a href="/trading-reports">Reports</a></div></div>
                         <a href="/meetings" class="nav-group-btn">Meetings</a>
                         <div class="nav-group">
                             <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
@@ -595,78 +585,88 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
                 <div>
                     <h2 class="font-heading font-bold text-xl tracking-wide flex items-center gap-2">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M8.6 1.33h2.8l.43 2.16.15.06a6.4 6.4 0 011.62.94l.12.1 2.04-.86 1.18 2.04-1.61 1.31.02.16a6.5 6.5 0 010 1.38l-.02.16 1.61 1.31-1.18 2.04-2.04-.86-.12.1a6.4 6.4 0 01-1.62.94l-.15.06-.43 2.16H8.6l-.43-2.16-.15-.06a6.4 6.4 0 01-1.62-.94l-.12-.1-2.04.86-1.18-2.04 1.61-1.31-.02-.16a6.5 6.5 0 010-1.38l.02-.16-1.61-1.31 1.18-2.04 2.04.86.12-.1a6.4 6.4 0 011.62-.94l.15-.06.43-2.16zM10 7a3 3 0 100 6 3 3 0 000-6z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        Bot Configuration
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10h3M13 10h3M10 4v3M10 13v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.4"/><path d="M4 4l2.5 2.5M13.5 13.5L16 16M4 16l2.5-2.5M13.5 6.5L16 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.4"/></svg>
+                        Cross-Pair Analysis
                     </h2>
-                    <p class="text-sm text-txt-2 mt-1">Bot settings and trading pair management</p>
+                    <p class="text-sm text-txt-2 mt-1">Lead-lag relationships and inter-pair trading edges</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <div class="top-tabs">
-                        <button class="top-tab active" onclick="switchTab('config')" id="tabConfig">Configuration</button>
-                        <button class="top-tab" onclick="switchTab('pairs')" id="tabPairs">Pair Universe</button>
+                    <button onclick="refreshData()" class="btn btn-ghost text-xs py-1.5 px-2.5">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                <div class="stat-chip">
+                    <div class="w-full">
+                        <div class="stat-value" style="color: var(--deft-accent-warm, #4CC9F0);" id="statEdges">--</div>
+                        <div class="stat-label">Total Edges Found</div>
+                    </div>
+                </div>
+                <div class="stat-chip">
+                    <div class="w-full">
+                        <div class="stat-value" style="color: var(--deft-success, #06D6A0);" id="statBestCorr">--</div>
+                        <div class="stat-label">Best Correlation</div>
+                    </div>
+                </div>
+                <div class="stat-chip">
+                    <div class="w-full">
+                        <div class="stat-value text-sm font-mono" style="font-size: 0.85rem;" id="statLastRun">--</div>
+                        <div class="stat-label">Last Analysis Run</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab: Configuration -->
-            <div id="panelConfig">
-                <div class="panel">
-                    <div class="panel-header">
-                        <div class="flex items-center gap-2">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2v10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-                            <span class="font-heading font-semibold text-sm">Bot Config</span>
-                            <span class="text-xs text-txt-3 font-mono" id="configCount"></span>
-                        </div>
-                        <button class="btn btn-primary text-xs py-1.5 px-3" id="saveConfigBtn" onclick="saveConfig()" disabled>
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 4L4.5 9.5L2 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            Save Changes
-                        </button>
+            <!-- Cross-Pair Edges Table -->
+            <div class="panel mb-6">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h7M2 11h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        <span class="font-heading font-semibold text-sm">Cross-Pair Edges</span>
+                        <span class="text-xs text-txt-3 font-mono" id="edgeCount"></span>
                     </div>
-                    <div class="panel-body" id="configBody">
-                        <div class="flex flex-col gap-2 py-8">
-                            <div class="skeleton h-10 w-full rounded"></div>
-                            <div class="skeleton h-10 w-full rounded"></div>
-                            <div class="skeleton h-10 w-full rounded"></div>
-                            <div class="skeleton h-10 w-full rounded"></div>
-                        </div>
-                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table" id="edgesTable">
+                        <thead>
+                            <tr>
+                                <th>Leader</th>
+                                <th style="width:40px;text-align:center;"></th>
+                                <th>Follower</th>
+                                <th>Lag (bars)</th>
+                                <th>Correlation</th>
+                                <th>Direction Accuracy</th>
+                                <th>Expected Profit</th>
+                                <th>Samples</th>
+                            </tr>
+                        </thead>
+                        <tbody id="edgesBody">
+                            <tr><td colspan="8" class="text-center py-8 text-txt-3 text-sm">
+                                <div class="skeleton h-4 w-48 mx-auto rounded mb-2"></div>
+                                <div class="skeleton h-4 w-32 mx-auto rounded"></div>
+                            </td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- Tab: Pair Universe -->
-            <div id="panelPairs" style="display:none;">
-                <div class="panel">
-                    <div class="panel-header">
-                        <div class="flex items-center gap-2">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 7h5M7 4.5v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-                            <span class="font-heading font-semibold text-sm">Pair Universe</span>
-                            <span class="text-xs text-txt-3 font-mono" id="pairCount"></span>
-                        </div>
+            <!-- Edge Detail Cards -->
+            <div id="edgeCards" class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6"></div>
+
+            <!-- Lead-Lag Visualization -->
+            <div class="panel mb-6">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="4" cy="7" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.2"/><path d="M5.8 6.3L8.2 4.7M5.8 7.7l2.4 1.6" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.5"/></svg>
+                        <span class="font-heading font-semibold text-sm">Lead-Lag Network</span>
                     </div>
-                    <div class="filter-bar">
-                        <label class="filter-checkbox">
-                            <input type="checkbox" id="qualifiedFilter" onchange="renderPairs()">
-                            Show qualified only
-                        </label>
-                    </div>
-                    <div style="overflow-x: auto;">
-                        <table class="data-table" id="pairsTable">
-                            <thead>
-                                <tr>
-                                    <th>Symbol</th>
-                                    <th>Volume 24h</th>
-                                    <th>Spread</th>
-                                    <th>Qualified</th>
-                                    <th>Last Scanned</th>
-                                </tr>
-                            </thead>
-                            <tbody id="pairsBody">
-                                <tr><td colspan="5" class="text-center py-8 text-txt-3 text-sm">
-                                    <div class="skeleton h-4 w-48 mx-auto rounded mb-2"></div>
-                                    <div class="skeleton h-4 w-32 mx-auto rounded"></div>
-                                </td></tr>
-                            </tbody>
-                        </table>
+                </div>
+                <div class="panel-body p-0">
+                    <div class="viz-container" id="vizWrap">
+                        <canvas id="vizCanvas"></canvas>
                     </div>
                 </div>
             </div>
@@ -678,40 +678,28 @@
     <div class="toast-container" id="toasts"></div>
 
     <script>
-    // ═══════════════════════════════════════
+    // =======================================
     // CONSTANTS
-    // ═══════════════════════════════════════
+    // =======================================
     const BRAND_ID = 'carlton';
     const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
     const BOT_API = localStorage.getItem('rdgr-bot-api') || 'http://localhost:8420';
     const CACHE_KEY = 'rdgr-profiles-cache';
 
-    const EDITABLE_KEYS = new Set([
-        'mode',
-        'min_trade_size',
-        'starting_equity',
-        'daily_loss_limit_pct',
-        'max_drawdown_reduced',
-        'max_drawdown_halted',
-        'max_drawdown_stop',
-    ]);
-
-    // ═══════════════════════════════════════
+    // =======================================
     // STATE
-    // ═══════════════════════════════════════
-    let configData = [];
-    let originalValues = {};
-    let pairsData = [];
-    let activeTab = 'config';
+    // =======================================
+    let crossPairData = null;
+    let pollTimer = null;
 
     let activeProfileId = null;
     let gateSelectedProfile = null;
     try { activeProfileId = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}').id; } catch(e) {}
 
-    // ═══════════════════════════════════════
+    // =======================================
     // UTILITIES
-    // ═══════════════════════════════════════
+    // =======================================
     function esc(str) {
         const div = document.createElement('div');
         div.textContent = str || '';
@@ -738,26 +726,9 @@
         } catch { return new Date(dateStr).toLocaleDateString(); }
     }
 
-    function formatVolume(val) {
-        if (val == null || val === '') return '--';
-        const n = Number(val);
-        if (isNaN(n)) return '--';
-        if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
-        if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
-        if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
-        return n.toFixed(0);
-    }
-
-    function formatSpread(val) {
-        if (val == null || val === '') return '--';
-        const n = Number(val);
-        if (isNaN(n)) return '--';
-        return (n * 100).toFixed(3) + '%';
-    }
-
-    // ═══════════════════════════════════════
+    // =======================================
     // SUPABASE HELPERS
-    // ═══════════════════════════════════════
+    // =======================================
     async function supabaseSelect(table, query = '') {
         const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
         try {
@@ -769,190 +740,417 @@
         } catch (err) { console.error('Supabase fetch error:', table, err); return null; }
     }
 
-    async function supabaseWrite(table, method, body, matchQuery = '') {
-        const url = `${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`;
+    // =======================================
+    // BOT API HELPERS
+    // =======================================
+    async function botFetch(path) {
         try {
-            const res = await fetch(url, {
-                method,
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=representation',
-                },
-                body: method === 'DELETE' ? undefined : JSON.stringify(body),
-            });
-            if (!res.ok) { console.error('Supabase write error:', res.status, await res.text()); return null; }
-            const text = await res.text();
-            return text ? JSON.parse(text) : true;
-        } catch (err) { console.error('Supabase write error:', err); return null; }
+            const res = await fetch(`${BOT_API}${path}`);
+            if (!res.ok) throw new Error(`${res.status}`);
+            return await res.json();
+        } catch (e) {
+            return null;
+        }
     }
 
-    // ═══════════════════════════════════════
-    // TAB SWITCHING
-    // ═══════════════════════════════════════
-    function switchTab(tab) {
-        activeTab = tab;
-        document.getElementById('tabConfig').classList.toggle('active', tab === 'config');
-        document.getElementById('tabPairs').classList.toggle('active', tab === 'pairs');
-        document.getElementById('panelConfig').style.display = tab === 'config' ? '' : 'none';
-        document.getElementById('panelPairs').style.display = tab === 'pairs' ? '' : 'none';
+    // =======================================
+    // CROSS-PAIR DATA LOADING
+    // =======================================
+    async function loadCrossPairs() {
+        const data = await botFetch('/cross-pairs');
+        crossPairData = data;
+        updateSummaryStats(data);
+        renderEdgesTable(data);
+        renderEdgeCards(data);
+        drawVisualization(data);
     }
 
-    // ═══════════════════════════════════════
-    // CONFIG TAB
-    // ═══════════════════════════════════════
-    async function loadConfig() {
-        const data = await supabaseSelect('bot_config', 'select=key,value,description&order=key');
-        if (!data) {
-            document.getElementById('configBody').innerHTML = '<div class="py-8 text-center text-txt-3 text-sm">Failed to load configuration. Check your connection.</div>';
+    function updateSummaryStats(data) {
+        const edgesEl = document.getElementById('statEdges');
+        const corrEl = document.getElementById('statBestCorr');
+        const runEl = document.getElementById('statLastRun');
+
+        if (!data || !data.edges || data.edges.length === 0) {
+            edgesEl.textContent = '0';
+            corrEl.textContent = '--';
+            runEl.textContent = data && data.last_run ? formatPacific(data.last_run) : '--';
             return;
         }
-        configData = data;
-        originalValues = {};
-        data.forEach(row => { originalValues[row.key] = row.value; });
-        renderConfig(data);
+
+        edgesEl.textContent = data.edges.length;
+
+        const bestCorr = Math.max(...data.edges.map(e => e.correlation || 0));
+        corrEl.textContent = bestCorr.toFixed(3);
+
+        runEl.textContent = data.last_run ? formatPacific(data.last_run) : '--';
     }
 
-    function renderConfig(data) {
-        const body = document.getElementById('configBody');
-        const countEl = document.getElementById('configCount');
+    // =======================================
+    // EDGES TABLE
+    // =======================================
+    function renderEdgesTable(data) {
+        const tbody = document.getElementById('edgesBody');
+        const countEl = document.getElementById('edgeCount');
 
-        if (!data || data.length === 0) {
-            body.innerHTML = '<div class="py-8 text-center text-txt-3 text-sm">No config entries found.</div>';
+        if (!data || !data.edges || data.edges.length === 0) {
             countEl.textContent = '';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-10 text-txt-3 text-sm">No cross-pair edges found yet. Run a cross-pair analysis to discover lead-lag relationships.</td></tr>';
             return;
         }
 
-        countEl.textContent = `(${data.length} keys)`;
+        countEl.textContent = `(${data.edges.length})`;
 
-        body.innerHTML = data.map(row => {
-            const editable = EDITABLE_KEYS.has(row.key);
-            return `<div class="config-row">
-                <div class="config-key">${esc(row.key)}</div>
-                <div class="config-value">
-                    <input
-                        type="text"
-                        class="config-input"
-                        data-key="${esc(row.key)}"
-                        value="${esc(row.value || '')}"
-                        ${editable ? 'oninput="markDirty()"' : 'disabled'}
-                    >
-                    ${row.description ? `<div class="config-desc">${esc(row.description)}</div>` : ''}
-                </div>
-            </div>`;
-        }).join('');
+        tbody.innerHTML = data.edges.map(edge => {
+            const corrClass = edge.correlation >= 0.8 ? 'corr-high' : edge.correlation >= 0.5 ? 'corr-mid' : 'corr-low';
+            const dirAccPct = (edge.direction_accuracy * 100).toFixed(1);
+            const dirAccClass = edge.direction_accuracy >= 0.9 ? 'corr-high' : '';
+            const profitPct = (edge.expected_profit * 100).toFixed(4);
+            const profitClass = edge.expected_profit > 0 ? 'corr-high' : edge.expected_profit < 0 ? 'color: var(--deft-danger)' : '';
+            const profitStyle = edge.expected_profit > 0 ? 'color: var(--deft-success)' : edge.expected_profit < 0 ? 'color: var(--deft-danger)' : '';
 
-        document.getElementById('saveConfigBtn').disabled = true;
-    }
-
-    function markDirty() {
-        const inputs = document.querySelectorAll('.config-input:not(:disabled)');
-        let hasChanges = false;
-        inputs.forEach(input => {
-            const key = input.dataset.key;
-            if (input.value !== (originalValues[key] || '')) {
-                hasChanges = true;
-            }
-        });
-        document.getElementById('saveConfigBtn').disabled = !hasChanges;
-    }
-
-    async function saveConfig() {
-        const btn = document.getElementById('saveConfigBtn');
-        btn.disabled = true;
-        btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="animate-spin"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2" stroke-dasharray="14 14" stroke-linecap="round"/></svg> Saving...';
-
-        const inputs = document.querySelectorAll('.config-input:not(:disabled)');
-        const updates = [];
-
-        inputs.forEach(input => {
-            const key = input.dataset.key;
-            const newVal = input.value;
-            if (newVal !== (originalValues[key] || '')) {
-                updates.push({ key, value: newVal });
-            }
-        });
-
-        if (updates.length === 0) {
-            btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 4L4.5 9.5L2 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Save Changes';
-            return;
-        }
-
-        let successCount = 0;
-        let failCount = 0;
-
-        for (const update of updates) {
-            const result = await supabaseWrite(
-                'bot_config',
-                'PATCH',
-                { value: update.value },
-                `key=eq.${encodeURIComponent(update.key)}`
-            );
-            if (result) {
-                successCount++;
-                originalValues[update.key] = update.value;
-            } else {
-                failCount++;
-            }
-        }
-
-        if (failCount === 0) {
-            toast(`Saved ${successCount} config value${successCount > 1 ? 's' : ''} successfully`);
-        } else {
-            toast(`${failCount} of ${updates.length} saves failed`, 'error');
-        }
-
-        btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10 4L4.5 9.5L2 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Save Changes';
-        btn.disabled = true;
-    }
-
-    // ═══════════════════════════════════════
-    // PAIRS TAB
-    // ═══════════════════════════════════════
-    async function loadPairs() {
-        const data = await supabaseSelect('bot_pair_universe', 'select=*&order=volume_24h.desc');
-        if (!data) {
-            document.getElementById('pairsBody').innerHTML = '<tr><td colspan="5" class="text-center py-8 text-txt-3 text-sm">Failed to load pair universe. Check your connection.</td></tr>';
-            return;
-        }
-        pairsData = data;
-        renderPairs();
-    }
-
-    function renderPairs() {
-        const tbody = document.getElementById('pairsBody');
-        const countEl = document.getElementById('pairCount');
-        const qualifiedOnly = document.getElementById('qualifiedFilter').checked;
-
-        let filtered = pairsData;
-        if (qualifiedOnly) {
-            filtered = pairsData.filter(p => p.qualified === true);
-        }
-
-        if (!filtered || filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-txt-3 text-sm">No pairs found.</td></tr>';
-            countEl.textContent = qualifiedOnly ? `(${filtered.length} qualified of ${pairsData.length})` : `(${pairsData.length})`;
-            return;
-        }
-
-        countEl.textContent = qualifiedOnly ? `(${filtered.length} qualified of ${pairsData.length})` : `(${filtered.length})`;
-
-        tbody.innerHTML = filtered.map(p => {
-            const isQualified = p.qualified === true;
             return `<tr>
-                <td class="font-mono font-medium" style="color:var(--deft-txt);">${esc(p.symbol || p.pair || '--')}</td>
-                <td class="font-mono">${formatVolume(p.volume_24h)}</td>
-                <td class="font-mono">${formatSpread(p.spread)}</td>
-                <td><span class="badge ${isQualified ? 'badge-yes' : 'badge-no'}">${isQualified ? 'YES' : 'NO'}</span></td>
-                <td class="font-mono text-xs">${formatPacific(p.last_scanned || p.updated_at || p.scanned_at)}</td>
+                <td class="font-mono font-semibold" style="color: var(--deft-txt);">${esc(edge.leader)}</td>
+                <td style="text-align:center;"><span class="arrow-icon">&#8594;</span></td>
+                <td class="font-mono" style="color: var(--deft-txt-2);">${esc(edge.follower)}</td>
+                <td class="font-mono text-center">${edge.lag_bars}</td>
+                <td class="font-mono font-medium ${corrClass}">${edge.correlation.toFixed(3)}</td>
+                <td class="font-mono font-medium ${dirAccClass}" style="${edge.direction_accuracy >= 0.9 ? 'color: var(--deft-success)' : ''}">${dirAccPct}%</td>
+                <td class="font-mono font-medium" style="${profitStyle}">${edge.expected_profit >= 0 ? '+' : ''}${profitPct}%</td>
+                <td class="font-mono">${Number(edge.sample_count).toLocaleString()}</td>
             </tr>`;
         }).join('');
     }
 
-    // ═══════════════════════════════════════
+    // =======================================
+    // EDGE DETAIL CARDS
+    // =======================================
+    function renderEdgeCards(data) {
+        const container = document.getElementById('edgeCards');
+
+        if (!data || !data.edges || data.edges.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+
+        container.innerHTML = data.edges.map(edge => {
+            const corrPct = (edge.correlation * 100).toFixed(0);
+            const dirAccPct = (edge.direction_accuracy * 100).toFixed(1);
+            const profitPct = (edge.expected_profit * 100).toFixed(4);
+            const corrColor = edge.correlation >= 0.8 ? 'var(--deft-success, #06D6A0)' : edge.correlation >= 0.5 ? 'var(--deft-warning, #FFD93D)' : 'var(--deft-txt-3, #525E73)';
+            const profitColor = edge.expected_profit > 0 ? 'var(--deft-success, #06D6A0)' : 'var(--deft-danger, #FF6B6B)';
+
+            return `<div class="edge-card">
+                <!-- Header: Leader -> Follower -->
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="font-mono font-bold text-lg" style="color: var(--deft-txt);">${esc(edge.leader)}</span>
+                    <span class="flex items-center gap-1">
+                        <svg width="24" height="12" viewBox="0 0 24 12" fill="none">
+                            <path d="M2 6h18M16 2l4 4-4 4" stroke="${corrColor}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <span class="font-mono font-bold text-lg" style="color: var(--deft-txt);">${esc(edge.follower)}</span>
+                </div>
+
+                <!-- Correlation bar -->
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-xs text-txt-3 uppercase tracking-wider font-semibold">Correlation Strength</span>
+                        <span class="font-mono text-sm font-bold" style="color: ${corrColor};">${edge.correlation.toFixed(3)}</span>
+                    </div>
+                    <div class="corr-bar-track">
+                        <div class="corr-bar-fill" style="width: ${corrPct}%; background: ${corrColor};"></div>
+                    </div>
+                </div>
+
+                <!-- Metrics Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                    <div class="p-2.5 rounded-lg" style="background: rgba(255,255,255,0.02);">
+                        <div class="text-xs text-txt-3 uppercase tracking-wider font-semibold mb-1" style="font-size:0.65rem;">Lag</div>
+                        <div class="font-heading font-bold text-base">${edge.lag_bars} bar${edge.lag_bars !== 1 ? 's' : ''}</div>
+                    </div>
+                    <div class="p-2.5 rounded-lg" style="background: rgba(255,255,255,0.02);">
+                        <div class="text-xs text-txt-3 uppercase tracking-wider font-semibold mb-1" style="font-size:0.65rem;">Correlation</div>
+                        <div class="font-heading font-bold text-base" style="color: ${corrColor};">${edge.correlation.toFixed(3)}</div>
+                    </div>
+                    <div class="p-2.5 rounded-lg" style="background: rgba(255,255,255,0.02);">
+                        <div class="text-xs text-txt-3 uppercase tracking-wider font-semibold mb-1" style="font-size:0.65rem;">Dir. Accuracy</div>
+                        <div class="font-heading font-bold text-base" style="${edge.direction_accuracy >= 0.9 ? 'color: var(--deft-success)' : ''}">${dirAccPct}%</div>
+                    </div>
+                    <div class="p-2.5 rounded-lg" style="background: rgba(255,255,255,0.02);">
+                        <div class="text-xs text-txt-3 uppercase tracking-wider font-semibold mb-1" style="font-size:0.65rem;">Exp. Profit</div>
+                        <div class="font-heading font-bold text-base" style="color: ${profitColor};">${edge.expected_profit >= 0 ? '+' : ''}${profitPct}%</div>
+                    </div>
+                </div>
+
+                <!-- Sample count + insight note -->
+                <div class="flex items-start gap-2 p-3 rounded-lg" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04);">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="flex-shrink-0 mt-0.5"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"/><path d="M7 6v3.5M7 4.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    <div>
+                        <span class="text-xs text-txt-2">When <strong style="color:var(--deft-txt);">${esc(edge.leader)}</strong> moves, <strong style="color:var(--deft-txt);">${esc(edge.follower)}</strong> follows ${edge.lag_bars} bar${edge.lag_bars !== 1 ? 's' : ''} later with <strong style="color:var(--deft-success);">${dirAccPct}%</strong> directional accuracy</span>
+                        <span class="text-xs text-txt-3 ml-1">(${Number(edge.sample_count).toLocaleString()} samples)</span>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // =======================================
+    // LEAD-LAG VISUALIZATION (Canvas)
+    // =======================================
+    function drawVisualization(data) {
+        const canvas = document.getElementById('vizCanvas');
+        const wrap = document.getElementById('vizWrap');
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+
+        canvas.width = wrap.clientWidth * dpr;
+        canvas.height = wrap.clientHeight * dpr;
+        ctx.scale(dpr, dpr);
+
+        const W = wrap.clientWidth;
+        const H = wrap.clientHeight;
+
+        ctx.clearRect(0, 0, W, H);
+
+        if (!data || !data.edges || data.edges.length === 0) {
+            drawEmptyVisualization(ctx, W, H);
+            return;
+        }
+
+        const edges = data.edges;
+
+        // Collect unique leaders and followers
+        const leaders = [...new Set(edges.map(e => e.leader))];
+        const followers = [...new Set(edges.map(e => e.follower))];
+
+        const pad = { top: 40, right: 60, bottom: 40, left: 60 };
+        const chartW = W - pad.left - pad.right;
+        const chartH = H - pad.top - pad.bottom;
+
+        // Node sizing
+        const nodeRadius = Math.min(36, Math.max(22, chartH / (Math.max(leaders.length, followers.length) + 1) / 2.5));
+        const fontSize = Math.min(11, Math.max(8, nodeRadius * 0.35));
+
+        // Positions for leaders (left side)
+        const leaderX = pad.left + nodeRadius + 20;
+        const leaderPositions = {};
+        leaders.forEach((l, i) => {
+            const y = pad.top + (chartH / (leaders.length + 1)) * (i + 1);
+            leaderPositions[l] = { x: leaderX, y };
+        });
+
+        // Positions for followers (right side)
+        const followerX = W - pad.right - nodeRadius - 20;
+        const followerPositions = {};
+        followers.forEach((f, i) => {
+            const y = pad.top + (chartH / (followers.length + 1)) * (i + 1);
+            followerPositions[f] = { x: followerX, y };
+        });
+
+        // Labels
+        ctx.fillStyle = 'rgba(138,149,169,0.4)';
+        ctx.font = `600 ${Math.max(9, fontSize - 1)}px "JetBrains Mono", monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillText('LEADERS', leaderX, pad.top - 12);
+        ctx.fillText('FOLLOWERS', followerX, pad.top - 12);
+
+        // Get accent colors
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--deft-accent').trim() || '#06D6A0';
+        const successColor = getComputedStyle(document.documentElement).getPropertyValue('--deft-success').trim() || '#06D6A0';
+        const dangerColor = getComputedStyle(document.documentElement).getPropertyValue('--deft-danger').trim() || '#FF6B6B';
+
+        // Draw arrows (connections)
+        edges.forEach(edge => {
+            const from = leaderPositions[edge.leader];
+            const to = followerPositions[edge.follower];
+            if (!from || !to) return;
+
+            const lineWidth = 1 + edge.correlation * 4;
+            const arrowColor = edge.expected_profit > 0 ? successColor : dangerColor;
+            const alpha = 0.3 + edge.correlation * 0.5;
+
+            // Draw curved arrow
+            const cpX = (from.x + to.x) / 2;
+            const cpY = (from.y + to.y) / 2 - 20;
+
+            ctx.strokeStyle = arrowColor;
+            ctx.globalAlpha = alpha;
+            ctx.lineWidth = lineWidth;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            ctx.beginPath();
+            ctx.moveTo(from.x + nodeRadius + 4, from.y);
+            ctx.quadraticCurveTo(cpX, cpY, to.x - nodeRadius - 4, to.y);
+            ctx.stroke();
+
+            // Arrowhead
+            const arrowSize = 6 + lineWidth;
+            const endX = to.x - nodeRadius - 4;
+            const endY = to.y;
+            const angle = Math.atan2(endY - cpY, endX - cpX);
+
+            ctx.beginPath();
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(
+                endX - arrowSize * Math.cos(angle - Math.PI / 6),
+                endY - arrowSize * Math.sin(angle - Math.PI / 6)
+            );
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(
+                endX - arrowSize * Math.cos(angle + Math.PI / 6),
+                endY - arrowSize * Math.sin(angle + Math.PI / 6)
+            );
+            ctx.stroke();
+
+            // Label on arrow: correlation
+            ctx.globalAlpha = 0.6;
+            ctx.fillStyle = arrowColor;
+            ctx.font = `500 ${Math.max(8, fontSize - 2)}px "JetBrains Mono", monospace`;
+            ctx.textAlign = 'center';
+            const labelX = cpX;
+            const labelY = cpY - 6;
+            ctx.fillText(edge.correlation.toFixed(2), labelX, labelY);
+
+            ctx.globalAlpha = 1;
+        });
+
+        // Draw leader nodes
+        leaders.forEach(l => {
+            const pos = leaderPositions[l];
+            drawNode(ctx, pos.x, pos.y, nodeRadius, l, accentColor, fontSize);
+        });
+
+        // Draw follower nodes
+        followers.forEach(f => {
+            const pos = followerPositions[f];
+            const accentWarm = getComputedStyle(document.documentElement).getPropertyValue('--deft-accent-warm').trim() || '#4CC9F0';
+            drawNode(ctx, pos.x, pos.y, nodeRadius, f, accentWarm, fontSize);
+        });
+    }
+
+    function drawNode(ctx, x, y, radius, label, color, fontSize) {
+        // Glow
+        ctx.beginPath();
+        ctx.arc(x, y, radius + 4, 0, Math.PI * 2);
+        ctx.fillStyle = color + '10';
+        ctx.fill();
+
+        // Background
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = color + '18';
+        ctx.fill();
+
+        // Border
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = color + '50';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Label
+        ctx.fillStyle = color;
+        ctx.font = `600 ${fontSize}px "JetBrains Mono", monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Split pair name if needed (e.g. XRP/USDT)
+        const parts = label.split('/');
+        if (parts.length === 2 && radius > 24) {
+            ctx.fillText(parts[0], x, y - fontSize * 0.5);
+            ctx.globalAlpha = 0.6;
+            ctx.font = `400 ${Math.max(7, fontSize - 2)}px "JetBrains Mono", monospace`;
+            ctx.fillText('/' + parts[1], x, y + fontSize * 0.5);
+            ctx.globalAlpha = 1;
+        } else {
+            ctx.fillText(label, x, y);
+        }
+
+        ctx.textBaseline = 'alphabetic';
+    }
+
+    function drawEmptyVisualization(ctx, W, H) {
+        ctx.fillStyle = 'rgba(138,149,169,0.3)';
+        ctx.font = '13px "IBM Plex Sans", system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('No cross-pair edges to visualize', W / 2, H / 2 - 20);
+        ctx.font = '11px "IBM Plex Sans", system-ui';
+        ctx.fillStyle = 'rgba(138,149,169,0.2)';
+        ctx.fillText('Run a cross-pair analysis to discover lead-lag relationships', W / 2, H / 2 + 4);
+
+        // Placeholder nodes
+        const placeholderColor = 'rgba(138,149,169,0.1)';
+        const nodeR = 28;
+
+        // Left placeholder
+        ctx.beginPath();
+        ctx.arc(W * 0.25, H * 0.5, nodeR, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(138,149,169,0.1)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Right placeholder
+        ctx.beginPath();
+        ctx.arc(W * 0.75, H * 0.5, nodeR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Dashed arrow between them
+        ctx.beginPath();
+        ctx.moveTo(W * 0.25 + nodeR + 8, H * 0.5);
+        ctx.lineTo(W * 0.75 - nodeR - 8, H * 0.5);
+        ctx.setLineDash([6, 6]);
+        ctx.strokeStyle = 'rgba(138,149,169,0.08)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Question marks inside nodes
+        ctx.fillStyle = 'rgba(138,149,169,0.15)';
+        ctx.font = '16px "JetBrains Mono", monospace';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('?', W * 0.25, H * 0.5);
+        ctx.fillText('?', W * 0.75, H * 0.5);
+        ctx.textBaseline = 'alphabetic';
+    }
+
+    // =======================================
+    // REFRESH & POLLING
+    // =======================================
+    async function refreshData() {
+        await loadCrossPairs();
+        toast('Cross-pair data refreshed');
+    }
+
+    function startPolling() {
+        loadCrossPairs();
+        pollTimer = setInterval(loadCrossPairs, 300000); // 5 minutes
+    }
+
+    // Resize visualization on window resize
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (crossPairData) drawVisualization(crossPairData);
+            else {
+                const canvas = document.getElementById('vizCanvas');
+                const wrap = document.getElementById('vizWrap');
+                const ctx = canvas.getContext('2d');
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = wrap.clientWidth * dpr;
+                canvas.height = wrap.clientHeight * dpr;
+                ctx.scale(dpr, dpr);
+                drawEmptyVisualization(ctx, wrap.clientWidth, wrap.clientHeight);
+            }
+        }, 200);
+    });
+
+    // =======================================
     // GATE & PROFILE SYSTEM
-    // ═══════════════════════════════════════
+    // =======================================
     function getCachedProfiles(callback) {
         try {
             const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
@@ -1079,12 +1277,11 @@
         location.reload();
     }
 
-    // ═══════════════════════════════════════
+    // =======================================
     // INIT
-    // ═══════════════════════════════════════
+    // =======================================
     function initPage() {
-        loadConfig();
-        loadPairs();
+        startPolling();
     }
 
     if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {

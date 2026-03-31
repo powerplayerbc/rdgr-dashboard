@@ -207,7 +207,7 @@
                         <div class="nav-group"><a href="/bsi-discovery" class="nav-group-btn">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a><div class="nav-dropdown"><a href="/bsi-discovery">Discovery</a><a href="/compliance">Compliance</a><a href="/bsi-documents">Documents</a></div></div>
                         <div class="nav-group"><a href="/content" class="nav-group-btn">Content <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a><div class="nav-dropdown"><a href="/content">Publishing</a><a href="/media">Media</a></div></div>
                         <div class="nav-group"><a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a><div class="nav-dropdown"><a href="/brain">BRAIN</a><a href="/deft">DEFT</a></div></div>
-                        <div class="nav-group"><a href="/trading-bot" class="nav-group-btn active">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a><div class="nav-dropdown"><a href="/trading-bot">Bot Dashboard</a><a href="/trading-strategies" class="active">Strategies</a><a href="/trading-monitor">Monitor</a><a href="/trading-research">Research</a><a href="/trading-config">Config</a><a href="/trading-reports">Reports</a></div></div>
+                        <div class="nav-group"><a href="/trading-bot" class="nav-group-btn active">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a><div class="nav-dropdown"><a href="/trading-bot">Bot Dashboard</a><a href="/trading-strategies" class="active">Strategies</a><a href="/trading-monitor">Monitor</a><a href="/trading-research">Research</a><a href="/trading-discovery">Discovery</a><a href="/trading-cross-pairs">Cross-Pairs</a><a href="/trading-exchanges">Exchanges</a><a href="/trading-config">Config</a><a href="/trading-reports">Reports</a></div></div>
                         <a href="/meetings" class="nav-group-btn">Meetings</a>
                         <div class="nav-group"><a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a><div class="nav-dropdown"><a href="/our-workflows">Workflows</a><a href="/org-chart">Org Map</a><a href="/hub">HUB</a></div></div>
                     </div>
@@ -479,19 +479,25 @@
         tbody.innerHTML = filteredCombinations.map((d, i) => {
             const scoreColor = d.composite_score >= 60 ? 'var(--deft-success)' : d.composite_score >= 40 ? 'var(--deft-warning)' : 'var(--deft-txt-3)';
             const scorePct = Math.min(100, (d.composite_score || 0));
-            const avgProfit = d.avg_profit_per_trade != null ? (d.avg_profit_per_trade * 100).toFixed(2) + '%' : '--';
+            const avgProfitPct = d.avg_profit_per_trade != null ? (d.avg_profit_per_trade * 100).toFixed(2) + '%' : '--';
+            // Show dollar amount on a $50 trade for context
+            const tierAmounts = { 'A': 100, 'B': 200, 'C': 500 };
+            const tradeSize = tierAmounts[d.capital_tier] || 50;
+            const dollarProfit = d.avg_profit_per_trade != null ? '$' + (d.avg_profit_per_trade * tradeSize).toFixed(2) : '';
             const winRate = d.win_rate != null ? (d.win_rate * 100).toFixed(1) + '%' : '--';
             const mdd = d.max_drawdown != null ? (d.max_drawdown * 100).toFixed(1) + '%' : '--';
             const statusCls = 'badge-' + (d.status || 'candidate');
+            const isQualified = d.status === 'qualified';
+            const rowHighlight = isQualified ? 'style="background:rgba(6,214,160,0.03);border-left:2px solid var(--deft-accent, #06D6A0);"' : '';
 
-            return `<tr class="expandable-row" onclick="toggleStratDetail(${i})">
+            return `<tr class="expandable-row" onclick="toggleStratDetail(${i})" ${rowHighlight}>
                 <td class="font-mono text-xs text-txt-3">${i + 1}</td>
                 <td class="font-mono font-medium" style="color:var(--deft-txt);">${esc(d.strategy_name)}</td>
                 <td class="font-mono">${esc(d.pair)}</td>
                 <td class="hidden sm:table-cell font-mono">${esc(d.timeframe || '--')}</td>
                 <td class="hidden sm:table-cell">${esc(d.order_type || '--')}</td>
                 <td class="hidden lg:table-cell"><span class="badge" style="background:rgba(76,201,240,0.1);color:#4CC9F0;">${esc(d.capital_tier || '--')}</span></td>
-                <td class="font-mono" style="color:var(--deft-success);">${avgProfit}</td>
+                <td class="font-mono" style="color:var(--deft-success);">${avgProfitPct}${dollarProfit ? ' <span class="text-txt-3 text-xs">(' + dollarProfit + ')</span>' : ''}</td>
                 <td class="font-mono">${winRate}</td>
                 <td class="hidden sm:table-cell font-mono">${d.trades_per_day != null ? d.trades_per_day.toFixed(1) : '--'}</td>
                 <td class="hidden lg:table-cell font-mono">${mdd}</td>

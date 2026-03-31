@@ -619,6 +619,9 @@
                                 <a href="/trading-strategies">Strategies</a>
                                 <a href="/trading-monitor">Monitor</a>
                                 <a href="/trading-research">Research</a>
+                                <a href="/trading-discovery">Discovery</a>
+                                <a href="/trading-cross-pairs">Cross-Pairs</a>
+                                <a href="/trading-exchanges">Exchanges</a>
                                 <a href="/trading-config">Config</a>
                                 <a href="/trading-reports">Reports</a>
                             </div>
@@ -730,6 +733,46 @@
                     <div class="w-full">
                         <div class="stat-value" id="metricPositions">--</div>
                         <div class="stat-label">Open Positions</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exploration Metrics Row -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+                <div class="stat-chip">
+                    <div class="w-full">
+                        <div class="text-xs text-txt-2 font-mono truncate" id="metricBestStrat">--</div>
+                        <div class="stat-label">Best Strategy</div>
+                    </div>
+                </div>
+                <div class="stat-chip">
+                    <div class="w-full">
+                        <div class="stat-value" style="color: var(--deft-success, #06D6A0);" id="metricBestProfit">--</div>
+                        <div class="stat-label">Best Avg Profit</div>
+                    </div>
+                </div>
+                <div class="stat-chip">
+                    <div class="w-full">
+                        <div class="stat-value" id="metricCombosTested">--</div>
+                        <div class="stat-label">Combos Tested</div>
+                    </div>
+                </div>
+                <div class="stat-chip">
+                    <div class="w-full">
+                        <div class="stat-value" style="color: var(--deft-accent, #06D6A0);" id="metricCombosPassing">--</div>
+                        <div class="stat-label">Combos Passing</div>
+                    </div>
+                </div>
+                <div class="stat-chip">
+                    <div class="w-full">
+                        <div class="stat-value" id="metricPatterns">--</div>
+                        <div class="stat-label">Patterns Found</div>
+                    </div>
+                </div>
+                <div class="stat-chip">
+                    <div class="w-full">
+                        <div class="stat-value" style="color: var(--deft-accent-warm, #4CC9F0);" id="metricCrossPairs">--</div>
+                        <div class="stat-label">Cross-Pair Edges</div>
                     </div>
                 </div>
             </div>
@@ -1332,10 +1375,67 @@
     }
 
     // ═══════════════════════════════════════
+    // EXPLORATION METRICS (load once + every 5min)
+    // ═══════════════════════════════════════
+    async function loadExplorationMetrics() {
+        // Best strategy from bot_combinations
+        const top = await supabaseSelect('bot_combinations', 'select=strategy_name,pair,avg_profit_per_trade,composite_score&order=composite_score.desc.nullslast&limit=1');
+        if (top && top.length > 0) {
+            const best = top[0];
+            document.getElementById('metricBestStrat').textContent = `${best.strategy_name} on ${best.pair}`;
+            document.getElementById('metricBestStrat').title = `Score: ${best.composite_score?.toFixed(1)}`;
+            const pct = best.avg_profit_per_trade != null ? (best.avg_profit_per_trade * 100).toFixed(2) + '%' : '--';
+            document.getElementById('metricBestProfit').textContent = '+' + pct;
+        }
+
+        // Total combos tested (count)
+        const allCombos = await supabaseSelect('bot_combinations', 'select=id&limit=1&order=id');
+        // Use head request pattern — fetch count via Prefer header
+        try {
+            const countRes = await fetch(`${SUPABASE_URL}/rest/v1/bot_combinations?select=id`, {
+                method: 'HEAD',
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Prefer': 'count=exact' }
+            });
+            const total = countRes.headers.get('content-range');
+            if (total) {
+                const count = total.split('/')[1];
+                document.getElementById('metricCombosTested').textContent = Number(count).toLocaleString();
+            }
+        } catch(e) {}
+
+        // Combos passing (status=qualified)
+        try {
+            const passRes = await fetch(`${SUPABASE_URL}/rest/v1/bot_combinations?select=id&status=eq.qualified`, {
+                method: 'HEAD',
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Prefer': 'count=exact' }
+            });
+            const passTotal = passRes.headers.get('content-range');
+            if (passTotal) {
+                const passCount = passTotal.split('/')[1];
+                document.getElementById('metricCombosPassing').textContent = passCount;
+            }
+        } catch(e) {}
+
+        // Patterns found (from /discovery endpoint)
+        const discovery = await botFetch('/discovery');
+        if (discovery) {
+            const totalRules = discovery.total_rules || 0;
+            const oosRules = discovery.oos_survivors || 0;
+            document.getElementById('metricPatterns').textContent = `${totalRules} (${oosRules} OOS)`;
+        }
+
+        // Cross-pair edges (from /cross-pairs endpoint)
+        const crossPairs = await botFetch('/cross-pairs');
+        if (crossPairs && crossPairs.edges) {
+            document.getElementById('metricCrossPairs').textContent = crossPairs.edges.length;
+        }
+    }
+
+    // ═══════════════════════════════════════
     // REFRESH ALL
     // ═══════════════════════════════════════
     async function refreshAll() {
-        await Promise.all([loadHealth(), loadMetrics(), loadTrades(), loadEquityChart()]);
+        await Promise.all([loadHealth(), loadMetrics(), loadTrades(), loadEquityChart(), loadExplorationMetrics()]);
     }
 
     function startPolling() {
@@ -1343,11 +1443,13 @@
         loadMetrics();
         loadTrades();
         loadEquityChart();
+        loadExplorationMetrics();
 
         healthTimer = setInterval(loadHealth, 30000);
         metricsTimer = setInterval(loadMetrics, 60000);
         tradesTimer = setInterval(loadTrades, 10000);
         chartTimer = setInterval(loadEquityChart, 300000);
+        setInterval(loadExplorationMetrics, 300000);
     }
 
     // Resize chart on window resize
