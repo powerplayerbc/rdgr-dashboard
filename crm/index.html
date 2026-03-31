@@ -3532,9 +3532,11 @@
                 sheets_url: url, sheet_name: tab, source: 'google_sheets', brand_id: 'carlton'
             });
             if (result?.success) {
-                toast(`Import started: ${result.import_id || 'processing'}`, 'success');
+                const count = result.contacts_imported || result.imported_count || result.count || '?';
+                toast(`Import successful! ${count} contacts imported from Sheets.`, 'success');
                 document.getElementById('importSheetsUrl').value = '';
-            } else { toast(`Import failed: ${result?.message || 'Unknown error'}`, 'error'); }
+                setTimeout(() => fetchContacts(), 2000);
+            } else { toast(`Import failed: ${result?.message || result?.error || JSON.stringify(result) || 'Unknown error'}`, 'error'); }
         } catch (err) { toast(`Import failed: ${err.message}`, 'error'); }
         finally { btn.disabled = false; btn.textContent = 'Import from Sheets'; }
     }
