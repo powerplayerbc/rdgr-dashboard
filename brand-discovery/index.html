@@ -1854,8 +1854,8 @@
                 <p class="text-sm text-txt-2">Looking for gaps in your brand narrative</p>
             </div>`;
 
-        // Call submit_answer with empty payload to trigger holistic gap analysis
-        const result = await apiSubmitAnswer(state.sessionId, {});
+        // Call submit_answer with deepen flag to trigger holistic gap analysis
+        const result = await apiSubmitAnswer(state.sessionId, { deepen: true });
         if (!result || !result.success) {
             toast('Failed to analyze: ' + (result?.error || 'Connection error'), 'error');
             openReviewMode(state.activeCategory, state.sessionId);
