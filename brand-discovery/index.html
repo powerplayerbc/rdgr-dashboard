@@ -909,6 +909,31 @@
             </div>
         </div>
 
+        <div id="view-review" style="display:none;">
+            <div class="max-w-[800px] mx-auto px-4 sm:px-6 py-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <button onclick="goBackToProgress()" class="btn btn-ghost text-xs py-1.5 px-2.5">← Back</button>
+                        <span class="text-lg" id="reviewIcon"></span>
+                        <div>
+                            <h2 class="font-heading font-semibold text-base" id="reviewTitle">Review</h2>
+                            <p class="text-xs text-txt-3" id="reviewSubtitle"></p>
+                        </div>
+                    </div>
+                    <button onclick="continueSession()" class="btn btn-primary text-xs py-1.5 px-3" id="reviewContinueBtn">Continue Session →</button>
+                </div>
+                <div class="mb-4">
+                    <div class="flex items-center gap-3 text-xs text-txt-2">
+                        <span id="reviewProgressText"></span>
+                        <div class="flex-1 progress-bar" style="height:4px;">
+                            <div id="reviewProgressBar" style="height:100%; border-radius:2px; transition: width 0.5s;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="reviewCards" class="space-y-4"></div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Toast container -->
@@ -961,6 +986,8 @@
         rankingOrder: [],
         sortableInstance: null,
         voiceDimensions: null,
+        reviewData: null,
+        reAnswerMode: false,
     };
 
     let activeProfileId = null;
@@ -1043,6 +1070,14 @@
         return await fetchJSON(WEBHOOK_URL, { operation: 'synthesize_category', brand_id: BRAND_ID, session_id: sessionId });
     }
 
+    async function apiGetSessionReview(sessionId) {
+        return await fetchJSON(WEBHOOK_URL, { operation: 'get_session_review', brand_id: BRAND_ID, session_id: sessionId });
+    }
+
+    async function apiReAnswer(sessionId, questionIndex) {
+        return await fetchJSON(WEBHOOK_URL, { operation: 're_answer', brand_id: BRAND_ID, session_id: sessionId, question_index: questionIndex });
+    }
+
     // ═══════════════════════════════════════
     // VIEW SWITCHING
     // ═══════════════════════════════════════
@@ -1052,11 +1087,14 @@
         document.getElementById('view-session').style.display = view === 'session' ? '' : 'none';
         document.getElementById('view-synthesis').style.display = view === 'synthesis' ? '' : 'none';
         document.getElementById('view-complete').style.display = view === 'complete' ? '' : 'none';
+        document.getElementById('view-review').style.display = view === 'review' ? '' : 'none';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function goBackToProgress() {
         if (state.sortableInstance) { state.sortableInstance.destroy(); state.sortableInstance = null; }
+        const voiceOverlay = document.getElementById('voiceCalOverlay');
+        if (voiceOverlay) voiceOverlay.remove();
         state.activeCategory = null;
         state.sessionId = null;
         state.currentQuestion = null;
@@ -1107,7 +1145,7 @@
             const statusClass = status === 'complete' ? 'complete' : status === 'in_progress' ? 'in-progress' : '';
             const badgeClass = status === 'complete' ? 'badge-complete' : status === 'in_progress' ? 'badge-in_progress' : 'badge-not_started';
             const badgeText = status === 'complete' ? 'Complete' : status === 'in_progress' ? 'In Progress' : 'Not Started';
-            const actionText = status === 'complete' ? 'View' : status === 'in_progress' ? 'Resume' : 'Start';
+            const actionText = status === 'complete' ? 'Review' : status === 'in_progress' ? 'Resume' : 'Start';
 
             return `
                 <div class="discovery-card ${statusClass}" onclick="startCategory('${cat.key}')">
@@ -1236,10 +1274,10 @@
         const catInfo = CATEGORIES.find(c => c.key === categoryKey);
         if (!catInfo) return;
 
-        // Check if already complete — show results
+        // Check if already complete or in_progress with session — show review
         const catData = state.categoryMap[categoryKey];
         if (catData && catData.status === 'complete') {
-            toast('This category is already complete', 'success');
+            openReviewMode(categoryKey, catData.session_id);
             return;
         }
 
@@ -1254,7 +1292,11 @@
 
         const result = await apiStartSession(categoryKey);
         if (!result || !result.success) {
-            toast('Failed to start session: ' + (result?.error || 'Connection error'), 'error');
+            if (result?.missing_sections) {
+                toast('Complete these categories first: ' + result.missing_sections.join(', '), 'error');
+            } else {
+                toast('Failed to start session: ' + (result?.error || 'Connection error'), 'error');
+            }
             goBackToProgress();
             return;
         }
@@ -1524,10 +1566,29 @@
         }
 
         // Wait for user to see feedback, then advance
-        const delay = result.depth_analysis ? 2500 : 500;
+        const delay = result.depth_analysis ? 1500 : 500;
         setTimeout(() => {
             document.getElementById('depthFeedback').style.display = 'none';
 
+            if (state.reAnswerMode) {
+                state.reAnswerMode = false;
+                openReviewMode(state.activeCategory, state.sessionId);
+                return;
+            }
+            // Update voice dimensions overlay if in voice calibration
+            if (result.voice_dimensions && state.activeCategory === 'voice_calibration') {
+                state.voiceDimensions = result.voice_dimensions;
+                updateVoiceCalibrationOverlay(result.voice_dimensions);
+            }
+            // Handle round transition for voice calibration
+            if (result.round_complete && result.next_question) {
+                showRoundTransition(() => {
+                    state.currentQuestion = result.next_question;
+                    if (result.progress) { state.sessionProgress = result.progress; updateSessionHeader(); }
+                    renderQuestion(result.next_question);
+                });
+                return;
+            }
             if (result.is_complete) {
                 showCategoryComplete();
             } else if (result.next_question) {
@@ -1535,6 +1596,211 @@
                 renderQuestion(result.next_question);
             }
         }, delay);
+    }
+
+    // ═══════════════════════════════════════
+    // VOICE CALIBRATION UI
+    // ═══════════════════════════════════════
+    function showRoundTransition(callback) {
+        const container = document.getElementById('questionContainer');
+        container.innerHTML = `
+            <div class="text-center py-12 animate-fade-in">
+                <div class="text-3xl mb-4">&#127897;</div>
+                <h3 class="font-heading font-semibold text-base mb-2">Round Complete!</h3>
+                <p class="text-sm text-txt-2 mb-4">Refining your voice profile...</p>
+                <div class="flex justify-center">
+                    <div class="skeleton h-2 w-32 rounded-full"></div>
+                </div>
+            </div>
+        `;
+        setTimeout(callback, 2000);
+    }
+
+    function updateVoiceCalibrationOverlay(dims) {
+        let overlay = document.getElementById('voiceCalOverlay');
+        if (!overlay) {
+            // Create the overlay container after the session header
+            const sessionView = document.getElementById('view-session');
+            const header = sessionView.querySelector('.flex.items-center.justify-between');
+            if (header) {
+                overlay = document.createElement('div');
+                overlay.id = 'voiceCalOverlay';
+                overlay.className = 'mb-4';
+                header.parentNode.insertBefore(overlay, header.nextSibling?.nextSibling);
+            } else return;
+        }
+        const dimList = [
+            { key: 'warmth', label: 'Warmth', low: 'Professional', high: 'Warm' },
+            { key: 'formality', label: 'Formality', low: 'Casual', high: 'Formal' },
+            { key: 'confidence', label: 'Confidence', low: 'Humble', high: 'Bold' },
+            { key: 'humor', label: 'Humor', low: 'Serious', high: 'Witty' }
+        ];
+        overlay.innerHTML = `
+            <div class="panel">
+                <div class="panel-body py-3 px-4">
+                    <div class="text-xs font-medium text-txt-2 mb-2">Voice Profile</div>
+                    <div class="grid grid-cols-2 gap-x-6 gap-y-2">
+                        ${dimList.map(d => {
+                            const val = dims[d.key] || 0.5;
+                            const pct = val * 100;
+                            return `
+                                <div>
+                                    <div class="flex justify-between text-xs mb-0.5">
+                                        <span class="text-txt-3">${d.low}</span>
+                                        <span class="font-mono text-txt-2">${d.label}</span>
+                                        <span class="text-txt-3">${d.high}</span>
+                                    </div>
+                                    <div class="progress-bar" style="height:4px; position:relative;">
+                                        <div style="position:absolute; left:${pct}%; top:-2px; width:8px; height:8px; border-radius:50%; background:var(--deft-accent); transform:translateX(-50%); transition:left 0.5s;"></div>
+                                        <div style="width:100%; height:100%; border-radius:2px; background:var(--deft-border);"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // ═══════════════════════════════════════
+    // REVIEW MODE
+    // ═══════════════════════════════════════
+    async function openReviewMode(categoryKey, sessionId) {
+        const catInfo = CATEGORIES.find(c => c.key === categoryKey);
+        if (!catInfo) return;
+
+        state.activeCategory = categoryKey;
+        state.sessionId = sessionId;
+
+        document.getElementById('reviewIcon').textContent = catInfo.icon;
+        document.getElementById('reviewTitle').textContent = catInfo.label + ' — Review';
+        document.getElementById('reviewSubtitle').textContent = catInfo.group;
+
+        switchView('review');
+        document.getElementById('reviewCards').innerHTML = '<div class="text-center py-8"><div class="skeleton h-32 w-full rounded-lg"></div></div>';
+
+        const result = await apiGetSessionReview(sessionId);
+        if (!result || !result.success) {
+            toast('Failed to load review: ' + (result?.error || 'Connection error'), 'error');
+            goBackToProgress();
+            return;
+        }
+
+        state.reviewData = result;
+        renderReviewProgress(result.progress);
+        renderReviewCards(result.questions);
+
+        // Hide continue button if complete
+        const btn = document.getElementById('reviewContinueBtn');
+        if (result.status === 'complete') {
+            btn.textContent = 'Synthesize Identity';
+            btn.onclick = () => handleSynthesis();
+        } else {
+            btn.textContent = 'Continue Session →';
+            btn.onclick = () => continueSession();
+        }
+    }
+
+    function renderReviewProgress(progress) {
+        if (!progress) return;
+        const pct = progress.target > 0 ? Math.min((progress.avg_depth / progress.target) * 100, 100) : 0;
+        const color = pct >= 100 ? 'var(--deft-success, #22C55E)' : pct >= 50 ? 'var(--deft-accent, #06D6A0)' : 'var(--deft-warning, #FFD93D)';
+        document.getElementById('reviewProgressText').textContent = `${progress.answered}/${progress.total} answered | Depth: ${(progress.avg_depth || 0).toFixed(2)}/${(progress.target || 0.85).toFixed(2)}`;
+        const bar = document.getElementById('reviewProgressBar');
+        bar.style.width = pct + '%';
+        bar.style.background = color;
+    }
+
+    function renderReviewCards(questions) {
+        const container = document.getElementById('reviewCards');
+        if (!questions || !questions.length) {
+            container.innerHTML = '<p class="text-sm text-txt-3 text-center py-8">No questions in this session yet.</p>';
+            return;
+        }
+        container.innerHTML = questions.map((q, i) => {
+            const hasAnswer = q.answer || q.selected || q.verdict || q.rankings;
+            const score = q.depth_score;
+            const scoreColor = score >= 0.7 ? 'var(--deft-success, #22C55E)' : score >= 0.5 ? 'var(--deft-accent, #06D6A0)' : score !== null ? 'var(--deft-warning, #FFD93D)' : 'var(--deft-border, #2A2E3D)';
+            const scorePct = score !== null ? Math.min(score * 100, 100) : 0;
+
+            let answerHtml = '';
+            if (q.answer) {
+                answerHtml = `<p class="text-sm text-txt-1 mt-2 whitespace-pre-wrap">${esc(q.answer)}</p>`;
+            } else if (q.selected) {
+                answerHtml = `<p class="text-sm text-txt-1 mt-2"><span class="font-mono text-accent text-xs mr-1">${q.selected.toUpperCase()}</span> selected</p>`;
+            } else if (q.verdict) {
+                answerHtml = `<p class="text-sm text-txt-1 mt-2">Verdict: <span class="font-medium">${esc(q.verdict)}</span>${q.adjustment ? ' — ' + esc(q.adjustment) : ''}</p>`;
+            } else if (q.rankings) {
+                answerHtml = `<p class="text-sm text-txt-1 mt-2">Ranked: ${q.rankings.map((r, ri) => (ri+1) + '. ' + esc(r)).join(', ')}</p>`;
+            } else {
+                answerHtml = `<p class="text-sm text-txt-3 mt-2 italic">Not answered yet</p>`;
+            }
+
+            return `
+                <div class="panel review-card" style="border-left: 3px solid ${scoreColor};">
+                    <div class="panel-body">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-xs font-mono text-txt-3">Q${i + 1}</span>
+                                    ${q.is_followup ? '<span class="text-xs px-1.5 py-0.5 rounded" style="background: var(--deft-accent-dim); color: var(--deft-accent);">Follow-up</span>' : ''}
+                                    ${score !== null ? `<span class="text-xs font-mono" style="color: ${scoreColor};">${score.toFixed(2)}</span>` : ''}
+                                </div>
+                                <p class="font-heading font-semibold text-sm">${esc(q.question)}</p>
+                                ${q.context ? `<p class="text-xs text-txt-3 mt-0.5">${esc(q.context)}</p>` : ''}
+                                ${answerHtml}
+                                ${q.insight ? `<div class="mt-2 p-2 rounded text-xs" style="background: var(--deft-accent-dim); border: 1px solid color-mix(in srgb, var(--deft-accent) 15%, transparent);"><span class="font-medium text-accent">Insight:</span> ${esc(q.insight)}</div>` : ''}
+                            </div>
+                            ${hasAnswer ? `<button onclick="handleReAnswer(${q.index})" class="btn btn-ghost text-xs py-1 px-2 whitespace-nowrap">Re-answer</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function handleReAnswer(questionIndex) {
+        if (!state.sessionId) return;
+        const result = await apiReAnswer(state.sessionId, questionIndex);
+        if (!result || !result.success) {
+            toast('Failed to reset question: ' + (result?.error || 'Connection error'), 'error');
+            return;
+        }
+        // Switch to session view with the question loaded
+        state.currentQuestion = result.question;
+        state.reAnswerMode = true;
+        const catInfo = CATEGORIES.find(c => c.key === state.activeCategory);
+        if (catInfo) {
+            document.getElementById('sessionIcon').textContent = catInfo.icon;
+            document.getElementById('sessionTitle').textContent = catInfo.label;
+        }
+        switchView('session');
+        renderQuestion(result.question);
+    }
+
+    async function continueSession() {
+        if (!state.sessionId) return;
+        const catInfo = CATEGORIES.find(c => c.key === state.activeCategory);
+        if (catInfo) {
+            document.getElementById('sessionIcon').textContent = catInfo.icon;
+            document.getElementById('sessionTitle').textContent = catInfo.label;
+        }
+        switchView('session');
+        document.getElementById('questionContainer').innerHTML = '<div class="text-center py-8"><div class="skeleton h-32 w-full rounded-lg"></div></div>';
+        const result = await apiGetNextQuestion(state.sessionId);
+        if (!result || !result.success) {
+            toast('Failed to load: ' + (result?.error || 'Connection error'), 'error');
+            goBackToProgress();
+            return;
+        }
+        if (result.is_complete) {
+            showCategoryComplete();
+        } else if (result.current_question) {
+            state.currentQuestion = result.current_question;
+            if (result.progress) { state.sessionProgress = result.progress; updateSessionHeader(); }
+            renderQuestion(result.current_question);
+        }
     }
 
     function showDepthFeedback(analysis) {
