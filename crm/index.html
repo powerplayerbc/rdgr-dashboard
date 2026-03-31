@@ -881,9 +881,9 @@
                     <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
                         <a href="/rdgr" class="nav-group-btn">Dashboard</a>
                         <div class="nav-group">
-                            <a href="/chat" class="nav-group-btn">Chat <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
-                                <a href="/chat">Chat</a>
+                                <a href="/chat">Rodger</a>
                                 <a href="/council">Council</a>
                             </div>
                         </div>
@@ -1006,8 +1006,8 @@
                 <button class="crm-tab active" id="tab-contacts" onclick="switchView('contacts')">Contacts</button>
                 <button class="crm-tab" id="tab-pipeline" onclick="switchView('pipeline')">Pipeline</button>
                 <button class="crm-tab" id="tab-attribution" onclick="switchView('attribution')">Attribution</button>
-                <button class="crm-tab" id="tab-sequences" onclick="switchView('sequences')">Sequences</button>
-                <button class="crm-tab" id="tab-outreach" onclick="switchView('outreach')">Outreach</button>
+                <!-- Sequences tab removed — canonical location is Outreach > Email > Sequences -->
+                <!-- Outreach tab removed — use Outreach > Email > Drafts instead -->
                 <button class="crm-tab" id="tab-prospecting" onclick="switchView('prospecting')">Prospecting</button>
             </div>
         </div>
@@ -1021,6 +1021,7 @@
                         <button onclick="searchContacts()" class="btn btn-ghost text-xs py-1.5 px-3">Search</button>
                     </div>
                     <div class="flex items-center gap-2">
+                        <button onclick="openAddContactModal()" class="btn btn-primary text-xs py-1.5 px-3">+ Add Contact</button>
                         <select id="filterLifecycle" class="form-input py-1 px-2 text-xs" style="width: auto;" onchange="applyContactFilters()">
                             <option value="all">All Stages</option>
                             <option value="subscriber">Subscriber</option>
@@ -1317,10 +1318,13 @@
     <div class="slide-panel" id="panel360">
         <div class="sticky top-0 z-10 border-b border-border" style="background: rgba(13,15,22,0.95); backdrop-filter: blur(12px);">
             <div class="flex items-center justify-between p-4">
-                <h2 class="font-heading font-bold text-lg" id="p360Name">—</h2>
-                <button onclick="close360Panel()" class="text-txt-3 hover:text-txt transition-colors">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 5l10 10M15 5l-10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                </button>
+                <h2 class="font-heading font-bold text-lg" id="p360Name">---</h2>
+                <div class="flex items-center gap-2">
+                    <button onclick="toggle360Edit()" id="p360EditBtn" class="btn btn-ghost text-xs py-1 px-2">Edit</button>
+                    <button onclick="close360Panel()" class="text-txt-3 hover:text-txt transition-colors">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 5l10 10M15 5l-10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
             </div>
             <div class="px-4 pb-3 flex items-center gap-2 flex-wrap" id="p360Header">
                 <!-- Populated by JS -->
@@ -1332,6 +1336,68 @@
     </div>
 
     <!-- ═══ LOG INTERACTION MODAL ═══ -->
+    <!-- ═══ ADD CONTACT MODAL ═══ -->
+    <div class="modal-backdrop" id="addContactModal">
+        <div class="modal-content">
+            <div class="panel-header">
+                <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Add Contact</h3>
+                <button onclick="closeModal('addContactModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">First Name <span class="text-alert">*</span></label>
+                        <input type="text" id="acFirstName" class="form-input" placeholder="First name">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Last Name</label>
+                        <input type="text" id="acLastName" class="form-input" placeholder="Last name">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Email</label>
+                    <input type="email" id="acEmail" class="form-input" placeholder="email@example.com">
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Phone</label>
+                    <input type="tel" id="acPhone" class="form-input" placeholder="(555) 123-4567">
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Company</label>
+                    <input type="text" id="acCompany" class="form-input" placeholder="Company name">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Role / Title</label>
+                        <input type="text" id="acRole" class="form-input" placeholder="e.g. Owner, CEO">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Website</label>
+                        <input type="url" id="acWebsite" class="form-input" placeholder="https://...">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Lifecycle Stage</label>
+                    <select id="acStage" class="form-input">
+                        <option value="subscriber">Subscriber</option>
+                        <option value="prospect" selected>Prospect</option>
+                        <option value="lead">Lead</option>
+                        <option value="mql">MQL</option>
+                        <option value="sql">SQL</option>
+                        <option value="opportunity">Opportunity</option>
+                        <option value="customer">Customer</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="submitAddContact()" class="btn btn-primary flex-1 py-2.5" id="acSubmitBtn">Add Contact</button>
+                    <button onclick="closeModal('addContactModal')" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-backdrop" id="logInteractionModal">
         <div class="modal-content">
             <div class="panel-header">
@@ -1833,8 +1899,7 @@
         // Lazy-load data for views that need it
         if (view === 'pipeline') fetchPipelineData();
         if (view === 'attribution') fetchAttribution();
-        if (view === 'sequences') fetchSequences();
-        if (view === 'outreach') fetchOutreachDrafts();
+        // Sequences + Outreach tabs removed — both live in Email Outreach page
         if (view === 'prospecting') fetchProspectingData();
     }
 
@@ -1949,11 +2014,10 @@
                             <span class="text-[0.6rem] text-txt-3">${esc(c.engagement_level || 'inactive')}</span>
                         </div>
                     </td>
-                    <td class="text-txt-2 text-xs">${esc(c.acquisition_source || '—')}</td>
+                    <td class="text-txt-2 text-xs">${esc(({'prospecting':'Google Maps','manual':'Manual','website':'Website','form':'Form'})[c.acquisition_source] || c.acquisition_source || '—')}</td>
                     <td class="text-txt-3 text-xs font-mono">${timeAgo(c.last_interaction_at)}</td>
                     <td>
                         <div class="flex gap-1">
-                            <button class="btn btn-ghost text-[0.6rem] py-1 px-2" onclick="event.stopPropagation();open360('${esc(c.contact_id)}')">360</button>
                             <button class="btn btn-ghost text-[0.6rem] py-1 px-2" onclick="event.stopPropagation();openChangeStage('${esc(c.contact_id)}')">Stage</button>
                             <button class="btn btn-ghost text-[0.6rem] py-1 px-2" onclick="event.stopPropagation();openLogInteraction('${esc(c.contact_id)}')">Log</button>
                         </div>
@@ -2001,6 +2065,8 @@
     // ═══════════════════════════════════════
     async function open360(contactId) {
         current360ContactId = contactId;
+        current360Data = null;
+        document.getElementById('p360EditBtn').textContent = 'Edit';
         document.getElementById('panelOverlay').classList.add('active');
         document.getElementById('panel360').classList.add('active');
         document.getElementById('p360Name').textContent = 'Loading...';
@@ -2014,6 +2080,7 @@
         }
 
         const c = data.result.contact || {};
+        current360Data = c;
         const interactions = data.result.interactions || [];
         const lifecycle = data.result.lifecycle_history || [];
         const engagement = data.result.engagement_summary || {};
@@ -2110,6 +2177,68 @@
         document.getElementById('panelOverlay').classList.remove('active');
         document.getElementById('panel360').classList.remove('active');
         current360ContactId = null;
+        current360Data = null;
+    }
+
+    let current360Data = null;
+
+    function toggle360Edit() {
+        if (!current360Data || !current360ContactId) return;
+        const c = current360Data;
+        const contentEl = document.getElementById('p360Content');
+        const btn = document.getElementById('p360EditBtn');
+
+        if (btn.textContent === 'Edit') {
+            btn.textContent = 'Cancel';
+            const editHtml = `
+            <div class="panel"><div class="panel-body space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-xs text-txt-3 uppercase mb-1">First Name</label><input type="text" id="e360FirstName" class="form-input text-sm" value="${esc(c.first_name || '')}"></div>
+                    <div><label class="block text-xs text-txt-3 uppercase mb-1">Last Name</label><input type="text" id="e360LastName" class="form-input text-sm" value="${esc(c.last_name || '')}"></div>
+                </div>
+                <div><label class="block text-xs text-txt-3 uppercase mb-1">Email</label><input type="email" id="e360Email" class="form-input text-sm" value="${esc(c.email || '')}"></div>
+                <div><label class="block text-xs text-txt-3 uppercase mb-1">Phone</label><input type="tel" id="e360Phone" class="form-input text-sm" value="${esc(c.phone || '')}"></div>
+                <div><label class="block text-xs text-txt-3 uppercase mb-1">Company</label><input type="text" id="e360Company" class="form-input text-sm" value="${esc(c.company || '')}"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-xs text-txt-3 uppercase mb-1">Role / Title</label><input type="text" id="e360Role" class="form-input text-sm" value="${esc(c.title || c.role || '')}"></div>
+                    <div><label class="block text-xs text-txt-3 uppercase mb-1">Website</label><input type="url" id="e360Website" class="form-input text-sm" value="${esc(c.website || '')}"></div>
+                </div>
+                <div class="pt-2"><button onclick="save360Edit()" class="btn btn-primary py-2 px-4 text-sm" id="e360SaveBtn">Save Changes</button></div>
+            </div></div>`;
+            contentEl.insertAdjacentHTML('afterbegin', editHtml);
+        } else {
+            btn.textContent = 'Edit';
+            open360(current360ContactId);
+        }
+    }
+
+    async function save360Edit() {
+        const contact = {
+            contact_id: current360ContactId,
+            first_name: document.getElementById('e360FirstName').value.trim() || null,
+            last_name: document.getElementById('e360LastName').value.trim() || null,
+            email: document.getElementById('e360Email').value.trim() || null,
+            phone: document.getElementById('e360Phone').value.trim() || null,
+            company: document.getElementById('e360Company').value.trim() || null,
+            title: document.getElementById('e360Role').value.trim() || null,
+            website: document.getElementById('e360Website').value.trim() || null
+        };
+        const btn = document.getElementById('e360SaveBtn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+        try {
+            const result = await crmBridge('upsert_contact', { contact });
+            if (result && result.success !== false) {
+                showToast('Contact updated', 'success');
+                document.getElementById('p360EditBtn').textContent = 'Edit';
+                open360(current360ContactId);
+                fetchContacts();
+            } else {
+                showToast('Failed: ' + (result?.error || 'Unknown error'), 'error');
+            }
+        } catch (err) { showToast('Error: ' + err.message, 'error'); }
+        btn.disabled = false;
+        btn.textContent = 'Save Changes';
     }
 
     // ═══════════════════════════════════════
@@ -2936,6 +3065,54 @@
     // ═══════════════════════════════════════
     // ACTIONS: LOG INTERACTION
     // ═══════════════════════════════════════
+    function openAddContactModal() {
+        document.getElementById('acFirstName').value = '';
+        document.getElementById('acLastName').value = '';
+        document.getElementById('acEmail').value = '';
+        document.getElementById('acPhone').value = '';
+        document.getElementById('acCompany').value = '';
+        document.getElementById('acRole').value = '';
+        document.getElementById('acWebsite').value = '';
+        document.getElementById('acStage').value = 'prospect';
+        openModal('addContactModal');
+    }
+
+    async function submitAddContact() {
+        const firstName = document.getElementById('acFirstName').value.trim();
+        if (!firstName) { showToast('First name is required', 'error'); return; }
+
+        const contact = {
+            first_name: firstName,
+            last_name: document.getElementById('acLastName').value.trim() || null,
+            email: document.getElementById('acEmail').value.trim() || null,
+            phone: document.getElementById('acPhone').value.trim() || null,
+            company: document.getElementById('acCompany').value.trim() || null,
+            role: document.getElementById('acRole').value.trim() || null,
+            website: document.getElementById('acWebsite').value.trim() || null,
+            lifecycle_stage: document.getElementById('acStage').value,
+            acquisition_source: 'manual'
+        };
+
+        const btn = document.getElementById('acSubmitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        try {
+            const result = await crmBridge('upsert_contact', { contact });
+            if (result && result.success !== false) {
+                showToast('Contact added', 'success');
+                closeModal('addContactModal');
+                fetchContacts();
+            } else {
+                showToast('Failed to add contact: ' + (result?.error || 'Unknown error'), 'error');
+            }
+        } catch (err) {
+            showToast('Error: ' + err.message, 'error');
+        }
+        btn.disabled = false;
+        btn.textContent = 'Add Contact';
+    }
+
     function openLogInteraction(contactId) {
         document.getElementById('liContactId').value = contactId;
         document.getElementById('liSummary').value = '';

@@ -780,9 +780,9 @@
                     <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
                         <a href="/rdgr" class="nav-group-btn active">Dashboard</a>
                         <div class="nav-group">
-                            <a href="/chat" class="nav-group-btn">Chat <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
-                                <a href="/chat">Chat</a>
+                                <a href="/chat">Rodger</a>
                                 <a href="/council">Council</a>
                             </div>
                         </div>
@@ -1201,15 +1201,15 @@
                     </div>
                     <div>
                         <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Deadline (optional)</label>
-                        <input type="datetime-local" id="taskDeadline" class="form-input">
+                        <input type="date" id="taskDeadline" class="form-input">
                     </div>
                     <div>
                         <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Notes (optional)</label>
                         <textarea id="taskNotes" class="form-input" rows="2" placeholder="Additional context..."></textarea>
                     </div>
                     <div class="flex items-center gap-2 pt-1">
-                        <input type="checkbox" id="taskIntegratePlan" checked class="accent-[var(--deft-accent)]" style="width:14px;height:14px;">
-                        <label for="taskIntegratePlan" class="text-xs text-txt-2">Integrate with daily plan</label>
+                        <input type="checkbox" id="taskIntegratePlan" checked class="accent-[var(--deft-accent)]" style="width:14px;height:14px;" title="When checked, this task appears in your next BRAIN daily plan">
+                        <label for="taskIntegratePlan" class="text-xs text-txt-2" title="When checked, this task appears in your next BRAIN daily plan">Integrate with daily plan</label>
                     </div>
                     <div class="flex gap-3 pt-2">
                         <button type="submit" class="btn btn-primary flex-1 py-2.5" id="submitTaskBtn">Submit Task</button>
@@ -2924,7 +2924,7 @@ ${esc(content)}
         if (notes) payload.context = { notes };
 
         const deadline = document.getElementById('taskDeadline').value;
-        if (deadline) payload.deadline = new Date(deadline).toISOString();
+        if (deadline) payload.deadline = new Date(deadline + 'T23:59:00').toISOString();
 
         try {
             const result = await fetchJSON(API.intake, payload);

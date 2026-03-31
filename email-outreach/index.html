@@ -942,9 +942,9 @@
                     <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
                         <a href="/rdgr" class="nav-group-btn">Dashboard</a>
                         <div class="nav-group">
-                            <a href="/chat" class="nav-group-btn">Chat <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
-                                <a href="/chat">Chat</a>
+                                <a href="/chat">Rodger</a>
                                 <a href="/council">Council</a>
                             </div>
                         </div>
@@ -3375,10 +3375,30 @@
     function getDraftRecipient(draft) {
         const ctx = draft.context || {};
         const content = draft.content || {};
-        const name = ctx.contact_name || ctx.name || content.recipient_name || '';
-        const company = ctx.company || content.company || '';
+        let name = ctx.contact_name || ctx.name || content.recipient_name || '';
+        let company = ctx.company || content.company || '';
         const email = ctx.email || content.recipient_email || '';
         const contactId = ctx.contact_id || '';
+
+        // If company contains " - " (e.g. "Name - Title"), extract just the business name
+        if (company && company.includes(' - ')) {
+            company = company.split(' - ')[0].trim();
+        }
+
+        // If name is empty but we have a first/last from context, build it
+        if (!name && (ctx.first_name || ctx.last_name)) {
+            name = `${ctx.first_name || ''} ${ctx.last_name || ''}`.trim();
+        }
+
+        // If name still looks like a company name (contains business keywords), clear it
+        // so we don't use it in greetings
+        const businessKeywords = ['consultant', 'solutions', 'services', 'llc', 'inc', 'corp'];
+        const nameLower = name.toLowerCase();
+        if (name && businessKeywords.some(kw => nameLower.includes(kw))) {
+            company = company || name;
+            name = '';
+        }
+
         return { name, company, email, contactId };
     }
 
@@ -3469,7 +3489,7 @@
                             </div>
                             <div class="flex items-center gap-2 mb-1">
                                 ${r.name ? `<span class="text-sm font-medium text-txt">${esc(r.name)}</span>` : ''}
-                                ${r.company ? `<span class="text-xs text-txt-3">@ ${esc(r.company)}</span>` : ''}
+                                ${r.company && r.name ? `<span class="text-xs text-txt-3">@ ${esc(r.company)}</span>` : r.company && !r.name ? `<span class="text-sm font-medium text-txt">${esc(r.company)}</span>` : ''}
                                 ${r.email ? `<span class="text-xs text-info">${esc(r.email)}</span>` : '<span class="text-xs text-alert">No email</span>'}
                             </div>
                             <div class="email-subject-line text-sm mb-1" style="font-size: 0.85rem;">${esc(subject)}</div>
@@ -3514,8 +3534,12 @@
         document.getElementById('epStatusBadge').textContent = draft.review_status || 'draft';
         document.getElementById('epStatusBadge').style.cssText = `background:rgba(${draft.review_status === 'approved' ? '6,214,160' : draft.review_status === 'rejected' ? '255,107,107' : draft.review_status === 'skipped' ? '107,114,128' : draft.review_status === 'sent' ? '76,201,240' : '255,217,61'},0.15);color:${statusColor};`;
 
-        const toLine = [r.name, r.company ? `@ ${r.company}` : '', r.email ? `<${r.email}>` : ''].filter(Boolean).join(' ');
-        document.getElementById('epTo').innerHTML = esc(toLine) || '(Unknown recipient)';
+        const toParts = [];
+        if (r.name) toParts.push(r.name);
+        if (r.company && r.name) toParts.push(`@ ${r.company}`);
+        else if (r.company) toParts.push(r.company);
+        if (r.email) toParts.push(`<${r.email}>`);
+        document.getElementById('epTo').innerHTML = esc(toParts.join(' ')) || '(Unknown recipient)';
         document.getElementById('epSubject').textContent = subject;
         document.getElementById('epScore').innerHTML = score
             ? `<span class="badge eng-${score >= 75 ? 'hot' : score >= 50 ? 'active' : 'warm'}">${score}</span>`

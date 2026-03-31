@@ -1164,9 +1164,9 @@
                 <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
                         <a href="/rdgr" class="nav-group-btn">Dashboard</a>
                         <div class="nav-group">
-                            <a href="/chat" class="nav-group-btn">Chat <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
-                                <a href="/chat">Chat</a>
+                                <a href="/chat">Rodger</a>
                                 <a href="/council">Council</a>
                             </div>
                         </div>
@@ -1447,6 +1447,35 @@
                 <div class="empty-state">
                     <p>No meals logged yet today</p>
                     <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Use the Log Meal tab or quick action to get started</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Exercises -->
+        <div class="panel deft-reveal deft-reveal-5">
+            <div class="panel-header">
+                <div class="flex items-center gap-2">
+                    <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--deft-txt-2);">Today's Exercise</span>
+                    <span id="todayExCount" class="font-mono text-xs px-1.5 py-0.5 rounded" style="background: var(--deft-accent-dim); color: var(--deft-accent);">0</span>
+                </div>
+                <button class="btn btn-primary text-xs" onclick="switchView('exercise')">
+                    <span class="flex items-center gap-1.5">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2.5v7M2.5 6h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        Add
+                    </span>
+                </button>
+            </div>
+            <div class="panel-body" id="todayExerciseList">
+                <div class="empty-state">
+                    <p>No exercises logged yet today</p>
+                    <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Use the Exercise tab or quick action to log activity</p>
+                </div>
+            </div>
+            <div id="todayExSummary" style="display:none; border-top: 1px solid var(--deft-border); padding: 0.75rem 1rem;">
+                <div class="flex gap-4 text-xs" style="color: var(--deft-txt-2);">
+                    <span><strong id="todayExDuration">0</strong> min total</span>
+                    <span>&middot;</span>
+                    <span><strong id="todayExCal">0</strong> cal burned</span>
                 </div>
             </div>
         </div>
@@ -3140,6 +3169,11 @@ async function refreshToday() {
     const meals = await supabaseSelect('deft_meal_entries', `user_id=eq.${activeProfileId}&logged_at=gte.${today}T00:00:00&logged_at=lt.${today}T23:59:59&order=logged_at.asc&select=*`);
     todayMeals = meals || [];
 
+    // Fetch today's exercises via bridge
+    const exResult = await deftApi('get_exercises', { date: today }, { silent: true });
+    todayExercises = (exResult && exResult.data) ? (exResult.data.exercises || exResult.data) : [];
+    if (!Array.isArray(todayExercises)) todayExercises = [];
+
     renderToday();
 }
 
@@ -3164,6 +3198,9 @@ function renderToday() {
     // Update meals list
     renderMealsList();
 
+    // Update exercise summary on today view
+    renderTodayExercises();
+
     // Update water tracker
     const water = dailyLog?.water_oz || 0;
     document.getElementById('waterAmount').textContent = water;
@@ -3172,6 +3209,49 @@ function renderToday() {
 
     // Update meal count badge
     document.getElementById('mealCount').textContent = todayMeals.length;
+}
+
+function renderTodayExercises() {
+    const container = document.getElementById('todayExerciseList');
+    const countEl = document.getElementById('todayExCount');
+    const summaryEl = document.getElementById('todayExSummary');
+
+    countEl.textContent = todayExercises.length;
+
+    if (todayExercises.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>No exercises logged yet today</p><p class="text-sm mt-1" style="color: var(--deft-txt-3);">Use the Exercise tab or quick action to log activity</p></div>';
+        summaryEl.style.display = 'none';
+        return;
+    }
+
+    const typeColors = {
+        cardio: 'var(--deft-accent)', strength: 'var(--deft-accent-warm)',
+        flexibility: '#C084FC', sports: 'var(--deft-success)', other: 'var(--deft-txt-3)'
+    };
+
+    container.innerHTML = todayExercises.map(ex => {
+        const color = typeColors[ex.exercise_type] || typeColors.other;
+        return `<div class="exercise-card">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center gap-2">
+                    <span class="badge" style="background: ${color}20; color: ${color}; border: 1px solid ${color}30;">${ex.exercise_type || 'other'}</span>
+                    <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${ex.exercise_name || 'Exercise'}</span>
+                </div>
+                <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${ex.intensity || ''}</span>
+            </div>
+            <div class="flex gap-3 text-xs" style="color: var(--deft-txt-2);">
+                <span>${ex.duration_min || 0} min</span>
+                <span>&middot;</span>
+                <span>${Math.round(ex.calories_burned || 0)} cal burned</span>
+            </div>
+        </div>`;
+    }).join('');
+
+    const totalDuration = todayExercises.reduce((s, e) => s + (e.duration_min || 0), 0);
+    const totalCal = todayExercises.reduce((s, e) => s + (e.calories_burned || 0), 0);
+    summaryEl.style.display = '';
+    document.getElementById('todayExDuration').textContent = totalDuration;
+    document.getElementById('todayExCal').textContent = Math.round(totalCal);
 }
 
 function updateNetCarbsBar(consumed, target) {
@@ -3245,6 +3325,7 @@ function renderMealsList() {
         const time = new Date(m.logged_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
         const mealType = (m.meal_type || 'meal').toLowerCase();
         const badgeClass = `badge badge-${mealType}`;
+        const mealId = m.meal_id || m.id || '';
         return `
         <div class="meal-card">
             <div class="flex items-center justify-between mb-2">
@@ -3252,7 +3333,12 @@ function renderMealsList() {
                     <span class="${badgeClass}">${m.meal_type || 'Meal'}</span>
                     <span class="font-medium text-sm">${m.recipe_name || 'Unnamed'}</span>
                 </div>
-                <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${time}</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${time}</span>
+                    <button onclick="deleteMealEntry('${mealId}')" class="text-xs px-1.5 py-0.5 rounded hover:bg-red-500/20 transition-colors" style="color: var(--deft-danger);" title="Delete meal">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 3.5h7M4.5 3.5V2.5a1 1 0 011-1h1a1 1 0 011 1v1M5 5.5v3M7 5.5v3M3.5 3.5l.5 6a1 1 0 001 1h2a1 1 0 001-1l.5-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                </div>
             </div>
             <div class="flex gap-3 text-xs" style="color: var(--deft-txt-2);">
                 <span class="font-mono">${Math.round(n.calories || 0)} cal</span>
@@ -3262,6 +3348,27 @@ function renderMealsList() {
             </div>
         </div>`;
     }).join('');
+}
+
+async function deleteMealEntry(mealId) {
+    if (!mealId) return;
+    if (!confirm('Delete this meal entry?')) return;
+    const result = await deftApi('undo_meal', { meal_id: mealId });
+    if (result) {
+        toast('Meal deleted', 'success');
+        refreshToday();
+    }
+}
+
+async function deleteExerciseEntry(exerciseId) {
+    if (!exerciseId) return;
+    if (!confirm('Delete this exercise entry?')) return;
+    const result = await supabaseWrite('deft_exercise_entries', 'DELETE', null, `exercise_id=eq.${exerciseId}`);
+    if (result !== false) {
+        toast('Exercise deleted', 'success');
+        loadExercises();
+        refreshToday();
+    }
 }
 
 // ═══════════════════════════════════════
@@ -3347,7 +3454,11 @@ async function submitWeighIn() {
     btn.disabled = true;
     btn.textContent = 'Saving...';
 
-    const result = await deftApi('log_weight', { weight_lbs: weight, notes });
+    const result = await deftApi('log_weight', {
+        weight_lbs: weight,
+        weigh_date: new Date().toLocaleDateString('en-CA'),
+        notes: notes || null
+    });
 
     btn.disabled = false;
     btn.textContent = 'Save Weight';
@@ -3857,6 +3968,7 @@ function renderExercises() {
             other: 'var(--deft-txt-3)'
         };
         const color = typeColors[ex.exercise_type] || typeColors.other;
+        const exId = ex.exercise_id || ex.id || '';
         return `
         <div class="exercise-card">
             <div class="flex items-center justify-between mb-1">
@@ -3864,7 +3976,12 @@ function renderExercises() {
                     <span class="badge" style="background: ${color}20; color: ${color}; border: 1px solid ${color}30;">${ex.exercise_type || 'other'}</span>
                     <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${ex.exercise_name || 'Exercise'}</span>
                 </div>
-                <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${ex.intensity || ''}</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${ex.intensity || ''}</span>
+                    <button onclick="deleteExerciseEntry('${exId}')" class="text-xs px-1.5 py-0.5 rounded hover:bg-red-500/20 transition-colors" style="color: var(--deft-danger);" title="Delete exercise">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 3.5h7M4.5 3.5V2.5a1 1 0 011-1h1a1 1 0 011 1v1M5 5.5v3M7 5.5v3M3.5 3.5l.5 6a1 1 0 001 1h2a1 1 0 001-1l.5-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                </div>
             </div>
             <div class="flex gap-3 text-xs" style="color: var(--deft-txt-2);">
                 <span>${ex.duration_min || 0} min</span>
@@ -3919,11 +4036,30 @@ async function logExercise() {
     btn.disabled = true;
     btn.innerHTML = '<span class="flex items-center justify-center gap-2">Logging...</span>';
 
+    // Estimate calories if not entered
+    let finalCalories = calories;
+    let caloriesEstimated = false;
+    if (!finalCalories || finalCalories <= 0) {
+        const MET = {
+            cardio:     { low: 4.0, moderate: 7.0, high: 10.0, max: 12.5 },
+            strength:   { low: 3.0, moderate: 5.0, high: 6.0,  max: 8.0  },
+            flexibility:{ low: 2.5, moderate: 3.5, high: 4.0,  max: 5.0  },
+            sports:     { low: 4.0, moderate: 6.0, high: 8.0,  max: 10.0 },
+            other:      { low: 3.0, moderate: 5.0, high: 7.0,  max: 9.0  }
+        };
+        const met = (MET[type] || MET.other)[selectedIntensity || 'moderate'];
+        const profWeightEl = document.getElementById('profWeight');
+        const weightLbs = (profWeightEl && parseFloat(profWeightEl.value)) || (dailyLog?.weight_lbs) || 170;
+        const weightKg = weightLbs * 0.453592;
+        finalCalories = Math.round(met * weightKg * (duration / 60));
+        caloriesEstimated = true;
+    }
+
     const result = await deftApi('log_exercise', {
         exercise_name: name,
         exercise_type: type,
         duration_min: duration,
-        calories_burned: calories || 0,
+        calories_burned: finalCalories,
         intensity: selectedIntensity,
         details: Object.keys(details).length > 0 ? details : undefined
     });
@@ -3932,7 +4068,7 @@ async function logExercise() {
     btn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 3v8M3 7h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Log Exercise</span>';
 
     if (result) {
-        toast(`${name} logged!`, 'success');
+        toast(`${name} logged!${caloriesEstimated ? ' (~' + finalCalories + ' cal estimated)' : ''}`, 'success');
         // Clear form
         document.getElementById('exName').value = '';
         document.getElementById('exDuration').value = '';
