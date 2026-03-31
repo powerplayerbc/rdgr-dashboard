@@ -1322,10 +1322,15 @@
                     handleCategoryCompletion();
                     return;
                 }
-                state.currentQuestion = qResult.current_question;
-                state.sessionProgress = qResult.progress || state.sessionProgress;
-                updateSessionHeader();
-                renderQuestion(qResult.current_question);
+                if (qResult.current_question) {
+                    state.currentQuestion = qResult.current_question;
+                    state.sessionProgress = qResult.progress || state.sessionProgress;
+                    updateSessionHeader();
+                    renderQuestion(qResult.current_question);
+                } else {
+                    // All questions answered but depth not met - show review
+                    openReviewMode(categoryKey, state.sessionId);
+                }
             } else {
                 toast('Failed to get question', 'error');
                 goBackToProgress();
@@ -1565,6 +1570,9 @@
                     state.currentQuestion = verify.current_question;
                     if (verify.progress) { state.sessionProgress = verify.progress; updateSessionHeader(); }
                     renderQuestion(verify.current_question);
+                } else {
+                    toast('Answer saved!', 'success');
+                    openReviewMode(state.activeCategory, state.sessionId);
                 }
                 return;
             }
@@ -1612,6 +1620,9 @@
             } else if (result.next_question) {
                 state.currentQuestion = result.next_question;
                 renderQuestion(result.next_question);
+            } else {
+                // All questions answered but depth not met - show review
+                openReviewMode(state.activeCategory, state.sessionId);
             }
         }, delay);
     }
@@ -1818,6 +1829,9 @@
             state.currentQuestion = result.current_question;
             if (result.progress) { state.sessionProgress = result.progress; updateSessionHeader(); }
             renderQuestion(result.current_question);
+        } else {
+            // All questions answered but depth not met - show review
+            openReviewMode(state.activeCategory, state.sessionId);
         }
     }
 
