@@ -1017,25 +1017,6 @@
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8">
             <div class="dashboard-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
 
-                <!-- Human Review Queue -->
-                <div class="panel span-2" style="grid-column: span 2;">
-                    <div class="panel-header">
-                        <div class="flex items-center gap-2">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1l2.35 4.76 5.25.76-3.8 3.7.9 5.24L8 13.27l-4.7 2.47.9-5.24-3.8-3.7 5.25-.76L8 1z" stroke="#FF6B6B" stroke-width="1.2" fill="none"/></svg>
-                            <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Human Review Queue</h2>
-                            <span class="badge badge-failed ml-1" id="reviewCount">0</span>
-                        </div>
-                        <span class="text-xs text-txt-3 font-mono">Requires your decision</span>
-                    </div>
-                    <div class="panel-body" id="reviewPanel">
-                        <div class="empty-state">
-                            <div class="skeleton h-12 w-full mb-2"></div>
-                            <div class="skeleton h-12 w-full mb-2"></div>
-                            <div class="skeleton h-12 w-3/4"></div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Active Task Queue -->
                 <div class="panel">
                     <div class="panel-header">
@@ -1352,7 +1333,7 @@
     };
 
     let taskData = [];
-    let reviewData = [];
+    let reviewData = []; // deprecated — Human Review Queue removed, kept for compatibility
     let activityData = [];
     let directiveData = [];
     let directiveHistory = [];
@@ -1545,7 +1526,6 @@
 
         await Promise.all([
             fetchTaskQueue(),
-            fetchHumanReview(),
             fetchDirectives(),
             fetchActivity(),
             fetchHealth(),
@@ -1583,14 +1563,9 @@
         renderTasks();
     }
 
-    async function fetchHumanReview() {
-        const result = await supabaseSelect(
-            'human_review_queue',
-            'decision=is.null&order=submitted_at.desc&limit=100'
-        );
-        reviewData = Array.isArray(result) ? result : [];
-        renderReviews();
-    }
+    // Human Review Queue removed — superseded by Human Tasks (directive_tasks)
+    async function fetchHumanReview() { /* no-op */ }
+    function renderReviews() { /* no-op */ }
 
     async function fetchDirectives() {
         const [pendingResult, historyResult, activeResult] = await Promise.all([
@@ -2152,7 +2127,7 @@
     function updateStatusBar() {
         const today = new Date().toISOString().split('T')[0];
         const active = taskData.filter(t => ['ready', 'in_progress'].includes(t.status)).length;
-        const review = reviewData.length + directiveData.length;
+        const review = directiveData.length;
         const completed = taskData.filter(t => t.status === 'completed' && (t.completed_at || t.updated_at || '').startsWith(today)).length;
         const failed = taskData.filter(t => t.status === 'failed' && (t.completed_at || t.updated_at || '').startsWith(today)).length;
         const blocked = taskData.filter(t => t.status === 'blocked').length;
@@ -2396,135 +2371,6 @@
         else msg = `Failed to ${action}: ${result?.error || 'Unknown error'}`;
         toast(msg, 'error');
         if (btn) btn.disabled = false;
-    }
-
-    // ═══════════════════════════════════════
-    // RENDER: HUMAN REVIEW
-    // ═══════════════════════════════════════
-    function renderReviews() {
-        const panel = document.getElementById('reviewPanel');
-        const countEl = document.getElementById('reviewCount');
-        countEl.textContent = reviewData.length;
-
-        if (reviewData.length === 0) {
-            panel.innerHTML = '<div class="empty-state"><div class="mb-2 text-2xl opacity-40">✓</div>No items pending review</div>';
-            return;
-        }
-
-        const DISPLAY_LIMIT = 5;
-        const showAll = panel.dataset.showAll === 'true';
-        const displayItems = showAll ? reviewData : reviewData.slice(0, DISPLAY_LIMIT);
-        let html = displayItems.map((item, i) => {
-            const taskId = item.task_id || 'Unknown';
-            const contentType = item.content_type || '';
-            const content = item.content || '';
-            const aiDecision = item.ai_decision || '';
-            const reason = item.escalation_reason || '';
-            const confidence = item.confidence;
-            const summary = item.summary || '';
-            const isInfra = contentType === 'infrastructure/install_request';
-
-            // Parse issues: infrastructure items have object {type, risk_level, integrations}, content items have array of strings
-            let issuesDisplay = '';
-            let infraIntegrations = [];
-            let infraRiskLevel = '';
-            if (isInfra && item.issues && typeof item.issues === 'object' && !Array.isArray(item.issues)) {
-                infraRiskLevel = item.issues.risk_level || 'high';
-                infraIntegrations = Array.isArray(item.issues.integrations) ? item.issues.integrations : [];
-            } else {
-                issuesDisplay = Array.isArray(item.issues) ? item.issues.join(', ') : (item.issues || '');
-            }
-
-            // Header badges
-            const typeBadge = isInfra
-                ? `<span class="badge badge-infra">INFRASTRUCTURE</span><span class="badge badge-risk-high">${esc(infraRiskLevel.toUpperCase())} RISK</span>`
-                : (contentType ? `<span class="badge badge-domain">${esc(contentType)}</span>` : '');
-            const confidenceLabel = isInfra
-                ? '<span class="text-xs text-warn">Requires Manual Approval</span>'
-                : (confidence ? `<span class="text-xs text-txt-3">Confidence: ${esc(String(confidence))}</span>` : '');
-
-            // Detail section
-            let detailContent = '';
-            if (isInfra) {
-                const integrationsList = infraIntegrations.length
-                    ? `<div class="mb-3"><span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Integrations to Install</span><ul class="mt-1 text-xs text-txt-2 list-disc list-inside">${infraIntegrations.map(pkg => `<li class="py-0.5">${esc(String(pkg))}</li>`).join('')}</ul></div>`
-                    : '';
-                detailContent = `
-                    ${integrationsList}
-                    <div class="mb-3">
-                        <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Justification</span>
-                        <div class="mt-1 p-3 rounded text-xs text-txt-2 font-mono whitespace-pre-wrap max-h-48 overflow-y-auto" style="background: rgba(0,0,0,0.3); border: 1px solid #1E2130;">
-${esc(content)}
-                        </div>
-                    </div>`;
-            } else {
-                detailContent = `
-                    ${issuesDisplay ? `<div class="mb-3"><span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Issues</span><p class="text-xs text-warn mt-1">${esc(issuesDisplay)}</p></div>` : ''}
-                    <div class="mb-3">
-                        <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Publishing</span>
-                        <div class="mt-1 p-3 rounded text-xs text-txt-2 font-mono whitespace-pre-wrap max-h-48 overflow-y-auto" style="background: rgba(0,0,0,0.3); border: 1px solid #1E2130;">
-${esc(content)}
-                        </div>
-                    </div>`;
-            }
-
-            return `
-                <div class="review-card mb-3 p-4" id="review-${i}">
-                    <div class="flex items-start justify-between gap-3 cursor-pointer" onclick="toggleReview(${i})">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-                                <span class="font-mono text-xs text-info">${esc(taskId)}</span>
-                                ${typeBadge}
-                                ${confidenceLabel}
-                            </div>
-                            ${summary ? `<p class="text-sm text-txt mb-1">${esc(summary)}</p>` : ''}
-                            ${reason ? `<p class="text-xs text-alert"><span class="text-txt-3">Escalation:</span> ${esc(reason)}</p>` : ''}
-                        </div>
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="text-txt-3 flex-shrink-0 mt-1 transition-transform" id="chevron-${i}">
-                            <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-
-                    <div class="hidden mt-4" id="review-detail-${i}">
-                        ${detailContent}
-
-                        <div class="mb-3">
-                            <label class="text-xs text-txt-3 uppercase tracking-wider font-medium block mb-1">Notes / Feedback</label>
-                            <textarea class="form-input text-xs" rows="2" placeholder="Add notes about your decision..." id="review-notes-${i}"></textarea>
-                        </div>
-
-                        <div class="flex gap-2 flex-wrap">
-                            <button class="btn btn-approve text-xs" onclick="submitDecision('${esc(taskId)}', 'approved', ${i})">
-                                ✓ Approve
-                            </button>
-                            ${isInfra ? '' : `<button class="btn btn-modify text-xs" onclick="openModify('${esc(taskId)}', ${i})">
-                                ✎ Modify
-                            </button>`}
-                            <button class="btn btn-deny text-xs" onclick="submitDecision('${esc(taskId)}', 'denied', ${i})">
-                                ✕ Deny
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        if (reviewData.length > DISPLAY_LIMIT) {
-            const btnText = showAll ? 'Show Less' : `Show All (${reviewData.length} total)`;
-            html += `<div class="text-center mt-3 pt-3" style="border-top: 1px solid var(--deft-border, #2A2E3D);">
-                <button onclick="this.closest('.panel-body').dataset.showAll = this.closest('.panel-body').dataset.showAll === 'true' ? 'false' : 'true'; renderReviews();" class="btn btn-ghost text-xs py-1.5 px-4">${btnText}</button>
-            </div>`;
-        }
-        panel.innerHTML = html;
-    }
-
-    function toggleReview(i) {
-        const detail = document.getElementById(`review-detail-${i}`);
-        const chevron = document.getElementById(`chevron-${i}`);
-        const card = document.getElementById(`review-${i}`);
-        const isHidden = detail.classList.contains('hidden');
-        detail.classList.toggle('hidden');
-        card.classList.toggle('expanded', isHidden);
-        chevron.style.transform = isHidden ? 'rotate(180deg)' : '';
     }
 
     // ═══════════════════════════════════════
