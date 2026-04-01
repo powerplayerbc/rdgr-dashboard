@@ -1681,6 +1681,18 @@
     }
 
     // Button config for dynamic action buttons
+    // Default action options per task type — ensures consistency with individual pages
+    const DEFAULT_ACTIONS_BY_TYPE = {
+        approve_social_draft:   ['approve', 'edit', 'reject', 'skip'],
+        approve_content:        ['approve', 'reject', 'edit', 'request_changes'],
+        approve_emails:         ['approve', 'reject', 'edit', 'request_changes'],
+        approve_landing_page:   ['approve', 'reject', 'request_changes'],
+        approve_testimonial:    ['approve', 'reject', 'edit'],
+        review_research:        ['approve', 'reject', 'request_changes'],
+        acknowledge:            ['acknowledge'],
+        mark_complete:          ['mark_complete'],
+    };
+
     const ACTION_BUTTON_CONFIG = {
         approve:         { label: 'Approve',        cls: 'btn-approve', icon: '✓' },
         reject:          { label: 'Reject',         cls: 'btn-deny',    icon: '✕' },
@@ -1782,8 +1794,8 @@
                 paramsHtml = `<div class="mt-2"><span class="text-[0.65rem] font-semibold text-txt-3 uppercase tracking-wider">Parameters</span><div class="mt-0.5 space-y-0.5">${paramRows}</div></div>`;
             }
 
-            // Dynamic action buttons from action_options
-            const actionOptions = params.action_options || ['approve', 'reject'];
+            // Dynamic action buttons — use task's action_options, fall back to defaults by type
+            const actionOptions = params.action_options || DEFAULT_ACTIONS_BY_TYPE[actionType] || ['approve', 'reject'];
             let buttonsHtml;
             if (isProcessing) {
                 buttonsHtml = `<div class="flex items-center gap-2 text-xs text-txt-3"><span class="ha-spinner"></span> Processing...</div>`;
@@ -2039,13 +2051,14 @@
         container.style.display = '';
         container.innerHTML = '<span class="text-txt-3">Loading batch...</span>';
         try {
-            const data = await supabaseSelect('social_content_queue', `batch_id=eq.${batchId}&select=id,platform,status,content&order=platform`);
+            const data = await supabaseSelect('social_content_queue', `generation_batch_id=eq.${batchId}&select=id,platform,status,content_text,title&order=platform`);
             if (!data || data.length === 0) {
                 container.innerHTML = '<span class="text-txt-3">No posts found for this batch.</span>';
                 return;
             }
             container.innerHTML = data.map(p => {
-                const preview = (p.content || '').substring(0, 80) + ((p.content || '').length > 80 ? '...' : '');
+                const text = p.content_text || p.title || '';
+                const preview = text.substring(0, 80) + (text.length > 80 ? '...' : '');
                 return `<div class="flex items-center gap-2 p-1.5 rounded" style="background:rgba(0,0,0,0.2);">
                     <span class="badge badge-domain text-[0.55rem]">${esc(p.platform)}</span>
                     <span class="badge badge-${p.status || 'draft'} text-[0.55rem]">${esc(p.status || 'draft')}</span>

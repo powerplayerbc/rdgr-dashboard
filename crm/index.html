@@ -1566,6 +1566,17 @@
     <!-- Human task actions are now inline within each card -->
 
     <!-- ═══ TOAST CONTAINER ═══ -->
+    <!-- Interaction Detail Modal -->
+    <div class="modal-backdrop" id="interactionDetailModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="panel-header">
+                <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Interaction Detail</h3>
+                <button class="btn btn-ghost text-xs py-1 px-2" onclick="closeModal('interactionDetailModal')">Close</button>
+            </div>
+            <div class="panel-body" id="interactionDetailBody"></div>
+        </div>
+    </div>
+
     <div class="toast-container" id="toasts"></div>
 
     <!-- ═══ SCRIPT ═══ -->
@@ -2082,6 +2093,7 @@
         const c = data.result.contact || {};
         current360Data = c;
         const interactions = data.result.interactions || [];
+        current360Interactions = interactions;
         const lifecycle = data.result.lifecycle_history || [];
         const engagement = data.result.engagement_summary || {};
 
@@ -2107,6 +2119,9 @@
         html += `<div class="panel"><div class="panel-body"><div class="grid grid-cols-2 gap-3 text-sm">
             ${c.email ? `<div><span class="text-xs text-txt-3 uppercase">Email</span><div><a href="mailto:${esc(c.email)}" class="text-info hover:underline">${esc(c.email)}</a></div></div>` : ''}
             ${c.phone ? `<div><span class="text-xs text-txt-3 uppercase">Phone</span><div><a href="tel:${esc(c.phone)}" class="text-info hover:underline">${esc(c.phone)}</a></div></div>` : ''}
+            ${c.company ? `<div><span class="text-xs text-txt-3 uppercase">Company</span><div class="text-txt-2">${esc(c.company)}</div></div>` : ''}
+            ${(c.title || c.role) ? `<div><span class="text-xs text-txt-3 uppercase">Title / Role</span><div class="text-txt-2">${esc(c.title || c.role)}</div></div>` : ''}
+            ${c.website ? `<div><span class="text-xs text-txt-3 uppercase">Website</span><div><a href="${esc(c.website.startsWith('http') ? c.website : 'https://' + c.website)}" target="_blank" rel="noopener" class="text-info hover:underline">${esc(c.website)}</a></div></div>` : ''}
             ${c.acquisition_source ? `<div><span class="text-xs text-txt-3 uppercase">Source</span><div class="text-txt-2">${esc(c.acquisition_source)}</div></div>` : ''}
             ${c.offer_interest ? `<div><span class="text-xs text-txt-3 uppercase">Interest</span><div class="text-txt-2">${esc(c.offer_interest)}</div></div>` : ''}
         </div></div></div>`;
@@ -2146,15 +2161,16 @@
         </div>
         <div class="panel-body" style="max-height: 400px; overflow-y: auto;">
             ${interactions.length === 0 ? '<div class="empty-state">No interactions recorded</div>' :
-            interactions.map(int => `
-                <div class="flex gap-3 py-2 border-b border-border/30 last:border-0">
+            interactions.map((int, idx) => `
+                <div class="flex gap-3 py-2 border-b border-border/30 last:border-0 cursor-pointer hover:bg-white/[0.02] rounded px-1 -mx-1 transition-colors" onclick="showInteractionDetail(${idx})">
                     <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background: ${int.direction === 'outbound' ? '#06D6A0' : '#4CC9F0'};"></div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-0.5">
                             <span class="badge badge-domain" style="font-size:0.55rem;">${esc(int.channel || '')}</span>
                             <span class="text-[0.6rem] text-txt-3">${esc(int.direction || '')}</span>
+                            <span class="text-[0.55rem] text-txt-3 ml-auto">Click to view full</span>
                         </div>
-                        <div class="text-xs text-txt">${esc(int.summary || '')}</div>
+                        <div class="text-xs text-txt">${esc((int.summary || '').substring(0, 120))}${(int.summary || '').length > 120 ? '...' : ''}</div>
                         <div class="text-[0.6rem] text-txt-3 font-mono mt-0.5">${toPT(int.created_at)}</div>
                     </div>
                 </div>
@@ -2181,6 +2197,7 @@
     }
 
     let current360Data = null;
+    let current360Interactions = [];
 
     function toggle360Edit() {
         if (!current360Data || !current360ContactId) return;
@@ -3111,6 +3128,32 @@
         }
         btn.disabled = false;
         btn.textContent = 'Add Contact';
+    }
+
+    function showInteractionDetail(idx) {
+        const int = current360Interactions[idx];
+        if (!int) return;
+        const fullContent = int.body || int.message || int.full_text || int.content || int.summary || '';
+        const subject = int.subject || '';
+        const channel = int.channel || 'unknown';
+        const direction = int.direction || '';
+        const dirColor = direction === 'outbound' ? '#06D6A0' : '#4CC9F0';
+
+        let modalHtml = `
+            <div class="space-y-3">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="badge badge-domain">${esc(channel)}</span>
+                    <span class="text-xs text-txt-3">${esc(direction)}</span>
+                    <span class="text-xs text-txt-3 font-mono ml-auto">${toPT(int.created_at)}</span>
+                </div>
+                ${subject ? `<div class="text-sm font-semibold">${esc(subject)}</div>` : ''}
+                <div class="text-sm text-txt-2" style="line-height:1.7;white-space:pre-wrap;max-height:400px;overflow-y:auto;padding:12px;border-radius:8px;background:rgba(0,0,0,0.2);">${esc(fullContent)}</div>
+                ${int.metadata ? `<div class="text-[0.65rem] text-txt-3 mt-2">Metadata: ${esc(typeof int.metadata === 'object' ? JSON.stringify(int.metadata) : String(int.metadata))}</div>` : ''}
+            </div>
+        `;
+
+        document.getElementById('interactionDetailBody').innerHTML = modalHtml;
+        openModal('interactionDetailModal');
     }
 
     function openLogInteraction(contactId) {

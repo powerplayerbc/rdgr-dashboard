@@ -998,7 +998,7 @@
 
     function renderCopy() {
         let filtered = copyDrafts;
-        if (copyFilter !== 'all') filtered = copyDrafts.filter(d => d.status === copyFilter);
+        if (copyFilter !== 'all') filtered = copyDrafts.filter(d => (d.review_status || d.status || 'draft') === copyFilter);
 
         document.getElementById('copyCount').textContent = `${filtered.length} draft${filtered.length !== 1 ? 's' : ''}`;
 
@@ -1011,9 +1011,10 @@
         }
 
         document.getElementById('copyList').innerHTML = filtered.map(d => {
-            const status = d.status || 'pending';
+            const status = d.review_status || d.status || 'draft';
             const title = esc(d.title || d.copy_type || 'Untitled');
-            const preview = esc((d.content || d.body || '').substring(0, 200));
+            const contentStr = typeof d.content === 'object' ? (d.content.body || d.content.subject || '') : (d.content || d.body || '');
+            const preview = esc(contentStr.substring(0, 200));
             const copyType = esc(d.copy_type || '');
             return `<div class="content-card cursor-pointer" onclick="openCopyDetail('${d.id}')">
                 <div class="flex items-start justify-between gap-3">
@@ -1040,8 +1041,8 @@
 
         document.getElementById('copyDetailTitle').textContent = draft.title || draft.copy_type || 'Copy Draft';
 
-        const status = draft.status || 'pending';
-        const content = draft.content || draft.body || 'No content';
+        const status = draft.review_status || draft.status || 'draft';
+        const content = typeof draft.content === 'object' ? (draft.content.body || draft.content.subject || JSON.stringify(draft.content, null, 2)) : (draft.content || draft.body || 'No content');
         const copyType = draft.copy_type || '';
         const feedback = draft.feedback || '';
 

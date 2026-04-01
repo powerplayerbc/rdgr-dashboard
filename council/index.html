@@ -362,6 +362,10 @@
                     </div>
 
                     <!-- Session List -->
+                    <div class="flex items-center justify-between mb-3" id="sessionListHeader">
+                        <div class="text-xs font-semibold text-txt-3 uppercase tracking-wider">Session History</div>
+                        <span class="text-[0.65rem] text-txt-3">Click to review past conversations</span>
+                    </div>
                     <div id="sessionList" class="grid gap-3">
                         <div class="skeleton h-20 rounded-lg"></div>
                         <div class="skeleton h-20 rounded-lg"></div>
@@ -735,6 +739,32 @@
                 html += '</div>';
             }
 
+            // Follow-up conversation (only for completed sessions with responses)
+            if (status === 'completed' && responses.length) {
+                const allAdv = getAllAdvisors();
+                const respondedAdvisors = responses.map(r => r.advisor_name).filter(Boolean);
+                html += `<div class="mt-5 pt-5" style="border-top:1px solid var(--deft-border,#2A2E3D);">
+                    <div class="font-heading font-semibold text-sm mb-3">Continue Conversation</div>
+                    <p class="text-xs text-txt-3 mb-2">Ask a follow-up question to one or more council members.</p>
+                    <div class="flex flex-wrap gap-2 mb-3" id="followUpAdvisors">
+                        ${respondedAdvisors.map(name => {
+                            const adv = allAdv.find(a => a.name === name) || { color: '#8A95A9' };
+                            return `<label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs transition-colors" style="background:rgba(255,255,255,0.03);border:1px solid var(--deft-border,#2A2E3D);">
+                                <input type="checkbox" value="${esc(name)}" class="followup-advisor-cb" checked style="accent-color:${adv.color};">
+                                <span style="color:${adv.color};">${esc(name)}</span>
+                            </label>`;
+                        }).join('')}
+                    </div>
+                    <textarea id="followUpQuestion" rows="2" class="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none mb-3" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);" placeholder="Ask a follow-up question..."></textarea>
+                    <button class="btn btn-primary" onclick="sendFollowUp()" id="followUpBtn">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M10.5 1.5l-9 4 3.5 1.5 1.5 3.5 4-9z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Ask Follow-up
+                    </button>
+                    <div id="followUpLoading" style="display:none;" class="text-center py-4"><div class="spinner mx-auto mb-2"></div><p class="text-xs text-txt-3">Advisors are responding...</p></div>
+                    <div id="followUpResults"></div>
+                </div>`;
+            }
+
             // Discuss with Agent (only for completed sessions)
             if (status === 'completed') {
                 html += `<div class="mt-5 pt-5" style="border-top:1px solid var(--deft-border,#2A2E3D);">
@@ -853,6 +883,73 @@
         } catch (e) {
             console.error('Remove advisor error:', e);
             toast('Failed to remove advisor', 'error');
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // FOLLOW-UP CONVERSATION
+    // ═══════════════════════════════════════
+    async function sendFollowUp() {
+        const question = (document.getElementById('followUpQuestion') || {}).value?.trim();
+        if (!question) { toast('Enter a follow-up question', 'error'); return; }
+        if (!currentSessionData) { toast('No session data', 'error'); return; }
+
+        const checkedAdvisors = [...document.querySelectorAll('.followup-advisor-cb:checked')].map(cb => cb.value);
+        if (!checkedAdvisors.length) { toast('Select at least one advisor', 'error'); return; }
+
+        const btn = document.getElementById('followUpBtn');
+        const loading = document.getElementById('followUpLoading');
+        const results = document.getElementById('followUpResults');
+        btn.style.display = 'none';
+        loading.style.display = '';
+
+        try {
+            const res = await fetch(`${WEBHOOK_BASE}/rdgr-council`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    operation: 'follow_up',
+                    session_id: currentSessionData.id,
+                    advisor_names: checkedAdvisors,
+                    follow_up_question: question,
+                    brand_id: BRAND_ID
+                })
+            });
+            const data = await res.json();
+
+            if (data.success || data.responses) {
+                const followUpResponses = data.responses || [];
+                const allAdv = getAllAdvisors();
+                let html = '<div class="mt-4 space-y-3">';
+                html += '<div class="text-xs font-semibold text-accent uppercase tracking-wider mb-2">Follow-up Responses</div>';
+                html += `<div class="text-xs text-txt-3 mb-3 px-3 py-2 rounded" style="background:rgba(255,255,255,0.02);border-left:2px solid var(--deft-accent-warm);">You asked: "${esc(question)}"</div>`;
+                followUpResponses.forEach(r => {
+                    const advisor = allAdv.find(a => a.name === r.advisor_name) || { name: r.advisor_name || '?', color: '#8A95A9' };
+                    html += `<div class="p-3 rounded-lg" style="background:rgba(255,255,255,0.02);border:1px solid var(--deft-border,#2A2E3D);">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="advisor-dot" style="background:${advisor.color}30;color:${advisor.color};width:24px;height:24px;font-size:0.65rem;">${advisor.name[0]}</div>
+                            <span class="text-sm font-semibold">${esc(advisor.name)}</span>
+                        </div>
+                        <p class="text-xs text-txt-2" style="line-height:1.6;">${esc(r.opinion || r.response || '')}</p>
+                    </div>`;
+                });
+                html += '</div>';
+                results.innerHTML += html;
+                document.getElementById('followUpQuestion').value = '';
+                toast('Follow-up responses received!', 'success');
+
+                // Update current session data with follow-up
+                if (!currentSessionData.follow_ups) currentSessionData.follow_ups = [];
+                currentSessionData.follow_ups.push({ question, responses: followUpResponses, asked_at: new Date().toISOString() });
+            } else {
+                toast(data.error || 'Follow-up failed', 'error');
+            }
+        } catch (e) {
+            console.error('Follow-up error:', e);
+            toast('Failed to send follow-up', 'error');
+        } finally {
+            btn.style.display = '';
+            loading.style.display = 'none';
         }
     }
 

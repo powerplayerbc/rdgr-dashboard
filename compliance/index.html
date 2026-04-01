@@ -738,7 +738,7 @@
                         <div class="stat-label">Pass Rate %</div>
                     </div>
                 </div>
-                <div class="stat-chip flex-1 min-w-[130px]">
+                <div class="stat-chip flex-1 min-w-[130px]" style="cursor:pointer;" onclick="scrollToViolations()" title="Click to view violations">
                     <div>
                         <div class="stat-value" style="color: var(--deft-danger, #FF6B6B);" id="statViolations">--</div>
                         <div class="stat-label">Violations (7d)</div>
@@ -1393,7 +1393,7 @@
     // SECTION 4: RECENT COMPLIANCE CHECKS
     // ═══════════════════════════════════════
     async function loadChecks() {
-        const checks = await supabaseSelect('compliance_checks', 'brand_id=eq.carlton&order=created_at.desc&limit=50&select=id,created_at,content_type,entity_id,verdict,rules_checked,rules_failed,overall_assessment,violations');
+        const checks = await supabaseSelect('compliance_checks', 'brand_id=eq.carlton&order=created_at.desc&limit=50&select=id,created_at,content_type,entity_id,verdict,rules_checked,rules_failed,violations');
         const tbody = document.getElementById('checksTableBody');
 
         if (!checks || checks.length === 0) {
@@ -1424,7 +1424,7 @@
             const rulesFailed = check.rules_failed ?? 0;
             const failedStyle = rulesFailed > 0 ? 'color: var(--deft-danger);' : '';
 
-            const hasDetails = check.overall_assessment || (check.violations && check.violations.length > 0);
+            const hasDetails = (check.violations && check.violations.length > 0);
 
             return `
                 <tr class="${hasDetails ? 'expandable-row' : ''}" ${hasDetails ? `onclick="toggleCheckDetail('checkDetail${idx}')"` : ''}>
@@ -1438,7 +1438,6 @@
                 ${hasDetails ? `
                 <tr class="detail-row" id="checkDetail${idx}">
                     <td colspan="6">
-                        ${check.overall_assessment ? `<p class="text-sm mb-2"><strong class="text-xs text-txt-3 uppercase">Assessment:</strong> ${esc(check.overall_assessment)}</p>` : ''}
                         ${check.violations && check.violations.length > 0 ? `
                             <div class="mt-2">
                                 <strong class="text-xs text-txt-3 uppercase">Violations:</strong>
@@ -1460,6 +1459,19 @@
     function toggleCheckDetail(id) {
         const row = document.getElementById(id);
         if (row) row.classList.toggle('open');
+    }
+
+    function scrollToViolations() {
+        const checksSection = document.getElementById('checksTableBody');
+        if (checksSection) {
+            checksSection.closest('.panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Highlight non-compliant rows briefly
+            checksSection.querySelectorAll('.expandable-row').forEach(row => {
+                row.style.transition = 'background 0.3s';
+                row.style.background = 'rgba(255,107,107,0.15)';
+                setTimeout(() => { row.style.background = ''; }, 2000);
+            });
+        }
     }
 
     // ═══════════════════════════════════════

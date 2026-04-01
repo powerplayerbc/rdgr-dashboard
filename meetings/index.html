@@ -580,7 +580,7 @@
             const date = getMeetingDate(m);
             const duration = getMeetingDuration(m);
             const summary = m.summary ? esc(m.summary.substring(0, 120)) : '';
-            const id = m.id || m.meeting_id;
+            const id = m.meeting_id || m.id;
 
             return `<div class="session-card" onclick="viewMeeting('${id}')">
                 <div class="flex items-start justify-between gap-3">
@@ -621,7 +621,7 @@
             const client = getMeetingClient(meeting);
             const date = getMeetingDate(meeting);
             const duration = getMeetingDuration(meeting);
-            const meetingId = meeting.id || meeting.meeting_id;
+            const meetingId = meeting.meeting_id || meeting.id;
 
             let html = '';
 
@@ -782,8 +782,8 @@
                 body: JSON.stringify({
                     meeting_id: meetingId,
                     action: action,
-                    feedback: feedback,
-                    actor: activeProfileId
+                    revision_notes: feedback,
+                    approved_by: activeProfileId
                 })
             });
             const data = await res.json();
@@ -821,19 +821,41 @@
             const data = await res.json();
 
             if (data.success || res.ok) {
-                toast('Calendar scanned! Prep materials are being generated.', 'success');
-                // Refresh stats after a short delay
-                setTimeout(() => { loadStats(); loadMeetings(); }, 3000);
+                toast('Calendar scanned! Generating prep materials...', 'success');
+                // Poll for new prep data every 5s for up to 60s
+                let attempts = 0;
+                const maxAttempts = 12;
+                const beforeCount = (meetingsData || []).length;
+                const pollInterval = setInterval(async () => {
+                    attempts++;
+                    try {
+                        await Promise.all([loadStats(), loadMeetings()]);
+                        const afterCount = (meetingsData || []).length;
+                        if (afterCount > beforeCount) {
+                            clearInterval(pollInterval);
+                            toast('Prep materials ready!', 'success');
+                            btn.style.display = '';
+                            spinner.style.display = 'none';
+                        } else if (attempts >= maxAttempts) {
+                            clearInterval(pollInterval);
+                            toast('Prep generation may still be in progress. Refresh the page in a minute.', 'info');
+                            btn.style.display = '';
+                            spinner.style.display = 'none';
+                        }
+                    } catch (err) {
+                        console.error('Poll error:', err);
+                    }
+                }, 5000);
+                return; // don't reset button in finally — polling handles it
             } else {
                 toast(data.error || 'Calendar scan failed', 'error');
             }
         } catch (e) {
             console.error('Scan error:', e);
             toast('Failed to scan calendar', 'error');
-        } finally {
-            btn.style.display = '';
-            spinner.style.display = 'none';
         }
+        btn.style.display = '';
+        spinner.style.display = 'none';
     }
 
     // ═══════════════════════════════════════
