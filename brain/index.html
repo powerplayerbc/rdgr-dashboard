@@ -7,7 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>BRAIN Tracker | Carlton AI</title>
+    <title>Gameboard | Carlton AI</title>
 
     <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
     <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
@@ -1005,7 +1005,7 @@
                         <div class="nav-group">
                             <a href="/brain" class="nav-group-btn active">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
-                                <a href="/brain" class="active">BRAIN</a>
+                                <a href="/brain" class="active">Gameboard</a>
                                 <a href="/deft">DEFT</a>
                             </div>
                         </div>
@@ -1053,7 +1053,7 @@
             <a href="/hub" class="task-tab" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">HUB</a>
             <a href="/meetings" class="task-tab" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">Meetings</a>
             <a href="/deft" class="task-tab" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">DEFT</a>
-            <a href="/brain" class="task-tab active" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">BRAIN</a>
+            <a href="/brain" class="task-tab active" style="flex:none;padding:0.25rem 0.6rem;font-size:0.65rem;text-decoration:none;">Gameboard</a>
         </div>
     </nav>
         <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
@@ -2115,10 +2115,23 @@
             </div>
             <div>
                 <label class="form-label">Frequency</label>
-                <select class="form-input" id="addHabitFrequency">
+                <select class="form-input" id="addHabitFrequency" onchange="toggleWeeklyDayPicker('add')">
                     <option value="daily" selected>Daily</option>
                     <option value="weekdays">Weekdays (Mon-Fri)</option>
                     <option value="weekends">Weekends (Sat-Sun)</option>
+                    <option value="weekly">Weekly</option>
+                </select>
+            </div>
+            <div id="addHabitWeeklyDay" style="display:none;">
+                <label class="form-label">Day of Week</label>
+                <select class="form-input" id="addHabitDayOfWeek">
+                    <option value="0">Sunday</option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
                 </select>
             </div>
         </div>
@@ -2163,10 +2176,23 @@
             </div>
             <div>
                 <label class="form-label">Frequency</label>
-                <select class="form-input" id="editHabitFrequency">
+                <select class="form-input" id="editHabitFrequency" onchange="toggleWeeklyDayPicker('edit')">
                     <option value="daily">Daily</option>
                     <option value="weekdays">Weekdays (Mon-Fri)</option>
                     <option value="weekends">Weekends (Sat-Sun)</option>
+                    <option value="weekly">Weekly</option>
+                </select>
+            </div>
+            <div id="editHabitWeeklyDay" style="display:none;">
+                <label class="form-label">Day of Week</label>
+                <select class="form-input" id="editHabitDayOfWeek">
+                    <option value="0">Sunday</option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
                 </select>
             </div>
         </div>
@@ -3021,7 +3047,16 @@ function renderLeaderboardSnippet(result) {
 
 function renderCategoryDonut() {
     const ds = dailySummary || {};
-    const breakdown = ds.category_breakdown || {};
+    let breakdown = ds.category_breakdown || {};
+    // Fallback: build from todayActivities when category_breakdown is empty
+    if (!Object.keys(breakdown).length && todayActivities && todayActivities.length > 0) {
+        breakdown = {};
+        todayActivities.forEach(a => {
+            const cat = categories.find(c => c.category_id === a.category_id || c.slug === a.category_slug);
+            const catName = cat?.name || a.category_slug || 'General';
+            breakdown[catName] = (breakdown[catName] || 0) + (a.points_earned || 0);
+        });
+    }
     const entries = Object.entries(breakdown).filter(([_, v]) => v > 0);
     const svg = document.getElementById('categoryDonut');
     const legend = document.getElementById('categoryLegend');
@@ -3062,6 +3097,14 @@ function renderTodayActivities() {
     const container = document.getElementById('todayActivityList');
     const count = document.getElementById('todayActivityCount');
     count.textContent = `${todayActivities.length} activit${todayActivities.length === 1 ? 'y' : 'ies'}`;
+
+    // Auto-hide stale "no activities" insight banner when activities exist
+    if (todayActivities.length > 0) {
+        const insightTxt = document.getElementById('dailyInsightText')?.textContent || '';
+        if (insightTxt.includes('No activities logged')) {
+            document.getElementById('dailyInsightBanner').style.display = 'none';
+        }
+    }
 
     if (!todayActivities.length) {
         container.innerHTML = '<div class="px-4 py-8 text-center text-xs" style="color: var(--brain-txt-3);">No activities logged today</div>';
@@ -3476,7 +3519,14 @@ async function submitLogActivity() {
     if (webhookAvailable) {
         const result = await brainApi('log_activity', data);
         if (result && result.success !== false) {
-            // Re-read from Supabase since webhook returns empty data:{}
+            // Optimistic score ring update: show estimated points immediately
+            const cat = categories.find(c => c.slug === catSlug);
+            const estPoints = Math.round(duration * (cat?.points_per_minute || 1) * (cat?.bonus_multiplier || 1) * 10) / 10;
+            dailySummary.total_points = (dailySummary.total_points || 0) + estPoints;
+            dailySummary.total_minutes = (dailySummary.total_minutes || 0) + duration;
+            dailySummary.activities_count = (dailySummary.activities_count || 0) + 1;
+            renderScoreRing();
+            // Re-read from Supabase for authoritative data
             await loadDashboardData();
             loadActivities();
             toast('Activity logged!', 'success');
@@ -3873,7 +3923,12 @@ async function loadCalendarEvents() {
 
     const result = await brainApi('get_events', { start_date: range.start_date, end_date: range.end_date }, { silent: true });
     const events = result?.data?.events || result?.events || [];
-    renderCalendarEvents(Array.isArray(events) ? events : []);
+    // Filter out Google Calendar work-location markers (0-duration "Home"/"Office"/"Work" entries)
+    const filtered = (Array.isArray(events) ? events : []).filter(e => {
+        if (e.duration_min === 0 && /^(Home|Office|Work)$/i.test(e.title)) return false;
+        return true;
+    });
+    renderCalendarEvents(filtered);
 }
 
 function renderCalendarEvents(events) {
@@ -4044,7 +4099,8 @@ async function loadLeaderboard(period) {
     data = result?.data?.leaderboard || result?.leaderboard || [];
 
     // Fallback: build leaderboard from brain_user_profiles + platform_users
-    if (!data.length) {
+    // For "all" period, also trigger fallback if fewer than expected users returned
+    if (!data.length || (period === 'all' && data.length < 3)) {
         const profiles = await supabaseSelect('brain_user_profiles', 'select=user_id,total_points,current_streak,level,xp');
         const users = await supabaseSelect('platform_users', 'select=user_id,display_name,avatar_url');
         if (profiles && users) {
@@ -4342,15 +4398,43 @@ async function loadAnalytics(period) {
     document.getElementById('anGoalDays').textContent = goalDays;
     document.getElementById('anTrendGoalLine').textContent = `Goal: ${goal}`;
 
-    // Category and weekly report (try webhook, accept empty gracefully)
-    const catResult = { categories: catTotals };
-    const weeklyResult = await brainApi('get_weekly_report', {}, { silent: true });
+    // Category fallback: if category_breakdown was empty in daily scores, build from activities
+    if (Object.keys(catTotals).length === 0) {
+        const periodActivities = await supabaseSelect('brain_activities',
+            `user_id=eq.${activeProfileId}&started_at=gte.${start}T00:00:00&started_at=lte.${end}T23:59:59&select=category_slug,category_id,points_earned`);
+        if (periodActivities && periodActivities.length > 0) {
+            periodActivities.forEach(a => {
+                const cat = categories.find(c => c.category_id === a.category_id || c.slug === a.category_slug);
+                const catName = cat?.name || a.category_slug || 'General';
+                catTotals[catName] = (catTotals[catName] || 0) + (a.points_earned || 0);
+            });
+        }
+    }
 
     // Category donut
-    const catData = catResult?.data || catResult || {};
+    const catData = { categories: catTotals };
     renderAnalyticsCatDonut(catData);
 
-    // Weekly report
+    // Weekly report (try webhook, fall back to building from scoreRows)
+    let weeklyResult = await brainApi('get_weekly_report', {}, { silent: true });
+    if (!weeklyResult?.data?.this_week && scoreRows && scoreRows.length > 0) {
+        const now = new Date();
+        const weekAgoMs = 7 * 86400000;
+        const twoWeeksAgoMs = 14 * 86400000;
+        const thisWeekRows = scoreRows.filter(s => (now - new Date(s.score_date)) < weekAgoMs);
+        const lastWeekRows = scoreRows.filter(s => {
+            const age = now - new Date(s.score_date);
+            return age >= weekAgoMs && age < twoWeeksAgoMs;
+        });
+        const thisWeekPts = thisWeekRows.reduce((sum, s) => sum + (s.total_points || 0), 0);
+        const lastWeekPts = lastWeekRows.reduce((sum, s) => sum + (s.total_points || 0), 0);
+        const diff = thisWeekPts - lastWeekPts;
+        weeklyResult = { data: {
+            this_week: { total_points: thisWeekPts },
+            last_week: { total_points: lastWeekPts },
+            comparison: { points_diff: diff, points_trend: diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat' }
+        }};
+    }
     renderWeeklyReport(weeklyResult);
 
     // Minutes chart (reuse points series data if it has minutes)
@@ -4634,12 +4718,24 @@ function renderHabitsDaily(date) {
         dotDates.push(dd.toLocaleDateString('en-CA'));
     }
 
+    // Filter habits for the current day (weekly habits only show on their designated day)
+    const viewDate = new Date(date + 'T12:00:00');
+    const viewDayOfWeek = viewDate.getDay(); // 0=Sun..6=Sat
+    const visibleHabits = habits.filter(h => {
+        if (h.frequency === 'weekly' && h.weekly_day != null) {
+            return h.weekly_day === viewDayOfWeek;
+        }
+        if (h.frequency === 'weekdays') return viewDayOfWeek >= 1 && viewDayOfWeek <= 5;
+        if (h.frequency === 'weekends') return viewDayOfWeek === 0 || viewDayOfWeek === 6;
+        return true; // daily
+    });
+
     // Render habits
     const habitsList = document.getElementById('habitsList');
-    if (habits.length === 0) {
-        habitsList.innerHTML = `<div class="text-center py-6 text-xs" style="color: var(--brain-txt-3);">No habits configured yet. <button class="underline" style="color: var(--brain-accent);" onclick="openAddHabitModal()">Add your first habit</button></div>`;
+    if (visibleHabits.length === 0) {
+        habitsList.innerHTML = `<div class="text-center py-6 text-xs" style="color: var(--brain-txt-3);">${habits.length === 0 ? 'No habits configured yet. <button class="underline" style="color: var(--brain-accent);" onclick="openAddHabitModal()">Add your first habit</button>' : 'No habits scheduled for this day'}</div>`;
     } else {
-        habitsList.innerHTML = habits.map(h => {
+        habitsList.innerHTML = visibleHabits.map(h => {
             const comp = habitCompletions[h.habit_id]?.[date];
             const isChecked = !!comp;
             const icon = getCatIcon(h);
@@ -5078,6 +5174,12 @@ function openAddHabitModal() {
     openModal('addHabitModal');
 }
 
+function toggleWeeklyDayPicker(prefix) {
+    const freq = document.getElementById(prefix + 'HabitFrequency').value;
+    const dayPicker = document.getElementById(prefix + 'HabitWeeklyDay');
+    if (dayPicker) dayPicker.style.display = freq === 'weekly' ? '' : 'none';
+}
+
 async function submitAddHabit() {
     const name = document.getElementById('addHabitName').value.trim();
     if (!name) { toast('Habit name required', 'error'); return; }
@@ -5092,6 +5194,9 @@ async function submitAddHabit() {
         points_value: points, frequency: freq,
         sort_order: habits.length, is_active: true
     };
+    if (freq === 'weekly') {
+        body.weekly_day = parseInt(document.getElementById('addHabitDayOfWeek').value) || 0;
+    }
 
     if (webhookAvailable) {
         await brainApi('add_habit', body);
@@ -5111,6 +5216,14 @@ function openEditHabitModal(habitId) {
     document.getElementById('editHabitName').value = h.name;
     document.getElementById('editHabitPoints').value = h.points_value || 15;
     document.getElementById('editHabitFrequency').value = h.frequency || 'daily';
+    // Show/hide weekly day picker and set value
+    const weeklyDayEl = document.getElementById('editHabitWeeklyDay');
+    if (h.frequency === 'weekly') {
+        weeklyDayEl.style.display = '';
+        document.getElementById('editHabitDayOfWeek').value = h.weekly_day || 0;
+    } else {
+        weeklyDayEl.style.display = 'none';
+    }
     editSelectedHabitIcon = h.icon || 'star';
     populateHabitCategoryDropdown('editHabitCategory');
     document.getElementById('editHabitCategory').value = h.category_id || '';
@@ -5123,13 +5236,19 @@ async function submitEditHabit() {
     const name = document.getElementById('editHabitName').value.trim();
     if (!name) { toast('Habit name required', 'error'); return; }
 
+    const freq = document.getElementById('editHabitFrequency').value || 'daily';
     const body = {
         name,
         category_id: document.getElementById('editHabitCategory').value || null,
         icon: document.getElementById('editHabitIcon').value || 'star',
         points_value: parseFloat(document.getElementById('editHabitPoints').value) || 15,
-        frequency: document.getElementById('editHabitFrequency').value || 'daily'
+        frequency: freq
     };
+    if (freq === 'weekly') {
+        body.weekly_day = parseInt(document.getElementById('editHabitDayOfWeek').value) || 0;
+    } else {
+        body.weekly_day = null;
+    }
 
     if (webhookAvailable) {
         await brainApi('update_habit', { habit_id: id, ...body });
@@ -5618,7 +5737,19 @@ async function loadActivitySuggestions() {
     const content = document.getElementById('aiSuggestionsContent');
     content.innerHTML = '<div class="px-4 py-4 text-center text-xs ai-loading" style="color: var(--brain-txt-3);">Loading suggestions...</div>';
 
-    const result = await brainApi('suggest_activities', {}, { silent: true });
+    let result = null;
+    try {
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000));
+        result = await Promise.race([
+            brainApi('suggest_activities', {}, { silent: true }),
+            timeoutPromise
+        ]);
+    } catch (e) {
+        console.warn('loadActivitySuggestions:', e.message);
+        content.innerHTML = '<div class="px-4 py-4 text-center text-xs" style="color: var(--brain-txt-3);">Suggestions unavailable</div>';
+        return;
+    }
+
     if (!result || !result.data) {
         content.innerHTML = '<div class="px-4 py-4 text-center text-xs" style="color: var(--brain-txt-3);">No suggestions right now</div>';
         return;
@@ -5692,8 +5823,15 @@ async function submitCreateEvent() {
     if (!title) { toast('Title is required', 'error'); return; }
     if (!start) { toast('Start time is required', 'error'); return; }
 
+    // Convert datetime-local values (YYYY-MM-DDTHH:MM) to full ISO for Google Calendar API
+    const formatDT = (dt) => {
+        if (!dt) return undefined;
+        if (dt.length === 16) dt += ':00'; // add seconds if missing
+        return new Date(dt).toISOString();
+    };
+
     const result = await brainApi('create_event', {
-        title, start, end: end || undefined, description: description || undefined
+        title, start: formatDT(start), end: formatDT(end), description: description || undefined
     });
 
     if (result) {
@@ -5733,11 +5871,25 @@ async function aiFillTask() {
     if (result && result.data) {
         const d = result.data;
         if (d.estimated_minutes || d.minutes) document.getElementById('addTaskMinutes').value = d.estimated_minutes || d.minutes;
-        if (d.category || d.category_slug) {
+        if (d.category || d.category_slug || d.category_name) {
             const sel = document.getElementById('addTaskCategory');
+            const target = (d.category_slug || d.category || d.category_name || '').toLowerCase().trim();
+            let matched = false;
+            // Try direct match (case-insensitive) on option value and text
             for (let opt of sel.options) {
-                if (opt.value === (d.category_slug || d.category) || opt.textContent === (d.category || d.category_slug)) {
-                    sel.value = opt.value; break;
+                if ((opt.value || '').toLowerCase() === target || (opt.textContent || '').toLowerCase().trim() === target) {
+                    sel.value = opt.value; matched = true; break;
+                }
+            }
+            // Fallback: look up in categories array by slug/name, then match to dropdown
+            if (!matched && target) {
+                const cat = categories.find(c => c.slug === target || (c.name || '').toLowerCase() === target);
+                if (cat) {
+                    for (let opt of sel.options) {
+                        if (opt.value === cat.slug || opt.value === cat.category_id) {
+                            sel.value = opt.value; matched = true; break;
+                        }
+                    }
                 }
             }
         }

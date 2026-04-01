@@ -2059,8 +2059,25 @@
             </div>
         </div>
 
+        <!-- Water Intake Chart -->
+        <div class="panel deft-reveal deft-reveal-7">
+            <div class="panel-header">
+                <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--deft-txt-2);">Water Intake</span>
+                <span class="badge" style="background: rgba(56,189,248,0.12); color: #38BDF8;">64oz goal</span>
+            </div>
+            <div class="panel-body">
+                <div class="chart-container" style="height: 200px;">
+                    <canvas id="waterCanvas"></canvas>
+                </div>
+                <div id="waterEmptyState" class="empty-state" style="display:none;">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-2" style="color: var(--deft-txt-3);"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                    <p>No water data for this period</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Weekly AI Report Panel -->
-        <div class="panel deft-reveal deft-reveal-7 mt-4" id="aiWeeklyReportPanel">
+        <div class="panel deft-reveal deft-reveal-8 mt-4" id="aiWeeklyReportPanel">
             <div class="panel-header">
                 <div class="flex items-center gap-2">
                     <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--deft-txt-2);">Weekly AI Report</span>
@@ -4091,6 +4108,7 @@ let chartJsLoaded = false;
 let weightChart = null;
 let calorieChart = null;
 let macroChart = null;
+let waterChart = null;
 let analyticsRange = '7d';
 let analyticsStartDate = null;
 let analyticsEndDate = null;
@@ -4157,18 +4175,81 @@ async function loadAnalytics() {
 
     const { startStr, endStr } = getAnalyticsDateRange();
 
-    // Fetch all analytics data in parallel
-    const [weightData, calData, macroData] = await Promise.all([
-        deftApi('get_analytics', { metric: 'weight', start_date: startStr, end_date: endStr }),
-        deftApi('get_analytics', { metric: 'calories', start_date: startStr, end_date: endStr }),
-        deftApi('get_analytics', { metric: 'macros', start_date: startStr, end_date: endStr }),
+    // Fetch all analytics data in parallel (silent: true so fallback can handle failures)
+    let [weightData, calData, macroData] = await Promise.all([
+        deftApi('get_analytics', { metric: 'weight', start_date: startStr, end_date: endStr }, { silent: true }),
+        deftApi('get_analytics', { metric: 'calories', start_date: startStr, end_date: endStr }, { silent: true }),
+        deftApi('get_analytics', { metric: 'macros', start_date: startStr, end_date: endStr }, { silent: true }),
     ]);
+
+    // Fallback: if webhook returned no data, read directly from Supabase
+    const allEmpty = !weightData?.data?.series?.length && !calData?.data?.series?.length && !macroData?.data?.series?.length;
+    let fallback = null;
+    if (allEmpty) {
+        fallback = await loadAnalyticsFallback(startStr, endStr);
+        if (fallback) {
+            weightData = fallback.weightData;
+            calData = fallback.calData;
+            macroData = fallback.macroData;
+        }
+    }
 
     renderAnalyticsSummary(weightData, calData, macroData);
     renderWeightChart(weightData);
     renderCalorieChart(calData);
     renderMacroChart(macroData);
     renderKetoAdherence(macroData);
+
+    // Water chart: use fallback data if available, otherwise fetch directly
+    let waterData = allEmpty && fallback ? fallback.waterData : null;
+    if (!waterData) {
+        const { startStr: ws, endStr: we } = getAnalyticsDateRange();
+        const waterLogs = await supabaseSelect('deft_daily_logs',
+            `user_id=eq.${activeProfileId}&log_date=gte.${ws}&log_date=lte.${we}&select=log_date,water_oz&order=log_date`
+        );
+        waterData = { data: { series: (waterLogs || []).map(l => ({ date: l.log_date, water_oz: l.water_oz || 0 })) } };
+    }
+    renderWaterChart(waterData);
+}
+
+async function loadAnalyticsFallback(startStr, endStr) {
+    try {
+        const logs = await supabaseSelect('deft_daily_logs',
+            `user_id=eq.${activeProfileId}&log_date=gte.${startStr}&log_date=lte.${endStr}&select=log_date,weight_lbs,water_oz,consumed_totals,target_calories,target_macros&order=log_date`
+        );
+        if (!logs || logs.length === 0) return null;
+
+        // Build weight series
+        const weightSeries = logs.filter(l => l.weight_lbs).map(l => ({ date: l.log_date, value: l.weight_lbs }));
+        const wChange = weightSeries.length >= 2 ? weightSeries[weightSeries.length - 1].value - weightSeries[0].value : null;
+        const weightData = { data: { stats: { change: wChange }, series: weightSeries } };
+
+        // Build calorie series
+        const calSeries = logs.map(l => ({
+            date: l.log_date,
+            consumed: l.consumed_totals?.calories || 0,
+            target: l.target_calories || l.target_macros?.calories || 2000
+        }));
+        const calData = { data: { series: calSeries } };
+
+        // Build macro series
+        const macroSeries = logs.map(l => ({
+            date: l.log_date,
+            fat_g: l.consumed_totals?.fat_g || l.consumed_totals?.total_fat_g || 0,
+            protein_g: l.consumed_totals?.protein_g || 0,
+            net_carbs_g: l.consumed_totals?.net_carbs_g || 0
+        }));
+        const macroData = { data: { series: macroSeries } };
+
+        // Build water series (used by water chart in Phase 4)
+        const waterSeries = logs.map(l => ({ date: l.log_date, water_oz: l.water_oz || 0 }));
+        const waterData = { data: { series: waterSeries } };
+
+        return { weightData, calData, macroData, waterData };
+    } catch (err) {
+        console.warn('loadAnalyticsFallback error:', err.message);
+        return null;
+    }
 }
 
 function renderAnalyticsSummary(weightData, calData, macroData) {
@@ -4464,6 +4545,75 @@ function renderKetoAdherence(macroData) {
     document.getElementById('ketoStreak').textContent = currentStreak;
     document.getElementById('ketoBestStreak').textContent = bestStreak;
     document.getElementById('ketoDaysUnder').textContent = daysUnder;
+}
+
+function renderWaterChart(waterData) {
+    const canvas = document.getElementById('waterCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const series = waterData?.data?.series || [];
+    const emptyEl = document.getElementById('waterEmptyState');
+
+    if (series.length === 0 || series.every(d => !d.water_oz)) {
+        if (emptyEl) emptyEl.style.display = '';
+        canvas.style.display = 'none';
+        return;
+    }
+    if (emptyEl) emptyEl.style.display = 'none';
+    canvas.style.display = '';
+
+    const c = getChartColors();
+    if (waterChart) waterChart.destroy();
+
+    waterChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: series.map(d => formatDateLabel(d.date)),
+            datasets: [{
+                label: 'Water (oz)',
+                data: series.map(d => d.water_oz || 0),
+                backgroundColor: '#38BDF850',
+                borderColor: '#38BDF8',
+                borderWidth: 1,
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            ...chartDefaults(c),
+            plugins: {
+                ...chartDefaults(c).plugins,
+                annotation: undefined,
+            },
+            scales: {
+                ...chartDefaults(c).scales,
+                y: {
+                    ...chartDefaults(c).scales.y,
+                    suggestedMax: 80,
+                }
+            }
+        },
+        plugins: [{
+            id: 'waterGoalLine',
+            afterDraw(chart) {
+                const yScale = chart.scales.y;
+                const goalY = yScale.getPixelForValue(64);
+                const ctx = chart.ctx;
+                ctx.save();
+                ctx.strokeStyle = c.txt3 + '80';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(chart.chartArea.left, goalY);
+                ctx.lineTo(chart.chartArea.right, goalY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = c.txt3;
+                ctx.font = '9px JetBrains Mono';
+                ctx.fillText('64oz goal', chart.chartArea.right - 50, goalY - 5);
+                ctx.restore();
+            }
+        }]
+    });
 }
 
 // ═══════════════════════════════════════
@@ -4845,7 +4995,7 @@ async function searchFoodDb(query) {
     clearTimeout(foodDbTimeout);
     foodDbTimeout = setTimeout(async () => {
         const results = await supabaseSelect('deft_food_database',
-            `name=ilike.*${encodeURIComponent(query)}*&select=id,name,serving_size,serving_unit,calories,total_fat_g,protein_g,net_carbs_g&limit=10&order=name`
+            `name=ilike.*${encodeURIComponent(query)}*&select=food_id,name,brand,serving_size,nutrition_per_serving&limit=10&order=name`
         );
 
         const container = document.getElementById('foodDbResults');
@@ -4854,20 +5004,22 @@ async function searchFoodDb(query) {
             return;
         }
 
-        container.innerHTML = results.map(f => `
+        container.innerHTML = results.map(f => {
+            const n = f.nutrition_per_serving || {};
+            return `
             <div class="meal-card">
                 <div class="flex items-center justify-between mb-1">
                     <span class="font-medium text-sm">${f.name}</span>
-                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${f.serving_size || ''} ${f.serving_unit || ''}</span>
+                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${f.serving_size || ''}</span>
                 </div>
                 <div class="flex gap-3 text-xs font-mono" style="color: var(--deft-txt-2);">
-                    <span>${Math.round(f.calories || 0)} cal</span>
-                    <span>${(f.total_fat_g || 0).toFixed(1)}g F</span>
-                    <span>${(f.protein_g || 0).toFixed(1)}g P</span>
-                    <span>${(f.net_carbs_g || 0).toFixed(1)}g C</span>
+                    <span>${Math.round(n.calories || 0)} cal</span>
+                    <span>${(n.total_fat_g || 0).toFixed(1)}g F</span>
+                    <span>${(n.protein_g || 0).toFixed(1)}g P</span>
+                    <span>${(n.net_carbs_g || 0).toFixed(1)}g C</span>
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
     }, 250);
 }
 
@@ -4973,14 +5125,36 @@ async function analyzeNutrition() {
     btn.innerHTML = '<span class="flex items-center justify-center gap-2 ai-loading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg> Analyzing...</span>';
     resultDiv.style.display = 'none';
 
-    const result = await deftApi('analyze_nutrition', { food_description: text });
+    // Direct fetch to capture backend error details (deftApi swallows errors)
+    let result = null;
+    let backendError = null;
+    try {
+        const res = await fetch(DEFT_BRIDGE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ operation: 'analyze_nutrition', user_id: activeProfileId, data: { food_description: text } })
+        });
+        const raw = await res.text();
+        if (raw) {
+            try { result = JSON.parse(raw); } catch(e) { backendError = 'Invalid response from server'; }
+            if (result && result.success === false) {
+                backendError = result.error || 'Backend analysis failed';
+                result = null;
+            }
+        } else {
+            backendError = 'Empty response from server';
+        }
+    } catch (err) {
+        backendError = 'Connection error: ' + err.message;
+    }
 
     btn.disabled = false;
     btn.innerHTML = '<span class="flex items-center justify-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg> Analyze Nutrition</span>';
 
     if (!result || !result.data) {
         resultDiv.style.display = 'block';
-        resultDiv.innerHTML = `<div class="ai-card"><p class="text-xs" style="color: var(--deft-danger);">Unable to analyze. Try a more specific description.</p></div>`;
+        const errMsg = backendError || 'Unable to analyze. Try a more specific description.';
+        resultDiv.innerHTML = `<div class="ai-card"><p class="text-xs" style="color: var(--deft-danger);">${esc(errMsg)}</p></div>`;
         return;
     }
 
