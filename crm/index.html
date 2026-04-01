@@ -920,6 +920,7 @@
                                 <a href="/media">Media</a>
                             </div>
                         </div>
+                        <a href="/partnerships" class="nav-group-btn">Partnerships</a>
                         <div class="nav-group">
                             <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -927,7 +928,7 @@
                                 <a href="/deft">DEFT</a>
                             </div>
                         </div>
-                        <div class="nav-group"><a href="/trading-bot" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a><div class="nav-dropdown"><a href="/trading-bot">Bot Dashboard</a><a href="/trading-strategies">Strategies</a><a href="/trading-monitor">Monitor</a><a href="/trading-research">Research</a><a href="/trading-discovery">Discovery</a><a href="/trading-cross-pairs">Cross-Pairs</a><a href="/trading-exchanges">Exchanges</a><a href="/trading-config">Config</a><a href="/trading-reports">Reports</a></div></div>
+                        <a href="/trading-research" class="nav-group-btn">Trading</a>
                         <a href="/meetings" class="nav-group-btn">Meetings</a>
                         <div class="nav-group">
                             <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
@@ -2180,6 +2181,11 @@
         // Social Activity section
         html += await renderSocialActivity(contactId, name);
 
+        // Partnership section (if contact is a partner)
+        if (c.partner_id || c.contact_type === 'partner') {
+            html += await renderPartnershipPanel(c);
+        }
+
         // Action buttons
         html += `<div class="flex gap-2 flex-wrap">
             <button class="btn btn-primary text-xs" onclick="openLogInteraction('${esc(contactId)}')">Log Interaction</button>
@@ -2261,6 +2267,62 @@
     // ═══════════════════════════════════════
     // SOCIAL ACTIVITY IN 360 PANEL
     // ═══════════════════════════════════════
+    async function renderPartnershipPanel(contact) {
+        try {
+            const partnerId = contact.partner_id;
+            let partnerData = [];
+            if (partnerId) {
+                partnerData = await (await fetch(`${SUPABASE_URL}/rest/v1/partnership_partners?id=eq.${partnerId}&select=*`, {
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                })).json();
+            }
+            if (!partnerData.length && contact.contact_type === 'partner' && contact.email) {
+                partnerData = await (await fetch(`${SUPABASE_URL}/rest/v1/partnership_partners?contact_email=eq.${encodeURIComponent(contact.email)}&select=*&limit=1`, {
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                })).json();
+            }
+            if (!partnerData.length) return '';
+
+            const p = partnerData[0];
+            const outreach = await (await fetch(`${SUPABASE_URL}/rest/v1/partnership_outreach?partner_name=eq.${encodeURIComponent(p.partner_name)}&brand_id=eq.carlton&order=sent_at.desc&limit=5&select=*`, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            })).json();
+
+            const typeLabel = (p.engagement_type || '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const statusColor = p.status === 'Active' ? 'var(--deft-success)' : p.status === 'Engaged' ? 'var(--deft-accent)' : 'var(--deft-txt-3)';
+
+            let html = `<div class="panel" style="border-left: 3px solid var(--deft-accent-warm);">
+                <div class="panel-header">
+                    <span class="text-xs font-semibold text-txt-3 uppercase tracking-wider">Partnership</span>
+                    <a href="/partnership.html" class="text-xs text-info hover:underline">View in Partnerships</a>
+                </div>
+                <div class="panel-body">
+                    <div class="grid grid-cols-2 gap-3 text-sm mb-3">
+                        <div><span class="text-xs text-txt-3 uppercase">Type</span><div class="text-txt-2">${esc(typeLabel)}</div></div>
+                        <div><span class="text-xs text-txt-3 uppercase">Status</span><div style="color:${statusColor}">${esc(p.status || 'Unknown')}</div></div>
+                        <div><span class="text-xs text-txt-3 uppercase">Tier</span><div class="text-txt-2">${esc(p.tier || 'Untiered')}</div></div>
+                        <div><span class="text-xs text-txt-3 uppercase">Score</span><div class="text-txt-2">${p.fit_score || '—'}/100</div></div>
+                    </div>`;
+
+            if (outreach.length > 0) {
+                html += `<div class="text-xs text-txt-3 uppercase mb-1 mt-2">Recent Outreach</div>`;
+                for (const o of outreach) {
+                    const statusBadge = o.response_status === 'replied' ? 'badge-completed' : o.response_status === 'pending' ? 'badge-in_progress' : 'badge-review';
+                    html += `<div class="flex items-center gap-2 py-1 border-b border-border/30 last:border-0 text-xs">
+                        <span class="badge ${statusBadge}" style="font-size:0.55rem;">${esc(o.response_status || 'sent')}</span>
+                        <span class="text-txt-2 truncate flex-1">${esc(o.subject || '')}</span>
+                        <span class="text-txt-3 font-mono text-[0.6rem]">${o.sent_at ? new Date(o.sent_at).toLocaleDateString() : ''}</span>
+                    </div>`;
+                }
+            }
+
+            html += `</div></div>`;
+            return html;
+        } catch (e) {
+            return '';
+        }
+    }
+
     async function renderSocialActivity(contactId, contactName) {
         let socialData = null;
         try {
