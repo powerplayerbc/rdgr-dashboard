@@ -778,6 +778,12 @@
                             <div class="stat-label">Overall %</div>
                         </div>
                     </div>
+                    <div class="stat-chip flex-1 min-w-[130px]" id="statConfidenceChip" style="display:none;">
+                        <div>
+                            <div class="stat-value" style="color: var(--deft-success, #22C55E);" id="statConfidence">--</div>
+                            <div class="stat-label">Identity Confidence</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -792,6 +798,31 @@
                     </div>
                     <div class="panel-body flex justify-center">
                         <div id="radarChartContainer"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Identity Synthesis CTA -->
+            <div id="identitySynthesisCTA" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-4" style="display:none;">
+                <div class="panel" style="border: 1px solid color-mix(in srgb, var(--deft-accent) 30%, var(--deft-border));">
+                    <div class="panel-body flex flex-col sm:flex-row items-center justify-between gap-4 py-5 px-6">
+                        <div class="flex items-center gap-4">
+                            <div class="text-3xl">&#x1F9EC;</div>
+                            <div>
+                                <h3 class="font-heading font-semibold text-base" id="synthCTATitle">All Categories Complete</h3>
+                                <p class="text-sm text-txt-2" id="synthCTASubtitle">Ready to synthesize your full brand identity across all categories</p>
+                            </div>
+                        </div>
+                        <button onclick="handleFullIdentitySynthesis()" class="btn btn-primary text-sm py-2.5 px-6 whitespace-nowrap" id="fullSynthBtn">
+                            Synthesize Full Identity
+                        </button>
+                    </div>
+                    <div id="synthProgressContainer" style="display:none;" class="px-6 pb-5">
+                        <div class="flex items-center justify-between text-xs text-txt-2 mb-2">
+                            <span id="synthProgressLabel">Synthesizing...</span>
+                            <span id="synthProgressPct" class="font-mono">0%</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill" id="synthProgressFill" style="width: 0%;"></div></div>
                     </div>
                 </div>
             </div>
@@ -945,6 +976,7 @@
     // ═══════════════════════════════════════
     const BRAND_ID = 'carlton';
     const WEBHOOK_URL = 'https://n8n.carltonaiservices.com/webhook/brand-discovery';
+    const IDENTITY_SYNTHESIS_URL = 'https://n8n.carltonaiservices.com/webhook/brand-identity-synthesis';
     const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
 
@@ -988,6 +1020,8 @@
         voiceDimensions: null,
         reviewData: null,
         reAnswerMode: false,
+        identityConfidence: null,
+        identitySynthesizing: false,
     };
 
     let activeProfileId = null;
@@ -1078,6 +1112,10 @@
         return await fetchJSON(WEBHOOK_URL, { operation: 're_answer', brand_id: BRAND_ID, session_id: sessionId, question_index: questionIndex });
     }
 
+    async function apiSynthesizeFullIdentity() {
+        return await fetchJSON(IDENTITY_SYNTHESIS_URL, { brand_id: BRAND_ID });
+    }
+
     function getCategoryLabel(key) {
         const cat = CATEGORIES.find(c => c.key === key);
         return cat ? cat.label : 'Category';
@@ -1129,20 +1167,40 @@
         renderStats(result.summary, result.overall_completion);
         renderCategoryCards();
         loadVoiceData();
+        // Show synthesis CTA if all 15 categories complete
+        const allComplete = CATEGORIES.every(function(cat) {
+            const data = state.categoryMap[cat.key];
+            return data && data.status === 'complete';
+        });
+        const cta = document.getElementById('identitySynthesisCTA');
+        if (cta) cta.style.display = allComplete ? '' : 'none';
     }
 
     function renderStats(summary, overall) {
-        if (!summary) return;
-        document.getElementById('statCompleted').textContent = summary.completed || 0;
-        document.getElementById('statInProgress').textContent = summary.in_progress || 0;
-        document.getElementById('statNotStarted').textContent = summary.not_started || 0;
-        document.getElementById('statOverall').textContent = (overall || 0) + '%';
+        if (summary) {
+            document.getElementById('statCompleted').textContent = summary.completed || 0;
+            document.getElementById('statInProgress').textContent = summary.in_progress || 0;
+            document.getElementById('statNotStarted').textContent = summary.not_started || 0;
+            document.getElementById('statOverall').textContent = (overall || 0) + '%';
+        }
+        const confChip = document.getElementById('statConfidenceChip');
+        if (state.identityConfidence !== null) {
+            confChip.style.display = '';
+            const confEl = document.getElementById('statConfidence');
+            confEl.textContent = state.identityConfidence + '%';
+            confEl.style.color = state.identityConfidence >= 80 ? 'var(--deft-success, #22C55E)' :
+                                  state.identityConfidence >= 60 ? 'var(--deft-accent, #06D6A0)' :
+                                  'var(--deft-warning, #FFD93D)';
+        } else if (confChip) {
+            confChip.style.display = 'none';
+        }
     }
 
     function renderCategoryCards() {
         const grid = document.getElementById('categoryGrid');
         grid.innerHTML = CATEGORIES.map(cat => {
             const data = state.categoryMap[cat.key] || { status: 'not_started', answered: 0, total: 0, avg_depth: 0, target: 0.85 };
+            const crossCount = data.cross_insight_count || 0;
             const status = data.status || 'not_started';
             const depthPct = data.target > 0 ? Math.min((data.avg_depth / data.target) * 100, 100) : 0;
             const depthColor = depthPct >= 100 ? 'var(--deft-success, #22C55E)' : depthPct >= 50 ? 'var(--deft-accent, #06D6A0)' : 'var(--deft-warning, #FFD93D)';
@@ -1166,7 +1224,7 @@
                     </div>
                     ${status !== 'not_started' ? `
                         <div class="flex items-center justify-between text-xs text-txt-2 mt-3">
-                            <span>${data.answered} / ${data.total} questions</span>
+                            <span>${data.answered} / ${data.total} questions${crossCount > 0 ? `<span style="color: #4CC9F0; font-size: 0.65rem; margin-left: 0.5rem;">&#x1F517; ${crossCount}</span>` : ''}</span>
                             <span class="font-mono" style="color: ${depthColor};">Depth: ${(data.avg_depth || 0).toFixed(2)}</span>
                         </div>
                         <div class="depth-bar">
@@ -1991,6 +2049,62 @@
                 <span class="text-sm">${esc(String(val))}</span>
             </div>`;
         }).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // FULL IDENTITY SYNTHESIS
+    // ═══════════════════════════════════════
+    async function handleFullIdentitySynthesis() {
+        if (state.identitySynthesizing) return;
+        state.identitySynthesizing = true;
+        const btn = document.getElementById('fullSynthBtn');
+        btn.disabled = true;
+        btn.textContent = 'Synthesizing...';
+        const progressContainer = document.getElementById('synthProgressContainer');
+        progressContainer.style.display = '';
+        const progressFill = document.getElementById('synthProgressFill');
+        const progressLabel = document.getElementById('synthProgressLabel');
+        const progressPct = document.getElementById('synthProgressPct');
+        let step = 0;
+        const totalSteps = 16;
+        const categoryNames = CATEGORIES.map(function(c) { return c.label; });
+        const progressInterval = setInterval(function() {
+            if (step < 15) {
+                progressLabel.textContent = 'Extracting: ' + categoryNames[step] + '...';
+            } else {
+                progressLabel.textContent = 'Cross-referencing all categories...';
+            }
+            step = Math.min(step + 1, totalSteps);
+            const pct = Math.min(Math.round((step / totalSteps) * 95), 95);
+            progressFill.style.width = pct + '%';
+            progressPct.textContent = pct + '%';
+        }, 3000);
+        try {
+            const result = await apiSynthesizeFullIdentity();
+            clearInterval(progressInterval);
+            progressFill.style.width = '100%';
+            progressPct.textContent = '100%';
+            progressLabel.textContent = 'Synthesis complete!';
+            if (result && result.success) {
+                state.identityConfidence = result.confidence_score || null;
+                toast('Brand identity synthesized! ' + (result.confidence_score || '') + '% confidence', 'success');
+                renderStats();
+                document.getElementById('synthCTATitle').textContent = 'Brand Identity Synthesized';
+                document.getElementById('synthCTASubtitle').textContent = state.identityConfidence + '% confidence score. Click to re-synthesize.';
+                btn.textContent = 'Re-Synthesize Identity';
+            } else {
+                toast('Synthesis failed: ' + (result && result.error ? result.error : 'Connection error'), 'error');
+            }
+        } catch (err) {
+            clearInterval(progressInterval);
+            toast('Synthesis error: ' + err.message, 'error');
+        }
+        state.identitySynthesizing = false;
+        btn.disabled = false;
+        setTimeout(function() {
+            progressContainer.style.display = 'none';
+            progressFill.style.width = '0%';
+        }, 3000);
     }
 
     // ═══════════════════════════════════════
