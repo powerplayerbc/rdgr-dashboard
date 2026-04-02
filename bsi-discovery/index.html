@@ -897,9 +897,36 @@
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                             Synthesize Policy
                         </button>
+                        <button onclick="openReviewMode(state.activeCategory, state.sessionId)" class="btn btn-ghost text-sm py-2.5 px-5">Review Answers</button>
                         <button onclick="goBackToProgress()" class="btn btn-ghost text-sm py-2.5 px-5">Back to Grid</button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- ═══ VIEW: REVIEW ═══ -->
+        <div id="view-review" style="display:none;">
+            <div class="max-w-[800px] mx-auto px-4 sm:px-6 py-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <button onclick="goBackToProgress()" class="btn btn-ghost text-xs py-1.5 px-2.5">&larr; Back</button>
+                        <span class="text-lg" id="reviewIcon"></span>
+                        <div>
+                            <h2 class="font-heading font-semibold text-base" id="reviewTitle">Review</h2>
+                            <p class="text-xs text-txt-3" id="reviewSubtitle"></p>
+                        </div>
+                    </div>
+                    <button onclick="continueSession()" class="btn btn-primary text-xs py-1.5 px-3" id="reviewContinueBtn">Continue Session &rarr;</button>
+                </div>
+                <div class="mb-4">
+                    <div class="flex items-center gap-3 text-xs text-txt-2">
+                        <span id="reviewProgressText"></span>
+                        <div class="flex-1 progress-bar" style="height:4px;">
+                            <div id="reviewProgressBar" style="height:100%; border-radius:2px; transition: width 0.5s;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="reviewCards" class="space-y-4"></div>
             </div>
         </div>
 
@@ -953,6 +980,8 @@
         selectedOption: null,
         rankingOrder: [],
         sortableInstance: null,
+        reviewData: null,
+        reAnswerMode: false,
     };
 
     let activeProfileId = null;
@@ -1035,6 +1064,19 @@
         return await fetchJSON(WEBHOOK_URL, { operation: 'synthesize_category', brand_id: BRAND_ID, session_id: sessionId });
     }
 
+    async function apiGetSessionReview(sessionId) {
+        return await fetchJSON(WEBHOOK_URL, { operation: 'get_session_review', brand_id: BRAND_ID, session_id: sessionId });
+    }
+
+    async function apiReAnswer(sessionId, questionIndex) {
+        return await fetchJSON(WEBHOOK_URL, { operation: 're_answer', brand_id: BRAND_ID, session_id: sessionId, question_index: questionIndex });
+    }
+
+    function getCategoryLabel(key) {
+        const cat = CATEGORIES.find(c => c.key === key);
+        return cat ? cat.label : 'Category';
+    }
+
     // ═══════════════════════════════════════
     // VIEW SWITCHING
     // ═══════════════════════════════════════
@@ -1044,6 +1086,7 @@
         document.getElementById('view-session').style.display = view === 'session' ? '' : 'none';
         document.getElementById('view-synthesis').style.display = view === 'synthesis' ? '' : 'none';
         document.getElementById('view-complete').style.display = view === 'complete' ? '' : 'none';
+        document.getElementById('view-review').style.display = view === 'review' ? '' : 'none';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -1091,13 +1134,14 @@
         grid.innerHTML = CATEGORIES.map(cat => {
             const data = state.categoryMap[cat.key] || { status: 'not_started', answered: 0, total: 0, avg_depth: 0, target: 0.85 };
             const status = data.status || 'not_started';
-            const depthPct = data.target > 0 ? Math.min((data.avg_depth / data.target) * 100, 100) : 0;
+            const displayScore = data.section_score || data.avg_depth;
+            const depthPct = data.target > 0 ? Math.min((displayScore / data.target) * 100, 100) : 0;
             const depthColor = depthPct >= 100 ? 'var(--deft-success, #22C55E)' : depthPct >= 50 ? 'var(--deft-accent, #06D6A0)' : 'var(--deft-warning, #FFD93D)';
 
             const statusClass = status === 'complete' ? 'complete' : status === 'in_progress' ? 'in-progress' : '';
             const badgeClass = status === 'complete' ? 'badge-complete' : status === 'in_progress' ? 'badge-in_progress' : 'badge-not_started';
             const badgeText = status === 'complete' ? 'Complete' : status === 'in_progress' ? 'In Progress' : 'Not Started';
-            const actionText = status === 'complete' ? 'View' : status === 'in_progress' ? 'Resume' : 'Start';
+            const actionText = status === 'complete' ? 'Review' : status === 'in_progress' ? 'Resume' : 'Start';
 
             return `
                 <div class="discovery-card ${statusClass}" onclick="startCategory('${cat.key}')">
@@ -1114,7 +1158,7 @@
                     ${status !== 'not_started' ? `
                         <div class="flex items-center justify-between text-xs text-txt-2 mt-3">
                             <span>${data.answered} / ${data.total} questions</span>
-                            <span class="font-mono" style="color: ${depthColor};">Depth: ${(data.avg_depth || 0).toFixed(2)}</span>
+                            <span class="font-mono" style="color: ${depthColor};">${data.section_score ? 'Coverage' : 'Depth'}: ${(displayScore || 0).toFixed(2)}</span>
                         </div>
                         <div class="depth-bar">
                             <div class="depth-bar-fill" style="width: ${depthPct}%; background: ${depthColor};"></div>
@@ -1137,9 +1181,10 @@
         const catInfo = CATEGORIES.find(c => c.key === categoryKey);
         if (!catInfo) return;
 
+        // Check if already complete — show review
         const catData = state.categoryMap[categoryKey];
         if (catData && catData.status === 'complete') {
-            toast('This category is already complete', 'success');
+            openReviewMode(categoryKey, catData.session_id);
             return;
         }
 
@@ -1162,22 +1207,27 @@
 
         if (result.action === 'created' && result.first_question) {
             state.currentQuestion = result.first_question;
-            state.sessionProgress = { answered: 0, total: result.total_questions, avg_depth: 0, target: result.depth_target || 0.85 };
+            state.sessionProgress = { answered: 0, total: result.total_questions, avg_depth: 0, section_score: null, target: result.depth_target || 0.85 };
             updateSessionHeader();
             renderQuestion(result.first_question);
         } else if (result.action === 'resumed') {
-            state.sessionProgress = result.progress || { answered: 0, total: 0, avg_depth: 0, target: 0.85 };
+            state.sessionProgress = result.progress || { answered: 0, total: 0, avg_depth: 0, section_score: null, target: 0.85 };
             updateSessionHeader();
             const qResult = await apiGetNextQuestion(state.sessionId);
             if (qResult && qResult.success) {
                 if (qResult.is_complete) {
-                    showCategoryComplete();
+                    handleCategoryCompletion();
                     return;
                 }
-                state.currentQuestion = qResult.current_question;
-                state.sessionProgress = qResult.progress || state.sessionProgress;
-                updateSessionHeader();
-                renderQuestion(qResult.current_question);
+                if (qResult.current_question) {
+                    state.currentQuestion = qResult.current_question;
+                    state.sessionProgress = qResult.progress || state.sessionProgress;
+                    updateSessionHeader();
+                    renderQuestion(qResult.current_question);
+                } else {
+                    // All questions answered but depth not met — show review
+                    openReviewMode(categoryKey, state.sessionId);
+                }
             } else {
                 toast('Failed to get question', 'error');
                 goBackToProgress();
@@ -1191,7 +1241,8 @@
         document.getElementById('sessionQuestionCount').textContent = `${p.answered} / ${p.total} questions`;
         const pct = p.total > 0 ? (p.answered / p.total) * 100 : 0;
         document.getElementById('sessionProgressBar').style.width = pct + '%';
-        document.getElementById('sessionDepthLabel').textContent = `Depth: ${(p.avg_depth || 0).toFixed(2)}`;
+        const depthDisplay = p.section_score ? `Coverage: ${p.section_score.toFixed(2)}` : `Depth: ${(p.avg_depth || 0).toFixed(2)}`;
+        document.getElementById('sessionDepthLabel').textContent = depthDisplay;
     }
 
     // ═══════════════════════════════════════
@@ -1406,6 +1457,22 @@
         if (btn) { btn.disabled = false; btn.textContent = 'Submit Answer'; }
 
         if (!result || !result.success) {
+            // Verify if answer was saved despite error response
+            const verify = await apiGetNextQuestion(state.sessionId);
+            if (verify && verify.success) {
+                if (verify.is_complete) {
+                    handleCategoryCompletion();
+                } else if (verify.current_question) {
+                    toast('Answer saved!', 'success');
+                    state.currentQuestion = verify.current_question;
+                    if (verify.progress) { state.sessionProgress = verify.progress; updateSessionHeader(); }
+                    renderQuestion(verify.current_question);
+                } else {
+                    toast('Answer saved!', 'success');
+                    openReviewMode(state.activeCategory, state.sessionId);
+                }
+                return;
+            }
             toast('Failed to submit: ' + (result?.error || 'Connection error. Your progress is saved — try again.'), 'error');
             return;
         }
@@ -1419,15 +1486,24 @@
             updateSessionHeader();
         }
 
-        const delay = result.depth_analysis ? 2500 : 500;
+        const delay = result.depth_analysis ? 1500 : 500;
         setTimeout(() => {
             document.getElementById('depthFeedback').style.display = 'none';
 
+            if (state.reAnswerMode) {
+                state.reAnswerMode = false;
+                openReviewMode(state.activeCategory, state.sessionId);
+                return;
+            }
+
             if (result.is_complete) {
-                showCategoryComplete();
+                handleCategoryCompletion();
             } else if (result.next_question) {
                 state.currentQuestion = result.next_question;
                 renderQuestion(result.next_question);
+            } else {
+                // All questions answered but depth not met — show review
+                openReviewMode(state.activeCategory, state.sessionId);
             }
         }, delay);
     }
@@ -1437,16 +1513,30 @@
         const score = analysis.score || 0;
         const pct = Math.min(score * 100, 100);
         const color = score >= 0.7 ? 'var(--deft-success, #22C55E)' : score >= 0.5 ? 'var(--deft-accent, #06D6A0)' : 'var(--deft-warning, #FFD93D)';
+        const sectionScore = analysis.section_score || null;
 
         let html = `
             <div class="depth-feedback">
-                <div class="flex items-center gap-3 mb-3">
+                <div class="flex items-center gap-3 mb-2">
                     <span class="text-xs font-mono" style="color: ${color};">Depth: ${score.toFixed(2)}</span>
                     <div class="flex-1 progress-bar" style="height: 4px;">
                         <div style="width: ${pct}%; height: 100%; border-radius: 2px; background: ${color}; transition: width 0.5s;"></div>
                     </div>
                 </div>
         `;
+
+        if (sectionScore !== null) {
+            const secPct = Math.min(sectionScore * 100, 100);
+            const secColor = sectionScore >= 0.85 ? 'var(--deft-success, #22C55E)' : sectionScore >= 0.7 ? 'var(--deft-accent, #06D6A0)' : 'var(--deft-warning, #FFD93D)';
+            html += `
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-xs font-mono" style="color: ${secColor};">Coverage: ${sectionScore.toFixed(2)}</span>
+                    <div class="flex-1 progress-bar" style="height: 4px;">
+                        <div style="width: ${secPct}%; height: 100%; border-radius: 2px; background: ${secColor}; transition: width 0.5s;"></div>
+                    </div>
+                </div>
+            `;
+        }
 
         // BSI-specific: Show 4 dimension bars if dimensions are present
         if (analysis.dimensions) {
@@ -1483,14 +1573,225 @@
         container.style.display = '';
     }
 
+    function handleCategoryCompletion() {
+        const label = getCategoryLabel(state.activeCategory);
+        toast(label + ' complete!', 'success');
+        triggerBackgroundSynthesis(state.sessionId);
+        setTimeout(() => goBackToProgress(), 2000);
+    }
+
+    function triggerBackgroundSynthesis(sessionId) {
+        if (!sessionId) return;
+        apiSynthesizeCategory(sessionId).then(result => {
+            if (result && result.success) {
+                console.log('Background synthesis complete for session:', sessionId);
+            } else {
+                console.warn('Background synthesis failed:', result?.error || 'unknown error');
+            }
+        }).catch(err => {
+            console.warn('Background synthesis error:', err);
+        });
+    }
+
     function showCategoryComplete() {
         const catInfo = CATEGORIES.find(c => c.key === state.activeCategory);
         document.getElementById('completeTitle').textContent = `${catInfo?.icon || ''} ${catInfo?.label || 'Category'} Complete!`;
         const p = state.sessionProgress;
         if (p) {
-            document.getElementById('completeStats').textContent = `${p.answered} questions answered | Average depth: ${(p.avg_depth || 0).toFixed(2)} / ${(p.target || 0.85).toFixed(2)}`;
+            const score = p.section_score || p.avg_depth;
+            const label = p.section_score ? 'Coverage score' : 'Average depth';
+            document.getElementById('completeStats').textContent = `${p.answered} questions answered | ${label}: ${(score || 0).toFixed(2)} / ${(p.target || 0.85).toFixed(2)}`;
         }
         switchView('complete');
+    }
+
+    // ═══════════════════════════════════════
+    // REVIEW MODE
+    // ═══════════════════════════════════════
+    async function openReviewMode(categoryKey, sessionId) {
+        const catInfo = CATEGORIES.find(c => c.key === categoryKey);
+        if (!catInfo) return;
+
+        state.activeCategory = categoryKey;
+        state.sessionId = sessionId;
+
+        document.getElementById('reviewIcon').textContent = catInfo.icon;
+        document.getElementById('reviewTitle').textContent = catInfo.label + ' \u2014 Review';
+        document.getElementById('reviewSubtitle').textContent = catInfo.group;
+
+        switchView('review');
+        document.getElementById('reviewCards').innerHTML = '<div class="text-center py-8"><div class="skeleton h-32 w-full rounded-lg"></div></div>';
+
+        const result = await apiGetSessionReview(sessionId);
+        if (!result || !result.success) {
+            toast('Failed to load review: ' + (result?.error || 'Connection error'), 'error');
+            goBackToProgress();
+            return;
+        }
+
+        state.reviewData = result;
+        renderReviewProgress(result.progress);
+        renderReviewCards(result.questions);
+
+        // Set button based on session state
+        const btn = document.getElementById('reviewContinueBtn');
+        if (result.status === 'complete') {
+            btn.textContent = 'Synthesize Policy';
+            btn.onclick = () => handleSynthesis();
+        } else if (result.progress && result.progress.answered >= result.progress.total) {
+            // All answered but depth not met — offer holistic gap analysis
+            btn.textContent = 'Deepen Understanding \u2192';
+            btn.onclick = () => deepenSession();
+        } else {
+            btn.textContent = 'Continue Session \u2192';
+            btn.onclick = () => continueSession();
+        }
+    }
+
+    function renderReviewProgress(progress) {
+        if (!progress) return;
+        const score = progress.section_score || progress.avg_depth;
+        const pct = progress.target > 0 ? Math.min((score / progress.target) * 100, 100) : 0;
+        const color = pct >= 100 ? 'var(--deft-success, #22C55E)' : pct >= 50 ? 'var(--deft-accent, #06D6A0)' : 'var(--deft-warning, #FFD93D)';
+        const label = progress.section_score ? 'Coverage' : 'Depth';
+        document.getElementById('reviewProgressText').textContent = `${progress.answered}/${progress.total} answered | ${label}: ${(score || 0).toFixed(2)}/${(progress.target || 0.85).toFixed(2)}`;
+        const bar = document.getElementById('reviewProgressBar');
+        bar.style.width = pct + '%';
+        bar.style.background = color;
+    }
+
+    function renderReviewCards(questions) {
+        const container = document.getElementById('reviewCards');
+        if (!questions || !questions.length) {
+            container.innerHTML = '<p class="text-sm text-txt-3 text-center py-8">No questions in this session yet.</p>';
+            return;
+        }
+        container.innerHTML = questions.map((q, i) => {
+            const hasAnswer = q.answer || q.selected || q.verdict || q.rankings;
+            const score = q.depth_score;
+            const scoreColor = score >= 0.7 ? 'var(--deft-success, #22C55E)' : score >= 0.5 ? 'var(--deft-accent, #06D6A0)' : score !== null ? 'var(--deft-warning, #FFD93D)' : 'var(--deft-border, #2A2E3D)';
+            const scorePct = score !== null ? Math.min(score * 100, 100) : 0;
+
+            let answerHtml = '';
+            if (q.answer) {
+                answerHtml = `<p class="text-sm text-txt-1 mt-2 whitespace-pre-wrap">${esc(q.answer)}</p>`;
+            } else if (q.selected) {
+                answerHtml = `<p class="text-sm text-txt-1 mt-2"><span class="font-mono text-accent text-xs mr-1">${q.selected.toUpperCase()}</span> selected</p>`;
+            } else if (q.verdict) {
+                answerHtml = `<p class="text-sm text-txt-1 mt-2">Verdict: <span class="font-medium">${esc(q.verdict)}</span>${q.adjustment ? ' \u2014 ' + esc(q.adjustment) : ''}</p>`;
+            } else if (q.rankings) {
+                answerHtml = `<p class="text-sm text-txt-1 mt-2">Ranked: ${q.rankings.map((r, ri) => (ri+1) + '. ' + esc(r)).join(', ')}</p>`;
+            } else {
+                answerHtml = `<p class="text-sm text-txt-3 mt-2 italic">Not answered yet</p>`;
+            }
+
+            return `
+                <div class="panel review-card" style="border-left: 3px solid ${scoreColor};">
+                    <div class="panel-body">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-xs font-mono text-txt-3">Q${i + 1}</span>
+                                    ${q.is_followup ? '<span class="text-xs px-1.5 py-0.5 rounded" style="background: var(--deft-accent-dim); color: var(--deft-accent);">Follow-up</span>' : ''}
+                                    ${q.is_gap ? '<span class="text-xs px-1.5 py-0.5 rounded" style="background: var(--deft-warning-dim, rgba(255,217,61,0.15)); color: var(--deft-warning, #FFD93D);">Gap</span>' : ''}
+                                    ${score !== null ? `<span class="text-xs font-mono" style="color: ${scoreColor};">${score.toFixed(2)}</span>` : ''}
+                                </div>
+                                <p class="font-heading font-semibold text-sm">${esc(q.question)}</p>
+                                ${q.context ? `<p class="text-xs text-txt-3 mt-0.5">${esc(q.context)}</p>` : ''}
+                                ${answerHtml}
+                                ${q.insight ? `<div class="mt-2 p-2 rounded text-xs" style="background: var(--deft-accent-dim); border: 1px solid color-mix(in srgb, var(--deft-accent) 15%, transparent);"><span class="font-medium text-accent">Insight:</span> ${esc(q.insight)}</div>` : ''}
+                            </div>
+                            ${hasAnswer ? `<button onclick="handleReAnswer(${q.index})" class="btn btn-ghost text-xs py-1 px-2 whitespace-nowrap">Re-answer</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function handleReAnswer(questionIndex) {
+        if (!state.sessionId) return;
+        const result = await apiReAnswer(state.sessionId, questionIndex);
+        if (!result || !result.success) {
+            toast('Failed to reset question: ' + (result?.error || 'Connection error'), 'error');
+            return;
+        }
+        // Switch to session view with the question loaded
+        state.currentQuestion = result.question;
+        state.reAnswerMode = true;
+        const catInfo = CATEGORIES.find(c => c.key === state.activeCategory);
+        if (catInfo) {
+            document.getElementById('sessionIcon').textContent = catInfo.icon;
+            document.getElementById('sessionTitle').textContent = catInfo.label;
+        }
+        switchView('session');
+        renderQuestion(result.question);
+    }
+
+    async function continueSession() {
+        if (!state.sessionId) return;
+        const catInfo = CATEGORIES.find(c => c.key === state.activeCategory);
+        if (catInfo) {
+            document.getElementById('sessionIcon').textContent = catInfo.icon;
+            document.getElementById('sessionTitle').textContent = catInfo.label;
+        }
+        switchView('session');
+        document.getElementById('questionContainer').innerHTML = '<div class="text-center py-8"><div class="skeleton h-32 w-full rounded-lg"></div></div>';
+        const result = await apiGetNextQuestion(state.sessionId);
+        if (!result || !result.success) {
+            toast('Failed to load: ' + (result?.error || 'Connection error'), 'error');
+            goBackToProgress();
+            return;
+        }
+        if (result.is_complete) {
+            handleCategoryCompletion();
+        } else if (result.current_question) {
+            state.currentQuestion = result.current_question;
+            if (result.progress) { state.sessionProgress = result.progress; updateSessionHeader(); }
+            renderQuestion(result.current_question);
+        } else {
+            // All questions answered but depth not met — show review
+            openReviewMode(state.activeCategory, state.sessionId);
+        }
+    }
+
+    async function deepenSession() {
+        if (!state.sessionId) return;
+        const catInfo = CATEGORIES.find(c => c.key === state.activeCategory);
+        if (catInfo) {
+            document.getElementById('sessionIcon').textContent = catInfo.icon;
+            document.getElementById('sessionTitle').textContent = catInfo.label;
+        }
+        switchView('session');
+        document.getElementById('questionContainer').innerHTML = `
+            <div class="text-center py-12">
+                <div class="text-3xl mb-4">&#128270;</div>
+                <h3 class="font-heading font-semibold text-base mb-2">Analyzing your answers...</h3>
+                <p class="text-sm text-txt-2">Looking for gaps in your policy definitions</p>
+            </div>`;
+
+        // Call submit_answer with deepen flag to trigger holistic gap analysis
+        const result = await apiSubmitAnswer(state.sessionId, { deepen: true });
+        if (!result || !result.success) {
+            toast('Failed to analyze: ' + (result?.error || 'Connection error'), 'error');
+            openReviewMode(state.activeCategory, state.sessionId);
+            return;
+        }
+
+        if (result.next_question) {
+            // Gap analysis generated a new targeted question
+            state.currentQuestion = result.next_question;
+            if (result.progress) { state.sessionProgress = result.progress; updateSessionHeader(); }
+            if (result.depth_analysis?.insight) {
+                showDepthFeedback({ score: result.depth_analysis.score, feedback: result.depth_analysis.insight });
+            }
+            renderQuestion(result.next_question);
+        } else if (result.is_complete) {
+            handleCategoryCompletion();
+        } else {
+            toast('No additional gaps identified', 'success');
+            openReviewMode(state.activeCategory, state.sessionId);
+        }
     }
 
     // ═══════════════════════════════════════
