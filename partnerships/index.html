@@ -771,7 +771,9 @@
             <div class="flex gap-1 p-0.5 rounded-lg overflow-x-auto" style="background: rgba(255,255,255,0.04);">
                 <button class="prtn-tab active" id="tab-overview" onclick="switchView('overview')">Overview</button>
                 <button class="prtn-tab" id="tab-partners" onclick="switchView('partners')">Partners</button>
-                <button class="prtn-tab" id="tab-outreach" onclick="switchView('outreach')">Outreach</button>
+                <button class="prtn-tab" id="tab-discovery" onclick="switchView('discovery')">Discovery</button>
+                <button class="prtn-tab" id="tab-enrichment" onclick="switchView('enrichment')">Enrichment</button>
+                <button class="prtn-tab" id="tab-outreach" onclick="switchView('outreach')">Outreach & Approvals</button>
                 <button class="prtn-tab" id="tab-pipeline" onclick="switchView('pipeline')">Pipeline</button>
                 <button class="prtn-tab" id="tab-types" onclick="switchView('types')">Engagement Types</button>
             </div>
@@ -916,6 +918,62 @@
             </div>
             <div class="kanban-board" id="pipelineBoard">
                 <div class="empty-state" style="width:100%;"><div class="skeleton h-64 w-full"></div></div>
+            </div>
+        </div>
+
+        <!-- VIEW: DISCOVERY SETTINGS -->
+        <div id="view-discovery" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8 space-y-4" style="display: none;">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="font-heading text-lg font-semibold">Discovery Settings</h2>
+                <div class="flex gap-2">
+                    <select id="discoveryTypeFilter" onchange="renderDiscovery()" class="form-input text-xs py-1.5 px-3" style="width: auto;">
+                        <option value="">All Types</option>
+                    </select>
+                    <button onclick="runDiscoveryNow()" class="btn-primary text-xs px-3 py-1.5">Run Discovery Now</button>
+                </div>
+            </div>
+            <div id="targetingCriteriaGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="empty-state col-span-full">Loading targeting criteria...</div>
+            </div>
+            <button onclick="openAddTargetingModal()" class="btn-secondary text-xs px-3 py-1.5 mt-2">+ Add Targeting Criteria</button>
+        </div>
+
+        <!-- VIEW: ENRICHMENT QUEUE -->
+        <div id="view-enrichment" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8 space-y-4" style="display: none;">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="font-heading text-lg font-semibold">Enrichment Queue</h2>
+                <div class="flex gap-2">
+                    <select id="enrichmentStatusFilter" onchange="renderEnrichment()" class="form-input text-xs py-1.5 px-3" style="width: auto;">
+                        <option value="">All Statuses</option>
+                        <option value="not_enriched">Not Enriched</option>
+                        <option value="enriching">Enriching</option>
+                        <option value="enriched">Enriched</option>
+                        <option value="enrichment_failed">Failed</option>
+                    </select>
+                    <select id="enrichmentTypeFilter" onchange="renderEnrichment()" class="form-input text-xs py-1.5 px-3" style="width: auto;">
+                        <option value="">All Types</option>
+                    </select>
+                </div>
+            </div>
+            <div id="enrichmentSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4"></div>
+            <div class="panel">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="text-left text-txt-2 text-xs uppercase tracking-wider border-b" style="border-color: var(--deft-border);">
+                                <th class="pb-2 pr-3">Status</th>
+                                <th class="pb-2 pr-3">Partner</th>
+                                <th class="pb-2 pr-3">Type</th>
+                                <th class="pb-2 pr-3">Audience</th>
+                                <th class="pb-2 pr-3">Fit Score</th>
+                                <th class="pb-2 pr-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="enrichmentTableBody">
+                            <tr><td colspan="6" class="py-4 text-center text-txt-3">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -1363,6 +1421,7 @@
             fetchPartners(),
             fetchOutreachLog(),
             fetchEngagements(),
+            fetchTargetingCriteria(),
         ]);
 
         computeStats();
@@ -1446,10 +1505,12 @@
     // ========================================
     function switchView(view) {
         currentView = view;
-        var views = ['overview', 'partners', 'outreach', 'pipeline', 'types'];
+        var views = ['overview', 'partners', 'discovery', 'enrichment', 'outreach', 'pipeline', 'types'];
         views.forEach(function(v) {
-            document.getElementById('view-' + v).style.display = v === view ? '' : 'none';
-            document.getElementById('tab-' + v).classList.toggle('active', v === view);
+            var el = document.getElementById('view-' + v);
+            if (el) el.style.display = v === view ? '' : 'none';
+            var tab = document.getElementById('tab-' + v);
+            if (tab) tab.classList.toggle('active', v === view);
         });
         renderCurrentView();
     }
@@ -1457,6 +1518,8 @@
     function renderCurrentView() {
         if (currentView === 'overview') renderOverview();
         if (currentView === 'partners') renderPartners();
+        if (currentView === 'discovery') renderDiscovery();
+        if (currentView === 'enrichment') renderEnrichment();
         if (currentView === 'outreach') renderOutreach();
         if (currentView === 'pipeline') renderPipeline();
         if (currentView === 'types') renderTypes();
@@ -1995,6 +2058,162 @@
             closeDetailPanel();
         }
     });
+
+    // ========================================
+    // DISCOVERY SETTINGS (v2)
+    // ========================================
+    let targetingCriteria = [];
+
+    async function fetchTargetingCriteria() {
+        try {
+            targetingCriteria = await supabaseSelect('partnership_targeting_criteria', '?brand_id=eq.carlton&order=engagement_type') || [];
+        } catch (e) { targetingCriteria = []; }
+    }
+
+    function renderDiscovery() {
+        fetchTargetingCriteria().then(function() {
+            var filter = document.getElementById('discoveryTypeFilter').value;
+            var filtered = filter ? targetingCriteria.filter(function(tc) { return tc.engagement_type === filter; }) : targetingCriteria;
+
+            // Populate type filter dropdown
+            var typeSelect = document.getElementById('discoveryTypeFilter');
+            if (typeSelect.options.length <= 1) {
+                engagementTypes.forEach(function(t) {
+                    var opt = document.createElement('option');
+                    opt.value = t.type_key;
+                    opt.textContent = t.display_name;
+                    typeSelect.appendChild(opt);
+                });
+            }
+
+            var grid = document.getElementById('targetingCriteriaGrid');
+            if (!filtered.length) {
+                grid.innerHTML = '<div class="empty-state col-span-full">No targeting criteria configured. Click "+ Add Targeting Criteria" to create one.</div>';
+                return;
+            }
+
+            grid.innerHTML = filtered.map(function(tc) {
+                var typeName = (engagementTypes.find(function(t) { return t.type_key === tc.engagement_type; }) || {}).display_name || tc.engagement_type;
+                var audienceRange = (tc.min_audience_size || tc.max_audience_size) ?
+                    ((tc.min_audience_size ? tc.min_audience_size.toLocaleString() : '0') + ' - ' + (tc.max_audience_size ? tc.max_audience_size.toLocaleString() : 'No max')) : 'No filter';
+                var keywords = (tc.required_keywords || []).slice(0, 6).join(', ');
+                var engines = (tc.search_engines || []).join(', ');
+                return '<div class="panel">' +
+                    '<div class="panel-header"><h3 class="font-heading font-semibold text-sm">' + tc.criteria_name + '</h3>' +
+                    '<div class="flex gap-1">' +
+                    '<span class="badge badge-accent text-[10px]">' + typeName + '</span>' +
+                    (tc.is_active ? '<span class="badge badge-success text-[10px]">Active</span>' : '<span class="badge badge-muted text-[10px]">Inactive</span>') +
+                    '</div></div>' +
+                    '<div class="panel-body space-y-2 text-xs text-txt-2">' +
+                    '<div><span class="text-txt-3">Audience:</span> ' + audienceRange + (tc.audience_size_source ? ' (' + tc.audience_size_source + ')' : '') + '</div>' +
+                    '<div><span class="text-txt-3">Keywords:</span> ' + (keywords || 'None') + '</div>' +
+                    '<div><span class="text-txt-3">Engines:</span> ' + engines + ' | <span class="text-txt-3">Max searches/day:</span> ' + (tc.max_daily_searches || 3) + '</div>' +
+                    (tc.niche_description ? '<div class="text-txt-3 italic truncate" title="' + tc.niche_description.replace(/"/g, '&quot;') + '">' + tc.niche_description.substring(0, 120) + (tc.niche_description.length > 120 ? '...' : '') + '</div>' : '') +
+                    '</div></div>';
+            }).join('');
+        });
+    }
+
+    async function runDiscoveryNow() {
+        if (!confirm('Run a discovery cycle now? This will use Google/YouTube API quota.')) return;
+        toast('Triggering discovery...', 'info');
+        try {
+            var resp = await fetch('https://n8n.carltonaiservices.com/webhook/prtn-discover-test', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ max_searches: 2 })
+            });
+            toast('Discovery triggered! Results will appear shortly.', 'success');
+        } catch (e) { toast('Failed to trigger discovery: ' + e.message, 'error'); }
+    }
+
+    function openAddTargetingModal() {
+        toast('Targeting criteria editor coming soon. Use the Engagement Types tab for now.', 'info');
+    }
+
+    // ========================================
+    // ENRICHMENT QUEUE (v2)
+    // ========================================
+    function renderEnrichment() {
+        var statusFilter = document.getElementById('enrichmentStatusFilter').value;
+        var typeFilter = document.getElementById('enrichmentTypeFilter').value;
+
+        // Populate type filter
+        var typeSelect = document.getElementById('enrichmentTypeFilter');
+        if (typeSelect.options.length <= 1) {
+            engagementTypes.forEach(function(t) {
+                var opt = document.createElement('option');
+                opt.value = t.type_key;
+                opt.textContent = t.display_name;
+                typeSelect.appendChild(opt);
+            });
+        }
+
+        var query = '?brand_id=eq.carlton&select=id,partner_name,engagement_type,enrichment_status,audience_estimate,audience_source,fit_score,enriched_at,social_profiles,content_analysis&order=enrichment_status,created_at.desc&limit=100';
+        if (statusFilter) query += '&enrichment_status=eq.' + statusFilter;
+        if (typeFilter) query += '&engagement_type=eq.' + typeFilter;
+
+        supabaseSelect('partnership_partners', query).then(function(data) {
+            data = data || [];
+
+            // Summary counts
+            var counts = { not_enriched: 0, enriching: 0, enriched: 0, enrichment_failed: 0 };
+            allPartners.forEach(function(p) {
+                var s = p.enrichment_status || 'not_enriched';
+                if (counts[s] !== undefined) counts[s]++;
+            });
+
+            document.getElementById('enrichmentSummary').innerHTML =
+                '<div class="panel text-center py-2"><div class="text-lg font-bold" style="color:var(--deft-accent)">' + counts.enriched + '</div><div class="text-[10px] text-txt-3 uppercase">Enriched</div></div>' +
+                '<div class="panel text-center py-2"><div class="text-lg font-bold" style="color:var(--deft-warning)">' + counts.enriching + '</div><div class="text-[10px] text-txt-3 uppercase">Enriching</div></div>' +
+                '<div class="panel text-center py-2"><div class="text-lg font-bold text-txt-2">' + counts.not_enriched + '</div><div class="text-[10px] text-txt-3 uppercase">Pending</div></div>' +
+                '<div class="panel text-center py-2"><div class="text-lg font-bold" style="color:var(--deft-danger)">' + counts.enrichment_failed + '</div><div class="text-[10px] text-txt-3 uppercase">Failed</div></div>';
+
+            var STATUS_COLORS = { enriched: 'badge-success', enriching: 'badge-warning', not_enriched: 'badge-muted', enrichment_failed: 'badge-danger' };
+
+            var tbody = document.getElementById('enrichmentTableBody');
+            if (!data.length) {
+                tbody.innerHTML = '<tr><td colspan="6" class="py-4 text-center text-txt-3">No partners match the current filters.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(function(p) {
+                var typeName = (engagementTypes.find(function(t) { return t.type_key === p.engagement_type; }) || {}).display_name || p.engagement_type;
+                var statusBadge = '<span class="badge ' + (STATUS_COLORS[p.enrichment_status] || 'badge-muted') + ' text-[10px]">' + (p.enrichment_status || 'unknown').replace(/_/g, ' ') + '</span>';
+                var audience = p.audience_estimate ? (p.audience_estimate >= 1000 ? (p.audience_estimate / 1000).toFixed(1) + 'K' : p.audience_estimate) + (p.audience_source ? ' (' + p.audience_source.replace(/_/g, ' ') + ')' : '') : '--';
+                var scoreEl = p.fit_score ? '<span class="font-medium" style="color:' + (p.fit_score >= 70 ? 'var(--deft-success)' : p.fit_score >= 40 ? 'var(--deft-warning)' : 'var(--deft-danger)') + '">' + p.fit_score + '</span>' : '--';
+                var socialIcons = '';
+                var sp = p.social_profiles || {};
+                if (sp.youtube) socialIcons += '<a href="' + (sp.youtube.url || sp.youtube) + '" target="_blank" class="text-txt-3 hover:text-txt" title="YouTube">YT</a> ';
+                if (sp.linkedin) socialIcons += '<a href="' + (sp.linkedin.url || sp.linkedin) + '" target="_blank" class="text-txt-3 hover:text-txt" title="LinkedIn">LI</a> ';
+                if (sp.twitter) socialIcons += '<a href="' + (sp.twitter.url || sp.twitter) + '" target="_blank" class="text-txt-3 hover:text-txt" title="Twitter">X</a> ';
+
+                var actions = '';
+                if (p.enrichment_status === 'not_enriched' || p.enrichment_status === 'enrichment_failed') {
+                    actions = '<button onclick="triggerEnrich(' + p.id + ')" class="text-accent text-xs hover:underline">Enrich</button>';
+                } else {
+                    actions = '<button onclick="openDetailPanel(' + p.id + ')" class="text-accent text-xs hover:underline">View</button>';
+                }
+
+                return '<tr class="border-b" style="border-color: var(--deft-border);">' +
+                    '<td class="py-2 pr-3">' + statusBadge + '</td>' +
+                    '<td class="py-2 pr-3"><span class="font-medium">' + (p.partner_name || '') + '</span> ' + socialIcons + '</td>' +
+                    '<td class="py-2 pr-3 text-txt-2 text-xs">' + typeName + '</td>' +
+                    '<td class="py-2 pr-3 text-xs">' + audience + '</td>' +
+                    '<td class="py-2 pr-3">' + scoreEl + '</td>' +
+                    '<td class="py-2 pr-3">' + actions + '</td>' +
+                    '</tr>';
+            }).join('');
+        });
+    }
+
+    async function triggerEnrich(partnerId) {
+        toast('Triggering enrichment for partner ' + partnerId + '...', 'info');
+        try {
+            await prtnApi('trigger_enrich', { partner_id: partnerId });
+            toast('Enrichment queued! Partner will be processed in the next cycle.', 'success');
+            setTimeout(function() { renderEnrichment(); }, 2000);
+        } catch (e) { toast('Failed: ' + e.message, 'error'); }
+    }
 
     // ========================================
     // PROFILE SWITCHER
