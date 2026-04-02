@@ -1513,7 +1513,7 @@
         fetchWorkflows();
         startAutoRefresh();
         checkPendingSnapshots();
-        switchCalView(calendarView); // Initialize calendar view toggle state
+        // switchCalView is called after calendar variables are declared (below)
     }
 
     async function checkPendingSnapshots() {
@@ -1573,6 +1573,8 @@
     // ═══════════════════════════════════════
     let calendarData = [];
     let calendarView = localStorage.getItem('dashCalView') || 'list';
+    // Initialize calendar view toggle state (must be after variable declaration)
+    if (typeof switchCalView === 'function') switchCalView(calendarView);
 
     async function fetchContentCalendar() {
         try {
