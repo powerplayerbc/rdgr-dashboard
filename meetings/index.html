@@ -821,17 +821,19 @@
             });
             const data = await res.json();
 
-            if (data.success || res.ok) {
+            if (data.status === 'no_qualifying_meetings' || (res.ok && data.matched_count === 0 && !data.success)) {
+                toast('No qualifying meetings found on the calendar.', 'info');
+            } else if (data.success || data.status === 'complete' || data.status === 'processing') {
                 toast('Calendar scanned! Generating prep materials...', 'success');
                 // Poll for new prep data every 5s for up to 60s
                 let attempts = 0;
                 const maxAttempts = 12;
-                const beforeCount = (meetingsData || []).length;
+                const beforeCount = (meetings || []).length;
                 const pollInterval = setInterval(async () => {
                     attempts++;
                     try {
                         await Promise.all([loadStats(), loadMeetings()]);
-                        const afterCount = (meetingsData || []).length;
+                        const afterCount = (meetings || []).length;
                         if (afterCount > beforeCount) {
                             clearInterval(pollInterval);
                             toast('Prep materials ready!', 'success');

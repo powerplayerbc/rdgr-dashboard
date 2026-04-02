@@ -908,6 +908,19 @@
             </div>
         </div>
 
+        <!-- ── Cross-Section Notifications ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3" id="notificationsSection" style="display:none;">
+            <div class="panel" style="border-left: 3px solid var(--deft-warning, #F0A830);">
+                <div class="panel-body" style="padding:0.6rem 1rem;">
+                    <div class="flex items-center gap-2 flex-wrap" id="notificationBar">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5a3.5 3.5 0 00-3.5 3.5c0 1.75-.5 3-1 3.5h9c-.5-.5-1-1.75-1-3.5A3.5 3.5 0 007 1.5zM5.5 9v.5a1.5 1.5 0 003 0V9" stroke="var(--deft-warning,#F0A830)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="text-xs font-medium" style="color:var(--deft-warning,#F0A830);">Needs Attention</span>
+                        <div class="flex gap-2 flex-wrap" id="notificationBadges"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ── Workflow Control ── -->
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
             <div class="panel">
@@ -946,6 +959,41 @@
                             <div class="skeleton h-10 w-2/3"></div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Content Calendar ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="2.5" width="12" height="10" rx="1.5" stroke="#4CC9F0" stroke-width="1"/><path d="M1 5.5h12M4.5 1v3M9.5 1v3" stroke="#4CC9F0" stroke-width="1" stroke-linecap="round"/></svg>
+                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Content Calendar</h2>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button class="cal-view-btn active" id="calViewList" onclick="switchCalView('list')" title="List view" style="padding:0.2rem 0.5rem;border:1px solid var(--deft-border,#2A2E3D);border-radius:0.25rem;background:transparent;color:var(--deft-txt-2,#8A95A9);font-size:0.6rem;cursor:pointer;">List</button>
+                        <button class="cal-view-btn" id="calViewGrid" onclick="switchCalView('grid')" title="Month grid" style="padding:0.2rem 0.5rem;border:1px solid var(--deft-border,#2A2E3D);border-radius:0.25rem;background:transparent;color:var(--deft-txt-2,#8A95A9);font-size:0.6rem;cursor:pointer;">Month</button>
+                        <button class="cal-view-btn" id="calViewStrip" onclick="switchCalView('strip')" title="Week strip" style="padding:0.2rem 0.5rem;border:1px solid var(--deft-border,#2A2E3D);border-radius:0.25rem;background:transparent;color:var(--deft-txt-2,#8A95A9);font-size:0.6rem;cursor:pointer;">Week</button>
+                    </div>
+                </div>
+                <div class="panel-body" id="calendarPanel" style="max-height:360px;overflow-y:auto;">
+                    <div class="empty-state">Loading content calendar...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Sales & Revenue Metrics ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M4 3.5h4.5a2 2 0 010 4H4M4 7.5h5a2 2 0 010 4H4" stroke="#06D6A0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Sales & Revenue</h2>
+                    </div>
+                </div>
+                <div class="panel-body" id="salesMetricsPanel">
+                    <div class="empty-state">Loading sales metrics...</div>
                 </div>
             </div>
         </div>
@@ -1465,6 +1513,7 @@
         fetchWorkflows();
         startAutoRefresh();
         checkPendingSnapshots();
+        switchCalView(calendarView); // Initialize calendar view toggle state
     }
 
     async function checkPendingSnapshots() {
@@ -1485,6 +1534,252 @@
     function startAutoRefresh() {
         if (autoRefreshInterval) clearInterval(autoRefreshInterval);
         autoRefreshInterval = setInterval(refreshAll, 300000);
+    }
+
+    // ═══════════════════════════════════════
+    // CROSS-SECTION NOTIFICATIONS
+    // ═══════════════════════════════════════
+    async function fetchNotifications() {
+        try {
+            const [compliance, outreach, copyDrafts, socialQueue] = await Promise.all([
+                supabaseSelect('compliance_checks', 'select=id&status=eq.pending&limit=50').catch(() => null),
+                supabaseSelect('outreach_drafts', 'select=id&status=eq.pending_review&brand_id=eq.carlton&limit=50').catch(() => null),
+                supabaseSelect('copy_drafts', 'select=id&review_status=eq.pending&brand_id=eq.carlton&limit=50').catch(() => null),
+                supabaseSelect('social_content_queue', 'select=id&status=eq.pending_approval&brand_id=eq.carlton&limit=50').catch(() => null),
+            ]);
+            const items = [];
+            const cCount = Array.isArray(compliance) ? compliance.length : 0;
+            const oCount = Array.isArray(outreach) ? outreach.length : 0;
+            const cpCount = Array.isArray(copyDrafts) ? copyDrafts.length : 0;
+            const sCount = Array.isArray(socialQueue) ? socialQueue.length : 0;
+
+            if (cCount > 0) items.push({ label: `${cCount} Compliance`, href: '/compliance', color: '#FF6B6B' });
+            if (oCount > 0) items.push({ label: `${oCount} Outreach drafts`, href: '/crm', color: '#4CC9F0' });
+            if (cpCount > 0) items.push({ label: `${cpCount} Copy reviews`, href: '/content', color: '#A855F7' });
+            if (sCount > 0) items.push({ label: `${sCount} Social posts`, href: '/social-dashboard', color: '#FFD93D' });
+
+            const section = document.getElementById('notificationsSection');
+            const bar = document.getElementById('notificationBadges');
+            if (items.length === 0) { section.style.display = 'none'; return; }
+            section.style.display = '';
+            bar.innerHTML = items.map(i =>
+                `<a href="${i.href}" style="display:inline-flex;align-items:center;gap:0.3rem;padding:0.2rem 0.6rem;border-radius:9999px;background:${i.color}1A;color:${i.color};font-size:0.65rem;font-weight:600;text-decoration:none;transition:opacity 0.15s;" onmouseenter="this.style.opacity='0.8'" onmouseleave="this.style.opacity='1'">${i.label}</a>`
+            ).join('');
+        } catch (err) { console.warn('Notifications fetch error:', err); }
+    }
+
+    // ═══════════════════════════════════════
+    // CONTENT CALENDAR
+    // ═══════════════════════════════════════
+    let calendarData = [];
+    let calendarView = localStorage.getItem('dashCalView') || 'list';
+
+    async function fetchContentCalendar() {
+        try {
+            const now = new Date();
+            const from = now.toISOString().split('T')[0];
+            const to = new Date(now.getTime() + 30 * 86400000).toISOString().split('T')[0];
+            const url = `${SUPABASE_URL}/rest/v1/rpc/get_content_calendar`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ p_brand_id: 'carlton', p_from: from, p_to: to }),
+            });
+            const result = await res.json();
+            calendarData = (result && result.posts) ? result.posts : (Array.isArray(result) ? result : []);
+            renderCalendar();
+        } catch (err) {
+            console.warn('Calendar fetch error:', err);
+            document.getElementById('calendarPanel').innerHTML = '<div class="empty-state">Could not load calendar data.</div>';
+        }
+    }
+
+    function switchCalView(view) {
+        calendarView = view;
+        localStorage.setItem('dashCalView', view);
+        document.querySelectorAll('.cal-view-btn').forEach(b => {
+            b.classList.toggle('active', b.id === 'calView' + view.charAt(0).toUpperCase() + view.slice(1));
+            b.style.background = b.classList.contains('active') ? 'var(--deft-accent-dim, rgba(6,214,160,0.12))' : 'transparent';
+            b.style.color = b.classList.contains('active') ? 'var(--deft-accent, #06D6A0)' : 'var(--deft-txt-2, #8A95A9)';
+        });
+        renderCalendar();
+    }
+
+    const PLATFORM_COLORS = { linkedin: '#0A66C2', twitter: '#1DA1F2', facebook: '#1877F2', instagram: '#E4405F', reddit: '#FF4500', blog: '#06D6A0', newsletter: '#A855F7' };
+
+    function renderCalendar() {
+        const panel = document.getElementById('calendarPanel');
+        if (calendarData.length === 0) {
+            panel.innerHTML = '<div class="empty-state">No upcoming content scheduled.</div>';
+            return;
+        }
+        if (calendarView === 'list') renderCalList(panel);
+        else if (calendarView === 'grid') renderCalGrid(panel);
+        else renderCalStrip(panel);
+    }
+
+    function renderCalList(panel) {
+        const sorted = [...calendarData].sort((a, b) => new Date(a.scheduled_at || a.created_at) - new Date(b.scheduled_at || b.created_at)).slice(0, 30);
+        let lastDate = '';
+        let html = '';
+        sorted.forEach(p => {
+            const dt = new Date(p.scheduled_at || p.created_at);
+            const dateStr = dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            if (dateStr !== lastDate) {
+                html += `<div style="padding:0.3rem 0;font-size:0.6rem;font-weight:700;color:var(--deft-txt-3,#525E73);text-transform:uppercase;letter-spacing:0.05em;${lastDate ? 'border-top:1px solid var(--deft-border,#2A2E3D);margin-top:0.4rem;padding-top:0.5rem;' : ''}">${dateStr}</div>`;
+                lastDate = dateStr;
+            }
+            const plat = (p.platform || 'blog').toLowerCase();
+            const color = PLATFORM_COLORS[plat] || '#8A95A9';
+            const status = p.status || 'scheduled';
+            const statusColor = status === 'approved' ? '#06D6A0' : status === 'pending_approval' ? '#FFD93D' : status === 'rejected' ? '#FF6B6B' : '#8A95A9';
+            const title = p.title || p.content_text?.substring(0, 60) || '(Untitled)';
+            html += `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0;">
+                <span style="width:6px;height:6px;border-radius:50%;background:${color};flex-shrink:0;"></span>
+                <span style="font-size:0.6rem;font-weight:600;color:${color};min-width:55px;text-transform:capitalize;">${plat}</span>
+                <span style="font-size:0.65rem;color:var(--deft-txt,#E8ECF1);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(title)}</span>
+                <span style="font-size:0.55rem;padding:0.1rem 0.4rem;border-radius:9999px;background:${statusColor}1A;color:${statusColor};flex-shrink:0;">${status.replace(/_/g,' ')}</span>
+            </div>`;
+        });
+        panel.innerHTML = html || '<div class="empty-state">No content scheduled.</div>';
+    }
+
+    function renderCalGrid(panel) {
+        const now = new Date();
+        const year = now.getFullYear(), month = now.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+        // Group posts by day
+        const byDay = {};
+        calendarData.forEach(p => {
+            const d = new Date(p.scheduled_at || p.created_at);
+            if (d.getMonth() === month && d.getFullYear() === year) {
+                const day = d.getDate();
+                if (!byDay[day]) byDay[day] = [];
+                byDay[day].push(p);
+            }
+        });
+
+        let html = `<div style="text-align:center;font-size:0.7rem;font-weight:700;color:var(--deft-txt,#E8ECF1);padding:0.3rem 0;">${monthName}</div>`;
+        html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:0.55rem;">';
+        ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => {
+            html += `<div style="text-align:center;padding:0.2rem;color:var(--deft-txt-3,#525E73);font-weight:600;">${d}</div>`;
+        });
+        for (let i = 0; i < firstDay; i++) html += '<div></div>';
+        for (let d = 1; d <= daysInMonth; d++) {
+            const isToday = d === now.getDate();
+            const posts = byDay[d] || [];
+            const bg = isToday ? 'var(--deft-accent-dim, rgba(6,214,160,0.12))' : posts.length > 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
+            const border = isToday ? '1px solid var(--deft-accent,#06D6A0)' : '1px solid transparent';
+            html += `<div style="text-align:center;padding:0.25rem 0.15rem;border-radius:0.25rem;background:${bg};border:${border};cursor:${posts.length ? 'pointer' : 'default'};position:relative;" ${posts.length ? `title="${posts.length} post(s): ${posts.map(p=>(p.platform||'').substring(0,2)).join(', ')}"` : ''}>
+                <div style="font-size:0.6rem;color:${isToday ? 'var(--deft-accent,#06D6A0)' : 'var(--deft-txt-2,#8A95A9)'};font-weight:${isToday ? '700' : '400'};">${d}</div>
+                ${posts.length > 0 ? `<div style="display:flex;justify-content:center;gap:2px;margin-top:1px;">${posts.slice(0,4).map(p => `<span style="width:4px;height:4px;border-radius:50%;background:${PLATFORM_COLORS[(p.platform||'blog').toLowerCase()] || '#8A95A9'};"></span>`).join('')}</div>` : ''}
+            </div>`;
+        }
+        html += '</div>';
+        panel.innerHTML = html;
+    }
+
+    function renderCalStrip(panel) {
+        const now = new Date();
+        const days = [];
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(now.getTime() + i * 86400000);
+            days.push(d);
+        }
+
+        const byDay = {};
+        calendarData.forEach(p => {
+            const dateKey = new Date(p.scheduled_at || p.created_at).toLocaleDateString('en-CA');
+            if (!byDay[dateKey]) byDay[dateKey] = [];
+            byDay[dateKey].push(p);
+        });
+
+        let html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.4rem;">';
+        days.forEach(d => {
+            const key = d.toLocaleDateString('en-CA');
+            const isToday = key === now.toLocaleDateString('en-CA');
+            const posts = byDay[key] || [];
+            const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
+            const dateLabel = d.getDate();
+            html += `<div style="border:1px solid ${isToday ? 'var(--deft-accent,#06D6A0)' : 'var(--deft-border,#2A2E3D)'};border-radius:0.375rem;padding:0.4rem;min-height:80px;background:${isToday ? 'var(--deft-accent-dim, rgba(6,214,160,0.06))' : 'transparent'};">
+                <div style="text-align:center;margin-bottom:0.3rem;">
+                    <div style="font-size:0.55rem;color:var(--deft-txt-3,#525E73);font-weight:600;">${dayLabel}</div>
+                    <div style="font-size:0.75rem;color:${isToday ? 'var(--deft-accent,#06D6A0)' : 'var(--deft-txt,#E8ECF1)'};font-weight:700;">${dateLabel}</div>
+                </div>
+                ${posts.length === 0 ? '<div style="font-size:0.5rem;color:var(--deft-txt-3,#525E73);text-align:center;">-</div>' :
+                posts.slice(0,3).map(p => {
+                    const plat = (p.platform || 'blog').toLowerCase();
+                    const color = PLATFORM_COLORS[plat] || '#8A95A9';
+                    return `<div style="display:flex;align-items:center;gap:3px;margin-bottom:2px;"><span style="width:5px;height:5px;border-radius:50%;background:${color};flex-shrink:0;"></span><span style="font-size:0.5rem;color:var(--deft-txt-2,#8A95A9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${plat}</span></div>`;
+                }).join('') + (posts.length > 3 ? `<div style="font-size:0.5rem;color:var(--deft-txt-3,#525E73);text-align:center;">+${posts.length-3} more</div>` : '')}
+            </div>`;
+        });
+        html += '</div>';
+        panel.innerHTML = html;
+    }
+
+    // ═══════════════════════════════════════
+    // SALES & REVENUE METRICS
+    // ═══════════════════════════════════════
+    async function fetchSalesMetrics() {
+        const panel = document.getElementById('salesMetricsPanel');
+        try {
+            const [contacts, revenue] = await Promise.all([
+                supabaseSelect('unified_contacts', 'select=lifecycle_stage,engagement_score&merged_into=is.null'),
+                supabaseSelect('autonomous_financial_snapshots', 'order=snapshot_date.desc&limit=1'),
+            ]);
+
+            const allContacts = Array.isArray(contacts) ? contacts : [];
+            const total = allContacts.length;
+            const customers = allContacts.filter(c => c.lifecycle_stage === 'customer').length;
+            const pipeline = allContacts.filter(c => ['mql','sql','opportunity'].includes(c.lifecycle_stage)).length;
+            const convRate = total > 0 ? ((customers / total) * 100).toFixed(1) : '0.0';
+            const avgScore = total > 0 ? Math.round(allContacts.reduce((sum, c) => sum + (c.engagement_score || 0), 0) / total) : 0;
+
+            const snap = Array.isArray(revenue) && revenue[0] ? revenue[0] : {};
+            const monthlyRev = snap.monthly_revenue || snap.revenue || 0;
+            const snapDate = snap.snapshot_date || '';
+
+            panel.innerHTML = `
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.75rem;">
+                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.15);">
+                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Total Contacts</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:var(--deft-txt,#E8ECF1);font-family:var(--deft-heading-font,'Chakra Petch');">${total}</div>
+                    </div>
+                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(76,201,240,0.06);border:1px solid rgba(76,201,240,0.15);">
+                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">In Pipeline</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:#4CC9F0;font-family:var(--deft-heading-font,'Chakra Petch');">${pipeline}</div>
+                    </div>
+                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15);">
+                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Customers</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:#A855F7;font-family:var(--deft-heading-font,'Chakra Petch');">${customers}</div>
+                    </div>
+                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(255,217,61,0.06);border:1px solid rgba(255,217,61,0.15);">
+                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Conversion</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:#FFD93D;font-family:var(--deft-heading-font,'Chakra Petch');">${convRate}%</div>
+                    </div>
+                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.15);">
+                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Avg Engagement</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:var(--deft-accent,#06D6A0);font-family:var(--deft-heading-font,'Chakra Petch');">${avgScore}</div>
+                    </div>
+                    ${monthlyRev ? `<div style="padding:0.6rem;border-radius:0.5rem;background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.15);">
+                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Monthly Revenue</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:var(--deft-accent,#06D6A0);font-family:var(--deft-heading-font,'Chakra Petch');">$${Number(monthlyRev).toLocaleString()}</div>
+                        ${snapDate ? `<div style="font-size:0.5rem;color:var(--deft-txt-3,#525E73);margin-top:0.15rem;">as of ${snapDate}</div>` : ''}
+                    </div>` : ''}
+                </div>
+            `;
+        } catch (err) {
+            console.warn('Sales metrics fetch error:', err);
+            panel.innerHTML = '<div class="empty-state">Could not load sales metrics.</div>';
+        }
     }
 
     function toggleAutoRefresh() {
@@ -1533,6 +1828,9 @@
             fetchHealth(),
             fetchRevenue(),
             fetchHumanTasks(),
+            fetchNotifications(),
+            fetchContentCalendar(),
+            fetchSalesMetrics(),
         ]);
 
         document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString();
@@ -1665,6 +1963,8 @@
         approve_emails:         ['approve', 'reject', 'edit', 'request_changes'],
         approve_landing_page:   ['approve', 'reject', 'request_changes'],
         approve_testimonial:    ['approve', 'reject', 'edit'],
+        approve_offer_proposal: ['approve', 'edit', 'reject', 'skip'],
+        review_outreach_draft:  ['approve', 'edit', 'reject', 'skip'],
         review_research:        ['approve', 'reject', 'request_changes'],
         acknowledge:            ['acknowledge'],
         mark_complete:          ['mark_complete'],

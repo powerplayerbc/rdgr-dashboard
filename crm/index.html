@@ -1286,6 +1286,13 @@
                         </div>
                         <button class="btn btn-primary py-2 px-4" id="importSheetsBtn" onclick="importFromSheets()">Import from Sheets</button>
                         <p class="text-xs text-txt-3 mt-2">Leads will be scored by GPT and stored as prospects. High-scoring leads enter the enrichment + outreach pipeline automatically.</p>
+                        <div style="margin-top:0.75rem;padding:0.6rem;border-radius:0.375rem;background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.12);">
+                            <div style="font-size:0.6rem;font-weight:600;color:var(--deft-txt-2,#8A95A9);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.3rem;">Expected Sheet Columns</div>
+                            <div style="font-size:0.65rem;color:var(--deft-txt-3,#5A6478);line-height:1.5;">
+                                <strong style="color:var(--deft-txt-2,#8A95A9);">Required:</strong> business_name<br>
+                                <strong style="color:var(--deft-txt-2,#8A95A9);">Optional:</strong> phone, website, address, email, category, sub_category, keywords
+                            </div>
+                        </div>
                     </div>
                     <!-- JSON import -->
                     <div id="importJsonForm" style="display:none;">
@@ -2495,6 +2502,14 @@
         );
         const data = Array.isArray(result) ? result : [];
 
+        if (data.length === 0) {
+            board.innerHTML = `<div class="empty-state" style="width:100%; text-align:center; padding:2rem;">
+                <p style="font-size:0.85rem; color:var(--deft-txt-2,#8A95A9); margin-bottom:0.5rem;">No contacts in the pipeline yet.</p>
+                <p style="font-size:0.7rem; color:var(--deft-txt-3,#5A6478);">Import leads from Google Sheets or add contacts manually to populate your pipeline.</p>
+            </div>`;
+            return;
+        }
+
         // Group by stage
         const groups = {};
         PIPELINE_STAGES.forEach(s => groups[s] = []);
@@ -2572,22 +2587,72 @@
     // ═══════════════════════════════════════
     // ATTRIBUTION
     // ═══════════════════════════════════════
+    let _attributionLoading = false;
     async function fetchAttribution() {
+        if (_attributionLoading) return;
+        _attributionLoading = true;
         const panel = document.getElementById('attributionPanel');
         panel.innerHTML = '<div class="empty-state">Loading attribution data...</div>';
 
         const dateFrom = document.getElementById('attrDateFrom').value;
         const dateTo = document.getElementById('attrDateTo').value;
+        const dfVal = dateFrom || '2026-01-01';
+        const dtVal = dateTo || new Date().toISOString().split('T')[0];
 
-        const result = await crmBridge('attribution_report', {
-            date_from: dateFrom || '2026-01-01',
-            date_to: dateTo || new Date().toISOString().split('T')[0]
-        });
+        let result = null;
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            const res = await fetch(API.crm, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    task_id: `ui-attribution_report-${Date.now()}`,
+                    brand_id: 'carlton', domain: 'crm',
+                    operation: 'attribution_report',
+                    parameters: { date_from: dfVal, date_to: dtVal },
+                    user_id: activeProfileId
+                }),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            result = await res.json();
+        } catch (err) {
+            console.warn('Attribution webhook failed, using Supabase fallback:', err.message);
+        }
 
         attributionData = result?.result?.report || [];
 
+        // Supabase fallback: compute attribution client-side if webhook failed
         if (attributionData.length === 0) {
-            panel.innerHTML = '<div class="empty-state">No attribution data for this period</div>';
+            try {
+                const contacts = await supabaseSelect('unified_contacts',
+                    `select=acquisition_source,lifecycle_stage,engagement_score&merged_into=is.null&created_at=gte.${dfVal}&created_at=lte.${dtVal}T23:59:59`);
+                if (Array.isArray(contacts) && contacts.length > 0) {
+                    const bySource = {};
+                    contacts.forEach(c => {
+                        const src = c.acquisition_source || 'unknown';
+                        if (!bySource[src]) bySource[src] = { contact_count: 0, customer_count: 0, scores: [], pipeline_count: 0 };
+                        bySource[src].contact_count++;
+                        if (c.lifecycle_stage === 'customer') bySource[src].customer_count++;
+                        if (['mql','sql','opportunity'].includes(c.lifecycle_stage)) bySource[src].pipeline_count++;
+                        bySource[src].scores.push(c.engagement_score || 0);
+                    });
+                    attributionData = Object.entries(bySource).map(([src, d]) => ({
+                        acquisition_source: src,
+                        contact_count: d.contact_count,
+                        customer_count: d.customer_count,
+                        avg_engagement_score: d.scores.length ? d.scores.reduce((a,b) => a+b, 0) / d.scores.length : 0,
+                        pipeline_count: d.pipeline_count
+                    })).sort((a,b) => b.contact_count - a.contact_count);
+                }
+            } catch (fbErr) { console.warn('Attribution fallback also failed:', fbErr.message); }
+        }
+
+        _attributionLoading = false;
+
+        if (attributionData.length === 0) {
+            panel.innerHTML = '<div class="empty-state">No attribution data for this period.</div>';
             return;
         }
 
@@ -3322,14 +3387,20 @@
     let prospSheets = [];
 
     async function fetchProspectingData() {
-        await Promise.all([fetchLocations(), fetchCategories(), fetchLinkedSheets()]);
+        try {
+            await Promise.all([fetchLocations(), fetchCategories(), fetchLinkedSheets()]);
+        } catch (err) {
+            console.error('Prospecting data load failed:', err);
+        }
     }
 
     // ── Locations ──
+    let _locLoadFailed = false;
     async function fetchLocations() {
         const result = await supabaseSelect('prosp_target_locations',
             'select=*&brand_id=eq.carlton&order=weight.desc,city.asc'
         );
+        _locLoadFailed = result === null;
         prospLocations = Array.isArray(result) ? result : [];
         document.getElementById('locCount').textContent = prospLocations.filter(l => l.is_active).length;
         renderLocations();
@@ -3337,8 +3408,12 @@
 
     function renderLocations() {
         const tbody = document.getElementById('locationsBody');
+        if (_locLoadFailed) {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty-state" style="color:#FF6B6B;">Failed to load locations. Check connection and try again.</td></tr>';
+            return;
+        }
         if (prospLocations.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No target locations configured</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No target locations yet. Add cities below to start prospecting.</td></tr>';
             return;
         }
         tbody.innerHTML = prospLocations.map(loc => {
@@ -3398,10 +3473,12 @@
     }
 
     // ── Categories ──
+    let _catLoadFailed = false;
     async function fetchCategories() {
         const result = await supabaseSelect('prosp_target_categories',
             'select=*&brand_id=eq.carlton&order=industry_group.asc,weight.desc'
         );
+        _catLoadFailed = result === null;
         prospCategories = Array.isArray(result) ? result : [];
         document.getElementById('catCount').textContent = prospCategories.filter(c => c.is_active).length;
         renderCategories();
@@ -3409,8 +3486,12 @@
 
     function renderCategories() {
         const panel = document.getElementById('categoriesPanel');
+        if (_catLoadFailed) {
+            panel.innerHTML = '<div class="empty-state" style="color:#FF6B6B;">Failed to load categories. Check connection and try again.</div>';
+            return;
+        }
         if (prospCategories.length === 0) {
-            panel.innerHTML = '<div class="empty-state">No target categories configured</div>';
+            panel.innerHTML = '<div class="empty-state">No target categories yet. Click "Add Category" to define industries to prospect.</div>';
             return;
         }
 
@@ -3551,10 +3632,12 @@
     }
 
     // ── Linked Sheets ──
+    let _sheetLoadFailed = false;
     async function fetchLinkedSheets() {
         const result = await supabaseSelect('prosp_linked_sheets',
             'select=*&brand_id=eq.carlton&order=created_at.desc'
         );
+        _sheetLoadFailed = result === null;
         prospSheets = Array.isArray(result) ? result : [];
         document.getElementById('sheetCount').textContent = prospSheets.filter(s => s.is_active).length;
         renderSheets();
@@ -3562,8 +3645,12 @@
 
     function renderSheets() {
         const tbody = document.getElementById('sheetsBody');
+        if (_sheetLoadFailed) {
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-state" style="color:#FF6B6B;">Failed to load linked sheets. Check connection and try again.</td></tr>';
+            return;
+        }
         if (prospSheets.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No linked sheets</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No linked sheets yet. Add a Google Sheets URL below to link prospect data.</td></tr>';
             return;
         }
         tbody.innerHTML = prospSheets.map(s => {
@@ -3633,16 +3720,32 @@
         const btn = document.getElementById('importSheetsBtn');
         btn.disabled = true; btn.textContent = 'Importing...';
         try {
-            const result = await fetchJSON('https://n8n.carltonaiservices.com/webhook/contact-import', {
-                sheets_url: url, sheet_name: tab, source: 'google_sheets', brand_id: 'carlton'
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
+            const res = await fetch('https://n8n.carltonaiservices.com/webhook/contact-import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sheets_url: url, sheet_name: tab, source: 'google_sheets', brand_id: 'carlton' }),
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
+            const result = await res.json();
+            console.log('Import response:', result);
             if (result?.success) {
                 const count = result.contacts_imported || result.imported_count || result.count || '?';
                 toast(`Import successful! ${count} contacts imported from Sheets.`, 'success');
                 document.getElementById('importSheetsUrl').value = '';
-                setTimeout(() => fetchContacts(), 2000);
-            } else { toast(`Import failed: ${result?.message || result?.error || JSON.stringify(result) || 'Unknown error'}`, 'error'); }
-        } catch (err) { toast(`Import failed: ${err.message}`, 'error'); }
+                setTimeout(() => { fetchContacts(); if (currentView === 'pipeline') fetchPipelineData(); }, 2000);
+            } else {
+                const errMsg = result?.message || result?.error || (typeof result === 'object' ? JSON.stringify(result) : 'Unknown error');
+                toast(`Import failed: ${errMsg}`, 'error');
+                console.error('Import failed details:', result);
+            }
+        } catch (err) {
+            const msg = err.name === 'AbortError' ? 'Import timed out after 30 seconds. The backend may still be processing.' : err.message;
+            toast(`Import failed: ${msg}`, 'error');
+            console.error('Import error:', err);
+        }
         finally { btn.disabled = false; btn.textContent = 'Import from Sheets'; }
     }
 
