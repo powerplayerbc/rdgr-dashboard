@@ -1203,7 +1203,8 @@
             const data = state.categoryMap[cat.key] || { status: 'not_started', answered: 0, total: 0, avg_depth: 0, target: 0.85 };
             const crossCount = data.cross_insight_count || 0;
             const status = data.status || 'not_started';
-            const depthPct = data.target > 0 ? Math.min((data.avg_depth / data.target) * 100, 100) : 0;
+            const displayScore = data.section_score || data.avg_depth;
+            const depthPct = data.target > 0 ? Math.min((displayScore / data.target) * 100, 100) : 0;
             const depthColor = depthPct >= 100 ? 'var(--deft-success, #22C55E)' : depthPct >= 50 ? 'var(--deft-accent, #06D6A0)' : 'var(--deft-warning, #FFD93D)';
 
             const statusClass = status === 'complete' ? 'complete' : status === 'in_progress' ? 'in-progress' : '';
@@ -1226,7 +1227,7 @@
                     ${status !== 'not_started' ? `
                         <div class="flex items-center justify-between text-xs text-txt-2 mt-3">
                             <span>${data.answered} / ${data.total} questions${crossCount > 0 ? `<span style="color: #4CC9F0; font-size: 0.65rem; margin-left: 0.5rem;">&#x1F517; ${crossCount}</span>` : ''}</span>
-                            <span class="font-mono" style="color: ${depthColor};">Depth: ${(data.avg_depth || 0).toFixed(2)}</span>
+                            <span class="font-mono" style="color: ${depthColor};">${data.section_score ? 'Coverage' : 'Depth'}: ${(displayScore || 0).toFixed(2)}</span>
                         </div>
                         <div class="depth-bar">
                             <div class="depth-bar-fill" style="width: ${depthPct}%; background: ${depthColor};"></div>
@@ -1369,11 +1370,11 @@
 
         if (result.action === 'created' && result.first_question) {
             state.currentQuestion = result.first_question;
-            state.sessionProgress = { answered: 0, total: result.total_questions, avg_depth: 0, target: result.depth_target || 0.85 };
+            state.sessionProgress = { answered: 0, total: result.total_questions, avg_depth: 0, section_score: null, target: result.depth_target || 0.85 };
             updateSessionHeader();
             renderQuestion(result.first_question);
         } else if (result.action === 'resumed') {
-            state.sessionProgress = result.progress || { answered: 0, total: 0, avg_depth: 0, target: 0.85 };
+            state.sessionProgress = result.progress || { answered: 0, total: 0, avg_depth: 0, section_score: null, target: 0.85 };
             updateSessionHeader();
             const qResult = await apiGetNextQuestion(state.sessionId);
             if (qResult && qResult.success) {
@@ -1403,7 +1404,8 @@
         document.getElementById('sessionQuestionCount').textContent = `${p.answered} / ${p.total} questions`;
         const pct = p.total > 0 ? (p.answered / p.total) * 100 : 0;
         document.getElementById('sessionProgressBar').style.width = pct + '%';
-        document.getElementById('sessionDepthLabel').textContent = `Depth: ${(p.avg_depth || 0).toFixed(2)}`;
+        const depthDisplay = p.section_score ? `Coverage: ${p.section_score.toFixed(2)}` : `Depth: ${(p.avg_depth || 0).toFixed(2)}`;
+        document.getElementById('sessionDepthLabel').textContent = depthDisplay;
     }
 
     // ═══════════════════════════════════════
@@ -1796,9 +1798,11 @@
 
     function renderReviewProgress(progress) {
         if (!progress) return;
-        const pct = progress.target > 0 ? Math.min((progress.avg_depth / progress.target) * 100, 100) : 0;
+        const score = progress.section_score || progress.avg_depth;
+        const pct = progress.target > 0 ? Math.min((score / progress.target) * 100, 100) : 0;
         const color = pct >= 100 ? 'var(--deft-success, #22C55E)' : pct >= 50 ? 'var(--deft-accent, #06D6A0)' : 'var(--deft-warning, #FFD93D)';
-        document.getElementById('reviewProgressText').textContent = `${progress.answered}/${progress.total} answered | Depth: ${(progress.avg_depth || 0).toFixed(2)}/${(progress.target || 0.85).toFixed(2)}`;
+        const label = progress.section_score ? 'Coverage' : 'Depth';
+        document.getElementById('reviewProgressText').textContent = `${progress.answered}/${progress.total} answered | ${label}: ${(score || 0).toFixed(2)}/${(progress.target || 0.85).toFixed(2)}`;
         const bar = document.getElementById('reviewProgressBar');
         bar.style.width = pct + '%';
         bar.style.background = color;
@@ -1942,6 +1946,7 @@
         const score = analysis.score || 0;
         const pct = Math.min(score * 100, 100);
         const color = score >= 0.7 ? 'var(--deft-success, #22C55E)' : score >= 0.5 ? 'var(--deft-accent, #06D6A0)' : 'var(--deft-warning, #FFD93D)';
+        const sectionScore = analysis.section_score || null;
 
         let html = `
             <div class="depth-feedback">
@@ -1952,6 +1957,19 @@
                     </div>
                 </div>
         `;
+
+        if (sectionScore !== null) {
+            const secPct = Math.min(sectionScore * 100, 100);
+            const secColor = sectionScore >= 0.85 ? 'var(--deft-success, #22C55E)' : sectionScore >= 0.7 ? 'var(--deft-accent, #06D6A0)' : 'var(--deft-warning, #FFD93D)';
+            html += `
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-xs font-mono" style="color: ${secColor};">Coverage: ${sectionScore.toFixed(2)}</span>
+                    <div class="flex-1 progress-bar" style="height: 4px;">
+                        <div style="width: ${secPct}%; height: 100%; border-radius: 2px; background: ${secColor}; transition: width 0.5s;"></div>
+                    </div>
+                </div>
+            `;
+        }
 
         if (analysis.feedback) {
             html += `<p class="text-sm text-txt-2">${esc(analysis.feedback)}</p>`;
@@ -1993,7 +2011,9 @@
         document.getElementById('completeTitle').textContent = `${catInfo?.icon || ''} ${catInfo?.label || 'Category'} Complete!`;
         const p = state.sessionProgress;
         if (p) {
-            document.getElementById('completeStats').textContent = `${p.answered} questions answered | Average depth: ${(p.avg_depth || 0).toFixed(2)} / ${(p.target || 0.85).toFixed(2)}`;
+            const score = p.section_score || p.avg_depth;
+            const label = p.section_score ? 'Coverage score' : 'Average depth';
+            document.getElementById('completeStats').textContent = `${p.answered} questions answered | ${label}: ${(score || 0).toFixed(2)} / ${(p.target || 0.85).toFixed(2)}`;
         }
         switchView('complete');
     }
