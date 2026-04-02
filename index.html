@@ -1576,21 +1576,10 @@
 
     async function fetchContentCalendar() {
         try {
-            const now = new Date();
-            const from = now.toISOString().split('T')[0];
-            const to = new Date(now.getTime() + 30 * 86400000).toISOString().split('T')[0];
-            const url = `${SUPABASE_URL}/rest/v1/rpc/get_content_calendar`;
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ p_brand_id: 'carlton', p_from: from, p_to: to }),
-            });
-            const result = await res.json();
-            calendarData = (result && result.posts) ? result.posts : (Array.isArray(result) ? result : []);
+            const result = await supabaseSelect('social_content_queue',
+                'select=id,title,content_text,platform,status,scheduled_at,created_at&brand_id=eq.carlton&order=scheduled_at.desc.nullslast,created_at.desc&limit=50'
+            );
+            calendarData = Array.isArray(result) ? result : [];
             renderCalendar();
         } catch (err) {
             console.warn('Calendar fetch error:', err);
@@ -2075,8 +2064,8 @@
                 paramsHtml = `<div class="mt-2"><span class="text-[0.65rem] font-semibold text-txt-3 uppercase tracking-wider">Parameters</span><div class="mt-0.5 space-y-0.5">${paramRows}</div></div>`;
             }
 
-            // Dynamic action buttons — use task's action_options, fall back to defaults by type
-            const actionOptions = params.action_options || DEFAULT_ACTIONS_BY_TYPE[actionType] || ['approve', 'reject'];
+            // Dynamic action buttons — frontend defaults take priority, then backend action_options
+            const actionOptions = DEFAULT_ACTIONS_BY_TYPE[actionType] || params.action_options || ['approve', 'edit', 'reject', 'skip'];
             let buttonsHtml;
             if (isProcessing) {
                 buttonsHtml = `<div class="flex items-center gap-2 text-xs text-txt-3"><span class="ha-spinner"></span> Processing...</div>`;
