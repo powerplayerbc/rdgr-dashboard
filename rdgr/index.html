@@ -694,6 +694,7 @@
         .badge-decide { background: rgba(255,217,61,0.15); color: #FFD93D; }
         .badge-approve-type { background: rgba(6,214,160,0.15); color: #06D6A0; }
         .badge-human { background: rgba(168,85,247,0.15); color: #A855F7; }
+        .badge-escalation { background: rgba(239,68,68,0.15); color: #EF4444; }
         .directive-actions {
             display: flex; align-items: flex-start; gap: 0.5rem;
             margin-top: 0.75rem;
@@ -819,6 +820,7 @@
                                 <a href="/media">Media</a>
                             </div>
                         </div>
+                        <a href="/partnerships" class="nav-group-btn">Partnerships</a>
                         <div class="nav-group">
                             <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -826,7 +828,7 @@
                                 <a href="/deft">DEFT</a>
                             </div>
                         </div>
-                        <div class="nav-group"><a href="/trading-bot" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a><div class="nav-dropdown"><a href="/trading-bot">Bot Dashboard</a><a href="/trading-strategies">Strategies</a><a href="/trading-monitor">Monitor</a><a href="/trading-research">Research</a><a href="/trading-discovery">Discovery</a><a href="/trading-cross-pairs">Cross-Pairs</a><a href="/trading-exchanges">Exchanges</a><a href="/trading-config">Config</a><a href="/trading-reports">Reports</a></div></div>
+                        <a href="/trading-research" class="nav-group-btn">Trading</a>
                         <a href="/meetings" class="nav-group-btn">Meetings</a>
                         <div class="nav-group">
                             <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
@@ -906,6 +908,19 @@
             </div>
         </div>
 
+        <!-- ── Cross-Section Notifications ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3" id="notificationsSection" style="display:none;">
+            <div class="panel" style="border-left: 3px solid var(--deft-warning, #F0A830);">
+                <div class="panel-body" style="padding:0.6rem 1rem;">
+                    <div class="flex items-center gap-2 flex-wrap" id="notificationBar">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5a3.5 3.5 0 00-3.5 3.5c0 1.75-.5 3-1 3.5h9c-.5-.5-1-1.75-1-3.5A3.5 3.5 0 007 1.5zM5.5 9v.5a1.5 1.5 0 003 0V9" stroke="var(--deft-warning,#F0A830)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="text-xs font-medium" style="color:var(--deft-warning,#F0A830);">Needs Attention</span>
+                        <div class="flex gap-2 flex-wrap" id="notificationBadges"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ── Workflow Control ── -->
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
             <div class="panel">
@@ -944,6 +959,41 @@
                             <div class="skeleton h-10 w-2/3"></div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Content Calendar ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="2.5" width="12" height="10" rx="1.5" stroke="#4CC9F0" stroke-width="1"/><path d="M1 5.5h12M4.5 1v3M9.5 1v3" stroke="#4CC9F0" stroke-width="1" stroke-linecap="round"/></svg>
+                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Content Calendar</h2>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button class="cal-view-btn active" id="calViewList" onclick="switchCalView('list')" title="List view" style="padding:0.2rem 0.5rem;border:1px solid var(--deft-border,#2A2E3D);border-radius:0.25rem;background:transparent;color:var(--deft-txt-2,#8A95A9);font-size:0.6rem;cursor:pointer;">List</button>
+                        <button class="cal-view-btn" id="calViewGrid" onclick="switchCalView('grid')" title="Month grid" style="padding:0.2rem 0.5rem;border:1px solid var(--deft-border,#2A2E3D);border-radius:0.25rem;background:transparent;color:var(--deft-txt-2,#8A95A9);font-size:0.6rem;cursor:pointer;">Month</button>
+                        <button class="cal-view-btn" id="calViewStrip" onclick="switchCalView('strip')" title="Week strip" style="padding:0.2rem 0.5rem;border:1px solid var(--deft-border,#2A2E3D);border-radius:0.25rem;background:transparent;color:var(--deft-txt-2,#8A95A9);font-size:0.6rem;cursor:pointer;">Week</button>
+                    </div>
+                </div>
+                <div class="panel-body" id="calendarPanel" style="max-height:360px;overflow-y:auto;">
+                    <div class="empty-state">Loading content calendar...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Sales & Revenue Metrics ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M4 3.5h4.5a2 2 0 010 4H4M4 7.5h5a2 2 0 010 4H4" stroke="#06D6A0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Sales & Revenue</h2>
+                    </div>
+                </div>
+                <div class="panel-body" id="salesMetricsPanel">
+                    <div class="empty-state">Loading sales metrics...</div>
                 </div>
             </div>
         </div>
@@ -1016,25 +1066,6 @@
         <!-- ── Dashboard Grid ── -->
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8">
             <div class="dashboard-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
-
-                <!-- Human Review Queue -->
-                <div class="panel span-2" style="grid-column: span 2;">
-                    <div class="panel-header">
-                        <div class="flex items-center gap-2">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1l2.35 4.76 5.25.76-3.8 3.7.9 5.24L8 13.27l-4.7 2.47.9-5.24-3.8-3.7 5.25-.76L8 1z" stroke="#FF6B6B" stroke-width="1.2" fill="none"/></svg>
-                            <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Human Review Queue</h2>
-                            <span class="badge badge-failed ml-1" id="reviewCount">0</span>
-                        </div>
-                        <span class="text-xs text-txt-3 font-mono">Requires your decision</span>
-                    </div>
-                    <div class="panel-body" id="reviewPanel">
-                        <div class="empty-state">
-                            <div class="skeleton h-12 w-full mb-2"></div>
-                            <div class="skeleton h-12 w-full mb-2"></div>
-                            <div class="skeleton h-12 w-3/4"></div>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Active Task Queue -->
                 <div class="panel">
@@ -1352,7 +1383,7 @@
     };
 
     let taskData = [];
-    let reviewData = [];
+    let reviewData = []; // deprecated — Human Review Queue removed, kept for compatibility
     let activityData = [];
     let directiveData = [];
     let directiveHistory = [];
@@ -1482,6 +1513,7 @@
         fetchWorkflows();
         startAutoRefresh();
         checkPendingSnapshots();
+        // switchCalView is called after calendar variables are declared (below)
     }
 
     async function checkPendingSnapshots() {
@@ -1502,6 +1534,243 @@
     function startAutoRefresh() {
         if (autoRefreshInterval) clearInterval(autoRefreshInterval);
         autoRefreshInterval = setInterval(refreshAll, 300000);
+    }
+
+    // ═══════════════════════════════════════
+    // CROSS-SECTION NOTIFICATIONS
+    // ═══════════════════════════════════════
+    async function fetchNotifications() {
+        try {
+            const [compliance, outreach, copyDrafts, socialQueue] = await Promise.all([
+                supabaseSelect('compliance_checks', 'select=id&status=eq.pending&limit=50').catch(() => null),
+                supabaseSelect('outreach_drafts', 'select=id&status=eq.pending_review&brand_id=eq.carlton&limit=50').catch(() => null),
+                supabaseSelect('copy_drafts', 'select=id&review_status=eq.pending&brand_id=eq.carlton&limit=50').catch(() => null),
+                supabaseSelect('social_content_queue', 'select=id&status=eq.pending_approval&brand_id=eq.carlton&limit=50').catch(() => null),
+            ]);
+            const items = [];
+            const cCount = Array.isArray(compliance) ? compliance.length : 0;
+            const oCount = Array.isArray(outreach) ? outreach.length : 0;
+            const cpCount = Array.isArray(copyDrafts) ? copyDrafts.length : 0;
+            const sCount = Array.isArray(socialQueue) ? socialQueue.length : 0;
+
+            if (cCount > 0) items.push({ label: `${cCount} Compliance`, href: '/compliance', color: '#FF6B6B' });
+            if (oCount > 0) items.push({ label: `${oCount} Outreach drafts`, href: '/crm', color: '#4CC9F0' });
+            if (cpCount > 0) items.push({ label: `${cpCount} Copy reviews`, href: '/content', color: '#A855F7' });
+            if (sCount > 0) items.push({ label: `${sCount} Social posts`, href: '/social-dashboard', color: '#FFD93D' });
+
+            const section = document.getElementById('notificationsSection');
+            const bar = document.getElementById('notificationBadges');
+            if (items.length === 0) { section.style.display = 'none'; return; }
+            section.style.display = '';
+            bar.innerHTML = items.map(i =>
+                `<a href="${i.href}" style="display:inline-flex;align-items:center;gap:0.3rem;padding:0.2rem 0.6rem;border-radius:9999px;background:${i.color}1A;color:${i.color};font-size:0.65rem;font-weight:600;text-decoration:none;transition:opacity 0.15s;" onmouseenter="this.style.opacity='0.8'" onmouseleave="this.style.opacity='1'">${i.label}</a>`
+            ).join('');
+        } catch (err) { console.warn('Notifications fetch error:', err); }
+    }
+
+    // ═══════════════════════════════════════
+    // CONTENT CALENDAR
+    // ═══════════════════════════════════════
+    let calendarData = [];
+    let calendarView = localStorage.getItem('dashCalView') || 'list';
+    // Initialize calendar view toggle state (must be after variable declaration)
+    if (typeof switchCalView === 'function') switchCalView(calendarView);
+
+    async function fetchContentCalendar() {
+        try {
+            const result = await supabaseSelect('social_content_queue',
+                'select=id,title,content_text,platform,status,scheduled_at,created_at&brand_id=eq.carlton&order=scheduled_at.desc.nullslast,created_at.desc&limit=50'
+            );
+            calendarData = Array.isArray(result) ? result : [];
+            renderCalendar();
+        } catch (err) {
+            console.warn('Calendar fetch error:', err);
+            document.getElementById('calendarPanel').innerHTML = '<div class="empty-state">Could not load calendar data.</div>';
+        }
+    }
+
+    function switchCalView(view) {
+        calendarView = view;
+        localStorage.setItem('dashCalView', view);
+        document.querySelectorAll('.cal-view-btn').forEach(b => {
+            b.classList.toggle('active', b.id === 'calView' + view.charAt(0).toUpperCase() + view.slice(1));
+            b.style.background = b.classList.contains('active') ? 'var(--deft-accent-dim, rgba(6,214,160,0.12))' : 'transparent';
+            b.style.color = b.classList.contains('active') ? 'var(--deft-accent, #06D6A0)' : 'var(--deft-txt-2, #8A95A9)';
+        });
+        renderCalendar();
+    }
+
+    const PLATFORM_COLORS = { linkedin: '#0A66C2', twitter: '#1DA1F2', facebook: '#1877F2', instagram: '#E4405F', reddit: '#FF4500', blog: '#06D6A0', newsletter: '#A855F7' };
+
+    function renderCalendar() {
+        const panel = document.getElementById('calendarPanel');
+        if (calendarData.length === 0) {
+            panel.innerHTML = '<div class="empty-state">No upcoming content scheduled.</div>';
+            return;
+        }
+        if (calendarView === 'list') renderCalList(panel);
+        else if (calendarView === 'grid') renderCalGrid(panel);
+        else renderCalStrip(panel);
+    }
+
+    function renderCalList(panel) {
+        const sorted = [...calendarData].sort((a, b) => new Date(a.scheduled_at || a.created_at) - new Date(b.scheduled_at || b.created_at)).slice(0, 30);
+        let lastDate = '';
+        let html = '';
+        sorted.forEach(p => {
+            const dt = new Date(p.scheduled_at || p.created_at);
+            const dateStr = dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            if (dateStr !== lastDate) {
+                html += `<div style="padding:0.3rem 0;font-size:0.6rem;font-weight:700;color:var(--deft-txt-3,#525E73);text-transform:uppercase;letter-spacing:0.05em;${lastDate ? 'border-top:1px solid var(--deft-border,#2A2E3D);margin-top:0.4rem;padding-top:0.5rem;' : ''}">${dateStr}</div>`;
+                lastDate = dateStr;
+            }
+            const plat = (p.platform || 'blog').toLowerCase();
+            const color = PLATFORM_COLORS[plat] || '#8A95A9';
+            const status = p.status || 'scheduled';
+            const statusColor = status === 'approved' ? '#06D6A0' : status === 'pending_approval' ? '#FFD93D' : status === 'rejected' ? '#FF6B6B' : '#8A95A9';
+            const title = p.title || p.content_text?.substring(0, 60) || '(Untitled)';
+            html += `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0;">
+                <span style="width:6px;height:6px;border-radius:50%;background:${color};flex-shrink:0;"></span>
+                <span style="font-size:0.6rem;font-weight:600;color:${color};min-width:55px;text-transform:capitalize;">${plat}</span>
+                <span style="font-size:0.65rem;color:var(--deft-txt,#E8ECF1);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(title)}</span>
+                <span style="font-size:0.55rem;padding:0.1rem 0.4rem;border-radius:9999px;background:${statusColor}1A;color:${statusColor};flex-shrink:0;">${status.replace(/_/g,' ')}</span>
+            </div>`;
+        });
+        panel.innerHTML = html || '<div class="empty-state">No content scheduled.</div>';
+    }
+
+    function renderCalGrid(panel) {
+        const now = new Date();
+        const year = now.getFullYear(), month = now.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+        // Group posts by day
+        const byDay = {};
+        calendarData.forEach(p => {
+            const d = new Date(p.scheduled_at || p.created_at);
+            if (d.getMonth() === month && d.getFullYear() === year) {
+                const day = d.getDate();
+                if (!byDay[day]) byDay[day] = [];
+                byDay[day].push(p);
+            }
+        });
+
+        let html = `<div style="text-align:center;font-size:0.7rem;font-weight:700;color:var(--deft-txt,#E8ECF1);padding:0.3rem 0;">${monthName}</div>`;
+        html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:0.55rem;">';
+        ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => {
+            html += `<div style="text-align:center;padding:0.2rem;color:var(--deft-txt-3,#525E73);font-weight:600;">${d}</div>`;
+        });
+        for (let i = 0; i < firstDay; i++) html += '<div></div>';
+        for (let d = 1; d <= daysInMonth; d++) {
+            const isToday = d === now.getDate();
+            const posts = byDay[d] || [];
+            const bg = isToday ? 'var(--deft-accent-dim, rgba(6,214,160,0.12))' : posts.length > 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
+            const border = isToday ? '1px solid var(--deft-accent,#06D6A0)' : '1px solid transparent';
+            html += `<div style="text-align:center;padding:0.25rem 0.15rem;border-radius:0.25rem;background:${bg};border:${border};cursor:${posts.length ? 'pointer' : 'default'};position:relative;" ${posts.length ? `title="${posts.length} post(s): ${posts.map(p=>(p.platform||'').substring(0,2)).join(', ')}"` : ''}>
+                <div style="font-size:0.6rem;color:${isToday ? 'var(--deft-accent,#06D6A0)' : 'var(--deft-txt-2,#8A95A9)'};font-weight:${isToday ? '700' : '400'};">${d}</div>
+                ${posts.length > 0 ? `<div style="display:flex;justify-content:center;gap:2px;margin-top:1px;">${posts.slice(0,4).map(p => `<span style="width:4px;height:4px;border-radius:50%;background:${PLATFORM_COLORS[(p.platform||'blog').toLowerCase()] || '#8A95A9'};"></span>`).join('')}</div>` : ''}
+            </div>`;
+        }
+        html += '</div>';
+        panel.innerHTML = html;
+    }
+
+    function renderCalStrip(panel) {
+        const now = new Date();
+        const days = [];
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(now.getTime() + i * 86400000);
+            days.push(d);
+        }
+
+        const byDay = {};
+        calendarData.forEach(p => {
+            const dateKey = new Date(p.scheduled_at || p.created_at).toLocaleDateString('en-CA');
+            if (!byDay[dateKey]) byDay[dateKey] = [];
+            byDay[dateKey].push(p);
+        });
+
+        let html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:0.4rem;">';
+        days.forEach(d => {
+            const key = d.toLocaleDateString('en-CA');
+            const isToday = key === now.toLocaleDateString('en-CA');
+            const posts = byDay[key] || [];
+            const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
+            const dateLabel = d.getDate();
+            html += `<div style="border:1px solid ${isToday ? 'var(--deft-accent,#06D6A0)' : 'var(--deft-border,#2A2E3D)'};border-radius:0.375rem;padding:0.4rem;min-height:80px;background:${isToday ? 'var(--deft-accent-dim, rgba(6,214,160,0.06))' : 'transparent'};">
+                <div style="text-align:center;margin-bottom:0.3rem;">
+                    <div style="font-size:0.55rem;color:var(--deft-txt-3,#525E73);font-weight:600;">${dayLabel}</div>
+                    <div style="font-size:0.75rem;color:${isToday ? 'var(--deft-accent,#06D6A0)' : 'var(--deft-txt,#E8ECF1)'};font-weight:700;">${dateLabel}</div>
+                </div>
+                ${posts.length === 0 ? '<div style="font-size:0.5rem;color:var(--deft-txt-3,#525E73);text-align:center;">-</div>' :
+                posts.slice(0,3).map(p => {
+                    const plat = (p.platform || 'blog').toLowerCase();
+                    const color = PLATFORM_COLORS[plat] || '#8A95A9';
+                    return `<div style="display:flex;align-items:center;gap:3px;margin-bottom:2px;"><span style="width:5px;height:5px;border-radius:50%;background:${color};flex-shrink:0;"></span><span style="font-size:0.5rem;color:var(--deft-txt-2,#8A95A9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${plat}</span></div>`;
+                }).join('') + (posts.length > 3 ? `<div style="font-size:0.5rem;color:var(--deft-txt-3,#525E73);text-align:center;">+${posts.length-3} more</div>` : '')}
+            </div>`;
+        });
+        html += '</div>';
+        panel.innerHTML = html;
+    }
+
+    // ═══════════════════════════════════════
+    // SALES & REVENUE METRICS
+    // ═══════════════════════════════════════
+    async function fetchSalesMetrics() {
+        const panel = document.getElementById('salesMetricsPanel');
+        try {
+            const [contacts, revenue] = await Promise.all([
+                supabaseSelect('unified_contacts', 'select=lifecycle_stage,engagement_score&merged_into=is.null'),
+                supabaseSelect('autonomous_financial_snapshots', 'order=snapshot_date.desc&limit=1'),
+            ]);
+
+            const allContacts = Array.isArray(contacts) ? contacts : [];
+            const total = allContacts.length;
+            const customers = allContacts.filter(c => c.lifecycle_stage === 'customer').length;
+            const pipeline = allContacts.filter(c => ['mql','sql','opportunity'].includes(c.lifecycle_stage)).length;
+            const convRate = total > 0 ? ((customers / total) * 100).toFixed(1) : '0.0';
+            const avgScore = total > 0 ? Math.round(allContacts.reduce((sum, c) => sum + (c.engagement_score || 0), 0) / total) : 0;
+
+            const snap = Array.isArray(revenue) && revenue[0] ? revenue[0] : {};
+            const monthlyRev = snap.monthly_revenue || snap.revenue || 0;
+            const snapDate = snap.snapshot_date || '';
+
+            panel.innerHTML = `
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.75rem;">
+                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.15);">
+                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Total Contacts</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:var(--deft-txt,#E8ECF1);font-family:var(--deft-heading-font,'Chakra Petch');">${total}</div>
+                    </div>
+                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(76,201,240,0.06);border:1px solid rgba(76,201,240,0.15);">
+                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">In Pipeline</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:#4CC9F0;font-family:var(--deft-heading-font,'Chakra Petch');">${pipeline}</div>
+                    </div>
+                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15);">
+                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Customers</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:#A855F7;font-family:var(--deft-heading-font,'Chakra Petch');">${customers}</div>
+                    </div>
+                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(255,217,61,0.06);border:1px solid rgba(255,217,61,0.15);">
+                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Conversion</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:#FFD93D;font-family:var(--deft-heading-font,'Chakra Petch');">${convRate}%</div>
+                    </div>
+                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.15);">
+                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Avg Engagement</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:var(--deft-accent,#06D6A0);font-family:var(--deft-heading-font,'Chakra Petch');">${avgScore}</div>
+                    </div>
+                    ${monthlyRev ? `<div style="padding:0.6rem;border-radius:0.5rem;background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.15);">
+                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Monthly Revenue</div>
+                        <div style="font-size:1.3rem;font-weight:700;color:var(--deft-accent,#06D6A0);font-family:var(--deft-heading-font,'Chakra Petch');">$${Number(monthlyRev).toLocaleString()}</div>
+                        ${snapDate ? `<div style="font-size:0.5rem;color:var(--deft-txt-3,#525E73);margin-top:0.15rem;">as of ${snapDate}</div>` : ''}
+                    </div>` : ''}
+                </div>
+            `;
+        } catch (err) {
+            console.warn('Sales metrics fetch error:', err);
+            panel.innerHTML = '<div class="empty-state">Could not load sales metrics.</div>';
+        }
     }
 
     function toggleAutoRefresh() {
@@ -1545,12 +1814,14 @@
 
         await Promise.all([
             fetchTaskQueue(),
-            fetchHumanReview(),
             fetchDirectives(),
             fetchActivity(),
             fetchHealth(),
             fetchRevenue(),
             fetchHumanTasks(),
+            fetchNotifications(),
+            fetchContentCalendar(),
+            fetchSalesMetrics(),
         ]);
 
         document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString();
@@ -1583,14 +1854,9 @@
         renderTasks();
     }
 
-    async function fetchHumanReview() {
-        const result = await supabaseSelect(
-            'human_review_queue',
-            'decision=is.null&order=submitted_at.desc&limit=100'
-        );
-        reviewData = Array.isArray(result) ? result : [];
-        renderReviews();
-    }
+    // Human Review Queue removed — superseded by Human Tasks (directive_tasks)
+    async function fetchHumanReview() { /* no-op */ }
+    function renderReviews() { /* no-op */ }
 
     async function fetchDirectives() {
         const [pendingResult, historyResult, activeResult] = await Promise.all([
@@ -1681,6 +1947,23 @@
     }
 
     // Button config for dynamic action buttons
+    // Default action options per task type — ensures consistency with individual pages
+    const DEFAULT_ACTIONS_BY_TYPE = {
+        approve_social_draft:   ['approve', 'edit', 'reject', 'skip'],
+        approve_content:        ['approve', 'reject', 'edit', 'request_changes'],
+        approve_emails:         ['approve', 'reject', 'edit', 'request_changes'],
+        approve_landing_page:   ['approve', 'reject', 'request_changes'],
+        approve_testimonial:    ['approve', 'reject', 'edit'],
+        approve_offer_proposal: ['approve', 'edit', 'reject', 'skip'],
+        review_outreach_draft:  ['approve', 'edit', 'reject', 'skip'],
+        review_research:        ['approve', 'reject', 'request_changes'],
+        acknowledge:            ['acknowledge'],
+        mark_complete:          ['mark_complete'],
+        ai_escalation:          ['approve', 'reject', 'request_changes'],
+        compliance_flag:        ['approve', 'reject', 'request_changes'],
+        confidence_low:         ['approve', 'reject', 'request_changes', 'skip'],
+    };
+
     const ACTION_BUTTON_CONFIG = {
         approve:         { label: 'Approve',        cls: 'btn-approve', icon: '✓' },
         reject:          { label: 'Reject',         cls: 'btn-deny',    icon: '✕' },
@@ -1745,6 +2028,7 @@
             const actionBadgeClass = actionType === 'approve' || actionType === 'approve_content' ? 'badge-approve-type'
                 : actionType === 'execute' ? 'badge-execute'
                 : actionType === 'decide' ? 'badge-decide'
+                : actionType === 'ai_escalation' || actionType === 'compliance_flag' || actionType === 'confidence_low' ? 'badge-escalation'
                 : 'badge-review';
 
             const domainBadge = task.domain
@@ -1782,8 +2066,8 @@
                 paramsHtml = `<div class="mt-2"><span class="text-[0.65rem] font-semibold text-txt-3 uppercase tracking-wider">Parameters</span><div class="mt-0.5 space-y-0.5">${paramRows}</div></div>`;
             }
 
-            // Dynamic action buttons from action_options
-            const actionOptions = params.action_options || ['approve', 'reject'];
+            // Dynamic action buttons — frontend defaults take priority, then backend action_options
+            const actionOptions = DEFAULT_ACTIONS_BY_TYPE[actionType] || params.action_options || ['approve', 'edit', 'reject', 'skip'];
             let buttonsHtml;
             if (isProcessing) {
                 buttonsHtml = `<div class="flex items-center gap-2 text-xs text-txt-3"><span class="ha-spinner"></span> Processing...</div>`;
@@ -2039,13 +2323,14 @@
         container.style.display = '';
         container.innerHTML = '<span class="text-txt-3">Loading batch...</span>';
         try {
-            const data = await supabaseSelect('social_content_queue', `batch_id=eq.${batchId}&select=id,platform,status,content&order=platform`);
+            const data = await supabaseSelect('social_content_queue', `generation_batch_id=eq.${batchId}&select=id,platform,status,content_text,title&order=platform`);
             if (!data || data.length === 0) {
                 container.innerHTML = '<span class="text-txt-3">No posts found for this batch.</span>';
                 return;
             }
             container.innerHTML = data.map(p => {
-                const preview = (p.content || '').substring(0, 80) + ((p.content || '').length > 80 ? '...' : '');
+                const text = p.content_text || p.title || '';
+                const preview = text.substring(0, 80) + (text.length > 80 ? '...' : '');
                 return `<div class="flex items-center gap-2 p-1.5 rounded" style="background:rgba(0,0,0,0.2);">
                     <span class="badge badge-domain text-[0.55rem]">${esc(p.platform)}</span>
                     <span class="badge badge-${p.status || 'draft'} text-[0.55rem]">${esc(p.status || 'draft')}</span>
@@ -2139,7 +2424,7 @@
     function updateStatusBar() {
         const today = new Date().toISOString().split('T')[0];
         const active = taskData.filter(t => ['ready', 'in_progress'].includes(t.status)).length;
-        const review = reviewData.length + directiveData.length;
+        const review = directiveData.length;
         const completed = taskData.filter(t => t.status === 'completed' && (t.completed_at || t.updated_at || '').startsWith(today)).length;
         const failed = taskData.filter(t => t.status === 'failed' && (t.completed_at || t.updated_at || '').startsWith(today)).length;
         const blocked = taskData.filter(t => t.status === 'blocked').length;
@@ -2383,135 +2668,6 @@
         else msg = `Failed to ${action}: ${result?.error || 'Unknown error'}`;
         toast(msg, 'error');
         if (btn) btn.disabled = false;
-    }
-
-    // ═══════════════════════════════════════
-    // RENDER: HUMAN REVIEW
-    // ═══════════════════════════════════════
-    function renderReviews() {
-        const panel = document.getElementById('reviewPanel');
-        const countEl = document.getElementById('reviewCount');
-        countEl.textContent = reviewData.length;
-
-        if (reviewData.length === 0) {
-            panel.innerHTML = '<div class="empty-state"><div class="mb-2 text-2xl opacity-40">✓</div>No items pending review</div>';
-            return;
-        }
-
-        const DISPLAY_LIMIT = 5;
-        const showAll = panel.dataset.showAll === 'true';
-        const displayItems = showAll ? reviewData : reviewData.slice(0, DISPLAY_LIMIT);
-        let html = displayItems.map((item, i) => {
-            const taskId = item.task_id || 'Unknown';
-            const contentType = item.content_type || '';
-            const content = item.content || '';
-            const aiDecision = item.ai_decision || '';
-            const reason = item.escalation_reason || '';
-            const confidence = item.confidence;
-            const summary = item.summary || '';
-            const isInfra = contentType === 'infrastructure/install_request';
-
-            // Parse issues: infrastructure items have object {type, risk_level, integrations}, content items have array of strings
-            let issuesDisplay = '';
-            let infraIntegrations = [];
-            let infraRiskLevel = '';
-            if (isInfra && item.issues && typeof item.issues === 'object' && !Array.isArray(item.issues)) {
-                infraRiskLevel = item.issues.risk_level || 'high';
-                infraIntegrations = Array.isArray(item.issues.integrations) ? item.issues.integrations : [];
-            } else {
-                issuesDisplay = Array.isArray(item.issues) ? item.issues.join(', ') : (item.issues || '');
-            }
-
-            // Header badges
-            const typeBadge = isInfra
-                ? `<span class="badge badge-infra">INFRASTRUCTURE</span><span class="badge badge-risk-high">${esc(infraRiskLevel.toUpperCase())} RISK</span>`
-                : (contentType ? `<span class="badge badge-domain">${esc(contentType)}</span>` : '');
-            const confidenceLabel = isInfra
-                ? '<span class="text-xs text-warn">Requires Manual Approval</span>'
-                : (confidence ? `<span class="text-xs text-txt-3">Confidence: ${esc(String(confidence))}</span>` : '');
-
-            // Detail section
-            let detailContent = '';
-            if (isInfra) {
-                const integrationsList = infraIntegrations.length
-                    ? `<div class="mb-3"><span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Integrations to Install</span><ul class="mt-1 text-xs text-txt-2 list-disc list-inside">${infraIntegrations.map(pkg => `<li class="py-0.5">${esc(String(pkg))}</li>`).join('')}</ul></div>`
-                    : '';
-                detailContent = `
-                    ${integrationsList}
-                    <div class="mb-3">
-                        <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Justification</span>
-                        <div class="mt-1 p-3 rounded text-xs text-txt-2 font-mono whitespace-pre-wrap max-h-48 overflow-y-auto" style="background: rgba(0,0,0,0.3); border: 1px solid #1E2130;">
-${esc(content)}
-                        </div>
-                    </div>`;
-            } else {
-                detailContent = `
-                    ${issuesDisplay ? `<div class="mb-3"><span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Issues</span><p class="text-xs text-warn mt-1">${esc(issuesDisplay)}</p></div>` : ''}
-                    <div class="mb-3">
-                        <span class="text-xs text-txt-3 uppercase tracking-wider font-medium">Publishing</span>
-                        <div class="mt-1 p-3 rounded text-xs text-txt-2 font-mono whitespace-pre-wrap max-h-48 overflow-y-auto" style="background: rgba(0,0,0,0.3); border: 1px solid #1E2130;">
-${esc(content)}
-                        </div>
-                    </div>`;
-            }
-
-            return `
-                <div class="review-card mb-3 p-4" id="review-${i}">
-                    <div class="flex items-start justify-between gap-3 cursor-pointer" onclick="toggleReview(${i})">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 mb-1.5 flex-wrap">
-                                <span class="font-mono text-xs text-info">${esc(taskId)}</span>
-                                ${typeBadge}
-                                ${confidenceLabel}
-                            </div>
-                            ${summary ? `<p class="text-sm text-txt mb-1">${esc(summary)}</p>` : ''}
-                            ${reason ? `<p class="text-xs text-alert"><span class="text-txt-3">Escalation:</span> ${esc(reason)}</p>` : ''}
-                        </div>
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="text-txt-3 flex-shrink-0 mt-1 transition-transform" id="chevron-${i}">
-                            <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-
-                    <div class="hidden mt-4" id="review-detail-${i}">
-                        ${detailContent}
-
-                        <div class="mb-3">
-                            <label class="text-xs text-txt-3 uppercase tracking-wider font-medium block mb-1">Notes / Feedback</label>
-                            <textarea class="form-input text-xs" rows="2" placeholder="Add notes about your decision..." id="review-notes-${i}"></textarea>
-                        </div>
-
-                        <div class="flex gap-2 flex-wrap">
-                            <button class="btn btn-approve text-xs" onclick="submitDecision('${esc(taskId)}', 'approved', ${i})">
-                                ✓ Approve
-                            </button>
-                            ${isInfra ? '' : `<button class="btn btn-modify text-xs" onclick="openModify('${esc(taskId)}', ${i})">
-                                ✎ Modify
-                            </button>`}
-                            <button class="btn btn-deny text-xs" onclick="submitDecision('${esc(taskId)}', 'denied', ${i})">
-                                ✕ Deny
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        if (reviewData.length > DISPLAY_LIMIT) {
-            const btnText = showAll ? 'Show Less' : `Show All (${reviewData.length} total)`;
-            html += `<div class="text-center mt-3 pt-3" style="border-top: 1px solid var(--deft-border, #2A2E3D);">
-                <button onclick="this.closest('.panel-body').dataset.showAll = this.closest('.panel-body').dataset.showAll === 'true' ? 'false' : 'true'; renderReviews();" class="btn btn-ghost text-xs py-1.5 px-4">${btnText}</button>
-            </div>`;
-        }
-        panel.innerHTML = html;
-    }
-
-    function toggleReview(i) {
-        const detail = document.getElementById(`review-detail-${i}`);
-        const chevron = document.getElementById(`chevron-${i}`);
-        const card = document.getElementById(`review-${i}`);
-        const isHidden = detail.classList.contains('hidden');
-        detail.classList.toggle('hidden');
-        card.classList.toggle('expanded', isHidden);
-        chevron.style.transform = isHidden ? 'rotate(180deg)' : '';
     }
 
     // ═══════════════════════════════════════
