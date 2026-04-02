@@ -1911,8 +1911,10 @@
         currentView = view;
         const views = ['contacts', 'pipeline', 'attribution', 'sequences', 'outreach', 'prospecting'];
         views.forEach(v => {
-            document.getElementById(`view-${v}`).style.display = v === view ? '' : 'none';
-            document.getElementById(`tab-${v}`).classList.toggle('active', v === view);
+            const viewEl = document.getElementById(`view-${v}`);
+            const tabEl = document.getElementById(`tab-${v}`);
+            if (viewEl) viewEl.style.display = v === view ? '' : 'none';
+            if (tabEl) tabEl.classList.toggle('active', v === view);
         });
 
         // Lazy-load data for views that need it
