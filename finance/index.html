@@ -1349,7 +1349,8 @@
         `;
 
         // Cash flow chart
-        const cf = Array.isArray(cashFlow) ? cashFlow : [];
+        const cfRaw = cashFlow?.data || cashFlow;
+        const cf = Array.isArray(cfRaw) ? cfRaw : [];
         if (cf.length === 0) {
             document.getElementById('ovCashFlowPanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No cash flow data available</div>';
             return;
@@ -1422,8 +1423,9 @@
             `;
         }
 
-        // Monthly trend
-        const cf = Array.isArray(cashFlow) ? cashFlow : [];
+        // Monthly trend (RPC returns { data: [...] } wrapper)
+        const cfRaw = cashFlow?.data || cashFlow;
+        const cf = Array.isArray(cfRaw) ? cfRaw : [];
         if (cf.length === 0) {
             document.getElementById('revTrendPanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No trend data available</div>';
         } else {
@@ -1571,7 +1573,8 @@
     }
 
     function renderExpenseTrend(cashFlow) {
-        const cf = Array.isArray(cashFlow) ? cashFlow : [];
+        const cfRaw = cashFlow?.data || cashFlow;
+        const cf = Array.isArray(cfRaw) ? cfRaw : [];
         if (cf.length === 0) {
             document.getElementById('exTrendPanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No trend data available</div>';
             return;
