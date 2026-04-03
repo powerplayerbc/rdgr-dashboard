@@ -935,7 +935,6 @@
                             </div>
                         </div>
                         <a href="/partnerships" class="nav-group-btn">Partnerships</a>
-                        <a href="/finance" class="nav-group-btn">Finance</a>
                         <div class="nav-group">
                             <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -1065,7 +1064,7 @@
                     </select>
 
                     <!-- Status Filter -->
-                    <div class="flex items-center gap-1 flex-wrap">
+                    <div class="flex items-center gap-1 flex-wrap" id="statusFilterRow">
                         <button class="status-btn active" data-status="all" onclick="setStatusFilter('all')">All</button>
                         <button class="status-btn" data-status="pending_approval" onclick="setStatusFilter('pending_approval')">Pending</button>
                         <button class="status-btn" data-status="scheduled" onclick="setStatusFilter('scheduled')">Scheduled</button>
@@ -1916,6 +1915,19 @@ function switchView(view) {
     document.querySelectorAll('.view-container').forEach(el => el.classList.add('hidden'));
     const viewMap = { approvals: 'viewApprovals', calendar: 'viewCalendar', queue: 'viewQueue', analytics: 'viewAnalytics' };
     document.getElementById(viewMap[view]).classList.remove('hidden');
+
+    // Show status filters only for Approvals and Queue views
+    const statusRow = document.getElementById('statusFilterRow');
+    if (statusRow) {
+        statusRow.style.display = (view === 'approvals' || view === 'queue') ? '' : 'none';
+    }
+
+    // Auto-set to pending when entering Approvals view
+    if (view === 'approvals' && filters.status === 'all') {
+        setStatusFilter('pending_approval');
+        return; // setStatusFilter calls renderCurrentView
+    }
+
     renderCurrentView();
 }
 
@@ -2089,7 +2101,11 @@ async function approvePost(id) {
     if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
     try {
         await writeApi('approve', { id });
-        allPosts = allPosts.filter(p => p.id !== id);
+        const post = allPosts.find(p => p.id === id);
+        if (post) {
+            post.status = 'approved';
+            post.approved_at = new Date().toISOString();
+        }
         updateStats();
         renderCurrentView();
         showToast('Post approved', 'success');
@@ -2104,7 +2120,10 @@ async function denyPost(id) {
     if (card) { card.style.opacity = '0.4'; card.style.pointerEvents = 'none'; }
     try {
         await writeApi('deny', { id });
-        allPosts = allPosts.filter(p => p.id !== id);
+        const post = allPosts.find(p => p.id === id);
+        if (post) {
+            post.status = 'rejected';
+        }
         updateStats();
         renderCurrentView();
         showToast('Post denied', 'success');
@@ -3023,13 +3042,13 @@ function renderApprovalCard(draft) {
     // ── Action buttons (shared across all card types) ──
     const actionsHtml = `
         <div class="flex items-center gap-2 flex-wrap">
-            <button onclick="approveSocialDraft(${draft.id})" class="btn btn-approve text-xs py-1.5 px-2.5">Approve</button>
-            <button onclick="startSocialEdit(${draft.id})" class="btn btn-ghost text-xs py-1.5 px-2.5">Edit</button>
-            <button onclick="openRedraftModal(${draft.id})" class="btn btn-regenerate text-xs py-1.5 px-2.5">Redraft (${redraftCount}/${maxRedrafts})</button>
-            <button onclick="skipSocialDraft(${draft.id})" class="btn btn-skip text-xs py-1.5 px-2.5">Skip</button>
+            <button onclick="event.stopPropagation();approveSocialDraft(${draft.id})" class="btn btn-approve text-xs py-1.5 px-2.5">Approve</button>
+            <button onclick="event.stopPropagation();startSocialEdit(${draft.id})" class="btn btn-ghost text-xs py-1.5 px-2.5">Edit</button>
+            <button onclick="event.stopPropagation();openRedraftModal(${draft.id})" class="btn btn-regenerate text-xs py-1.5 px-2.5">Redraft (${redraftCount}/${maxRedrafts})</button>
+            <button onclick="event.stopPropagation();skipSocialDraft(${draft.id})" class="btn btn-skip text-xs py-1.5 px-2.5">Skip</button>
             <span class="mx-1"></span>
-            <button onclick="copyToClip(\`${escapeHtml(message).replace(/`/g, '\\`')}\`)" class="btn btn-copy text-xs py-1.5 px-2.5">Copy</button>
-            <button onclick="quickActDraft(${draft.id})" class="btn btn-primary text-xs py-1.5 px-2.5" style="background:rgba(6,214,160,0.2);border-color:rgba(6,214,160,0.4);">Done &#10003;</button>
+            <button onclick="event.stopPropagation();copyToClip(\`${escapeHtml(message).replace(/`/g, '\\`')}\`)" class="btn btn-copy text-xs py-1.5 px-2.5">Copy</button>
+            <button onclick="event.stopPropagation();quickActDraft(${draft.id})" class="btn btn-primary text-xs py-1.5 px-2.5" style="background:rgba(6,214,160,0.2);border-color:rgba(6,214,160,0.4);">Done &#10003;</button>
         </div>
     `;
 
@@ -3054,7 +3073,7 @@ function renderApprovalCard(draft) {
                     <div class="flex items-center gap-3 text-xs">
                         ${postCreatedAt ? postAge(postCreatedAt) : ''}
                         ${commentCount !== '' ? `<span class="text-txt-3 font-mono">${commentCount} comments</span>` : ''}
-                        ${contactId ? `<button onclick="window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2">CRM</button>` : ''}
+                        ${contactId ? `<button onclick="event.stopPropagation();window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2">CRM</button>` : ''}
                         ${linkHtml}
                     </div>
                 </div>
@@ -3093,7 +3112,7 @@ function renderApprovalCard(draft) {
                     </div>
                     <div class="flex items-center gap-3 text-xs">
                         ${postCreatedAt ? postAge(postCreatedAt) : ''}
-                        ${contactId ? `<button onclick="window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2">CRM</button>` : ''}
+                        ${contactId ? `<button onclick="event.stopPropagation();window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2">CRM</button>` : ''}
                         ${linkHtml}
                     </div>
                 </div>
@@ -3163,9 +3182,10 @@ function renderApprovalCard(draft) {
                     ${bio && p === 'linkedin' ? `<span class="text-xs text-txt-3">${escapeHtml(truncate(bio, 40))}</span>` : ''}
                     <span class="badge badge-${otype}">${otype.toUpperCase()}</span>
                     ${draft.engagement_subtype ? `<span class="text-[0.55rem] text-txt-3 font-mono">${escapeHtml(draft.engagement_subtype)}</span>` : ''}
+                    ${draft.created_at ? `<span class="text-[0.6rem] text-txt-3 font-mono">${timeAgo(draft.created_at)}</span>` : ''}
                 </div>
                 <div class="flex items-center gap-2">
-                    ${contactId ? `<button onclick="window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2" title="View in CRM">CRM</button>` : ''}
+                    ${contactId ? `<button onclick="event.stopPropagation();window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2" title="View in CRM">CRM</button>` : ''}
                     ${linkHtml}
                 </div>
             </div>
@@ -3194,6 +3214,25 @@ function renderActionCard(draft) {
     const contactId = draft.contact_id || '';
     const isReddit = draft.platform === 'reddit';
     const otype = draft.outreach_type || outreachType;
+    const rsd = draft.raw_scrape_data || {};
+    const bio = draft.target_bio || draft.bio || rsd.author?.description || '';
+    const company = rsd.company || draft.company || '';
+    const followers = draft.follower_count ? `${formatNum(draft.follower_count)} followers` : '';
+    const score = draft.relevance_score || draft.score || '';
+
+    let actionMetaLine = '';
+    if (draft.platform === 'linkedin') {
+        const headline = rsd.headline || '';
+        const jobTitle = rsd.jobTitle || bio || '';
+        actionMetaLine = [company, jobTitle || headline ? escapeHtml(truncate(jobTitle || headline, 50)) : '', followers, score ? `Score: ${score}` : ''].filter(Boolean).join(' | ');
+    } else if (draft.platform === 'twitter') {
+        const username = draft.platform_username ? `@${draft.platform_username}` : '';
+        actionMetaLine = [username, followers, score ? `Score: ${score}` : ''].filter(Boolean).join(' | ');
+    } else if (isReddit) {
+        actionMetaLine = [draft.thread_subreddit ? `r/${draft.thread_subreddit}` : '', draft.thread_title ? `"${truncate(draft.thread_title, 50)}"` : '', score ? `Score: ${score}` : ''].filter(Boolean).join(' | ');
+    } else {
+        actionMetaLine = [company, followers, score ? `Score: ${score}` : ''].filter(Boolean).join(' | ');
+    }
 
     let linkLabel, linkUrl;
     if (isReddit) { linkUrl = threadUrl || targetUrl; linkLabel = 'Open Thread →'; }
@@ -3207,16 +3246,18 @@ function renderActionCard(draft) {
                 <div class="flex items-center gap-2">
                     <span class="badge badge-${draft.platform}">${platform.label}</span>
                     <span class="text-sm font-semibold text-txt">${escapeHtml(name)}</span>
+                    ${draft.created_at ? `<span class="text-[0.6rem] text-txt-3 font-mono">${timeAgo(draft.created_at)}</span>` : ''}
                 </div>
                 <div class="flex items-center gap-2">
-                    ${contactId ? `<button onclick="window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2" title="View in CRM">CRM</button>` : ''}
+                    ${contactId ? `<button onclick="event.stopPropagation();window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2" title="View in CRM">CRM</button>` : ''}
                     ${linkHtml}
                 </div>
             </div>
+            ${actionMetaLine ? `<div class="text-xs text-txt-3 mb-2">${actionMetaLine}</div>` : ''}
             <div class="msg-preview mb-3">${escapeHtml(message)}</div>
             <div class="flex items-center gap-2">
-                <button onclick="copyToClip(\`${escapeHtml(message).replace(/`/g, '\\`')}\`)" class="btn btn-copy text-xs py-1.5 px-3">Copy to Clipboard</button>
-                <button onclick="markActedUpon(${draft.id}, '${draft.platform}', '${draft.outreach_type || outreachType}')" class="btn btn-approve text-xs py-1.5 px-3">Mark Acted Upon</button>
+                <button onclick="event.stopPropagation();copyToClip(\`${escapeHtml(message).replace(/`/g, '\\`')}\`)" class="btn btn-copy text-xs py-1.5 px-3">Copy to Clipboard</button>
+                <button onclick="event.stopPropagation();markActedUpon(${draft.id}, '${draft.platform}', '${draft.outreach_type || outreachType}')" class="btn btn-approve text-xs py-1.5 px-3">Mark Acted Upon</button>
             </div>
         </div>
     `;
@@ -3224,7 +3265,7 @@ function renderActionCard(draft) {
 
 function renderConvoCard(convo) {
     const platform = PLATFORMS[convo.platform] || { label: convo.platform, color: '#8A95A9' };
-    const name = convo.target_name || convo.platform_username || 'Unknown';
+    const name = getDraftDisplayName(convo);
     const inboundCount = convo.inbound_count || 0;
     const convoCount = convo.conversation_count || 0;
     const pendingReplies = convo.pending_replies || 0;
@@ -3431,6 +3472,7 @@ async function markActedUpon(id, platform, outType) {
             }
         }
         showToast('Marked as acted upon', 'success');
+        fetchConversionFunnel();
     } catch (err) {
         showToast('Failed: ' + err.message, 'error');
     }
@@ -3648,7 +3690,7 @@ function openOutreachDetail(draftId) {
     const name = getDraftDisplayName(draft);
     const username = draft.platform_username || rsd.author?.userName || rsd.ownerUsername || '';
     const bio = draft.target_bio || rsd.author?.description || draft.bio || '';
-    const message = draft.draft_content || draft.message_content || '';
+    const message = draft.final_content || draft.edited_content || draft.draft_content || draft.message_content || draft.content || '';
     const otype = draft.outreach_type || outreachType;
     const score = draft.relevance_score || '';
     const profileUrl = draft.target_profile_url || draft.target_url || '';
@@ -3667,6 +3709,7 @@ function openOutreachDetail(draftId) {
         ${draft.discovery_type === 'wave_catcher' ? '<span class="badge" style="background:rgba(20,184,166,0.15);color:#2DD4BF;">Wave</span>' : ''}
         ${draft.discovery_type === 'pain_prospector' ? '<span class="badge" style="background:rgba(245,158,11,0.15);color:#F59E0B;">Pain Point</span>' : ''}
         ${score ? `<span class="badge badge-approved">Score: ${score}</span>` : ''}
+        ${draft.created_at ? `<span class="text-[0.6rem] text-txt-3 font-mono ml-auto">Drafted ${timeAgo(draft.created_at)}</span>` : ''}
     </div>`;
 
     // ── Target info ──
@@ -3721,9 +3764,19 @@ function openOutreachDetail(draftId) {
 
     // ── Full original content (tweet, post, caption, thread body) ──
     const originalContent = rsd.text || rsd.caption || rsd.message || rsd.selftext || draft.thread_body_snippet || snippet || '';
+    let originalLabel;
+    if (isReddit) {
+        originalLabel = otype === 'engagement' ? 'Reddit Post to Reply To' : 'Original Reddit Thread';
+    } else if (otype === 'engagement') {
+        originalLabel = draft.platform === 'twitter' ? 'Tweet to Engage With' : 'Post to Engage With';
+    } else if (otype === 'dm') {
+        originalLabel = 'Content That Triggered Outreach';
+    } else {
+        originalLabel = draft.platform === 'twitter' ? 'Original Tweet' : 'Original Content';
+    }
     if (originalContent) {
         html += `<div class="mb-4">
-            <div class="text-[0.65rem] text-txt-3 font-mono uppercase tracking-wide mb-1.5">Original ${isReddit ? 'Post' : draft.platform === 'twitter' ? 'Tweet' : 'Content'}</div>
+            <div class="text-[0.65rem] text-txt-3 font-mono uppercase tracking-wide mb-1.5">${originalLabel}</div>
             <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:0.375rem;padding:0.75rem;border-left:3px solid ${p.color};">
                 <div class="text-xs text-txt-2" style="white-space:pre-wrap;line-height:1.6;">${escapeHtml(originalContent)}</div>
             </div>
@@ -3783,16 +3836,23 @@ function openOutreachDetail(draftId) {
         </div>`;
     }
 
-    // ── Actions ──
-    html += `<div class="flex flex-wrap gap-2 pt-3 border-t border-border">
+    // ── Actions (context-aware based on queue type) ──
+    html += `<div class="flex flex-wrap gap-2 pt-3 border-t border-border">`;
+    if (queueType === 'action') {
+        html += `
+        <button onclick="copyToClip(\`${escapeHtml(message).replace(/`/g, '\\`')}\`)" class="btn btn-copy text-xs py-1.5 px-3">Copy to Clipboard</button>
+        <button onclick="markActedUpon(${draft.id}, '${draft.platform}', '${otype}');closeDetail();" class="btn btn-approve text-xs py-1.5 px-3">Mark Acted Upon</button>`;
+    } else {
+        html += `
         <button onclick="approveSocialDraft(${draft.id});closeDetail();" class="btn btn-approve text-xs py-1.5 px-3">Approve</button>
         <button onclick="closeDetail();startSocialEdit(${draft.id});" class="btn btn-ghost text-xs py-1.5 px-3">Edit</button>
         <button onclick="closeDetail();openRedraftModal(${draft.id});" class="btn btn-regenerate text-xs py-1.5 px-3">Redraft</button>
         <button onclick="skipSocialDraft(${draft.id});closeDetail();" class="btn btn-skip text-xs py-1.5 px-3">Skip</button>
         <span class="mx-1"></span>
         <button onclick="copyToClip(\`${escapeHtml(message).replace(/`/g, '\\`')}\`)" class="btn btn-copy text-xs py-1.5 px-3">Copy</button>
-        <button onclick="quickActDraft(${draft.id});closeDetail();" class="btn btn-primary text-xs py-1.5 px-3" style="background:rgba(6,214,160,0.2);border-color:rgba(6,214,160,0.4);">Done</button>
-    </div>`;
+        <button onclick="quickActDraft(${draft.id});closeDetail();" class="btn btn-primary text-xs py-1.5 px-3" style="background:rgba(6,214,160,0.2);border-color:rgba(6,214,160,0.4);">Done</button>`;
+    }
+    html += `</div>`;
 
     // ── ID ──
     html += `<div class="text-[0.55rem] text-txt-3 font-mono opacity-40 pt-3">Draft #${draft.id} | Target: ${escapeHtml(draft.directive_id || draft.target_id || '')}</div>`;

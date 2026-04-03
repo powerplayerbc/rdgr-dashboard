@@ -821,7 +821,6 @@
                             </div>
                         </div>
                         <a href="/partnerships" class="nav-group-btn">Partnerships</a>
-                        <a href="/finance" class="nav-group-btn">Finance</a>
                         <div class="nav-group">
                             <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -1353,6 +1352,8 @@
         directiveAction: 'https://n8n.carltonaiservices.com/webhook/rdgr-directive-action',
         complete: 'https://n8n.carltonaiservices.com/webhook/rdgr-complete',
         humanAction: 'https://n8n.carltonaiservices.com/webhook/human-action',
+        hubApprovalQueue: 'https://n8n.carltonaiservices.com/webhook/hub-approval-queue',
+        hubApprovalAction: 'https://n8n.carltonaiservices.com/webhook/hub-approval-action',
         crm: 'https://n8n.carltonaiservices.com/webhook/rdgr-crm',
         social: 'https://n8n.carltonaiservices.com/webhook/rdgr-tool-social',
         revenue: 'https://n8n.carltonaiservices.com/webhook/rdgr-revenue',
@@ -1723,10 +1724,9 @@
     async function fetchSalesMetrics() {
         const panel = document.getElementById('salesMetricsPanel');
         try {
-            const [contacts, revenue, purchases] = await Promise.all([
+            const [contacts, revenue] = await Promise.all([
                 supabaseSelect('unified_contacts', 'select=lifecycle_stage,engagement_score&merged_into=is.null'),
                 supabaseSelect('autonomous_financial_snapshots', 'order=snapshot_date.desc&limit=1'),
-                supabaseSelect('offer_purchases', 'brand_id=eq.carlton&select=amount_cents,payment_status,created_at'),
             ]);
 
             const allContacts = Array.isArray(contacts) ? contacts : [];
@@ -1737,13 +1737,7 @@
             const avgScore = total > 0 ? Math.round(allContacts.reduce((sum, c) => sum + (c.engagement_score || 0), 0) / total) : 0;
 
             const snap = Array.isArray(revenue) && revenue[0] ? revenue[0] : {};
-            const snapshotRev = parseFloat(snap.monthly_revenue || snap.revenue || 0);
-
-            // Add completed offer_purchases revenue
-            const allPurchases = Array.isArray(purchases) ? purchases : [];
-            const completedPurchases = allPurchases.filter(p => p.payment_status === 'completed' || p.payment_status === 'paid');
-            const purchaseRevenue = completedPurchases.reduce((sum, p) => sum + ((parseInt(p.amount_cents) || 0) / 100), 0);
-            const monthlyRev = snapshotRev + purchaseRevenue;
+            const monthlyRev = snap.monthly_revenue || snap.revenue || 0;
             const snapDate = snap.snapshot_date || '';
 
             panel.innerHTML = `
@@ -1941,11 +1935,43 @@
     // HUMAN TASKS
     // ═══════════════════════════════════════
     async function fetchHumanTasks() {
-        let result = await supabaseSelect(
-            'directive_tasks',
-            'select=task_id,directive_id,title,domain,status,human_action_type,description,parameters,expected_output,created_at&requires_human=eq.true&status=in.(pending,in_progress)&brand_id=eq.carlton&order=created_at.desc'
-        );
+        // Fetch directive_tasks and hub approvals in parallel
+        const [result, hubResult] = await Promise.all([
+            supabaseSelect(
+                'directive_tasks',
+                'select=task_id,directive_id,title,domain,status,human_action_type,description,parameters,expected_output,created_at&requires_human=eq.true&status=in.(pending,in_progress)&brand_id=eq.carlton&order=created_at.desc'
+            ),
+            fetch(API.hubApprovalQueue + '?status=pending_review').then(r => r.json()).catch(() => null)
+        ]);
         humanTasksData = Array.isArray(result) ? result : [];
+
+        // Merge hub approvals as human tasks
+        const hubItems = hubResult?.items || (Array.isArray(hubResult) ? hubResult : []);
+        hubItems.forEach(item => {
+            humanTasksData.push({
+                task_id: `hub-${item.file_id}`,
+                directive_id: item.file_id,
+                title: `Review: ${item.file_name || 'Untitled File'}`,
+                domain: 'hub',
+                status: 'pending',
+                human_action_type: 'approve_hub_file',
+                description: [
+                    item.category ? `Category: ${item.category}` : '',
+                    item.client_name && item.client_name !== 'N/A' ? `Client: ${item.client_name}` : '',
+                    item.summary || '',
+                    item.submitted_by ? `Submitted by: ${item.submitted_by}` : '',
+                ].filter(Boolean).join('\n'),
+                parameters: {
+                    _hub_file: true,
+                    file_id: item.file_id,
+                    review_content: item.drive_url ? { type: 'url', data: item.drive_url } : item.summary ? { type: 'text', data: item.summary } : null,
+                },
+                created_at: item.created_at,
+            });
+        });
+
+        // Re-sort by created_at desc after merge
+        humanTasksData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         renderHumanTasks();
     }
 
@@ -1970,6 +1996,7 @@
         ai_escalation:          ['approve', 'reject', 'request_changes'],
         compliance_flag:        ['approve', 'reject', 'request_changes'],
         confidence_low:         ['approve', 'reject', 'request_changes', 'skip'],
+        approve_hub_file:       ['approve', 'reject'],
     };
 
     const ACTION_BUTTON_CONFIG = {
@@ -2394,16 +2421,30 @@
             // Check for edited_content from any inline edit textarea
             const editedContent = document.getElementById(`ht-edited-content-${idx}`)?.value?.trim() || undefined;
 
-            // Send to human-action webhook
-            const payload = {
-                task_id: task.task_id,
-                action: action,
-                feedback: feedback || undefined,
-                acted_by: 'bradford'
-            };
-            if (editedContent) payload.edited_content = editedContent;
+            const params = task.parameters && typeof task.parameters === 'object' ? task.parameters : {};
+            let result;
 
-            const result = await fetchJSON(API.humanAction, payload);
+            // Route hub file approvals to hub-approval-action endpoint
+            if (params._hub_file) {
+                result = await fetchJSON(API.hubApprovalAction, {
+                    file_id: params.file_id,
+                    action: action,
+                    feedback: feedback || '',
+                    actor: 'bradford'
+                });
+                // Normalize response for downstream handling
+                if (result && !result.hasOwnProperty('success')) result.success = true;
+            } else {
+                // Send to human-action webhook
+                const payload = {
+                    task_id: task.task_id,
+                    action: action,
+                    feedback: feedback || undefined,
+                    acted_by: 'bradford'
+                };
+                if (editedContent) payload.edited_content = editedContent;
+                result = await fetchJSON(API.humanAction, payload);
+            }
 
             if (result?.success) {
                 humanTasksData.splice(idx, 1);

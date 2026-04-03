@@ -323,6 +323,9 @@
             border-radius: 0.5rem;
             padding: 0.625rem 1rem;
             display: flex; flex-direction: column; gap: 0.25rem;
+            overflow: hidden;
+            min-width: 0;
+            position: relative;
         }
         .stat-value { font-family: 'Chakra Petch', system-ui; font-weight: 700; font-size: 1.4rem; line-height: 1; }
         .stat-label { font-size: 0.7rem; color: #8A95A9; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
@@ -982,7 +985,6 @@
                             </div>
                         </div>
                         <a href="/partnerships" class="nav-group-btn">Partnerships</a>
-                        <a href="/finance" class="nav-group-btn">Finance</a>
                         <div class="nav-group">
                             <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -1137,7 +1139,7 @@
                 <div class="stat-bar grid grid-cols-2 md:grid-cols-4 gap-3 mb-4" id="calStats">
                     <div class="stat-chip"><div class="stat-label">Posts</div><div class="stat-value" id="calStatPosts">—</div></div>
                     <div class="stat-chip"><div class="stat-label">Approval Rate</div><div class="stat-value" id="calStatApproval">—</div></div>
-                    <div class="stat-chip"><div class="stat-label">Platforms</div><div id="calStatPlatforms" class="flex items-center gap-1 mt-1">—</div></div>
+                    <div class="stat-chip"><div class="stat-label">Platforms</div><div id="calStatPlatforms" class="flex items-center gap-1 mt-1 flex-wrap">—</div></div>
                     <div class="stat-chip"><div class="stat-label">Bumps</div><div class="stat-value" id="calStatBumps">—</div></div>
                 </div>
 
