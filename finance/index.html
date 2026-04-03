@@ -753,6 +753,13 @@
                     <div class="loading-bar w-1/2"></div>
                 </div>
             </div>
+            <div class="panel">
+                <div class="panel-header"><h3>Recent Sales (Offer Purchases)</h3></div>
+                <div class="panel-body" id="revSalesPanel">
+                    <div class="loading-bar w-full mb-3"></div>
+                    <div class="loading-bar w-3/4"></div>
+                </div>
+            </div>
         </div>
 
         <!-- EXPENSES -->
@@ -1378,12 +1385,14 @@
     // REVENUE TAB
     // =======================================
     async function loadRevenue() {
-        const [transactions, cashFlow, pipeline] = await Promise.all([
+        const [transactions, cashFlow, pipeline, sales] = await Promise.all([
             sbSelect('bkai_transactions', 'brand_id=eq.carlton&amount=gt.0&select=counterparty,amount&order=amount.desc'),
             rpc('bkai_cash_flow', { p_brand_id: BRAND_ID, p_months: 12 }),
-            sbSelect('autonomous_revenue_pipeline', 'brand_id=eq.carlton&order=expected_value.desc&limit=20')
+            sbSelect('autonomous_revenue_pipeline', 'brand_id=eq.carlton&order=expected_value.desc&limit=20'),
+            sbSelect('offer_purchases', 'brand_id=eq.carlton&order=created_at.desc&limit=20&select=purchase_id,customer_email,customer_name,amount_cents,payment_status,offer_id,created_at')
         ]);
         renderRevenue(transactions, cashFlow, pipeline);
+        renderSales(sales);
     }
 
     function renderRevenue(transactions, cashFlow, pipeline) {
@@ -1463,6 +1472,39 @@
                 </table>
             `;
         }
+    }
+
+    function renderSales(sales) {
+        const items = Array.isArray(sales) ? sales : [];
+        const panel = document.getElementById('revSalesPanel');
+        if (items.length === 0) {
+            panel.innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No sales recorded yet</div>';
+            return;
+        }
+        const statusBadge = s => {
+            const colors = { pending: 'badge-warning', completed: 'badge-success', paid: 'badge-success', failed: 'badge-danger', refunded: 'badge-neutral' };
+            return `<span class="badge ${colors[s] || 'badge-neutral'}">${esc(s || 'unknown')}</span>`;
+        };
+        const totalRevenue = items.filter(i => i.payment_status === 'completed' || i.payment_status === 'paid').reduce((sum, i) => sum + (parseInt(i.amount_cents) || 0), 0);
+        panel.innerHTML = `
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs text-txt-3">${items.length} sale(s)</span>
+                <span class="text-sm font-heading font-semibold" style="color:var(--deft-accent);">Total: ${fmtMoney(totalRevenue / 100)}</span>
+            </div>
+            <table class="data-table">
+                <thead><tr>
+                    <th>Customer</th><th>Amount</th><th>Status</th><th>Date</th>
+                </tr></thead>
+                <tbody>
+                    ${items.map(p => `<tr>
+                        <td class="text-xs">${esc(p.customer_name || p.customer_email || '--')}</td>
+                        <td class="text-xs font-heading font-semibold">$${((parseInt(p.amount_cents) || 0) / 100).toFixed(2)}</td>
+                        <td>${statusBadge(p.payment_status)}</td>
+                        <td class="text-xs text-txt-3">${p.created_at ? new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'America/Los_Angeles' }) : '--'}</td>
+                    </tr>`).join('')}
+                </tbody>
+            </table>
+        `;
     }
 
     // =======================================

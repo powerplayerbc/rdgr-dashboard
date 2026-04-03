@@ -821,6 +821,7 @@
                             </div>
                         </div>
                         <a href="/partnerships" class="nav-group-btn">Partnerships</a>
+                        <a href="/finance" class="nav-group-btn">Finance</a>
                         <div class="nav-group">
                             <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -1722,9 +1723,10 @@
     async function fetchSalesMetrics() {
         const panel = document.getElementById('salesMetricsPanel');
         try {
-            const [contacts, revenue] = await Promise.all([
+            const [contacts, revenue, purchases] = await Promise.all([
                 supabaseSelect('unified_contacts', 'select=lifecycle_stage,engagement_score&merged_into=is.null'),
                 supabaseSelect('autonomous_financial_snapshots', 'order=snapshot_date.desc&limit=1'),
+                supabaseSelect('offer_purchases', 'brand_id=eq.carlton&select=amount_cents,payment_status,created_at'),
             ]);
 
             const allContacts = Array.isArray(contacts) ? contacts : [];
@@ -1735,7 +1737,13 @@
             const avgScore = total > 0 ? Math.round(allContacts.reduce((sum, c) => sum + (c.engagement_score || 0), 0) / total) : 0;
 
             const snap = Array.isArray(revenue) && revenue[0] ? revenue[0] : {};
-            const monthlyRev = snap.monthly_revenue || snap.revenue || 0;
+            const snapshotRev = parseFloat(snap.monthly_revenue || snap.revenue || 0);
+
+            // Add completed offer_purchases revenue
+            const allPurchases = Array.isArray(purchases) ? purchases : [];
+            const completedPurchases = allPurchases.filter(p => p.payment_status === 'completed' || p.payment_status === 'paid');
+            const purchaseRevenue = completedPurchases.reduce((sum, p) => sum + ((parseInt(p.amount_cents) || 0) / 100), 0);
+            const monthlyRev = snapshotRev + purchaseRevenue;
             const snapDate = snap.snapshot_date || '';
 
             panel.innerHTML = `
