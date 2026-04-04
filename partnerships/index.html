@@ -825,11 +825,13 @@
                         </select>
                         <select id="filterStatus" class="form-input py-1 px-2 text-xs" style="width: auto;" onchange="applyPartnerFilters()">
                             <option value="all">All Statuses</option>
-                            <option value="active">Active</option>
-                            <option value="prospect">Prospect</option>
-                            <option value="negotiating">Negotiating</option>
-                            <option value="paused">Paused</option>
-                            <option value="closed">Closed</option>
+                            <option value="Discovered">Discovered</option>
+                            <option value="Identified">Identified</option>
+                            <option value="Active">Active</option>
+                            <option value="Prospect">Prospect</option>
+                            <option value="Negotiating">Negotiating</option>
+                            <option value="Paused">Paused</option>
+                            <option value="Closed">Closed</option>
                         </select>
                         <input type="text" id="partnerSearch" class="form-input py-1.5 text-xs" style="max-width: 240px;" placeholder="Search partners..." onkeydown="if(event.key==='Enter')applyPartnerFilters()">
                         <button onclick="applyPartnerFilters()" class="btn btn-ghost text-xs py-1.5 px-3">Search</button>
@@ -882,6 +884,19 @@
                 </div>
             </div>
 
+            <div class="panel mb-4" id="draftsSection">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M12 2H4a1.5 1.5 0 00-1.5 1.5v9A1.5 1.5 0 004 14h8a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0012 2z" stroke="#FFD93D" stroke-width="1.2"/><path d="M6 6h4M6 8.5h3" stroke="#FFD93D" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Drafts & Approvals</h2>
+                        <span class="badge" style="background: #FFD93D20; color: #FFD93D;" id="draftCount">--</span>
+                    </div>
+                </div>
+                <div class="panel-body" id="draftsBody">
+                    <div class="empty-state text-xs">Loading drafts...</div>
+                </div>
+            </div>
+
             <div class="panel">
                 <div class="panel-header">
                     <div class="flex items-center gap-2">
@@ -896,13 +911,14 @@
                                 <th onclick="sortOutreach('created_at')">Date <span class="sort-arrow">&#8597;</span></th>
                                 <th onclick="sortOutreach('partner_name')">Partner <span class="sort-arrow">&#8597;</span></th>
                                 <th onclick="sortOutreach('engagement_type')">Type <span class="sort-arrow">&#8597;</span></th>
+                                <th>Channel</th>
                                 <th>Subject</th>
                                 <th onclick="sortOutreach('status')">Status <span class="sort-arrow">&#8597;</span></th>
                                 <th>Response</th>
                             </tr>
                         </thead>
                         <tbody id="outreachBody">
-                            <tr><td colspan="6" class="empty-state"><div class="skeleton h-8 w-full mb-2"></div><div class="skeleton h-8 w-full mb-2"></div><div class="skeleton h-8 w-3/4"></div></td></tr>
+                            <tr><td colspan="7" class="empty-state"><div class="skeleton h-8 w-full mb-2"></div><div class="skeleton h-8 w-full mb-2"></div><div class="skeleton h-8 w-3/4"></div></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -936,6 +952,26 @@
                 <div class="empty-state col-span-full">Loading targeting criteria...</div>
             </div>
             <button onclick="openAddTargetingModal()" class="btn-secondary text-xs px-3 py-1.5 mt-2">+ Add Targeting Criteria</button>
+
+            <div class="panel mt-4">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#60A5FA" stroke-width="1.2"/><path d="M8 5v3l2 1.5" stroke="#60A5FA" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Recently Discovered Partners</h3>
+                        <span class="badge" style="background: #60A5FA20; color: #60A5FA;" id="discoveredCount">--</span>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="contact-table">
+                        <thead>
+                            <tr><th>Name</th><th>Type</th><th>Source</th><th>Discovered</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="discoveredPartnersBody">
+                            <tr><td colspan="5" class="empty-state text-xs">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
         <!-- VIEW: ENRICHMENT QUEUE -->
@@ -1150,6 +1186,63 @@
         </div>
     </div>
 
+    <!-- ADD TARGETING CRITERIA MODAL -->
+    <div class="modal-backdrop" id="addTargetingModal">
+        <div class="modal-content" style="max-width: 540px;">
+            <div class="panel-header">
+                <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Add Targeting Criteria</h3>
+                <button onclick="closeModal('addTargetingModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Criteria Name <span class="text-alert">*</span></label>
+                    <input type="text" id="tcName" class="form-input" placeholder="e.g., AI YouTubers 10K+">
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Engagement Type <span class="text-alert">*</span></label>
+                    <select id="tcEngType" class="form-input"></select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Min Audience Size</label>
+                        <input type="number" id="tcMinAudience" class="form-input" placeholder="e.g., 5000">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Max Audience Size</label>
+                        <input type="number" id="tcMaxAudience" class="form-input" placeholder="e.g., 500000">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Required Keywords</label>
+                    <input type="text" id="tcKeywords" class="form-input" placeholder="ai, automation, business (comma-separated)">
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Search Engines</label>
+                    <div class="flex flex-wrap gap-3 mt-1" id="tcEnginesWrap">
+                        <label class="flex items-center gap-1.5 text-xs cursor-pointer"><input type="checkbox" value="google" checked> Google</label>
+                        <label class="flex items-center gap-1.5 text-xs cursor-pointer"><input type="checkbox" value="youtube"> YouTube</label>
+                        <label class="flex items-center gap-1.5 text-xs cursor-pointer"><input type="checkbox" value="linkedin"> LinkedIn</label>
+                        <label class="flex items-center gap-1.5 text-xs cursor-pointer"><input type="checkbox" value="twitter"> Twitter</label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Max Daily Searches</label>
+                    <input type="number" id="tcMaxSearches" class="form-input" value="3" min="1" max="20">
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Niche Description</label>
+                    <textarea id="tcNiche" class="form-input" rows="2" placeholder="Optional: describe the target niche..."></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="submitTargetingCriteria()" class="btn btn-primary flex-1 py-2.5" id="tcSubmitBtn">Save Criteria</button>
+                    <button onclick="closeModal('addTargetingModal')" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="toast-container" id="toasts"></div>
 
     <script>
@@ -1170,10 +1263,19 @@
     };
     const STATUS_COLORS = {
         active: '#06D6A0',
+        Active: '#06D6A0',
         prospect: '#4CC9F0',
+        Prospect: '#4CC9F0',
         negotiating: '#FFD93D',
+        Negotiating: '#FFD93D',
         paused: '#8A95A9',
-        closed: '#525E73'
+        Paused: '#8A95A9',
+        closed: '#525E73',
+        Closed: '#525E73',
+        Discovered: '#60A5FA',
+        discovered: '#60A5FA',
+        Identified: '#60A5FA',
+        identified: '#60A5FA'
     };
     const TYPE_ICONS = {
         jv_partnership: '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3l7 4v6l-7 4-7-4V7l7-4z" stroke="currentColor" stroke-width="1.3"/><path d="M10 3v14M3 7l7 4 7-4" stroke="currentColor" stroke-width="1.3"/></svg>',
@@ -1236,6 +1338,13 @@
         el.textContent = message;
         container.appendChild(el);
         setTimeout(function() { el.style.opacity = '0'; setTimeout(function() { el.remove(); }, 300); }, 4000);
+    }
+
+    function deriveOutreachStatus(o) {
+        if (!o.sent_at) return 'draft';
+        if (o.response_status === 'bounced') return 'bounced';
+        if (o.response_status === 'received' || o.response_date) return 'replied';
+        return 'sent';
     }
 
     function openModal(id) { document.getElementById(id).classList.add('active'); }
@@ -1422,6 +1531,7 @@
             fetchOutreachLog(),
             fetchEngagements(),
             fetchTargetingCriteria(),
+            fetchPartnershipDrafts(),
         ]);
 
         computeStats();
@@ -1463,14 +1573,14 @@
         var pipelineFilter = document.getElementById('pipelineTypeFilter');
 
         var opts = '<option value="all">All Types</option>' + engagementTypes.map(function(t) {
-            return '<option value="' + esc(t.type_slug) + '">' + esc(t.display_name) + '</option>';
+            return '<option value="' + esc(t.type_key) + '">' + esc(t.display_name) + '</option>';
         }).join('');
 
         if (filterType) filterType.innerHTML = opts;
         if (pipelineFilter) pipelineFilter.innerHTML = opts;
 
         var apOpts = engagementTypes.map(function(t) {
-            return '<option value="' + esc(t.type_slug) + '">' + esc(t.display_name) + '</option>';
+            return '<option value="' + esc(t.type_key) + '">' + esc(t.display_name) + '</option>';
         }).join('');
         if (apType) apType.innerHTML = apOpts || '<option value="">No types configured</option>';
     }
@@ -1485,8 +1595,8 @@
         var sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
         var outreach7d = outreachLog.filter(function(o) { return o.created_at >= sevenDaysAgo; }).length;
 
-        var sentCount = outreachLog.filter(function(o) { return o.status === 'sent' || o.status === 'replied'; }).length;
-        var repliedCount = outreachLog.filter(function(o) { return o.status === 'replied'; }).length;
+        var sentCount = outreachLog.filter(function(o) { return deriveOutreachStatus(o) === 'sent' || deriveOutreachStatus(o) === 'replied'; }).length;
+        var repliedCount = outreachLog.filter(function(o) { return deriveOutreachStatus(o) === 'replied'; }).length;
         var responseRate = sentCount > 0 ? Math.round((repliedCount / sentCount) * 100) + '%' : '--';
 
         var pipelineValue = engagements.reduce(function(sum, e) {
@@ -1520,7 +1630,7 @@
         if (currentView === 'partners') renderPartners();
         if (currentView === 'discovery') renderDiscovery();
         if (currentView === 'enrichment') renderEnrichment();
-        if (currentView === 'outreach') renderOutreach();
+        if (currentView === 'outreach') { renderDrafts(); renderOutreach(); }
         if (currentView === 'pipeline') renderPipeline();
         if (currentView === 'types') renderTypes();
     }
@@ -1541,9 +1651,9 @@
         }
 
         container.innerHTML = engagementTypes.map(function(t) {
-            var typePartners = partners.filter(function(p) { return p.engagement_type === t.type_slug; });
-            var typeEngagements = engagements.filter(function(e) { return e.engagement_type === t.type_slug && e.status === 'active'; });
-            var icon = TYPE_ICONS[t.type_slug] || TYPE_ICONS.jv_partnership;
+            var typePartners = partners.filter(function(p) { return p.engagement_type === t.type_key; });
+            var typeEngagements = engagements.filter(function(e) { return e.engagement_type === t.type_key && e.status === 'active'; });
+            var icon = TYPE_ICONS[t.type_key] || TYPE_ICONS.jv_partnership;
             var color = t.accent_color || '#06D6A0';
 
             return '<div class="type-card">' +
@@ -1571,7 +1681,7 @@
                 date: o.created_at,
                 type: 'outreach',
                 text: (o.partner_name || 'Unknown') + ' - ' + (o.subject || 'Outreach'),
-                status: o.status
+                status: deriveOutreachStatus(o)
             });
         });
 
@@ -1642,7 +1752,7 @@
 
         var filtered = partners.filter(function(p) {
             if (typeFilter !== 'all' && p.engagement_type !== typeFilter) return false;
-            if (statusFilter !== 'all' && p.status !== statusFilter) return false;
+            if (statusFilter !== 'all' && (p.status || '').toLowerCase() !== statusFilter.toLowerCase()) return false;
             if (search && !(
                 (p.partner_name || '').toLowerCase().includes(search) ||
                 (p.company || '').toLowerCase().includes(search) ||
@@ -1682,19 +1792,31 @@
         var body = document.getElementById('outreachBody');
 
         if (!filtered.length) {
-            body.innerHTML = '<tr><td colspan="6" class="empty-state">No outreach records found</td></tr>';
+            body.innerHTML = '<tr><td colspan="7" class="empty-state">No outreach records found</td></tr>';
             return;
         }
 
-        body.innerHTML = filtered.map(function(o) {
-            var statusColor = { draft: '#FFD93D', sent: '#4CC9F0', replied: '#06D6A0', bounced: '#FF6B6B' }[o.status] || '#525E73';
-            return '<tr>' +
+        body.innerHTML = filtered.map(function(o, idx) {
+            var oSt = deriveOutreachStatus(o);
+            var statusColor = { draft: '#FFD93D', sent: '#4CC9F0', replied: '#06D6A0', bounced: '#FF6B6B' }[oSt] || '#525E73';
+            var channelLabel = (o.sent_via || '').replace('util-', '').replace(/_/g, ' ') || '--';
+            var hasDetail = o.response_summary || o.template_used;
+            return '<tr onclick="toggleOutreachDetail(' + idx + ')" style="cursor:pointer;" title="Click to expand">' +
                 '<td class="text-xs text-txt-3 whitespace-nowrap">' + formatDate(o.created_at) + '</td>' +
                 '<td class="font-medium">' + esc(o.partner_name || 'Unknown') + '</td>' +
                 '<td><span class="badge badge-domain">' + esc(getTypeName(o.engagement_type)) + '</span></td>' +
+                '<td class="text-xs text-txt-2">' + esc(channelLabel) + '</td>' +
                 '<td class="text-txt-2 truncate" style="max-width: 200px;">' + esc(o.subject || '--') + '</td>' +
-                '<td><span class="badge" style="background: ' + statusColor + '20; color: ' + statusColor + ';">' + esc(o.status || 'draft') + '</span></td>' +
+                '<td><span class="badge" style="background: ' + statusColor + '20; color: ' + statusColor + ';">' + esc(oSt) + '</span></td>' +
                 '<td class="text-xs text-txt-3 truncate" style="max-width: 160px;">' + esc(o.response_summary || '--') + '</td>' +
+            '</tr>' +
+            '<tr id="orDetail-' + idx + '" style="display:none;">' +
+                '<td colspan="7" style="background: var(--deft-surface-el); padding: 0.75rem 1rem;">' +
+                    (o.response_summary ? '<div class="text-xs text-txt-2 mb-2"><span class="font-medium text-txt">Response:</span> ' + esc(o.response_summary) + '</div>' : '') +
+                    (o.template_used ? '<div class="text-xs text-txt-3"><span class="font-medium">Template:</span> ' + esc(o.template_used) + '</div>' : '') +
+                    (o.contact_email ? '<div class="text-xs text-txt-3 mt-1"><span class="font-medium">To:</span> ' + esc(o.contact_email) + '</div>' : '') +
+                    (!hasDetail ? '<div class="text-xs text-txt-3">No additional details available</div>' : '') +
+                '</td>' +
             '</tr>';
         }).join('');
     }
@@ -1702,7 +1824,8 @@
     function updateOutreachCounts() {
         var counts = { all: outreachLog.length, draft: 0, sent: 0, replied: 0, bounced: 0 };
         outreachLog.forEach(function(o) {
-            if (counts[o.status] !== undefined) counts[o.status]++;
+            var s = deriveOutreachStatus(o);
+            if (counts[s] !== undefined) counts[s]++;
         });
         document.getElementById('orAll').textContent = counts.all;
         document.getElementById('orDraft').textContent = counts.draft;
@@ -1714,7 +1837,7 @@
     function getFilteredOutreach() {
         var filtered = outreachLog;
         if (outreachActiveFilter !== 'all') {
-            filtered = filtered.filter(function(o) { return o.status === outreachActiveFilter; });
+            filtered = filtered.filter(function(o) { return deriveOutreachStatus(o) === outreachActiveFilter; });
         }
 
         filtered.sort(function(a, b) {
@@ -1743,6 +1866,107 @@
             outreachSortDir = 'desc';
         }
         renderOutreach();
+    }
+
+    function toggleOutreachDetail(idx) {
+        var row = document.getElementById('orDetail-' + idx);
+        if (row) row.style.display = row.style.display === 'none' ? '' : 'none';
+    }
+
+    // ========================================
+    // DRAFTS & APPROVALS
+    // ========================================
+    let partnershipDrafts = [];
+
+    async function fetchPartnershipDrafts() {
+        var result = await prtnApi('list_drafts', { status: 'draft' });
+        if (result && result.success && Array.isArray(result.data)) {
+            partnershipDrafts = result.data;
+        } else if (result && Array.isArray(result.data)) {
+            partnershipDrafts = result.data;
+        } else {
+            partnershipDrafts = [];
+        }
+    }
+
+    function renderDrafts() {
+        var container = document.getElementById('draftsBody');
+        var countEl = document.getElementById('draftCount');
+        if (!container) return;
+
+        countEl.textContent = partnershipDrafts.length;
+
+        if (!partnershipDrafts.length) {
+            container.innerHTML = '<div class="empty-state text-xs">No drafts pending review</div>';
+            return;
+        }
+
+        container.innerHTML = partnershipDrafts.map(function(d) {
+            var ctx = d.context || {};
+            var content = d.content || {};
+            var partnerName = ctx.contact_name || ctx.company || 'Unknown';
+            var subject = content.subject || d.title || '--';
+            var body = content.body || '';
+            var typeName = getTypeName(ctx.engagement_type);
+            var destination = d.destination || ctx.email || '--';
+
+            return '<div style="border: 1px solid var(--deft-border); border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem; background: var(--deft-surface-el);">' +
+                '<div class="flex items-center justify-between mb-2">' +
+                    '<div class="flex items-center gap-2">' +
+                        '<span class="font-medium text-sm">' + esc(partnerName) + '</span>' +
+                        '<span class="badge badge-domain">' + esc(typeName) + '</span>' +
+                        '<span class="badge" style="background: #FFD93D20; color: #FFD93D;">draft</span>' +
+                    '</div>' +
+                    '<span class="text-xs text-txt-3">' + formatDate(d.created_at) + '</span>' +
+                '</div>' +
+                '<div class="text-sm font-medium mb-1">' + esc(subject) + '</div>' +
+                '<div class="text-xs text-txt-3 mb-2">To: ' + esc(destination) + '</div>' +
+                '<div class="text-xs text-txt-2 whitespace-pre-wrap mb-3" style="max-height: 160px; overflow-y: auto; line-height: 1.5; padding: 0.5rem; background: var(--deft-surface); border-radius: 0.375rem;">' +
+                    esc(body || 'No message body') +
+                '</div>' +
+                '<div class="flex gap-2">' +
+                    '<button onclick="approveDraft(\'' + d.id + '\')" class="btn btn-primary text-xs py-1.5 px-3">Approve & Send</button>' +
+                    '<button onclick="rejectDraft(\'' + d.id + '\')" class="btn btn-ghost text-xs py-1.5 px-3" style="color: var(--deft-danger, #FF6B6B);">Reject</button>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    async function approveDraft(draftId) {
+        if (!confirm('Approve and send this outreach email?')) return;
+        toast('Approving draft...', 'info');
+        var result = await prtnApi('approve_draft', { draft_id: draftId });
+        if (result && result.success) {
+            toast('Outreach approved and sent!', 'success');
+            await fetchPartnershipDrafts();
+            await fetchOutreachLog();
+            renderDrafts();
+            renderOutreach();
+        } else {
+            toast('Failed to approve: ' + ((result && result.error) || 'Unknown error'), 'error');
+        }
+    }
+
+    async function rejectDraft(draftId) {
+        if (!confirm('Reject this draft? It will be removed from the queue.')) return;
+        toast('Rejecting draft...', 'info');
+        // Update copy_drafts review_status to rejected via Supabase directly
+        try {
+            await fetch(SUPABASE_URL + '/rest/v1/copy_drafts?id=eq.' + draftId, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': 'Bearer ' + SUPABASE_KEY,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ review_status: 'rejected', updated_at: new Date().toISOString() })
+            });
+            toast('Draft rejected', 'success');
+            await fetchPartnershipDrafts();
+            renderDrafts();
+        } catch (e) {
+            toast('Failed to reject: ' + e.message, 'error');
+        }
     }
 
     // ========================================
@@ -1801,9 +2025,9 @@
         }
 
         grid.innerHTML = engagementTypes.map(function(t) {
-            var icon = TYPE_ICONS[t.type_slug] || TYPE_ICONS.jv_partnership;
+            var icon = TYPE_ICONS[t.type_key] || TYPE_ICONS.jv_partnership;
             var color = t.accent_color || '#06D6A0';
-            var partnerCount = partners.filter(function(p) { return p.engagement_type === t.type_slug; }).length;
+            var partnerCount = partners.filter(function(p) { return p.engagement_type === t.type_key; }).length;
             var isActive = t.is_active !== false;
 
             return '<div class="type-card">' +
@@ -1907,12 +2131,13 @@
         content += '<div class="panel"><div class="panel-header"><h3 class="font-heading font-semibold text-xs tracking-wide uppercase">Outreach History</h3><span class="badge badge-in_progress">' + partnerOutreach.length + '</span></div><div class="panel-body">';
         if (partnerOutreach.length) {
             content += partnerOutreach.map(function(o) {
-                var sc = { draft: '#FFD93D', sent: '#4CC9F0', replied: '#06D6A0', bounced: '#FF6B6B' }[o.status] || '#525E73';
+                var oSt = deriveOutreachStatus(o);
+                var sc = { draft: '#FFD93D', sent: '#4CC9F0', replied: '#06D6A0', bounced: '#FF6B6B' }[oSt] || '#525E73';
                 return '<div class="activity-item">' +
                     '<div class="activity-dot" style="background: ' + sc + ';"></div>' +
                     '<div class="flex-1"><div class="text-xs font-medium">' + esc(o.subject || 'Outreach') + '</div>' +
                     '<div class="flex items-center gap-2 mt-0.5"><span class="text-xs text-txt-3">' + formatDate(o.created_at) + '</span>' +
-                    '<span class="badge" style="background: ' + sc + '20; color: ' + sc + ';">' + esc(o.status) + '</span></div></div></div>';
+                    '<span class="badge" style="background: ' + sc + '20; color: ' + sc + ';">' + esc(oSt) + '</span></div></div></div>';
             }).join('');
         } else {
             content += '<div class="empty-state text-xs">No outreach history</div>';
@@ -2040,7 +2265,7 @@
     // HELPERS
     // ========================================
     function getTypeName(slug) {
-        var t = engagementTypes.find(function(et) { return et.type_slug === slug; });
+        var t = engagementTypes.find(function(et) { return et.type_key === slug; });
         return t ? t.display_name : (slug || '--');
     }
 
@@ -2111,6 +2336,27 @@
                     (tc.niche_description ? '<div class="text-txt-3 italic truncate" title="' + tc.niche_description.replace(/"/g, '&quot;') + '">' + tc.niche_description.substring(0, 120) + (tc.niche_description.length > 120 ? '...' : '') + '</div>' : '') +
                     '</div></div>';
             }).join('');
+
+            // Render recently discovered partners
+            var discovered = partners.filter(function(p) { return p.source === 'ai_discovery'; });
+            discovered.sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+            discovered = discovered.slice(0, 20);
+            document.getElementById('discoveredCount').textContent = discovered.length;
+
+            var dBody = document.getElementById('discoveredPartnersBody');
+            if (!discovered.length) {
+                dBody.innerHTML = '<tr><td colspan="5" class="empty-state text-xs">No partners discovered yet. Configure targeting criteria and run discovery.</td></tr>';
+            } else {
+                dBody.innerHTML = discovered.map(function(p) {
+                    return '<tr>' +
+                        '<td class="font-medium">' + esc(p.partner_name) + '</td>' +
+                        '<td><span class="badge badge-domain">' + esc(getTypeName(p.engagement_type)) + '</span></td>' +
+                        '<td class="text-xs text-txt-3">' + esc(p.discovery_source || p.source || '--') + '</td>' +
+                        '<td class="text-xs text-txt-3">' + formatDate(p.created_at) + '</td>' +
+                        '<td><button onclick="openDetailPanel(\'' + p.id + '\')" class="btn btn-ghost text-xs py-1 px-2">View</button></td>' +
+                    '</tr>';
+                }).join('');
+            }
         });
     }
 
@@ -2127,7 +2373,64 @@
     }
 
     function openAddTargetingModal() {
-        toast('Targeting criteria editor coming soon. Use the Engagement Types tab for now.', 'info');
+        var tcType = document.getElementById('tcEngType');
+        tcType.innerHTML = engagementTypes.map(function(t) {
+            return '<option value="' + esc(t.type_key) + '">' + esc(t.display_name) + '</option>';
+        }).join('');
+        if (!engagementTypes.length) tcType.innerHTML = '<option value="">No types configured</option>';
+        document.getElementById('tcName').value = '';
+        document.getElementById('tcMinAudience').value = '';
+        document.getElementById('tcMaxAudience').value = '';
+        document.getElementById('tcKeywords').value = '';
+        document.getElementById('tcMaxSearches').value = '3';
+        document.getElementById('tcNiche').value = '';
+        document.querySelectorAll('#tcEnginesWrap input[type="checkbox"]').forEach(function(cb) {
+            cb.checked = cb.value === 'google';
+        });
+        openModal('addTargetingModal');
+    }
+
+    async function submitTargetingCriteria() {
+        var name = document.getElementById('tcName').value.trim();
+        var engType = document.getElementById('tcEngType').value;
+        if (!name) { toast('Criteria name is required', 'error'); return; }
+        if (!engType) { toast('Select an engagement type', 'error'); return; }
+
+        var engines = [];
+        document.querySelectorAll('#tcEnginesWrap input[type="checkbox"]:checked').forEach(function(cb) {
+            engines.push(cb.value);
+        });
+
+        var keywords = document.getElementById('tcKeywords').value.split(',')
+            .map(function(k) { return k.trim(); }).filter(Boolean);
+
+        var btn = document.getElementById('tcSubmitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        var data = {
+            criteria_name: name,
+            engagement_type: engType,
+            min_audience_size: parseInt(document.getElementById('tcMinAudience').value) || null,
+            max_audience_size: parseInt(document.getElementById('tcMaxAudience').value) || null,
+            required_keywords: keywords,
+            search_engines: engines,
+            max_daily_searches: parseInt(document.getElementById('tcMaxSearches').value) || 3,
+            niche_description: document.getElementById('tcNiche').value.trim() || null,
+            is_active: true,
+        };
+
+        var result = await prtnApi('create_targeting', data);
+        if (result && result.success) {
+            toast('Targeting criteria created', 'success');
+            closeModal('addTargetingModal');
+            await fetchTargetingCriteria();
+            renderDiscovery();
+        } else {
+            toast('Failed to create criteria: ' + ((result && result.error) || 'Unknown error'), 'error');
+        }
+        btn.disabled = false;
+        btn.textContent = 'Save Criteria';
     }
 
     // ========================================
@@ -2157,7 +2460,7 @@
 
             // Summary counts
             var counts = { not_enriched: 0, enriching: 0, enriched: 0, enrichment_failed: 0 };
-            allPartners.forEach(function(p) {
+            partners.forEach(function(p) {
                 var s = p.enrichment_status || 'not_enriched';
                 if (counts[s] !== undefined) counts[s]++;
             });

@@ -1536,20 +1536,23 @@
     // ═══════════════════════════════════════
     async function fetchNotifications() {
         try {
-            const [compliance, outreach, copyDrafts, socialQueue] = await Promise.all([
+            const [compliance, outreach, copyDrafts, socialQueue, partnershipDrafts] = await Promise.all([
                 supabaseSelect('compliance_checks', 'select=id&status=eq.pending&limit=50').catch(() => null),
                 supabaseSelect('outreach_drafts', 'select=id&status=eq.pending_review&brand_id=eq.carlton&limit=50').catch(() => null),
                 supabaseSelect('copy_drafts', 'select=id&review_status=eq.pending&brand_id=eq.carlton&limit=50').catch(() => null),
                 supabaseSelect('social_content_queue', 'select=id&status=eq.pending_approval&brand_id=eq.carlton&limit=50').catch(() => null),
+                supabaseSelect('copy_drafts', 'select=id&requested_by=eq.prtn-draft&review_status=eq.draft&limit=50').catch(() => null),
             ]);
             const items = [];
             const cCount = Array.isArray(compliance) ? compliance.length : 0;
             const oCount = Array.isArray(outreach) ? outreach.length : 0;
             const cpCount = Array.isArray(copyDrafts) ? copyDrafts.length : 0;
             const sCount = Array.isArray(socialQueue) ? socialQueue.length : 0;
+            const pdCount = Array.isArray(partnershipDrafts) ? partnershipDrafts.length : 0;
 
             if (cCount > 0) items.push({ label: `${cCount} Compliance`, href: '/compliance', color: '#FF6B6B' });
             if (oCount > 0) items.push({ label: `${oCount} Outreach drafts`, href: '/crm', color: '#4CC9F0' });
+            if (pdCount > 0) items.push({ label: `${pdCount} Partnership drafts`, href: '/partnerships', color: '#06D6A0' });
             if (cpCount > 0) items.push({ label: `${cpCount} Copy reviews`, href: '/content', color: '#A855F7' });
             if (sCount > 0) items.push({ label: `${sCount} Social posts`, href: '/social-dashboard', color: '#FFD93D' });
 
