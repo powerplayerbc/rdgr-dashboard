@@ -199,6 +199,7 @@
                 <div class="flex items-center gap-3">
                     <div class="pulse-dot"></div>
                     <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <button class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Open menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
                     <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
                         <a href="/rdgr" class="nav-group-btn">Dashboard</a>
                         <div class="nav-group">
@@ -258,7 +259,6 @@
                         <div class="nav-group">
                             <a href="/trading-bot" class="nav-group-btn active">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
-                                <a href="/trading-desk">Trading Desk</a>
                                 <a href="/trading-bot">Bot Dashboard</a>
                                 <a href="/trading-strategies" class="active">Strategies</a>
                                 <a href="/trading-monitor">Monitor</a>
@@ -293,6 +293,79 @@
                     <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2" title="Settings"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
                 </div>
             </div>
+        
+        <!-- Mobile Nav Overlay -->
+        <div id="mobileNavOverlay">
+            <div class="mobile-nav-backdrop"></div>
+            <div class="mobile-nav-sidebar">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 1rem 0.75rem;">
+                    <span style="font-size:0.8rem;font-weight:700;color:var(--deft-txt,#E8ECF1);">Menu</span>
+                    <button class="mobile-nav-close" onclick="toggleMobileNav()">&times;</button>
+                </div>
+                <div class="mobile-nav-divider"></div>
+                <a href="/rdgr" class="mobile-nav-link">Dashboard</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Rodger <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/chat" class="mobile-nav-link">Rodger</a>
+    <a href="/council" class="mobile-nav-link">Council</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Outreach <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/crm" class="mobile-nav-link">CRM</a>
+    <a href="/email-outreach" class="mobile-nav-link">Email</a>
+    <a href="/social-dashboard" class="mobile-nav-link">Social</a>
+    <a href="/social-content" class="mobile-nav-link">Social Content</a>
+    <a href="/offer-studio" class="mobile-nav-link">Offers</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Finance <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/finance" class="mobile-nav-link">Dashboard</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Brand <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/brand-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/template-studio" class="mobile-nav-link">Templates</a>
+    <a href="/brand-documents" class="mobile-nav-link">Docs</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Policy <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/bsi-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/compliance" class="mobile-nav-link">Compliance</a>
+    <a href="/bsi-documents" class="mobile-nav-link">Documents</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Content <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/content" class="mobile-nav-link">Publishing</a>
+    <a href="/media" class="mobile-nav-link">Media</a>
+</div>
+<a href="/partnerships" class="mobile-nav-link">Partnerships</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">BRAIN <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/brain" class="mobile-nav-link">BRAIN</a>
+    <a href="/deft" class="mobile-nav-link">DEFT</a>
+</div>
+<button class="mobile-nav-group-btn active expanded" onclick="toggleMobileAccordion(this)">Trading <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children open">
+    <a href="/trading-bot" class="mobile-nav-link">Bot Dashboard</a>
+    <a href="/trading-strategies" class="mobile-nav-link active">Strategies</a>
+    <a href="/trading-monitor" class="mobile-nav-link">Monitor</a>
+    <a href="/trading-research" class="mobile-nav-link">Research</a>
+    <a href="/trading-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/trading-cross-pairs" class="mobile-nav-link">Cross-Pairs</a>
+    <a href="/trading-exchanges" class="mobile-nav-link">Exchanges</a>
+    <a href="/trading-config" class="mobile-nav-link">Config</a>
+    <a href="/trading-reports" class="mobile-nav-link">Reports</a>
+</div>
+<a href="/meetings" class="mobile-nav-link">Meetings</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">System <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/our-workflows" class="mobile-nav-link">Workflows</a>
+    <a href="/org-chart" class="mobile-nav-link">Org Map</a>
+    <a href="/hub" class="mobile-nav-link">HUB</a>
+</div>
+
+            </div>
+        </div>
         </nav>
         <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
 

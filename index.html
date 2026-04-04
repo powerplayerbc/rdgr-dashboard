@@ -98,6 +98,91 @@
             background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
             color: var(--deft-accent, #06D6A0) !important;
         }
+        /* ── Mobile Nav System ── */
+        .mobile-menu-btn {
+            display: none;
+            align-items: center; justify-content: center;
+            width: 32px; height: 32px;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.375rem;
+            background: transparent;
+            color: var(--deft-txt-2, #8A95A9);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            flex-shrink: 0;
+        }
+        .mobile-menu-btn:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        @media (max-width: 639px) { .mobile-menu-btn { display: flex; } }
+        #mobileNavOverlay {
+            position: fixed; inset: 0; z-index: 200;
+            display: none; opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        #mobileNavOverlay.open { display: flex; opacity: 1; }
+        .mobile-nav-backdrop {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.5);
+        }
+        .mobile-nav-sidebar {
+            position: relative; z-index: 1;
+            width: 280px; max-width: 85vw; height: 100vh;
+            background: var(--deft-base, #11131A);
+            border-right: 1px solid var(--deft-border, #2A2E3D);
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            padding: 0.75rem 0;
+        }
+        #mobileNavOverlay.open .mobile-nav-sidebar { transform: translateX(0); }
+        .mobile-nav-close {
+            display: flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px;
+            border: none; background: transparent;
+            color: var(--deft-txt-3, #525E73);
+            cursor: pointer; font-size: 1.1rem;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+        }
+        .mobile-nav-close:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link {
+            display: block;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.75rem; font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            transition: background 0.12s, color 0.12s;
+        }
+        .mobile-nav-link:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        .mobile-nav-group-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 0.5rem 1.25rem;
+            font-size: 0.75rem; font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            background: transparent; border: none;
+            cursor: pointer;
+            transition: background 0.12s, color 0.12s;
+            text-align: left;
+        }
+        .mobile-nav-group-btn:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-group-btn.active { color: var(--deft-accent, #06D6A0); }
+        .mobile-nav-group-btn .mn-chevron {
+            transition: transform 0.2s; opacity: 0.5;
+        }
+        .mobile-nav-group-btn.expanded .mn-chevron { transform: rotate(180deg); opacity: 0.8; }
+        .mobile-nav-children {
+            display: none;
+            padding-left: 1rem;
+        }
+        .mobile-nav-children.open { display: block; }
+        .mobile-nav-divider {
+            height: 1px;
+            background: var(--deft-border, #2A2E3D);
+            margin: 0.375rem 1rem;
+        }
         .btn-primary {
             background: var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
             color: var(--deft-accent, #06D6A0) !important;
@@ -778,6 +863,7 @@
                 <div class="flex items-center gap-3">
                     <div class="pulse-dot" id="systemPulse"></div>
                     <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <button class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Open menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
                     <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
                         <a href="/rdgr" class="nav-group-btn active">Dashboard</a>
                         <div class="nav-group">
@@ -837,7 +923,6 @@
                         <div class="nav-group">
                             <a href="/trading-bot" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
-                                <a href="/trading-desk">Trading Desk</a>
                                 <a href="/trading-bot">Bot Dashboard</a>
                                 <a href="/trading-strategies">Strategies</a>
                                 <a href="/trading-monitor">Monitor</a>
@@ -886,7 +971,86 @@
                     </button>
                 </div>
             </div>
+        
+        <!-- Mobile Nav Overlay -->
+        <div id="mobileNavOverlay">
+            <div class="mobile-nav-backdrop"></div>
+            <div class="mobile-nav-sidebar">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 1rem 0.75rem;">
+                    <span style="font-size:0.8rem;font-weight:700;color:var(--deft-txt,#E8ECF1);">Menu</span>
+                    <button class="mobile-nav-close" onclick="toggleMobileNav()">&times;</button>
+                </div>
+                <div class="mobile-nav-divider"></div>
+                <a href="/rdgr" class="mobile-nav-link active">Dashboard</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Rodger <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/chat" class="mobile-nav-link">Rodger</a>
+    <a href="/council" class="mobile-nav-link">Council</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Outreach <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/crm" class="mobile-nav-link">CRM</a>
+    <a href="/email-outreach" class="mobile-nav-link">Email</a>
+    <a href="/social-dashboard" class="mobile-nav-link">Social</a>
+    <a href="/social-content" class="mobile-nav-link">Social Content</a>
+    <a href="/offer-studio" class="mobile-nav-link">Offers</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Finance <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/finance" class="mobile-nav-link">Dashboard</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Brand <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/brand-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/template-studio" class="mobile-nav-link">Templates</a>
+    <a href="/brand-documents" class="mobile-nav-link">Docs</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Policy <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/bsi-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/compliance" class="mobile-nav-link">Compliance</a>
+    <a href="/bsi-documents" class="mobile-nav-link">Documents</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Content <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/content" class="mobile-nav-link">Publishing</a>
+    <a href="/media" class="mobile-nav-link">Media</a>
+</div>
+<a href="/partnerships" class="mobile-nav-link">Partnerships</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">BRAIN <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/brain" class="mobile-nav-link">BRAIN</a>
+    <a href="/deft" class="mobile-nav-link">DEFT</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Trading <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/trading-bot" class="mobile-nav-link">Bot Dashboard</a>
+    <a href="/trading-strategies" class="mobile-nav-link">Strategies</a>
+    <a href="/trading-monitor" class="mobile-nav-link">Monitor</a>
+    <a href="/trading-research" class="mobile-nav-link">Research</a>
+    <a href="/trading-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/trading-cross-pairs" class="mobile-nav-link">Cross-Pairs</a>
+    <a href="/trading-exchanges" class="mobile-nav-link">Exchanges</a>
+    <a href="/trading-config" class="mobile-nav-link">Config</a>
+    <a href="/trading-reports" class="mobile-nav-link">Reports</a>
+</div>
+<a href="/meetings" class="mobile-nav-link">Meetings</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">System <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/our-workflows" class="mobile-nav-link">Workflows</a>
+    <a href="/org-chart" class="mobile-nav-link">Org Map</a>
+    <a href="/hub" class="mobile-nav-link">HUB</a>
+</div>
+
+            </div>
+        </div>
         </nav>
+        <script>
+function toggleMobileNav(){var o=document.getElementById('mobileNavOverlay');if(o.classList.contains('open')){o.style.opacity='0';o.querySelector('.mobile-nav-sidebar').style.transform='translateX(-100%)';setTimeout(function(){o.classList.remove('open');o.style.display='none';},250);}else{o.style.display='flex';requestAnimationFrame(function(){o.classList.add('open');o.style.opacity='1';o.querySelector('.mobile-nav-sidebar').style.transform='translateX(0)';});}}
+function toggleMobileAccordion(btn){btn.classList.toggle('expanded');var ch=btn.nextElementSibling;ch.classList.toggle('open');}
+document.getElementById('mobileNavOverlay')?.querySelector('.mobile-nav-backdrop')?.addEventListener('click',function(){toggleMobileNav();});
+document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function(a){a.addEventListener('click',function(){toggleMobileNav();});});
+</script>
         <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
 
         <!-- ═══ DASHBOARD VIEW ═══ -->
@@ -1000,6 +1164,17 @@
                 <div class="panel-body" id="calendarPanel" style="max-height:360px;overflow-y:auto;">
                     <div class="empty-state">Loading content calendar...</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- ── Calendar Day Popup ── -->
+        <div id="calendarPopup" class="fixed inset-0 z-[200] hidden" style="display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);">
+            <div style="background:var(--deft-surface-el,#1A1D28);border:1px solid var(--deft-border,#2A2E3D);border-radius:0.75rem;padding:1rem;max-width:420px;width:90vw;max-height:70vh;overflow-y:auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+                    <h3 id="calPopupTitle" class="font-heading font-semibold text-sm" style="color:var(--deft-txt,#E8ECF1);"></h3>
+                    <button onclick="closeCalPopup()" style="color:var(--deft-txt-3,#525E73);cursor:pointer;background:none;border:none;font-size:1.2rem;line-height:1;">&times;</button>
+                </div>
+                <div id="calPopupBody"></div>
             </div>
         </div>
 
@@ -1597,7 +1772,7 @@
     async function fetchContentCalendar() {
         try {
             const result = await supabaseSelect('social_content_queue',
-                'select=id,title,content_text,platform,status,scheduled_at,created_at&brand_id=eq.carlton&order=scheduled_at.desc.nullslast,created_at.desc&limit=50'
+                'select=id,title,content_text,platform,status,scheduled_at,created_at,content_category&brand_id=eq.carlton&order=scheduled_at.desc.nullslast,created_at.desc&limit=50'
             );
             calendarData = Array.isArray(result) ? result : [];
             renderCalendar();
@@ -1647,8 +1822,9 @@
             const status = p.status || 'scheduled';
             const statusColor = status === 'approved' ? '#06D6A0' : status === 'pending_approval' ? '#FFD93D' : status === 'rejected' ? '#FF6B6B' : '#8A95A9';
             const title = p.title || p.content_text?.substring(0, 60) || '(Untitled)';
-            html += `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0;">
-                <span style="width:6px;height:6px;border-radius:50%;background:${color};flex-shrink:0;"></span>
+            const listDateKey = dt.toLocaleDateString('en-CA');
+            html += `<div onclick="openCalPopup('${listDateKey}')" style="display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0;cursor:pointer;">
+                <span style="width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;"></span>
                 <span style="font-size:0.6rem;font-weight:600;color:${color};min-width:55px;text-transform:capitalize;">${plat}</span>
                 <span style="font-size:0.65rem;color:var(--deft-txt,#E8ECF1);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(title)}</span>
                 <span style="font-size:0.55rem;padding:0.1rem 0.4rem;border-radius:9999px;background:${statusColor}1A;color:${statusColor};flex-shrink:0;">${status.replace(/_/g,' ')}</span>
@@ -1686,9 +1862,10 @@
             const posts = byDay[d] || [];
             const bg = isToday ? 'var(--deft-accent-dim, rgba(6,214,160,0.12))' : posts.length > 0 ? 'rgba(255,255,255,0.02)' : 'transparent';
             const border = isToday ? '1px solid var(--deft-accent,#06D6A0)' : '1px solid transparent';
-            html += `<div style="text-align:center;padding:0.25rem 0.15rem;border-radius:0.25rem;background:${bg};border:${border};cursor:${posts.length ? 'pointer' : 'default'};position:relative;" ${posts.length ? `title="${posts.length} post(s): ${posts.map(p=>(p.platform||'').substring(0,2)).join(', ')}"` : ''}>
+            const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            html += `<div onclick="openCalPopup('${dateKey}')" style="text-align:center;padding:0.25rem 0.15rem;border-radius:0.25rem;background:${bg};border:${border};cursor:pointer;position:relative;" ${posts.length ? `title="${posts.length} post(s): ${posts.map(p=>(p.platform||'').substring(0,2)).join(', ')}"` : ''}>
                 <div style="font-size:0.6rem;color:${isToday ? 'var(--deft-accent,#06D6A0)' : 'var(--deft-txt-2,#8A95A9)'};font-weight:${isToday ? '700' : '400'};">${d}</div>
-                ${posts.length > 0 ? `<div style="display:flex;justify-content:center;gap:2px;margin-top:1px;">${posts.slice(0,4).map(p => `<span style="width:4px;height:4px;border-radius:50%;background:${PLATFORM_COLORS[(p.platform||'blog').toLowerCase()] || '#8A95A9'};"></span>`).join('')}</div>` : ''}
+                ${posts.length > 0 ? `<div style="display:flex;justify-content:center;gap:3px;margin-top:1px;">${posts.slice(0,4).map(p => `<span style="width:7px;height:7px;border-radius:50%;background:${PLATFORM_COLORS[(p.platform||'blog').toLowerCase()] || '#8A95A9'};"></span>`).join('')}</div>` : ''}
             </div>`;
         }
         html += '</div>';
@@ -1717,7 +1894,7 @@
             const posts = byDay[key] || [];
             const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
             const dateLabel = d.getDate();
-            html += `<div style="border:1px solid ${isToday ? 'var(--deft-accent,#06D6A0)' : 'var(--deft-border,#2A2E3D)'};border-radius:0.375rem;padding:0.4rem;min-height:80px;background:${isToday ? 'var(--deft-accent-dim, rgba(6,214,160,0.06))' : 'transparent'};">
+            html += `<div onclick="openCalPopup('${key}')" style="cursor:pointer;border:1px solid ${isToday ? 'var(--deft-accent,#06D6A0)' : 'var(--deft-border,#2A2E3D)'};border-radius:0.375rem;padding:0.4rem;min-height:80px;background:${isToday ? 'var(--deft-accent-dim, rgba(6,214,160,0.06))' : 'transparent'};">
                 <div style="text-align:center;margin-bottom:0.3rem;">
                     <div style="font-size:0.55rem;color:var(--deft-txt-3,#525E73);font-weight:600;">${dayLabel}</div>
                     <div style="font-size:0.75rem;color:${isToday ? 'var(--deft-accent,#06D6A0)' : 'var(--deft-txt,#E8ECF1)'};font-weight:700;">${dateLabel}</div>
@@ -1726,13 +1903,59 @@
                 posts.slice(0,3).map(p => {
                     const plat = (p.platform || 'blog').toLowerCase();
                     const color = PLATFORM_COLORS[plat] || '#8A95A9';
-                    return `<div style="display:flex;align-items:center;gap:3px;margin-bottom:2px;"><span style="width:5px;height:5px;border-radius:50%;background:${color};flex-shrink:0;"></span><span style="font-size:0.5rem;color:var(--deft-txt-2,#8A95A9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${plat}</span></div>`;
+                    return `<div style="display:flex;align-items:center;gap:3px;margin-bottom:2px;"><span style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0;"></span><span style="font-size:0.5rem;color:var(--deft-txt-2,#8A95A9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${plat}</span></div>`;
                 }).join('') + (posts.length > 3 ? `<div style="font-size:0.5rem;color:var(--deft-txt-3,#525E73);text-align:center;">+${posts.length-3} more</div>` : '')}
             </div>`;
         });
         html += '</div>';
         panel.innerHTML = html;
     }
+
+    // ═══ CALENDAR DAY POPUP ═══
+    function openCalPopup(dateKey) {
+        const posts = calendarData.filter(p => {
+            const d = new Date(p.scheduled_at || p.created_at);
+            return d.toLocaleDateString('en-CA') === dateKey;
+        });
+        const dateLabel = new Date(dateKey + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        document.getElementById('calPopupTitle').textContent = dateLabel + ' (' + posts.length + ' post' + (posts.length !== 1 ? 's' : '') + ')';
+
+        let html = '';
+        if (posts.length === 0) {
+            html = '<div style="font-size:0.7rem;color:var(--deft-txt-3,#525E73);">No content scheduled for this day.</div>';
+        } else {
+            posts.forEach(p => {
+                const plat = (p.platform || 'blog').toLowerCase();
+                const color = PLATFORM_COLORS[plat] || '#8A95A9';
+                const time = p.scheduled_at ? new Date(p.scheduled_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : 'No time set';
+                const pillar = p.content_category || '--';
+                const title = p.title || (p.content_text ? p.content_text.substring(0, 80) : '(Untitled)');
+                html += '<div style="padding:0.5rem;border:1px solid var(--deft-border,#2A2E3D);border-radius:0.375rem;margin-bottom:0.4rem;">'
+                    + '<div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.25rem;">'
+                    + '<span style="width:8px;height:8px;border-radius:50%;background:' + color + ';flex-shrink:0;"></span>'
+                    + '<span style="font-size:0.7rem;font-weight:600;color:' + color + ';text-transform:capitalize;">' + esc(plat) + '</span>'
+                    + '<span style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);margin-left:auto;">' + time + '</span>'
+                    + '</div>'
+                    + '<div style="font-size:0.7rem;color:var(--deft-txt,#E8ECF1);margin-bottom:0.2rem;">' + esc(title) + '</div>'
+                    + '<div style="font-size:0.6rem;color:var(--deft-txt-2,#8A95A9);">Pillar: ' + esc(pillar) + '</div>'
+                    + '</div>';
+            });
+        }
+        document.getElementById('calPopupBody').innerHTML = html;
+        const popup = document.getElementById('calendarPopup');
+        popup.style.display = 'flex';
+        popup.classList.remove('hidden');
+    }
+
+    function closeCalPopup() {
+        const popup = document.getElementById('calendarPopup');
+        popup.style.display = 'none';
+        popup.classList.add('hidden');
+    }
+
+    document.getElementById('calendarPopup')?.addEventListener('click', function(e) {
+        if (e.target === this) closeCalPopup();
+    });
 
     function toggleAutoRefresh() {
         if (document.getElementById('autoRefreshToggle').checked) {
@@ -1791,7 +2014,7 @@
     async function fetchTaskQueue() {
         const [directiveTasks, legacyTasks] = await Promise.all([
             supabaseSelect('directive_tasks',
-                'select=task_id,directive_id,title,domain,status,human_action_type,description,sequence,created_at&brand_id=eq.carlton&order=created_at.desc&limit=100'),
+                'select=task_id,directive_id,title,domain,status,human_action_type,description,sequence,created_at&brand_id=eq.carlton&or=(requires_human.eq.false,requires_human.is.null)&order=created_at.desc&limit=100'),
             supabaseSelect('autonomous_task_queue',
                 'order=priority.asc,created_at.desc&limit=100')
         ]);
