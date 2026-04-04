@@ -961,7 +961,7 @@
                 <div class="pulse-dot"></div>
                 <h1 style="font-family: 'Chakra Petch', system-ui, sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.025em; color: #E8ECF1;">RDGR <span style="color: #525E73; font-weight: 400;">Command Center</span></h1>
                 <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
-                        <a href="/" class="nav-group-btn">Dashboard</a>
+                        <a href="/rdgr" class="nav-group-btn">Dashboard</a>
                         <div class="nav-group">
                             <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -977,6 +977,12 @@
                                 <a href="/social-dashboard">Social</a>
                                 <a href="/social-content">Social Content</a>
                                 <a href="/offer-studio">Offers</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/finance" class="nav-group-btn">Finance <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/finance">Dashboard</a>
                             </div>
                         </div>
                         <div class="nav-group">
@@ -1003,7 +1009,6 @@
                             </div>
                         </div>
                         <a href="/partnerships" class="nav-group-btn">Partnerships</a>
-                        <a href="/finance" class="nav-group-btn">Finance</a>
                         <div class="nav-group">
                             <a href="/brain" class="nav-group-btn active">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -1011,7 +1016,20 @@
                                 <a href="/deft">DEFT</a>
                             </div>
                         </div>
-                        <a href="/trading-research" class="nav-group-btn">Trading</a>
+                        <div class="nav-group">
+                            <a href="/trading-bot" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/trading-bot">Bot Dashboard</a>
+                                <a href="/trading-strategies">Strategies</a>
+                                <a href="/trading-monitor">Monitor</a>
+                                <a href="/trading-research">Research</a>
+                                <a href="/trading-discovery">Discovery</a>
+                                <a href="/trading-cross-pairs">Cross-Pairs</a>
+                                <a href="/trading-exchanges">Exchanges</a>
+                                <a href="/trading-config">Config</a>
+                                <a href="/trading-reports">Reports</a>
+                            </div>
+                        </div>
                         <a href="/meetings" class="nav-group-btn">Meetings</a>
                         <div class="nav-group">
                             <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
@@ -2442,6 +2460,7 @@ let categories = [];
 let dailySummary = null;
 let todayActivities = [];
 let realtimeChannels = [];
+let _dashboardLoading = false;
 let activityLogDate = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
 let webhookAvailable = false; // checked on init
 let settingsLoaded = false;
@@ -2515,17 +2534,21 @@ async function supabaseWrite(table, method, body, matchQuery = '') {
 // ═══════════════════════════════════════
 // BRAIN-BRIDGE API
 // ═══════════════════════════════════════
-async function brainApi(operation, data = {}, { silent = false } = {}) {
+async function brainApi(operation, data = {}, { silent = false, timeout = 10000 } = {}) {
     if (!activeProfileId) {
         if (!silent) toast('Please select a profile first', 'error');
         return null;
     }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
     try {
         const res = await fetch(BRAIN_BRIDGE_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ operation, user_id: activeProfileId, data })
+            body: JSON.stringify({ operation, user_id: activeProfileId, data }),
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
         const text = await res.text();
         if (!text) { console.warn(`brainApi(${operation}): empty response`); return null; }
         let result;
@@ -2539,6 +2562,11 @@ async function brainApi(operation, data = {}, { silent = false } = {}) {
         }
         return result;
     } catch (err) {
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') {
+            console.warn(`brainApi(${operation}): timed out after ${timeout}ms`);
+            return null;
+        }
         console.warn(`brainApi(${operation}) error:`, err.message);
         if (!silent) toast('Connection error', 'error');
         return null;
@@ -2887,14 +2915,18 @@ async function loadDashboardData() {
     const today = new Date().toLocaleDateString('en-CA');
 
     // Read directly from Supabase tables (reliable) — webhook used only for writes
-    const [profileRows, catRows, timerRows, scoreRows, activityRows, leaderboardResult] = await Promise.all([
+    const [profileRows, catRows, timerRows, scoreRows, activityRows] = await Promise.all([
         supabaseSelect('brain_user_profiles', `user_id=eq.${activeProfileId}&select=*`),
         supabaseSelect('brain_categories', `user_id=eq.${activeProfileId}&is_active=eq.true&order=sort_order&select=*`),
         supabaseSelect('brain_timers', `user_id=eq.${activeProfileId}&select=*`),
         supabaseSelect('brain_daily_scores', `user_id=eq.${activeProfileId}&score_date=eq.${today}&select=*`),
         supabaseSelect('brain_activities', `user_id=eq.${activeProfileId}&started_at=gte.${today}T00:00:00&started_at=lt.${today}T23:59:59&order=started_at.desc&select=*`),
-        brainApi('get_leaderboard', { period: 'week' }, { silent: true }),
     ]);
+
+    // Non-blocking leaderboard fetch (don't hold up the page)
+    brainApi('get_leaderboard', { period: 'week' }, { silent: true, timeout: 8000 })
+        .then(result => renderLeaderboardSnippet(result))
+        .catch(() => renderLeaderboardSnippet(null));
 
     // Profile
     const profile = (profileRows && profileRows[0]) || {};
@@ -2934,11 +2966,10 @@ async function loadDashboardData() {
         longest_streak: profile.longest_streak || 0,
     };
 
-    // Render everything
+    // Render everything (leaderboard renders async via its own .then())
     renderScoreRing();
     renderStreakBadge(streakInfo);
     renderLevelBadge(levelInfo);
-    renderLeaderboardSnippet(leaderboardResult);
     renderCategoryDonut();
     renderTodayActivities();
     renderQuickActions();
@@ -2974,8 +3005,11 @@ function switchView(view) {
         });
     }
 
-    // Lazy-load
-    if (view === 'dashboard') loadDashboardData();
+    // Lazy-load (debounce dashboard to prevent concurrent loads)
+    if (view === 'dashboard' && !_dashboardLoading) {
+        _dashboardLoading = true;
+        loadDashboardData().finally(() => { _dashboardLoading = false; });
+    }
     if (view === 'activities') loadActivities();
     if (view === 'settings' && !settingsLoaded) loadSettings();
     if (view === 'calendar') loadCalendarEvents();

@@ -387,6 +387,47 @@
         .btn-ghost:hover { background: rgba(255,255,255,0.03); color: #E8ECF1; }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.65rem; }
+        .btn-icon { padding: 0.3rem; line-height: 0; border-radius: 0.25rem; }
+
+        /* Quick action menu */
+        .quick-menu {
+            position: fixed; z-index: 110; min-width: 170px; padding: 0.375rem;
+            border-radius: 0.5rem; border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        .quick-menu-item {
+            display: block; width: 100%; text-align: left; padding: 0.4rem 0.625rem;
+            font-size: 0.7rem; font-weight: 500; color: var(--deft-txt-2, #8A95A9);
+            background: transparent; border: none; border-radius: 0.25rem;
+            cursor: pointer; transition: background 0.12s, color 0.12s;
+        }
+        .quick-menu-item:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        .quick-menu-item.text-danger { color: var(--deft-danger, #FF6B6B); }
+        .quick-menu-divider { border-top: 1px solid var(--deft-border, #2A2E3D); margin: 0.25rem 0; }
+
+        /* Transaction summary bar */
+        .txn-summary {
+            padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--deft-border, #2A2E3D);
+        }
+
+        /* Match candidate */
+        .match-candidate {
+            padding: 0.5rem 0.75rem; border-radius: 0.375rem; cursor: pointer;
+            border: 1px solid transparent; transition: all 0.15s;
+        }
+        .match-candidate:hover { background: rgba(255,255,255,0.04); border-color: var(--deft-border, #2A2E3D); }
+        .match-candidate.selected { background: rgba(6,214,160,0.08); border-color: rgba(6,214,160,0.3); }
+
+        /* Tab toggle */
+        .tab-toggle { display: flex; gap: 0; border-radius: 0.375rem; overflow: hidden; border: 1px solid var(--deft-border, #2A2E3D); }
+        .tab-toggle-btn {
+            flex: 1; padding: 0.4rem 0.75rem; font-size: 0.7rem; font-weight: 600;
+            background: transparent; color: var(--deft-txt-3, #525E73); border: none;
+            cursor: pointer; transition: all 0.15s; text-align: center;
+        }
+        .tab-toggle-btn.active { background: rgba(6,214,160,0.12); color: var(--deft-accent, #06D6A0); }
 
         /* Form inputs */
         .form-input {
@@ -597,7 +638,7 @@
                     <div class="pulse-dot"></div>
                     <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
                     <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
-                        <a href="/" class="nav-group-btn">Dashboard</a>
+                        <a href="/rdgr" class="nav-group-btn">Dashboard</a>
                         <div class="nav-group">
                             <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -644,6 +685,7 @@
                                 <a href="/media">Media</a>
                             </div>
                         </div>
+                        <a href="/partnerships" class="nav-group-btn">Partnerships</a>
                         <div class="nav-group">
                             <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -651,7 +693,20 @@
                                 <a href="/deft">DEFT</a>
                             </div>
                         </div>
-                        <div class="nav-group"><a href="/trading-bot" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a><div class="nav-dropdown"><a href="/trading-bot">Bot Dashboard</a><a href="/trading-strategies">Strategies</a><a href="/trading-monitor">Monitor</a><a href="/trading-research">Research</a><a href="/trading-discovery">Discovery</a><a href="/trading-cross-pairs">Cross-Pairs</a><a href="/trading-exchanges">Exchanges</a><a href="/trading-config">Config</a><a href="/trading-reports">Reports</a></div></div>
+                        <div class="nav-group">
+                            <a href="/trading-bot" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/trading-bot">Bot Dashboard</a>
+                                <a href="/trading-strategies">Strategies</a>
+                                <a href="/trading-monitor">Monitor</a>
+                                <a href="/trading-research">Research</a>
+                                <a href="/trading-discovery">Discovery</a>
+                                <a href="/trading-cross-pairs">Cross-Pairs</a>
+                                <a href="/trading-exchanges">Exchanges</a>
+                                <a href="/trading-config">Config</a>
+                                <a href="/trading-reports">Reports</a>
+                            </div>
+                        </div>
                         <a href="/meetings" class="nav-group-btn">Meetings</a>
                         <div class="nav-group">
                             <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
@@ -751,13 +806,6 @@
                     <div class="loading-bar w-full mb-3"></div>
                     <div class="loading-bar w-3/4 mb-3"></div>
                     <div class="loading-bar w-1/2"></div>
-                </div>
-            </div>
-            <div class="panel">
-                <div class="panel-header"><h3>Recent Sales (Offer Purchases)</h3></div>
-                <div class="panel-body" id="revSalesPanel">
-                    <div class="loading-bar w-full mb-3"></div>
-                    <div class="loading-bar w-3/4"></div>
                 </div>
             </div>
         </div>
@@ -1153,6 +1201,109 @@
         </div>
     </div>
 
+    <!-- QUICK ACTIONS DROPDOWN (positioned via JS) -->
+    <div id="txnQuickMenu" class="quick-menu hidden">
+        <button onclick="openCategorizeModal(currentTxnId)" class="quick-menu-item">Categorize / Create Record</button>
+        <button onclick="openNoteModal(currentTxnId)" class="quick-menu-item">Add Note</button>
+        <div class="quick-menu-divider"></div>
+        <button onclick="markReviewed(currentTxnId)" class="quick-menu-item">Mark as Reviewed</button>
+        <button onclick="ignoreTransaction(currentTxnId)" class="quick-menu-item text-danger">Ignore / Dismiss</button>
+    </div>
+
+    <!-- MATCH TRANSACTION MODAL -->
+    <div class="modal-backdrop" id="matchTransactionModal">
+        <div class="modal-content" style="max-width:560px;">
+            <div class="panel-header">
+                <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Match Transaction</h3>
+                <button onclick="closeModal('matchTransactionModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="txn-summary" id="matchTxnSummary"></div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Match Against</label>
+                    <div class="tab-toggle mb-3">
+                        <button onclick="switchMatchType('expense')" id="matchTabExpense" class="tab-toggle-btn active">Expenses</button>
+                        <button onclick="switchMatchType('invoice')" id="matchTabInvoice" class="tab-toggle-btn">Invoices</button>
+                    </div>
+                </div>
+                <div>
+                    <input type="text" id="matchSearch" class="form-input" placeholder="Search by description, vendor, or amount..." oninput="filterMatchCandidates(this.value)">
+                </div>
+                <div id="matchCandidatesList" style="max-height:220px;overflow-y:auto;" class="space-y-1">
+                    <div class="text-sm text-txt-3 text-center py-4">Loading candidates...</div>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Notes (optional)</label>
+                    <textarea id="matchNotes" class="form-input" rows="2" placeholder="Why are you matching these?"></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="submitMatch()" class="btn btn-primary flex-1 py-2.5" id="matchSubmitBtn" disabled>Confirm Match</button>
+                    <button onclick="closeModal('matchTransactionModal')" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CATEGORIZE TRANSACTION MODAL -->
+    <div class="modal-backdrop" id="categorizeTransactionModal">
+        <div class="modal-content" style="max-width:480px;">
+            <div class="panel-header">
+                <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Categorize Transaction</h3>
+                <button onclick="closeModal('categorizeTransactionModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="txn-summary" id="catTxnSummary"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Category <span class="text-alert">*</span></label>
+                        <select id="catCategory" class="form-input">
+                            <option value="">Select category...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Vendor / Customer</label>
+                        <input type="text" id="catCounterparty" class="form-input" placeholder="Name">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Notes</label>
+                    <textarea id="catNotes" class="form-input" rows="2" placeholder="Additional context (optional)"></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="submitCategorize()" class="btn btn-primary flex-1 py-2.5" id="catSubmitBtn">Categorize & Create Record</button>
+                    <button onclick="closeModal('categorizeTransactionModal')" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD NOTE MODAL -->
+    <div class="modal-backdrop" id="txnNoteModal">
+        <div class="modal-content" style="max-width:420px;">
+            <div class="panel-header">
+                <h3 class="font-heading font-semibold text-sm tracking-wide uppercase">Add Note</h3>
+                <button onclick="closeModal('txnNoteModal')" class="text-txt-3 hover:text-txt transition-colors">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="txn-summary" id="noteTxnSummary"></div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Note <span class="text-alert">*</span></label>
+                    <textarea id="txnNoteText" class="form-input" rows="3" placeholder="Enter your note about this transaction..."></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="submitTxnNote()" class="btn btn-primary flex-1 py-2.5" id="noteSubmitBtn">Save Note</button>
+                    <button onclick="closeModal('txnNoteModal')" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- TOAST CONTAINER -->
     <div class="toast-container" id="toasts"></div>
 
@@ -1177,6 +1328,14 @@
     let invoiceFilter = 'all';
     let parsedCSVRows = [];
     let expenseCategories = [];
+
+    // Reconciliation interaction state
+    let unmatchedTransactions = [];
+    let currentTxnId = null;
+    let matchCandidates = [];
+    let selectedMatchId = null;
+    let selectedMatchType = null;
+    let currentMatchTab = 'expense';
 
     // =======================================
     // HELPERS
@@ -1349,8 +1508,7 @@
         `;
 
         // Cash flow chart
-        const cfRaw = cashFlow?.data || cashFlow;
-        const cf = Array.isArray(cfRaw) ? cfRaw : [];
+        const cf = Array.isArray(cashFlow) ? cashFlow : [];
         if (cf.length === 0) {
             document.getElementById('ovCashFlowPanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No cash flow data available</div>';
             return;
@@ -1386,14 +1544,12 @@
     // REVENUE TAB
     // =======================================
     async function loadRevenue() {
-        const [transactions, cashFlow, pipeline, sales] = await Promise.all([
+        const [transactions, cashFlow, pipeline] = await Promise.all([
             sbSelect('bkai_transactions', 'brand_id=eq.carlton&amount=gt.0&select=counterparty,amount&order=amount.desc'),
             rpc('bkai_cash_flow', { p_brand_id: BRAND_ID, p_months: 12 }),
-            sbSelect('autonomous_revenue_pipeline', 'brand_id=eq.carlton&order=expected_value.desc&limit=20'),
-            sbSelect('offer_purchases', 'brand_id=eq.carlton&order=created_at.desc&limit=20&select=purchase_id,customer_email,customer_name,amount_cents,payment_status,offer_id,created_at')
+            sbSelect('autonomous_revenue_pipeline', 'brand_id=eq.carlton&order=expected_value.desc&limit=20')
         ]);
         renderRevenue(transactions, cashFlow, pipeline);
-        renderSales(sales);
     }
 
     function renderRevenue(transactions, cashFlow, pipeline) {
@@ -1423,9 +1579,8 @@
             `;
         }
 
-        // Monthly trend (RPC returns { data: [...] } wrapper)
-        const cfRaw = cashFlow?.data || cashFlow;
-        const cf = Array.isArray(cfRaw) ? cfRaw : [];
+        // Monthly trend
+        const cf = Array.isArray(cashFlow) ? cashFlow : [];
         if (cf.length === 0) {
             document.getElementById('revTrendPanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No trend data available</div>';
         } else {
@@ -1474,39 +1629,6 @@
                 </table>
             `;
         }
-    }
-
-    function renderSales(sales) {
-        const items = Array.isArray(sales) ? sales : [];
-        const panel = document.getElementById('revSalesPanel');
-        if (items.length === 0) {
-            panel.innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No sales recorded yet</div>';
-            return;
-        }
-        const statusBadge = s => {
-            const colors = { pending: 'badge-warning', completed: 'badge-success', paid: 'badge-success', failed: 'badge-danger', refunded: 'badge-neutral' };
-            return `<span class="badge ${colors[s] || 'badge-neutral'}">${esc(s || 'unknown')}</span>`;
-        };
-        const totalRevenue = items.filter(i => i.payment_status === 'completed' || i.payment_status === 'paid').reduce((sum, i) => sum + (parseInt(i.amount_cents) || 0), 0);
-        panel.innerHTML = `
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-xs text-txt-3">${items.length} sale(s)</span>
-                <span class="text-sm font-heading font-semibold" style="color:var(--deft-accent);">Total: ${fmtMoney(totalRevenue / 100)}</span>
-            </div>
-            <table class="data-table">
-                <thead><tr>
-                    <th>Customer</th><th>Amount</th><th>Status</th><th>Date</th>
-                </tr></thead>
-                <tbody>
-                    ${items.map(p => `<tr>
-                        <td class="text-xs">${esc(p.customer_name || p.customer_email || '--')}</td>
-                        <td class="text-xs font-heading font-semibold">$${((parseInt(p.amount_cents) || 0) / 100).toFixed(2)}</td>
-                        <td>${statusBadge(p.payment_status)}</td>
-                        <td class="text-xs text-txt-3">${p.created_at ? new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'America/Los_Angeles' }) : '--'}</td>
-                    </tr>`).join('')}
-                </tbody>
-            </table>
-        `;
     }
 
     // =======================================
@@ -1573,8 +1695,7 @@
     }
 
     function renderExpenseTrend(cashFlow) {
-        const cfRaw = cashFlow?.data || cashFlow;
-        const cf = Array.isArray(cfRaw) ? cfRaw : [];
+        const cf = Array.isArray(cashFlow) ? cashFlow : [];
         if (cf.length === 0) {
             document.getElementById('exTrendPanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">No trend data available</div>';
             return;
@@ -1799,22 +1920,33 @@
         document.getElementById('rcCoverage').textContent = (coverage * (coverage < 2 ? 100 : 1)).toFixed(1) + '%';
         document.getElementById('rcRecurring').textContent = recurringCount;
 
-        // Unmatched transactions
+        // Unmatched transactions (interactive)
         const unmatched = Array.isArray(s.recent_unmatched) ? s.recent_unmatched : [];
+        unmatchedTransactions = unmatched;
         if (unmatched.length === 0) {
             document.getElementById('rcUnmatchedPanel').innerHTML = '<div class="text-sm text-txt-3 text-center py-8">All transactions matched</div>';
         } else {
             document.getElementById('rcUnmatchedPanel').innerHTML = `
                 <div class="space-y-2">
-                    ${unmatched.slice(0, 10).map(t => `
-                        <div class="flex items-center gap-3 py-2 px-3 rounded" style="background:rgba(255,255,255,0.02);border:1px solid var(--deft-border);">
-                            <div class="flex-1">
-                                <div class="text-xs text-txt">${esc(t.description || '--')}</div>
+                    ${unmatched.slice(0, 10).map((t, i) => {
+                        const txnId = t.id || t.transaction_id || ('txn-' + i);
+                        return `
+                        <div class="flex items-center gap-2 py-2 px-3 rounded group" style="background:rgba(255,255,255,0.02);border:1px solid var(--deft-border);transition:background 0.15s;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='rgba(255,255,255,0.02)'">
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs text-txt truncate">${esc(t.description || '--')}</div>
                                 <div class="text-[0.65rem] text-txt-3">${fmtDate(t.transaction_date || t.date)} ${t.confidence ? '| Confidence: ' + (parseFloat(t.confidence) * 100).toFixed(0) + '%' : ''}</div>
                             </div>
-                            <span class="font-heading font-semibold text-sm ${parseFloat(t.amount) >= 0 ? 'text-accent' : 'text-warn'}">${fmtMoney(parseFloat(t.amount) || 0)}</span>
-                        </div>
-                    `).join('')}
+                            <span class="font-heading font-semibold text-sm whitespace-nowrap mr-1 ${parseFloat(t.amount) >= 0 ? 'text-accent' : 'text-warn'}">${fmtMoney(parseFloat(t.amount) || 0)}</span>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="event.stopPropagation();openMatchModal('${esc(txnId)}')" class="btn btn-sm btn-primary btn-icon" title="Match to record">
+                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6.5 3.5h-2a1 1 0 00-1 1v2m6-3h2a1 1 0 011 1v2m-6 6h-2a1 1 0 01-1-1v-2m6 3h2a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                                </button>
+                                <button onclick="event.stopPropagation();showQuickMenu('${esc(txnId)}', this)" class="btn btn-sm btn-ghost btn-icon" title="More actions">
+                                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="4" r="1" fill="currentColor"/><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="8" cy="12" r="1" fill="currentColor"/></svg>
+                                </button>
+                            </div>
+                        </div>`;
+                    }).join('')}
                 </div>
             `;
         }
@@ -1861,6 +1993,285 @@
                 </table>
             `;
         }
+    }
+
+    // =======================================
+    // RECONCILIATION INTERACTIONS
+    // =======================================
+
+    function getTxn(txnId) {
+        return unmatchedTransactions.find(t => (t.id || t.transaction_id) === txnId) || unmatchedTransactions.find((t, i) => ('txn-' + i) === txnId);
+    }
+
+    function renderTxnSummary(txn) {
+        if (!txn) return '<div class="text-txt-3 text-xs">Transaction not found</div>';
+        const amt = parseFloat(txn.amount) || 0;
+        return `<div class="flex items-center gap-3">
+            <div class="flex-1">
+                <div class="text-xs text-txt font-medium">${esc(txn.description || '--')}</div>
+                <div class="text-[0.65rem] text-txt-3">${fmtDate(txn.transaction_date || txn.date)}</div>
+            </div>
+            <span class="font-heading font-semibold text-sm ${amt >= 0 ? 'text-accent' : 'text-warn'}">${fmtMoney(amt)}</span>
+        </div>`;
+    }
+
+    // Quick actions menu
+    function showQuickMenu(txnId, btn) {
+        currentTxnId = txnId;
+        const menu = document.getElementById('txnQuickMenu');
+        const rect = btn.getBoundingClientRect();
+        menu.style.top = (rect.bottom + 4) + 'px';
+        menu.style.left = Math.min(rect.left, window.innerWidth - 180) + 'px';
+        menu.classList.remove('hidden');
+        setTimeout(() => document.addEventListener('click', closeQuickMenu, { once: true }), 10);
+    }
+
+    function closeQuickMenu() {
+        document.getElementById('txnQuickMenu').classList.add('hidden');
+    }
+
+    // Match modal
+    function openMatchModal(txnId) {
+        closeQuickMenu();
+        currentTxnId = txnId;
+        selectedMatchId = null;
+        selectedMatchType = null;
+        const txn = getTxn(txnId);
+        document.getElementById('matchTxnSummary').innerHTML = renderTxnSummary(txn);
+        document.getElementById('matchNotes').value = '';
+        document.getElementById('matchSearch').value = '';
+        document.getElementById('matchSubmitBtn').disabled = true;
+        currentMatchTab = 'expense';
+        document.getElementById('matchTabExpense').classList.add('active');
+        document.getElementById('matchTabInvoice').classList.remove('active');
+        openModal('matchTransactionModal');
+        loadMatchCandidates('expense');
+    }
+
+    function switchMatchType(type) {
+        currentMatchTab = type;
+        selectedMatchId = null;
+        selectedMatchType = null;
+        document.getElementById('matchSubmitBtn').disabled = true;
+        document.getElementById('matchSearch').value = '';
+        document.getElementById('matchTabExpense').classList.toggle('active', type === 'expense');
+        document.getElementById('matchTabInvoice').classList.toggle('active', type === 'invoice');
+        loadMatchCandidates(type);
+    }
+
+    async function loadMatchCandidates(type) {
+        const container = document.getElementById('matchCandidatesList');
+        container.innerHTML = '<div class="text-sm text-txt-3 text-center py-4">Loading...</div>';
+        if (type === 'expense') {
+            if (expenseTransactions.length === 0) {
+                expenseTransactions = await sbSelect('bkai_transactions', 'brand_id=eq.carlton&amount=lt.0&order=transaction_date.desc&limit=50');
+            }
+            matchCandidates = expenseTransactions.map(e => ({
+                id: e.id, type: 'expense',
+                description: e.description || e.counterparty || '--',
+                date: e.transaction_date,
+                amount: parseFloat(e.amount) || 0,
+                detail: e.category || e.account_name || ''
+            }));
+        } else {
+            if (invoiceList.length === 0) {
+                invoiceList = await sbSelect('bkai_invoices', 'brand_id=eq.carlton&order=created_at.desc&limit=50');
+            }
+            matchCandidates = invoiceList.map(inv => ({
+                id: inv.id, type: 'invoice',
+                description: inv.customer_name || inv.description || '--',
+                date: inv.due_date || inv.created_at?.slice(0, 10),
+                amount: parseFloat(inv.amount) || 0,
+                detail: inv.status || ''
+            }));
+        }
+        renderMatchCandidates(matchCandidates);
+    }
+
+    function filterMatchCandidates(search) {
+        const term = search.toLowerCase();
+        const filtered = matchCandidates.filter(c =>
+            (c.description || '').toLowerCase().includes(term) ||
+            (c.detail || '').toLowerCase().includes(term) ||
+            String(c.amount).includes(term)
+        );
+        renderMatchCandidates(filtered);
+    }
+
+    function renderMatchCandidates(candidates) {
+        const container = document.getElementById('matchCandidatesList');
+        if (candidates.length === 0) {
+            container.innerHTML = '<div class="text-sm text-txt-3 text-center py-4">No matching records found</div>';
+            return;
+        }
+        container.innerHTML = candidates.map(c => `
+            <div class="match-candidate flex items-center gap-3 ${selectedMatchId === c.id ? 'selected' : ''}"
+                 onclick="selectMatchCandidate('${c.id}', '${c.type}')">
+                <div class="flex-1 min-w-0">
+                    <div class="text-xs text-txt truncate">${esc(c.description)}</div>
+                    <div class="text-[0.65rem] text-txt-3">${fmtDate(c.date)} ${c.detail ? '| ' + esc(c.detail) : ''}</div>
+                </div>
+                <span class="font-heading font-semibold text-xs whitespace-nowrap ${c.amount >= 0 ? 'text-accent' : 'text-warn'}">${fmtMoney(c.amount)}</span>
+            </div>
+        `).join('');
+    }
+
+    function selectMatchCandidate(candidateId, candidateType) {
+        selectedMatchId = candidateId;
+        selectedMatchType = candidateType;
+        document.getElementById('matchSubmitBtn').disabled = false;
+        renderMatchCandidates(matchCandidates.filter(c => {
+            const term = document.getElementById('matchSearch').value.toLowerCase();
+            if (!term) return true;
+            return (c.description || '').toLowerCase().includes(term) || (c.detail || '').toLowerCase().includes(term) || String(c.amount).includes(term);
+        }));
+    }
+
+    async function submitMatch() {
+        if (!selectedMatchId || !currentTxnId) return;
+        const btn = document.getElementById('matchSubmitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Matching...';
+        try {
+            const res = await bkaiBridge('reconcile', {
+                mode: 'manual_match',
+                transaction_id: currentTxnId,
+                matched_to_id: selectedMatchId,
+                matched_to_type: selectedMatchType,
+                confidence: 1.0,
+                notes: document.getElementById('matchNotes').value.trim() || undefined
+            });
+            if (res && !res.error) {
+                toast('Transaction matched successfully', 'success');
+                closeModal('matchTransactionModal');
+                refreshReconciliation();
+            } else {
+                toast('Match failed: ' + (res?.error || res?.message || 'Unknown error'), 'error');
+            }
+        } catch (err) {
+            toast('Error: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Confirm Match';
+        }
+    }
+
+    // Categorize modal
+    async function openCategorizeModal(txnId) {
+        closeQuickMenu();
+        currentTxnId = txnId;
+        const txn = getTxn(txnId);
+        document.getElementById('catTxnSummary').innerHTML = renderTxnSummary(txn);
+        document.getElementById('catCounterparty').value = txn?.counterparty || '';
+        document.getElementById('catNotes').value = '';
+
+        // Load categories if not cached
+        const catSelect = document.getElementById('catCategory');
+        if (catSelect.options.length <= 1) {
+            if (expenseCategories.length === 0) {
+                expenseCategories = await sbSelect('bkai_chart_of_accounts', 'brand_id=eq.carlton&order=account_name');
+            }
+            catSelect.innerHTML = '<option value="">Select category...</option>' +
+                expenseCategories.map(c => `<option value="${esc(c.account_code)}">${esc(c.account_name)}</option>`).join('');
+        }
+        openModal('categorizeTransactionModal');
+    }
+
+    async function submitCategorize() {
+        const accountCode = document.getElementById('catCategory').value;
+        if (!accountCode) { toast('Please select a category', 'error'); return; }
+
+        const btn = document.getElementById('catSubmitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+        try {
+            const res = await bkaiBridge('reconcile', {
+                mode: 'categorize',
+                transaction_id: currentTxnId,
+                account_code: accountCode,
+                counterparty: document.getElementById('catCounterparty').value.trim() || undefined,
+                notes: document.getElementById('catNotes').value.trim() || undefined,
+                create_record: true
+            });
+            if (res && !res.error) {
+                toast('Transaction categorized', 'success');
+                closeModal('categorizeTransactionModal');
+                refreshReconciliation();
+            } else {
+                toast('Failed: ' + (res?.error || res?.message || 'Unknown error'), 'error');
+            }
+        } catch (err) {
+            toast('Error: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Categorize & Create Record';
+        }
+    }
+
+    // Note modal
+    function openNoteModal(txnId) {
+        closeQuickMenu();
+        currentTxnId = txnId;
+        const txn = getTxn(txnId);
+        document.getElementById('noteTxnSummary').innerHTML = renderTxnSummary(txn);
+        document.getElementById('txnNoteText').value = '';
+        openModal('txnNoteModal');
+    }
+
+    async function submitTxnNote() {
+        const note = document.getElementById('txnNoteText').value.trim();
+        if (!note) { toast('Please enter a note', 'error'); return; }
+
+        const btn = document.getElementById('noteSubmitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+        try {
+            const res = await bkaiBridge('reconcile', {
+                mode: 'add_note',
+                transaction_id: currentTxnId,
+                note: note
+            });
+            if (res && !res.error) {
+                toast('Note saved', 'success');
+                closeModal('txnNoteModal');
+            } else {
+                toast('Failed: ' + (res?.error || res?.message || 'Unknown error'), 'error');
+            }
+        } catch (err) {
+            toast('Error: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Save Note';
+        }
+    }
+
+    // Mark reviewed / ignore
+    async function markReviewed(txnId) {
+        closeQuickMenu();
+        const res = await bkaiBridge('reconcile', { mode: 'mark_reviewed', transaction_id: txnId || currentTxnId, status: 'reviewed' });
+        if (res && !res.error) {
+            toast('Transaction marked as reviewed', 'success');
+            refreshReconciliation();
+        } else {
+            toast('Failed: ' + (res?.error || res?.message || 'Unknown error'), 'error');
+        }
+    }
+
+    async function ignoreTransaction(txnId) {
+        closeQuickMenu();
+        const res = await bkaiBridge('reconcile', { mode: 'mark_reviewed', transaction_id: txnId || currentTxnId, status: 'ignored' });
+        if (res && !res.error) {
+            toast('Transaction dismissed', 'success');
+            refreshReconciliation();
+        } else {
+            toast('Failed: ' + (res?.error || res?.message || 'Unknown error'), 'error');
+        }
+    }
+
+    function refreshReconciliation() {
+        tabLoaded.reconciliation = false;
+        tabLoaded.overview = false;
+        switchTab('reconciliation');
     }
 
     // =======================================

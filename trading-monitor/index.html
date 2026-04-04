@@ -189,6 +189,7 @@
         }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -584,7 +585,7 @@
                     <div class="pulse-dot"></div>
                     <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
                     <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
-                        <a href="/" class="nav-group-btn active">Dashboard</a>
+                        <a href="/rdgr" class="nav-group-btn">Dashboard</a>
                         <div class="nav-group">
                             <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -600,6 +601,12 @@
                                 <a href="/social-dashboard">Social</a>
                                 <a href="/social-content">Social Content</a>
                                 <a href="/offer-studio">Offers</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/finance" class="nav-group-btn">Finance <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/finance">Dashboard</a>
                             </div>
                         </div>
                         <div class="nav-group">
@@ -626,7 +633,6 @@
                             </div>
                         </div>
                         <a href="/partnerships" class="nav-group-btn">Partnerships</a>
-                        <a href="/finance" class="nav-group-btn">Finance</a>
                         <div class="nav-group">
                             <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -634,7 +640,20 @@
                                 <a href="/deft">DEFT</a>
                             </div>
                         </div>
-                        <a href="/trading-research" class="nav-group-btn">Trading</a>
+                        <div class="nav-group">
+                            <a href="/trading-bot" class="nav-group-btn active">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/trading-bot">Bot Dashboard</a>
+                                <a href="/trading-strategies">Strategies</a>
+                                <a href="/trading-monitor" class="active">Monitor</a>
+                                <a href="/trading-research">Research</a>
+                                <a href="/trading-discovery">Discovery</a>
+                                <a href="/trading-cross-pairs">Cross-Pairs</a>
+                                <a href="/trading-exchanges">Exchanges</a>
+                                <a href="/trading-config">Config</a>
+                                <a href="/trading-reports">Reports</a>
+                            </div>
+                        </div>
                         <a href="/meetings" class="nav-group-btn">Meetings</a>
                         <div class="nav-group">
                             <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
@@ -688,6 +707,7 @@
                 <button class="top-tab active" onclick="switchTab('liveMonitor')" id="tabLiveMonitor">
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M6 3.5V6l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
                     Live Monitor
+                    <span id="realtimeStatus" class="text-xs font-mono ml-1" style="color: var(--deft-txt-3); font-size: 0.6rem;">POLLING</span>
                 </button>
                 <button class="top-tab" onclick="switchTab('riskControls')" id="tabRiskControls">
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l5 3v4c0 2.5-2.2 4.3-5 5-2.8-.7-5-2.5-5-5V4l5-3z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1001,6 +1021,71 @@
     let activeProfileId = null;
     let gateSelectedProfile = null;
     try { activeProfileId = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}').id; } catch(e) {}
+
+    // ═══════════════════════════════════════
+    // SUPABASE REALTIME
+    // ═══════════════════════════════════════
+    let supabaseClient = null;
+    let realtimeChannel = null;
+
+    function initSupabaseRealtime() {
+        if (typeof supabase === 'undefined' || !supabase.createClient) {
+            console.warn('Supabase client not loaded, falling back to polling only');
+            return;
+        }
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        realtimeChannel = supabaseClient.channel('bot-live')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bot_metrics' }, payload => {
+                const row = payload.new;
+                if (row.brand_id !== BRAND_ID) return;
+                updateRiskMetrics({
+                    equity: Number(row.equity),
+                    peak_equity: Number(row.peak_equity),
+                    drawdown_pct: Number(row.drawdown_pct),
+                    open_positions: row.open_positions,
+                    daily_pnl: Number(row.daily_pnl),
+                    consecutive_losses: 0,
+                    circuit_breaker: { level: row.bot_status || 'normal', can_trade: !row.circuit_breaker, position_scale: row.circuit_breaker ? 0 : 1 },
+                    today: { total_pnl: Number(row.daily_pnl), total_trades: row.total_trades_today, win_rate: Number(row.win_rate) || 0 },
+                    mode: row.mode,
+                });
+                // Update header equity display
+                const eqEl = document.getElementById('headerEquity');
+                if (eqEl) eqEl.textContent = '$' + Number(row.equity).toFixed(2);
+            })
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bot_trades' }, payload => {
+                const row = payload.new;
+                if (row.brand_id !== BRAND_ID) return;
+                // Prepend to trade feed
+                recentTrades.unshift(row);
+                if (recentTrades.length > 50) recentTrades.pop();
+                renderTradeFeed(recentTrades);
+                toast(`Trade: ${row.pair} ${row.side} PnL: $${Number(row.pnl || 0).toFixed(2)}`, row.pnl >= 0 ? 'success' : 'error');
+            })
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bot_events' }, payload => {
+                const row = payload.new;
+                if (row.brand_id !== BRAND_ID) return;
+                if (row.severity === 'critical' || row.severity === 'warning') {
+                    toast(row.message, row.severity === 'critical' ? 'error' : 'warning');
+                }
+            })
+            .subscribe(status => {
+                const indicator = document.getElementById('realtimeStatus');
+                if (indicator) {
+                    if (status === 'SUBSCRIBED') {
+                        indicator.textContent = 'LIVE';
+                        indicator.style.color = 'var(--deft-success)';
+                    } else {
+                        indicator.textContent = 'CONNECTING...';
+                        indicator.style.color = 'var(--deft-warning)';
+                    }
+                }
+            });
+
+        // Slow down polling since Realtime handles live updates
+        if (metricsTimer) { clearInterval(metricsTimer); metricsTimer = setInterval(loadMetrics, 300000); }
+    }
 
     // ═══════════════════════════════════════
     // UTILITIES
@@ -1856,6 +1941,7 @@
     // ═══════════════════════════════════════
     function initPage() {
         startPolling();
+        initSupabaseRealtime();
         // Also render positions from strategies data on first load
         setTimeout(() => {
             if (strategiesData) renderPositions(strategiesData);

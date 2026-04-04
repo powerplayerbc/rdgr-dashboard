@@ -779,7 +779,7 @@
                     <div class="pulse-dot" id="systemPulse"></div>
                     <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
                     <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
-                        <a href="/" class="nav-group-btn active">Dashboard</a>
+                        <a href="/rdgr" class="nav-group-btn active">Dashboard</a>
                         <div class="nav-group">
                             <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -795,6 +795,12 @@
                                 <a href="/social-dashboard">Social</a>
                                 <a href="/social-content">Social Content</a>
                                 <a href="/offer-studio">Offers</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/finance" class="nav-group-btn">Finance <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/finance">Dashboard</a>
                             </div>
                         </div>
                         <div class="nav-group">
@@ -821,7 +827,6 @@
                             </div>
                         </div>
                         <a href="/partnerships" class="nav-group-btn">Partnerships</a>
-                        <a href="/finance" class="nav-group-btn">Finance</a>
                         <div class="nav-group">
                             <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -829,7 +834,20 @@
                                 <a href="/deft">DEFT</a>
                             </div>
                         </div>
-                        <a href="/trading-research" class="nav-group-btn">Trading</a>
+                        <div class="nav-group">
+                            <a href="/trading-bot" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/trading-bot">Bot Dashboard</a>
+                                <a href="/trading-strategies">Strategies</a>
+                                <a href="/trading-monitor">Monitor</a>
+                                <a href="/trading-research">Research</a>
+                                <a href="/trading-discovery">Discovery</a>
+                                <a href="/trading-cross-pairs">Cross-Pairs</a>
+                                <a href="/trading-exchanges">Exchanges</a>
+                                <a href="/trading-config">Config</a>
+                                <a href="/trading-reports">Reports</a>
+                            </div>
+                        </div>
                         <a href="/meetings" class="nav-group-btn">Meetings</a>
                         <div class="nav-group">
                             <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
@@ -984,21 +1002,6 @@
             </div>
         </div>
 
-        <!-- ── Sales & Revenue Metrics ── -->
-        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
-            <div class="panel">
-                <div class="panel-header">
-                    <div class="flex items-center gap-2">
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M4 3.5h4.5a2 2 0 010 4H4M4 7.5h5a2 2 0 010 4H4" stroke="#06D6A0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Sales & Revenue</h2>
-                    </div>
-                </div>
-                <div class="panel-body" id="salesMetricsPanel">
-                    <div class="empty-state">Loading sales metrics...</div>
-                </div>
-            </div>
-        </div>
-
         <!-- ── Directive Approvals ── -->
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
             <div class="panel">
@@ -1053,7 +1056,13 @@
                         <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Human Tasks</h2>
                         <span class="badge badge-human ml-1" id="humanTasksCount">0</span>
                     </div>
-                    <span class="text-xs text-txt-3 font-mono">Requires your action</span>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <button class="btn btn-ghost text-xs py-0.5 px-2 active" id="htf-all" onclick="setHumanTaskFilter('all')">All</button>
+                        <button class="btn btn-ghost text-xs py-0.5 px-2" id="htf-hub" onclick="setHumanTaskFilter('hub')">HUB</button>
+                        <button class="btn btn-ghost text-xs py-0.5 px-2" id="htf-content" onclick="setHumanTaskFilter('content')">Content</button>
+                        <button class="btn btn-ghost text-xs py-0.5 px-2" id="htf-social" onclick="setHumanTaskFilter('social')">Social</button>
+                        <button class="btn btn-ghost text-xs py-0.5 px-2" id="htf-outreach" onclick="setHumanTaskFilter('outreach')">Outreach</button>
+                    </div>
                 </div>
                 <div class="panel-body" id="humanTasksPanel">
                     <div class="empty-state">
@@ -1353,6 +1362,8 @@
         directiveAction: 'https://n8n.carltonaiservices.com/webhook/rdgr-directive-action',
         complete: 'https://n8n.carltonaiservices.com/webhook/rdgr-complete',
         humanAction: 'https://n8n.carltonaiservices.com/webhook/human-action',
+        hubApprovalQueue: 'https://n8n.carltonaiservices.com/webhook/hub-approval-queue',
+        hubApprovalAction: 'https://n8n.carltonaiservices.com/webhook/hub-approval-action',
         crm: 'https://n8n.carltonaiservices.com/webhook/rdgr-crm',
         social: 'https://n8n.carltonaiservices.com/webhook/rdgr-tool-social',
         revenue: 'https://n8n.carltonaiservices.com/webhook/rdgr-revenue',
@@ -1390,6 +1401,8 @@
     let directiveHistory = [];
     let activeDirectives = [];
     let humanTasksData = [];
+    let humanTaskDisplayLimit = 5;
+    let humanTaskFilter = 'all';
     let currentHumanTaskIdx = null;
     let autoRefreshInterval = null;
     let currentModifyTaskId = null;
@@ -1542,20 +1555,23 @@
     // ═══════════════════════════════════════
     async function fetchNotifications() {
         try {
-            const [compliance, outreach, copyDrafts, socialQueue] = await Promise.all([
+            const [compliance, outreach, copyDrafts, socialQueue, partnershipDrafts] = await Promise.all([
                 supabaseSelect('compliance_checks', 'select=id&status=eq.pending&limit=50').catch(() => null),
                 supabaseSelect('outreach_drafts', 'select=id&status=eq.pending_review&brand_id=eq.carlton&limit=50').catch(() => null),
                 supabaseSelect('copy_drafts', 'select=id&review_status=eq.pending&brand_id=eq.carlton&limit=50').catch(() => null),
                 supabaseSelect('social_content_queue', 'select=id&status=eq.pending_approval&brand_id=eq.carlton&limit=50').catch(() => null),
+                supabaseSelect('copy_drafts', 'select=id&requested_by=eq.prtn-draft&review_status=eq.draft&limit=50').catch(() => null),
             ]);
             const items = [];
             const cCount = Array.isArray(compliance) ? compliance.length : 0;
             const oCount = Array.isArray(outreach) ? outreach.length : 0;
             const cpCount = Array.isArray(copyDrafts) ? copyDrafts.length : 0;
             const sCount = Array.isArray(socialQueue) ? socialQueue.length : 0;
+            const pdCount = Array.isArray(partnershipDrafts) ? partnershipDrafts.length : 0;
 
             if (cCount > 0) items.push({ label: `${cCount} Compliance`, href: '/compliance', color: '#FF6B6B' });
             if (oCount > 0) items.push({ label: `${oCount} Outreach drafts`, href: '/crm', color: '#4CC9F0' });
+            if (pdCount > 0) items.push({ label: `${pdCount} Partnership drafts`, href: '/partnerships', color: '#06D6A0' });
             if (cpCount > 0) items.push({ label: `${cpCount} Copy reviews`, href: '/content', color: '#A855F7' });
             if (sCount > 0) items.push({ label: `${sCount} Social posts`, href: '/social-dashboard', color: '#FFD93D' });
 
@@ -1717,63 +1733,6 @@
         panel.innerHTML = html;
     }
 
-    // ═══════════════════════════════════════
-    // SALES & REVENUE METRICS
-    // ═══════════════════════════════════════
-    async function fetchSalesMetrics() {
-        const panel = document.getElementById('salesMetricsPanel');
-        try {
-            const [contacts, revenue] = await Promise.all([
-                supabaseSelect('unified_contacts', 'select=lifecycle_stage,engagement_score&merged_into=is.null'),
-                supabaseSelect('autonomous_financial_snapshots', 'order=snapshot_date.desc&limit=1'),
-            ]);
-
-            const allContacts = Array.isArray(contacts) ? contacts : [];
-            const total = allContacts.length;
-            const customers = allContacts.filter(c => c.lifecycle_stage === 'customer').length;
-            const pipeline = allContacts.filter(c => ['mql','sql','opportunity'].includes(c.lifecycle_stage)).length;
-            const convRate = total > 0 ? ((customers / total) * 100).toFixed(1) : '0.0';
-            const avgScore = total > 0 ? Math.round(allContacts.reduce((sum, c) => sum + (c.engagement_score || 0), 0) / total) : 0;
-
-            const snap = Array.isArray(revenue) && revenue[0] ? revenue[0] : {};
-            const monthlyRev = snap.monthly_revenue || snap.revenue || 0;
-            const snapDate = snap.snapshot_date || '';
-
-            panel.innerHTML = `
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.75rem;">
-                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.15);">
-                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Total Contacts</div>
-                        <div style="font-size:1.3rem;font-weight:700;color:var(--deft-txt,#E8ECF1);font-family:var(--deft-heading-font,'Chakra Petch');">${total}</div>
-                    </div>
-                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(76,201,240,0.06);border:1px solid rgba(76,201,240,0.15);">
-                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">In Pipeline</div>
-                        <div style="font-size:1.3rem;font-weight:700;color:#4CC9F0;font-family:var(--deft-heading-font,'Chakra Petch');">${pipeline}</div>
-                    </div>
-                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15);">
-                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Customers</div>
-                        <div style="font-size:1.3rem;font-weight:700;color:#A855F7;font-family:var(--deft-heading-font,'Chakra Petch');">${customers}</div>
-                    </div>
-                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(255,217,61,0.06);border:1px solid rgba(255,217,61,0.15);">
-                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Conversion</div>
-                        <div style="font-size:1.3rem;font-weight:700;color:#FFD93D;font-family:var(--deft-heading-font,'Chakra Petch');">${convRate}%</div>
-                    </div>
-                    <div style="padding:0.6rem;border-radius:0.5rem;background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.15);">
-                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Avg Engagement</div>
-                        <div style="font-size:1.3rem;font-weight:700;color:var(--deft-accent,#06D6A0);font-family:var(--deft-heading-font,'Chakra Petch');">${avgScore}</div>
-                    </div>
-                    ${monthlyRev ? `<div style="padding:0.6rem;border-radius:0.5rem;background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.15);">
-                        <div style="font-size:0.6rem;color:var(--deft-txt-3,#525E73);text-transform:uppercase;font-weight:600;letter-spacing:0.04em;">Monthly Revenue</div>
-                        <div style="font-size:1.3rem;font-weight:700;color:var(--deft-accent,#06D6A0);font-family:var(--deft-heading-font,'Chakra Petch');">$${Number(monthlyRev).toLocaleString()}</div>
-                        ${snapDate ? `<div style="font-size:0.5rem;color:var(--deft-txt-3,#525E73);margin-top:0.15rem;">as of ${snapDate}</div>` : ''}
-                    </div>` : ''}
-                </div>
-            `;
-        } catch (err) {
-            console.warn('Sales metrics fetch error:', err);
-            panel.innerHTML = '<div class="empty-state">Could not load sales metrics.</div>';
-        }
-    }
-
     function toggleAutoRefresh() {
         if (document.getElementById('autoRefreshToggle').checked) {
             startAutoRefresh();
@@ -1822,7 +1781,6 @@
             fetchHumanTasks(),
             fetchNotifications(),
             fetchContentCalendar(),
-            fetchSalesMetrics(),
         ]);
 
         document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString();
@@ -1934,11 +1892,44 @@
     // HUMAN TASKS
     // ═══════════════════════════════════════
     async function fetchHumanTasks() {
-        let result = await supabaseSelect(
-            'directive_tasks',
-            'select=task_id,directive_id,title,domain,status,human_action_type,description,parameters,expected_output,created_at&requires_human=eq.true&status=in.(pending,in_progress)&brand_id=eq.carlton&order=created_at.desc'
-        );
+        // Fetch directive_tasks and hub approvals in parallel
+        const [result, hubResult] = await Promise.all([
+            supabaseSelect(
+                'directive_tasks',
+                'select=task_id,directive_id,title,domain,status,human_action_type,description,parameters,expected_output,created_at&requires_human=eq.true&status=in.(pending,in_progress)&brand_id=eq.carlton&order=created_at.desc'
+            ),
+            fetch(API.hubApprovalQueue + '?status=pending_review').then(r => r.json()).catch(() => null)
+        ]);
         humanTasksData = Array.isArray(result) ? result : [];
+        humanTaskDisplayLimit = 5;
+
+        // Merge hub approvals as human tasks
+        const hubItems = hubResult?.items || (Array.isArray(hubResult) ? hubResult : []);
+        hubItems.forEach(item => {
+            humanTasksData.push({
+                task_id: `hub-${item.file_id}`,
+                directive_id: item.file_id,
+                title: `Review: ${item.file_name || 'Untitled File'}`,
+                domain: 'hub',
+                status: 'pending',
+                human_action_type: 'approve_hub_file',
+                description: [
+                    item.category ? `Category: ${item.category}` : '',
+                    item.client_name && item.client_name !== 'N/A' ? `Client: ${item.client_name}` : '',
+                    item.summary || '',
+                    item.submitted_by ? `Submitted by: ${item.submitted_by}` : '',
+                ].filter(Boolean).join('\n'),
+                parameters: {
+                    _hub_file: true,
+                    file_id: item.file_id,
+                    review_content: item.drive_url ? { type: 'url', data: item.drive_url } : item.summary ? { type: 'text', data: item.summary } : null,
+                },
+                created_at: item.created_at,
+            });
+        });
+
+        // Re-sort by created_at desc after merge
+        humanTasksData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         renderHumanTasks();
     }
 
@@ -1963,6 +1954,7 @@
         ai_escalation:          ['approve', 'reject', 'request_changes'],
         compliance_flag:        ['approve', 'reject', 'request_changes'],
         confidence_low:         ['approve', 'reject', 'request_changes', 'skip'],
+        approve_hub_file:       ['approve', 'reject'],
     };
 
     const ACTION_BUTTON_CONFIG = {
@@ -1998,19 +1990,46 @@
         }
     }
 
+    function setHumanTaskFilter(filter) {
+        humanTaskFilter = filter;
+        humanTaskDisplayLimit = 5;
+        document.querySelectorAll('[id^="htf-"]').forEach(b => b.classList.remove('active'));
+        const el = document.getElementById('htf-' + filter);
+        if (el) el.classList.add('active');
+        renderHumanTasks();
+    }
+
     function renderHumanTasks() {
         const panel = document.getElementById('humanTasksPanel');
         const countEl = document.getElementById('humanTasksCount');
-        countEl.textContent = humanTasksData.length;
 
-        if (humanTasksData.length === 0) {
-            panel.innerHTML = '<div class="empty-state"><div class="mb-2 text-2xl opacity-40">👤</div>No tasks requiring human action</div>';
+        // Apply filter
+        let filteredTasks = humanTasksData;
+        if (humanTaskFilter !== 'all') {
+            filteredTasks = humanTasksData.filter(task => {
+                const domain = (task.domain || '').toLowerCase();
+                const actionType = (task.human_action_type || '').toLowerCase();
+                switch (humanTaskFilter) {
+                    case 'hub': return domain === 'hub' || actionType === 'approve_hub_file';
+                    case 'content': return domain === 'content' || actionType.includes('content');
+                    case 'social': return domain === 'social' || actionType.includes('social');
+                    case 'outreach': return domain === 'outreach' || actionType.includes('outreach');
+                    default: return true;
+                }
+            });
+        }
+
+        countEl.textContent = humanTaskFilter === 'all'
+            ? humanTasksData.length
+            : `${filteredTasks.length}/${humanTasksData.length}`;
+
+        if (filteredTasks.length === 0) {
+            panel.innerHTML = '<div class="empty-state"><div class="mb-2 text-2xl opacity-40">👤</div>' + (humanTaskFilter === 'all' ? 'No tasks requiring human action' : 'No ' + humanTaskFilter.toUpperCase() + ' tasks') + '</div>';
             return;
         }
 
-        const DISPLAY_LIMIT = 5;
-        const showAll = panel.dataset.showAll === 'true';
-        const displayItems = showAll ? humanTasksData : humanTasksData.slice(0, DISPLAY_LIMIT);
+        const DISPLAY_LIMIT_DEFAULT = 5;
+        const displayItems = filteredTasks.slice(0, humanTaskDisplayLimit);
         let html = displayItems.map((task, i) => {
             const actionType = task.human_action_type || 'review';
             const params = task.parameters && typeof task.parameters === 'object' ? task.parameters : {};
@@ -2144,11 +2163,16 @@
                 </div>
             `;
         }).join('');
-        if (humanTasksData.length > DISPLAY_LIMIT) {
-            const btnText = showAll ? 'Show Less' : `Show All (${humanTasksData.length} total)`;
-            html += `<div class="text-center mt-3 pt-3" style="border-top: 1px solid var(--deft-border, #2A2E3D);">
-                <button onclick="this.closest('.panel-body').dataset.showAll = this.closest('.panel-body').dataset.showAll === 'true' ? 'false' : 'true'; renderHumanTasks();" class="btn btn-ghost text-xs py-1.5 px-4">${btnText}</button>
-            </div>`;
+        if (filteredTasks.length > DISPLAY_LIMIT_DEFAULT) {
+            const isFullyExpanded = humanTaskDisplayLimit >= filteredTasks.length;
+            html += `<div class="flex items-center justify-center gap-2 mt-3 pt-3" style="border-top: 1px solid var(--deft-border, #2A2E3D);">`;
+            if (!isFullyExpanded) {
+                html += `<button onclick="humanTaskDisplayLimit += 10; renderHumanTasks();" class="btn btn-ghost text-xs py-1.5 px-4">Load 10 More</button>`;
+                html += `<button onclick="humanTaskDisplayLimit = Infinity; renderHumanTasks();" class="btn btn-ghost text-xs py-1.5 px-4">Show All (${filteredTasks.length})</button>`;
+            } else {
+                html += `<button onclick="humanTaskDisplayLimit = 5; renderHumanTasks();" class="btn btn-ghost text-xs py-1.5 px-4">Show Less</button>`;
+            }
+            html += `</div>`;
         }
         panel.innerHTML = html;
     }
@@ -2387,16 +2411,30 @@
             // Check for edited_content from any inline edit textarea
             const editedContent = document.getElementById(`ht-edited-content-${idx}`)?.value?.trim() || undefined;
 
-            // Send to human-action webhook
-            const payload = {
-                task_id: task.task_id,
-                action: action,
-                feedback: feedback || undefined,
-                acted_by: 'bradford'
-            };
-            if (editedContent) payload.edited_content = editedContent;
+            const params = task.parameters && typeof task.parameters === 'object' ? task.parameters : {};
+            let result;
 
-            const result = await fetchJSON(API.humanAction, payload);
+            // Route hub file approvals to hub-approval-action endpoint
+            if (params._hub_file) {
+                result = await fetchJSON(API.hubApprovalAction, {
+                    file_id: params.file_id,
+                    action: action,
+                    feedback: feedback || '',
+                    actor: 'bradford'
+                });
+                // Normalize response for downstream handling
+                if (result && !result.hasOwnProperty('success')) result.success = true;
+            } else {
+                // Send to human-action webhook
+                const payload = {
+                    task_id: task.task_id,
+                    action: action,
+                    feedback: feedback || undefined,
+                    acted_by: 'bradford'
+                };
+                if (editedContent) payload.edited_content = editedContent;
+                result = await fetchJSON(API.humanAction, payload);
+            }
 
             if (result?.success) {
                 humanTasksData.splice(idx, 1);
