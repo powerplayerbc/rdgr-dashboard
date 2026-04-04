@@ -91,8 +91,8 @@ const PAGE_URL_MAP = {
     'hub.html': '/hub',
     'appearance.html': '/appearance',
     'profile.html': '/profile',
-    'settings.html': '/email-voice-settings',
-    'settings-directory.html': '/settings',
+    'email-voice-settings.html': '/email-voice-settings',
+    'settings.html': '/settings',
     'deft-settings.html': '/deft-settings',
     'scraper-settings.html': '/scraper-settings',
     'social-content.html': '/social-content',
@@ -113,7 +113,7 @@ const PAGE_URL_MAP = {
     'trading-desk.html': '/trading-desk',
     'trading-reports.html': '/trading-reports',
     'subscribers.html': '/subscribers',
-    'partnership.html': '/partnerships',
+    'partnerships.html': '/partnerships',
     'finance/index.html': '/finance',
 };
 
