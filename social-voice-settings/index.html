@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Social Voice Settings | Carlton AI</title>
+
+    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://yrwrswyjawmgtxrgbnim.supabase.co">
+    <script>
+        // Instant auth check + theme application — runs before body renders
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _presets = {
+                forest:     { accent:'#A8D65B',accentWarm:'#F0A830',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                sunrise:    { accent:'#F0A830',accentWarm:'#E85D5D',base:'#100D08',surface:'#1C1810',surfaceEl:'#272118',surfaceHi:'#322B20',border:'#3F382C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                ocean:      { accent:'#38BDF8',accentWarm:'#06D6A0',base:'#080D10',surface:'#10161C',surfaceEl:'#182027',surfaceHi:'#202A32',border:'#2C363F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E0E8EA',txt2:'#8C9BA0',txt3:'#586B6B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                berry:      { accent:'#C084FC',accentWarm:'#FB7185',base:'#0D0810',surface:'#16101C',surfaceEl:'#201827',surfaceHi:'#2A2032',border:'#3A2C3F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E0EA',txt2:'#A08CA0',txt3:'#6B586B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                rdgr:       { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' },
+                monochrome: { accent:'#E8E8E8',accentWarm:'#A0A0A0',base:'#000000',surface:'#0A0A0A',surfaceEl:'#141414',surfaceHi:'#1E1E1E',border:'#2A2A2A',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E8E8',txt2:'#A0A0A0',txt3:'#666666',headingFont:'Nunito',bodyFont:'DM Sans' },
+            };
+            var _t = (_tc.preset === 'custom' && _tc.custom) ? _tc.custom : (_presets[_tc.preset] || _presets.rdgr);
+            // Apply status color overrides if present
+            if (_tc.statusOverrides) {
+                if (_tc.statusOverrides.success) _t.success = _tc.statusOverrides.success;
+                if (_tc.statusOverrides.warning) _t.warning = _tc.statusOverrides.warning;
+                if (_tc.statusOverrides.danger) _t.danger = _tc.statusOverrides.danger;
+            }
+            var _r = document.documentElement;
+            _r.style.setProperty('--deft-accent', _t.accent);
+            _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+            _r.style.setProperty('--deft-accent-warm', _t.accentWarm || _t.accent);
+            _r.style.setProperty('--deft-base', _t.base);
+            _r.style.setProperty('--deft-surface', _t.surface);
+            _r.style.setProperty('--deft-surface-el', _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-surface-hi', _t.surfaceHi || _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-border', _t.border);
+            _r.style.setProperty('--deft-success', _t.success || '#6BCB77');
+            _r.style.setProperty('--deft-success-dim', (_t.success || '#6BCB77') + '26');
+            _r.style.setProperty('--deft-warning', _t.warning || '#F0A830');
+            _r.style.setProperty('--deft-warning-dim', (_t.warning || '#F0A830') + '26');
+            _r.style.setProperty('--deft-danger', _t.danger || '#E85D5D');
+            _r.style.setProperty('--deft-danger-dim', (_t.danger || '#E85D5D') + '26');
+            _r.style.setProperty('--deft-txt', _t.txt);
+            _r.style.setProperty('--deft-txt-2', _t.txt2 || '#8A95A9');
+            _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
+            _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
+            _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+            var _fs = _tc.fontScale || 1;
+            _r.style.setProperty('--deft-font-scale', _fs);
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent,
+        html.rdgr-authed #deftApp,
+        html.rdgr-authed #brainApp,
+        html.rdgr-authed #settingsApp { opacity: 1 !important; }
+
+        /* Universal theme */
+        body {
+            background: var(--deft-base, #08090D) !important;
+            color: var(--deft-txt, #E8ECF1) !important;
+            font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important;
+        }
+        .font-heading, h1, h2, h3 {
+            font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important;
+        }
+        nav {
+            background: color-mix(in srgb, var(--deft-base, #08090D) 92%, transparent) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel, .stat-chip {
+            background: var(--deft-surface, #11131A) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel-header { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input:focus {
+            border-color: var(--deft-accent, #06D6A0) !important;
+            box-shadow: 0 0 0 2px var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+        }
+        /* Accent color */
+        .text-accent { color: var(--deft-accent, #06D6A0) !important; }
+        .bg-accent { background-color: var(--deft-accent, #06D6A0) !important; }
+        .task-tab.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+        .btn-primary {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent) !important;
+        }
+        .btn-primary:hover {
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent) !important;
+        }
+        .btn-ghost { border-color: var(--deft-border, #2A2E3D) !important; }
+        /* Status colors */
+        .text-info { color: var(--deft-accent, #06D6A0) !important; }
+        .badge-in_progress, .badge-approve-type { background: var(--deft-accent-dim) !important; color: var(--deft-accent) !important; }
+        .badge-completed { background: var(--deft-success-dim, rgba(34,197,94,0.15)) !important; color: var(--deft-success, #22C55E) !important; }
+        .badge-failed, .badge-risk-high { background: var(--deft-danger-dim, rgba(255,107,107,0.15)) !important; color: var(--deft-danger, #FF6B6B) !important; }
+        .badge-blocked, .badge-review { background: var(--deft-warning-dim, rgba(255,217,61,0.15)) !important; color: var(--deft-warning, #FFD93D) !important; }
+        .btn-approve { background: var(--deft-success-dim) !important; color: var(--deft-success) !important; border-color: color-mix(in srgb, var(--deft-success) 25%, transparent) !important; }
+        .btn-deny { background: var(--deft-danger-dim) !important; color: var(--deft-danger) !important; border-color: color-mix(in srgb, var(--deft-danger) 25%, transparent) !important; }
+        .text-alert { color: var(--deft-danger, #FF6B6B) !important; }
+        .text-warn { color: var(--deft-warning, #FFD93D) !important; }
+        /* Secondary text */
+        .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+        .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+        .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+        ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D) !important; }
+        .pulse-dot { background: var(--deft-accent, #06D6A0) !important; }
+        .gate-input:focus {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent) !important;
+        }
+        /* Surface elevation */
+        .review-card, .directive-card, .human-task-card, .wf-card, .thread-item {
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        select.form-input option { background: var(--deft-surface-el, #1A1D28) !important; color: var(--deft-txt, #E8ECF1) !important; }
+        /* Font scale */
+        body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
+        .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
+        .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
+        .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
+        .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
+        .text-3xl { font-size: calc(1.875rem * var(--deft-font-scale, 1)) !important; }
+    
+        /* ── Nav Dropdown System ── */
+        .nav-group { position: relative; }
+        .nav-group-btn {
+            display: flex; align-items: center; gap: 0.25rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem; font-weight: 500;
+            color: #8A95A9;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+            border: none; background: transparent;
+        }
+        .nav-group-btn:hover { color: #E8ECF1; }
+        .nav-group-btn.active {
+            background: rgba(6,214,160,0.12);
+            color: #06D6A0;
+        }
+        .nav-group-btn .chevron {
+            transition: transform 0.2s;
+            opacity: 0.5;
+        }
+        .nav-group:hover .nav-group-btn .chevron { transform: rotate(180deg); opacity: 0.8; }
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 150px;
+            padding: 0.375rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: opacity 0.15s, visibility 0.15s, transform 0.15s;
+            z-index: 70;
+        }
+        .nav-group:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .nav-dropdown a {
+            display: block;
+            padding: 0.4rem 0.625rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+        .nav-dropdown a:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--deft-txt, #E8ECF1);
+        }
+        .nav-dropdown a.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        /* Theme overrides for nav */
+        .nav-group-btn.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deft-base': '#08090D', surface: '#11131A', 'surface-el': '#1A1D28', 'surface-hi': '#242836',
+                        border: '#2A2E3D', accent: '#06D6A0', 'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B', 'alert-dim': 'rgba(255,107,107,0.15)', warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)', info: '#4CC9F0', 'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1', 'txt-2': '#8A95A9', 'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'IBM Plex Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; background: #08090D; color: #E8ECF1; }
+        body::after { content:''; position:fixed; inset:0; pointer-events:none; z-index:9998; opacity:0.04; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); background-repeat:repeat; background-size:256px 256px; }
+        ::-webkit-scrollbar { width:6px; height:6px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#2A2E3D; border-radius:3px; } ::-webkit-scrollbar-thumb:hover { background:#3A3E4D; }
+
+        .gate-overlay { position:fixed; inset:0; z-index:9999; background:radial-gradient(ellipse at center,#0D0F16 0%,#08090D 70%); display:flex; align-items:center; justify-content:center; }
+        .gate-overlay.hidden { display:none; }
+        .gate-input { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:0.5rem; padding:0.875rem 1rem; color:#E8ECF1; font-family:'JetBrains Mono',monospace; font-size:0.9rem; outline:none; transition:border-color 0.25s,box-shadow 0.25s; width:100%; }
+        .gate-input:focus { border-color:rgba(6,214,160,0.4); box-shadow:0 0 0 3px rgba(6,214,160,0.08); }
+        .gate-input::placeholder { color:#525E73; }
+        .gate-error { color:#FF6B6B; font-size:0.8rem; margin-top:0.5rem; opacity:0; transition:opacity 0.2s; }
+        .gate-error.show { opacity:1; }
+
+        @keyframes pulse-live { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(6,214,160,0.5);} 50%{opacity:0.7;box-shadow:0 0 0 6px rgba(6,214,160,0);} }
+        .pulse-dot { width:8px; height:8px; border-radius:50%; background:#06D6A0; animation:pulse-live 2s ease-in-out infinite; }
+
+        .task-tab { flex:1; padding:0.4rem 0.75rem; font-size:0.75rem; font-weight:500; text-align:center; border-radius:0.375rem; cursor:pointer; color:rgba(255,255,255,0.45); background:transparent; border:none; transition:color 0.2s,background 0.2s; }
+        .task-tab:hover { color:#E8ECF1; }
+        .task-tab.active { background:rgba(6,214,160,0.12); color:#06D6A0; }
+
+        .btn { font-family:'Chakra Petch',system-ui; font-weight:600; font-size:0.8rem; letter-spacing:0.03em; padding:0.5rem 1rem; border-radius:0.375rem; cursor:pointer; transition:background 0.2s,border-color 0.2s,box-shadow 0.2s,color 0.2s; border:none; text-transform:uppercase; }
+        .btn-primary { background:rgba(6,214,160,0.15); color:#06D6A0; border:1px solid rgba(6,214,160,0.3); }
+        .btn-primary:hover { background:rgba(6,214,160,0.25); }
+        .btn-ghost { background:transparent; color:#8A95A9; border:1px solid #2A2E3D; }
+        .btn-ghost:hover { background:rgba(255,255,255,0.03); color:#E8ECF1; }
+        .btn-ghost.active { background:rgba(6,214,160,0.1); color:#06D6A0; border-color:rgba(6,214,160,0.3); }
+        .btn:disabled { opacity:0.4; cursor:not-allowed; }
+        .btn-approve { background:rgba(6,214,160,0.15); color:#06D6A0; border:1px solid rgba(6,214,160,0.25); }
+        .btn-approve:hover { background:rgba(6,214,160,0.25); }
+        .btn-deny { background:rgba(255,107,107,0.15); color:#FF6B6B; border:1px solid rgba(255,107,107,0.25); }
+        .btn-deny:hover { background:rgba(255,107,107,0.25); }
+
+        .panel { background:#11131A; border:1px solid #1E2130; border-radius:0.75rem; overflow:hidden; }
+        .panel-header { display:flex; align-items:center; justify-content:space-between; padding:0.75rem 1rem; border-bottom:1px solid #1E2130; }
+        .panel-body { padding:1rem; }
+
+        .form-input { background:rgba(255,255,255,0.03); border:1px solid #2A2E3D; border-radius:0.375rem; padding:0.5rem 0.75rem; color:#E8ECF1; font-family:'IBM Plex Sans',system-ui; font-size:0.8rem; outline:none; transition:border-color 0.2s,box-shadow 0.2s; width:100%; }
+        .form-input:focus { border-color:rgba(6,214,160,0.4); box-shadow:0 0 0 2px rgba(6,214,160,0.08); }
+        .form-input::placeholder { color:#525E73; }
+        textarea.form-input { resize:vertical; min-height:80px; font-family:'IBM Plex Sans',system-ui; }
+        select.form-input { cursor:pointer; }
+        select.form-input option { background:#1A1D28; color:#E8ECF1; }
+
+        .badge { font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:500; letter-spacing:0.05em; text-transform:uppercase; padding:0.15rem 0.4rem; border-radius:0.2rem; line-height:1.2; white-space:nowrap; display:inline-flex; align-items:center; }
+        .badge-linkedin { background:rgba(10,102,194,0.15); color:#3B9BF5; }
+        .badge-twitter { background:rgba(29,161,242,0.15); color:#1DA1F2; }
+        .badge-facebook { background:rgba(24,119,242,0.15); color:#5B9CF5; }
+        .badge-instagram { background:linear-gradient(135deg,rgba(225,48,108,0.15),rgba(131,58,180,0.15)); color:#E1306C; }
+        .badge-reddit { background:rgba(255,69,0,0.15); color:#FF6347; }
+
+        .empty-state { text-align:center; padding:3rem 1rem; color:#525E73; font-size:0.85rem; }
+
+        .toast-container { position:fixed; bottom:1.5rem; right:1.5rem; z-index:200; display:flex; flex-direction:column; gap:0.5rem; }
+        .toast { padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.8rem; font-family:'IBM Plex Sans',system-ui; animation:toast-in 0.3s ease forwards; max-width:380px; }
+        .toast-success { background:rgba(6,214,160,0.15); border:1px solid rgba(6,214,160,0.3); color:#06D6A0; }
+        .toast-error { background:rgba(255,107,107,0.15); border:1px solid rgba(255,107,107,0.3); color:#FF6B6B; }
+        .toast-info { background:rgba(76,201,240,0.15); border:1px solid rgba(76,201,240,0.3); color:#4CC9F0; }
+        @keyframes toast-in { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+
+        .modal-backdrop { position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:opacity 0.25s,visibility 0.25s; }
+        .modal-backdrop.active { opacity:1; visibility:visible; }
+        .modal-content { background:#11131A; border:1px solid #2A2E3D; border-radius:0.75rem; width:90%; max-width:620px; max-height:90vh; overflow-y:auto; transform:translateY(20px); transition:transform 0.25s ease; }
+        .modal-backdrop.active .modal-content { transform:translateY(0); }
+
+        /* ── Platform tab ── */
+        .plat-tab {
+            padding: 0.5rem 1rem;
+            font-family: 'Chakra Petch', system-ui;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            background: transparent;
+            color: #525E73;
+        }
+        .plat-tab:hover { color: #8A95A9; }
+        .plat-tab.active { border-color: var(--plat-color, rgba(6,214,160,0.3)); color: var(--plat-color, #06D6A0); background: var(--plat-dim, rgba(6,214,160,0.08)); }
+
+        /* ── Tone slider ── */
+        .tone-slider-container { display: flex; align-items: center; gap: 0.75rem; }
+        .tone-slider {
+            -webkit-appearance: none; appearance: none;
+            flex: 1; height: 4px; border-radius: 2px;
+            background: #1E2130; outline: none;
+        }
+        .tone-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: #06D6A0; cursor: pointer;
+            border: 2px solid #08090D;
+            box-shadow: 0 0 8px rgba(6,214,160,0.3);
+            transition: box-shadow 0.2s;
+        }
+        .tone-slider::-webkit-slider-thumb:hover { box-shadow: 0 0 14px rgba(6,214,160,0.5); }
+        .tone-slider::-moz-range-thumb { width:16px; height:16px; border-radius:50%; background:#06D6A0; cursor:pointer; border:2px solid #08090D; }
+
+        /* ── Chip input ── */
+        .chip-container { display:flex; flex-wrap:wrap; gap:0.375rem; padding:0.5rem; background:rgba(255,255,255,0.02); border:1px solid #2A2E3D; border-radius:0.375rem; min-height:38px; }
+        .chip { display:inline-flex; align-items:center; gap:0.25rem; padding:0.2rem 0.5rem; background:rgba(6,214,160,0.1); color:#06D6A0; border:1px solid rgba(6,214,160,0.2); border-radius:9999px; font-size:0.7rem; font-family:'JetBrains Mono',monospace; }
+        .chip-remove { cursor:pointer; opacity:0.6; transition:opacity 0.15s; font-size:0.75rem; line-height:1; }
+        .chip-remove:hover { opacity:1; }
+        .chip-input { border:none; background:transparent; color:#E8ECF1; font-size:0.75rem; outline:none; min-width:80px; flex:1; font-family:'IBM Plex Sans',system-ui; }
+        .chip-input::placeholder { color:#525E73; }
+
+        /* ── Suggestion card ── */
+        .suggestion-card {
+            background: rgba(255,217,61,0.03);
+            border: 1px solid rgba(255,217,61,0.12);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            transition: border-color 0.2s;
+        }
+        .suggestion-card:hover { border-color: rgba(255,217,61,0.25); }
+        .suggestion-card.instruction-card { background: rgba(76,201,240,0.04); border-color: rgba(76,201,240,0.15); }
+        .suggestion-card.instruction-card:hover { border-color: rgba(76,201,240,0.3); }
+        .badge-instruction { background: rgba(76,201,240,0.15); color: #4CC9F0; }
+        .badge-high { background: rgba(6,214,160,0.15); color: #06D6A0; }
+        .badge-medium { background: rgba(255,217,61,0.15); color: #FFD93D; }
+        .badge-low { background: rgba(138,149,169,0.15); color: #8A95A9; }
+
+        /* ── Snapshot row ── */
+        .snapshot-row { padding:0.5rem 0; border-bottom:1px solid rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:space-between; }
+        .snapshot-row:last-child { border-bottom:none; }
+
+        /* ── Toggle switch ── */
+        .toggle-sw { position:relative; width:36px; height:20px; background:rgba(255,255,255,0.08); border-radius:10px; cursor:pointer; border:none; transition:background 0.2s; flex-shrink:0; }
+        .toggle-sw.on { background:rgba(6,214,160,0.3); }
+        .toggle-sw::after { content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:#8A95A9; transition:transform 0.2s,background 0.2s; }
+        .toggle-sw.on::after { transform:translateX(16px); background:#06D6A0; }
+
+        @media (max-width: 1024px) { .settings-grid { grid-template-columns: 1fr !important; } }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ PASSWORD GATE ═══ -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+            </div>
+            <div id="gateProfiles" class="flex justify-center gap-3 mb-6">
+                <div class="text-center text-xs text-txt-3">Loading profiles...</div>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- ── Top Nav ── -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="nav-group-btn">Dashboard</a>
+                        <div class="nav-group">
+                            <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/chat">Rodger</a>
+                                <a href="/council">Council</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/crm" class="nav-group-btn">Outreach <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/crm">CRM</a>
+                                <a href="/email-outreach">Email</a>
+                                <a href="/social-dashboard">Social</a>
+                                <a href="/social-content">Social Content</a>
+                                <a href="/offer-studio">Offers</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/finance" class="nav-group-btn">Finance <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/finance">Dashboard</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brand-discovery" class="nav-group-btn">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brand-discovery">Discovery</a>
+                                <a href="/template-studio">Templates</a>
+                                <a href="/brand-documents">Docs</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/bsi-discovery" class="nav-group-btn">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/bsi-discovery">Discovery</a>
+                                <a href="/compliance">Compliance</a>
+                                <a href="/bsi-documents">Documents</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/content" class="nav-group-btn">Content <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/content">Publishing</a>
+                                <a href="/media">Media</a>
+                            </div>
+                        </div>
+                        <a href="/partnerships" class="nav-group-btn">Partnerships</a>
+                        <div class="nav-group">
+                            <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brain">BRAIN</a>
+                                <a href="/deft">DEFT</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/trading-bot" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/trading-desk">Trading Desk</a>
+                                <a href="/trading-bot">Bot Dashboard</a>
+                                <a href="/trading-strategies">Strategies</a>
+                                <a href="/trading-monitor">Monitor</a>
+                                <a href="/trading-research">Research</a>
+                                <a href="/trading-discovery">Discovery</a>
+                                <a href="/trading-cross-pairs">Cross-Pairs</a>
+                                <a href="/trading-exchanges">Exchanges</a>
+                                <a href="/trading-config">Config</a>
+                                <a href="/trading-reports">Reports</a>
+                            </div>
+                        </div>
+                        <a href="/meetings" class="nav-group-btn">Meetings</a>
+                        <div class="nav-group">
+                            <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/our-workflows">Workflows</a>
+                                <a href="/org-chart">Org Map</a>
+                                <a href="/hub">HUB</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Profile Switcher -->
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown">
+                        </div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-txt transition-colors p-2" title="Email Voice Settings">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                    <button onclick="saveAllSettings()" class="btn btn-primary text-xs py-2 px-3 flex items-center gap-1.5" id="saveBtn">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Save
+                    </button>
+                    <button onclick="loadPlatformSettings(selectedPlatform)" class="btn btn-ghost text-xs py-2 px-3 flex items-center gap-1.5">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Reload
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
+
+        <!-- ── Deprecation Banner ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pt-3">
+            <div class="panel" style="border-color: rgba(255,217,61,0.3); background: rgba(255,217,61,0.04);">
+                <div class="panel-body flex items-center justify-between py-3 px-4">
+                    <div>
+                        <span class="text-warn font-semibold text-sm">Templates Now Available</span>
+                        <p class="text-xs text-txt-3 mt-0.5">Social outreach templates are now managed from the Social Dashboard. These slider settings are being phased out.</p>
+                    </div>
+                    <a href="/social-dashboard" class="btn btn-primary text-xs py-1.5 px-4" style="text-decoration:none; white-space:nowrap;">Go to Templates</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Page Header + Platform Tabs ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pt-4 pb-2">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="font-heading font-bold text-lg tracking-wide">Social Voice & Style</h2>
+                    <p class="text-xs text-txt-3 mt-0.5">Configure how the AI writes DMs and engagement messages per platform</p>
+                </div>
+                <a href="/settings" class="text-xs text-txt-3 hover:text-info transition-colors" style="text-decoration:none;">Email Voice Settings →</a>
+            </div>
+            <div class="flex gap-2 overflow-x-auto pb-2" id="platformTabs">
+                <button class="plat-tab active" style="--plat-color:#3B9BF5;--plat-dim:rgba(10,102,194,0.08);" onclick="selectPlatform('linkedin')">LinkedIn</button>
+                <button class="plat-tab" style="--plat-color:#E1306C;--plat-dim:rgba(225,48,108,0.08);" onclick="selectPlatform('instagram')">Instagram</button>
+                <button class="plat-tab" style="--plat-color:#5B9CF5;--plat-dim:rgba(24,119,242,0.08);" onclick="selectPlatform('facebook')">Facebook</button>
+                <button class="plat-tab" style="--plat-color:#1DA1F2;--plat-dim:rgba(29,161,242,0.08);" onclick="selectPlatform('twitter')">X / Twitter</button>
+                <button class="plat-tab" style="--plat-color:#FF6347;--plat-dim:rgba(255,69,0,0.08);" onclick="selectPlatform('reddit')">Reddit</button>
+            </div>
+        </div>
+
+        <!-- ── Outreach Type Sub-tabs ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-3">
+            <div class="flex items-center gap-2">
+                <span class="text-[0.65rem] text-txt-3 font-mono uppercase tracking-wider">Configuring:</span>
+                <div class="flex items-center gap-1 bg-surface rounded-lg p-0.5 border border-border/50">
+                    <button id="voiceTabEng" onclick="setVoiceMode('engagement')" style="padding:0.45rem 1rem;font-family:'Chakra Petch',system-ui;font-size:0.8rem;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;border-radius:0.375rem;cursor:pointer;border:1px solid rgba(76,201,240,0.4);background:rgba(76,201,240,0.12);color:#4CC9F0;transition:all 0.2s;">Engagement Voice</button>
+                    <button id="voiceTabDm" onclick="setVoiceMode('dm')" style="padding:0.45rem 1rem;font-family:'Chakra Petch',system-ui;font-size:0.8rem;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;border-radius:0.375rem;cursor:pointer;border:1px solid transparent;background:transparent;color:#525E73;transition:all 0.2s;">DM Voice</button>
+                </div>
+                <span class="text-[0.6rem] text-txt-3 italic" id="voiceModeHint">Controls how AI writes comments, replies, and engagement posts</span>
+            </div>
+        </div>
+
+        <!-- ═══ SETTINGS GRID ═══ -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8">
+            <div class="settings-grid" style="display:grid; grid-template-columns: 1fr 380px; gap: 1rem; align-items: start;">
+
+                <!-- ═══ LEFT COLUMN: Tone + Platform Settings + Content Rules ═══ -->
+                <div class="space-y-4">
+
+                    <!-- Tone Sliders -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="text-xs font-semibold text-txt-3 uppercase tracking-wider font-mono">Tone & Personality</span>
+                        </div>
+                        <div class="panel-body space-y-4">
+                            <div>
+                                <div class="flex justify-between mb-1"><label class="text-xs text-txt-2">Warmth</label><span class="text-xs font-mono text-accent" id="labelWarmth">7 — Warm</span></div>
+                                <div class="tone-slider-container"><span class="text-[0.6rem] text-txt-3">Cold</span><input type="range" min="1" max="10" value="7" class="tone-slider" id="sliderWarmth" oninput="updateSliderLabel('Warmth')"><span class="text-[0.6rem] text-txt-3">Warm</span></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1"><label class="text-xs text-txt-2">Formality</label><span class="text-xs font-mono text-accent" id="labelFormality">6 — Semi-formal</span></div>
+                                <div class="tone-slider-container"><span class="text-[0.6rem] text-txt-3">Casual</span><input type="range" min="1" max="10" value="6" class="tone-slider" id="sliderFormality" oninput="updateSliderLabel('Formality')"><span class="text-[0.6rem] text-txt-3">Formal</span></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1"><label class="text-xs text-txt-2">Confidence</label><span class="text-xs font-mono text-accent" id="labelConfidence">8 — Confident</span></div>
+                                <div class="tone-slider-container"><span class="text-[0.6rem] text-txt-3">Tentative</span><input type="range" min="1" max="10" value="8" class="tone-slider" id="sliderConfidence" oninput="updateSliderLabel('Confidence')"><span class="text-[0.6rem] text-txt-3">Bold</span></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1"><label class="text-xs text-txt-2">Humor</label><span class="text-xs font-mono text-accent" id="labelHumor">3 — Light</span></div>
+                                <div class="tone-slider-container"><span class="text-[0.6rem] text-txt-3">Serious</span><input type="range" min="1" max="10" value="3" class="tone-slider" id="sliderHumor" oninput="updateSliderLabel('Humor')"><span class="text-[0.6rem] text-txt-3">Playful</span></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1"><label class="text-xs text-txt-2">Salesiness</label><span class="text-xs font-mono text-accent" id="labelSalesiness">2 — Anti-sales</span></div>
+                                <div class="tone-slider-container"><span class="text-[0.6rem] text-txt-3">Zero pitch</span><input type="range" min="1" max="10" value="2" class="tone-slider" id="sliderSalesiness" oninput="updateSliderLabel('Salesiness')"><span class="text-[0.6rem] text-txt-3">Full pitch</span></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1"><label class="text-xs text-txt-2">Creativity</label><span class="text-xs font-mono text-accent" id="labelCreativity">6 — Balanced</span></div>
+                                <div class="tone-slider-container"><span class="text-[0.6rem] text-txt-3">Template</span><input type="range" min="1" max="10" value="6" class="tone-slider" id="sliderCreativity" oninput="updateSliderLabel('Creativity')"><span class="text-[0.6rem] text-txt-3">Wild</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Platform-Specific Controls -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="text-xs font-semibold text-txt-3 uppercase tracking-wider font-mono">Message Settings</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1">Max Message Length</label>
+                                    <input type="number" class="form-input" id="inputMaxLength" value="300" min="50" max="5000">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1">Message Length</label>
+                                    <select class="form-input" id="selectMsgLength">
+                                        <option value="micro">Micro (1-2 sentences)</option>
+                                        <option value="short" selected>Short (3-4 sentences)</option>
+                                        <option value="medium">Medium (paragraph)</option>
+                                        <option value="long">Long (multi-paragraph)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1">Opening Style</label>
+                                    <select class="form-input" id="selectOpening">
+                                        <option value="personalized" selected>Personalized</option>
+                                        <option value="observation">Observation</option>
+                                        <option value="compliment">Compliment</option>
+                                        <option value="question">Question-led</option>
+                                        <option value="shared_interest">Shared Interest</option>
+                                        <option value="mutual_connection">Mutual Connection</option>
+                                        <option value="problem">Problem/Pain Point</option>
+                                        <option value="direct">Direct</option>
+                                        <option value="story">Story/Anecdote</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1">CTA Style</label>
+                                    <select class="form-input" id="selectCta">
+                                        <option value="soft" selected>Soft suggestion</option>
+                                        <option value="question">Open question</option>
+                                        <option value="direct">Direct ask</option>
+                                        <option value="none">No CTA</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1">Personalization Depth</label>
+                                    <select class="form-input" id="selectPersonalization">
+                                        <option value="light">Light</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="deep">Deep</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1">Emoji</label>
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="toggle-sw" id="toggleEmoji" onclick="this.classList.toggle('on');toggleEmojiDensity()"></button>
+                                        <select class="form-input" id="selectEmojiDensity" style="max-width:140px;display:none;">
+                                            <option value="minimal" selected>Minimal</option>
+                                            <option value="moderate">Moderate</option>
+                                            <option value="heavy">Heavy</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Hashtag controls (shown for Instagram, Twitter) -->
+                            <div id="hashtagControls" class="mt-4 pt-4 border-t border-border/30" style="display:none;">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="text-xs text-txt-2">Hashtags</label>
+                                    <button type="button" class="toggle-sw" id="toggleHashtags" onclick="this.classList.toggle('on');toggleHashtagRange()"></button>
+                                </div>
+                                <div id="hashtagRange" class="grid grid-cols-2 gap-3" style="display:none;">
+                                    <div><label class="block text-[0.65rem] text-txt-3 mb-1">Min</label><input type="number" class="form-input" id="inputHashtagMin" value="3" min="0" max="30"></div>
+                                    <div><label class="block text-[0.65rem] text-txt-3 mb-1">Max</label><input type="number" class="form-input" id="inputHashtagMax" value="10" min="0" max="30"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Rules -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="text-xs font-semibold text-txt-3 uppercase tracking-wider font-mono">Content Rules</span>
+                        </div>
+                        <div class="panel-body space-y-4">
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1.5">Keywords to Include</label>
+                                <div class="chip-container" id="chipKeywords" onclick="this.querySelector('input').focus()">
+                                    <input type="text" class="chip-input" placeholder="Type + Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();addChip('chipKeywords',this.value);this.value='';}">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1.5">Banned Phrases</label>
+                                <div class="chip-container" id="chipBanned" onclick="this.querySelector('input').focus()" style="--chip-bg:rgba(255,107,107,0.1);--chip-color:#FF6B6B;--chip-border:rgba(255,107,107,0.2);">
+                                    <input type="text" class="chip-input" placeholder="Type + Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();addChip('chipBanned',this.value);this.value='';}">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1.5">Value Propositions</label>
+                                <div class="chip-container" id="chipValueProps" onclick="this.querySelector('input').focus()" style="--chip-bg:rgba(76,201,240,0.1);--chip-color:#4CC9F0;--chip-border:rgba(76,201,240,0.2);">
+                                    <input type="text" class="chip-input" placeholder="Type + Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();addChip('chipValueProps',this.value);this.value='';}">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-txt-2 mb-1.5">Custom Instruction</label>
+                                <textarea class="form-input" id="inputCustomInstruction" placeholder="Any additional instructions for the AI..." rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Limits -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="text-xs font-semibold text-txt-3 uppercase tracking-wider font-mono">Daily Limits</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="grid grid-cols-3 gap-4 items-end">
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1">DM Limit</label>
+                                    <input type="number" class="form-input" id="inputDmLimit" value="10" min="0" max="100">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1">Engagement Limit</label>
+                                    <input type="number" class="form-input" id="inputEngLimit" value="15" min="0" max="100">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-txt-2 mb-1">Platform Active</label>
+                                    <button type="button" class="toggle-sw on" id="togglePlatActive" onclick="this.classList.toggle('on')"></button>
+                                </div>
+                            </div>
+                            <button onclick="saveDailyLimits()" class="btn btn-ghost text-xs py-1.5 px-3 mt-3">Save Limits</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ RIGHT COLUMN: AI Suggestions + Snapshots ═══ -->
+                <div class="space-y-4">
+
+                    <!-- AI Suggestions -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold text-txt-3 uppercase tracking-wider font-mono">AI Suggestions</span>
+                                <span class="badge badge-pending_approval" id="suggestionCount" style="display:none;">0</span>
+                            </div>
+                        </div>
+                        <div class="panel-body" id="suggestionsContainer">
+                            <div class="empty-state text-xs py-4">No pending suggestions</div>
+                        </div>
+                    </div>
+
+                    <!-- Snapshots -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <span class="text-xs font-semibold text-txt-3 uppercase tracking-wider font-mono">Voice Snapshots</span>
+                        </div>
+                        <div class="panel-body" id="snapshotsContainer">
+                            <div class="empty-state text-xs py-4">No snapshots</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TOAST ═══ -->
+    <div class="toast-container" id="toastContainer"></div>
+
+<script>
+// Migrate old localStorage key
+if (!localStorage.getItem('rdgr-active-profile') && localStorage.getItem('rdgr-active-profile')) {
+    localStorage.setItem('rdgr-active-profile', localStorage.getItem('rdgr-active-profile'));
+    localStorage.removeItem('rdgr-active-profile');
+}
+
+// ═══ CONFIG ═══
+const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+const headers = { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' };
+
+const PLAT_ORDER = ['linkedin', 'instagram', 'facebook', 'twitter', 'reddit'];
+const TONE_LABELS = {
+    Warmth:     ['','Ice cold','Cold','Cool','Reserved','Neutral','Approachable','Warm','Very warm','Heartfelt','Effusive'],
+    Formality:  ['','Ultra casual','Very casual','Casual','Semi-casual','Neutral','Semi-formal','Formal','Very formal','Corporate','Legal'],
+    Confidence: ['','Tentative','Uncertain','Cautious','Mild','Balanced','Assured','Confident','Bold','Commanding','Absolute'],
+    Humor:      ['','Stone-faced','Serious','Dry','Light','Wry','Witty','Playful','Fun','Zany','Comedy'],
+    Salesiness: ['','Anti-sales','Minimal','Subtle','Soft','Balanced','Suggestive','Persuasive','Pitch-y','Hard sell','Infomercial'],
+    Creativity: ['','Template','Rigid','Safe','Conservative','Balanced','Creative','Inventive','Bold','Wild','Chaotic'],
+};
+
+let selectedPlatform = 'linkedin';
+let currentSettings = {};
+let currentLimits = {};
+let voiceMode = 'engagement'; // 'engagement' or 'dm'
+
+// ═══ AUTH ═══
+
+// Gate profile picker
+let gateSelectedProfile = null;
+
+function getCachedProfiles(callback) {
+    var CACHE_KEY = 'rdgr-profiles-cache';
+    var CACHE_TTL = 300000; // 5 minutes
+    try {
+        var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+        if (cached.profiles && cached.ts && (Date.now() - cached.ts) < CACHE_TTL) {
+            callback(cached.profiles);
+            return;
+        }
+    } catch(e) {}
+    var _SB_URL = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    var _SB_KEY = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    fetch(`${_SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+        headers: { 'apikey': _SB_KEY, 'Authorization': `Bearer ${_SB_KEY}` }
+    }).then(r => r.json()).then(profiles => {
+        if (profiles && Array.isArray(profiles) && profiles.length > 0) {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ profiles: profiles, ts: Date.now() }));
+        }
+        callback(profiles);
+    }).catch(() => callback([]));
+}
+
+function loadGateProfiles() {
+    getCachedProfiles(function(profiles) {
+        const container = document.getElementById('gateProfiles');
+                if (!container || !profiles || !profiles.length) return;
+                const saved = localStorage.getItem('rdgr-active-profile');
+                let savedId = null;
+                if (saved) { try { savedId = JSON.parse(saved).id; } catch(e) {} }
+                const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+                container.innerHTML = profiles.map(p => {
+                    const name = p.display_name || p.email || '?';
+                    const initial = name[0].toUpperCase();
+                    const color = colors[name] || '#8A95A9';
+                    return `<button type="button" onclick="selectGateProfile('${p.user_id}','${name.replace(/'/g, '&#39;')}',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="if(!this.classList.contains('selected'))this.style.background='rgba(255,255,255,0.02)'">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:${color}20;color:${color};border:2px solid transparent;">${initial}</div>
+                        <span class="text-xs" style="color:#8A95A9;">${name}</span>
+                    </button>`;
+                }).join('');
+                if (savedId) {
+                    const btns = container.querySelectorAll('.gate-profile-btn');
+                    btns.forEach(btn => { if (btn.getAttribute('onclick').includes(savedId)) btn.click(); });
+                }
+    });
+}
+
+function selectGateProfile(userId, name, el) {
+    gateSelectedProfile = { id: userId, name: name };
+    document.querySelectorAll('.gate-profile-btn').forEach(btn => {
+        btn.classList.remove('selected');
+        btn.style.background = 'rgba(255,255,255,0.02)';
+        btn.style.borderColor = 'transparent';
+        btn.querySelector('.w-10').style.borderColor = 'transparent';
+    });
+    el.classList.add('selected');
+    el.style.background = 'rgba(255,255,255,0.06)';
+    el.style.borderColor = 'rgba(6,214,160,0.4)';
+    el.querySelector('.w-10').style.borderColor = el.querySelector('.w-10').style.color;
+    const btn = document.getElementById('gateSubmitBtn');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.textContent = 'Sign In as ' + name;
+    document.getElementById('gateInput').focus();
+}
+
+function handleGate(e) {
+    e.preventDefault();
+    const input = document.getElementById('gateInput').value;
+    if (input === 'Advance1!') {
+        localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+        if (gateSelectedProfile) {
+            localStorage.setItem('rdgr-active-profile', JSON.stringify(gateSelectedProfile));
+            activeProfileId = gateSelectedProfile.id;
+        }
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity = '1';
+        initPage();
+        return false;
+    }
+    document.getElementById('gateError').classList.add('show');
+    document.getElementById('gateInput').value = '';
+    document.getElementById('gateInput').focus();
+    setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+    return false;
+}
+if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('mainContent').style.opacity = '1';
+    initPage();
+}
+// Load gate profiles if gate is visible
+if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+    loadGateProfiles();
+}
+
+// ═══ INIT ═══
+function initPage() {
+    selectPlatform('linkedin');
+}
+
+// ═══ SUPABASE HELPERS ═══
+async function supabaseRpc(fn, params) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: JSON.stringify(params) });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+async function supabaseSelect(table, query) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, { headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` } });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+async function supabasePatch(table, filter, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filter}`, {
+        method: 'PATCH', headers: { ...headers, 'Prefer': 'return=minimal' }, body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error(await res.text());
+}
+
+// ═══ PLATFORM SELECTION ═══
+function selectPlatform(platform) {
+    selectedPlatform = platform;
+    document.querySelectorAll('.plat-tab').forEach((btn, i) => {
+        btn.classList.toggle('active', PLAT_ORDER[i] === platform);
+    });
+    // Show/hide hashtag controls
+    const showHashtags = platform === 'instagram' || platform === 'twitter';
+    document.getElementById('hashtagControls').style.display = showHashtags ? '' : 'none';
+    loadPlatformSettings(platform);
+    loadSuggestions(platform);
+    loadSnapshots(platform);
+    loadDailyLimits(platform);
+}
+
+// ═══ VOICE MODE (DM vs Engagement) ═══
+function setVoiceMode(mode) {
+    voiceMode = mode;
+    const engBtn = document.getElementById('voiceTabEng');
+    const dmBtn = document.getElementById('voiceTabDm');
+    if (mode === 'engagement') {
+        engBtn.style.background = 'rgba(76,201,240,0.12)'; engBtn.style.color = '#4CC9F0'; engBtn.style.borderColor = 'rgba(76,201,240,0.4)';
+        dmBtn.style.background = 'transparent'; dmBtn.style.color = '#525E73'; dmBtn.style.borderColor = 'transparent';
+    } else {
+        dmBtn.style.background = 'rgba(168,85,247,0.12)'; dmBtn.style.color = '#A855F7'; dmBtn.style.borderColor = 'rgba(168,85,247,0.4)';
+        engBtn.style.background = 'transparent'; engBtn.style.color = '#525E73'; engBtn.style.borderColor = 'transparent';
+    }
+    document.getElementById('voiceModeHint').textContent = mode === 'dm'
+        ? 'Controls how AI writes direct messages and connection requests'
+        : 'Controls how AI writes comments, replies, and engagement posts';
+    populateForm(currentSettings);
+}
+
+// ═══ LOAD SETTINGS ═══
+async function loadPlatformSettings(platform) {
+    try {
+        const data = await supabaseRpc('get_social_voice_settings', { p_brand_id: 'carlton', p_platform: platform });
+        currentSettings = data || {};
+        populateForm(currentSettings);
+    } catch (e) {
+        currentSettings = {};
+        populateForm({});
+    }
+}
+
+function populateForm(s) {
+    // If DM mode, use dm_overrides if available, falling back to base values
+    const dm = (voiceMode === 'dm' && s.dm_overrides) ? s.dm_overrides : {};
+    const v = (field, fallback) => voiceMode === 'dm' ? (dm[field] ?? s[field] ?? fallback) : (s[field] ?? fallback);
+    document.getElementById('sliderWarmth').value = v('tone_warmth', 7);
+    document.getElementById('sliderFormality').value = v('tone_formality', 6);
+    document.getElementById('sliderConfidence').value = v('tone_confidence', 8);
+    document.getElementById('sliderHumor').value = v('tone_humor', 3);
+    document.getElementById('sliderSalesiness').value = v('tone_salesiness', 2);
+    document.getElementById('sliderCreativity').value = v('creativity', 6);
+    ['Warmth','Formality','Confidence','Humor','Salesiness','Creativity'].forEach(updateSliderLabel);
+
+    document.getElementById('inputMaxLength').value = v('max_message_length', 300);
+    document.getElementById('selectMsgLength').value = v('message_length', 'short');
+    document.getElementById('selectOpening').value = v('opening_style', 'personalized');
+    document.getElementById('selectCta').value = v('cta_style', 'soft');
+    document.getElementById('selectPersonalization').value = v('personalization_depth', 'medium');
+
+    const emojiOn = v('use_emoji', false);
+    document.getElementById('toggleEmoji').classList.toggle('on', emojiOn);
+    document.getElementById('selectEmojiDensity').value = v('emoji_density', 'minimal');
+    document.getElementById('selectEmojiDensity').style.display = emojiOn ? '' : 'none';
+
+    const hashOn = v('use_hashtags', false);
+    document.getElementById('toggleHashtags').classList.toggle('on', hashOn);
+    document.getElementById('inputHashtagMin').value = v('hashtag_count_min', 3);
+    document.getElementById('inputHashtagMax').value = v('hashtag_count_max', 10);
+    document.getElementById('hashtagRange').style.display = hashOn ? '' : 'none';
+
+    setChips('chipKeywords', voiceMode === 'dm' ? (dm.keywords || s.keywords || []) : (s.keywords || []));
+    setChips('chipBanned', voiceMode === 'dm' ? (dm.banned_phrases || s.banned_phrases || []) : (s.banned_phrases || []));
+    setChips('chipValueProps', s.value_propositions || []);
+    document.getElementById('inputCustomInstruction').value = v('custom_instruction', '');
+}
+
+// ═══ SAVE SETTINGS ═══
+async function saveAllSettings() {
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    const selVal = (id, fallback) => { const val = document.getElementById(id).value; return val && val.trim() ? val : fallback; };
+
+    const formValues = {
+        tone_warmth: parseInt(document.getElementById('sliderWarmth').value) || 7,
+        tone_formality: parseInt(document.getElementById('sliderFormality').value) || 6,
+        tone_confidence: parseInt(document.getElementById('sliderConfidence').value) || 8,
+        tone_humor: parseInt(document.getElementById('sliderHumor').value) || 3,
+        tone_salesiness: parseInt(document.getElementById('sliderSalesiness').value) || 2,
+        creativity: parseInt(document.getElementById('sliderCreativity').value) || 6,
+        max_message_length: parseInt(document.getElementById('inputMaxLength').value) || 300,
+        message_length: selVal('selectMsgLength', 'short'),
+        opening_style: selVal('selectOpening', 'personalized'),
+        cta_style: selVal('selectCta', 'soft'),
+        personalization_depth: selVal('selectPersonalization', 'medium'),
+        use_emoji: document.getElementById('toggleEmoji').classList.contains('on'),
+        emoji_density: document.getElementById('toggleEmoji').classList.contains('on') ? selVal('selectEmojiDensity', 'minimal') : 'none',
+        use_hashtags: document.getElementById('toggleHashtags').classList.contains('on'),
+        hashtag_count_min: parseInt(document.getElementById('inputHashtagMin').value) || 3,
+        hashtag_count_max: parseInt(document.getElementById('inputHashtagMax').value) || 10,
+        keywords: getChips('chipKeywords'),
+        banned_phrases: getChips('chipBanned'),
+        value_propositions: getChips('chipValueProps'),
+        custom_instruction: document.getElementById('inputCustomInstruction').value.trim() || '',
+    };
+
+    // Build settings object — if DM mode, save as dm_overrides; if engagement, save as base
+    let settings;
+    if (voiceMode === 'dm') {
+        settings = { dm_overrides: formValues };
+    } else {
+        settings = formValues;
+    }
+
+    const modeLabel = voiceMode === 'dm' ? 'DM' : 'Engagement';
+
+    try {
+        await supabaseRpc('save_social_voice_settings', {
+            p_brand_id: 'carlton',
+            p_platform: selectedPlatform,
+            p_settings: settings,
+        });
+        if (voiceMode === 'dm') {
+            currentSettings.dm_overrides = formValues;
+        } else {
+            currentSettings = { ...currentSettings, ...formValues };
+        }
+        showToast(`${selectedPlatform} ${modeLabel} voice saved`, 'success');
+    } catch (err) {
+        showToast('Save failed: ' + err.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Save';
+    }
+}
+
+// ═══ DAILY LIMITS ═══
+async function loadDailyLimits(platform) {
+    try {
+        const data = await supabaseSelect('social_platform_config', `platform=eq.${platform}&select=daily_dm_limit,daily_engagement_limit,is_active`);
+        if (Array.isArray(data) && data.length > 0) {
+            currentLimits = data[0];
+            document.getElementById('inputDmLimit').value = currentLimits.daily_dm_limit || 10;
+            document.getElementById('inputEngLimit').value = currentLimits.daily_engagement_limit || 15;
+            document.getElementById('togglePlatActive').classList.toggle('on', currentLimits.is_active !== false);
+        }
+    } catch (e) { /* silent */ }
+}
+
+async function saveDailyLimits() {
+    try {
+        await supabasePatch('social_platform_config', `platform=eq.${selectedPlatform}`, {
+            daily_dm_limit: parseInt(document.getElementById('inputDmLimit').value),
+            daily_engagement_limit: parseInt(document.getElementById('inputEngLimit').value),
+            is_active: document.getElementById('togglePlatActive').classList.contains('on'),
+        });
+        showToast('Daily limits saved', 'success');
+    } catch (err) {
+        showToast('Failed: ' + err.message, 'error');
+    }
+}
+
+// ═══ AI SUGGESTIONS ═══
+async function loadSuggestions(platform) {
+    const container = document.getElementById('suggestionsContainer');
+    try {
+        const data = await supabaseSelect('social_voice_learning_log',
+            `platform=eq.${platform}&status=eq.pending&select=*&order=created_at.desc&limit=20`);
+        const suggestions = Array.isArray(data) ? data : [];
+
+        const badge = document.getElementById('suggestionCount');
+        if (suggestions.length > 0) {
+            badge.textContent = suggestions.length;
+            badge.style.display = '';
+        } else {
+            badge.style.display = 'none';
+        }
+
+        if (suggestions.length === 0) {
+            container.innerHTML = '<div class="empty-state text-xs py-4">No pending suggestions for this platform</div>';
+            return;
+        }
+
+        container.innerHTML = suggestions.map(s => {
+            const confLevel = (s.confidence || 0) >= 0.8 ? 'high' : (s.confidence || 0) >= 0.5 ? 'medium' : 'low';
+            const confColor = confLevel === 'high' ? '#06D6A0' : confLevel === 'medium' ? '#FFD93D' : '#8A95A9';
+
+            if (s.suggestion_type === 'instruction_change') {
+                return `
+                <div class="suggestion-card instruction-card mb-2">
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center gap-2">
+                            <span class="badge badge-instruction">System Prompt</span>
+                            <span class="badge badge-${confLevel}">${confLevel}</span>
+                        </div>
+                        <span class="text-[0.55rem] font-mono" style="color:${confColor};">${Math.round((s.confidence || 0) * 100)}% conf</span>
+                    </div>
+                    <div class="text-xs text-txt mb-1 p-2 rounded" style="background:rgba(76,201,240,0.06);border:1px solid rgba(76,201,240,0.1);line-height:1.6;">${esc(String(s.suggested_value ?? ''))}</div>
+                    ${s.reasoning ? `<div class="text-[0.65rem] text-txt-3 mb-2">${esc(s.reasoning)}</div>` : ''}
+                    <div class="flex gap-2">
+                        <button onclick="acceptInstructionChange(${s.id}, ${JSON.stringify(String(s.suggested_value || '')).replace(/'/g, "\\'")})" class="btn btn-approve text-xs py-1 px-2" style="font-size:0.65rem;">Add to System Prompt</button>
+                        <button onclick="dismissSuggestion(${s.id})" class="btn btn-ghost text-xs py-1 px-2" style="font-size:0.65rem;">Dismiss</button>
+                    </div>
+                </div>`;
+            }
+
+            return `
+                <div class="suggestion-card mb-2">
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center gap-2">
+                            <span class="badge badge-warn">${esc(s.suggestion_type || s.type || 'tune')}</span>
+                            <span class="text-xs text-txt-2 font-mono">${esc(s.field || '')}</span>
+                        </div>
+                        <span class="text-[0.55rem] font-mono" style="color:${confColor};">${Math.round((s.confidence || 0) * 100)}% conf</span>
+                    </div>
+                    <div class="text-xs text-txt-3 mb-1">
+                        <span class="text-txt-3">Current:</span> <span class="text-txt-2">${esc(String(s.current_value ?? '—'))}</span>
+                        → <span class="text-accent">${esc(String(s.suggested_value ?? '—'))}</span>
+                    </div>
+                    ${s.reasoning ? `<div class="text-[0.65rem] text-txt-3 mb-2">${esc(s.reasoning)}</div>` : ''}
+                    <div class="flex gap-2">
+                        <button onclick="acceptSuggestion(${s.id}, '${esc(s.field)}', ${JSON.stringify(s.suggested_value).replace(/'/g, "\\'")})" class="btn btn-approve text-xs py-1 px-2" style="font-size:0.65rem;">Accept & Apply</button>
+                        <button onclick="dismissSuggestion(${s.id})" class="btn btn-ghost text-xs py-1 px-2" style="font-size:0.65rem;">Dismiss</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch (e) {
+        container.innerHTML = '<div class="empty-state text-xs py-4">Could not load suggestions</div>';
+    }
+}
+
+async function acceptSuggestion(id, field, value) {
+    try {
+        await supabaseRpc('resolve_social_voice_suggestion', { p_suggestion_id: id, p_action: 'accepted' });
+        await supabaseRpc('save_social_voice_settings', {
+            p_brand_id: 'carlton', p_platform: selectedPlatform,
+            p_settings: { [field]: value },
+        });
+        showToast('Suggestion applied', 'success');
+        loadPlatformSettings(selectedPlatform);
+        loadSuggestions(selectedPlatform);
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+async function dismissSuggestion(id) {
+    try {
+        await supabaseRpc('resolve_social_voice_suggestion', { p_suggestion_id: id, p_action: 'dismissed' });
+        showToast('Suggestion dismissed', 'info');
+        loadSuggestions(selectedPlatform);
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+async function acceptInstructionChange(id, instructionText) {
+    try {
+        await supabaseRpc('resolve_social_voice_suggestion', { p_suggestion_id: id, p_action: 'accepted' });
+        const currentInstruction = document.getElementById('inputCustomInstruction').value.trim();
+        const newInstruction = currentInstruction ? currentInstruction + '\n\n' + instructionText : instructionText;
+        const settings = voiceMode === 'dm'
+            ? { dm_overrides: { custom_instruction: newInstruction } }
+            : { custom_instruction: newInstruction };
+        await supabaseRpc('save_social_voice_settings', {
+            p_brand_id: 'carlton', p_platform: selectedPlatform, p_settings: settings,
+        });
+        document.getElementById('inputCustomInstruction').value = newInstruction;
+        showToast('System prompt updated', 'success');
+        loadSuggestions(selectedPlatform);
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+// ═══ SNAPSHOTS ═══
+async function loadSnapshots(platform) {
+    const container = document.getElementById('snapshotsContainer');
+    try {
+        const data = await supabaseSelect('social_voice_snapshots',
+            `platform=eq.${platform}&select=*&order=created_at.desc&limit=10`);
+        const snaps = Array.isArray(data) ? data : [];
+
+        if (snaps.length === 0) {
+            container.innerHTML = '<div class="empty-state text-xs py-4">No snapshots for this platform</div>';
+            return;
+        }
+
+        container.innerHTML = snaps.map(s => `
+            <div class="snapshot-row">
+                <div>
+                    <div class="text-xs text-txt">${s.label || 'v' + (s.version || '?')}</div>
+                    <div class="text-[0.6rem] text-txt-3 font-mono">${formatDT(s.created_at)}</div>
+                </div>
+                <button onclick="applySnapshot(${s.id})" class="btn btn-ghost text-xs py-1 px-2" style="font-size:0.6rem;">Apply</button>
+            </div>
+        `).join('');
+    } catch (e) {
+        container.innerHTML = '<div class="empty-state text-xs py-4">Could not load snapshots</div>';
+    }
+}
+
+async function applySnapshot(snapshotId) {
+    if (!confirm('Apply this snapshot? Your current settings will be backed up first.')) return;
+    try {
+        await supabaseRpc('apply_social_voice_snapshot', { p_snapshot_id: snapshotId });
+        showToast('Snapshot applied', 'success');
+        loadPlatformSettings(selectedPlatform);
+        loadSnapshots(selectedPlatform);
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+}
+
+// ═══ SLIDER LABELS ═══
+function updateSliderLabel(name) {
+    const slider = document.getElementById('slider' + name);
+    const label = document.getElementById('label' + name);
+    const val = parseInt(slider.value);
+    const labels = TONE_LABELS[name] || [];
+    label.textContent = `${val} — ${labels[val] || ''}`;
+}
+
+// ═══ TOGGLE HELPERS ═══
+function toggleEmojiDensity() {
+    const on = document.getElementById('toggleEmoji').classList.contains('on');
+    document.getElementById('selectEmojiDensity').style.display = on ? '' : 'none';
+}
+function toggleHashtagRange() {
+    const on = document.getElementById('toggleHashtags').classList.contains('on');
+    document.getElementById('hashtagRange').style.display = on ? '' : 'none';
+}
+
+// ═══ CHIP INPUT ═══
+function addChip(containerId, value) {
+    value = value.trim();
+    if (!value) return;
+    const container = document.getElementById(containerId);
+    const input = container.querySelector('input');
+    const style = getComputedStyle(container);
+    const bg = style.getPropertyValue('--chip-bg') || 'rgba(6,214,160,0.1)';
+    const color = style.getPropertyValue('--chip-color') || '#06D6A0';
+    const border = style.getPropertyValue('--chip-border') || 'rgba(6,214,160,0.2)';
+
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.style.background = bg;
+    chip.style.color = color;
+    chip.style.borderColor = border;
+    chip.innerHTML = `${esc(value)}<span class="chip-remove" onclick="this.parentElement.remove()">×</span>`;
+    container.insertBefore(chip, input);
+}
+
+function setChips(containerId, values) {
+    const container = document.getElementById(containerId);
+    const input = container.querySelector('input');
+    container.querySelectorAll('.chip').forEach(c => c.remove());
+    (values || []).forEach(v => addChip(containerId, v));
+}
+
+function getChips(containerId) {
+    const chips = document.getElementById(containerId).querySelectorAll('.chip');
+    return [...chips].map(c => c.textContent.replace('×', '').trim());
+}
+
+// ═══ UTILITIES ═══
+function esc(str) { return str == null ? '' : String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatDT(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
+function showToast(msg, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-backdrop.active').forEach(m => m.classList.remove('active'));
+    }
+});
+
+// ── Profile Switcher ──
+(function initProfileSwitcher() {
+
+    const saved = localStorage.getItem('rdgr-active-profile');
+    if (saved) {
+        try {
+            const p = JSON.parse(saved);
+            const nameEl = document.getElementById('profileName');
+            const avatarEl = document.getElementById('profileAvatar');
+            if (nameEl) nameEl.textContent = p.name;
+            if (avatarEl) avatarEl.textContent = (p.name || 'B')[0].toUpperCase();
+        } catch(e) {}
+    }
+    getCachedProfiles(function(profiles) {
+        const dd = document.getElementById('profileDropdown');
+                if (!dd || !profiles || profiles.length === 0) return;
+                const activeId = saved ? JSON.parse(saved).id : null;
+                dd.innerHTML = profiles.map(p => {
+                    const name = p.display_name || p.email || '?';
+                    const initial = name[0].toUpperCase();
+                    const isActive = p.user_id === activeId;
+                    return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, '&#39;')}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                        <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div>
+                        <span>${name}</span>
+                        ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+                    </button>`;
+                }).join('');
+                dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+    });
+})();
+
+function toggleProfileDD() {
+    const dd = document.getElementById('profileDropdown');
+    dd.classList.toggle('hidden');
+    if (!dd.classList.contains('hidden')) {
+        setTimeout(() => document.addEventListener('click', function closePDD(e) {
+            if (!document.getElementById('profileSwitcher').contains(e.target)) {
+                dd.classList.add('hidden');
+            }
+            document.removeEventListener('click', closePDD);
+        }), 0);
+    }
+}
+
+function selectProfileGlobal(userId, name) {
+    localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+    location.reload();
+}
+
+function signOut() {
+    localStorage.removeItem('rdgr-session');
+    localStorage.removeItem('rdgr-active-profile');
+    location.reload();
+}
+</script>
+</body>
+</html>

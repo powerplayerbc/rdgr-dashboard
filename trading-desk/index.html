@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Trading Desk | Carlton AI</title>
+
+    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://yrwrswyjawmgtxrgbnim.supabase.co">
+    <script>
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _presets = {
+                forest:     { accent:'#A8D65B',accentWarm:'#F0A830',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                sunrise:    { accent:'#F0A830',accentWarm:'#E85D5D',base:'#100D08',surface:'#1C1810',surfaceEl:'#272118',surfaceHi:'#322B20',border:'#3F382C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                ocean:      { accent:'#38BDF8',accentWarm:'#06D6A0',base:'#080D10',surface:'#10161C',surfaceEl:'#182027',surfaceHi:'#202A32',border:'#2C363F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E0E8EA',txt2:'#8C9BA0',txt3:'#586B6B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                berry:      { accent:'#C084FC',accentWarm:'#FB7185',base:'#0D0810',surface:'#16101C',surfaceEl:'#201827',surfaceHi:'#2A2032',border:'#3A2C3F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E0EA',txt2:'#A08CA0',txt3:'#6B586B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                rdgr:       { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' },
+                monochrome: { accent:'#E8E8E8',accentWarm:'#A0A0A0',base:'#000000',surface:'#0A0A0A',surfaceEl:'#141414',surfaceHi:'#1E1E1E',border:'#2A2A2A',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E8E8',txt2:'#A0A0A0',txt3:'#666666',headingFont:'Nunito',bodyFont:'DM Sans' },
+            };
+            var _t = (_tc.preset === 'custom' && _tc.custom) ? _tc.custom : (_presets[_tc.preset] || _presets.rdgr);
+            if (_tc.statusOverrides) {
+                if (_tc.statusOverrides.success) _t.success = _tc.statusOverrides.success;
+                if (_tc.statusOverrides.warning) _t.warning = _tc.statusOverrides.warning;
+                if (_tc.statusOverrides.danger) _t.danger = _tc.statusOverrides.danger;
+            }
+            var _r = document.documentElement;
+            _r.style.setProperty('--deft-accent', _t.accent);
+            _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+            _r.style.setProperty('--deft-accent-warm', _t.accentWarm || _t.accent);
+            _r.style.setProperty('--deft-base', _t.base);
+            _r.style.setProperty('--deft-surface', _t.surface);
+            _r.style.setProperty('--deft-surface-el', _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-surface-hi', _t.surfaceHi || _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-border', _t.border);
+            _r.style.setProperty('--deft-success', _t.success || '#6BCB77');
+            _r.style.setProperty('--deft-success-dim', (_t.success || '#6BCB77') + '26');
+            _r.style.setProperty('--deft-warning', _t.warning || '#F0A830');
+            _r.style.setProperty('--deft-warning-dim', (_t.warning || '#F0A830') + '26');
+            _r.style.setProperty('--deft-danger', _t.danger || '#E85D5D');
+            _r.style.setProperty('--deft-danger-dim', (_t.danger || '#E85D5D') + '26');
+            _r.style.setProperty('--deft-txt', _t.txt);
+            _r.style.setProperty('--deft-txt-2', _t.txt2 || '#8A95A9');
+            _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
+            _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
+            _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+            var _fs = _tc.fontScale || 1;
+            _r.style.setProperty('--deft-font-scale', _fs);
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent { opacity: 1 !important; }
+
+        body {
+            background: var(--deft-base, #08090D) !important;
+            color: var(--deft-txt, #E8ECF1) !important;
+            font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important;
+        }
+        .font-heading, h1, h2, h3 {
+            font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important;
+        }
+        nav {
+            background: color-mix(in srgb, var(--deft-base, #08090D) 92%, transparent) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel, .stat-chip {
+            background: var(--deft-surface, #11131A) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel-header { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input:focus {
+            border-color: var(--deft-accent, #06D6A0) !important;
+            box-shadow: 0 0 0 2px var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+        }
+        .text-accent { color: var(--deft-accent, #06D6A0) !important; }
+        .bg-accent { background-color: var(--deft-accent, #06D6A0) !important; }
+        .btn-primary {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent) !important;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent) !important;
+        }
+        .btn-ghost { border-color: var(--deft-border, #2A2E3D) !important; }
+        .badge-paper { background: rgba(76,201,240,0.15) !important; color: #4CC9F0 !important; }
+        .badge-live-mode { background: var(--deft-danger-dim, rgba(255,107,107,0.15)) !important; color: var(--deft-danger, #FF6B6B) !important; }
+        .badge-healthy { background: rgba(6,214,160,0.15) !important; color: #06D6A0 !important; }
+        .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+        .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+        .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+        ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D) !important; }
+        .pulse-dot { background: var(--deft-accent, #06D6A0) !important; }
+        .gate-input:focus {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent) !important;
+        }
+        select.form-input option { background: var(--deft-surface-el, #1A1D28) !important; color: var(--deft-txt, #E8ECF1) !important; }
+        body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
+        .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
+        .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
+        .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
+        .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
+
+        .nav-group { position: relative; }
+        .nav-group-btn {
+            display: flex; align-items: center; gap: 0.25rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem; font-weight: 500;
+            color: #8A95A9;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+            border: none; background: transparent;
+        }
+        .nav-group-btn:hover { color: #E8ECF1; }
+        .nav-group-btn.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+        .nav-group-btn .chevron {
+            transition: transform 0.2s;
+            opacity: 0.5;
+        }
+        .nav-group:hover .nav-group-btn .chevron { transform: rotate(180deg); opacity: 0.8; }
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 150px;
+            padding: 0.375rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: opacity 0.15s, visibility 0.15s, transform 0.15s;
+            z-index: 70;
+        }
+        .nav-group:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .nav-dropdown a {
+            display: block;
+            padding: 0.4rem 0.625rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+        .nav-dropdown a:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--deft-txt, #E8ECF1);
+        }
+        .nav-dropdown a.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deft-base': '#08090D',
+                        surface: '#11131A',
+                        'surface-el': '#1A1D28',
+                        'surface-hi': '#242836',
+                        border: '#2A2E3D',
+                        accent: '#06D6A0',
+                        'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B',
+                        'alert-dim': 'rgba(255,107,107,0.15)',
+                        warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)',
+                        info: '#4CC9F0',
+                        'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1',
+                        'txt-2': '#8A95A9',
+                        'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #08090D;
+            color: #E8ECF1;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3A3E4D; }
+
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: #E8ECF1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            width: 100%;
+        }
+        .gate-input::placeholder { color: #525E73; }
+        .gate-error { color: #FF6B6B; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #06D6A0;
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+
+        .panel {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid #1E2130;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel-body { padding: 1rem 1.25rem; }
+
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        .badge-paper { background: rgba(76,201,240,0.15); color: #4CC9F0; }
+        .badge-live-mode { background: rgba(255,107,107,0.15); color: #FF6B6B; }
+        .badge-healthy { background: rgba(6,214,160,0.15); color: #06D6A0; }
+
+        .btn {
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s, opacity 0.15s;
+            display: inline-flex; align-items: center; gap: 0.375rem;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .btn-primary {
+            background: rgba(6,214,160,0.15);
+            color: #06D6A0;
+            border-color: rgba(6,214,160,0.3);
+        }
+        .btn-primary:hover:not(:disabled) { background: rgba(6,214,160,0.25); }
+        .btn-ghost {
+            background: transparent;
+            color: #8A95A9;
+            border-color: #2A2E3D;
+        }
+        .btn-ghost:hover { background: rgba(255,255,255,0.04); color: #E8ECF1; }
+        .btn-danger {
+            background: rgba(255,107,107,0.1);
+            color: #FF6B6B;
+            border-color: rgba(255,107,107,0.25);
+        }
+        .btn-danger:hover:not(:disabled) { background: rgba(255,107,107,0.2); }
+
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-family: 'IBM Plex Sans', system-ui;
+            animation: toast-in 0.3s ease forwards;
+            max-width: 380px;
+        }
+        .toast-success { background: rgba(6,214,160,0.15); border: 1px solid rgba(6,214,160,0.3); color: #06D6A0; }
+        .toast-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #FF6B6B; }
+        .toast-warning { background: rgba(255,217,61,0.15); border: 1px solid rgba(255,217,61,0.3); color: #FFD93D; }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .stat-chip {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.5rem;
+            padding: 0.625rem 1rem;
+        }
+        .stat-value { font-family: 'Chakra Petch', system-ui; font-weight: 700; font-size: 1.25rem; line-height: 1; }
+        .stat-label { font-size: 0.65rem; color: #8A95A9; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; margin-top: 0.25rem; }
+
+        .pnl-positive { color: var(--deft-success, #06D6A0); }
+        .pnl-negative { color: var(--deft-danger, #FF6B6B); }
+
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th {
+            text-align: left; padding: 0.625rem 0.75rem;
+            font-size: 0.65rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--deft-txt-3, #525E73);
+            border-bottom: 1px solid var(--deft-border, #2A2E3D);
+        }
+        .data-table td {
+            padding: 0.625rem 0.75rem; font-size: 0.8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            color: var(--deft-txt-2, #8A95A9);
+        }
+        .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+        /* ═══ TRADING DESK SPECIFIC ═══ */
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            background: var(--deft-surface, #11131A);
+            border: 1px solid var(--deft-border, #1E2130);
+            flex-wrap: wrap;
+        }
+        .status-dot {
+            width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+        }
+        .status-dot.live {
+            background: var(--deft-success, #06D6A0);
+            box-shadow: 0 0 8px rgba(6,214,160,0.4);
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+        .status-dot.connecting {
+            background: var(--deft-warning, #FFD93D);
+            box-shadow: 0 0 8px rgba(255,217,61,0.4);
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+        .status-dot.offline {
+            background: var(--deft-txt-3, #525E73);
+        }
+
+        .dd-gauge {
+            width: 100px; height: 6px; border-radius: 3px;
+            background: rgba(255,255,255,0.06);
+            overflow: hidden;
+        }
+        .dd-gauge-fill {
+            height: 100%; border-radius: 3px;
+            transition: width 0.4s ease, background 0.4s ease;
+        }
+
+        /* Capital Block Cards */
+        .tier-card {
+            background: var(--deft-surface, #11131A);
+            border: 1px solid var(--deft-border, #1E2130);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            transition: transform 0.15s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .tier-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--tier-color);
+        }
+        .tier-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .block-square {
+            width: 16px; height: 16px;
+            border-radius: 3px;
+            transition: transform 0.15s, opacity 0.15s;
+        }
+        .block-square.active {
+            box-shadow: 0 0 6px color-mix(in srgb, var(--tier-color, #06D6A0) 40%, transparent);
+        }
+        .block-square.idle {
+            border: 1.5px dashed var(--deft-border, #2A2E3D);
+            background: transparent;
+        }
+
+        .block-btn {
+            width: 32px; height: 32px;
+            border-radius: 0.375rem;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            background: transparent;
+            color: var(--deft-txt-2, #8A95A9);
+            font-size: 1rem; font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s, color 0.15s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .block-btn:hover:not(:disabled) {
+            background: rgba(255,255,255,0.06);
+            color: var(--deft-txt, #E8ECF1);
+        }
+        .block-btn:active:not(:disabled) { transform: scale(0.82); }
+        .block-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+        @keyframes block-pop-in {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.3); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes block-pop-out {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        @keyframes count-bump {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+        @keyframes tier-card-enter {
+            0% { opacity: 0; transform: translateY(16px) scale(0.96); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes tier-flash {
+            0% { box-shadow: 0 0 0 0 var(--tier-color); }
+            50% { box-shadow: 0 0 16px 2px color-mix(in srgb, var(--tier-color, #06D6A0) 25%, transparent); }
+            100% { box-shadow: 0 0 0 0 transparent; }
+        }
+
+        .ghost-card {
+            border: 2px dashed var(--deft-border, #2A2E3D);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            min-height: 180px;
+        }
+        .ghost-card:hover {
+            border-color: var(--deft-accent, #06D6A0);
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 4%, transparent);
+        }
+
+        .create-form {
+            max-height: 0; opacity: 0; overflow: hidden;
+            transition: max-height 0.35s ease, opacity 0.25s ease;
+        }
+        .create-form.open {
+            max-height: 400px; opacity: 1;
+        }
+
+        .form-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            color: var(--deft-txt, #E8ECF1);
+            font-size: 0.8rem;
+            outline: none;
+            width: 100%;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            border-color: var(--deft-accent, #06D6A0);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--deft-accent, #06D6A0) 15%, transparent);
+        }
+        .form-input::placeholder { color: var(--deft-txt-3, #525E73); }
+
+        /* Trade Feed */
+        .trade-entry {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            border-left: 3px solid transparent;
+            transition: background 0.15s;
+        }
+        .trade-entry:hover { background: rgba(255,255,255,0.02); }
+        .trade-entry.win { border-left-color: var(--deft-success, #06D6A0); }
+        .trade-entry.loss { border-left-color: var(--deft-danger, #FF6B6B); }
+        .trade-entry.pending { border-left-color: var(--deft-accent-warm, #4CC9F0); }
+
+        @keyframes trade-slide-in {
+            0% { opacity: 0; transform: translateY(-12px); max-height: 0; }
+            40% { max-height: 100px; }
+            100% { opacity: 1; transform: translateY(0); max-height: 100px; }
+        }
+        @keyframes trade-glow {
+            0% { box-shadow: inset 0 0 20px rgba(6,214,160,0.12); }
+            100% { box-shadow: inset 0 0 0 transparent; }
+        }
+
+        .trade-feed-scroll {
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        /* Sparkline */
+        .sparkline-container {
+            width: 100%; height: 60px;
+            position: relative;
+        }
+        .sparkline-container canvas {
+            width: 100% !important; height: 100% !important;
+        }
+
+        /* Collapsible */
+        .collapse-toggle {
+            cursor: pointer; user-select: none;
+        }
+        .collapse-toggle .chevron-icon {
+            transition: transform 0.2s;
+        }
+        .collapse-toggle.open .chevron-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Responsive */
+        @media (max-width: 767px) {
+            .block-btn { width: 40px; height: 40px; }
+            .block-square { width: 12px; height: 12px; }
+            .trade-feed-scroll { max-height: 70vh; }
+            .stat-value { font-size: 1.05rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PASSWORD GATE -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+            </div>
+            <div id="gateProfiles" class="flex justify-center gap-3 mb-6">
+                <div class="text-center text-xs text-txt-3">Loading profiles...</div>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- Top Nav -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/rdgr" class="nav-group-btn">Dashboard</a>
+                        <div class="nav-group">
+                            <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/chat">Rodger</a>
+                                <a href="/council">Council</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/crm" class="nav-group-btn">Outreach <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/crm">CRM</a>
+                                <a href="/email-outreach">Email</a>
+                                <a href="/social-dashboard">Social</a>
+                                <a href="/social-content">Social Content</a>
+                                <a href="/offer-studio">Offers</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/finance" class="nav-group-btn">Finance <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/finance">Dashboard</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brand-discovery" class="nav-group-btn">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brand-discovery">Discovery</a>
+                                <a href="/template-studio">Templates</a>
+                                <a href="/brand-documents">Docs</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/bsi-discovery" class="nav-group-btn">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/bsi-discovery">Discovery</a>
+                                <a href="/compliance">Compliance</a>
+                                <a href="/bsi-documents">Documents</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/content" class="nav-group-btn">Content <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/content">Publishing</a>
+                                <a href="/media">Media</a>
+                            </div>
+                        </div>
+                        <a href="/partnerships" class="nav-group-btn">Partnerships</a>
+                        <div class="nav-group">
+                            <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brain">BRAIN</a>
+                                <a href="/deft">DEFT</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/trading-desk" class="nav-group-btn active">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/trading-desk" class="active">Trading Desk</a>
+                                <a href="/trading-bot">Bot Dashboard</a>
+                                <a href="/trading-strategies">Strategies</a>
+                                <a href="/trading-monitor">Monitor</a>
+                                <a href="/trading-research">Research</a>
+                                <a href="/trading-discovery">Discovery</a>
+                                <a href="/trading-cross-pairs">Cross-Pairs</a>
+                                <a href="/trading-exchanges">Exchanges</a>
+                                <a href="/trading-config">Config</a>
+                                <a href="/trading-reports">Reports</a>
+                            </div>
+                        </div>
+                        <a href="/meetings" class="nav-group-btn">Meetings</a>
+                        <div class="nav-group">
+                            <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/our-workflows">Workflows</a>
+                                <a href="/org-chart">Org Map</a>
+                                <a href="/hub">HUB</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown"></div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2" title="Settings">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+            </div>
+        </nav>
+        <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
+
+        <!-- PAGE CONTENT -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 pb-24">
+
+            <!-- Page Heading -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+                <div>
+                    <h2 class="font-heading font-bold text-xl tracking-wide flex items-center gap-2">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="8" width="4" height="10" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="8" y="4" width="4" height="14" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="14" y="2" width="4" height="16" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+                        Trading Desk
+                    </h2>
+                    <p class="text-sm text-txt-2 mt-1">Manage capital blocks, monitor live trades, and control your strategies</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="refreshAll()" class="btn btn-ghost text-xs py-1.5 px-2.5">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="status-bar mb-5" id="statusBar">
+                <div class="flex items-center gap-2">
+                    <div class="status-dot offline" id="statusDot"></div>
+                    <span class="font-heading font-semibold text-sm" id="statusText">Connecting...</span>
+                </div>
+                <div id="modeBadge" class="badge badge-paper" style="display:none;">PAPER</div>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-xs text-txt-3">Equity</span>
+                    <span class="font-heading font-bold text-sm" id="statusEquity">--</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-xs text-txt-3">P&L</span>
+                    <span class="font-heading font-bold text-sm" id="statusPnl">--</span>
+                </div>
+                <div class="flex items-center gap-2 ml-auto">
+                    <span class="text-xs text-txt-3">Drawdown</span>
+                    <div class="dd-gauge">
+                        <div class="dd-gauge-fill" id="ddGaugeFill" style="width: 0%; background: var(--deft-success, #06D6A0);"></div>
+                    </div>
+                    <span class="font-mono text-xs" id="ddLabel">0%</span>
+                </div>
+            </div>
+
+            <!-- Two Column Layout: Capital Blocks + Performance Summary -->
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 mb-6">
+
+                <!-- Capital Blocks (3/5) -->
+                <div class="lg:col-span-3">
+                    <div class="flex items-center gap-2 mb-4">
+                        <h3 class="font-heading font-semibold text-sm tracking-wide">Capital Blocks</h3>
+                        <span class="text-xs text-txt-3 font-mono" id="totalBlocksLabel">0 active</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4" id="blocksGrid">
+                        <!-- Tier cards rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- Performance Summary (2/5) -->
+                <div class="lg:col-span-2">
+                    <h3 class="font-heading font-semibold text-sm tracking-wide mb-4">Performance</h3>
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="stat-chip"><div class="stat-value" id="perfEquity">--</div><div class="stat-label">Equity</div></div>
+                        <div class="stat-chip"><div class="stat-value" id="perfPeak">--</div><div class="stat-label">Peak</div></div>
+                        <div class="stat-chip"><div class="stat-value" id="perfDrawdown">--</div><div class="stat-label">Drawdown</div></div>
+                        <div class="stat-chip"><div class="stat-value" id="perfTrades">--</div><div class="stat-label">Trades Today</div></div>
+                        <div class="stat-chip"><div class="stat-value" style="color: var(--deft-accent-warm, #4CC9F0);" id="perfWinRate">--</div><div class="stat-label">Win Rate</div></div>
+                        <div class="stat-chip"><div class="stat-value" id="perfStrategies">--</div><div class="stat-label">Strategies</div></div>
+                        <div class="stat-chip"><div class="stat-value" id="perfPositions">--</div><div class="stat-label">Open Positions</div></div>
+                        <div class="stat-chip">
+                            <div class="stat-value" id="perfCircuit">--</div>
+                            <div class="stat-label">Circuit Breaker</div>
+                        </div>
+                    </div>
+
+                    <!-- Sparkline -->
+                    <div class="panel mb-4">
+                        <div class="panel-header" style="padding: 0.5rem 1rem;">
+                            <span class="text-xs text-txt-3 font-mono">Equity 24h</span>
+                        </div>
+                        <div class="panel-body" style="padding: 0.75rem 1rem;">
+                            <div class="sparkline-container">
+                                <canvas id="sparklineCanvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alerts -->
+                    <div class="panel">
+                        <div class="panel-header" style="padding: 0.5rem 1rem;">
+                            <span class="text-xs text-txt-3 font-mono">Recent Alerts</span>
+                        </div>
+                        <div class="panel-body" style="padding: 0.5rem 1rem;" id="alertsFeed">
+                            <div class="text-xs text-txt-3 py-2">No alerts</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Trade Feed -->
+            <div class="panel mb-6">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 10l3-4 2.5 2.5L10 4l3 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="font-heading font-semibold text-sm">Live Trade Feed</span>
+                        <span class="badge badge-healthy font-mono" id="tradeFeedCount">0</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-1.5 h-1.5 rounded-full" id="realtimeDot" style="background: var(--deft-txt-3);"></div>
+                        <span class="text-[0.6rem] text-txt-3 font-mono" id="realtimeLabel">OFFLINE</span>
+                    </div>
+                </div>
+                <div class="trade-feed-scroll" id="tradeFeed">
+                    <div class="text-center py-12 text-sm text-txt-3" id="tradeFeedEmpty">
+                        Waiting for signals...<br>
+                        <span class="text-xs">Strategies are evaluating market conditions</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Playbook (Collapsible) -->
+            <div class="panel">
+                <div class="panel-header collapse-toggle" id="playbookToggle" onclick="togglePlaybook()">
+                    <div class="flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2" width="11" height="10" rx="1.5" stroke="currentColor" stroke-width="1.1"/><path d="M4 5h6M4 7.5h4" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                        <span class="font-heading font-semibold text-sm">Playbook</span>
+                        <span class="badge badge-healthy font-mono" id="playbookCount">0</span>
+                    </div>
+                    <svg class="chevron-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                </div>
+                <div id="playbookBody" style="display: none;">
+                    <div class="overflow-x-auto">
+                        <table class="data-table" id="playbookTable">
+                            <thead>
+                                <tr>
+                                    <th>Strategy</th>
+                                    <th>Pair</th>
+                                    <th>TF</th>
+                                    <th>BT WR</th>
+                                    <th>BT Profit</th>
+                                    <th>Live Trades</th>
+                                    <th>Live WR</th>
+                                    <th>Live P&L</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="playbookTbody">
+                                <tr><td colspan="9" class="text-center text-txt-3 py-6 text-sm">No strategies loaded. The playbook will appear when strategies are active.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toasts"></div>
+
+    <script>
+    // ══════��════════════════════════════════
+    // CONSTANTS
+    // ═══════════════════════════════════════
+    const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    const BRAND_ID = 'carlton';
+    const CACHE_KEY = 'rdgr-profiles-cache';
+    const TIER_COLORS = ['#06D6A0', '#4CC9F0', '#C084FC', '#FFD93D', '#FB923C', '#FF6B6B', '#A855F7', '#38BDF8', '#EC4899', '#84CC16'];
+    const PERMANENT_TIER = 'quick_flip';
+
+    // ═══════════════════��═══════════════════
+    // STATE
+    // ════════════════════════��══════════════
+    let supabaseClient = null;
+    let realtimeChannel = null;
+    let latestMetrics = null;
+    let recentTrades = [];
+    let playbook = [];
+    let capitalBlocks = [];
+    let activeProfileId = null;
+    let gateSelectedProfile = null;
+    let sparklineData = [];
+    let createFormOpen = false;
+
+    try {
+        const _ap = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+        activeProfileId = _ap.id || null;
+    } catch(e) {}
+
+    // ═══════════════════���═══════════════════
+    // UTILITIES
+    // ��════════════════��═════════════════════
+    function esc(str) {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+
+    function toast(message, type = 'success') {
+        const container = document.getElementById('toasts');
+        const el = document.createElement('div');
+        el.className = `toast toast-${type}`;
+        el.textContent = message;
+        container.appendChild(el);
+        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 4000);
+    }
+
+    function formatPacificTime(dateStr) {
+        if (!dateStr) return '--';
+        try {
+            return new Date(dateStr).toLocaleTimeString('en-US', {
+                timeZone: 'America/Los_Angeles',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+            }) + ' PT';
+        } catch { return '--'; }
+    }
+
+    function formatPacific(dateStr) {
+        if (!dateStr) return '--';
+        try {
+            return new Date(dateStr).toLocaleString('en-US', {
+                timeZone: 'America/Los_Angeles',
+                month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit',
+            });
+        } catch { return '--'; }
+    }
+
+    function formatDuration(openedAt, closedAt) {
+        if (!openedAt || !closedAt) return '--';
+        const ms = new Date(closedAt) - new Date(openedAt);
+        const secs = Math.floor(ms / 1000);
+        if (secs < 60) return secs + 's';
+        if (secs < 3600) return Math.floor(secs / 60) + 'm ' + (secs % 60) + 's';
+        return Math.floor(secs / 3600) + 'h ' + Math.floor((secs % 3600) / 60) + 'm';
+    }
+
+    function formatUSD(val) {
+        if (val == null) return '--';
+        return '$' + Number(val).toFixed(2);
+    }
+
+    function formatPct(val) {
+        if (val == null) return '--';
+        return (Number(val) * 100).toFixed(1) + '%';
+    }
+
+    function timeAgo(dateStr) {
+        if (!dateStr) return '';
+        const diff = Date.now() - new Date(dateStr).getTime();
+        const mins = Math.floor(diff / 60000);
+        if (mins < 1) return 'just now';
+        if (mins < 60) return mins + 'm ago';
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return hrs + 'h ago';
+        return Math.floor(hrs / 24) + 'd ago';
+    }
+
+    function slugify(name) {
+        return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    }
+
+    function holdLabel(mins) {
+        if (mins < 60) return mins + ' min';
+        if (mins < 1440) return (mins / 60) + ' hour' + (mins > 60 ? 's' : '');
+        return (mins / 1440).toFixed(0) + ' day' + (mins > 1440 ? 's' : '');
+    }
+
+    // ═════���═════════════════════════════════
+    // SUPABASE HELPERS
+    // ═══════���═══════════════════════════════
+    async function supabaseSelect(table, query = '') {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
+        try {
+            const res = await fetch(url, {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+            });
+            if (!res.ok) { console.error('Supabase error:', res.status, await res.text()); return null; }
+            return await res.json();
+        } catch (err) { console.error('Supabase fetch error:', table, err); return null; }
+    }
+
+    async function supabaseWrite(table, method, body, matchQuery = '') {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`;
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation',
+                },
+                body: method === 'DELETE' ? undefined : JSON.stringify(body),
+            });
+            if (!res.ok) { console.error('Supabase write error:', res.status, await res.text()); return null; }
+            const text = await res.text();
+            return text ? JSON.parse(text) : true;
+        } catch (err) { console.error('Supabase write error:', err); return null; }
+    }
+
+    // ═════════��═════════════════��═══════════
+    // HEADER BAR
+    // ═══════════════��═══════════════════════
+    function updateHeaderBar(m) {
+        if (!m) return;
+        latestMetrics = m;
+
+        // Status dot
+        const dot = document.getElementById('statusDot');
+        const text = document.getElementById('statusText');
+        const status = m.bot_status || 'normal';
+        if (status === 'normal' || status === 'healthy') {
+            dot.className = 'status-dot live';
+            text.textContent = 'Bot Online';
+            text.style.color = 'var(--deft-success)';
+        } else if (status === 'reduced' || status === 'observation') {
+            dot.className = 'status-dot connecting';
+            text.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            text.style.color = 'var(--deft-warning)';
+        } else {
+            dot.className = 'status-dot offline';
+            text.textContent = 'Halted';
+            text.style.color = 'var(--deft-danger)';
+        }
+
+        // Mode badge
+        const badge = document.getElementById('modeBadge');
+        badge.style.display = '';
+        if (m.mode === 'live') {
+            badge.className = 'badge badge-live-mode';
+            badge.textContent = 'LIVE';
+        } else {
+            badge.className = 'badge badge-paper';
+            badge.textContent = 'PAPER';
+        }
+
+        // Equity
+        document.getElementById('statusEquity').textContent = formatUSD(m.equity);
+
+        // P&L
+        const pnl = m.realized_pnl_today != null ? m.realized_pnl_today : m.daily_pnl;
+        const pnlEl = document.getElementById('statusPnl');
+        if (pnl != null) {
+            pnlEl.textContent = (pnl >= 0 ? '+' : '') + formatUSD(pnl);
+            pnlEl.className = 'font-heading font-bold text-sm ' + (pnl >= 0 ? 'pnl-positive' : 'pnl-negative');
+        } else {
+            pnlEl.textContent = '$0.00';
+        }
+
+        // Drawdown gauge
+        const dd = Number(m.drawdown_pct || 0);
+        const ddPct = Math.min(dd * 100, 20);
+        const ddFill = document.getElementById('ddGaugeFill');
+        ddFill.style.width = (ddPct / 20 * 100) + '%';
+        if (ddPct < 5) ddFill.style.background = 'var(--deft-success)';
+        else if (ddPct < 10) ddFill.style.background = 'var(--deft-warning)';
+        else ddFill.style.background = 'var(--deft-danger)';
+        document.getElementById('ddLabel').textContent = ddPct.toFixed(1) + '%';
+    }
+
+    // ═══════════════════════════════════════
+    // PERFORMANCE SUMMARY
+    // ══════════════��════════════════════════
+    function updatePerformance(m) {
+        if (!m) return;
+        document.getElementById('perfEquity').textContent = formatUSD(m.equity);
+        document.getElementById('perfPeak').textContent = formatUSD(m.peak_equity);
+
+        const dd = Number(m.drawdown_pct || 0) * 100;
+        const ddEl = document.getElementById('perfDrawdown');
+        ddEl.textContent = dd.toFixed(1) + '%';
+        ddEl.style.color = dd < 5 ? 'var(--deft-success)' : dd < 10 ? 'var(--deft-warning)' : 'var(--deft-danger)';
+
+        document.getElementById('perfTrades').textContent = m.total_trades_today ?? '--';
+        document.getElementById('perfWinRate').textContent = m.win_rate != null ? formatPct(m.win_rate) : '--';
+        document.getElementById('perfStrategies').textContent = m.active_strategies ?? '--';
+        document.getElementById('perfPositions').textContent = m.open_positions ?? '--';
+
+        const cbEl = document.getElementById('perfCircuit');
+        const bs = m.bot_status || 'normal';
+        cbEl.textContent = bs.toUpperCase();
+        cbEl.style.color = (bs === 'normal' || bs === 'healthy') ? 'var(--deft-success)' : bs === 'halted' ? 'var(--deft-danger)' : 'var(--deft-warning)';
+    }
+
+    // ═════���═══════════════════════════��═════
+    // SPARKLINE
+    // ════════════════��══════════════════════
+    async function loadSparkline() {
+        const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        const data = await supabaseSelect('bot_metrics', `brand_id=eq.${BRAND_ID}&select=equity,peak_equity,created_at&order=created_at.asc&created_at=gte.${since}`);
+        if (!data || data.length === 0) return;
+        sparklineData = data;
+        drawSparkline(data);
+    }
+
+    function drawSparkline(data) {
+        const canvas = document.getElementById('sparklineCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width * 2;
+        canvas.height = rect.height * 2;
+        ctx.scale(2, 2);
+        const w = rect.width, h = rect.height;
+
+        const values = data.map(d => Number(d.equity));
+        const min = Math.min(...values) * 0.999;
+        const max = Math.max(...values) * 1.001;
+        const range = max - min || 1;
+        const peak = data.length > 0 ? Number(data[0].peak_equity || max) : max;
+
+        ctx.clearRect(0, 0, w, h);
+
+        // Peak line
+        const peakY = h - ((peak - min) / range) * h;
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(0, peakY);
+        ctx.lineTo(w, peakY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Line
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--deft-accent').trim() || '#06D6A0';
+        ctx.strokeStyle = accentColor;
+        ctx.lineWidth = 1.5;
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        values.forEach((v, i) => {
+            const x = (i / (values.length - 1)) * w;
+            const y = h - ((v - min) / range) * h;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        // Gradient fill
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, accentColor + '30');
+        grad.addColorStop(1, accentColor + '00');
+        ctx.lineTo(w, h);
+        ctx.lineTo(0, h);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // End dot
+        if (values.length > 0) {
+            const lastX = w;
+            const lastY = h - ((values[values.length - 1] - min) / range) * h;
+            ctx.beginPath();
+            ctx.arc(lastX, lastY, 3, 0, Math.PI * 2);
+            ctx.fillStyle = accentColor;
+            ctx.fill();
+        }
+    }
+
+    // ═══���═══════════════════════════════════
+    // ALERTS
+    // ���════════════════════��═════════════════
+    function renderAlerts(alerts) {
+        const container = document.getElementById('alertsFeed');
+        if (!alerts || alerts.length === 0) {
+            container.innerHTML = '<div class="text-xs text-txt-3 py-2">No recent alerts</div>';
+            return;
+        }
+        container.innerHTML = alerts.map(a => {
+            const color = a.severity === 'critical' ? 'var(--deft-danger)' : 'var(--deft-warning)';
+            return `<div class="flex items-start gap-2 py-2 border-b" style="border-color: rgba(255,255,255,0.03);">
+                <div class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style="background: ${color};"></div>
+                <div>
+                    <div class="text-xs" style="color: var(--deft-txt-2);">${esc(a.message)}</div>
+                    <div class="text-[0.6rem] text-txt-3 font-mono mt-0.5">${timeAgo(a.created_at)}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ════════════════════════════���══════════
+    // CAPITAL BLOCKS
+    // ��═══════════════════���══════════════════
+    function getTierColor(index) {
+        return TIER_COLORS[index % TIER_COLORS.length];
+    }
+
+    function renderBlocks() {
+        const grid = document.getElementById('blocksGrid');
+        const totalActive = capitalBlocks.reduce((s, b) => s + (b.active_count || 0), 0);
+        document.getElementById('totalBlocksLabel').textContent = totalActive + ' active';
+
+        let html = '';
+        capitalBlocks.forEach((block, idx) => {
+            const color = getTierColor(idx);
+            const isPermanent = block.tier_name === PERMANENT_TIER;
+            const squares = [];
+            for (let i = 0; i < (block.max_count || 10); i++) {
+                if (i < block.active_count) {
+                    squares.push(`<div class="block-square active" style="background: ${color}; --tier-color: ${color};"></div>`);
+                } else {
+                    squares.push(`<div class="block-square idle"></div>`);
+                }
+            }
+
+            html += `<div class="tier-card" style="--tier-color: ${color};" id="tier-${block.id}">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full" style="background: ${color};"></div>
+                            <span class="font-heading font-semibold text-sm">\$${Number(block.trade_size).toLocaleString()} ${esc(block.tier_name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()))}</span>
+                        </div>
+                        <div class="text-xs text-txt-3 mt-0.5 ml-4">Hold: ${holdLabel(block.max_hold_minutes)} max</div>
+                    </div>
+                    ${!isPermanent ? `<button onclick="deleteTier(${block.id}, '${esc(block.tier_name)}')" class="text-txt-3 hover:text-alert transition-colors p-1" title="Delete tier">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M4.5 3V2h3v1M3 3v7.5a1 1 0 001 1h4a1 1 0 001-1V3" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>` : ''}
+                </div>
+                <div class="mb-3">
+                    <div class="text-xs text-txt-3 mb-1.5">Active: <span class="font-mono font-semibold" style="color: ${color};" id="count-${block.id}">${block.active_count}</span> blocks</div>
+                    <div class="flex items-center gap-2">
+                        <button class="block-btn" onclick="adjustBlock(${block.id}, -1)" ${block.active_count <= 0 ? 'disabled' : ''}>−</button>
+                        <div class="flex flex-wrap gap-1 flex-1">${squares.join('')}</div>
+                        <button class="block-btn" onclick="adjustBlock(${block.id}, 1)" ${block.active_count >= (block.max_count || 10) ? 'disabled' : ''}>+</button>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 text-xs text-txt-3 font-mono border-t pt-2" style="border-color: rgba(255,255,255,0.04);">
+                    <span>Trades: --</span>
+                    <span>P&L: --</span>
+                    <span>WR: --</span>
+                </div>
+            </div>`;
+        });
+
+        // Ghost card for creating new tier
+        html += `<div class="ghost-card" id="ghostCard" onclick="openCreateForm()">
+            <div class="text-center" id="ghostCardContent">
+                <div class="text-2xl mb-1" style="color: var(--deft-accent); opacity: 0.6;">+</div>
+                <div class="text-sm font-heading font-semibold" style="color: var(--deft-txt-2);">Create New Tier</div>
+                <div class="text-xs text-txt-3 mt-0.5">Unlock a new capital level</div>
+            </div>
+            <div class="create-form w-full" id="createForm" onclick="event.stopPropagation()">
+                <div class="text-sm font-heading font-semibold mb-4" style="color: var(--deft-txt);">Create New Capital Tier</div>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs text-txt-3 block mb-1">Tier Name</label>
+                        <input type="text" class="form-input" id="newTierName" placeholder="e.g., Micro Scalp" maxlength="30">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-txt-3 block mb-1">Trade Size ($)</label>
+                            <input type="number" class="form-input" id="newTierSize" placeholder="100" min="1">
+                        </div>
+                        <div>
+                            <label class="text-xs text-txt-3 block mb-1">Max Hold (min)</label>
+                            <input type="number" class="form-input" id="newTierHold" placeholder="15" min="1">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs text-txt-3 block mb-1">Max Blocks</label>
+                        <input type="number" class="form-input" id="newTierMax" value="10" min="1" max="20">
+                    </div>
+                    <div class="flex items-center gap-2 pt-1">
+                        <button class="btn btn-ghost text-xs flex-1" onclick="closeCreateForm()">Cancel</button>
+                        <button class="btn btn-primary text-xs flex-1" onclick="createTier()">Create Tier</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+        grid.innerHTML = html;
+    }
+
+    async function adjustBlock(blockId, delta) {
+        const block = capitalBlocks.find(b => b.id === blockId);
+        if (!block) return;
+        const newCount = Math.max(0, Math.min(block.max_count || 10, block.active_count + delta));
+        if (newCount === block.active_count) return;
+
+        // Optimistic update
+        block.active_count = newCount;
+        renderBlocks();
+
+        // Animate count bump
+        const countEl = document.getElementById('count-' + blockId);
+        if (countEl) { countEl.style.animation = 'count-bump 0.2s ease'; setTimeout(() => countEl.style.animation = '', 200); }
+
+        // PATCH Supabase
+        const result = await supabaseWrite('capital_blocks', 'PATCH', { active_count: newCount, updated_at: new Date().toISOString() }, `id=eq.${blockId}`);
+        if (!result) {
+            toast('Failed to update block count', 'error');
+            block.active_count = newCount - delta; // revert
+            renderBlocks();
+        }
+    }
+
+    function openCreateForm() {
+        if (createFormOpen) return;
+        createFormOpen = true;
+        const ghost = document.getElementById('ghostCard');
+        ghost.style.cursor = 'default';
+        document.getElementById('ghostCardContent').style.display = 'none';
+        const form = document.getElementById('createForm');
+        form.classList.add('open');
+        setTimeout(() => document.getElementById('newTierName').focus(), 100);
+    }
+
+    function closeCreateForm() {
+        createFormOpen = false;
+        const ghost = document.getElementById('ghostCard');
+        ghost.style.cursor = 'pointer';
+        document.getElementById('ghostCardContent').style.display = '';
+        document.getElementById('createForm').classList.remove('open');
+        document.getElementById('newTierName').value = '';
+        document.getElementById('newTierSize').value = '';
+        document.getElementById('newTierHold').value = '';
+        document.getElementById('newTierMax').value = '10';
+    }
+
+    async function createTier() {
+        const name = document.getElementById('newTierName').value.trim();
+        const size = Number(document.getElementById('newTierSize').value);
+        const hold = Number(document.getElementById('newTierHold').value);
+        const max = Number(document.getElementById('newTierMax').value) || 10;
+
+        if (!name) { toast('Name is required', 'error'); return; }
+        if (!size || size <= 0) { toast('Trade size must be positive', 'error'); return; }
+        if (!hold || hold <= 0) { toast('Hold time must be positive', 'error'); return; }
+
+        const tierName = slugify(name);
+        if (capitalBlocks.some(b => b.tier_name === tierName)) {
+            toast('A tier with that name already exists', 'error');
+            return;
+        }
+
+        const payload = {
+            brand_id: BRAND_ID,
+            tier_name: tierName,
+            trade_size: size,
+            max_hold_minutes: hold,
+            active_count: 0,
+            max_count: Math.min(20, Math.max(1, max)),
+        };
+
+        const result = await supabaseWrite('capital_blocks', 'POST', payload);
+        if (result && Array.isArray(result) && result.length > 0) {
+            capitalBlocks.push(result[0]);
+            closeCreateForm();
+            renderBlocks();
+            toast(`Tier created: ${name}`, 'success');
+        } else {
+            toast('Failed to create tier', 'error');
+        }
+    }
+
+    async function deleteTier(blockId, tierName) {
+        if (tierName === PERMANENT_TIER) { toast('Cannot delete the default tier', 'error'); return; }
+        if (!confirm(`Remove tier "${tierName.replace(/_/g, ' ')}"? This cannot be undone.`)) return;
+
+        const result = await supabaseWrite('capital_blocks', 'DELETE', null, `id=eq.${blockId}`);
+        if (result !== null) {
+            capitalBlocks = capitalBlocks.filter(b => b.id !== blockId);
+            renderBlocks();
+            toast('Tier removed', 'success');
+        } else {
+            toast('Failed to delete tier', 'error');
+        }
+    }
+
+    // ═════════════��═════════════════════════
+    // TRADE FEED
+    // ═══════════════════════��═══════════════
+    function renderTradeFeed(trades) {
+        const feed = document.getElementById('tradeFeed');
+        const empty = document.getElementById('tradeFeedEmpty');
+        const countBadge = document.getElementById('tradeFeedCount');
+
+        if (!trades || trades.length === 0) {
+            if (empty) empty.style.display = '';
+            countBadge.textContent = '0';
+            return;
+        }
+        if (empty) empty.style.display = 'none';
+        countBadge.textContent = trades.length;
+
+        feed.innerHTML = trades.map(t => tradeEntryHTML(t)).join('');
+    }
+
+    function tradeEntryHTML(t, isNew = false) {
+        const pnl = Number(t.pnl || 0);
+        const pnlPct = Number(t.pnl_pct || 0);
+        const cls = pnl >= 0 ? 'win' : 'loss';
+        const pnlColor = pnl >= 0 ? 'pnl-positive' : 'pnl-negative';
+        const animStyle = isNew ? 'animation: trade-slide-in 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards, trade-glow 1.5s ease forwards;' : '';
+
+        return `<div class="trade-entry ${cls}" style="${animStyle}">
+            <div class="flex items-center justify-between flex-wrap gap-1">
+                <div class="flex items-center gap-2">
+                    <span class="font-mono text-[0.65rem] text-txt-3">${formatPacificTime(t.closed_at || t.opened_at)}</span>
+                    <span class="badge ${t.side === 'sell' ? 'badge-live-mode' : 'badge-paper'}">${esc((t.side || 'buy').toUpperCase())}</span>
+                    <span class="font-mono font-medium text-sm">${esc(t.pair)}</span>
+                </div>
+                <span class="font-mono font-semibold text-sm ${pnlColor}">${pnl >= 0 ? '+' : ''}${formatUSD(pnl)} (${pnl >= 0 ? '+' : ''}${(pnlPct * 100).toFixed(2)}%)</span>
+            </div>
+            <div class="text-[0.65rem] text-txt-3 mt-0.5 ml-[4.5rem]">
+                ${esc(t.strategy_name || '--')} | ${esc(t.timeframe || '--')} | held ${formatDuration(t.opened_at, t.closed_at)}
+            </div>
+        </div>`;
+    }
+
+    function prependTrade(trade) {
+        const feed = document.getElementById('tradeFeed');
+        const empty = document.getElementById('tradeFeedEmpty');
+        if (empty) empty.style.display = 'none';
+
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = tradeEntryHTML(trade, true);
+        feed.prepend(wrapper.firstElementChild);
+
+        // Trim to 50
+        while (feed.children.length > 50) feed.lastElementChild.remove();
+
+        const countBadge = document.getElementById('tradeFeedCount');
+        countBadge.textContent = feed.children.length;
+    }
+
+    // ���════════════════════════════���═════════
+    // PLAYBOOK
+    // ═════════════════════════════���═════════
+    function renderPlaybook(strategies) {
+        const tbody = document.getElementById('playbookTbody');
+        const countBadge = document.getElementById('playbookCount');
+        playbook = strategies || [];
+        countBadge.textContent = playbook.length;
+
+        if (playbook.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-txt-3 py-6 text-sm">No strategies loaded. The playbook will appear when strategies are active.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = playbook.map(s => {
+            const statusCls = s.status === 'active' ? 'badge-healthy' : 'badge-paper';
+            const pnl = Number(s.live_total_pnl || 0);
+            return `<tr>
+                <td class="font-mono text-xs">${esc(s.strategy_name)}</td>
+                <td><span class="badge badge-paper">${esc(s.pair)}</span></td>
+                <td class="font-mono">${esc(s.timeframe)}</td>
+                <td class="font-mono">${s.bt_win_rate != null ? formatPct(s.bt_win_rate) : '--'}</td>
+                <td class="font-mono">${s.bt_avg_profit != null ? (s.bt_avg_profit * 100).toFixed(2) + '%' : '--'}</td>
+                <td class="font-mono">${s.live_total_trades ?? '--'}</td>
+                <td class="font-mono">${s.live_win_rate != null ? formatPct(s.live_win_rate) : '--'}</td>
+                <td class="font-mono ${pnl >= 0 ? 'pnl-positive' : 'pnl-negative'}">${pnl >= 0 ? '+' : ''}${formatUSD(pnl)}</td>
+                <td>
+                    <button class="badge ${statusCls} cursor-pointer hover:opacity-80 transition-opacity" onclick="toggleStrategy('${esc(s.uid)}', '${s.status}')">
+                        ${(s.status || 'active').toUpperCase()}
+                    </button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    async function toggleStrategy(uid, currentStatus) {
+        const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+        const result = await supabaseWrite('bot_playbook', 'PATCH', { status: newStatus, updated_at: new Date().toISOString() }, `uid=eq.${uid}`);
+        if (result) {
+            const s = playbook.find(p => p.uid === uid);
+            if (s) s.status = newStatus;
+            renderPlaybook(playbook);
+            toast(`Strategy ${newStatus === 'active' ? 'resumed' : 'paused'}`, 'success');
+        } else {
+            toast('Failed to update strategy', 'error');
+        }
+    }
+
+    function togglePlaybook() {
+        const body = document.getElementById('playbookBody');
+        const toggle = document.getElementById('playbookToggle');
+        const isOpen = body.style.display !== 'none';
+        body.style.display = isOpen ? 'none' : '';
+        toggle.classList.toggle('open', !isOpen);
+    }
+
+    // ═══════════════════��═══════════════════
+    // REALTIME
+    // ══��══════════════���═════════════════════
+    function initRealtime() {
+        if (typeof window.supabase === 'undefined' || !window.supabase.createClient) {
+            console.warn('Supabase client not loaded');
+            return;
+        }
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        realtimeChannel = supabaseClient.channel('trading-desk')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bot_metrics' }, payload => {
+                const row = payload.new;
+                if (row.brand_id !== BRAND_ID) return;
+                updateHeaderBar(row);
+                updatePerformance(row);
+                // Append to sparkline
+                if (sparklineData.length > 0) {
+                    sparklineData.push(row);
+                    if (sparklineData.length > 1440) sparklineData.shift();
+                    drawSparkline(sparklineData);
+                }
+            })
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bot_trades' }, payload => {
+                const row = payload.new;
+                if (row.brand_id !== BRAND_ID) return;
+                recentTrades.unshift(row);
+                if (recentTrades.length > 50) recentTrades.pop();
+                prependTrade(row);
+                toast(`Trade: ${row.pair} ${(row.side || '').toUpperCase()} PnL: ${formatUSD(row.pnl)}`, Number(row.pnl || 0) >= 0 ? 'success' : 'error');
+            })
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bot_events' }, payload => {
+                const row = payload.new;
+                if (row.brand_id !== BRAND_ID) return;
+                if (row.severity === 'critical') {
+                    toast(row.message, 'error');
+                } else if (row.severity === 'warning') {
+                    toast(row.message, 'warning');
+                }
+                // Handle trade_opened events as pending entries
+                if (row.event_type === 'trade_opened' && row.details) {
+                    const d = typeof row.details === 'string' ? JSON.parse(row.details) : row.details;
+                    prependTrade({
+                        pair: d.pair || '--',
+                        side: d.side || 'buy',
+                        pnl: 0,
+                        pnl_pct: 0,
+                        strategy_name: d.strategy_name || '',
+                        timeframe: d.timeframe || '',
+                        opened_at: row.created_at,
+                        closed_at: null,
+                        status: 'open',
+                    });
+                }
+            })
+            .subscribe(status => {
+                const dot = document.getElementById('realtimeDot');
+                const label = document.getElementById('realtimeLabel');
+                if (status === 'SUBSCRIBED') {
+                    dot.style.background = 'var(--deft-success)';
+                    dot.style.boxShadow = '0 0 6px rgba(6,214,160,0.4)';
+                    label.textContent = 'LIVE';
+                    label.style.color = 'var(--deft-success)';
+                } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                    dot.style.background = 'var(--deft-danger)';
+                    dot.style.boxShadow = 'none';
+                    label.textContent = 'ERROR';
+                    label.style.color = 'var(--deft-danger)';
+                } else {
+                    dot.style.background = 'var(--deft-warning)';
+                    dot.style.boxShadow = '0 0 6px rgba(255,217,61,0.4)';
+                    label.textContent = 'CONNECTING';
+                    label.style.color = 'var(--deft-warning)';
+                }
+            });
+    }
+
+    // ════════════════════════════════��══════
+    // REFRESH / INIT
+    // ═══════════════════��═══════════════════
+    async function refreshAll() {
+        const [metrics, trades, pb, alerts, blocks] = await Promise.all([
+            supabaseSelect('bot_metrics', `brand_id=eq.${BRAND_ID}&order=created_at.desc&limit=1`),
+            supabaseSelect('bot_trades', `brand_id=eq.${BRAND_ID}&order=closed_at.desc&limit=50`),
+            supabaseSelect('bot_playbook', `brand_id=eq.${BRAND_ID}&status=eq.active&order=bt_avg_profit.desc&limit=50`),
+            supabaseSelect('bot_events', `brand_id=eq.${BRAND_ID}&severity=in.(warning,critical)&order=created_at.desc&limit=5`),
+            supabaseSelect('capital_blocks', `brand_id=eq.${BRAND_ID}&order=id.asc`),
+        ]);
+
+        if (metrics && metrics.length > 0) {
+            updateHeaderBar(metrics[0]);
+            updatePerformance(metrics[0]);
+        }
+
+        recentTrades = trades || [];
+        renderTradeFeed(recentTrades);
+        renderPlaybook(pb || []);
+        renderAlerts(alerts || []);
+
+        if (blocks && blocks.length > 0) {
+            capitalBlocks = blocks;
+        }
+        renderBlocks();
+
+        loadSparkline();
+    }
+
+    async function initPage() {
+        await refreshAll();
+        initRealtime();
+    }
+
+    // Resize sparkline
+    window.addEventListener('resize', () => {
+        if (sparklineData.length > 0) drawSparkline(sparklineData);
+    });
+
+    // ═══════════════════════════════════════
+    // GATE & PROFILE SYSTEM
+    // ══════��═════════════════��══════════════
+    function getCachedProfiles(callback) {
+        try {
+            const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+            if (cached.profiles && (Date.now() - cached.ts) < 300000) {
+                callback(cached.profiles);
+                return;
+            }
+        } catch(e) {}
+        fetch(`${SUPABASE_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+        }).then(r => r.json()).then(profiles => {
+            if (profiles && Array.isArray(profiles) && profiles.length > 0) {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ profiles: profiles, ts: Date.now() }));
+            }
+            callback(profiles);
+        }).catch(() => callback([]));
+    }
+
+    function loadGateProfiles() {
+        getCachedProfiles(function(profiles) {
+            const container = document.getElementById('gateProfiles');
+            if (!container || !profiles || !profiles.length) return;
+            const saved = localStorage.getItem('rdgr-active-profile');
+            let savedId = null;
+            if (saved) { try { savedId = JSON.parse(saved).id; } catch(e) {} }
+            container.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?';
+                const initial = name[0].toUpperCase();
+                const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+                const color = colors[name] || '#8A95A9';
+                return `<button type="button" onclick="selectGateProfile('${p.user_id}','${name.replace(/'/g, '&#39;')}',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="if(!this.classList.contains('selected'))this.style.background='rgba(255,255,255,0.02)'">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:${color}20;color:${color};border:2px solid transparent;">${initial}</div>
+                    <span class="text-xs" style="color:#8A95A9;">${name}</span>
+                </button>`;
+            }).join('');
+            if (savedId) {
+                const btns = container.querySelectorAll('.gate-profile-btn');
+                btns.forEach(btn => { if (btn.getAttribute('onclick').includes(savedId)) btn.click(); });
+            }
+        });
+    }
+
+    function selectGateProfile(userId, name, el) {
+        gateSelectedProfile = { id: userId, name: name };
+        document.querySelectorAll('.gate-profile-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            btn.style.background = 'rgba(255,255,255,0.02)';
+            btn.style.borderColor = 'transparent';
+            btn.querySelector('.w-10').style.borderColor = 'transparent';
+        });
+        el.classList.add('selected');
+        el.style.background = 'rgba(255,255,255,0.06)';
+        el.style.borderColor = 'rgba(6,214,160,0.4)';
+        el.querySelector('.w-10').style.borderColor = el.querySelector('.w-10').style.color;
+        const btn = document.getElementById('gateSubmitBtn');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.textContent = 'Sign In as ' + name;
+        document.getElementById('gateInput').focus();
+    }
+
+    function handleGate(e) {
+        e.preventDefault();
+        const input = document.getElementById('gateInput').value;
+        if (input === 'Advance1!') {
+            localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+            if (gateSelectedProfile) {
+                localStorage.setItem('rdgr-active-profile', JSON.stringify(gateSelectedProfile));
+                activeProfileId = gateSelectedProfile.id;
+            }
+            document.getElementById('gate').classList.add('hidden');
+            document.getElementById('mainContent').style.opacity = '1';
+            initPage();
+            return false;
+        }
+        document.getElementById('gateError').classList.add('show');
+        document.getElementById('gateInput').value = '';
+        document.getElementById('gateInput').focus();
+        setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+        return false;
+    }
+
+    // Profile dropdown
+    (function populateProfileDD() {
+        getCachedProfiles(function(profiles) {
+            const dd = document.getElementById('profileDropdown');
+            if (!dd || !profiles || !profiles.length) return;
+            const activeId = activeProfileId;
+            dd.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?';
+                const initial = name[0].toUpperCase();
+                const isActive = p.user_id === activeId;
+                return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, '&#39;')}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                    <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive ? 'rgba(6,214,160,0.15)' : 'rgba(255,255,255,0.06)'};color:${isActive ? '#06D6A0' : '#8A95A9'};">${initial}</div>
+                    <span>${name}</span>
+                    ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+                </button>`;
+            }).join('');
+            dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+        });
+    })();
+
+    function toggleProfileDD() {
+        const dd = document.getElementById('profileDropdown');
+        dd.classList.toggle('hidden');
+        if (!dd.classList.contains('hidden')) {
+            setTimeout(() => document.addEventListener('click', function closePDD(e) {
+                if (!document.getElementById('profileSwitcher').contains(e.target)) {
+                    dd.classList.add('hidden');
+                }
+                document.removeEventListener('click', closePDD);
+            }), 0);
+        }
+    }
+
+    function selectProfileGlobal(userId, name) {
+        localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+        location.reload();
+    }
+
+    function signOut() {
+        localStorage.removeItem('rdgr-session');
+        localStorage.removeItem('rdgr-active-profile');
+        location.reload();
+    }
+
+    // ═══════════════════════════════════════
+    // BOOT
+    // ══════════���═══════��════════════════════
+    if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity = '1';
+        initPage();
+    }
+
+    if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+        loadGateProfiles();
+    }
+
+    // Update profile display
+    try {
+        const _ap = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+        if (_ap.name) {
+            document.getElementById('profileName').textContent = _ap.name;
+            document.getElementById('profileAvatar').textContent = _ap.name[0].toUpperCase();
+            const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+            const c = colors[_ap.name] || '#8A95A9';
+            document.getElementById('profileAvatar').style.background = c + '26';
+            document.getElementById('profileAvatar').style.color = c;
+        }
+    } catch(e) {}
+
+    </script>
+</body>
+</html>
