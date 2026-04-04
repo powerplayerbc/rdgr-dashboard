@@ -15,7 +15,7 @@ const path = require('path');
 // Each group: { label, href, items: [{ label, href }] }
 // Groups with no items array are standalone tabs
 const NAV_GROUPS = [
-    { label: 'Dashboard', href: '/rdgr' },
+    { label: 'Dashboard', href: '/' },
     { label: 'Rodger', href: '/chat', items: [
         { label: 'Rodger', href: '/chat' },
         { label: 'Council', href: '/council' },
@@ -49,7 +49,8 @@ const NAV_GROUPS = [
         { label: 'BRAIN', href: '/brain' },
         { label: 'DEFT', href: '/deft' },
     ]},
-    { label: 'Trading', href: '/trading-bot', items: [
+    { label: 'Trading', href: '/trading-desk', items: [
+        { label: 'Trading Desk', href: '/trading-desk' },
         { label: 'Bot Dashboard', href: '/trading-bot' },
         { label: 'Strategies', href: '/trading-strategies' },
         { label: 'Monitor', href: '/trading-monitor' },
@@ -70,7 +71,7 @@ const NAV_GROUPS = [
 
 // Map page URLs to source filenames (for active state detection)
 const PAGE_URL_MAP = {
-    'index.html': '/rdgr',
+    'index.html': '/',
     'chat.html': '/chat',
     'council.html': '/council',
     'crm.html': '/crm',
@@ -109,6 +110,7 @@ const PAGE_URL_MAP = {
     'trading-cross-pairs.html': '/trading-cross-pairs',
     'trading-exchanges.html': '/trading-exchanges',
     'trading-config.html': '/trading-config',
+    'trading-desk.html': '/trading-desk',
     'trading-reports.html': '/trading-reports',
     'subscribers.html': '/subscribers',
     'partnership.html': '/partnerships',
@@ -380,7 +382,7 @@ let updated = 0;
 files.forEach(file => {
     const filePath = path.join(dir, file);
     let content = fs.readFileSync(filePath, 'utf8');
-    const activeUrl = PAGE_URL_MAP[file] || '/rdgr';
+    const activeUrl = PAGE_URL_MAP[file] || '/';
 
     // 1. Inject dropdown CSS if not already present
     if (!content.includes('.nav-group-btn {')) {

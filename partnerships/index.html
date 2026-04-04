@@ -94,6 +94,91 @@
             background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
             color: var(--deft-accent, #06D6A0) !important;
         }
+        /* ── Mobile Nav System ── */
+        .mobile-menu-btn {
+            display: none;
+            align-items: center; justify-content: center;
+            width: 32px; height: 32px;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.375rem;
+            background: transparent;
+            color: var(--deft-txt-2, #8A95A9);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            flex-shrink: 0;
+        }
+        .mobile-menu-btn:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        @media (max-width: 639px) { .mobile-menu-btn { display: flex; } }
+        #mobileNavOverlay {
+            position: fixed; inset: 0; z-index: 200;
+            display: none; opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        #mobileNavOverlay.open { display: flex; opacity: 1; }
+        .mobile-nav-backdrop {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.5);
+        }
+        .mobile-nav-sidebar {
+            position: relative; z-index: 1;
+            width: 280px; max-width: 85vw; height: 100vh;
+            background: var(--deft-base, #11131A);
+            border-right: 1px solid var(--deft-border, #2A2E3D);
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            padding: 0.75rem 0;
+        }
+        #mobileNavOverlay.open .mobile-nav-sidebar { transform: translateX(0); }
+        .mobile-nav-close {
+            display: flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px;
+            border: none; background: transparent;
+            color: var(--deft-txt-3, #525E73);
+            cursor: pointer; font-size: 1.1rem;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+        }
+        .mobile-nav-close:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link {
+            display: block;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.75rem; font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            transition: background 0.12s, color 0.12s;
+        }
+        .mobile-nav-link:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        .mobile-nav-group-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 0.5rem 1.25rem;
+            font-size: 0.75rem; font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            background: transparent; border: none;
+            cursor: pointer;
+            transition: background 0.12s, color 0.12s;
+            text-align: left;
+        }
+        .mobile-nav-group-btn:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-group-btn.active { color: var(--deft-accent, #06D6A0); }
+        .mobile-nav-group-btn .mn-chevron {
+            transition: transform 0.2s; opacity: 0.5;
+        }
+        .mobile-nav-group-btn.expanded .mn-chevron { transform: rotate(180deg); opacity: 0.8; }
+        .mobile-nav-children {
+            display: none;
+            padding-left: 1rem;
+        }
+        .mobile-nav-children.open { display: block; }
+        .mobile-nav-divider {
+            height: 1px;
+            background: var(--deft-border, #2A2E3D);
+            margin: 0.375rem 1rem;
+        }
         .btn-primary {
             background: var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
             color: var(--deft-accent, #06D6A0) !important;
@@ -647,8 +732,9 @@
                 <div class="flex items-center gap-3">
                     <div class="pulse-dot"></div>
                     <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <button class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Open menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
                     <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
-                        <a href="/rdgr" class="nav-group-btn">Dashboard</a>
+                        <a href="/" class="nav-group-btn">Dashboard</a>
                         <div class="nav-group">
                             <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -704,8 +790,9 @@
                             </div>
                         </div>
                         <div class="nav-group">
-                            <a href="/trading-bot" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <a href="/trading-desk" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
+                                <a href="/trading-desk">Trading Desk</a>
                                 <a href="/trading-bot">Bot Dashboard</a>
                                 <a href="/trading-strategies">Strategies</a>
                                 <a href="/trading-monitor">Monitor</a>
@@ -748,7 +835,87 @@
                     </button>
                 </div>
             </div>
+
+        <!-- Mobile Nav Overlay -->
+        <div id="mobileNavOverlay">
+            <div class="mobile-nav-backdrop"></div>
+            <div class="mobile-nav-sidebar">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 1rem 0.75rem;">
+                    <span style="font-size:0.8rem;font-weight:700;color:var(--deft-txt,#E8ECF1);">Menu</span>
+                    <button class="mobile-nav-close" onclick="toggleMobileNav()">&times;</button>
+                </div>
+                <div class="mobile-nav-divider"></div>
+                <a href="/" class="mobile-nav-link">Dashboard</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Rodger <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/chat" class="mobile-nav-link">Rodger</a>
+    <a href="/council" class="mobile-nav-link">Council</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Outreach <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/crm" class="mobile-nav-link">CRM</a>
+    <a href="/email-outreach" class="mobile-nav-link">Email</a>
+    <a href="/social-dashboard" class="mobile-nav-link">Social</a>
+    <a href="/social-content" class="mobile-nav-link">Social Content</a>
+    <a href="/offer-studio" class="mobile-nav-link">Offers</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Finance <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/finance" class="mobile-nav-link">Dashboard</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Brand <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/brand-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/template-studio" class="mobile-nav-link">Templates</a>
+    <a href="/brand-documents" class="mobile-nav-link">Docs</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Policy <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/bsi-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/compliance" class="mobile-nav-link">Compliance</a>
+    <a href="/bsi-documents" class="mobile-nav-link">Documents</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Content <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/content" class="mobile-nav-link">Publishing</a>
+    <a href="/media" class="mobile-nav-link">Media</a>
+</div>
+<a href="/partnerships" class="mobile-nav-link active">Partnerships</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">BRAIN <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/brain" class="mobile-nav-link">BRAIN</a>
+    <a href="/deft" class="mobile-nav-link">DEFT</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Trading <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/trading-desk" class="mobile-nav-link">Trading Desk</a>
+    <a href="/trading-bot" class="mobile-nav-link">Bot Dashboard</a>
+    <a href="/trading-strategies" class="mobile-nav-link">Strategies</a>
+    <a href="/trading-monitor" class="mobile-nav-link">Monitor</a>
+    <a href="/trading-research" class="mobile-nav-link">Research</a>
+    <a href="/trading-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/trading-cross-pairs" class="mobile-nav-link">Cross-Pairs</a>
+    <a href="/trading-exchanges" class="mobile-nav-link">Exchanges</a>
+    <a href="/trading-config" class="mobile-nav-link">Config</a>
+    <a href="/trading-reports" class="mobile-nav-link">Reports</a>
+</div>
+<a href="/meetings" class="mobile-nav-link">Meetings</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">System <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/our-workflows" class="mobile-nav-link">Workflows</a>
+    <a href="/org-chart" class="mobile-nav-link">Org Map</a>
+    <a href="/hub" class="mobile-nav-link">HUB</a>
+</div>
+
+            </div>
+        </div>
         </nav>
+        <script>
+function toggleMobileNav(){var o=document.getElementById('mobileNavOverlay');if(o.classList.contains('open')){o.style.opacity='0';o.querySelector('.mobile-nav-sidebar').style.transform='translateX(-100%)';setTimeout(function(){o.classList.remove('open');o.style.display='none';},250);}else{o.style.display='flex';requestAnimationFrame(function(){o.classList.add('open');o.style.opacity='1';o.querySelector('.mobile-nav-sidebar').style.transform='translateX(0)';});}}
+function toggleMobileAccordion(btn){btn.classList.toggle('expanded');var ch=btn.nextElementSibling;ch.classList.toggle('open');}
+document.getElementById('mobileNavOverlay')?.querySelector('.mobile-nav-backdrop')?.addEventListener('click',function(){toggleMobileNav();});
+document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function(a){a.addEventListener('click',function(){toggleMobileNav();});});
+</script>
         <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
 
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
