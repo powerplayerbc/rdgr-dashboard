@@ -1204,7 +1204,6 @@
                             </div>
                         </div>
                         <a href="/partnerships" class="nav-group-btn">Partnerships</a>
-                        <a href="/finance" class="nav-group-btn">Finance</a>
                         <div class="nav-group">
                             <a href="/brain" class="nav-group-btn active">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -1561,7 +1560,7 @@
                     <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--deft-txt-2);">Food Database</span>
                     <span class="text-xs font-mono" style="color: var(--deft-txt-3);" id="foodCount"></span>
                 </div>
-                <button class="btn btn-primary text-xs" onclick="openModal('addFoodModal')">
+                <button class="btn btn-primary text-xs" onclick="resetFoodModal();openModal('addFoodModal')">
                     <span class="flex items-center gap-1.5">
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2.5v7M2.5 6h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                         Add Food
@@ -1608,10 +1607,11 @@
                                 <th class="text-right py-2 px-3 font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-3);">Net Carbs</th>
                                 <th class="text-right py-2 px-3 font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-3);">Fiber</th>
                                 <th class="text-center py-2 px-3 font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-3);">Keto</th>
+                                <th class="text-center py-2 px-2 font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-3);"></th>
                             </tr>
                         </thead>
                         <tbody id="foodTableBody">
-                            <tr><td colspan="8" class="py-8 text-center" style="color: var(--deft-txt-3);">Loading food database...</td></tr>
+                            <tr><td colspan="9" class="py-8 text-center" style="color: var(--deft-txt-3);">Loading food database...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -2512,11 +2512,11 @@
 
     <!-- Toast container -->
     <!-- ═══ ADD FOOD MODAL ═══ -->
-    <div class="modal-backdrop" id="addFoodModal" onclick="if(event.target===this)closeModal('addFoodModal')">
+    <div class="modal-backdrop" id="addFoodModal" onclick="if(event.target===this){closeModal('addFoodModal');resetFoodModal();}">
         <div class="modal-content" style="max-width: 560px;">
             <div class="panel-header">
                 <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--deft-txt-2);">Add Food to Database</span>
-                <button onclick="closeModal('addFoodModal')" class="p-1 rounded hover:opacity-70 transition-opacity" style="color: var(--deft-txt-3);">
+                <button onclick="closeModal('addFoodModal');resetFoodModal();" class="p-1 rounded hover:opacity-70 transition-opacity" style="color: var(--deft-txt-3);">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </button>
             </div>
@@ -3503,6 +3503,7 @@ let foodBrowserLoaded = false;
 let foodSearchQuery = '';
 let foodCategory = 'all';
 let foodOffset = 0;
+let editingFoodId = null;
 const FOOD_LIMIT = 50;
 
 async function loadFoodBrowser() {
@@ -3547,7 +3548,7 @@ function renderFoodTable() {
     document.getElementById('foodCount').textContent = `${allFoods.length} food${allFoods.length !== 1 ? 's' : ''}`;
 
     if (allFoods.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center" style="color: var(--deft-txt-3);">No foods found${foodSearchQuery ? ' — try a different search' : ''}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center" style="color: var(--deft-txt-3);">No foods found${foodSearchQuery ? ' — try a different search' : ''}</td></tr>`;
         return;
     }
 
@@ -3575,6 +3576,9 @@ function renderFoodTable() {
             <td class="py-2.5 px-3 text-center">
                 ${f.keto_tier ? `<span class="badge" style="background: ${tierColor}20; color: ${tierColor}; border: 1px solid ${tierColor}30;">${f.keto_tier}</span>` : '—'}
             </td>
+            <td class="py-2.5 px-2 text-center">
+                <button onclick="editFood('${f.food_id}')" class="btn btn-ghost text-xs py-1 px-2" title="Edit food" style="color:var(--deft-txt-3);">&#9998;</button>
+            </td>
         </tr>`;
     }).join('');
 }
@@ -3601,6 +3605,40 @@ function filterFoodCategory(cat) {
 function loadMoreFoods() {
     foodOffset += FOOD_LIMIT;
     fetchFoods(true);
+}
+
+function editFood(foodId) {
+    const food = allFoods.find(f => f.food_id === foodId);
+    if (!food) { toast('Food not found', 'error'); return; }
+    editingFoodId = foodId;
+
+    document.getElementById('newFoodName').value = food.name || '';
+    document.getElementById('newFoodBrand').value = food.brand || '';
+    document.getElementById('newFoodServing').value = food.serving_size || '';
+    document.getElementById('newFoodCategory').value = food.category || 'protein';
+    document.getElementById('newFoodKetoTier').value = food.keto_tier || 'good';
+
+    const n = food.nutrition_per_serving || {};
+    document.getElementById('newFoodCal').value = n.calories || '';
+    document.getElementById('newFoodFat').value = n.total_fat_g || '';
+    document.getElementById('newFoodProtein').value = n.protein_g || '';
+    document.getElementById('newFoodTotalCarbs').value = n.total_carbs_g || '';
+    document.getElementById('newFoodFiber').value = n.fiber_g || '';
+    document.getElementById('newFoodNetCarbs').value = n.net_carbs_g || '';
+    document.getElementById('newFoodSugar').value = n.sugar_g || '';
+    document.getElementById('newFoodSodium').value = n.sodium_mg || '';
+    document.getElementById('newFoodChol').value = n.cholesterol_mg || '';
+
+    document.querySelector('#addFoodModal .panel-header span').textContent = 'Edit Food';
+    document.getElementById('saveFoodBtn').textContent = 'Update Food';
+    openModal('addFoodModal');
+}
+
+function resetFoodModal() {
+    editingFoodId = null;
+    document.querySelector('#addFoodModal .panel-header span').textContent = 'Add Food to Database';
+    document.getElementById('saveFoodBtn').textContent = 'Save Food';
+    ['newFoodName','newFoodBrand','newFoodServing','newFoodCal','newFoodFat','newFoodProtein','newFoodTotalCarbs','newFoodFiber','newFoodNetCarbs','newFoodSugar','newFoodSodium','newFoodChol'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
 }
 
 async function saveNewFood() {
@@ -3636,18 +3674,19 @@ async function saveNewFood() {
 
     const btn = document.getElementById('saveFoodBtn');
     btn.disabled = true;
-    btn.textContent = 'Saving...';
+    btn.textContent = editingFoodId ? 'Updating...' : 'Saving...';
 
-    const result = await supabaseWrite('deft_food_database', 'POST', food);
+    const result = editingFoodId
+        ? await supabaseWrite('deft_food_database', 'PATCH', food, 'food_id=eq.' + editingFoodId)
+        : await supabaseWrite('deft_food_database', 'POST', food);
 
     btn.disabled = false;
-    btn.textContent = 'Save Food';
+    btn.textContent = editingFoodId ? 'Update Food' : 'Save Food';
 
     if (result) {
-        toast(name + ' added to food database!', 'success');
+        toast(name + (editingFoodId ? ' updated!' : ' added to food database!'), 'success');
         closeModal('addFoodModal');
-        // Clear form
-        ['newFoodName','newFoodBrand','newFoodServing','newFoodCal','newFoodFat','newFoodProtein','newFoodTotalCarbs','newFoodFiber','newFoodNetCarbs','newFoodSugar','newFoodSodium','newFoodChol'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        resetFoodModal();
         foodBrowserLoaded = false;
         loadFoodBrowser();
     } else {

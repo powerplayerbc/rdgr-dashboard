@@ -3048,7 +3048,7 @@ function renderApprovalCard(draft) {
             <button onclick="event.stopPropagation();skipSocialDraft(${draft.id})" class="btn btn-skip text-xs py-1.5 px-2.5">Skip</button>
             <span class="mx-1"></span>
             <button onclick="event.stopPropagation();copyToClip(\`${escapeHtml(message).replace(/`/g, '\\`')}\`)" class="btn btn-copy text-xs py-1.5 px-2.5">Copy</button>
-            <button onclick="event.stopPropagation();quickActDraft(${draft.id})" class="btn btn-primary text-xs py-1.5 px-2.5" style="background:rgba(6,214,160,0.2);border-color:rgba(6,214,160,0.4);">Done &#10003;</button>
+            <button onclick="event.stopPropagation();quickActDraft(${draft.id})" class="btn btn-primary text-xs py-1.5 px-2.5" style="background:var(--deft-accent-dim);border-color:color-mix(in srgb, var(--deft-accent) 40%, transparent);">Done &#10003;</button>
         </div>
     `;
 
@@ -3279,9 +3279,9 @@ function renderConvoCard(convo) {
     const draftId = convo.draft_id || convo.id;
 
     const linkHtml = isReddit && threadUrl
-        ? `<a href="${escapeHtml(threadUrl)}" target="_blank" class="text-xs text-txt-3 hover:text-accent transition-colors">Open Thread →</a>`
+        ? `<a href="${escapeHtml(threadUrl)}" target="_blank" onclick="event.stopPropagation()" class="text-xs text-txt-3 hover:text-accent transition-colors">Open Thread →</a>`
         : profileUrl
-        ? `<a href="${escapeHtml(profileUrl)}" target="_blank" class="text-xs text-txt-3 hover:text-accent transition-colors">View Profile →</a>`
+        ? `<a href="${escapeHtml(profileUrl)}" target="_blank" onclick="event.stopPropagation()" class="text-xs text-txt-3 hover:text-accent transition-colors">View Profile →</a>`
         : '';
 
     let contextLine = [
@@ -3292,7 +3292,7 @@ function renderConvoCard(convo) {
     ].filter(Boolean).join(' | ');
 
     return `
-        <div class="outreach-card">
+        <div class="outreach-card" style="cursor:pointer;" onclick="viewConvoThread('${draftId}')">
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
                     <span class="badge badge-${convo.platform}">${platform.label}</span>
@@ -3300,15 +3300,14 @@ function renderConvoCard(convo) {
                     ${convo.response_received ? '<span class="badge badge-approved" style="font-size:0.5rem;">REPLIED</span>' : ''}
                 </div>
                 <div class="flex items-center gap-2">
-                    ${contactId ? `<button onclick="window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2">CRM</button>` : ''}
-                    <button onclick="viewConvoThread('${draftId}')" class="btn btn-ghost text-xs py-1 px-2" title="View full thread">Thread</button>
+                    ${contactId ? `<button onclick="event.stopPropagation();window.open('/crm?contact=${contactId}','_blank')" class="btn btn-ghost text-xs py-1 px-2">CRM</button>` : ''}
                     ${linkHtml}
                 </div>
             </div>
             <div class="text-xs text-txt-3 mb-3">${escapeHtml(contextLine)}</div>
             ${ourMessage ? `
                 <div class="mb-2">
-                    <div class="reasoning-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'; this.textContent=this.textContent.includes('▸')?'▾ Your Original Message':'▸ Your Original Message'">▸ Your Original Message</div>
+                    <div class="reasoning-toggle" onclick="event.stopPropagation();this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'; this.textContent=this.textContent.includes('▸')?'▾ Your Original Message':'▸ Your Original Message'">▸ Your Original Message</div>
                     <div class="convo-msg ours mt-1" style="display:none;">${escapeHtml(ourMessage)}</div>
                 </div>
             ` : ''}
@@ -3317,14 +3316,14 @@ function renderConvoCard(convo) {
                     <div class="text-[0.65rem] text-warn uppercase tracking-wide mb-1 font-mono">Drafted Response (needs approval)</div>
                     <div class="convo-msg draft-reply" id="convo-draft-${convo.id || convo.conversation_id}">${escapeHtml(draftResponse)}</div>
                     <div class="flex items-center gap-2 mt-2">
-                        <button onclick="approveConvoResponse('${convo.id || convo.conversation_id}')" class="btn btn-approve text-xs py-1.5 px-2.5">Approve</button>
-                        <button onclick="copyToClip(\`${escapeHtml(draftResponse).replace(/`/g, '\\`')}\`)" class="btn btn-copy text-xs py-1.5 px-2.5">Copy</button>
-                        <button onclick="markConvoSent('${convo.id || convo.conversation_id}')" class="btn btn-primary text-xs py-1.5 px-2.5">Mark Sent</button>
+                        <button onclick="event.stopPropagation();approveConvoResponse('${convo.id || convo.conversation_id}')" class="btn btn-approve text-xs py-1.5 px-2.5">Approve</button>
+                        <button onclick="event.stopPropagation();copyToClip(\`${escapeHtml(draftResponse).replace(/`/g, '\\`')}\`)" class="btn btn-copy text-xs py-1.5 px-2.5">Copy</button>
+                        <button onclick="event.stopPropagation();markConvoSent('${convo.id || convo.conversation_id}')" class="btn btn-primary text-xs py-1.5 px-2.5">Mark Sent</button>
                     </div>
                 </div>
             ` : ''}
             <div class="flex items-center gap-2 pt-2 border-t border-border/30">
-                <button onclick="openLogReplyModal('${draftId}', '${convo.platform}', '${contactId}')" class="btn btn-ghost text-xs py-1.5 px-3">Log New Reply</button>
+                <button onclick="event.stopPropagation();openLogReplyModal('${draftId}', '${convo.platform}', '${contactId}')" class="btn btn-ghost text-xs py-1.5 px-3">Log New Reply</button>
             </div>
         </div>
     `;
@@ -3818,7 +3817,7 @@ function openOutreachDetail(draftId) {
     // ── Draft message ──
     html += `<div class="mb-4">
         <div class="text-[0.65rem] text-txt-3 font-mono uppercase tracking-wide mb-1.5">Draft ${otype === 'dm' ? 'Message' : 'Comment'}</div>
-        <div style="background:rgba(6,214,160,0.04);border:1px solid rgba(6,214,160,0.1);border-radius:0.375rem;padding:0.75rem;">
+        <div style="background:var(--deft-accent-dim);border:1px solid color-mix(in srgb, var(--deft-accent) 10%, transparent);border-radius:0.375rem;padding:0.75rem;">
             <div class="text-sm text-txt" style="white-space:pre-wrap;line-height:1.6;">${escapeHtml(message)}</div>
         </div>
     </div>`;
@@ -3850,7 +3849,7 @@ function openOutreachDetail(draftId) {
         <button onclick="skipSocialDraft(${draft.id});closeDetail();" class="btn btn-skip text-xs py-1.5 px-3">Skip</button>
         <span class="mx-1"></span>
         <button onclick="copyToClip(\`${escapeHtml(message).replace(/`/g, '\\`')}\`)" class="btn btn-copy text-xs py-1.5 px-3">Copy</button>
-        <button onclick="quickActDraft(${draft.id});closeDetail();" class="btn btn-primary text-xs py-1.5 px-3" style="background:rgba(6,214,160,0.2);border-color:rgba(6,214,160,0.4);">Done</button>`;
+        <button onclick="quickActDraft(${draft.id});closeDetail();" class="btn btn-primary text-xs py-1.5 px-3" style="background:var(--deft-accent-dim);border-color:color-mix(in srgb, var(--deft-accent) 40%, transparent);">Done</button>`;
     }
     html += `</div>`;
 

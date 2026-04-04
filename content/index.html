@@ -562,7 +562,6 @@
                             </div>
                         </div>
                         <a href="/partnerships" class="nav-group-btn">Partnerships</a>
-                        <a href="/finance" class="nav-group-btn">Finance</a>
                         <div class="nav-group">
                             <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
@@ -1205,9 +1204,9 @@
 
         try {
             const data = await sbSelect('social_content_queue',
-                `brand_id=eq.${BRAND_ID}&status=eq.approved&scheduled_for=gte.${startOfMonth}&scheduled_for=lte.${endOfMonth}T23:59:59&select=id,platform,content_type,status,scheduled_for,content&order=scheduled_for`
+                `brand_id=eq.${BRAND_ID}&status=in.(approved,scheduled)&status=neq.pending&scheduled_for=gte.${startOfMonth}&scheduled_for=lte.${endOfMonth}T23:59:59&select=id,platform,content_type,status,scheduled_for,content&order=scheduled_for`
             );
-            calendarEvents = data || [];
+            calendarEvents = (data || []).filter(e => e.status !== 'pending' && e.status !== 'draft');
         } catch (e) {
             console.error('Calendar load error:', e);
             calendarEvents = [];
