@@ -1088,6 +1088,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     <div class="flex items-center gap-2">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4l6 4 6-4" stroke="#4CC9F0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="#4CC9F0" stroke-width="1.2"/></svg>
                         <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Outreach Log</h2>
+                        <span id="outreachTestBadge" class="badge" style="background: #FFD93D30; color: #FFD93D; font-size: 10px; padding: 2px 8px; display: none;">TEST MODE — emails go to bradford@bradfordcarlton.com</span>
                     </div>
                 </div>
                 <div style="overflow-x: auto;">
@@ -1720,6 +1721,17 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             fetchPartnershipDrafts(),
         ]);
 
+        // Check outreach test mode
+        try {
+            var modeResp = await fetch(SUPABASE_URL + '/rest/v1/shared_agent_memory?name=eq.outreach_mode&brand_id=eq.carlton&select=content', {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+            });
+            var modeData = await modeResp.json();
+            window._outreachTestMode = !(modeData && modeData[0] && modeData[0].content === 'live');
+        } catch (e) { window._outreachTestMode = true; }
+        var badge = document.getElementById('outreachTestBadge');
+        if (badge) badge.style.display = window._outreachTestMode ? 'inline-block' : 'none';
+
         computeStats();
         renderCurrentView();
 
@@ -1993,7 +2005,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 '<td><span class="badge badge-domain">' + esc(getTypeName(o.engagement_type)) + '</span></td>' +
                 '<td class="text-xs text-txt-2">' + esc(channelLabel) + '</td>' +
                 '<td class="text-txt-2 truncate" style="max-width: 200px;">' + esc(o.subject || '--') + '</td>' +
-                '<td><span class="badge" style="background: ' + statusColor + '20; color: ' + statusColor + ';">' + esc(oSt) + '</span></td>' +
+                '<td><span class="badge" style="background: ' + statusColor + '20; color: ' + statusColor + ';">' + esc(oSt) + '</span>' +
+                    ((o.engagement_context && o.engagement_context.test_mode) ? ' <span class="badge" style="background: #FFD93D20; color: #FFD93D; font-size: 9px;">TEST</span>' : '') + '</td>' +
                 '<td class="text-xs text-txt-3 truncate" style="max-width: 160px;">' + esc(o.response_summary || '--') + '</td>' +
             '</tr>' +
             '<tr id="orDetail-' + idx + '" style="display:none;">' +
@@ -2119,11 +2132,14 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     }
 
     async function approveDraft(draftId) {
-        if (!confirm('Approve and send this outreach email?')) return;
+        var confirmMsg = window._outreachTestMode
+            ? 'TEST MODE: This email will be sent to bradford@bradfordcarlton.com (not to the actual recipient). Approve?'
+            : 'Approve and send this outreach email to the REAL recipient?';
+        if (!confirm(confirmMsg)) return;
         toast('Approving draft...', 'info');
         var result = await prtnApi('approve_draft', { draft_id: draftId });
         if (result && result.success) {
-            toast('Outreach approved and sent!', 'success');
+            toast(result.test_mode ? 'Test email sent to bradford@bradfordcarlton.com!' : 'Outreach approved and sent!', 'success');
             await fetchPartnershipDrafts();
             await fetchOutreachLog();
             renderDrafts();
