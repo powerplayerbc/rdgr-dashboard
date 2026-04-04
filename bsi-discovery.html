@@ -1295,7 +1295,8 @@
                                         <span class="text-sm font-medium">${esc(opts.b || 'Option B')}</span>
                                     </div>
                                 </div>
-                                <div class="flex justify-end mt-4">
+                                <div class="flex items-center justify-between mt-4">
+                                    <button onclick="handleSkipQuestion()" class="btn btn-ghost text-xs text-txt-3">I don't have this &rarr; Skip</button>
                                     <button onclick="handleSubmitAnswer()" class="btn btn-primary" id="submitBtn" disabled>Select an option</button>
                                 </div>
                             </div>
@@ -1318,7 +1319,8 @@
                                 <div class="adjustment-area" id="adjustmentArea">
                                     <textarea class="form-input" id="adjustmentText" rows="3" placeholder="What would you adjust?"></textarea>
                                 </div>
-                                <div class="flex justify-end mt-4">
+                                <div class="flex items-center justify-between mt-4">
+                                    <button onclick="handleSkipQuestion()" class="btn btn-ghost text-xs text-txt-3">I don't have this &rarr; Skip</button>
                                     <button onclick="handleSubmitAnswer()" class="btn btn-primary" id="submitBtn" disabled>Select a verdict</button>
                                 </div>
                             </div>
@@ -1345,7 +1347,8 @@
                                         </div>
                                     `).join('')}
                                 </div>
-                                <div class="flex justify-end mt-4">
+                                <div class="flex items-center justify-between mt-4">
+                                    <button onclick="handleSkipQuestion()" class="btn btn-ghost text-xs text-txt-3">I don't have this &rarr; Skip</button>
                                     <button onclick="handleSubmitAnswer()" class="btn btn-primary" id="submitBtn">Submit Rankings</button>
                                 </div>
                             </div>
