@@ -1800,6 +1800,7 @@
                 <div id="foodDbResults">
                     <div class="text-center text-xs py-4" style="color: var(--deft-txt-3);">Type at least 2 characters to search</div>
                 </div>
+                <div id="quickLogFoodForm" style="display:none;"></div>
             </div>
         </div>
 
@@ -3713,6 +3714,56 @@ async function saveNewFood() {
     }
 }
 
+// ── Unit conversion tables ──
+const VOLUME_ML = { ml: 1, l: 1000, cup: 236.588, tbsp: 14.787, tsp: 4.929 };
+const WEIGHT_G = { g: 1, oz: 28.3495, lb: 453.592 };
+
+function parseServingSize(str) {
+    if (!str) return null;
+    const s = str.toLowerCase().trim();
+    const match = s.match(/^([\d./]+)\s*(.+)$/);
+    if (!match) return null;
+    let qty = match[1];
+    const unit = match[2].trim();
+    if (qty.includes('/')) {
+        const parts = qty.split('/');
+        qty = parseFloat(parts[0]) / parseFloat(parts[1]);
+    } else {
+        qty = parseFloat(qty);
+    }
+    if (isNaN(qty) || qty <= 0) return null;
+    return { quantity: qty, unit, ml: VOLUME_ML[unit] ? qty * VOLUME_ML[unit] : null, g: WEIGHT_G[unit] ? qty * WEIGHT_G[unit] : null };
+}
+
+function getConversionRatio(baseParsed, newQty, newUnit) {
+    if (!baseParsed || !newQty) return newQty || 1;
+    const baseMl = baseParsed.ml, baseG = baseParsed.g;
+    const newMl = VOLUME_ML[newUnit] ? newQty * VOLUME_ML[newUnit] : null;
+    const newG = WEIGHT_G[newUnit] ? newQty * WEIGHT_G[newUnit] : null;
+    if (baseMl && newMl) return newMl / baseMl;
+    if (baseG && newG) return newG / baseG;
+    return newQty / baseParsed.quantity;
+}
+
+function recalcIngredientNutrition(index) {
+    const ing = newRecipeIngredients[index];
+    if (!ing || !ing.baseNutrition || !ing.baseServingParsed) return;
+    const ratio = getConversionRatio(ing.baseServingParsed, ing.quantity, ing.unit);
+    const base = ing.baseNutrition;
+    const approx = (VOLUME_ML[ing.unit] && ing.baseServingParsed.g && !ing.baseServingParsed.ml) ||
+                   (WEIGHT_G[ing.unit] && ing.baseServingParsed.ml && !ing.baseServingParsed.g);
+    ing.nutrition = {
+        calories: +(base.calories * ratio).toFixed(1),
+        total_fat_g: +(base.total_fat_g * ratio).toFixed(2),
+        protein_g: +(base.protein_g * ratio).toFixed(2),
+        total_carbs_g: +(base.total_carbs_g * ratio).toFixed(2),
+        fiber_g: +(base.fiber_g * ratio).toFixed(2),
+        net_carbs_g: +(base.net_carbs_g * ratio).toFixed(2),
+    };
+    ing._approxConversion = approx;
+    renderIngredientRows();
+}
+
 // Food DB autocomplete for recipe ingredients
 let ingredientSearchTimeout;
 async function searchFoodForIngredient(query, index) {
@@ -3723,7 +3774,7 @@ async function searchFoodForIngredient(query, index) {
     clearTimeout(ingredientSearchTimeout);
     ingredientSearchTimeout = setTimeout(async () => {
         const results = await supabaseSelect('deft_food_database',
-            'name=ilike.*' + encodeURIComponent(query) + '*&select=name,serving_size,nutrition_per_serving&limit=6&order=name'
+            'name=ilike.*' + encodeURIComponent(query) + '*&select=name,brand,serving_size,nutrition_per_serving&limit=6&order=name'
         );
         if (!results || results.length === 0) { hideIngredientSuggestions(index); return; }
 
@@ -3731,8 +3782,11 @@ async function searchFoodForIngredient(query, index) {
         if (!container) return;
         container.innerHTML = results.map(f => {
             const n = f.nutrition_per_serving || {};
-            return '<button type="button" onclick="selectFoodForIngredient(' + index + ', this)" data-name="' + f.name + '" data-cal="' + (n.calories||0) + '" data-fat="' + (n.total_fat_g||0) + '" data-protein="' + (n.protein_g||0) + '" data-carbs="' + (n.total_carbs_g||0) + '" data-fiber="' + (n.fiber_g||0) + '" data-netcarbs="' + (n.net_carbs_g||0) + '" data-serving="' + (f.serving_size||'') + '" class="recipe-search-item">' +
+            const brandTag = f.brand ? '<span class="text-xs" style="color:var(--deft-txt-2);">' + f.brand + '</span> · ' : '';
+            const servingTag = f.serving_size ? '<span class="text-xs" style="color:var(--deft-txt-3);">' + f.serving_size + '</span>' : '';
+            return '<button type="button" onclick="selectFoodForIngredient(' + index + ', this)" data-name="' + f.name + '" data-brand="' + (f.brand||'') + '" data-cal="' + (n.calories||0) + '" data-fat="' + (n.total_fat_g||0) + '" data-protein="' + (n.protein_g||0) + '" data-carbs="' + (n.total_carbs_g||0) + '" data-fiber="' + (n.fiber_g||0) + '" data-netcarbs="' + (n.net_carbs_g||0) + '" data-serving="' + (f.serving_size||'') + '" class="recipe-search-item">' +
                 '<span class="font-medium">' + f.name + '</span>' +
+                '<div class="flex items-center gap-1 flex-wrap">' + brandTag + servingTag + '</div>' +
                 '<span class="text-xs font-mono" style="color:var(--deft-txt-3);">' + Math.round(n.calories||0) + ' cal · ' + (n.net_carbs_g||0).toFixed(1) + 'g carbs</span>' +
             '</button>';
         }).join('');
@@ -3744,7 +3798,7 @@ function selectFoodForIngredient(index, btn) {
     const ing = newRecipeIngredients[index];
     if (!ing) return;
     ing.name = btn.dataset.name;
-    ing.nutrition = {
+    ing.baseNutrition = {
         calories: parseFloat(btn.dataset.cal) || 0,
         total_fat_g: parseFloat(btn.dataset.fat) || 0,
         protein_g: parseFloat(btn.dataset.protein) || 0,
@@ -3752,6 +3806,15 @@ function selectFoodForIngredient(index, btn) {
         fiber_g: parseFloat(btn.dataset.fiber) || 0,
         net_carbs_g: parseFloat(btn.dataset.netcarbs) || 0,
     };
+    ing.baseServing = btn.dataset.serving || '';
+    ing.baseServingParsed = parseServingSize(btn.dataset.serving || '');
+    ing.nutrition = { ...ing.baseNutrition };
+    ing._approxConversion = false;
+    // Default quantity/unit from serving size if parseable
+    if (ing.baseServingParsed) {
+        ing.quantity = ing.baseServingParsed.quantity;
+        ing.unit = ing.baseServingParsed.unit;
+    }
     hideIngredientSuggestions(index);
     renderIngredientRows();
 }
@@ -3932,10 +3995,10 @@ function renderIngredientRows() {
                 <div id="ingSuggestions-${i}" class="absolute left-0 right-0 top-full mt-1 rounded-lg border overflow-hidden" style="background: var(--deft-surface-el); border-color: var(--deft-border); z-index: 10000; display: none; max-height: 200px; overflow-y: auto;"></div>
             </div>
             <div style="width: 4rem;">
-                <input type="number" class="form-input text-xs py-1.5 text-center" placeholder="Qty" value="${ing.quantity}" oninput="newRecipeIngredients[${i}].quantity=parseFloat(this.value)||0">
+                <input type="number" class="form-input text-xs py-1.5 text-center" placeholder="Qty" value="${ing.quantity}" oninput="newRecipeIngredients[${i}].quantity=parseFloat(this.value)||0; recalcIngredientNutrition(${i})">
             </div>
             <div style="width: 5rem;">
-                <select class="form-input text-xs py-1.5" onchange="newRecipeIngredients[${i}].unit=this.value">
+                <select class="form-input text-xs py-1.5" onchange="newRecipeIngredients[${i}].unit=this.value; recalcIngredientNutrition(${i})">
                     ${['g','oz','cup','tbsp','tsp','piece','ml','lb'].map(u => `<option value="${u}" ${ing.unit === u ? 'selected' : ''}>${u}</option>`).join('')}
                 </select>
             </div>
@@ -3943,6 +4006,7 @@ function renderIngredientRows() {
                 <svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             </button>
         </div>
+        ${ing.baseServing ? `<div class="flex items-center gap-2 mt-1.5 px-0.5"><span class="text-[10px] font-mono" style="color: var(--deft-txt-3);">Base: ${ing.baseServing}</span>${ing._approxConversion ? '<span class="text-[10px] font-mono" style="color: var(--deft-warning, #FB923C);">(approx.)</span>' : ''}</div>` : ''}
         <div class="flex gap-2 mt-2">
             <div class="flex-1">
                 <div class="text-[10px] mb-0.5 font-mono" style="color: var(--deft-txt-3);">Cal</div>
@@ -5066,21 +5130,132 @@ async function searchFoodDb(query) {
 
         container.innerHTML = results.map(f => {
             const n = f.nutrition_per_serving || {};
+            const nJson = JSON.stringify(n).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+            const eName = (f.name || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+            const eBrand = (f.brand || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+            const eServing = (f.serving_size || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
             return `
-            <div class="meal-card">
+            <button type="button" class="meal-card" style="width:100%; text-align:left; cursor:pointer;" onclick="selectFoodForQuickLog('${f.food_id}', '${eName}', '${eBrand}', '${eServing}', this)" data-nutrition="${nJson}">
                 <div class="flex items-center justify-between mb-1">
                     <span class="font-medium text-sm">${f.name}</span>
                     <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${f.serving_size || ''}</span>
                 </div>
+                ${f.brand ? `<div class="text-xs mb-1" style="color: var(--deft-txt-2);">${f.brand}</div>` : ''}
                 <div class="flex gap-3 text-xs font-mono" style="color: var(--deft-txt-2);">
                     <span>${Math.round(n.calories || 0)} cal</span>
                     <span>${(n.total_fat_g || 0).toFixed(1)}g F</span>
                     <span>${(n.protein_g || 0).toFixed(1)}g P</span>
                     <span>${(n.net_carbs_g || 0).toFixed(1)}g C</span>
                 </div>
-            </div>`;
+            </button>`;
         }).join('');
     }, 250);
+}
+
+// ── Quick Log from Food Database ──
+let selectedQuickFood = null;
+
+function selectFoodForQuickLog(foodId, name, brand, servingSize, btn) {
+    const nutrition = JSON.parse(btn.dataset.nutrition || '{}');
+    selectedQuickFood = { food_id: foodId, name, brand, serving_size: servingSize, nutrition };
+
+    const container = document.getElementById('quickLogFoodForm');
+    const n = nutrition;
+    container.innerHTML = `
+        <div class="p-3 rounded-lg mt-3" style="background: var(--deft-surface-el); border: 1px solid color-mix(in srgb, var(--deft-accent) 30%, transparent);">
+            <div class="flex items-center justify-between mb-1">
+                <p class="font-medium text-sm">${name}</p>
+                <button type="button" onclick="closeQuickLogForm()" class="p-1 rounded" style="color: var(--deft-txt-3);" title="Close">
+                    <svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </button>
+            </div>
+            ${brand ? `<p class="text-xs mb-1" style="color: var(--deft-txt-2);">${brand}</p>` : ''}
+            <p class="text-xs mb-3" style="color: var(--deft-txt-3);">Serving: ${servingSize || 'N/A'}</p>
+            <div class="flex gap-2 items-end mb-3">
+                <div class="flex-1">
+                    <label class="form-label">Servings</label>
+                    <input type="number" id="quickLogServings" class="form-input text-sm" value="1" step="0.25" min="0.25" oninput="updateQuickLogPreview()">
+                </div>
+                <div class="flex-1">
+                    <label class="form-label">Meal Type</label>
+                    <select id="quickLogMealType" class="form-input text-sm">
+                        <option value="breakfast">Breakfast</option>
+                        <option value="lunch">Lunch</option>
+                        <option value="dinner">Dinner</option>
+                        <option value="snack">Snack</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-3 text-xs font-mono mb-3" style="color: var(--deft-txt-2);" id="quickLogNutritionPreview">
+                <span>${Math.round(n.calories || 0)} cal</span>
+                <span>${(n.total_fat_g || 0).toFixed(1)}g F</span>
+                <span>${(n.protein_g || 0).toFixed(1)}g P</span>
+                <span>${(n.net_carbs_g || 0).toFixed(1)}g C</span>
+            </div>
+            <button class="btn btn-primary w-full" onclick="confirmQuickLogFood()">Log This Food</button>
+        </div>`;
+    container.style.display = '';
+}
+
+function updateQuickLogPreview() {
+    if (!selectedQuickFood) return;
+    const servings = parseFloat(document.getElementById('quickLogServings').value) || 1;
+    const n = selectedQuickFood.nutrition;
+    document.getElementById('quickLogNutritionPreview').innerHTML = `
+        <span>${Math.round((n.calories || 0) * servings)} cal</span>
+        <span>${((n.total_fat_g || 0) * servings).toFixed(1)}g F</span>
+        <span>${((n.protein_g || 0) * servings).toFixed(1)}g P</span>
+        <span>${((n.net_carbs_g || 0) * servings).toFixed(1)}g C</span>`;
+}
+
+function closeQuickLogForm() {
+    selectedQuickFood = null;
+    document.getElementById('quickLogFoodForm').style.display = 'none';
+}
+
+async function confirmQuickLogFood() {
+    if (!selectedQuickFood || !activeProfileId) return;
+    const servings = parseFloat(document.getElementById('quickLogServings').value) || 1;
+    const mealType = document.getElementById('quickLogMealType').value;
+    const n = selectedQuickFood.nutrition;
+
+    const nutritionConsumed = {
+        calories: Math.round((n.calories || 0) * servings),
+        total_fat_g: +((n.total_fat_g || 0) * servings).toFixed(1),
+        protein_g: +((n.protein_g || 0) * servings).toFixed(1),
+        total_carbs_g: +((n.total_carbs_g || 0) * servings).toFixed(1),
+        fiber_g: +((n.fiber_g || 0) * servings).toFixed(1),
+        net_carbs_g: +((n.net_carbs_g || 0) * servings).toFixed(1),
+    };
+
+    // Try bridge first
+    let result = await deftApi('log_meal', {
+        food_id: selectedQuickFood.food_id,
+        food_name: selectedQuickFood.name,
+        servings, meal_type: mealType,
+        meal_number: todayMeals.length + 1,
+        nutrition_consumed: nutritionConsumed
+    }, { silent: true });
+
+    if (!result) {
+        // Direct Supabase fallback
+        result = await supabaseWrite('deft_meal_entries', 'POST', {
+            user_id: activeProfileId,
+            food_id: selectedQuickFood.food_id,
+            recipe_name: selectedQuickFood.name,
+            servings,
+            meal_type: mealType,
+            nutrition_consumed: nutritionConsumed,
+            logged_at: new Date().toISOString(),
+            meal_number: todayMeals.length + 1
+        });
+    }
+
+    toast(`${selectedQuickFood.name} logged!`, 'success');
+    closeQuickLogForm();
+    document.getElementById('foodDbSearch').value = '';
+    document.getElementById('foodDbResults').innerHTML = '<div class="text-center text-xs py-4" style="color: var(--deft-txt-3);">Type at least 2 characters to search</div>';
+    refreshToday();
 }
 
 // Close recipe search dropdown on outside click

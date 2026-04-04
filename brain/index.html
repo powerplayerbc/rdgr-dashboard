@@ -810,6 +810,8 @@
             50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); }
         }
 
+        .heat-legend-trigger:hover .heat-legend-popup { display: block !important; }
+
         .deadline-badge {
             font-size: 0.6rem; font-weight: 600; padding: 0.1rem 0.4rem;
             border-radius: 9999px; white-space: nowrap;
@@ -1442,6 +1444,18 @@
             <div class="brain-reveal brain-reveal-3">
                 <div class="flex items-center gap-2 mb-2 px-1">
                     <span class="font-heading font-bold text-xs uppercase tracking-widest" style="color: var(--brain-txt-2);">Tasks</span>
+                    <span class="heat-legend-trigger" style="color: var(--brain-txt-3); cursor: help; position: relative; display: inline-flex;">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1"/><text x="6" y="9" text-anchor="middle" fill="currentColor" font-size="7" font-weight="bold">?</text></svg>
+                        <div class="heat-legend-popup" style="display: none; position: absolute; left: 0; bottom: 100%; margin-bottom: 8px; padding: 10px 14px; border-radius: 8px; background: var(--brain-surface-el); border: 1px solid var(--brain-border); box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 50; min-width: 210px; white-space: normal;">
+                            <p style="font-weight: 700; font-size: 11px; margin-bottom: 6px; color: var(--brain-txt);">Task Heat Levels</p>
+                            <div style="display: flex; flex-direction: column; gap: 4px; font-size: 10px; color: var(--brain-txt-2);">
+                                <div style="display: flex; align-items: center; gap: 6px;"><span style="display: block; width: 8px; height: 8px; border-radius: 50%; background: var(--brain-warm, #FB923C); opacity: 0.7;"></span>Warm — carried 1-2 times</div>
+                                <div style="display: flex; align-items: center; gap: 6px;"><span style="display: block; width: 8px; height: 8px; border-radius: 50%; background: #F97316;"></span>Hot ��� carried 3-4 times</div>
+                                <div style="display: flex; align-items: center; gap: 6px;"><span style="display: block; width: 8px; height: 8px; border-radius: 50%; background: var(--brain-danger);"></span>Critical — 5+ or overdue</div>
+                            </div>
+                            <p style="margin-top: 6px; font-size: 9px; color: var(--brain-txt-3);">Heat auto-increases when tasks are pushed. Deadlines also add heat.</p>
+                        </div>
+                    </span>
                     <div style="flex: 1; height: 1px; background: var(--brain-border);"></div>
                     <span class="font-mono text-xs" style="color: var(--brain-txt-3);" id="taskCount">0 tasks</span>
                 </div>
@@ -1653,7 +1667,7 @@
                 <span class="badge badge-ghost" id="anTrendGoalLine">Goal: 100</span>
             </div>
             <div class="panel-body" style="height: 220px; position: relative; overflow: hidden;">
-                <svg id="pointsChart" width="100%" height="100%" viewBox="0 0 800 200" preserveAspectRatio="none"></svg>
+                <svg id="pointsChart" width="100%" height="100%" viewBox="-50 -5 870 225" preserveAspectRatio="none"></svg>
             </div>
         </div>
 
@@ -3084,6 +3098,14 @@ function renderLeaderboardSnippet(result) {
 function renderCategoryDonut() {
     const ds = dailySummary || {};
     let breakdown = ds.category_breakdown || {};
+    // Normalize keys to category names (breakdown may use category_id UUIDs or slugs)
+    const normalizedBreakdown = {};
+    Object.entries(breakdown).forEach(([catKey, val]) => {
+        const cat = categories.find(c => c.name === catKey || c.slug === catKey || c.category_id === catKey);
+        const name = cat?.name || catKey;
+        normalizedBreakdown[name] = (normalizedBreakdown[name] || 0) + val;
+    });
+    breakdown = normalizedBreakdown;
     // Fallback: build from todayActivities when category_breakdown is empty
     if (!Object.keys(breakdown).length && todayActivities && todayActivities.length > 0) {
         breakdown = {};
@@ -3110,7 +3132,7 @@ function renderCategoryDonut() {
     let legendHtml = '';
 
     entries.forEach(([catName, value]) => {
-        const cat = categories.find(c => c.name === catName || c.slug === catName);
+        const cat = categories.find(c => c.name === catName || c.slug === catName || c.category_id === catName);
         const color = cat?.color || '#8A95A9';
         const pct = value / total;
         const dash = circumference * pct;
@@ -3959,8 +3981,21 @@ async function loadCalendarEvents() {
 
     const result = await brainApi('get_events', { start_date: range.start_date, end_date: range.end_date }, { silent: true });
     const events = result?.data?.events || result?.events || [];
+
+    // Enrich events with sync status from brain_activities (for fallback path where backend doesn't join)
+    const syncedActivities = await supabaseSelect('brain_activities',
+        `user_id=eq.${activeProfileId}&calendar_event_id=not.is.null&select=calendar_event_id`);
+    const syncedEventIds = new Set((syncedActivities || []).map(a => a.calendar_event_id));
+
+    const enriched = (Array.isArray(events) ? events : []).map(e => {
+        if (!e.activity_id && !e.synced && syncedEventIds.has(e.event_id)) {
+            return { ...e, synced: true };
+        }
+        return e;
+    });
+
     // Filter out Google Calendar work-location markers (0-duration "Home"/"Office"/"Work" entries)
-    const filtered = (Array.isArray(events) ? events : []).filter(e => {
+    const filtered = enriched.filter(e => {
         if (e.duration_min === 0 && /^(Home|Office|Work)$/i.test(e.title)) return false;
         return true;
     });
@@ -4322,7 +4357,7 @@ async function loadAchievements() {
     const earnedXP = earned.reduce((s, a) => s + (a.xp_awarded || ACHIEVE_XP[a.achievement_key] || 0), 0);
     document.getElementById('achieveEarnedCount').textContent = earned.length;
     document.getElementById('achieveTotalXP').textContent = `${earnedXP} XP`;
-    document.getElementById('achieveLockedCount').textContent = available.length;
+    document.getElementById('achieveLockedCount').textContent = Object.keys(ACHIEVE_XP).length - earned.length;
 
     renderAchievementGrid(earned, available);
 }
@@ -4330,20 +4365,29 @@ async function loadAchievements() {
 function renderAchievementGrid(earned, available) {
     const container = document.getElementById('achievementGrid');
     const earnedKeys = new Set(earned.map(a => a.achievement_key));
+    const availableKeys = new Set(available.map(a => a.achievement_key));
+    const allKnownKeys = new Set([...earnedKeys, ...availableKeys]);
 
-    // Merge: earned first, then available
+    // Merge: earned first, then available from DB, then missing defaults
     const all = [
         ...earned.map(a => ({ ...a, isEarned: true })),
         ...available.filter(a => !earnedKeys.has(a.achievement_key)).map(a => ({ ...a, isEarned: false }))
     ];
 
+    // Always add any ACHIEVE_XP keys missing from DB records
+    Object.entries(ACHIEVE_XP).forEach(([key, xp]) => {
+        if (!allKnownKeys.has(key)) {
+            all.push({
+                achievement_key: key,
+                title: key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+                xp_value: xp,
+                isEarned: false
+            });
+        }
+    });
+
     if (!all.length) {
-        // Show default achievement definitions
-        const defaults = Object.entries(ACHIEVE_XP).map(([key, xp]) => ({
-            achievement_key: key, title: key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-            xp_value: xp, isEarned: false
-        }));
-        container.innerHTML = defaults.map(a => renderAchievementTile(a)).join('');
+        container.innerHTML = '<div class="text-center py-6 col-span-full text-xs" style="color: var(--brain-txt-3);">No achievements available</div>';
         return;
     }
 
@@ -4415,10 +4459,12 @@ async function loadAnalytics(period) {
             totalMins += (s.total_minutes || 0);
             if (pts > bestDay) bestDay = pts;
             if (pts >= goal) goalDays++;
-            // Category breakdown aggregation
+            // Category breakdown aggregation (normalize keys to category names)
             const breakdown = s.category_breakdown || {};
-            Object.entries(breakdown).forEach(([cat, val]) => {
-                catTotals[cat] = (catTotals[cat] || 0) + val;
+            Object.entries(breakdown).forEach(([catKey, val]) => {
+                const cat = categories.find(c => c.name === catKey || c.slug === catKey || c.category_id === catKey);
+                const normalizedName = cat?.name || catKey;
+                catTotals[normalizedName] = (catTotals[normalizedName] || 0) + val;
             });
             return { date: s.score_date, value: pts, minutes: s.total_minutes || 0, goal_met: pts >= goal };
         });
@@ -4451,25 +4497,34 @@ async function loadAnalytics(period) {
     const catData = { categories: catTotals };
     renderAnalyticsCatDonut(catData);
 
-    // Weekly report (try webhook, fall back to building from scoreRows)
+    // Weekly report (try webhook, fall back to a dedicated 14-day fetch)
     let weeklyResult = await brainApi('get_weekly_report', {}, { silent: true });
-    if (!weeklyResult?.data?.this_week && scoreRows && scoreRows.length > 0) {
-        const now = new Date();
-        const weekAgoMs = 7 * 86400000;
-        const twoWeeksAgoMs = 14 * 86400000;
-        const thisWeekRows = scoreRows.filter(s => (now - new Date(s.score_date)) < weekAgoMs);
-        const lastWeekRows = scoreRows.filter(s => {
-            const age = now - new Date(s.score_date);
-            return age >= weekAgoMs && age < twoWeeksAgoMs;
-        });
-        const thisWeekPts = thisWeekRows.reduce((sum, s) => sum + (s.total_points || 0), 0);
-        const lastWeekPts = lastWeekRows.reduce((sum, s) => sum + (s.total_points || 0), 0);
-        const diff = thisWeekPts - lastWeekPts;
-        weeklyResult = { data: {
-            this_week: { total_points: thisWeekPts },
-            last_week: { total_points: lastWeekPts },
-            comparison: { points_diff: diff, points_trend: diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat' }
-        }};
+    if (!weeklyResult?.data?.this_week) {
+        // Fetch a full 14-day window so we have data for both this week and last week
+        const twoWeeksAgo = new Date();
+        twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+        const twoWeeksAgoStr = twoWeeksAgo.toLocaleDateString('en-CA');
+        const todayStr = new Date().toLocaleDateString('en-CA');
+        const weeklyScoreRows = await supabaseSelect('brain_daily_scores',
+            `user_id=eq.${activeProfileId}&score_date=gte.${twoWeeksAgoStr}&score_date=lte.${todayStr}&order=score_date.asc&select=score_date,total_points`);
+        if (weeklyScoreRows && weeklyScoreRows.length > 0) {
+            const now = new Date();
+            const weekAgoMs = 7 * 86400000;
+            const twoWeeksAgoMs = 14 * 86400000;
+            const thisWeekRows = weeklyScoreRows.filter(s => (now - new Date(s.score_date)) < weekAgoMs);
+            const lastWeekRows = weeklyScoreRows.filter(s => {
+                const age = now - new Date(s.score_date);
+                return age >= weekAgoMs && age < twoWeeksAgoMs;
+            });
+            const thisWeekPts = thisWeekRows.reduce((sum, s) => sum + (s.total_points || 0), 0);
+            const lastWeekPts = lastWeekRows.reduce((sum, s) => sum + (s.total_points || 0), 0);
+            const diff = thisWeekPts - lastWeekPts;
+            weeklyResult = { data: {
+                this_week: { total_points: thisWeekPts },
+                last_week: { total_points: lastWeekPts },
+                comparison: { points_diff: diff, points_trend: diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat' }
+            }};
+        }
     }
     renderWeeklyReport(weeklyResult);
 
@@ -4489,8 +4544,20 @@ function renderPointsChart(series, goal) {
     const stepX = w / Math.max(series.length - 1, 1);
     const goalY = h - (goal / maxVal) * h;
 
-    // Goal line
-    let content = `<line x1="0" y1="${goalY}" x2="${w}" y2="${goalY}" stroke="var(--brain-success)" stroke-width="1" stroke-dasharray="6,4" opacity="0.4"/>`;
+    // Y-axis labels and gridlines
+    let content = '';
+    [0, 0.25, 0.5, 0.75, 1.0].forEach(pct => {
+        const yVal = Math.round(maxVal * pct);
+        const y = h - (pct * h);
+        content += `<text x="-8" y="${y + 3}" text-anchor="end" fill="var(--brain-txt-3)" font-size="8" font-family="JetBrains Mono">${yVal}</text>`;
+        if (pct > 0 && pct < 1) {
+            content += `<line x1="0" y1="${y}" x2="${w}" y2="${y}" stroke="var(--brain-border)" stroke-width="0.5" opacity="0.3"/>`;
+        }
+    });
+
+    // Goal line with label
+    content += `<line x1="0" y1="${goalY}" x2="${w}" y2="${goalY}" stroke="var(--brain-success)" stroke-width="1" stroke-dasharray="6,4" opacity="0.4"/>`;
+    content += `<text x="${w + 4}" y="${goalY + 3}" fill="var(--brain-success)" font-size="8" font-family="JetBrains Mono" opacity="0.7">Goal</text>`;
 
     // Area fill
     const points = series.map((d, i) => {
@@ -4574,8 +4641,9 @@ function renderAnalyticsCatDonut(catData) {
     let legendHtml = '';
 
     entries.forEach(([catName, value]) => {
-        const cat = categories.find(c => c.name === catName || c.slug === catName);
+        const cat = categories.find(c => c.name === catName || c.slug === catName || c.category_id === catName);
         const color = cat?.color || '#8A95A9';
+        const displayName = cat?.name || catName;
         const pct = value / total;
         const dash = circumference * pct;
         paths += `<circle cx="80" cy="80" r="65" fill="none" stroke="${color}" stroke-width="20"
@@ -4584,7 +4652,7 @@ function renderAnalyticsCatDonut(catData) {
         offset += dash;
         legendHtml += `<div class="flex items-center gap-2">
             <div class="w-3 h-3 rounded-full flex-shrink-0" style="background: ${color};"></div>
-            <span class="text-sm flex-1">${catName}</span>
+            <span class="text-sm flex-1">${displayName}</span>
             <span class="text-xs font-mono font-bold" style="color: var(--brain-txt-2);">${Math.round(value)}</span>
             <span class="text-xs font-mono" style="color: var(--brain-txt-3);">${Math.round(pct * 100)}%</span>
         </div>`;
@@ -4701,9 +4769,41 @@ async function loadHabitsDaily(date) {
     );
     tasks = t || [];
 
+    // Auto-recover stuck tasks from unclosed past days
+    const today = new Date().toLocaleDateString('en-CA');
+    if (date === today && !window._stuckTasksRecovered) {
+        await autoRecoverStuckTasks(today);
+    }
+
     renderHabitsDaily(date);
     renderDayProgress();
     renderDashboardHabitWidget();
+}
+
+async function autoRecoverStuckTasks(today) {
+    window._stuckTasksRecovered = true;
+    const stuckTasks = await supabaseSelect('brain_tasks',
+        `user_id=eq.${activeProfileId}&scheduled_date=lt.${today}&status=eq.pending&select=*`
+    );
+    if (!stuckTasks || stuckTasks.length === 0) return;
+
+    const earliestDate = stuckTasks.reduce((min, t) => t.scheduled_date < min ? t.scheduled_date : min, stuckTasks[0].scheduled_date);
+    for (const t of stuckTasks) {
+        const daysStuck = Math.round((new Date(today + 'T12:00:00') - new Date(t.scheduled_date + 'T12:00:00')) / 86400000);
+        await supabaseWrite('brain_tasks', 'PATCH', {
+            scheduled_date: today,
+            heat_level: (t.heat_level || 0) + daysStuck,
+            updated_at: new Date().toISOString()
+        }, `task_id=eq.${t.task_id}`);
+    }
+
+    toast(`${stuckTasks.length} task${stuckTasks.length !== 1 ? 's' : ''} recovered from ${earliestDate}`, 'info');
+
+    // Reload tasks for today to include recovered ones
+    const refreshed = await supabaseSelect('brain_tasks',
+        `user_id=eq.${activeProfileId}&scheduled_date=eq.${today}&status=neq.pushed&select=*&order=heat_level.desc,deadline.asc.nullslast,created_at`
+    );
+    tasks = refreshed || [];
 }
 
 async function loadHabitsWeekly() {
