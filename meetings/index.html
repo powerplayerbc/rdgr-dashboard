@@ -495,7 +495,7 @@
                 sbCount('meeting_transcripts'),
                 sbCount('meeting_transcripts', 'or=(status.eq.pending,approval_status.eq.pending)'),
                 sbCount('meeting_transcripts', 'or=(status.eq.approved,approval_status.eq.approved)'),
-                sbCount('meeting_transcripts', 'created_at=gte.' + new Date(Date.now() - 7*24*60*60*1000).toISOString() + '&or=(prep_data.neq.null,prep_notes.neq.null)')
+                sbCount('meeting_prep_records', 'created_at=gte.' + new Date(Date.now() - 7*24*60*60*1000).toISOString())
             ]);
             document.getElementById('statTotal').textContent = total;
             document.getElementById('statPending').textContent = pending;
@@ -808,7 +808,7 @@
             });
             const data = await res.json();
 
-            if (data.success || res.ok) {
+            if (data.success) {
                 const successMsg = action === 'approve' ? 'Meeting approved' : action === 'reject' ? 'Meeting rejected' : 'Revision requested';
                 toast(successMsg, 'success');
                 // Refresh everything
@@ -842,24 +842,28 @@
 
             if (data.status === 'no_qualifying_meetings' || (res.ok && data.matched_count === 0 && !data.success)) {
                 toast('No qualifying meetings found on the calendar.', 'info');
+            } else if (data.error || data.success === false) {
+                toast(data.error || data.message || 'Calendar scan failed', 'error');
             } else if (data.success || data.status === 'complete' || data.status === 'processing') {
                 toast('Calendar scanned! Generating prep materials...', 'success');
-                // Poll for new prep data every 5s for up to 60s
+                // Poll for new prep records every 5s for up to 60s
                 let attempts = 0;
                 const maxAttempts = 12;
-                const beforeCount = (meetings || []).length;
+                const scanTime = new Date().toISOString();
                 const pollInterval = setInterval(async () => {
                     attempts++;
                     try {
-                        await Promise.all([loadStats(), loadMeetings()]);
-                        const afterCount = (meetings || []).length;
-                        if (afterCount > beforeCount) {
+                        const newPrep = await sbSelect('meeting_prep_records',
+                            'select=id&created_at=gte.' + scanTime + '&limit=1');
+                        if (newPrep && newPrep.length > 0) {
                             clearInterval(pollInterval);
+                            await Promise.all([loadStats(), loadMeetings()]);
                             toast('Prep materials ready!', 'success');
                             btn.style.display = '';
                             spinner.style.display = 'none';
                         } else if (attempts >= maxAttempts) {
                             clearInterval(pollInterval);
+                            await Promise.all([loadStats(), loadMeetings()]);
                             toast('Prep generation may still be in progress. Refresh the page in a minute.', 'info');
                             btn.style.display = '';
                             spinner.style.display = 'none';

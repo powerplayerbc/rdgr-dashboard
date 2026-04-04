@@ -884,7 +884,7 @@
                             </div>
                         </div>
                         <div class="space-y-2">
-                            <textarea class="w-full px-3 py-1.5 rounded-lg text-xs outline-none resize-none" rows="2" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);" placeholder="Feedback (optional)..." id="feedback-${item.file_id}"></textarea>
+                            <textarea class="w-full px-3 py-1.5 rounded-lg text-xs outline-none resize-none" rows="2" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);" placeholder="Feedback (required for reject)..." id="feedback-${item.file_id}"></textarea>
                             <div class="flex gap-2">
                                 <button class="btn btn-primary text-xs" onclick="approvalAction('${item.file_id}','approve')">
                                     <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -935,15 +935,15 @@
             const res = await fetch(`${WEBHOOK_BASE}/hub-approval-action`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ file_id: fileId, action, feedback, actor: activeProfileId })
+                body: JSON.stringify({ file_id: fileId, action, feedback, actor: activeProfileId, reviewer_name: activeProfileId })
             });
             const data = await res.json();
-            if (data.success || res.ok) {
+            if (data.success) {
                 toast(`File ${action === 'approve' ? 'approved' : 'rejected'}`, action === 'approve' ? 'success' : 'info');
                 loadApprovals();
                 loadStats();
             } else {
-                toast(data.error || 'Action failed', 'error');
+                toast(data.error || data.message || data.errorMessage || 'Action failed', 'error');
             }
         } catch(e) {
             console.error('Approval action error:', e);
