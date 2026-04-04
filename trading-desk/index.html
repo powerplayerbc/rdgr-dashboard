@@ -1182,6 +1182,38 @@
     // ═══���═══════════════════════════════════
     // ALERTS
     // ���════════════════════��═════════════════
+    function formatAlertData(eventType, data) {
+        if (!data || typeof data !== 'object') return String(data || '');
+        const type = eventType || '';
+
+        if (type === 'drawdown_alert' || data.drawdown_pct != null) {
+            const dd = (Number(data.drawdown_pct || 0) * 100).toFixed(1);
+            const eq = formatUSD(data.equity);
+            const peak = formatUSD(data.peak_equity);
+            return `Drawdown at ${dd}% — equity ${eq}, peak ${peak}`;
+        }
+        if (type === 'trade_closed' && data.pair) {
+            const pnl = Number(data.pnl || 0);
+            return `Trade closed: ${data.pair} ${(data.side || '').toUpperCase()} PnL ${pnl >= 0 ? '+' : ''}${formatUSD(pnl)}`;
+        }
+        if (type === 'bot_started') return 'Bot started';
+        if (type === 'bot_stopped') return 'Bot stopped' + (data.reason ? ': ' + data.reason : '');
+        if (type === 'daily_summary') {
+            const trades = data.total_trades || 0;
+            const pnl = formatUSD(data.total_pnl);
+            return `Daily summary: ${trades} trades, PnL ${pnl}`;
+        }
+
+        // Fallback: format key-value pairs nicely
+        const parts = [];
+        for (const [k, v] of Object.entries(data)) {
+            const label = k.replace(/_/g, ' ');
+            const val = typeof v === 'number' ? (k.includes('pct') ? (v * 100).toFixed(1) + '%' : k.includes('equity') || k.includes('pnl') ? formatUSD(v) : v) : v;
+            parts.push(`${label}: ${val}`);
+        }
+        return parts.join(' | ');
+    }
+
     function renderAlerts(alerts) {
         const container = document.getElementById('alertsFeed');
         if (!alerts || alerts.length === 0) {
@@ -1190,11 +1222,35 @@
         }
         container.innerHTML = alerts.map(a => {
             const color = a.severity === 'critical' ? 'var(--deft-danger)' : 'var(--deft-warning)';
-            return `<div class="flex items-start gap-2 py-2 border-b" style="border-color: rgba(255,255,255,0.03);">
+            const label = a.severity === 'critical' ? 'CRITICAL' : 'WARNING';
+            const labelColor = a.severity === 'critical' ? 'var(--deft-danger)' : 'var(--deft-warning)';
+
+            // Format alert message — parse structured data into readable text
+            let msg = a.message || '';
+            let detail = '';
+            try {
+                // If the message itself is JSON, parse and format it
+                const parsed = JSON.parse(msg);
+                if (typeof parsed === 'object') {
+                    msg = formatAlertData(a.event_type, parsed);
+                }
+            } catch(e) {
+                // Not JSON — use as-is, but also check details field
+            }
+            if (a.details && typeof a.details === 'object') {
+                msg = formatAlertData(a.event_type, a.details);
+            } else if (a.details && typeof a.details === 'string') {
+                try { msg = formatAlertData(a.event_type, JSON.parse(a.details)); } catch(e) {}
+            }
+
+            return `<div class="flex items-start gap-2 py-2.5 border-b" style="border-color: rgba(255,255,255,0.04);">
                 <div class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style="background: ${color};"></div>
-                <div>
-                    <div class="text-xs" style="color: var(--deft-txt-2);">${esc(a.message)}</div>
-                    <div class="text-[0.6rem] text-txt-3 font-mono mt-0.5">${timeAgo(a.created_at)}</div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-1.5 mb-0.5">
+                        <span class="font-mono text-[0.6rem] font-semibold" style="color: ${labelColor};">${label}</span>
+                        <span class="text-[0.55rem] text-txt-3">${timeAgo(a.created_at)}</span>
+                    </div>
+                    <div class="text-xs" style="color: var(--deft-txt-2);">${esc(msg)}</div>
                 </div>
             </div>`;
         }).join('');
