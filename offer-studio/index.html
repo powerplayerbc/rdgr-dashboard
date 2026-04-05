@@ -1085,6 +1085,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 <button class="studio-tab" id="tab-revenue" onclick="switchView('revenue')" role="tab" aria-selected="false" aria-controls="view-revenue">Revenue</button>
                 <button class="studio-tab" id="tab-email-sequences" onclick="switchView('email-sequences')" role="tab" aria-selected="false" aria-controls="view-email-sequences">Email Sequences</button>
                 <button class="studio-tab" id="tab-promotions" onclick="switchView('promotions')" role="tab" aria-selected="false" aria-controls="view-promotions">Promotions</button>
+                <button class="studio-tab" id="tab-fulfillment" onclick="switchView('fulfillment')" role="tab" aria-selected="false" aria-controls="view-fulfillment" style="color: var(--deft-accent-warm, #4CC9F0);">Fulfillment</button>
             </div>
         </div>
 
@@ -1707,6 +1708,33 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             </div>
         </div>
 
+        <!-- ═══════════════════════════════════ -->
+        <!-- VIEW: FULFILLMENT                   -->
+        <!-- ═══════════════════════════════════ -->
+        <div id="view-fulfillment" role="tabpanel" style="display:none;">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8 space-y-6">
+
+                <!-- Header -->
+                <div class="flex items-baseline justify-between">
+                    <div>
+                        <h2 class="font-heading font-semibold text-sm tracking-wide text-txt-2 uppercase">Website Build Fulfillment</h2>
+                        <p class="text-xs text-txt-3 mt-1">Purchased offers awaiting website build delivery</p>
+                    </div>
+                    <a href="/client-projects" class="btn btn-primary text-xs py-2 px-3 flex items-center gap-1.5">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M8 3l3 3-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Full Dashboard
+                    </a>
+                </div>
+
+                <!-- Fulfillment Pipeline -->
+                <div id="fulfillmentGrid" class="space-y-3">
+                    <div class="skeleton h-24 rounded-xl"></div>
+                    <div class="skeleton h-24 rounded-xl"></div>
+                </div>
+
+            </div>
+        </div>
+
     </div><!-- /mainContent -->
 
     <!-- Toast Container -->
@@ -1739,6 +1767,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     let emailSequencesData = [];
     let sequenceStepsCache = {};
     let promotionsData = [];
+    let fulfillmentData = [];
 
     // ═══════════════════════════════════════
     // UTILITIES
@@ -1951,6 +1980,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             fetchProductPerformance(),
             fetchEmailSequences(),
             fetchPromotions(),
+            fetchFulfillment(),
         ]);
 
         if (el) el.textContent = new Date().toLocaleTimeString();
@@ -1960,7 +1990,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     // ═══════════════════════════════════════
     // SUB-TAB SWITCHING
     // ═══════════════════════════════════════
-    const VIEWS = ['offers', 'testimonials', 'landing-pages', 'revenue', 'email-sequences', 'promotions'];
+    const VIEWS = ['offers', 'testimonials', 'landing-pages', 'revenue', 'email-sequences', 'promotions', 'fulfillment'];
 
     function switchView(view) {
         currentView = view;
@@ -3432,6 +3462,101 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             await fetchPromotions();
         } else {
             toast(result?.message || 'Update failed.', 'error');
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // FULFILLMENT
+    // ═══════════════════════════════════════
+    const FULFILL_STATUS = {
+        questionnaire_pending: { bg: 'rgba(255,217,61,0.15)', text: '#FFD93D', label: 'Awaiting Docs' },
+        extracting_data: { bg: 'rgba(56,189,248,0.15)', text: '#38BDF8', label: 'Extracting' },
+        generating_brand: { bg: 'rgba(56,189,248,0.15)', text: '#38BDF8', label: 'Brand Gen' },
+        generating_pages: { bg: 'rgba(56,189,248,0.15)', text: '#38BDF8', label: 'Page Gen' },
+        operator_review: { bg: 'rgba(251,146,60,0.15)', text: '#FB923C', label: 'Review' },
+        client_review: { bg: 'rgba(168,85,247,0.15)', text: '#A855F7', label: 'Client Review' },
+        deploying: { bg: 'rgba(56,189,248,0.15)', text: '#38BDF8', label: 'Deploying' },
+        live: { bg: 'rgba(34,197,94,0.15)', text: '#22C55E', label: 'Live' },
+        cancelled: { bg: 'rgba(255,107,107,0.15)', text: '#FF6B6B', label: 'Cancelled' },
+    };
+
+    async function fetchFulfillment() {
+        const data = await supabaseRPC('website_build_dashboard', { p_brand_id: 'carlton' });
+        fulfillmentData = data?.builds || [];
+        renderFulfillment();
+    }
+
+    function renderFulfillment() {
+        const grid = document.getElementById('fulfillmentGrid');
+        if (!grid) return;
+
+        if (fulfillmentData.length === 0) {
+            grid.innerHTML = `<div class="empty-state">No website builds yet. Builds appear here after a client purchases a website package.</div>`;
+            return;
+        }
+
+        grid.innerHTML = fulfillmentData.map(b => {
+            const st = FULFILL_STATUS[b.status] || { bg: 'rgba(255,255,255,0.1)', text: '#8A95A9', label: b.status };
+            const pages = b.page_status || {};
+            const pageTypes = ['homepage', 'lead_magnet_landing', 'lead_magnet_thankyou', 'sales_page', 'sales_thankyou'];
+            const pageDots = pageTypes.map(pt => {
+                const ps = pages[pt];
+                const color = ps === 'operator_approved' || ps === 'client_approved' || ps === 'deployed' ? '#22C55E'
+                    : ps === 'draft' ? '#FFD93D'
+                    : ps === 'generating' ? '#38BDF8'
+                    : '#525E73';
+                return `<div style="width:8px;height:8px;border-radius:50%;background:${color};" title="${pt}: ${ps || 'pending'}"></div>`;
+            }).join('');
+
+            const docLink = b.questionnaire_doc_url ? `<a href="${escHtml(b.questionnaire_doc_url)}" target="_blank" class="text-info text-xs hover:underline">Google Doc</a>` : '';
+            const driveLink = b.drive_folder_id ? `<a href="https://drive.google.com/drive/folders/${escHtml(b.drive_folder_id)}" target="_blank" class="text-info text-xs hover:underline">Drive Folder</a>` : '';
+
+            return `<div class="panel" style="padding: 1rem 1.25rem;">
+                <div class="flex items-start justify-between gap-4 flex-wrap">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="font-heading font-bold text-sm">${escHtml(b.client_name)}</span>
+                            <span class="text-xs rounded-full px-2 py-0.5 font-medium" style="background:${st.bg};color:${st.text};">${st.label}</span>
+                        </div>
+                        <div class="text-xs text-txt-3">${escHtml(b.client_email)} &middot; ${b.amount_cents ? formatCurrency(b.amount_cents) : '$800'} &middot; ${formatPacific(b.created_at)}</div>
+                        <div class="flex items-center gap-3 mt-2">
+                            <div class="flex items-center gap-1">${pageDots}</div>
+                            <span class="text-[0.65rem] text-txt-3">Pages</span>
+                            ${docLink} ${driveLink}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        ${b.status === 'questionnaire_pending' ? `<button class="btn btn-primary text-xs py-1.5 px-3" onclick="fulfillStartBuild(${b.id})">Start Build</button>` : ''}
+                        ${b.status === 'operator_review' ? `<a href="/client-projects" class="btn btn-primary text-xs py-1.5 px-3">Review Pages</a>` : ''}
+                        <a href="/client-projects" class="btn btn-ghost text-xs py-1.5 px-3">Details</a>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    async function fulfillStartBuild(buildId) {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.textContent = 'Starting...';
+        try {
+            const result = await fetchJSON(`${WEBHOOK_BASE}/wb-bridge`, {
+                operation: 'trigger_extract',
+                build_id: buildId,
+                brand_id: 'carlton'
+            });
+            if (result?.success !== false) {
+                toast('Build pipeline started. Extracting questionnaire data...', 'success');
+                await fetchFulfillment();
+            } else {
+                toast(result?.error || 'Failed to start build.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Start Build';
+            }
+        } catch (err) {
+            toast('Network error starting build.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Start Build';
         }
     }
 
