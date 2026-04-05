@@ -2007,13 +2007,28 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         if (result.status === 'complete') {
             btn.textContent = 'Synthesize Identity';
             btn.onclick = () => handleSynthesis();
+            const fcBtn = document.getElementById('forceCompleteBtn');
+            if (fcBtn) fcBtn.style.display = 'none';
         } else if (result.progress && result.progress.answered >= result.progress.total) {
             // All answered but depth not met - offer holistic gap analysis
-            btn.textContent = 'Deepen Understanding →';
+            btn.textContent = 'Deepen Understanding \u2192';
             btn.onclick = () => deepenSession();
+            // Add Complete Anyway button
+            let fcBtn = document.getElementById('forceCompleteBtn');
+            if (!fcBtn) {
+                fcBtn = document.createElement('button');
+                fcBtn.id = 'forceCompleteBtn';
+                fcBtn.style.cssText = 'font-size:0.75rem;color:#8B95A5;background:transparent;border:1px solid #2A2F3A;padding:6px 12px;border-radius:6px;cursor:pointer;margin-left:8px;';
+                btn.parentNode.insertBefore(fcBtn, btn.nextSibling);
+            }
+            fcBtn.textContent = 'Complete Anyway';
+            fcBtn.style.display = '';
+            fcBtn.onclick = () => forceCompleteSession();
         } else {
-            btn.textContent = 'Continue Session →';
+            btn.textContent = 'Continue Session \u2192';
             btn.onclick = () => continueSession();
+            const fcBtn = document.getElementById('forceCompleteBtn');
+            if (fcBtn) fcBtn.style.display = 'none';
         }
     }
 
@@ -2158,6 +2173,44 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             handleCategoryCompletion();
         } else {
             toast('No additional gaps identified', 'success');
+            openReviewMode(state.activeCategory, state.sessionId);
+        }
+    }
+
+    async function forceCompleteSession() {
+        if (!state.sessionId) return;
+
+        const confirmed = confirm(
+            'Complete this category with current depth?\n\n' +
+            'Your answers may still contain enough material for brand assets. ' +
+            'You can always revisit later.'
+        );
+        if (!confirmed) return;
+
+        const catInfo = CATEGORIES.find(c => c.key === state.activeCategory);
+        if (catInfo) {
+            document.getElementById('sessionIcon').textContent = catInfo.icon;
+            document.getElementById('sessionTitle').textContent = catInfo.label;
+        }
+        switchView('session');
+        document.getElementById('questionContainer').innerHTML =
+            '<div class="text-center py-12">' +
+            '<div class="text-3xl mb-4">&#9989;</div>' +
+            '<h3 class="font-heading font-semibold text-base mb-2">Completing category...</h3>' +
+            '<p class="text-sm text-txt-2">Wrapping up with your current answers</p>' +
+            '</div>';
+
+        const result = await apiSubmitAnswer(state.sessionId, {
+            deepen: true,
+            force_complete: true
+        });
+
+        if (result && result.is_complete) {
+            handleCategoryCompletion();
+        } else if (result && result.success !== false) {
+            handleCategoryCompletion();
+        } else {
+            toast('Failed to complete: ' + ((result && result.error) || 'Connection error'), 'error');
             openReviewMode(state.activeCategory, state.sessionId);
         }
     }
