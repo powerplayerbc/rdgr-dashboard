@@ -2676,6 +2676,13 @@ async function supabaseSelect(table, query = '') {
     } catch (err) { console.error('Supabase fetch error:', table, err); return null; }
 }
 
+// Convert a local YYYY-MM-DD date string to UTC ISO boundaries for timestamptz queries
+function localDateToUTCRange(dateStr) {
+    const start = new Date(dateStr + 'T00:00:00');
+    const end = new Date(dateStr + 'T23:59:59.999');
+    return { start: start.toISOString(), end: end.toISOString() };
+}
+
 async function supabaseWrite(table, method, body, matchQuery = '') {
     const url = `${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`;
     try {
@@ -3077,6 +3084,7 @@ async function initBrain() {
 async function loadDashboardData() {
     if (!activeProfileId) return;
     const today = new Date().toLocaleDateString('en-CA');
+    const todayRange = localDateToUTCRange(today);
 
     // Read directly from Supabase tables (reliable) — webhook used only for writes
     const [profileRows, catRows, timerRows, scoreRows, activityRows] = await Promise.all([
@@ -3084,7 +3092,7 @@ async function loadDashboardData() {
         supabaseSelect('brain_categories', `user_id=eq.${activeProfileId}&is_active=eq.true&order=sort_order&select=*`),
         supabaseSelect('brain_timers', `user_id=eq.${activeProfileId}&select=*`),
         supabaseSelect('brain_daily_scores', `user_id=eq.${activeProfileId}&score_date=eq.${today}&select=*`),
-        supabaseSelect('brain_activities', `user_id=eq.${activeProfileId}&started_at=gte.${today}T00:00:00&started_at=lt.${today}T23:59:59&order=started_at.desc&select=*`),
+        supabaseSelect('brain_activities', `user_id=eq.${activeProfileId}&started_at=gte.${todayRange.start}&started_at=lt.${todayRange.end}&order=started_at.desc&select=*`),
     ]);
 
     // Non-blocking leaderboard fetch (don't hold up the page)
@@ -3594,8 +3602,9 @@ function updateStopwatch() {
 async function loadActivities() {
     if (!activeProfileId) return;
     // Read directly from Supabase
+    const logRange = localDateToUTCRange(activityLogDate);
     const activities = await supabaseSelect('brain_activities',
-        `user_id=eq.${activeProfileId}&started_at=gte.${activityLogDate}T00:00:00&started_at=lt.${activityLogDate}T23:59:59&order=started_at.desc&select=*`);
+        `user_id=eq.${activeProfileId}&started_at=gte.${logRange.start}&started_at=lt.${logRange.end}&order=started_at.desc&select=*`);
     renderActivityLog(Array.isArray(activities) ? activities : []);
     updateDateLabel();
 }
@@ -4401,8 +4410,10 @@ async function showLbDetail(userId, displayName) {
     else if (currentLbPeriod === 'month') { const d = new Date(); d.setDate(d.getDate() - 30); start = d.toLocaleDateString('en-CA'); }
     else if (currentLbPeriod === 'all') { start = '2020-01-01'; }
 
+    const lbStartRange = localDateToUTCRange(start);
+    const lbEndRange = localDateToUTCRange(end);
     const activities = await supabaseSelect('brain_activities',
-        `user_id=eq.${userId}&started_at=gte.${start}T00:00:00&started_at=lte.${end}T23:59:59&select=category_id,duration_min,points_earned&order=started_at.desc`);
+        `user_id=eq.${userId}&started_at=gte.${lbStartRange.start}&started_at=lte.${lbEndRange.end}&select=category_id,duration_min,points_earned&order=started_at.desc`);
 
     const userCats = await supabaseSelect('brain_categories', `user_id=eq.${userId}&select=category_id,name,slug,color,icon`);
     const catMap = {};
@@ -4632,8 +4643,10 @@ async function loadAnalytics(period) {
 
     // Category fallback: if category_breakdown was empty in daily scores, build from activities
     if (Object.keys(catTotals).length === 0) {
+        const catStartRange = localDateToUTCRange(start);
+        const catEndRange = localDateToUTCRange(end);
         const periodActivities = await supabaseSelect('brain_activities',
-            `user_id=eq.${activeProfileId}&started_at=gte.${start}T00:00:00&started_at=lte.${end}T23:59:59&select=category_slug,category_id,points_earned`);
+            `user_id=eq.${activeProfileId}&started_at=gte.${catStartRange.start}&started_at=lte.${catEndRange.end}&select=category_slug,category_id,points_earned`);
         if (periodActivities && periodActivities.length > 0) {
             periodActivities.forEach(a => {
                 const cat = categories.find(c => c.category_id === a.category_id || c.slug === a.category_slug);

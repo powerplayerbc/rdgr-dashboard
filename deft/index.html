@@ -4145,7 +4145,7 @@ function renderIngredientRows() {
                 <div id="ingSuggestions-${i}" class="absolute left-0 right-0 top-full mt-1 rounded-lg border overflow-hidden" style="background: var(--deft-surface-el); border-color: var(--deft-border); z-index: 10000; display: none; max-height: 200px; overflow-y: auto;"></div>
             </div>
             <div style="width: 4rem;">
-                <input type="number" class="form-input text-xs py-1.5 text-center" placeholder="Qty" value="${ing.quantity}" oninput="newRecipeIngredients[${i}].quantity=parseFloat(this.value)||0; recalcIngredientNutrition(${i})">
+                <input type="number" step="any" class="form-input text-xs py-1.5 text-center" placeholder="Qty" value="${ing.quantity}" oninput="newRecipeIngredients[${i}].quantity=parseFloat(this.value)||0; recalcIngredientNutrition(${i})">
             </div>
             <div style="width: 5rem;">
                 <select class="form-input text-xs py-1.5" onchange="newRecipeIngredients[${i}].unit=this.value; recalcIngredientNutrition(${i})">

@@ -1240,7 +1240,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         <button class="btn btn-ghost text-xs py-0.5 px-2 active" id="htf-all" onclick="setHumanTaskFilter('all')">All</button>
                         <button class="btn btn-ghost text-xs py-0.5 px-2" id="htf-hub" onclick="setHumanTaskFilter('hub')">HUB</button>
                         <button class="btn btn-ghost text-xs py-0.5 px-2" id="htf-content" onclick="setHumanTaskFilter('content')">Content</button>
-                        <button class="btn btn-ghost text-xs py-0.5 px-2" id="htf-social" onclick="setHumanTaskFilter('social')">Social</button>
+                        <button class="btn btn-ghost text-xs py-0.5 px-2" id="htf-engagement" onclick="setHumanTaskFilter('engagement')">Engagement</button>
+                        <button class="btn btn-ghost text-xs py-0.5 px-2" id="htf-dm" onclick="setHumanTaskFilter('dm')">DM</button>
+                        <button class="btn btn-ghost text-xs py-0.5 px-2" id="htf-email" onclick="setHumanTaskFilter('email')">Email</button>
                         <button class="btn btn-ghost text-xs py-0.5 px-2" id="htf-outreach" onclick="setHumanTaskFilter('outreach')">Outreach</button>
                     </div>
                 </div>
@@ -1920,7 +1922,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         const posts = calendarData.filter(p => {
             const d = new Date(p.scheduled_at || p.created_at);
             return d.toLocaleDateString('en-CA') === dateKey;
-        });
+        }).sort((a, b) => new Date(a.scheduled_at || a.created_at) - new Date(b.scheduled_at || b.created_at));
         const dateLabel = new Date(dateKey + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
         document.getElementById('calPopupTitle').textContent = dateLabel + ' (' + posts.length + ' post' + (posts.length !== 1 ? 's' : '') + ')';
 
@@ -2237,11 +2239,16 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             filteredTasks = humanTasksData.filter(task => {
                 const domain = (task.domain || '').toLowerCase();
                 const actionType = (task.human_action_type || '').toLowerCase();
+                const params = task.parameters && typeof task.parameters === 'object' ? task.parameters : {};
+                const rc = params.review_content || {};
+                const outreachType = (rc.outreach_type || '').toLowerCase();
                 switch (humanTaskFilter) {
                     case 'hub': return domain === 'hub' || actionType === 'approve_hub_file';
-                    case 'content': return domain === 'content' || actionType.includes('content');
-                    case 'social': return domain === 'social' || actionType.includes('social');
-                    case 'outreach': return domain === 'outreach' || actionType.includes('outreach');
+                    case 'content': return actionType === 'approve_content' || actionType === 'approve_landing_page' || actionType === 'approve_testimonial';
+                    case 'engagement': return actionType === 'approve_social_draft' && (outreachType === 'engagement' || outreachType === '');
+                    case 'dm': return actionType === 'approve_social_draft' && outreachType === 'dm';
+                    case 'email': return actionType === 'approve_emails';
+                    case 'outreach': return actionType === 'review_outreach_draft' || actionType === 'approve_offer_proposal' || (domain === 'prospecting' || domain === 'offers');
                     default: return true;
                 }
             });
