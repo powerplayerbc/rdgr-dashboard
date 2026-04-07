@@ -3354,8 +3354,10 @@ async function refreshToday() {
     const logs = await supabaseSelect('deft_daily_logs', `user_id=eq.${activeProfileId}&log_date=eq.${today}&select=*`);
     dailyLog = logs && logs.length > 0 ? logs[0] : null;
 
-    // Fetch today's meals
-    const meals = await supabaseSelect('deft_meal_entries', `user_id=eq.${activeProfileId}&logged_at=gte.${today}T00:00:00&logged_at=lt.${today}T23:59:59&order=logged_at.asc&select=*`);
+    // Fetch today's meals (convert local day boundaries to UTC for PostgREST)
+    const dayStartUtc = new Date(`${today}T00:00:00`).toISOString();
+    const dayEndUtc = new Date(`${today}T23:59:59.999`).toISOString();
+    const meals = await supabaseSelect('deft_meal_entries', `user_id=eq.${activeProfileId}&logged_at=gte.${dayStartUtc}&logged_at=lt.${dayEndUtc}&order=logged_at.asc&select=*`);
     todayMeals = meals || [];
 
     // Fetch today's exercises via bridge

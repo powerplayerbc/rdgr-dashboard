@@ -2244,8 +2244,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 const outreachType = (rc.outreach_type || '').toLowerCase();
                 switch (humanTaskFilter) {
                     case 'hub': return domain === 'hub' || actionType === 'approve_hub_file';
-                    case 'content': return actionType === 'approve_content' || actionType === 'approve_landing_page' || actionType === 'approve_testimonial';
-                    case 'engagement': return actionType === 'approve_social_draft' && (outreachType === 'engagement' || outreachType === '');
+                    case 'content': return actionType === 'approve_content' || actionType === 'approve_landing_page' || actionType === 'approve_testimonial' || (actionType === 'approve_social_draft' && !outreachType);
+                    case 'engagement': return actionType === 'approve_social_draft' && outreachType === 'engagement';
                     case 'dm': return actionType === 'approve_social_draft' && outreachType === 'dm';
                     case 'email': return actionType === 'approve_emails';
                     case 'outreach': return actionType === 'review_outreach_draft' || actionType === 'approve_offer_proposal' || (domain === 'prospecting' || domain === 'offers');
@@ -2273,7 +2273,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             // ══════════════════════════════════════
             // SOCIAL OUTREACH DRAFT CARD
             // ══════════════════════════════════════
-            if (actionType === 'approve_social_draft') {
+            if (actionType === 'approve_social_draft' && (params.review_content || {}).outreach_type) {
                 return renderSocialDraftTask(task, i, params, isProcessing);
             }
 
@@ -2472,7 +2472,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         <div class="flex items-center gap-1.5 flex-wrap mb-1">
                             ${typeBadge}
                             <span class="badge" style="background:${platBg};color:${platTxt};">${esc(platLabel)}</span>
-                            <span class="badge" style="background:rgba(168,85,247,0.12);color:#C084FC;">${esc(outreachType || 'engagement')}</span>
+                            <span class="badge" style="background:rgba(168,85,247,0.12);color:#C084FC;">${esc(outreachType || 'social')}</span>
                             ${isOutdated ? '<span class="badge" style="background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:0.5rem;">OUTDATED</span>' : ''}
                         </div>
                         <div class="text-sm font-medium text-txt">${esc(task.title || 'Social Draft Review')}</div>
