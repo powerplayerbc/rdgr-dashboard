@@ -4494,6 +4494,18 @@ const ACHIEVE_XP = {
     '100_points_day': 50, '500_points_day': 100, all_categories: 75,
     early_bird: 15, marathon_session: 30, social_butterfly: 20
 };
+const ACHIEVE_DESCRIPTIONS = {
+    first_activity: 'Log your first activity in any category',
+    streak_3: 'Maintain a 3-day activity streak',
+    streak_7: 'Maintain a 7-day activity streak',
+    streak_30: 'Maintain a 30-day activity streak',
+    '100_points_day': 'Earn 100+ points in a single day',
+    '500_points_day': 'Earn 500+ points in a single day',
+    all_categories: 'Log activities in every category in one day',
+    early_bird: 'Log an activity before 7 AM',
+    marathon_session: 'Complete a session lasting 2+ hours',
+    social_butterfly: 'Share 3 activities with other users'
+};
 
 async function loadAchievements() {
     if (!activeProfileId) return;
@@ -4560,6 +4572,7 @@ function renderAchievementTile(a) {
     const icon = ACHIEVE_ICONS[key] || '\uD83C\uDFC6';
     const xp = a.xp_awarded || ACHIEVE_XP[key] || 0;
     const title = a.title || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const desc = ACHIEVE_DESCRIPTIONS[key] || '';
     const earnedDate = a.earned_at ? new Date(a.earned_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
     const progress = a.progress || '';
 
@@ -4568,6 +4581,7 @@ function renderAchievementTile(a) {
             <div class="panel-body text-center py-5">
                 <span class="text-3xl block mb-2">${icon}</span>
                 <p class="font-heading font-bold text-sm">${title}</p>
+                ${desc ? `<p class="text-xs mt-1" style="color: var(--brain-txt-2);">${desc}</p>` : ''}
                 <span class="badge badge-accent mt-2">${xp} XP</span>
                 <p class="text-xs mt-2" style="color: var(--brain-success);">${earnedDate}</p>
             </div>
@@ -4577,6 +4591,7 @@ function renderAchievementTile(a) {
             <div class="panel-body text-center py-5">
                 <span class="text-3xl block mb-2 grayscale">${icon}</span>
                 <p class="font-heading font-bold text-sm" style="color: var(--brain-txt-2);">${title}</p>
+                ${desc ? `<p class="text-xs mt-1" style="color: var(--brain-txt-3);">${desc}</p>` : ''}
                 <span class="badge badge-ghost mt-2">${xp} XP</span>
                 ${progress ? `<p class="text-xs mt-2" style="color: var(--brain-txt-3);">${progress}</p>` : ''}
             </div>
@@ -4625,7 +4640,8 @@ async function loadAnalytics(period) {
             Object.entries(breakdown).forEach(([catKey, val]) => {
                 const cat = categories.find(c => c.name === catKey || c.slug === catKey || c.category_id === catKey);
                 const normalizedName = cat?.name || catKey;
-                catTotals[normalizedName] = (catTotals[normalizedName] || 0) + val;
+                const pts = typeof val === 'object' ? (val.points || 0) : (val || 0);
+                catTotals[normalizedName] = (catTotals[normalizedName] || 0) + pts;
             });
             return { date: s.score_date, value: pts, minutes: s.total_minutes || 0, goal_met: pts >= goal };
         });

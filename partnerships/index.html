@@ -1077,6 +1077,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Drafts & Approvals</h2>
                         <span class="badge" style="background: #FFD93D20; color: #FFD93D;" id="draftCount">--</span>
                     </div>
+                    <a href="/template-studio" class="btn btn-ghost text-xs py-1 px-2" style="color: var(--deft-accent, #4CC9F0);">
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline;vertical-align:-2px;margin-right:4px;"><path d="M13 2.5H3A1.5 1.5 0 001.5 4v8A1.5 1.5 0 003 13.5h10a1.5 1.5 0 001.5-1.5V4A1.5 1.5 0 0013 2.5z" stroke="currentColor" stroke-width="1.2"/><path d="M5 6h6M5 8.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Templates
+                    </a>
                 </div>
                 <div class="panel-body" id="draftsBody">
                     <div class="empty-state text-xs">Loading drafts...</div>
@@ -1404,6 +1407,13 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 <div>
                     <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Required Keywords</label>
                     <input type="text" id="tcKeywords" class="form-input" placeholder="ai, automation, business (comma-separated)">
+                    <div class="flex items-center gap-2 mt-1.5">
+                        <label class="text-xs text-txt-3">Match logic:</label>
+                        <select id="tcKeywordLogic" class="form-input" style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.7rem;">
+                            <option value="or">Any keyword (OR)</option>
+                            <option value="and">All keywords (AND)</option>
+                        </select>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Search Engines</label>
@@ -1425,6 +1435,31 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 <div class="flex gap-3 pt-2">
                     <button onclick="submitTargetingCriteria()" class="btn btn-primary flex-1 py-2.5" id="tcSubmitBtn">Save Criteria</button>
                     <button onclick="closeModal('addTargetingModal')" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Draft Modal -->
+    <div class="modal-backdrop" id="editDraftModal" style="display:none;">
+        <div class="modal" style="max-width: 640px;">
+            <div class="modal-header">
+                <h3 class="font-heading font-semibold">Edit Draft</h3>
+                <button onclick="closeModal('editDraftModal')" class="btn btn-ghost text-xs py-1 px-2">Close</button>
+            </div>
+            <div class="modal-body space-y-4">
+                <input type="hidden" id="edDraftId">
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Subject</label>
+                    <input type="text" id="edSubject" class="form-input" placeholder="Email subject line">
+                </div>
+                <div>
+                    <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Message Body</label>
+                    <textarea id="edBody" class="form-input" rows="10" style="font-size: 0.8rem; line-height: 1.6;"></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button onclick="saveEditedDraft()" class="btn btn-primary flex-1 py-2.5" id="edSaveBtn">Save Changes</button>
+                    <button onclick="closeModal('editDraftModal')" class="btn btn-ghost flex-1 py-2.5">Cancel</button>
                 </div>
             </div>
         </div>
@@ -2123,8 +2158,10 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 '<div class="text-xs text-txt-2 whitespace-pre-wrap mb-3" style="max-height: 160px; overflow-y: auto; line-height: 1.5; padding: 0.5rem; background: var(--deft-surface); border-radius: 0.375rem;">' +
                     esc(body || 'No message body') +
                 '</div>' +
-                '<div class="flex gap-2">' +
+                '<div class="flex gap-2 flex-wrap">' +
                     '<button onclick="approveDraft(\'' + d.id + '\')" class="btn btn-primary text-xs py-1.5 px-3">Approve & Send</button>' +
+                    '<button onclick="editDraft(\'' + d.id + '\')" class="btn btn-ghost text-xs py-1.5 px-3" style="color: #4CC9F0;">Edit</button>' +
+                    '<button onclick="redraftDraft(\'' + d.id + '\')" class="btn btn-ghost text-xs py-1.5 px-3" style="color: #FFD93D;">Redraft</button>' +
                     '<button onclick="rejectDraft(\'' + d.id + '\')" class="btn btn-ghost text-xs py-1.5 px-3" style="color: var(--deft-danger, #FF6B6B);">Reject</button>' +
                 '</div>' +
             '</div>';
@@ -2168,6 +2205,73 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             renderDrafts();
         } catch (e) {
             toast('Failed to reject: ' + e.message, 'error');
+        }
+    }
+
+    function editDraft(draftId) {
+        var d = partnershipDrafts.find(function(x) { return x.id === draftId; });
+        if (!d) return;
+        document.getElementById('edDraftId').value = draftId;
+        document.getElementById('edSubject').value = (d.content && d.content.subject) || d.title || '';
+        document.getElementById('edBody').value = (d.content && d.content.body) || d.generated_text || '';
+        openModal('editDraftModal');
+    }
+
+    async function saveEditedDraft() {
+        var draftId = document.getElementById('edDraftId').value;
+        var subject = document.getElementById('edSubject').value.trim();
+        var body = document.getElementById('edBody').value.trim();
+        if (!body) { toast('Message body is required', 'error'); return; }
+        var btn = document.getElementById('edSaveBtn');
+        btn.disabled = true; btn.textContent = 'Saving...';
+        try {
+            var d = partnershipDrafts.find(function(x) { return x.id === draftId; });
+            var existingCtx = (d && d.context) || {};
+            var updatedContent = Object.assign({}, d && d.content || {}, { subject: subject, body: body });
+            await fetch(SUPABASE_URL + '/rest/v1/copy_drafts?id=eq.' + draftId, {
+                method: 'PATCH',
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: subject, content: updatedContent, generated_text: body, updated_at: new Date().toISOString() })
+            });
+            toast('Draft updated', 'success');
+            closeModal('editDraftModal');
+            await fetchPartnershipDrafts();
+            renderDrafts();
+        } catch (e) {
+            toast('Failed to save: ' + e.message, 'error');
+        }
+        btn.disabled = false; btn.textContent = 'Save Changes';
+    }
+
+    async function redraftDraft(draftId) {
+        var d = partnershipDrafts.find(function(x) { return x.id === draftId; });
+        if (!d) return;
+        if (!confirm('Regenerate this draft? The current version will be discarded and a new AI-generated draft will be created.')) return;
+        toast('Redrafting...', 'info');
+        try {
+            // Reject current draft
+            await fetch(SUPABASE_URL + '/rest/v1/copy_drafts?id=eq.' + draftId, {
+                method: 'PATCH',
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ review_status: 'rejected', updated_at: new Date().toISOString() })
+            });
+            // Trigger new outreach for the same partner
+            var ctx = d.context || {};
+            var result = await prtnApi('send_outreach', {
+                partner_id: ctx.partner_id,
+                engagement_type: ctx.engagement_type,
+                contact_email: ctx.email || d.destination,
+                contact_name: ctx.contact_name
+            });
+            if (result && result.success) {
+                toast('New draft generated! It may take a moment to appear.', 'success');
+            } else {
+                toast('Redraft triggered but may take a moment to process', 'info');
+            }
+            await fetchPartnershipDrafts();
+            renderDrafts();
+        } catch (e) {
+            toast('Failed to redraft: ' + e.message, 'error');
         }
     }
 
@@ -2493,7 +2597,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
     async function fetchTargetingCriteria() {
         try {
-            targetingCriteria = await supabaseSelect('partnership_targeting_criteria', '?brand_id=eq.carlton&order=engagement_type') || [];
+            targetingCriteria = await supabaseSelect('partnership_targeting_criteria', 'brand_id=eq.carlton&order=engagement_type') || [];
         } catch (e) { targetingCriteria = []; }
     }
 
@@ -2533,7 +2637,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     '</div></div>' +
                     '<div class="panel-body space-y-2 text-xs text-txt-2">' +
                     '<div><span class="text-txt-3">Audience:</span> ' + audienceRange + (tc.audience_size_source ? ' (' + tc.audience_size_source + ')' : '') + '</div>' +
-                    '<div><span class="text-txt-3">Keywords:</span> ' + (keywords || 'None') + '</div>' +
+                    '<div><span class="text-txt-3">Keywords:</span> ' + (keywords || 'None') + (keywords ? ' <span class="badge badge-ghost text-[9px]">' + ((tc.scoring_weights && tc.scoring_weights.keyword_logic) === 'and' ? 'ALL must match' : 'ANY match') + '</span>' : '') + '</div>' +
                     '<div><span class="text-txt-3">Engines:</span> ' + engines + ' | <span class="text-txt-3">Max searches/day:</span> ' + (tc.max_daily_searches || 3) + '</div>' +
                     (tc.niche_description ? '<div class="text-txt-3 italic truncate" title="' + tc.niche_description.replace(/"/g, '&quot;') + '">' + tc.niche_description.substring(0, 120) + (tc.niche_description.length > 120 ? '...' : '') + '</div>' : '') +
                     '</div></div>';
@@ -2584,6 +2688,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         document.getElementById('tcMinAudience').value = '';
         document.getElementById('tcMaxAudience').value = '';
         document.getElementById('tcKeywords').value = '';
+        document.getElementById('tcKeywordLogic').value = 'or';
         document.getElementById('tcMaxSearches').value = '3';
         document.getElementById('tcNiche').value = '';
         document.querySelectorAll('#tcEnginesWrap input[type="checkbox"]').forEach(function(cb) {
@@ -2617,6 +2722,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             max_audience_size: parseInt(document.getElementById('tcMaxAudience').value) || null,
             required_keywords: keywords,
             search_engines: engines,
+            keyword_logic: document.getElementById('tcKeywordLogic').value || 'or',
             max_daily_searches: parseInt(document.getElementById('tcMaxSearches').value) || 3,
             niche_description: document.getElementById('tcNiche').value.trim() || null,
             is_active: true,
