@@ -1332,7 +1332,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         </div>
                         <div>
                             <label class="form-label">Contact (optional)</label>
-                            <input type="text" class="form-input" id="composeContactSearch" placeholder="Search contacts..." oninput="searchComposeContacts(this.value)">
+                            <input type="text" class="form-input" id="composeContactSearch" placeholder="Type 2+ chars to search CRM contacts..." oninput="searchComposeContacts(this.value)">
                             <input type="hidden" id="composeContactId" value="">
                             <div id="composeContactResults" class="hidden" style="position: relative;">
                                 <div id="composeContactList" style="position: absolute; top: 0; left: 0; right: 0; z-index: 10; background: #1A1D28; border: 1px solid #2A2E3D; border-radius: 0.375rem; max-height: 200px; overflow-y: auto;"></div>
@@ -1744,7 +1744,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 <div class="flex gap-3">
                     <button class="btn btn-primary py-2 px-6" onclick="saveSettings()">Save All Settings</button>
                     <span class="text-xs text-txt-3 self-center" id="lastSaved"></span>
-                    <span class="badge badge-accent self-center" id="versionBadge">v1</span>
+                    <span class="badge badge-accent self-center" id="versionBadgeSettings">v1</span>
                 </div>
 
             </div>
@@ -2632,6 +2632,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         } catch (err) {
             console.error('Init failed:', err);
         }
+        // Ensure version badge shows a value even if settings failed to load
+        const vb = document.getElementById('versionBadge');
+        if (vb && vb.textContent === 'loading...') vb.textContent = 'v1';
     }
 
     // ═══════════════════════════════════════════════════
@@ -2732,8 +2735,10 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         // Preview
         updateGreetingPreview();
 
-        // Version
+        // Version — update both header badge and settings badge
         document.getElementById('versionBadge').textContent = `v${s.version || 1}`;
+        const vbs = document.getElementById('versionBadgeSettings');
+        if (vbs) vbs.textContent = `v${s.version || 1}`;
         if (s.updated_at) {
             document.getElementById('lastSaved').textContent = 'Saved ' + new Date(s.updated_at).toLocaleString();
         }
@@ -3460,6 +3465,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 dirtyFields.clear();
                 document.getElementById('settingsSaveBar').classList.remove('has-changes');
                 document.getElementById('versionBadge').textContent = `v${result.version}`;
+                const vbs2 = document.getElementById('versionBadgeSettings');
+                if (vbs2) vbs2.textContent = `v${result.version}`;
                 document.getElementById('lastSaved').textContent = 'Saved ' + new Date().toLocaleString();
                 toast(`Settings saved (v${result.version})`, 'success');
             } else {
@@ -3515,7 +3522,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
         try {
             const result = await supabaseGet(
-                'copy_drafts?select=id,brand_id,copy_type,title,content,context,review_status,review_feedback,revision_count,destination,requested_by,parent_draft_id,approved_at,approved_by,created_at,updated_at,structured_feedback,templates_used&brand_id=eq.carlton&order=created_at.desc&limit=200'
+                'copy_drafts?select=id,brand_id,copy_type,title,content,context,review_status,review_feedback,revision_count,destination,requested_by,parent_draft_id,approved_at,approved_by,created_at,updated_at,structured_feedback,templates_used&brand_id=eq.carlton&requested_by=neq.prtn-draft&order=created_at.desc&limit=200'
             );
             outreachDrafts = Array.isArray(result) ? result : [];
         } catch (err) {
@@ -3690,6 +3697,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         <div class="flex flex-col gap-1.5 flex-shrink-0">
                             ${isPending ? `
                                 <button class="btn btn-approve text-xs py-1.5 px-3" onclick="event.stopPropagation();quickApprove('${esc(draft.id)}')">Approve</button>
+                                <button class="btn btn-ghost text-xs py-1.5 px-3" style="border-color:var(--deft-info);color:var(--deft-info);" onclick="event.stopPropagation();openEmailPreview('${esc(draft.id)}')">Edit</button>
                                 <button class="btn btn-deny text-xs py-1.5 px-3" onclick="event.stopPropagation();quickRedraft('${esc(draft.id)}')">Redraft</button>
                                 <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="event.stopPropagation();quickSkip('${esc(draft.id)}')">Skip</button>
                             ` : ''}

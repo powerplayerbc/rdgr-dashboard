@@ -2449,8 +2449,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             if (result && result.success !== false) {
                 showToast('Contact updated', 'success');
                 document.getElementById('p360EditBtn').textContent = 'Edit';
-                open360(current360ContactId);
                 fetchContacts();
+                open360(current360ContactId);
+                return;
             } else {
                 showToast('Failed: ' + (result?.error || 'Unknown error'), 'error');
             }

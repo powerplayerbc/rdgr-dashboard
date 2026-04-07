@@ -1441,7 +1441,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     </div>
 
     <!-- Edit Draft Modal -->
-    <div class="modal-backdrop" id="editDraftModal" style="display:none;">
+    <div class="modal-backdrop" id="editDraftModal">
         <div class="modal" style="max-width: 640px;">
             <div class="modal-header">
                 <h3 class="font-heading font-semibold">Edit Draft</h3>
@@ -1786,7 +1786,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     }
 
     async function fetchPartners() {
-        var data = await supabaseSelect('partnership_partners', 'brand_id=eq.carlton&order=last_activity_at.desc.nullslast');
+        var data = await supabaseSelect('partnership_partners', 'brand_id=eq.carlton&order=updated_at.desc.nullslast,created_at.desc');
         if (data) partners = data;
     }
 
@@ -1972,7 +1972,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 '<td><span class="badge badge-domain">' + esc(typeName) + '</span></td>' +
                 '<td><span class="badge" style="background: ' + statusColor + '20; color: ' + statusColor + ';">' + esc(p.status || 'prospect') + '</span></td>' +
                 '<td class="text-txt-2">' + esc(p.tier || '--') + '</td>' +
-                '<td class="text-txt-3 text-xs">' + timeAgo(p.last_activity_at) + '</td>' +
+                '<td class="text-txt-3 text-xs">' + timeAgo(p.updated_at || p.created_at) + '</td>' +
                 '<td><button onclick="event.stopPropagation(); openDetailPanel(\'' + p.id + '\')" class="btn btn-ghost text-xs py-1 px-2">View</button></td>' +
             '</tr>';
         }).join('');
