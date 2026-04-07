@@ -4678,7 +4678,7 @@ async function loadAnalytics(period) {
 
     // Weekly report (try webhook, fall back to a dedicated 14-day fetch)
     let weeklyResult = await brainApi('get_weekly_report', {}, { silent: true });
-    if (!weeklyResult?.data?.this_week) {
+    if (!weeklyResult?.data?.this_week?.total_points && weeklyResult?.data?.this_week?.total_points !== 0) {
         // Fetch a full 14-day window so we have data for both this week and last week
         const twoWeeksAgo = new Date();
         twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
