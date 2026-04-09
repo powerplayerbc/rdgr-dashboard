@@ -2236,7 +2236,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             var res = await fetch(SUPABASE_URL + '/rest/v1/copy_drafts?id=eq.' + draftId, {
                 method: 'PATCH',
                 headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-                body: JSON.stringify({ title: subject, content: updatedContent, generated_text: body, updated_at: new Date().toISOString() })
+                body: JSON.stringify({ title: subject, content: updatedContent, updated_at: new Date().toISOString() })
             });
             if (!res.ok) {
                 // Supabase PATCH failed (likely RLS), fall back to PRTN-BRIDGE

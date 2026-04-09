@@ -3243,7 +3243,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         const actual = parseFloat(data.actual_revenue) || 0;
         const pipeline = parseFloat(data.total_pipeline) || 0;
         const weighted = parseFloat(data.weighted_pipeline) || 0;
-        const targetDate = new Date('2026-04-30T23:59:59');
+        const targetDate = new Date('2026-04-30');
         const now = new Date();
         const daysRemaining = Math.max(0, Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24)));
         const progress = Math.min((actual / target) * 100, 100);
