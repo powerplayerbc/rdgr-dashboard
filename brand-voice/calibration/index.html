@@ -1290,6 +1290,9 @@ function renderQuestion(question) {
     state.rankingOrder = [];
 
     const container = $('questionContainer');
+    const flagBtn = `<button class="btn btn-ghost text-xs" onclick="flagQuestion(${question.index != null ? question.index : 'state.currentQuestionIndex'})"
+        style="position: absolute; top: 8px; right: 8px; opacity: 0.5; padding: 4px 8px; font-size: 11px;"
+        title="Flag inaccurate content">&#9873; Flag</button>`;
     const contextHtml = question.context ? `<p class="text-xs text-txt-3 mt-1 mb-4">${esc(question.context)}</p>` : '<div class="mb-4"></div>';
 
     // Wrap in animation container
@@ -1300,7 +1303,8 @@ function renderQuestion(question) {
     switch (question.type) {
         case 'open':
             container.innerHTML = `
-                <div class="section-panel">
+                <div class="section-panel" style="position:relative;">
+                    ${flagBtn}
                     <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
                     ${contextHtml}
                     <textarea class="form-input" id="answerText" rows="5" placeholder="Share your thoughts... (2-3 sentences minimum for best results)"></textarea>
@@ -1315,7 +1319,8 @@ function renderQuestion(question) {
         case 'this_or_that': {
             const opts = question.options || {};
             container.innerHTML = `
-                <div class="section-panel">
+                <div class="section-panel" style="position:relative;">
+                    ${flagBtn}
                     <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
                     ${contextHtml}
                     <div class="flex gap-4 option-cards-row">
@@ -1338,11 +1343,12 @@ function renderQuestion(question) {
 
         case 'approve_deny':
             container.innerHTML = `
-                <div class="section-panel">
+                <div class="section-panel" style="position:relative;">
+                    ${flagBtn}
                     <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
                     ${contextHtml}
-                    ${question.content ? `<div class="p-3 rounded-lg mb-4" style="background: var(--deft-surface, #11131A); border: 1px solid var(--deft-border);">
-                        <p class="text-sm" style="color: var(--deft-txt); line-height: 1.6;">${esc(question.content)}</p>
+                    ${(question.options?.content || question.content) ? `<div class="p-3 rounded-lg mb-4" style="background: var(--deft-surface, #11131A); border: 1px solid var(--deft-border);">
+                        <p class="text-sm" style="color: var(--deft-txt); line-height: 1.6; white-space: pre-wrap;">${esc(question.options?.content || question.content)}</p>
                     </div>` : ''}
                     <div class="flex gap-3 verdict-row">
                         <button class="verdict-btn verdict-approve" onclick="selectVerdict('approve', this)">Approve</button>
@@ -1363,7 +1369,8 @@ function renderQuestion(question) {
             const items = question.options || [];
             state.rankingOrder = [...items];
             container.innerHTML = `
-                <div class="section-panel">
+                <div class="section-panel" style="position:relative;">
+                    ${flagBtn}
                     <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
                     ${contextHtml}
                     <p class="text-xs text-txt-2 mb-3">Drag to reorder from most to least important:</p>
@@ -1375,6 +1382,15 @@ function renderQuestion(question) {
                                 <span class="text-sm">${esc(item)}</span>
                             </div>
                         `).join('')}
+                    </div>
+                    <div id="noneOfTheseArea" class="mt-3">
+                        <button class="btn btn-ghost text-xs w-full" onclick="selectNoneOfThese()" id="noneBtn"
+                            style="border: 1px dashed var(--deft-border, #2a2d35); padding: 8px; opacity: 0.7;">
+                            None of these work for my brand
+                        </button>
+                        <textarea class="form-input mt-2" id="noneText" rows="2"
+                            placeholder="What would you say instead? (optional)"
+                            style="display: none;"></textarea>
                     </div>
                     <div class="flex items-center justify-between mt-4">
                         <button onclick="handleSkipQuestion()" class="btn btn-ghost text-xs">Skip &rarr;</button>
@@ -1399,6 +1415,36 @@ function selectOption(opt, el) {
     el.classList.add('selected');
     const btn = $('submitBtn');
     if (btn) { btn.disabled = false; btn.textContent = 'Submit Answer'; }
+}
+
+async function flagQuestion(questionIndex) {
+    const reason = prompt('What is inaccurate about this content?');
+    if (!reason) return;
+    try {
+        await webhookCall({
+            operation: 'flag_content',
+            dimension: state.activeDimension,
+            session_id: state.sessionId,
+            question_index: questionIndex,
+            flag_reason: reason
+        });
+        toast('Content flagged for review. Thank you!', 'info');
+    } catch (err) {
+        console.error('Flag error:', err);
+        toast('Failed to flag content', 'error');
+    }
+}
+
+function selectNoneOfThese() {
+    state.selectedOption = 'none';
+    const btn = $('submitBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit Feedback'; }
+    const ta = $('noneText');
+    if (ta) { ta.style.display = 'block'; ta.focus(); }
+    const noneBtn = $('noneBtn');
+    if (noneBtn) { noneBtn.style.opacity = '1'; noneBtn.style.borderColor = 'var(--deft-accent, #60a5fa)'; }
+    // Visually deselect ranking items
+    document.querySelectorAll('.rank-item').forEach(i => i.style.opacity = '0.4');
 }
 
 function selectVerdict(verdict, el) {
@@ -1474,7 +1520,11 @@ async function handleSubmitAnswer() {
             break;
         }
         case 'ranking': {
-            payload = { rankings: state.rankingOrder };
+            if (state.selectedOption === 'none') {
+                payload = { selected: 'none', feedback: ($('noneText') || {}).value || '' };
+            } else {
+                payload = { rankings: state.rankingOrder };
+            }
             break;
         }
     }
@@ -1489,7 +1539,7 @@ async function handleSubmitAnswer() {
         state.isSubmitting = false;
 
         // Check if dimension is complete
-        if (result.dimension_complete || result.is_complete) {
+        if (result.dimension_complete || result.is_complete || result.is_round_complete) {
             await handleDimensionComplete();
             return;
         }
@@ -1523,7 +1573,7 @@ async function handleSkipQuestion() {
         const result = await submitAnswer(state.activeDimension, state.currentQuestionIndex, { skipped: true });
         state.isSubmitting = false;
 
-        if (result.dimension_complete || result.is_complete) {
+        if (result.dimension_complete || result.is_complete || result.is_round_complete) {
             await handleDimensionComplete();
             return;
         }
