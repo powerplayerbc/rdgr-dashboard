@@ -1599,11 +1599,11 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             </div>
         </div>
 
-        <!-- Today's Meals -->
+        <!-- Today's Food -->
         <div class="panel deft-reveal deft-reveal-4">
             <div class="panel-header">
                 <div class="flex items-center gap-2">
-                    <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--deft-txt-2);">Today's Meals</span>
+                    <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--deft-txt-2);">Today's Food</span>
                     <span id="mealCount" class="font-mono text-xs px-1.5 py-0.5 rounded" style="background: var(--deft-accent-dim); color: var(--deft-accent);">0</span>
                 </div>
                 <button class="btn btn-primary text-xs" onclick="switchView('logmeal')">
@@ -1615,7 +1615,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             </div>
             <div class="panel-body" id="mealsList">
                 <div class="empty-state">
-                    <p>No meals logged yet today</p>
+                    <p>No food logged yet today</p>
                     <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Use the Log Meal tab or quick action to get started</p>
                 </div>
             </div>
@@ -3368,10 +3368,27 @@ async function refreshToday() {
     renderToday();
 }
 
+function calcConsumedFromMeals(meals) {
+    const totals = { calories: 0, fat_g: 0, protein_g: 0, net_carbs_g: 0, fiber_g: 0, sugar_g: 0 };
+    for (const m of meals) {
+        const n = m.nutrition_consumed || {};
+        totals.calories += (n.calories || 0);
+        totals.fat_g += (n.total_fat_g || n.fat_g || 0);
+        totals.protein_g += (n.protein_g || 0);
+        totals.net_carbs_g += (n.net_carbs_g || 0);
+        totals.fiber_g += (n.fiber_g || 0);
+        totals.sugar_g += (n.sugar_g || 0);
+    }
+    return totals;
+}
+
 function renderToday() {
     // Get targets from daily log or defaults
     const targets = dailyLog?.target_macros || { calories: 2000, fat_g: 155, protein_g: 130, net_carbs_g: 20 };
-    const consumed = dailyLog?.consumed_totals || { calories: 0, fat_g: 0, protein_g: 0, net_carbs_g: 0, fiber_g: 0, sugar_g: 0 };
+    // Prefer client-calculated totals from actual meal entries (authoritative)
+    // Falls back to daily log consumed_totals, then zeros
+    const mealConsumed = todayMeals.length > 0 ? calcConsumedFromMeals(todayMeals) : null;
+    const consumed = mealConsumed || dailyLog?.consumed_totals || { calories: 0, fat_g: 0, protein_g: 0, net_carbs_g: 0, fiber_g: 0, sugar_g: 0 };
     const targetCal = dailyLog?.target_calories || targets.calories || 2000;
 
     // Update net carbs bar
@@ -3507,7 +3524,7 @@ function updateKetoStatus(consumed, targets) {
 function renderMealsList() {
     const container = document.getElementById('mealsList');
     if (todayMeals.length === 0) {
-        container.innerHTML = `<div class="empty-state"><p>No meals logged yet today</p><p class="text-sm mt-1" style="color: var(--deft-txt-3);">Use the Log Meal tab or quick action to get started</p></div>`;
+        container.innerHTML = `<div class="empty-state"><p>No food logged yet today</p><p class="text-sm mt-1" style="color: var(--deft-txt-3);">Use the Log Meal tab or quick action to get started</p></div>`;
         return;
     }
 
@@ -3645,18 +3662,54 @@ async function submitWeighIn() {
     btn.disabled = true;
     btn.textContent = 'Saving...';
 
+    const today = new Date().toLocaleDateString('en-CA');
+    let saved = false;
+
     const result = await deftApi('log_weight', {
         weight_lbs: weight,
-        weigh_date: new Date().toLocaleDateString('en-CA'),
+        weigh_date: today,
         notes: notes || null
     });
+
+    if (result) {
+        saved = true;
+    } else {
+        // Fallback: write directly to Supabase
+        // 1. Write to weight history
+        const historyWrite = await supabaseWrite('deft_weight_history', 'POST', {
+            user_id: activeProfileId,
+            weigh_date: today,
+            weight_lbs: weight
+        });
+
+        // 2. Update daily log with today's weight
+        const existing = await supabaseSelect('deft_daily_logs', `user_id=eq.${activeProfileId}&log_date=eq.${today}&select=log_id`);
+        if (existing && existing.length > 0) {
+            await supabaseWrite('deft_daily_logs', 'PATCH', { weight_lbs: weight }, `log_id=eq.${existing[0].log_id}`);
+        } else {
+            const profile = await supabaseSelect('deft_user_profiles', `user_id=eq.${activeProfileId}&select=macro_targets,meal_count_default`);
+            const mt = profile?.[0]?.macro_targets || { calories: 2000, fat_g: 155, protein_g: 130, net_carbs_g: 20 };
+            await supabaseWrite('deft_daily_logs', 'POST', {
+                user_id: activeProfileId,
+                log_date: today,
+                weight_lbs: weight,
+                target_calories: mt.calories || 2000,
+                target_macros: mt,
+                consumed_totals: { calories: 0, fat_g: 0, protein_g: 0, net_carbs_g: 0, fiber_g: 0, sugar_g: 0 },
+                meal_count_planned: profile?.[0]?.meal_count_default || 3,
+            }, '');
+        }
+        if (historyWrite) saved = true;
+    }
 
     btn.disabled = false;
     btn.textContent = 'Save Weight';
 
-    if (result) {
+    if (saved) {
         toast(`Weight logged: ${weight} lbs`, 'success');
         closeModal('weighInModal');
+    } else {
+        toast('Failed to save weight — please try again', 'error');
     }
 }
 
