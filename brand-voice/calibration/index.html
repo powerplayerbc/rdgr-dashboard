@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Voice Calibration | Carlton AI</title>
+
+    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://yrwrswyjawmgtxrgbnim.supabase.co">
+    <script>
+        // Instant auth check + theme application
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _presets = {
+                forest:     { accent:'#A8D65B',accentWarm:'#F0A830',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                sunrise:    { accent:'#F0A830',accentWarm:'#E85D5D',base:'#100D08',surface:'#1C1810',surfaceEl:'#272118',surfaceHi:'#322B20',border:'#3F382C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                ocean:      { accent:'#38BDF8',accentWarm:'#06D6A0',base:'#080D10',surface:'#10161C',surfaceEl:'#182027',surfaceHi:'#202A32',border:'#2C363F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E0E8EA',txt2:'#8C9BA0',txt3:'#586B6B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                berry:      { accent:'#C084FC',accentWarm:'#FB7185',base:'#0D0810',surface:'#16101C',surfaceEl:'#201827',surfaceHi:'#2A2032',border:'#3A2C3F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E0EA',txt2:'#A08CA0',txt3:'#6B586B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                rdgr:       { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' },
+                monochrome: { accent:'#E8E8E8',accentWarm:'#A0A0A0',base:'#000000',surface:'#0A0A0A',surfaceEl:'#141414',surfaceHi:'#1E1E1E',border:'#2A2A2A',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E8E8',txt2:'#A0A0A0',txt3:'#666666',headingFont:'Nunito',bodyFont:'DM Sans' },
+            };
+            var _t = (_tc.preset === 'custom' && _tc.custom) ? _tc.custom : (_presets[_tc.preset] || _presets.rdgr);
+            if (_tc.statusOverrides) {
+                if (_tc.statusOverrides.success) _t.success = _tc.statusOverrides.success;
+                if (_tc.statusOverrides.warning) _t.warning = _tc.statusOverrides.warning;
+                if (_tc.statusOverrides.danger) _t.danger = _tc.statusOverrides.danger;
+            }
+            var _r = document.documentElement;
+            _r.style.setProperty('--deft-accent', _t.accent);
+            _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+            _r.style.setProperty('--deft-accent-warm', _t.accentWarm || _t.accent);
+            _r.style.setProperty('--deft-base', _t.base);
+            _r.style.setProperty('--deft-surface', _t.surface);
+            _r.style.setProperty('--deft-surface-el', _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-surface-hi', _t.surfaceHi || _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-border', _t.border);
+            _r.style.setProperty('--deft-success', _t.success || '#6BCB77');
+            _r.style.setProperty('--deft-success-dim', (_t.success || '#6BCB77') + '26');
+            _r.style.setProperty('--deft-warning', _t.warning || '#F0A830');
+            _r.style.setProperty('--deft-warning-dim', (_t.warning || '#F0A830') + '26');
+            _r.style.setProperty('--deft-danger', _t.danger || '#E85D5D');
+            _r.style.setProperty('--deft-danger-dim', (_t.danger || '#E85D5D') + '26');
+            _r.style.setProperty('--deft-txt', _t.txt);
+            _r.style.setProperty('--deft-txt-2', _t.txt2 || '#8A95A9');
+            _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
+            _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
+            _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+            var _fs = _tc.fontScale || 1;
+            _r.style.setProperty('--deft-font-scale', _fs);
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent { opacity: 1 !important; }
+
+        body {
+            background: var(--deft-base, #08090D) !important;
+            color: var(--deft-txt, #E8ECF1) !important;
+            font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important;
+        }
+        .font-heading, h1, h2, h3 {
+            font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important;
+        }
+        nav {
+            background: color-mix(in srgb, var(--deft-base, #08090D) 92%, transparent) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel {
+            background: var(--deft-surface, #11131A) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .text-accent { color: var(--deft-accent, #06D6A0) !important; }
+        .bg-accent { background-color: var(--deft-accent, #06D6A0) !important; }
+
+        /* Mobile Nav */
+        .mobile-menu-btn {
+            display: none; align-items: center; justify-content: center;
+            width: 32px; height: 32px;
+            border: 1px solid var(--deft-border, #2A2E3D); border-radius: 0.375rem;
+            background: transparent; color: var(--deft-txt-2, #8A95A9);
+            cursor: pointer; transition: background 0.15s, color 0.15s; flex-shrink: 0;
+        }
+        .mobile-menu-btn:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        @media (max-width: 639px) { .mobile-menu-btn { display: flex; } }
+        #mobileNavOverlay {
+            position: fixed; inset: 0; z-index: 200; display: none; opacity: 0; transition: opacity 0.2s ease;
+        }
+        #mobileNavOverlay.open { display: flex; opacity: 1; }
+        .mobile-nav-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
+        .mobile-nav-sidebar {
+            position: relative; z-index: 1; width: 280px; max-width: 85vw; height: 100vh;
+            background: var(--deft-base, #11131A); border-right: 1px solid var(--deft-border, #2A2E3D);
+            overflow-y: auto; transform: translateX(-100%); transition: transform 0.25s ease; padding: 0.75rem 0;
+        }
+        #mobileNavOverlay.open .mobile-nav-sidebar { transform: translateX(0); }
+        .mobile-nav-close {
+            display: flex; align-items: center; justify-content: center; width: 28px; height: 28px;
+            border: none; background: transparent; color: var(--deft-txt-3, #525E73);
+            cursor: pointer; font-size: 1.1rem; border-radius: 0.25rem; transition: background 0.12s, color 0.12s;
+        }
+        .mobile-nav-close:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link {
+            display: block; padding: 0.5rem 1.25rem; font-size: 0.75rem; font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9); text-decoration: none; transition: background 0.12s, color 0.12s;
+        }
+        .mobile-nav-link:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link.active { background: var(--deft-accent-dim, rgba(6,214,160,0.12)); color: var(--deft-accent, #06D6A0); }
+        .mobile-nav-group-btn {
+            display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0.5rem 1.25rem;
+            font-size: 0.75rem; font-weight: 500; color: var(--deft-txt-2, #8A95A9);
+            background: transparent; border: none; cursor: pointer; transition: background 0.12s, color 0.12s; text-align: left;
+        }
+        .mobile-nav-group-btn:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-group-btn.active { color: var(--deft-accent, #06D6A0); }
+        .mobile-nav-group-btn .mn-chevron { transition: transform 0.2s; opacity: 0.5; }
+        .mobile-nav-group-btn.expanded .mn-chevron { transform: rotate(180deg); opacity: 0.8; }
+        .mobile-nav-children { display: none; padding-left: 1rem; }
+        .mobile-nav-children.open { display: block; }
+        .mobile-nav-divider { height: 1px; background: var(--deft-border, #2A2E3D); margin: 0.375rem 1rem; }
+
+        .btn-primary {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent) !important;
+        }
+        .btn-primary:hover { background: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent) !important; }
+        .btn-ghost { border-color: var(--deft-border, #2A2E3D) !important; }
+        .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+        .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+        .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+        ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D) !important; }
+        select.form-input option { background: var(--deft-surface-el, #1A1D28) !important; color: var(--deft-txt, #E8ECF1) !important; }
+
+        /* Font scale */
+        body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
+        .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
+        .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
+        .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
+        .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
+
+        /* Nav Dropdown System */
+        .nav-group { position: relative; }
+        .nav-group-btn {
+            display: flex; align-items: center; gap: 0.25rem; padding: 0.3rem 0.75rem;
+            font-size: 0.7rem; font-weight: 500; color: #8A95A9; border-radius: 0.375rem;
+            text-decoration: none; cursor: pointer; transition: background 0.15s, color 0.15s;
+            white-space: nowrap; border: none; background: transparent;
+        }
+        .nav-group-btn:hover { color: #E8ECF1; }
+        .nav-group-btn.active { background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important; color: var(--deft-accent, #06D6A0) !important; }
+        .nav-group-btn .chevron { transition: transform 0.2s; opacity: 0.5; }
+        .nav-group:hover .nav-group-btn .chevron { transform: rotate(180deg); opacity: 0.8; }
+        .nav-dropdown {
+            position: absolute; top: calc(100% + 4px); left: 0; min-width: 150px; padding: 0.375rem;
+            border-radius: 0.5rem; border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28); box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            opacity: 0; visibility: hidden; transform: translateY(-4px);
+            transition: opacity 0.15s, visibility 0.15s, transform 0.15s; z-index: 70;
+        }
+        .nav-group:hover .nav-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+        .nav-dropdown a {
+            display: block; padding: 0.4rem 0.625rem; font-size: 0.7rem; font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9); text-decoration: none; border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s; white-space: nowrap;
+        }
+        .nav-dropdown a:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        .nav-dropdown a.active { background: var(--deft-accent-dim, rgba(6,214,160,0.12)); color: var(--deft-accent, #06D6A0); }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deft-base': '#08090D',
+                        surface: '#11131A',
+                        'surface-el': '#1A1D28',
+                        'surface-hi': '#242836',
+                        border: '#2A2E3D',
+                        accent: '#06D6A0',
+                        'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B',
+                        'alert-dim': 'rgba(255,107,107,0.15)',
+                        warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)',
+                        info: '#4CC9F0',
+                        'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1',
+                        'txt-2': '#8A95A9',
+                        'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #08090D; color: #E8ECF1;
+        }
+
+        /* Grain */
+        body::after {
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat; background-size: 256px 256px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3A3E4D; }
+
+        /* Gate */
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            width: 100%; padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.03); border: 1px solid #2A2E3D; border-radius: 0.5rem;
+            color: #E8ECF1; font-size: 0.875rem; outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .gate-input:focus {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent) !important;
+        }
+        .gate-error { color: #FF6B6B; font-size: 0.75rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem;
+            font-size: 0.75rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 0.375rem;
+            border: 1px solid transparent; cursor: pointer;
+            transition: background 0.15s, opacity 0.15s, transform 0.1s;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: rgba(6,214,160,0.15); color: #06D6A0; border-color: rgba(6,214,160,0.3); }
+        .btn-primary:hover { background: rgba(6,214,160,0.25); }
+        .btn-ghost { background: transparent; color: #8A95A9; border-color: #2A2E3D; }
+        .btn-ghost:hover { background: rgba(255,255,255,0.03); color: #E8ECF1; }
+        .btn-danger { background: rgba(255,107,107,0.15); color: #FF6B6B; border-color: rgba(255,107,107,0.3); }
+        .btn-danger:hover { background: rgba(255,107,107,0.25); }
+        .btn-warn { background: rgba(255,217,61,0.15); color: #FFD93D; border-color: rgba(255,217,61,0.3); }
+        .btn-warn:hover { background: rgba(255,217,61,0.25); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+        /* Pulse Dot */
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #06D6A0;
+            box-shadow: 0 0 6px rgba(6,214,160,0.4); animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(6,214,160,0.4); }
+            50% { opacity: 0.6; box-shadow: 0 0 12px rgba(6,214,160,0.2); }
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            padding: 0.2rem 0.625rem; border-radius: 9999px;
+            font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em;
+        }
+
+        /* Toast */
+        .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 10000; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            padding: 0.625rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4); transition: opacity 0.3s;
+        }
+        .toast-success { background: rgba(107,203,119,0.15); color: #6BCB77; border: 1px solid rgba(107,203,119,0.25); }
+        .toast-error { background: rgba(255,107,107,0.15); color: #FF6B6B; border: 1px solid rgba(255,107,107,0.25); }
+        .toast-info { background: rgba(76,201,240,0.15); color: #4CC9F0; border: 1px solid rgba(76,201,240,0.25); }
+
+        /* Loading skeleton */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #1A1D28 25%, #242836 50%, #1A1D28 75%);
+            background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 0.25rem;
+        }
+
+        /* Form inputs */
+        .form-input {
+            width: 100%; padding: 0.5rem 0.75rem;
+            background: rgba(255,255,255,0.03); border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.375rem; color: var(--deft-txt, #E8ECF1);
+            font-size: 0.8rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+        .form-input:focus {
+            border-color: var(--deft-accent, #06D6A0) !important;
+            box-shadow: 0 0 0 2px var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+        }
+        textarea.form-input { resize: vertical; min-height: 80px; }
+
+        /* Section panel */
+        .section-panel {
+            background: var(--deft-surface-el, #1A1D28); border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 12px; padding: 20px;
+        }
+
+        /* ═══════ CALIBRATION-SPECIFIC STYLES ═══════ */
+
+        /* Progress ring */
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.6s ease;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        /* Dimension cards */
+        .dim-card {
+            background: var(--deft-surface, #11131A);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 10px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .dim-card:hover {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, var(--deft-border, #2A2E3D));
+            background: var(--deft-surface-el, #1A1D28);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .dim-card.complete {
+            border-color: color-mix(in srgb, var(--deft-success, #6BCB77) 25%, var(--deft-border, #2A2E3D));
+        }
+        .dim-card.in-progress {
+            border-color: color-mix(in srgb, var(--deft-warning, #FFD93D) 25%, var(--deft-border, #2A2E3D));
+        }
+
+        /* Status badges */
+        .status-not-started { background: rgba(255,255,255,0.05); color: var(--deft-txt-3, #525E73); }
+        .status-in-progress { background: var(--deft-warning-dim, rgba(255,217,61,0.15)); color: var(--deft-warning, #FFD93D); }
+        .status-complete { background: var(--deft-success-dim, rgba(107,203,119,0.15)); color: var(--deft-success, #6BCB77); }
+        .status-stale { background: rgba(240,168,48,0.15); color: #F0A830; }
+
+        /* Score slider track */
+        .score-track {
+            position: relative;
+            height: 6px;
+            background: var(--deft-border, #2A2E3D);
+            border-radius: 3px;
+            overflow: visible;
+        }
+        .score-fill {
+            position: absolute;
+            left: 0; top: 0; height: 100%;
+            border-radius: 3px;
+            background: var(--deft-accent, #06D6A0);
+            transition: width 0.4s ease;
+        }
+        .score-thumb {
+            position: absolute;
+            top: 50%;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: var(--deft-accent, #06D6A0);
+            border: 2px solid var(--deft-surface, #11131A);
+            box-shadow: 0 0 8px color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent);
+            transform: translate(-50%, -50%);
+            transition: left 0.4s ease;
+        }
+
+        /* Animations */
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeSlideOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-12px); }
+        }
+        .anim-fade-in { animation: fadeSlideIn 0.35s ease forwards; }
+        .anim-fade-out { animation: fadeSlideOut 0.2s ease forwards; }
+
+        /* Option cards (this_or_that) */
+        .option-card {
+            background: var(--deft-surface-el, #1A1D28);
+            border: 2px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
+            text-align: center;
+            flex: 1;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .option-card:hover {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent);
+            background: var(--deft-surface-hi, #242836);
+        }
+        .option-card:active { transform: scale(0.97); }
+        .option-card.selected {
+            border-color: var(--deft-accent, #06D6A0);
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, var(--deft-surface-el, #1A1D28));
+            box-shadow: 0 0 20px color-mix(in srgb, var(--deft-accent, #06D6A0) 10%, transparent);
+        }
+
+        /* Verdict buttons (approve_deny) */
+        .verdict-btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s;
+            border: 1px solid transparent;
+            flex: 1;
+            text-align: center;
+        }
+        .verdict-btn:active { transform: scale(0.97); }
+        .verdict-approve {
+            background: rgba(34,197,94,0.1);
+            color: var(--deft-success, #22C55E);
+            border-color: rgba(34,197,94,0.2);
+        }
+        .verdict-approve:hover { background: rgba(34,197,94,0.2); }
+        .verdict-approve.selected { background: rgba(34,197,94,0.25); border-color: var(--deft-success, #22C55E); }
+        .verdict-close {
+            background: rgba(255,217,61,0.1);
+            color: var(--deft-warning, #FFD93D);
+            border-color: rgba(255,217,61,0.2);
+        }
+        .verdict-close:hover { background: rgba(255,217,61,0.2); }
+        .verdict-close.selected { background: rgba(255,217,61,0.25); border-color: var(--deft-warning, #FFD93D); }
+        .verdict-wrong {
+            background: rgba(255,107,107,0.1);
+            color: var(--deft-danger, #FF6B6B);
+            border-color: rgba(255,107,107,0.2);
+        }
+        .verdict-wrong:hover { background: rgba(255,107,107,0.2); }
+        .verdict-wrong.selected { background: rgba(255,107,107,0.25); border-color: var(--deft-danger, #FF6B6B); }
+
+        /* Ranking items */
+        .rank-item {
+            background: var(--deft-surface-el, #1A1D28);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            cursor: grab;
+            transition: background 0.15s, border-color 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            user-select: none;
+        }
+        .rank-item:active { cursor: grabbing; }
+        .rank-item:hover { background: var(--deft-surface-hi, #242836); }
+        .rank-item.sortable-ghost {
+            opacity: 0.5;
+            border-color: var(--deft-accent, #06D6A0);
+        }
+        .rank-item.sortable-chosen {
+            background: var(--deft-surface-hi, #242836);
+            border-color: var(--deft-accent, #06D6A0);
+        }
+
+        /* Adjustment textarea slide */
+        .adjustment-area {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, margin-top 0.3s ease;
+        }
+        .adjustment-area.open {
+            max-height: 200px;
+            margin-top: 0.75rem;
+        }
+
+        /* Session progress bar */
+        .session-progress-bar {
+            height: 4px;
+            background: var(--deft-border, #2A2E3D);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .session-progress-fill {
+            height: 100%;
+            background: var(--deft-accent, #06D6A0);
+            border-radius: 2px;
+            transition: width 0.4s ease;
+        }
+
+        /* Radar chart */
+        .radar-label {
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 10px;
+            fill: var(--deft-txt-2, #8A95A9);
+        }
+        .radar-label.active {
+            fill: var(--deft-accent, #06D6A0);
+            font-weight: 600;
+        }
+
+        /* Spinner */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner {
+            width: 20px; height: 20px;
+            border: 2px solid var(--deft-border, #2A2E3D);
+            border-top-color: var(--deft-accent, #06D6A0);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .spinner-lg { width: 32px; height: 32px; border-width: 3px; }
+
+        /* Synthesis pulse */
+        @keyframes synthPulse {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.08); }
+        }
+        .synth-icon { animation: synthPulse 2s ease-in-out infinite; }
+
+        /* Dimension complete - learned item */
+        .learned-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--deft-border, #2A2E3D);
+        }
+        .learned-item:last-child { border-bottom: none; }
+
+        /* Responsive */
+        @media (max-width: 767px) {
+            .section-panel { padding: 14px; border-radius: 8px; }
+            .dim-grid { grid-template-columns: 1fr !important; }
+            .option-cards-row { flex-direction: column !important; }
+            .verdict-row { flex-direction: column !important; }
+        }
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .dim-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PASSWORD GATE -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+            </div>
+            <div id="gateProfiles" class="flex justify-center gap-3 mb-6">
+                <div class="text-center text-xs text-txt-3">Loading profiles...</div>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- Top Nav -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <button class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Open menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/" class="nav-group-btn">Dashboard</a>
+                        <div class="nav-group">
+                            <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/chat">Rodger</a>
+                                <a href="/council">Council</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/crm" class="nav-group-btn">Outreach <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/crm">CRM</a>
+                                <a href="/email-outreach">Email</a>
+                                <a href="/social-dashboard">Social</a>
+                                <a href="/social-content">Social Content</a>
+                                <a href="/offer-studio">Offers</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/finance" class="nav-group-btn">Finance <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/finance">Dashboard</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brand-discovery" class="nav-group-btn active">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brand-discovery">Discovery</a>
+                                <a href="/brand-voice">Voice</a>
+                                <a href="/brand-voice/calibration" class="active">Calibration</a>
+                                <a href="/template-studio">Templates</a>
+                                <a href="/brand-documents">Docs</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/bsi-discovery" class="nav-group-btn">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/bsi-discovery">Discovery</a>
+                                <a href="/compliance">Compliance</a>
+                                <a href="/bsi-documents">Documents</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/content" class="nav-group-btn">Content <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/content">Publishing</a>
+                                <a href="/media">Media</a>
+                            </div>
+                        </div>
+                        <a href="/partnerships" class="nav-group-btn">Partnerships</a>
+                        <div class="nav-group">
+                            <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brain">BRAIN</a>
+                                <a href="/deft">DEFT</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/trading-desk" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/trading-desk">Trading Desk</a>
+                                <a href="/trading-bot">Bot Dashboard</a>
+                                <a href="/trading-strategies">Strategies</a>
+                                <a href="/trading-monitor">Monitor</a>
+                                <a href="/trading-research">Research</a>
+                                <a href="/trading-discovery">Discovery</a>
+                                <a href="/trading-cross-pairs">Cross-Pairs</a>
+                                <a href="/trading-exchanges">Exchanges</a>
+                                <a href="/trading-config">Config</a>
+                                <a href="/trading-reports">Reports</a>
+                            </div>
+                        </div>
+                        <a href="/meetings" class="nav-group-btn">Meetings</a>
+                        <div class="nav-group">
+                            <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/our-workflows">Workflows</a>
+                                <a href="/org-chart">Org Map</a>
+                                <a href="/hub">HUB</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown"></div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2" title="Settings">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile Nav Overlay -->
+            <div id="mobileNavOverlay">
+                <div class="mobile-nav-backdrop"></div>
+                <div class="mobile-nav-sidebar">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 1rem 0.75rem;">
+                        <span style="font-size:0.8rem;font-weight:700;color:var(--deft-txt,#E8ECF1);">Menu</span>
+                        <button class="mobile-nav-close" onclick="toggleMobileNav()">&times;</button>
+                    </div>
+                    <div class="mobile-nav-divider"></div>
+                    <a href="/" class="mobile-nav-link">Dashboard</a>
+                    <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Rodger <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+                    <div class="mobile-nav-children"><a href="/chat" class="mobile-nav-link">Rodger</a><a href="/council" class="mobile-nav-link">Council</a></div>
+                    <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Outreach <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+                    <div class="mobile-nav-children"><a href="/crm" class="mobile-nav-link">CRM</a><a href="/email-outreach" class="mobile-nav-link">Email</a><a href="/social-dashboard" class="mobile-nav-link">Social</a><a href="/social-content" class="mobile-nav-link">Social Content</a><a href="/offer-studio" class="mobile-nav-link">Offers</a></div>
+                    <button class="mobile-nav-group-btn active" onclick="toggleMobileAccordion(this)">Brand <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+                    <div class="mobile-nav-children"><a href="/brand-discovery" class="mobile-nav-link">Discovery</a><a href="/brand-voice" class="mobile-nav-link">Voice</a><a href="/brand-voice/calibration" class="mobile-nav-link active">Calibration</a><a href="/template-studio" class="mobile-nav-link">Templates</a><a href="/brand-documents" class="mobile-nav-link">Docs</a></div>
+                    <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Policy <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+                    <div class="mobile-nav-children"><a href="/bsi-discovery" class="mobile-nav-link">Discovery</a><a href="/compliance" class="mobile-nav-link">Compliance</a><a href="/bsi-documents" class="mobile-nav-link">Documents</a></div>
+                    <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Content <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+                    <div class="mobile-nav-children"><a href="/content" class="mobile-nav-link">Publishing</a><a href="/media" class="mobile-nav-link">Media</a></div>
+                    <a href="/partnerships" class="mobile-nav-link">Partnerships</a>
+                    <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">BRAIN <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+                    <div class="mobile-nav-children"><a href="/brain" class="mobile-nav-link">BRAIN</a><a href="/deft" class="mobile-nav-link">DEFT</a></div>
+                    <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Trading <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+                    <div class="mobile-nav-children"><a href="/trading-desk" class="mobile-nav-link">Trading Desk</a><a href="/trading-bot" class="mobile-nav-link">Bot</a><a href="/trading-strategies" class="mobile-nav-link">Strategies</a><a href="/trading-monitor" class="mobile-nav-link">Monitor</a></div>
+                    <a href="/meetings" class="mobile-nav-link">Meetings</a>
+                    <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">System <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+                    <div class="mobile-nav-children"><a href="/our-workflows" class="mobile-nav-link">Workflows</a><a href="/org-chart" class="mobile-nav-link">Org Map</a><a href="/hub" class="mobile-nav-link">HUB</a></div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+            <!-- Breadcrumb -->
+            <div class="flex items-center gap-2 text-xs">
+                <a href="/brand-voice" class="text-txt-3 hover:text-accent transition-colors font-medium flex items-center gap-1.5">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 9L4.5 6L7.5 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Brand Voice
+                </a>
+                <span class="text-txt-3">/</span>
+                <span style="color: var(--deft-txt-2, #8A95A9);">Calibration</span>
+            </div>
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- OVERVIEW VIEW                          -->
+            <!-- ═══════════════════════════════════════ -->
+            <div id="overviewView">
+
+                <!-- Progress Header -->
+                <div class="section-panel mb-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                        <!-- Progress Ring -->
+                        <div class="flex-shrink-0">
+                            <svg width="80" height="80" viewBox="0 0 80 80">
+                                <circle cx="40" cy="40" r="34" fill="none" stroke="var(--deft-border, #2A2E3D)" stroke-width="6"/>
+                                <circle id="progressRing" cx="40" cy="40" r="34" fill="none" stroke="var(--deft-accent, #06D6A0)" stroke-width="6" stroke-linecap="round"
+                                    class="progress-ring-circle"
+                                    stroke-dasharray="213.63" stroke-dashoffset="213.63"/>
+                                <text x="40" y="38" text-anchor="middle" fill="var(--deft-txt, #E8ECF1)" font-size="18" font-weight="700" font-family="var(--deft-heading-font, 'Chakra Petch')"><tspan id="progressCount">0</tspan></text>
+                                <text x="40" y="52" text-anchor="middle" fill="var(--deft-txt-3, #525E73)" font-size="10" font-weight="500">/10</text>
+                            </svg>
+                        </div>
+                        <!-- Text -->
+                        <div class="flex-1">
+                            <h2 class="font-heading text-2xl font-bold tracking-tight">Voice Calibration</h2>
+                            <p class="text-txt-2 text-sm mt-1">Pre-flight testing ground -- teach the system what sounds like you</p>
+                            <div class="flex items-center gap-4 mt-3">
+                                <div class="flex items-center gap-1.5 text-xs text-txt-3">
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2"/><path d="M6 3v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                                    <span id="timeEstimate">~100-150 min total</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-xs text-txt-3">
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6a5 5 0 0110 0 5 5 0 01-10 0z" stroke="currentColor" stroke-width="1.2"/><path d="M6 4v2h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                                    <span id="dimRemaining">10 dimensions remaining</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Actions -->
+                        <div class="flex-shrink-0 flex gap-2">
+                            <button onclick="refreshStatus()" class="btn btn-ghost text-xs py-2 px-3 flex items-center gap-1.5">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Core Tone -->
+                <div class="mb-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-1 h-4 rounded-full" style="background: var(--deft-accent, #06D6A0);"></div>
+                        <h3 class="font-heading text-lg font-semibold">Core Tone</h3>
+                    </div>
+                    <div class="dim-grid grid grid-cols-1 md:grid-cols-2 gap-3" id="gridCoreTone">
+                        <div class="skeleton h-32 rounded-lg"></div>
+                        <div class="skeleton h-32 rounded-lg"></div>
+                        <div class="skeleton h-32 rounded-lg"></div>
+                        <div class="skeleton h-32 rounded-lg"></div>
+                    </div>
+                </div>
+
+                <!-- Communication Style -->
+                <div class="mb-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-1 h-4 rounded-full" style="background: var(--deft-accent-warm, #4CC9F0);"></div>
+                        <h3 class="font-heading text-lg font-semibold">Communication Style</h3>
+                    </div>
+                    <div class="dim-grid grid grid-cols-1 md:grid-cols-2 gap-3" id="gridCommStyle">
+                        <div class="skeleton h-32 rounded-lg"></div>
+                        <div class="skeleton h-32 rounded-lg"></div>
+                        <div class="skeleton h-32 rounded-lg"></div>
+                        <div class="skeleton h-32 rounded-lg"></div>
+                    </div>
+                </div>
+
+                <!-- Channel-Specific -->
+                <div class="mb-6">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-1 h-4 rounded-full" style="background: var(--deft-warning, #FFD93D);"></div>
+                        <h3 class="font-heading text-lg font-semibold">Channel-Specific</h3>
+                    </div>
+                    <div class="dim-grid grid grid-cols-1 md:grid-cols-2 gap-3" id="gridChannelSpec">
+                        <div class="skeleton h-32 rounded-lg"></div>
+                        <div class="skeleton h-32 rounded-lg"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- SESSION VIEW                           -->
+            <!-- ═══════════════════════════════════════ -->
+            <div id="sessionView" style="display: none;">
+
+                <!-- Back + dimension header -->
+                <div class="flex items-center gap-3 mb-4">
+                    <button onclick="returnToOverview()" class="btn btn-ghost text-xs py-2 px-3 flex items-center gap-1.5">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 9L4.5 6L7.5 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Back to Overview
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: questions -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <!-- Dimension info -->
+                        <div class="section-panel">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-2xl" id="sessionIcon"></span>
+                                <div>
+                                    <h2 class="font-heading text-xl font-bold" id="sessionTitle"></h2>
+                                    <p class="text-txt-2 text-sm mt-0.5" id="sessionDesc"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 mt-3">
+                                <div class="flex items-center gap-2 text-xs text-txt-3">
+                                    <span id="sessionSpectrumLow" class="font-medium"></span>
+                                    <div class="w-16 h-0.5 rounded" style="background: linear-gradient(90deg, var(--deft-txt-3), var(--deft-accent));"></div>
+                                    <span id="sessionSpectrumHigh" class="font-medium" style="color: var(--deft-accent);"></span>
+                                </div>
+                            </div>
+                            <!-- Progress bar -->
+                            <div class="mt-4">
+                                <div class="flex items-center justify-between text-xs text-txt-3 mb-1.5">
+                                    <span id="sessionProgressLabel">Question 0 / 0</span>
+                                    <span id="sessionProgressPct">0%</span>
+                                </div>
+                                <div class="session-progress-bar">
+                                    <div class="session-progress-fill" id="sessionProgressFill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loading state -->
+                        <div id="sessionLoading" style="display: none;">
+                            <div class="section-panel flex flex-col items-center justify-center py-12">
+                                <div class="spinner-lg synth-icon mb-4"></div>
+                                <p class="text-sm text-txt-2 font-medium" id="sessionLoadingText">Generating questions from your brand content...</p>
+                                <p class="text-xs text-txt-3 mt-1">This may take 10-20 seconds</p>
+                            </div>
+                        </div>
+
+                        <!-- Question container -->
+                        <div id="questionContainer"></div>
+                    </div>
+
+                    <!-- Right: radar chart -->
+                    <div class="space-y-4">
+                        <div class="section-panel">
+                            <h4 class="font-heading text-sm font-semibold mb-3 text-txt-2 uppercase tracking-wider">Voice Profile</h4>
+                            <canvas id="radarCanvas" width="280" height="280" style="width: 100%; max-width: 280px; margin: 0 auto; display: block;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- DIMENSION COMPLETE VIEW                 -->
+            <!-- ═══════════════════════════════════════ -->
+            <div id="completeView" style="display: none;">
+
+                <div class="section-panel max-w-2xl mx-auto anim-fade-in">
+                    <!-- Header -->
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-14 h-14 rounded-full mb-3" style="background: var(--deft-success-dim); color: var(--deft-success);">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <h2 class="font-heading text-2xl font-bold" id="completeTitle">Dimension Complete</h2>
+                        <p class="text-txt-2 text-sm mt-1" id="completeSubtitle"></p>
+                    </div>
+
+                    <!-- What I Learned -->
+                    <div class="mb-6">
+                        <h3 class="font-heading text-sm font-semibold text-txt-2 uppercase tracking-wider mb-3">What I Learned</h3>
+                        <div class="section-panel" style="background: var(--deft-surface, #11131A);">
+                            <p class="text-sm leading-relaxed" id="completeSummary" style="color: var(--deft-txt);"></p>
+                        </div>
+                    </div>
+
+                    <!-- Score visualization -->
+                    <div class="mb-6">
+                        <h3 class="font-heading text-sm font-semibold text-txt-2 uppercase tracking-wider mb-3">Score</h3>
+                        <div class="flex items-center gap-3 text-xs text-txt-3 mb-2">
+                            <span id="completeLow" class="font-medium min-w-[70px]"></span>
+                            <div class="flex-1">
+                                <div class="score-track">
+                                    <div class="score-fill" id="completeScoreFill" style="width: 50%;"></div>
+                                    <div class="score-thumb" id="completeScoreThumb" style="left: 50%;"></div>
+                                </div>
+                            </div>
+                            <span id="completeHigh" class="font-medium min-w-[70px] text-right" style="color: var(--deft-accent);"></span>
+                        </div>
+                        <div class="text-center text-sm font-semibold mt-2" style="color: var(--deft-accent);">
+                            <span id="completeScoreValue">5.0</span> / 10
+                        </div>
+                    </div>
+
+                    <!-- Detected patterns -->
+                    <div class="mb-6" id="completePatternsSection" style="display: none;">
+                        <h3 class="font-heading text-sm font-semibold text-txt-2 uppercase tracking-wider mb-3">Detected Patterns</h3>
+                        <div id="completePatterns" class="space-y-2"></div>
+                    </div>
+
+                    <!-- Action -->
+                    <div class="text-center">
+                        <button onclick="returnToOverview()" class="btn btn-primary px-8 py-2.5">Return to Overview</button>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end page content -->
+    </div><!-- end mainContent -->
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Sortable.js -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+
+<script>
+// ══════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════
+const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+const WEBHOOK_URL = 'https://n8n.carltonaiservices.com/webhook/brand-voice-calibration';
+const HEADERS = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json'
+};
+
+// ══════════════════════════════════════════════════
+// DIMENSION DEFINITIONS
+// ══════════════════════════════════════════════════
+const DIMENSIONS = [
+    { key: 'warmth', label: 'Warmth', icon: '\u{1F321}\uFE0F', low: 'Professional', high: 'Personal', group: 'Core Tone', description: 'How personal and warm vs. polished and professional your content sounds' },
+    { key: 'formality', label: 'Formality', icon: '\u{1F454}', low: 'Casual', high: 'Structured', group: 'Core Tone', description: 'How conversational vs. formally structured your writing is' },
+    { key: 'confidence', label: 'Confidence', icon: '\u{1F4AA}', low: 'Humble', high: 'Bold', group: 'Core Tone', description: 'How assertive and bold vs. understated and humble you come across' },
+    { key: 'humor', label: 'Humor', icon: '\u{1F604}', low: 'Serious', high: 'Witty', group: 'Core Tone', description: 'How much wit and playfulness vs. earnest seriousness in your voice' },
+    { key: 'directness', label: 'Directness', icon: '\u{1F3AF}', low: 'Build-up', high: 'Direct', group: 'Communication Style', description: 'Whether you build up with context/stories or get straight to the point' },
+    { key: 'detail_level', label: 'Detail Level', icon: '\u{1F4CF}', low: 'Concise', high: 'Thorough', group: 'Communication Style', description: 'How much detail and depth vs. punchy brevity in your content' },
+    { key: 'proof_style', label: 'Proof Style', icon: '\u{1F4CA}', low: 'Story-driven', high: 'Data-driven', group: 'Communication Style', description: 'Whether you prove points with stories/testimonials or metrics/data' },
+    { key: 'emotional_register', label: 'Emotional Register', icon: '\u{1F3AD}', low: 'Vulnerable', high: 'Authoritative', group: 'Communication Style', description: 'Whether you lead with vulnerability/authenticity or authority/expertise' },
+    { key: 'engagement_style', label: 'Engagement Style', icon: '\u{1F4AC}', low: 'Conversational', high: 'Declarative', group: 'Channel-Specific', description: 'Whether you engage through questions and conversation or bold declarations' },
+    { key: 'cta_approach', label: 'CTA Approach', icon: '\u{1F4E3}', low: 'Soft', high: 'Direct', group: 'Channel-Specific', description: 'Whether your calls-to-action are soft invitations or direct and urgent' }
+];
+
+const GROUP_MAP = {
+    'Core Tone': 'gridCoreTone',
+    'Communication Style': 'gridCommStyle',
+    'Channel-Specific': 'gridChannelSpec'
+};
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let state = {
+    sessionId: null,
+    status: 'not_started',
+    dimensions: {},
+    currentView: 'overview',
+    activeDimension: null,
+    currentQuestionIndex: 0,
+    currentQuestion: null,
+    totalQuestions: 25,
+    questions: [],
+    isSubmitting: false,
+    selectedOption: null,
+    selectedVerdict: null,
+    rankingOrder: [],
+    sortableInstance: null
+};
+
+// ══════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════
+function $(id) { return document.getElementById(id); }
+
+function esc(s) {
+    if (!s) return '';
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+}
+
+function toast(msg, type) {
+    const c = $('toastContainer');
+    const el = document.createElement('div');
+    el.className = 'toast toast-' + (type || 'info');
+    el.textContent = msg;
+    c.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3500);
+}
+
+async function get(table, query) {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, { headers: HEADERS });
+    if (!r.ok) { const t = await r.text(); throw new Error(`GET ${table} failed: ${r.status} - ${t}`); }
+    return r.json();
+}
+
+async function rpc(fn, body) {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, { method: 'POST', headers: HEADERS, body: JSON.stringify(body) });
+    if (!r.ok) { const t = await r.text(); throw new Error(`RPC ${fn} failed: ${r.status} - ${t}`); }
+    return r.json();
+}
+
+// ══════════════════════════════════════════════════
+// WEBHOOK API
+// ══════════════════════════════════════════════════
+async function webhookCall(payload) {
+    const r = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brand_id: 'carlton', ...payload })
+    });
+    if (!r.ok) {
+        const t = await r.text();
+        throw new Error(`Webhook failed: ${r.status} - ${t}`);
+    }
+    return r.json();
+}
+
+async function loadStatus() {
+    return webhookCall({ operation: 'get_status' });
+}
+
+async function startDimension(dimension) {
+    return webhookCall({ operation: 'start_dimension', dimension, session_id: state.sessionId });
+}
+
+async function submitAnswer(dimension, questionIndex, answer) {
+    return webhookCall({
+        operation: 'submit_answer',
+        dimension,
+        session_id: state.sessionId,
+        question_index: questionIndex,
+        answer
+    });
+}
+
+async function completeDimension(dimension) {
+    return webhookCall({ operation: 'complete_dimension', dimension, session_id: state.sessionId });
+}
+
+// ══════════════════════════════════════════════════
+// VIEW MANAGEMENT
+// ══════════════════════════════════════════════════
+function showView(view) {
+    state.currentView = view;
+    $('overviewView').style.display = view === 'overview' ? 'block' : 'none';
+    $('sessionView').style.display = view === 'session' ? 'block' : 'none';
+    $('completeView').style.display = view === 'complete' ? 'block' : 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function returnToOverview() {
+    showView('overview');
+    state.activeDimension = null;
+    renderOverview();
+}
+
+// ══════════════════════════════════════════════════
+// OVERVIEW RENDERING
+// ══════════════════════════════════════════════════
+function renderOverview() {
+    const groups = {};
+    DIMENSIONS.forEach(dim => {
+        if (!groups[dim.group]) groups[dim.group] = [];
+        groups[dim.group].push(dim);
+    });
+
+    for (const [groupName, dims] of Object.entries(groups)) {
+        const containerId = GROUP_MAP[groupName];
+        const container = $(containerId);
+        if (!container) continue;
+
+        container.innerHTML = dims.map(dim => {
+            const ds = state.dimensions[dim.key] || {};
+            const status = ds.status || 'not_started';
+            const score = ds.score;
+            const patterns = ds.patterns || [];
+            const isStale = ds.stale;
+
+            let statusBadge = '';
+            let statusClass = '';
+            if (status === 'complete') {
+                statusBadge = `<span class="badge status-complete">Complete</span>`;
+                statusClass = 'complete';
+            } else if (status === 'in_progress') {
+                statusBadge = `<span class="badge status-in-progress">In Progress</span>`;
+                statusClass = 'in-progress';
+            } else {
+                statusBadge = `<span class="badge status-not-started">Not Started</span>`;
+            }
+
+            if (isStale) {
+                statusBadge += ` <span class="badge status-stale" title="Content has changed since calibration">Stale</span>`;
+            }
+
+            let scoreHtml = '';
+            if (score != null && (status === 'complete' || status === 'in_progress')) {
+                const pct = (score / 10) * 100;
+                scoreHtml = `
+                    <div class="mt-3">
+                        <div class="flex items-center justify-between text-xs text-txt-3 mb-1">
+                            <span>${esc(dim.low)}</span>
+                            <span style="color: var(--deft-accent);">${esc(dim.high)}</span>
+                        </div>
+                        <div class="score-track">
+                            <div class="score-fill" style="width: ${pct}%;"></div>
+                            <div class="score-thumb" style="left: ${pct}%;"></div>
+                        </div>
+                    </div>`;
+            }
+
+            let patternsHtml = '';
+            if (patterns.length > 0 && status === 'complete') {
+                patternsHtml = `
+                    <div class="mt-2.5 space-y-1">
+                        ${patterns.slice(0, 2).map(p => `
+                            <div class="flex items-start gap-1.5 text-xs text-txt-2">
+                                <span style="color: var(--deft-accent); margin-top: 1px;">&#9679;</span>
+                                <span>${esc(p)}</span>
+                            </div>
+                        `).join('')}
+                    </div>`;
+            }
+
+            return `
+                <div class="dim-card ${statusClass}" onclick="openDimension('${dim.key}')">
+                    <div class="flex items-start justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">${dim.icon}</span>
+                            <span class="font-heading font-semibold text-sm">${esc(dim.label)}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">${statusBadge}</div>
+                    </div>
+                    <p class="text-xs text-txt-3 leading-relaxed">${esc(dim.description)}</p>
+                    ${scoreHtml}
+                    ${patternsHtml}
+                </div>`;
+        }).join('');
+    }
+
+    updateProgressHeader();
+}
+
+function updateProgressHeader() {
+    const completed = Object.values(state.dimensions).filter(d => d.status === 'complete').length;
+    const inProgress = Object.values(state.dimensions).filter(d => d.status === 'in_progress').length;
+    const remaining = 10 - completed;
+
+    // Update progress ring
+    const circumference = 2 * Math.PI * 34;
+    const offset = circumference - (completed / 10) * circumference;
+    $('progressRing').setAttribute('stroke-dashoffset', offset);
+    $('progressCount').textContent = completed;
+
+    // Update text
+    const estMin = remaining * 12;
+    $('timeEstimate').textContent = remaining > 0 ? `~${estMin}-${remaining * 15} min remaining` : 'All complete';
+    $('dimRemaining').textContent = remaining > 0
+        ? `${remaining} dimension${remaining !== 1 ? 's' : ''} remaining${inProgress > 0 ? ` (${inProgress} in progress)` : ''}`
+        : 'All 10 dimensions calibrated';
+}
+
+// ══════════════════════════════════════════════════
+// DIMENSION SESSION
+// ══════════════════════════════════════════════════
+async function openDimension(key) {
+    const dim = DIMENSIONS.find(d => d.key === key);
+    if (!dim) return;
+
+    state.activeDimension = key;
+    state.currentQuestionIndex = 0;
+    state.currentQuestion = null;
+
+    // Update session header
+    $('sessionIcon').textContent = dim.icon;
+    $('sessionTitle').textContent = dim.label;
+    $('sessionDesc').textContent = dim.description;
+    $('sessionSpectrumLow').textContent = dim.low;
+    $('sessionSpectrumHigh').textContent = dim.high;
+
+    showView('session');
+    $('questionContainer').innerHTML = '';
+    $('sessionLoading').style.display = 'block';
+    $('sessionLoadingText').textContent = 'Generating questions from your brand content...';
+
+    drawRadar();
+
+    try {
+        const result = await startDimension(key);
+
+        if (result.session_id) state.sessionId = result.session_id;
+        if (result.total_questions) state.totalQuestions = result.total_questions;
+        if (result.current_index != null) state.currentQuestionIndex = result.current_index;
+
+        $('sessionLoading').style.display = 'none';
+
+        const question = result.first_question || result.current_question || result.question;
+        if (question) {
+            state.currentQuestion = question;
+            updateSessionProgress();
+            renderQuestion(question);
+        } else {
+            $('questionContainer').innerHTML = `
+                <div class="section-panel text-center py-8">
+                    <p class="text-txt-2 text-sm">No questions available for this dimension.</p>
+                    <button onclick="returnToOverview()" class="btn btn-ghost mt-4">Back to Overview</button>
+                </div>`;
+        }
+    } catch (err) {
+        console.error('Start dimension error:', err);
+        $('sessionLoading').style.display = 'none';
+        $('questionContainer').innerHTML = `
+            <div class="section-panel text-center py-8">
+                <p class="text-sm" style="color: var(--deft-danger);">Failed to start dimension: ${esc(err.message)}</p>
+                <button onclick="openDimension('${key}')" class="btn btn-ghost mt-4">Retry</button>
+                <button onclick="returnToOverview()" class="btn btn-ghost mt-4 ml-2">Back</button>
+            </div>`;
+    }
+}
+
+function updateSessionProgress() {
+    const current = state.currentQuestionIndex + 1;
+    const total = state.totalQuestions;
+    const pct = Math.round((current / total) * 100);
+    $('sessionProgressLabel').textContent = `Question ${current} / ${total}`;
+    $('sessionProgressPct').textContent = pct + '%';
+    $('sessionProgressFill').style.width = pct + '%';
+}
+
+// ══════════════════════════════════════════════════
+// QUESTION RENDERERS
+// ══════════════════════════════════════════════════
+function renderQuestion(question) {
+    if (!question) return;
+    state.selectedVerdict = null;
+    state.selectedOption = null;
+    state.rankingOrder = [];
+
+    const container = $('questionContainer');
+    const contextHtml = question.context ? `<p class="text-xs text-txt-3 mt-1 mb-4">${esc(question.context)}</p>` : '<div class="mb-4"></div>';
+
+    // Wrap in animation container
+    container.classList.remove('anim-fade-in');
+    void container.offsetWidth;
+    container.classList.add('anim-fade-in');
+
+    switch (question.type) {
+        case 'open':
+            container.innerHTML = `
+                <div class="section-panel">
+                    <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
+                    ${contextHtml}
+                    <textarea class="form-input" id="answerText" rows="5" placeholder="Share your thoughts... (2-3 sentences minimum for best results)"></textarea>
+                    <div class="flex items-center justify-between mt-4">
+                        <button onclick="handleSkipQuestion()" class="btn btn-ghost text-xs">Skip &rarr;</button>
+                        <button onclick="handleSubmitAnswer()" class="btn btn-primary" id="submitBtn">Submit Answer</button>
+                    </div>
+                </div>`;
+            setTimeout(() => { const ta = $('answerText'); if (ta) ta.focus(); }, 100);
+            break;
+
+        case 'this_or_that': {
+            const opts = question.options || {};
+            container.innerHTML = `
+                <div class="section-panel">
+                    <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
+                    ${contextHtml}
+                    <div class="flex gap-4 option-cards-row">
+                        <div class="option-card" onclick="selectOption('a', this)" id="optA">
+                            <span class="text-xs font-mono text-txt-3 mb-1">A</span>
+                            <span class="text-sm font-medium">${esc(opts.a || 'Option A')}</span>
+                        </div>
+                        <div class="option-card" onclick="selectOption('b', this)" id="optB">
+                            <span class="text-xs font-mono text-txt-3 mb-1">B</span>
+                            <span class="text-sm font-medium">${esc(opts.b || 'Option B')}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between mt-4">
+                        <button onclick="handleSkipQuestion()" class="btn btn-ghost text-xs">Skip &rarr;</button>
+                        <button onclick="handleSubmitAnswer()" class="btn btn-primary" id="submitBtn" disabled>Select an option</button>
+                    </div>
+                </div>`;
+            break;
+        }
+
+        case 'approve_deny':
+            container.innerHTML = `
+                <div class="section-panel">
+                    <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
+                    ${contextHtml}
+                    ${question.content ? `<div class="p-3 rounded-lg mb-4" style="background: var(--deft-surface, #11131A); border: 1px solid var(--deft-border);">
+                        <p class="text-sm" style="color: var(--deft-txt); line-height: 1.6;">${esc(question.content)}</p>
+                    </div>` : ''}
+                    <div class="flex gap-3 verdict-row">
+                        <button class="verdict-btn verdict-approve" onclick="selectVerdict('approve', this)">Approve</button>
+                        <button class="verdict-btn verdict-close" onclick="selectVerdict('close_but', this)">Close, But...</button>
+                        <button class="verdict-btn verdict-wrong" onclick="selectVerdict('wrong_direction', this)">Wrong Direction</button>
+                    </div>
+                    <div class="adjustment-area" id="adjustmentArea">
+                        <textarea class="form-input" id="adjustmentText" rows="3" placeholder="What would you adjust?"></textarea>
+                    </div>
+                    <div class="flex items-center justify-between mt-4">
+                        <button onclick="handleSkipQuestion()" class="btn btn-ghost text-xs">Skip &rarr;</button>
+                        <button onclick="handleSubmitAnswer()" class="btn btn-primary" id="submitBtn" disabled>Select a verdict</button>
+                    </div>
+                </div>`;
+            break;
+
+        case 'ranking': {
+            const items = question.options || [];
+            state.rankingOrder = [...items];
+            container.innerHTML = `
+                <div class="section-panel">
+                    <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
+                    ${contextHtml}
+                    <p class="text-xs text-txt-2 mb-3">Drag to reorder from most to least important:</p>
+                    <div id="rankingList" class="space-y-2">
+                        ${items.map((item, i) => `
+                            <div class="rank-item" data-value="${esc(item)}">
+                                <span class="text-txt-3 text-sm select-none" style="min-width:18px;">&#9776;</span>
+                                <span class="rank-number text-xs font-mono text-accent" style="min-width:22px;">${i + 1}.</span>
+                                <span class="text-sm">${esc(item)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="flex items-center justify-between mt-4">
+                        <button onclick="handleSkipQuestion()" class="btn btn-ghost text-xs">Skip &rarr;</button>
+                        <button onclick="handleSubmitAnswer()" class="btn btn-primary" id="submitBtn">Submit Rankings</button>
+                    </div>
+                </div>`;
+            initSortable();
+            break;
+        }
+
+        default:
+            container.innerHTML = `<div class="section-panel text-txt-2 text-sm">Unknown question type: ${esc(question.type)}</div>`;
+    }
+}
+
+// ══════════════════════════════════════════════════
+// INTERACTION HANDLERS
+// ══════════════════════════════════════════════════
+function selectOption(opt, el) {
+    state.selectedOption = opt;
+    document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    const btn = $('submitBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit Answer'; }
+}
+
+function selectVerdict(verdict, el) {
+    state.selectedVerdict = verdict;
+    document.querySelectorAll('.verdict-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+
+    const area = $('adjustmentArea');
+    if (verdict === 'close_but' || verdict === 'wrong_direction') {
+        area.classList.add('open');
+        setTimeout(() => { const t = $('adjustmentText'); if (t) t.focus(); }, 300);
+    } else {
+        area.classList.remove('open');
+    }
+
+    const btn = $('submitBtn');
+    if (btn) {
+        btn.disabled = false;
+        btn.textContent = verdict === 'approve' ? 'Submit Approval' : 'Submit Answer';
+    }
+}
+
+function initSortable() {
+    if (state.sortableInstance) state.sortableInstance.destroy();
+    const el = $('rankingList');
+    if (!el) return;
+    if (typeof Sortable === 'undefined') {
+        toast('Drag-and-drop unavailable. Submit in current order.', 'error');
+        return;
+    }
+    state.sortableInstance = new Sortable(el, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        onEnd: () => {
+            const items = el.querySelectorAll('.rank-item');
+            state.rankingOrder = [];
+            items.forEach((item, i) => {
+                item.querySelector('.rank-number').textContent = (i + 1) + '.';
+                state.rankingOrder.push(item.getAttribute('data-value'));
+            });
+        }
+    });
+}
+
+// ══════════════════════════════════════════════════
+// ANSWER SUBMISSION
+// ══════════════════════════════════════════════════
+async function handleSubmitAnswer() {
+    if (state.isSubmitting) return;
+    const question = state.currentQuestion;
+    if (!question) return;
+
+    let payload = {};
+    switch (question.type) {
+        case 'open': {
+            const text = ($('answerText') || {}).value || '';
+            if (!text.trim()) { toast('Please write an answer', 'error'); return; }
+            payload = { text: text.trim() };
+            break;
+        }
+        case 'this_or_that': {
+            if (!state.selectedOption) { toast('Select an option', 'error'); return; }
+            payload = { selected: state.selectedOption };
+            break;
+        }
+        case 'approve_deny': {
+            if (!state.selectedVerdict) { toast('Select a verdict', 'error'); return; }
+            payload = { verdict: state.selectedVerdict };
+            if (state.selectedVerdict !== 'approve') {
+                payload.adjustment = ($('adjustmentText') || {}).value || '';
+            }
+            break;
+        }
+        case 'ranking': {
+            payload = { rankings: state.rankingOrder };
+            break;
+        }
+    }
+
+    state.isSubmitting = true;
+    const btn = $('submitBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;"></span> Submitting...'; }
+
+    try {
+        const result = await submitAnswer(state.activeDimension, state.currentQuestionIndex, payload);
+
+        state.isSubmitting = false;
+
+        // Check if dimension is complete
+        if (result.dimension_complete || result.is_complete) {
+            await handleDimensionComplete();
+            return;
+        }
+
+        // Next question
+        const nextQ = result.next_question || result.current_question;
+        if (nextQ) {
+            state.currentQuestionIndex = result.next_index != null ? result.next_index : state.currentQuestionIndex + 1;
+            state.currentQuestion = nextQ;
+            if (result.total_questions) state.totalQuestions = result.total_questions;
+            updateSessionProgress();
+            renderQuestion(nextQ);
+            drawRadar();
+        } else {
+            // No more questions, try completing
+            await handleDimensionComplete();
+        }
+    } catch (err) {
+        console.error('Submit error:', err);
+        state.isSubmitting = false;
+        toast('Failed to submit: ' + err.message, 'error');
+        if (btn) { btn.disabled = false; btn.textContent = 'Retry'; }
+    }
+}
+
+async function handleSkipQuestion() {
+    if (state.isSubmitting) return;
+    state.isSubmitting = true;
+
+    try {
+        const result = await submitAnswer(state.activeDimension, state.currentQuestionIndex, { skipped: true });
+        state.isSubmitting = false;
+
+        if (result.dimension_complete || result.is_complete) {
+            await handleDimensionComplete();
+            return;
+        }
+
+        const nextQ = result.next_question || result.current_question;
+        if (nextQ) {
+            state.currentQuestionIndex = result.next_index != null ? result.next_index : state.currentQuestionIndex + 1;
+            state.currentQuestion = nextQ;
+            updateSessionProgress();
+            renderQuestion(nextQ);
+        } else {
+            await handleDimensionComplete();
+        }
+    } catch (err) {
+        console.error('Skip error:', err);
+        state.isSubmitting = false;
+        toast('Failed to skip: ' + err.message, 'error');
+    }
+}
+
+async function handleDimensionComplete() {
+    $('questionContainer').innerHTML = '';
+    $('sessionLoading').style.display = 'block';
+    $('sessionLoadingText').textContent = 'Analyzing your patterns...';
+
+    try {
+        const result = await completeDimension(state.activeDimension);
+
+        $('sessionLoading').style.display = 'none';
+
+        // Update local state
+        const dim = DIMENSIONS.find(d => d.key === state.activeDimension);
+        state.dimensions[state.activeDimension] = {
+            status: 'complete',
+            score: result.score,
+            patterns: result.patterns || [],
+            summary: result.summary || '',
+            stale: false
+        };
+
+        // Show complete view
+        $('completeTitle').textContent = (dim ? dim.label : 'Dimension') + ' Complete';
+        $('completeSubtitle').textContent = dim ? dim.description : '';
+        $('completeSummary').textContent = result.summary || 'Calibration analysis complete.';
+
+        if (dim) {
+            $('completeLow').textContent = dim.low;
+            $('completeHigh').textContent = dim.high;
+        }
+
+        const score = result.score != null ? result.score : 5;
+        const pct = (score / 10) * 100;
+        $('completeScoreFill').style.width = pct + '%';
+        $('completeScoreThumb').style.left = pct + '%';
+        $('completeScoreValue').textContent = score.toFixed(1);
+
+        const patterns = result.patterns || [];
+        if (patterns.length > 0) {
+            $('completePatternsSection').style.display = 'block';
+            $('completePatterns').innerHTML = patterns.map(p => `
+                <div class="learned-item flex items-start gap-2">
+                    <span style="color: var(--deft-accent); margin-top: 2px;">&#9679;</span>
+                    <span class="text-sm" style="color: var(--deft-txt);">${esc(p)}</span>
+                </div>
+            `).join('');
+        } else {
+            $('completePatternsSection').style.display = 'none';
+        }
+
+        showView('complete');
+
+    } catch (err) {
+        console.error('Complete dimension error:', err);
+        $('sessionLoading').style.display = 'none';
+        toast('Failed to analyze: ' + err.message, 'error');
+
+        // Still mark as complete locally with default data
+        state.dimensions[state.activeDimension] = {
+            status: 'complete',
+            score: 5,
+            patterns: [],
+            summary: 'Completed (analysis pending)',
+            stale: false
+        };
+        returnToOverview();
+    }
+}
+
+// ══════════════════════════════════════════════════
+// RADAR CHART
+// ══════════════════════════════════════════════════
+function drawRadar() {
+    const canvas = $('radarCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width;
+    const H = canvas.height;
+    const cx = W / 2;
+    const cy = H / 2;
+    const R = Math.min(cx, cy) - 40;
+
+    ctx.clearRect(0, 0, W, H);
+
+    const n = DIMENSIONS.length;
+    const angleStep = (2 * Math.PI) / n;
+
+    // Get computed accent color
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--deft-accent').trim() || '#06D6A0';
+    const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--deft-border').trim() || '#2A2E3D';
+    const txtColor = getComputedStyle(document.documentElement).getPropertyValue('--deft-txt-2').trim() || '#8A95A9';
+
+    // Draw grid circles
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 0.5;
+    for (let ring = 1; ring <= 5; ring++) {
+        const r = (ring / 5) * R;
+        ctx.beginPath();
+        for (let i = 0; i <= n; i++) {
+            const angle = i * angleStep - Math.PI / 2;
+            const x = cx + Math.cos(angle) * r;
+            const y = cy + Math.sin(angle) * r;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+    }
+
+    // Draw spokes
+    for (let i = 0; i < n; i++) {
+        const angle = i * angleStep - Math.PI / 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(angle) * R, cy + Math.sin(angle) * R);
+        ctx.stroke();
+    }
+
+    // Draw filled area
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+        const dim = DIMENSIONS[i];
+        const ds = state.dimensions[dim.key] || {};
+        const score = ds.score != null ? ds.score : 0;
+        const r = (score / 10) * R;
+        const angle = i * angleStep - Math.PI / 2;
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = hexToRgba(accentColor, 0.15);
+    ctx.fill();
+    ctx.strokeStyle = accentColor;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Draw data points
+    for (let i = 0; i < n; i++) {
+        const dim = DIMENSIONS[i];
+        const ds = state.dimensions[dim.key] || {};
+        const score = ds.score != null ? ds.score : 0;
+        const r = (score / 10) * R;
+        const angle = i * angleStep - Math.PI / 2;
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+
+        if (score > 0) {
+            ctx.beginPath();
+            ctx.arc(x, y, 3.5, 0, 2 * Math.PI);
+            ctx.fillStyle = accentColor;
+            ctx.fill();
+        }
+    }
+
+    // Draw labels
+    ctx.font = '10px IBM Plex Sans, system-ui';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    for (let i = 0; i < n; i++) {
+        const dim = DIMENSIONS[i];
+        const angle = i * angleStep - Math.PI / 2;
+        const labelR = R + 22;
+        let x = cx + Math.cos(angle) * labelR;
+        let y = cy + Math.sin(angle) * labelR;
+
+        const isActive = state.activeDimension === dim.key;
+        ctx.fillStyle = isActive ? accentColor : txtColor;
+        ctx.font = isActive ? 'bold 10px IBM Plex Sans, system-ui' : '10px IBM Plex Sans, system-ui';
+
+        // Adjust alignment based on position
+        if (Math.abs(Math.cos(angle)) > 0.8) {
+            ctx.textAlign = Math.cos(angle) > 0 ? 'left' : 'right';
+        } else {
+            ctx.textAlign = 'center';
+        }
+
+        ctx.fillText(dim.label, x, y);
+    }
+}
+
+function hexToRgba(hex, alpha) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ══════════════════════════════════════════════════
+// STATUS LOADING
+// ══════════════════════════════════════════════════
+async function refreshStatus() {
+    toast('Refreshing calibration status...', 'info');
+    await loadCalibrationStatus();
+}
+
+async function loadCalibrationStatus() {
+    try {
+        const result = await loadStatus();
+
+        if (result.session_id) state.sessionId = result.session_id;
+        if (result.status) state.status = result.status;
+
+        // Parse dimensions status
+        if (result.dimensions) {
+            for (const [key, data] of Object.entries(result.dimensions)) {
+                state.dimensions[key] = {
+                    status: data.status || 'not_started',
+                    score: data.score != null ? data.score : null,
+                    patterns: data.patterns || [],
+                    summary: data.summary || '',
+                    stale: data.stale || false
+                };
+            }
+        }
+
+        renderOverview();
+    } catch (err) {
+        console.error('Load status error:', err);
+        // Render overview with empty state
+        renderOverview();
+        toast('Could not load calibration status', 'error');
+    }
+}
+
+// ══════════════════════════════════════════════════
+// AUTH / PROFILE / NAV
+// ══════════════════════════════════════════════════
+function toggleMobileNav() {
+    const o = $('mobileNavOverlay');
+    o.classList.toggle('open');
+}
+
+function toggleMobileAccordion(btn) {
+    btn.classList.toggle('expanded');
+    const children = btn.nextElementSibling;
+    if (children) children.classList.toggle('open');
+}
+
+function toggleProfileDD() {
+    const dd = $('profileDropdown');
+    dd.classList.toggle('hidden');
+}
+
+async function initAuth() {
+    try {
+        const profiles = await get('rdgr_profiles', 'select=id,display_name,avatar_letter,avatar_color&order=display_name');
+        const container = $('gateProfiles');
+        if (!profiles || !profiles.length) {
+            container.innerHTML = '<div class="text-xs text-txt-3">No profiles found</div>';
+            return;
+        }
+        container.innerHTML = profiles.map(p => `
+            <button type="button" onclick="selectGateProfile('${p.id}','${esc(p.display_name)}','${esc(p.avatar_letter || p.display_name[0])}')" class="gate-profile-btn flex flex-col items-center gap-1.5 px-3 py-2 rounded-lg border transition-all" style="border-color:var(--deft-border);background:transparent;cursor:pointer;min-width:64px;" data-id="${p.id}">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style="background:${p.avatar_color || 'rgba(6,214,160,0.15)'};color:var(--deft-accent);">${esc(p.avatar_letter || p.display_name[0])}</div>
+                <span class="text-xs text-txt-2">${esc(p.display_name)}</span>
+            </button>
+        `).join('');
+
+        // Load profile dropdown
+        const dd = $('profileDropdown');
+        dd.innerHTML = profiles.map(p => `
+            <button onclick="switchProfile('${p.id}','${esc(p.display_name)}','${esc(p.avatar_letter || p.display_name[0])}')" class="block w-full text-left px-3 py-1.5 text-xs transition-colors" style="color:#8A95A9;background:transparent;border:none;cursor:pointer;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                ${esc(p.display_name)}
+            </button>
+        `).join('') + `<div style="border-top:1px solid #2A2E3D;margin:0.25rem 0;"></div><button onclick="logout()" class="block w-full text-left px-3 py-1.5 text-xs" style="color:#FF6B6B;background:transparent;border:none;cursor:pointer;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">Sign Out</button>`;
+    } catch(e) {
+        console.error('Profile load error:', e);
+    }
+}
+
+let selectedGateProfile = null;
+function selectGateProfile(id, name, letter) {
+    selectedGateProfile = { id, name, letter };
+    document.querySelectorAll('.gate-profile-btn').forEach(b => {
+        b.style.borderColor = b.dataset.id === id ? 'var(--deft-accent)' : 'var(--deft-border)';
+        b.style.background = b.dataset.id === id ? 'var(--deft-accent-dim)' : 'transparent';
+    });
+    $('gateSubmitBtn').disabled = false;
+    $('gateSubmitBtn').style.opacity = '1';
+    $('gateSubmitBtn').textContent = 'Enter as ' + name;
+}
+
+async function handleGate(e) {
+    e.preventDefault();
+    if (!selectedGateProfile) return false;
+    const code = $('gateInput').value;
+    try {
+        const data = await rpc('verify_rdgr_access', { p_profile_id: selectedGateProfile.id, p_code: code });
+        if (data === true || data?.verified || (Array.isArray(data) && data[0]?.verified)) {
+            localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, profile: selectedGateProfile.id, ts: Date.now() }));
+            localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: selectedGateProfile.id, name: selectedGateProfile.name, letter: selectedGateProfile.letter }));
+            document.documentElement.classList.add('rdgr-authed');
+            $('gate').classList.add('hidden');
+            $('mainContent').style.opacity = '1';
+            $('profileName').textContent = selectedGateProfile.name;
+            $('profileAvatar').textContent = selectedGateProfile.letter;
+            loadCalibrationStatus();
+        } else {
+            $('gateError').classList.add('show');
+            setTimeout(() => $('gateError').classList.remove('show'), 2000);
+        }
+    } catch(err) {
+        console.error('Auth error:', err);
+        $('gateError').classList.add('show');
+        setTimeout(() => $('gateError').classList.remove('show'), 2000);
+    }
+    return false;
+}
+
+function switchProfile(id, name, letter) {
+    localStorage.setItem('rdgr-active-profile', JSON.stringify({ id, name, letter }));
+    $('profileName').textContent = name;
+    $('profileAvatar').textContent = letter;
+    $('profileDropdown').classList.add('hidden');
+}
+
+function logout() {
+    localStorage.removeItem('rdgr-session');
+    localStorage.removeItem('rdgr-active-profile');
+    location.reload();
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+    initAuth();
+
+    // If already authenticated
+    try {
+        const sess = JSON.parse(localStorage.getItem('rdgr-session') || '{}');
+        const prof = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+        if (sess.authenticated) {
+            $('mainContent').style.opacity = '1';
+            if (prof.name) $('profileName').textContent = prof.name;
+            if (prof.letter) $('profileAvatar').textContent = prof.letter;
+            loadCalibrationStatus();
+        } else {
+            // Show skeleton overview in unauthenticated state
+            renderOverview();
+        }
+    } catch(e) {
+        renderOverview();
+    }
+
+    // Close profile dropdown on outside click
+    document.addEventListener('click', (e) => {
+        if (!$('profileSwitcher').contains(e.target)) {
+            $('profileDropdown').classList.add('hidden');
+        }
+    });
+
+    // Close mobile nav on backdrop click
+    const backdrop = document.querySelector('.mobile-nav-backdrop');
+    if (backdrop) backdrop.addEventListener('click', toggleMobileNav);
+});
+</script>
+</body>
+</html>

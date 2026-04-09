@@ -1522,6 +1522,12 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     // SESSION MANAGEMENT
     // ═══════════════════════════════════════
     async function startCategory(categoryKey) {
+        // Voice calibration has been moved to its own dedicated page
+        if (categoryKey === 'voice_calibration') {
+            window.location.href = '/brand-voice/calibration/';
+            return;
+        }
+
         const catInfo = CATEGORIES.find(c => c.key === categoryKey);
         if (!catInfo) return;
 
