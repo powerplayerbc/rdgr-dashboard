@@ -3970,7 +3970,16 @@ function recalcIngredientNutrition(index) {
         net_carbs_g: +(base.net_carbs_g * ratio).toFixed(2),
     };
     ing._approxConversion = approx;
-    renderIngredientRows();
+    // Update nutrition fields via DOM instead of re-rendering (preserves quantity input mid-typing)
+    const rows = document.getElementById('ingredientRows').children;
+    if (rows[index]) {
+        const inputs = rows[index].querySelectorAll('input[type="number"]');
+        if (inputs[1]) inputs[1].value = ing.nutrition.calories || '';
+        if (inputs[2]) inputs[2].value = ing.nutrition.total_fat_g || '';
+        if (inputs[3]) inputs[3].value = ing.nutrition.protein_g || '';
+        if (inputs[4]) inputs[4].value = ing.nutrition.total_carbs_g || '';
+        if (inputs[5]) inputs[5].value = ing.nutrition.net_carbs_g || '';
+    }
 }
 
 // Food DB autocomplete for recipe ingredients
@@ -4204,7 +4213,7 @@ function renderIngredientRows() {
                 <div id="ingSuggestions-${i}" class="absolute left-0 right-0 top-full mt-1 rounded-lg border overflow-hidden" style="background: var(--deft-surface-el); border-color: var(--deft-border); z-index: 10000; display: none; max-height: 200px; overflow-y: auto;"></div>
             </div>
             <div style="width: 4rem;">
-                <input type="number" step="any" class="form-input text-xs py-1.5 text-center" placeholder="Qty" value="${ing.quantity}" oninput="newRecipeIngredients[${i}].quantity=parseFloat(this.value)||0; recalcIngredientNutrition(${i})">
+                <input type="number" step="0.01" class="form-input text-xs py-1.5 text-center" placeholder="Qty" value="${ing.quantity}" oninput="const v=this.value; newRecipeIngredients[${i}].quantity=v===''?0:(parseFloat(v)||0); recalcIngredientNutrition(${i})">
             </div>
             <div style="width: 5rem;">
                 <select class="form-input text-xs py-1.5" onchange="newRecipeIngredients[${i}].unit=this.value; recalcIngredientNutrition(${i})">
