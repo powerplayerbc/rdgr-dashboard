@@ -1247,11 +1247,19 @@ async function openDimension(key) {
 
         $('sessionLoading').style.display = 'none';
 
+        // If dimension is already complete, show review page
+        if (result.is_complete && result.resumed) {
+            renderDimensionReview(result);
+            return;
+        }
+
         const question = result.first_question || result.current_question || result.question;
         if (question) {
             state.currentQuestion = question;
             updateSessionProgress();
             renderQuestion(question);
+        } else if (result.is_complete) {
+            renderDimensionReview(result);
         } else {
             $('questionContainer').innerHTML = `
                 <div class="section-panel text-center py-8">
@@ -1278,6 +1286,118 @@ function updateSessionProgress() {
     $('sessionProgressLabel').textContent = `Question ${current} / ${total}`;
     $('sessionProgressPct').textContent = pct + '%';
     $('sessionProgressFill').style.width = pct + '%';
+}
+
+// ══════════════════════════════════════════════════
+// DIMENSION REVIEW (completed dimensions)
+// ══════════════════════════════════════════════════
+function renderDimensionReview(result) {
+    const dim = DIMENSIONS.find(d => d.key === state.activeDimension);
+    const score = result.running_score != null ? result.running_score : null;
+    const scorePct = score != null ? Math.round(score * 100) : null;
+    const answered = result.answers_count || result.total_questions || 0;
+    const total = result.total_questions || 0;
+    const patterns = result.detected_patterns || [];
+    const rejected = result.rejected_patterns || [];
+    const summary = result.summary || null;
+
+    // Update progress bar to show 100%
+    $('sessionProgressLabel').textContent = `${answered} / ${total} answered`;
+    $('sessionProgressPct').textContent = '100%';
+    $('sessionProgressFill').style.width = '100%';
+
+    $('questionContainer').innerHTML = `
+        <div class="section-panel">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-heading text-lg font-semibold" style="color: var(--deft-accent);">
+                    ${esc(dim ? dim.label : state.activeDimension)} — Calibration Complete
+                </h3>
+                <span class="text-xs px-2 py-1 rounded" style="background: rgba(34,197,94,0.15); color: #22c55e;">Complete</span>
+            </div>
+
+            ${scorePct != null ? `
+            <div class="mb-4">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs text-txt-3">${dim ? esc(dim.low) : '0'}</span>
+                    <span class="text-xs font-mono font-semibold" style="color: var(--deft-accent);">${scorePct}%</span>
+                    <span class="text-xs text-txt-3">${dim ? esc(dim.high) : '100'}</span>
+                </div>
+                <div class="w-full rounded-full" style="height: 8px; background: var(--deft-surface);">
+                    <div class="rounded-full" style="height: 8px; width: ${scorePct}%; background: var(--deft-accent); transition: width 0.5s;"></div>
+                </div>
+            </div>` : ''}
+
+            ${summary ? `
+            <div class="mb-4 p-3 rounded-lg" style="background: var(--deft-surface); border: 1px solid var(--deft-border);">
+                <p class="text-xs font-semibold text-txt-3 mb-1">AI Analysis</p>
+                <p class="text-sm" style="color: var(--deft-txt); line-height: 1.6; white-space: pre-wrap;">${esc(summary)}</p>
+            </div>` : `
+            <div class="mb-4 p-3 rounded-lg" style="background: var(--deft-surface); border: 1px solid var(--deft-border);">
+                <p class="text-sm text-txt-2">All ${total} questions answered. Score: ${scorePct != null ? scorePct + '%' : 'calculating...'}.</p>
+                <p class="text-xs text-txt-3 mt-1">Run "Complete Dimension" to generate a full AI analysis of your answers.</p>
+            </div>`}
+
+            ${patterns.length > 0 ? `
+            <div class="mb-3">
+                <p class="text-xs font-semibold text-txt-3 mb-1">Detected Patterns</p>
+                <div class="flex flex-wrap gap-1">
+                    ${patterns.map(p => `<span class="text-xs px-2 py-0.5 rounded" style="background: rgba(96,165,250,0.15); color: #60a5fa;">${esc(p)}</span>`).join('')}
+                </div>
+            </div>` : ''}
+
+            ${rejected.length > 0 ? `
+            <div class="mb-4">
+                <p class="text-xs font-semibold text-txt-3 mb-1">Rejected Patterns</p>
+                <div class="flex flex-wrap gap-1">
+                    ${rejected.map(p => `<span class="text-xs px-2 py-0.5 rounded" style="background: rgba(239,68,68,0.15); color: #ef4444;">${esc(p)}</span>`).join('')}
+                </div>
+            </div>` : ''}
+
+            <div class="flex gap-3 mt-6">
+                <button onclick="returnToOverview()" class="btn btn-ghost">Back to Overview</button>
+                <button onclick="recalibrateDimension('${state.activeDimension}')" class="btn btn-primary">
+                    Generate Additional Questions
+                </button>
+            </div>
+        </div>`;
+}
+
+async function recalibrateDimension(key) {
+    if (!confirm('This will generate 25 new questions to further refine this dimension. Continue?')) return;
+
+    $('questionContainer').innerHTML = '';
+    $('sessionLoading').style.display = 'block';
+    $('sessionLoadingText').textContent = 'Generating additional calibration questions...';
+
+    try {
+        // Clear the dimension questions so start_dimension generates fresh ones
+        const result = await webhookCall({
+            operation: 'start_dimension',
+            dimension: key,
+            session_id: state.sessionId,
+            force_regenerate: true
+        });
+
+        if (result.session_id) state.sessionId = result.session_id;
+        if (result.total_questions) state.totalQuestions = result.total_questions;
+        state.currentQuestionIndex = 0;
+
+        $('sessionLoading').style.display = 'none';
+
+        const question = result.first_question || result.current_question || result.question;
+        if (question) {
+            state.currentQuestion = question;
+            updateSessionProgress();
+            renderQuestion(question);
+        } else {
+            toast('Failed to generate new questions', 'error');
+            renderDimensionReview(result);
+        }
+    } catch (err) {
+        console.error('Recalibrate error:', err);
+        $('sessionLoading').style.display = 'none';
+        toast('Recalibration failed: ' + err.message, 'error');
+    }
 }
 
 // ══════════════════════════════════════════════════
