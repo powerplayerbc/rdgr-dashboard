@@ -949,6 +949,16 @@
                         <div id="completePatterns" class="space-y-2"></div>
                     </div>
 
+                    <!-- Voice Lessons (for review) -->
+                    <div class="mb-6" id="completeLessonsSection" style="display: none;">
+                        <h3 class="font-heading text-sm font-semibold text-txt-2 uppercase tracking-wider mb-3">Voice Lessons Learned</h3>
+                        <p class="text-xs text-txt-3 mb-3">These insights were derived from your calibration feedback. Review each one — confirmed lessons will guide future content generation.</p>
+                        <div id="completeLessons" class="space-y-2"></div>
+                        <div class="flex gap-2 mt-3">
+                            <button onclick="bulkConfirmLessons()" class="btn btn-ghost text-xs">Confirm All</button>
+                        </div>
+                    </div>
+
                     <!-- Action -->
                     <div class="text-center">
                         <button onclick="returnToOverview()" class="btn btn-primary px-8 py-2.5">Return to Overview</button>
@@ -1146,6 +1156,22 @@ function renderOverview() {
                 statusBadge += ` <span class="badge status-stale" title="Content has changed since calibration">Stale</span>`;
             }
 
+            // Add staleness indicator for completed dimensions
+            let stalenessHtml = '';
+            if (status === 'complete' && state.staleness) {
+                const si = state.staleness.find(s => s.dimension === dim.key);
+                if (si) {
+                    const freshColor = si.freshness === 'stale' ? '#ef4444' : si.freshness === 'aging' ? '#F0A830' : '#22c55e';
+                    const freshLabel = si.freshness === 'stale' ? `Stale (${si.days_since}d)` : si.freshness === 'aging' ? `Aging (${si.days_since}d)` : '';
+                    if (freshLabel) {
+                        stalenessHtml = `<span class="text-xs px-1.5 py-0.5 rounded ml-1" style="background: ${freshColor}20; color: ${freshColor};">${freshLabel}</span>`;
+                    }
+                    if (si.pending_lessons > 0) {
+                        stalenessHtml += `<span class="text-xs px-1.5 py-0.5 rounded ml-1" style="background: rgba(96,165,250,0.15); color: #60a5fa;">${si.pending_lessons} lessons pending</span>`;
+                    }
+                }
+            }
+
             let scoreHtml = '';
             if (score != null && (status === 'complete' || status === 'in_progress')) {
                 const pct = (score / 10) * 100;
@@ -1182,7 +1208,7 @@ function renderOverview() {
                             <span class="text-lg">${dim.icon}</span>
                             <span class="font-heading font-semibold text-sm">${esc(dim.label)}</span>
                         </div>
-                        <div class="flex items-center gap-1.5">${statusBadge}</div>
+                        <div class="flex items-center gap-1.5 flex-wrap">${statusBadge}${stalenessHtml}</div>
                     </div>
                     <p class="text-xs text-txt-3 leading-relaxed">${esc(dim.description)}</p>
                     ${scoreHtml}
@@ -1631,6 +1657,99 @@ function initSortable() {
 }
 
 // ══════════════════════════════════════════════════
+// VOICE LESSON REVIEW
+// ══════════════════════════════════════════════════
+async function reviewLesson(idx, action, modifiedText) {
+    const lesson = state.pendingLessons[idx];
+    if (!lesson) return;
+
+    try {
+        const resp = await fetch(SUPABASE_URL + '/rest/v1/rpc/review_voice_lesson', {
+            method: 'POST',
+            headers: HEADERS,
+            body: JSON.stringify({
+                p_lesson_id: lesson.id,
+                p_action: action,
+                p_modified_text: modifiedText || null
+            })
+        });
+        await resp.json();
+
+        const card = $('lesson-' + idx);
+        if (card) {
+            if (action === 'confirm') {
+                card.style.borderColor = 'rgba(34,197,94,0.5)';
+                card.style.opacity = '0.7';
+                card.querySelector('.flex.gap-1').innerHTML = '<span class="text-xs" style="color: #22c55e;">&#10003; Confirmed</span>';
+            } else if (action === 'modify') {
+                card.style.borderColor = 'rgba(96,165,250,0.5)';
+                card.querySelector('.flex.gap-1').innerHTML = '<span class="text-xs" style="color: #60a5fa;">&#10003; Modified</span>';
+            } else if (action === 'dismiss') {
+                card.style.opacity = '0.3';
+                card.querySelector('.flex.gap-1').innerHTML = '<span class="text-xs" style="color: #ef4444;">Dismissed</span>';
+            }
+        }
+    } catch(e) {
+        console.error('Review lesson error:', e);
+        toast('Failed to save review', 'error');
+    }
+}
+
+function editLesson(idx) {
+    const textEl = $('lesson-text-' + idx);
+    if (!textEl) return;
+    const currentText = textEl.textContent;
+    const input = document.createElement('textarea');
+    input.value = currentText;
+    input.className = 'form-input w-full text-sm mt-1';
+    input.style.cssText = 'background: var(--deft-surface-hi); border: 1px solid var(--deft-accent); color: var(--deft-txt); min-height: 60px; resize: vertical;';
+    textEl.replaceWith(input);
+    input.focus();
+
+    const saveBtn = document.createElement('button');
+    saveBtn.textContent = 'Save';
+    saveBtn.className = 'text-xs px-2 py-1 rounded mt-1';
+    saveBtn.style.cssText = 'background: rgba(6,214,160,0.15); color: var(--deft-accent); border: 1px solid rgba(6,214,160,0.3);';
+    saveBtn.onclick = () => {
+        const newText = input.value.trim();
+        if (newText && newText !== currentText) {
+            state.pendingLessons[idx].lesson = newText;
+            reviewLesson(idx, 'modify', newText);
+        }
+        const p = document.createElement('p');
+        p.className = 'text-sm';
+        p.style.color = 'var(--deft-txt)';
+        p.id = 'lesson-text-' + idx;
+        p.textContent = newText || currentText;
+        input.replaceWith(p);
+        saveBtn.remove();
+    };
+    input.parentNode.insertBefore(saveBtn, input.nextSibling);
+}
+
+async function bulkConfirmLessons() {
+    try {
+        await fetch(SUPABASE_URL + '/rest/v1/rpc/bulk_confirm_lessons', {
+            method: 'POST',
+            headers: HEADERS,
+            body: JSON.stringify({ p_brand_id: 'carlton', p_dimension: state.activeDimension })
+        });
+        // Visual feedback
+        document.querySelectorAll('[id^="lesson-"]').forEach(card => {
+            if (card.id.match(/^lesson-\d+$/)) {
+                card.style.borderColor = 'rgba(34,197,94,0.5)';
+                card.style.opacity = '0.7';
+                const btns = card.querySelector('.flex.gap-1');
+                if (btns) btns.innerHTML = '<span class="text-xs" style="color: #22c55e;">&#10003; Confirmed</span>';
+            }
+        });
+        toast('All lessons confirmed');
+    } catch(e) {
+        toast('Failed to confirm lessons', 'error');
+    }
+}
+
+// ══════════════════════════════════════════════════
 // ANSWER SUBMISSION
 // ══════════════════════════════════════════════════
 async function handleSubmitAnswer() {
@@ -1792,6 +1911,31 @@ async function handleDimensionComplete() {
             `).join('');
         } else {
             $('completePatternsSection').style.display = 'none';
+        }
+
+        // Voice lessons
+        const lessons = result.voice_lessons || [];
+        if (lessons.length > 0) {
+            $('completeLessonsSection').style.display = 'block';
+            $('completeLessons').innerHTML = lessons.map((l, i) => `
+                <div class="lesson-card flex items-start gap-3 p-3 rounded-lg" style="background: var(--deft-surface); border: 1px solid var(--deft-border);" id="lesson-${i}" data-lesson-id="${l.id || ''}">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs px-1.5 py-0.5 rounded" style="background: rgba(96,165,250,0.15); color: #60a5fa;">${esc(l.category.replace(/_/g, ' '))}</span>
+                            ${l.channels && l.channels.length ? l.channels.map(c => '<span class="text-xs px-1.5 py-0.5 rounded" style="background: rgba(6,214,160,0.1); color: var(--deft-accent);">' + esc(c) + '</span>').join('') : ''}
+                        </div>
+                        <p class="text-sm" style="color: var(--deft-txt);" id="lesson-text-${i}">${esc(l.lesson)}</p>
+                    </div>
+                    <div class="flex gap-1 shrink-0">
+                        <button onclick="reviewLesson(${i}, 'confirm')" class="text-xs px-2 py-1 rounded" style="background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.3);" title="Confirm">&#10003;</button>
+                        <button onclick="editLesson(${i})" class="text-xs px-2 py-1 rounded" style="background: rgba(96,165,250,0.15); color: #60a5fa; border: 1px solid rgba(96,165,250,0.3);" title="Edit">&#9998;</button>
+                        <button onclick="reviewLesson(${i}, 'dismiss')" class="text-xs px-2 py-1 rounded" style="background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3);" title="Dismiss">&times;</button>
+                    </div>
+                </div>
+            `).join('');
+            state.pendingLessons = lessons;
+        } else {
+            $('completeLessonsSection').style.display = 'none';
         }
 
         showView('complete');
@@ -1963,6 +2107,17 @@ async function loadCalibrationStatus() {
                 };
             }
         }
+
+        // Load staleness info
+        try {
+            const stalenessResp = await fetch(SUPABASE_URL + '/rest/v1/rpc/get_calibration_staleness', {
+                method: 'POST',
+                headers: HEADERS,
+                body: JSON.stringify({ p_brand_id: 'carlton' })
+            });
+            const stalenessData = await stalenessResp.json();
+            state.staleness = stalenessData.dimensions || [];
+        } catch(e) { state.staleness = []; }
 
         renderOverview();
     } catch (err) {
