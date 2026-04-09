@@ -1453,6 +1453,15 @@ function renderQuestion(question) {
                             <span class="text-sm font-medium">${esc(opts.b || 'Option B')}</span>
                         </div>
                     </div>
+                    <div id="neitherArea" class="mt-3">
+                        <button class="btn btn-ghost text-xs w-full" onclick="selectNeither()" id="neitherBtn"
+                            style="border: 1px dashed var(--deft-border, #2a2d35); padding: 8px; opacity: 0.7;">
+                            Neither works for my brand
+                        </button>
+                        <textarea class="form-input mt-2" id="neitherText" rows="2"
+                            placeholder="What would you say instead? (optional)"
+                            style="display: none;"></textarea>
+                    </div>
                     <div class="flex items-center justify-between mt-4">
                         <button onclick="handleSkipQuestion()" class="btn btn-ghost text-xs">Skip &rarr;</button>
                         <button onclick="handleSubmitAnswer()" class="btn btn-primary" id="submitBtn" disabled>Select an option</button>
@@ -1555,6 +1564,17 @@ async function flagQuestion(questionIndex) {
     }
 }
 
+function selectNeither() {
+    state.selectedOption = 'neither';
+    const btn = $('submitBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit Feedback'; }
+    const ta = $('neitherText');
+    if (ta) { ta.style.display = 'block'; ta.focus(); }
+    const nBtn = $('neitherBtn');
+    if (nBtn) { nBtn.style.opacity = '1'; nBtn.style.borderColor = 'var(--deft-accent, #60a5fa)'; }
+    document.querySelectorAll('.option-card').forEach(c => { c.classList.remove('selected'); c.style.opacity = '0.4'; });
+}
+
 function selectNoneOfThese() {
     state.selectedOption = 'none';
     const btn = $('submitBtn');
@@ -1628,7 +1648,11 @@ async function handleSubmitAnswer() {
         }
         case 'this_or_that': {
             if (!state.selectedOption) { toast('Select an option', 'error'); return; }
-            payload = { selected: state.selectedOption };
+            if (state.selectedOption === 'neither') {
+                payload = { selected: 'neither', feedback: ($('neitherText') || {}).value || '' };
+            } else {
+                payload = { selected: state.selectedOption };
+            }
             break;
         }
         case 'approve_deny': {
@@ -1662,6 +1686,13 @@ async function handleSubmitAnswer() {
         if (result.dimension_complete || result.is_complete || result.is_round_complete) {
             await handleDimensionComplete();
             return;
+        }
+
+        // Update dimension score from response
+        if (result.running_score != null && state.activeDimension) {
+            if (!state.dimensions[state.activeDimension]) state.dimensions[state.activeDimension] = {};
+            state.dimensions[state.activeDimension].score = result.running_score * 10; // radar expects 0-10
+            state.dimensions[state.activeDimension].status = 'in_progress';
         }
 
         // Next question
