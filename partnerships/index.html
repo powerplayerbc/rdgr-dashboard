@@ -2060,11 +2060,12 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     }
 
     function updateOutreachCounts() {
-        var counts = { all: outreachLog.length, draft: 0, sent: 0, replied: 0, bounced: 0 };
+        var counts = { all: 0, draft: partnershipDrafts.length, sent: 0, replied: 0, bounced: 0 };
         outreachLog.forEach(function(o) {
             var s = deriveOutreachStatus(o);
             if (counts[s] !== undefined) counts[s]++;
         });
+        counts.all = counts.draft + counts.sent + counts.replied + counts.bounced;
         document.getElementById('orAll').textContent = counts.all;
         document.getElementById('orDraft').textContent = counts.draft;
         document.getElementById('orSent').textContent = counts.sent;
@@ -2230,13 +2231,31 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         btn.disabled = true; btn.textContent = 'Saving...';
         try {
             var d = partnershipDrafts.find(function(x) { return x.id === draftId; });
-            var existingCtx = (d && d.context) || {};
             var updatedContent = Object.assign({}, d && d.content || {}, { subject: subject, body: body });
-            await fetch(SUPABASE_URL + '/rest/v1/copy_drafts?id=eq.' + draftId, {
+            // Try direct Supabase PATCH first
+            var res = await fetch(SUPABASE_URL + '/rest/v1/copy_drafts?id=eq.' + draftId, {
                 method: 'PATCH',
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
                 body: JSON.stringify({ title: subject, content: updatedContent, generated_text: body, updated_at: new Date().toISOString() })
             });
+            if (!res.ok) {
+                // Supabase PATCH failed (likely RLS), fall back to PRTN-BRIDGE
+                console.warn('Direct PATCH failed (' + res.status + '), trying PRTN-BRIDGE...');
+                var bridgeRes = await prtnApi('edit_draft', { draft_id: draftId, content: updatedContent, title: subject, body: body });
+                if (!bridgeRes || !bridgeRes.success) {
+                    throw new Error((bridgeRes && bridgeRes.error) || 'Failed to save via bridge (HTTP ' + res.status + ')');
+                }
+            } else {
+                // Check if PATCH actually updated anything (Supabase returns empty array if RLS silently blocked)
+                var patchResult = await res.json();
+                if (Array.isArray(patchResult) && patchResult.length === 0) {
+                    console.warn('PATCH returned empty result, trying PRTN-BRIDGE...');
+                    var bridgeRes = await prtnApi('edit_draft', { draft_id: draftId, content: updatedContent, title: subject, body: body });
+                    if (!bridgeRes || !bridgeRes.success) {
+                        throw new Error('Update was silently blocked. Please try again.');
+                    }
+                }
+            }
             toast('Draft updated', 'success');
             closeModal('editDraftModal');
             await fetchPartnershipDrafts();
@@ -2412,8 +2431,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     // PARTNER DETAIL PANEL
     // ========================================
     function openDetailPanel(partnerId) {
+        try {
         var partner = partners.find(function(p) { return p.id === partnerId; });
-        if (!partner) return;
+        if (!partner) { toast('Partner not found. Try refreshing.', 'error'); return; }
 
         document.getElementById('dpName').textContent = partner.partner_name || 'Unknown';
 
@@ -2474,6 +2494,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
         document.getElementById('panelOverlay').classList.add('active');
         document.getElementById('detailPanel').classList.add('active');
+        } catch(e) { console.error('openDetailPanel error:', e); toast('Error loading partner: ' + e.message, 'error'); }
     }
 
     function closeDetailPanel() {

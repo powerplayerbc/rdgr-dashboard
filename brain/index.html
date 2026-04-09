@@ -5330,7 +5330,8 @@ async function toggleHabitCompletion(habitId, date) {
     if (existing) {
         // Uncomplete
         if (webhookAvailable) {
-            await brainApi('uncomplete_habit', { habit_id: habitId, date });
+            const res = await brainApi('uncomplete_habit', { habit_id: habitId, date });
+            if (!res) return;
         } else {
             await supabaseWrite('brain_habit_completions', 'DELETE', {},
                 `habit_id=eq.${habitId}&completion_date=eq.${date}`);
@@ -5341,7 +5342,8 @@ async function toggleHabitCompletion(habitId, date) {
         // Complete
         const pts = habit.points_value || 15;
         if (webhookAvailable) {
-            await brainApi('complete_habit', { habit_id: habitId, date });
+            const res = await brainApi('complete_habit', { habit_id: habitId, date });
+            if (!res) return;
         } else {
             const comp = {
                 habit_id: habitId,
@@ -5741,7 +5743,11 @@ async function confirmCloseDay() {
     const pendingTasks = tasks.filter(t => t.status === 'pending');
 
     if (webhookAvailable) {
-        await brainApi('close_day', { date });
+        const res = await brainApi('close_day', { date });
+        if (!res) {
+            closeModal('closeDayModal');
+            return;
+        }
     } else {
         // Fallback: push tasks to tomorrow directly
         const tomorrow = new Date(date + 'T12:00:00');
@@ -5776,7 +5782,7 @@ async function confirmCloseDay() {
     }
 
     closeModal('closeDayModal');
-    toast(`Day closed \u2014 ${pendingTasks.length} task${pendingTasks.length !== 1 ? 's' : ''} pushed to tomorrow`, 'success');
+    toast(`Day closed -- ${pendingTasks.length} task${pendingTasks.length !== 1 ? 's' : ''} pushed to tomorrow`, 'success');
     loadHabitsView();
 }
 

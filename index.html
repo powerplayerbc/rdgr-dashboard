@@ -2594,14 +2594,46 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             }
             container.innerHTML = data.map(p => {
                 const text = p.content_text || p.title || '';
-                const preview = text.substring(0, 80) + (text.length > 80 ? '...' : '');
-                return `<div class="flex items-center gap-2 p-1.5 rounded" style="background:rgba(0,0,0,0.2);">
-                    <span class="badge badge-domain text-[0.55rem]">${esc(p.platform)}</span>
-                    <span class="badge badge-${p.status || 'draft'} text-[0.55rem]">${esc(p.status || 'draft')}</span>
-                    <span class="text-txt-2 truncate">${esc(preview)}</span>
+                const preview = text.substring(0, 120) + (text.length > 120 ? '...' : '');
+                const isPending = !p.status || p.status === 'draft' || p.status === 'pending_review';
+                const actionBtns = isPending ? `
+                    <div class="flex gap-1 mt-1.5">
+                        <button class="btn btn-primary text-[0.6rem] py-0.5 px-2" onclick="event.stopPropagation();batchPostAction('${esc(p.id)}','approved','${esc(batchId)}',${idx})">Approve</button>
+                        <button class="btn btn-ghost text-[0.6rem] py-0.5 px-2" style="color:var(--deft-danger);" onclick="event.stopPropagation();batchPostAction('${esc(p.id)}','rejected','${esc(batchId)}',${idx})">Reject</button>
+                    </div>` : '';
+                return `<div class="p-2 rounded" style="background:rgba(0,0,0,0.2);border:1px solid var(--deft-border,#1E2130);">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="badge badge-domain text-[0.55rem]">${esc(p.platform)}</span>
+                        <span class="badge badge-${p.status || 'draft'} text-[0.55rem]">${esc(p.status || 'draft')}</span>
+                    </div>
+                    <div class="text-xs text-txt-2 leading-relaxed">${esc(preview)}</div>
+                    ${actionBtns}
                 </div>`;
             }).join('');
         } catch (err) { container.innerHTML = `<span class="text-alert text-xs">${err.message}</span>`; }
+    }
+
+    async function batchPostAction(postId, newStatus, batchId, taskIdx) {
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/social_content_queue?id=eq.${postId}`, {
+                method: 'PATCH',
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus, reviewed_at: new Date().toISOString() })
+            });
+            if (!res.ok) throw new Error('Update failed: HTTP ' + res.status);
+            toast(`Post ${newStatus}`, 'success');
+            // Refresh the batch view
+            const container = document.getElementById(`ht-batch-${taskIdx}`);
+            if (container) { container.style.display = 'none'; }
+            await viewBatch(batchId, taskIdx);
+            // Check if all posts in batch are acted upon
+            const remaining = await supabaseSelect('social_content_queue',
+                `generation_batch_id=eq.${batchId}&status=in.(draft,pending_review)&select=id`);
+            if (!remaining || remaining.length === 0) {
+                toast('All posts reviewed! Completing task...', 'success');
+                await fireAction(taskIdx, 'approve');
+            }
+        } catch (err) { toast('Failed: ' + err.message, 'error'); }
     }
 
     async function fireAction(idx, action) {
@@ -3211,7 +3243,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         const actual = parseFloat(data.actual_revenue) || 0;
         const pipeline = parseFloat(data.total_pipeline) || 0;
         const weighted = parseFloat(data.weighted_pipeline) || 0;
-        const daysRemaining = parseInt(data.days_remaining) || 0;
+        const targetDate = new Date('2026-04-30T23:59:59');
+        const now = new Date();
+        const daysRemaining = Math.max(0, Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24)));
         const progress = Math.min((actual / target) * 100, 100);
 
         panel.innerHTML = `
