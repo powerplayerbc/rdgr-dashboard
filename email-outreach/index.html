@@ -3957,6 +3957,24 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             closeModal('emailPreviewModal');
             currentPreviewDraft = null;
             await fetchOutreachDrafts();
+
+            // Submit to brand voice learning loop (non-blocking)
+            if (newStatus === 'approved' || newStatus === 'edited') {
+                const verdictMap = { approved: 'approved', edited: 'rejected' };
+                const fbCategories = structuredFeedback?.categories || [];
+                fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_content_feedback`, {
+                    method: 'POST', headers: HEADERS,
+                    body: JSON.stringify({
+                        p_brand_id: 'carlton',
+                        p_content_type: 'cold_outreach_email',
+                        p_content_id: draft.id,
+                        p_channel: 'cold_email',
+                        p_verdict: verdictMap[newStatus],
+                        p_feedback_categories: fbCategories.length ? fbCategories : (newStatus === 'approved' ? ['approved_as_is'] : ['needs_revision']),
+                        p_feedback_detail: notes || ''
+                    })
+                }).catch(e => console.warn('Feedback submit error:', e));
+            }
         } catch (err) {
             toast(`Failed: ${err.message}`, 'error');
         } finally {
