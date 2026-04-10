@@ -1054,8 +1054,6 @@
                             <a href="/brand-discovery" class="nav-group-btn">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
                                 <a href="/brand-discovery">Discovery</a>
-                                <a href="/brand-voice/">Voice</a>
-                                <a href="/brand-voice/calibration/">Calibration</a>
                                 <a href="/template-studio">Templates</a>
                                 <a href="/brand-documents">Docs</a>
                             </div>
@@ -1156,8 +1154,6 @@
 <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Brand <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
 <div class="mobile-nav-children">
     <a href="/brand-discovery" class="mobile-nav-link">Discovery</a>
-    <a href="/brand-voice/" class="mobile-nav-link">Voice</a>
-    <a href="/brand-voice/calibration/" class="mobile-nav-link">Calibration</a>
     <a href="/template-studio" class="mobile-nav-link">Templates</a>
     <a href="/brand-documents" class="mobile-nav-link">Docs</a>
 </div>
@@ -1256,10 +1252,6 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 <div class="outreach-stat-pill" onclick="filterOutreach('skipped')">
                     <span class="os-count" style="color:#6B7280;" id="osSkipped">--</span>
                     <span class="text-txt-2">Skipped</span>
-                </div>
-                <div class="outreach-stat-pill" onclick="filterOutreach('sent')">
-                    <span class="os-count" style="color:#4CC9F0;" id="osSent">--</span>
-                    <span class="text-txt-2">Sent</span>
                 </div>
                 <div class="outreach-stat-pill" onclick="filterOutreach('all')">
                     <span class="os-count" id="osAll">--</span>
@@ -3535,17 +3527,17 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         }
 
         // Update filter counts
-        const counts = { draft: 0, approved: 0, rejected: 0, skipped: 0, sent: 0 };
+        const counts = { draft: 0, approved: 0, rejected: 0, skipped: 0 };
         outreachDrafts.forEach(d => {
-            if (counts[d.review_status] !== undefined) counts[d.review_status]++;
+            const st = d.review_status === 'sent' ? 'approved' : d.review_status;
+            if (counts[st] !== undefined) counts[st]++;
         });
-        const totalAll = counts.draft + counts.approved + counts.rejected + counts.skipped + counts.sent;
+        const totalAll = counts.draft + counts.approved + counts.rejected + counts.skipped;
         document.getElementById('osAll').textContent = totalAll;
         document.getElementById('osDraft').textContent = counts.draft;
         document.getElementById('osApproved').textContent = counts.approved;
         document.getElementById('osRejected').textContent = counts.rejected;
         document.getElementById('osSkipped').textContent = counts.skipped;
-        document.getElementById('osSent').textContent = counts.sent;
 
         renderOutreachDrafts();
     }
@@ -3644,7 +3636,10 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             const superseded = getSupersededIds(outreachDrafts);
             filtered = filtered.filter(d => !superseded.has(d.id));
         } else {
-            filtered = filtered.filter(d => d.review_status === outreachFilter);
+            filtered = filtered.filter(d => {
+                const st = d.review_status === 'sent' ? 'approved' : d.review_status;
+                return st === outreachFilter;
+            });
         }
         if (searchQ) {
             filtered = filtered.filter(d => {

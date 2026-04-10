@@ -502,8 +502,7 @@
                             <a href="/brand-discovery" class="nav-group-btn active">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
                                 <a href="/brand-discovery">Discovery</a>
-                                <a href="/brand-voice/" class="active">Voice</a>
-                                <a href="/brand-voice/calibration/">Calibration</a>
+                                <a href="/brand-voice" class="active">Voice</a>
                                 <a href="/template-studio">Templates</a>
                                 <a href="/brand-documents">Docs</a>
                             </div>
@@ -587,7 +586,7 @@
                     <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Outreach <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
                     <div class="mobile-nav-children"><a href="/crm" class="mobile-nav-link">CRM</a><a href="/email-outreach" class="mobile-nav-link">Email</a><a href="/social-dashboard" class="mobile-nav-link">Social</a><a href="/social-content" class="mobile-nav-link">Social Content</a><a href="/offer-studio" class="mobile-nav-link">Offers</a></div>
                     <button class="mobile-nav-group-btn active" onclick="toggleMobileAccordion(this)">Brand <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
-                    <div class="mobile-nav-children"><a href="/brand-discovery" class="mobile-nav-link">Discovery</a><a href="/brand-voice/" class="mobile-nav-link active">Voice</a><a href="/brand-voice/calibration/" class="mobile-nav-link">Calibration</a><a href="/template-studio" class="mobile-nav-link">Templates</a><a href="/brand-documents" class="mobile-nav-link">Docs</a></div>
+                    <div class="mobile-nav-children"><a href="/brand-discovery" class="mobile-nav-link">Discovery</a><a href="/brand-voice" class="mobile-nav-link active">Voice</a><a href="/template-studio" class="mobile-nav-link">Templates</a><a href="/brand-documents" class="mobile-nav-link">Docs</a></div>
                     <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Policy <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
                     <div class="mobile-nav-children"><a href="/bsi-discovery" class="mobile-nav-link">Discovery</a><a href="/compliance" class="mobile-nav-link">Compliance</a><a href="/bsi-documents" class="mobile-nav-link">Documents</a></div>
                     <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Content <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
@@ -631,26 +630,6 @@
                 <div class="stat-card"><div class="text-txt-3 text-xs font-medium mb-1 uppercase tracking-wider">Types</div><div class="stat-val" style="color: var(--deft-txt, #E8ECF1)" id="statTypes"><span class="skeleton inline-block w-10 h-7"></span></div></div>
                 <div class="stat-card"><div class="text-txt-3 text-xs font-medium mb-1 uppercase tracking-wider">Never Used</div><div class="stat-val" style="color: var(--deft-warning, #FFD93D)" id="statNeverUsed"><span class="skeleton inline-block w-10 h-7"></span></div></div>
                 <div class="stat-card"><div class="text-txt-3 text-xs font-medium mb-1 uppercase tracking-wider">Unprocessed Feedback</div><div class="stat-val" style="color: var(--deft-danger, #FF6B6B)" id="statFeedback"><span class="skeleton inline-block w-10 h-7"></span></div></div>
-            </div>
-
-            <!-- ======================== QUICK ACTIONS ======================== -->
-            <div class="flex flex-wrap gap-3">
-                <a href="/brand-voice/calibration/" class="panel flex items-center gap-3 px-4 py-3 group" style="text-decoration:none; flex:1; min-width:220px; transition: border-color 0.2s;" onmouseenter="this.style.borderColor='var(--deft-accent)'" onmouseleave="this.style.borderColor='var(--deft-border)'">
-                    <span style="font-size: 1.5rem;">&#127897;</span>
-                    <div>
-                        <div class="text-sm font-semibold text-txt group-hover:text-accent transition-colors">Voice Calibration</div>
-                        <div class="text-xs text-txt-3">Calibrate your voice across 10 dimensions</div>
-                    </div>
-                    <span class="ml-auto text-txt-3 text-sm">&rarr;</span>
-                </a>
-                <a href="/brand-voice/feedback-review/" class="panel flex items-center gap-3 px-4 py-3 group" style="text-decoration:none; flex:1; min-width:220px; transition: border-color 0.2s;" onmouseenter="this.style.borderColor='var(--deft-accent)'" onmouseleave="this.style.borderColor='var(--deft-border)'">
-                    <span style="font-size: 1.5rem;">&#128221;</span>
-                    <div>
-                        <div class="text-sm font-semibold text-txt group-hover:text-accent transition-colors">Feedback Review</div>
-                        <div class="text-xs text-txt-3">Review and process content feedback</div>
-                    </div>
-                    <span class="ml-auto text-txt-3 text-sm">&rarr;</span>
-                </a>
             </div>
 
             <!-- ======================== SECTION 2: CHANNEL VOICES ======================== -->
@@ -854,6 +833,7 @@ const CHANNEL_LABELS = {
 
 let allAssets = [];
 let frPreviewData = null;
+let channelVoicesData = null;
 
 // ──────────────── HELPERS ────────────────
 function $(id) { return document.getElementById(id); }
@@ -957,6 +937,7 @@ async function loadChannelVoices() {
         }
 
         const voices = data[0].identity.channel_voices;
+        channelVoicesData = voices;
         const channelOrder = ['cold_email','partnership','social_twitter','social_linkedin','social_instagram','social_facebook','blog','sales','general'];
 
         let html = '';
@@ -971,20 +952,8 @@ async function loadChannelVoices() {
                     </div>
                     <svg class="channel-chevron" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
-                <div class="channel-body">
-                    ${v.tone_summary ? `<p class="text-sm mb-3" style="color:var(--deft-txt-2);">${esc(v.tone_summary)}</p>` : ''}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                        ${v.opening_style ? `<div><span class="text-txt-3 font-semibold uppercase tracking-wider block mb-1">Opening Style</span><span style="color:var(--deft-txt);">${esc(v.opening_style)}</span></div>` : ''}
-                        ${v.closing_style ? `<div><span class="text-txt-3 font-semibold uppercase tracking-wider block mb-1">Closing Style</span><span style="color:var(--deft-txt);">${esc(v.closing_style)}</span></div>` : ''}
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-xs">
-                        ${renderList(v.do_this, 'Do This', 'var(--deft-success, #6BCB77)')}
-                        ${renderList(v.never_do_this, 'Never Do This', 'var(--deft-danger, #FF6B6B)')}
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-xs">
-                        ${renderList(v.signature_moves, 'Signature Moves', 'var(--deft-accent, #06D6A0)')}
-                        ${renderList(v.example_phrasing, 'Example Phrasing', 'var(--deft-txt-2, #8A95A9)')}
-                    </div>
+                <div class="channel-body" id="chbody-${ch}">
+                    ${renderChannelView(ch, v)}
                 </div>
             </div>`;
         }
@@ -1004,6 +973,106 @@ function renderList(items, title, color) {
     </div>`;
 }
 
+function renderChannelView(ch, v) {
+    return `${v.tone_summary ? `<p class="text-sm mb-3" style="color:var(--deft-txt-2);">${esc(v.tone_summary)}</p>` : ''}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            ${v.opening_style ? `<div><span class="text-txt-3 font-semibold uppercase tracking-wider block mb-1">Opening Style</span><span style="color:var(--deft-txt);">${esc(v.opening_style)}</span></div>` : ''}
+            ${v.closing_style ? `<div><span class="text-txt-3 font-semibold uppercase tracking-wider block mb-1">Closing Style</span><span style="color:var(--deft-txt);">${esc(v.closing_style)}</span></div>` : ''}
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-xs">
+            ${renderList(v.do_this, 'Do This', 'var(--deft-success, #6BCB77)')}
+            ${renderList(v.never_do_this, 'Never Do This', 'var(--deft-danger, #FF6B6B)')}
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-xs">
+            ${renderList(v.signature_moves, 'Signature Moves', 'var(--deft-accent, #06D6A0)')}
+            ${renderList(v.example_phrasing, 'Example Phrasing', 'var(--deft-txt-2, #8A95A9)')}
+        </div>
+        <div class="flex justify-end mt-3">
+            <button class="btn btn-primary text-xs" onclick="event.stopPropagation(); editChannel('${ch}')">Edit</button>
+        </div>`;
+}
+
+function editChannelTextarea(label, id, value) {
+    return `<div class="mb-3"><label class="text-txt-3 text-xs font-semibold uppercase tracking-wider block mb-1">${esc(label)}</label><textarea id="${id}" class="form-input text-xs w-full" rows="2" style="resize:vertical;">${esc(value || '')}</textarea></div>`;
+}
+
+function editChannelList(label, id, items) {
+    return `<div class="mb-3"><label class="text-txt-3 text-xs font-semibold uppercase tracking-wider block mb-1">${esc(label)} <span class="font-normal">(one per line)</span></label><textarea id="${id}" class="form-input text-xs w-full" rows="4" style="resize:vertical;">${(items || []).map(i => i).join('\n')}</textarea></div>`;
+}
+
+function editChannel(ch) {
+    const v = channelVoicesData[ch];
+    if (!v) return;
+    const body = $('chbody-' + ch);
+    if (!body) return;
+    body.innerHTML = `
+        ${editChannelTextarea('Register', 'cev-register-' + ch, v.register)}
+        ${editChannelTextarea('Tone Summary', 'cev-tone-' + ch, v.tone_summary)}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${editChannelTextarea('Opening Style', 'cev-opening-' + ch, v.opening_style)}
+            ${editChannelTextarea('Closing Style', 'cev-closing-' + ch, v.closing_style)}
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${editChannelList('Do This', 'cev-do-' + ch, v.do_this)}
+            ${editChannelList('Never Do This', 'cev-never-' + ch, v.never_do_this)}
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${editChannelList('Signature Moves', 'cev-sig-' + ch, v.signature_moves)}
+            ${editChannelList('Example Phrasing', 'cev-ex-' + ch, v.example_phrasing)}
+        </div>
+        <div class="flex justify-end gap-2 mt-3">
+            <button class="btn text-xs" style="background:rgba(255,255,255,0.05);color:var(--deft-txt-2);" onclick="event.stopPropagation(); cancelEditChannel('${ch}')">Cancel</button>
+            <button class="btn btn-primary text-xs" id="cev-save-${ch}" onclick="event.stopPropagation(); saveChannel('${ch}')">Save</button>
+        </div>`;
+}
+
+function cancelEditChannel(ch) {
+    const v = channelVoicesData[ch];
+    if (!v) return;
+    const body = $('chbody-' + ch);
+    if (body) body.innerHTML = renderChannelView(ch, v);
+}
+
+function parseLines(id) {
+    const el = $(id);
+    if (!el) return [];
+    return el.value.split('\n').map(l => l.trim()).filter(Boolean);
+}
+
+async function saveChannel(ch) {
+    const btn = $('cev-save-' + ch);
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    try {
+        const updated = {
+            register: $('cev-register-' + ch)?.value?.trim() || '',
+            tone_summary: $('cev-tone-' + ch)?.value?.trim() || '',
+            opening_style: $('cev-opening-' + ch)?.value?.trim() || '',
+            closing_style: $('cev-closing-' + ch)?.value?.trim() || '',
+            do_this: parseLines('cev-do-' + ch),
+            never_do_this: parseLines('cev-never-' + ch),
+            signature_moves: parseLines('cev-sig-' + ch),
+            example_phrasing: parseLines('cev-ex-' + ch)
+        };
+        // Read current identity, merge, patch
+        const data = await get('autonomous_brands', 'brand_id=eq.' + BRAND_ID + '&select=identity');
+        const identity = data[0].identity;
+        identity.channel_voices[ch] = { ...identity.channel_voices[ch], ...updated };
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/autonomous_brands?brand_id=eq.${BRAND_ID}`, {
+            method: 'PATCH', headers: HEADERS,
+            body: JSON.stringify({ identity })
+        });
+        if (!r.ok) throw new Error('PATCH failed: ' + r.status);
+        channelVoicesData[ch] = identity.channel_voices[ch];
+        const body = $('chbody-' + ch);
+        if (body) body.innerHTML = renderChannelView(ch, channelVoicesData[ch]);
+        toast('Channel voice updated', 'success');
+    } catch(err) {
+        console.error('Save channel error:', err);
+        toast('Failed to save: ' + err.message, 'error');
+        if (btn) { btn.disabled = false; btn.textContent = 'Save'; }
+    }
+}
+
 function toggleChannel(ch) {
     const card = $('ch-' + ch);
     if (card) card.classList.toggle('open');
@@ -1012,7 +1081,7 @@ function toggleChannel(ch) {
 // ──────────────── SECTION 3: ASSET LIBRARY ────────────────
 async function loadAssets() {
     try {
-        const data = await get('brand_content_assets', 'brand_id=eq.' + BRAND_ID + '&is_active=eq.true&order=asset_type,created_at.desc&limit=100');
+        const data = await get('brand_content_assets', 'brand_id=eq.' + BRAND_ID + '&is_active=eq.true&order=asset_type,created_at.desc&limit=2000');
         allAssets = data || [];
         $('assetCount').textContent = allAssets.length + ' assets loaded';
         renderAssets(allAssets);
@@ -1202,8 +1271,10 @@ async function findReplacePreview() {
     try {
         const data = await rpc('find_replace_brand_assets', {
             p_brand_id: BRAND_ID,
-            p_find_text: find,
-            p_replace_text: replace,
+            p_find: find,
+            p_replace: replace,
+            p_fields: ['content', 'content_short', 'context'],
+            p_asset_types: null,
             p_preview_only: true
         });
 
@@ -1251,8 +1322,10 @@ async function findReplaceApply() {
     try {
         const data = await rpc('find_replace_brand_assets', {
             p_brand_id: BRAND_ID,
-            p_find_text: find,
-            p_replace_text: replace,
+            p_find: find,
+            p_replace: replace,
+            p_fields: ['content', 'content_short', 'context'],
+            p_asset_types: null,
             p_preview_only: false
         });
         const count = Array.isArray(data) ? data.length : (data?.updated_count ?? data?.match_count ?? '?');
