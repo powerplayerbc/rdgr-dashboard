@@ -3543,7 +3543,7 @@ function renderMealsList() {
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
                     <span class="${badgeClass}">${m.meal_type || 'Meal'}</span>
-                    <span class="font-medium text-sm">${m.recipe_name || 'Unnamed'}</span>
+                    <span class="font-medium text-sm">${m.recipe_name || 'Unnamed'}</span>${m.servings && m.servings !== 1 ? `<span class="text-xs font-mono px-1.5 py-0.5 rounded" style="background: var(--deft-accent, #06D6A0); color: var(--deft-bg); font-weight: 600;">&times;${m.servings}</span>` : ''}
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${time}</span>
@@ -3926,6 +3926,29 @@ async function saveNewFood() {
 // ── Unit conversion tables ──
 const VOLUME_ML = { ml: 1, l: 1000, cup: 236.588, tbsp: 14.787, tsp: 4.929 };
 const WEIGHT_G = { g: 1, oz: 28.3495, lb: 453.592 };
+const UNIT_ALIASES = {
+    'tablespoon': 'tbsp', 'tablespoons': 'tbsp', 'tbs': 'tbsp', 'tbsp.': 'tbsp', 'tb': 'tbsp',
+    'teaspoon': 'tsp', 'teaspoons': 'tsp', 'tsp.': 'tsp',
+    'cup': 'cup', 'cups': 'cup', 'c': 'cup',
+    'ounce': 'oz', 'ounces': 'oz', 'oz.': 'oz',
+    'pound': 'lb', 'pounds': 'lb', 'lbs': 'lb', 'lb.': 'lb',
+    'gram': 'g', 'grams': 'g', 'gr': 'g',
+    'milliliter': 'ml', 'milliliters': 'ml', 'ml.': 'ml',
+    'liter': 'l', 'liters': 'l',
+    'piece': 'piece', 'pieces': 'piece', 'pc': 'piece', 'pcs': 'piece',
+    'medium': 'medium', 'med': 'medium', 'med.': 'medium',
+    'large': 'large', 'lg': 'large', 'lg.': 'large',
+    'small': 'small', 'sm': 'small', 'sm.': 'small',
+    'slice': 'slice', 'slices': 'slice',
+    'whole': 'whole',
+};
+const INGREDIENT_UNITS = ['g','oz','cup','tbsp','tsp','piece','ml','lb','medium','large','small','slice','whole'];
+
+function normalizeUnit(raw) {
+    if (!raw) return raw;
+    const lower = raw.toLowerCase().replace(/[()]/g, '').trim();
+    return UNIT_ALIASES[lower] || lower;
+}
 
 function parseServingSize(str) {
     if (!str) return null;
@@ -3933,7 +3956,8 @@ function parseServingSize(str) {
     const match = s.match(/^([\d./]+)\s*(.+)$/);
     if (!match) return null;
     let qty = match[1];
-    const unit = match[2].trim();
+    const rawUnit = match[2].trim();
+    const unit = normalizeUnit(rawUnit);
     if (qty.includes('/')) {
         const parts = qty.split('/');
         qty = parseFloat(parts[0]) / parseFloat(parts[1]);
@@ -3941,7 +3965,7 @@ function parseServingSize(str) {
         qty = parseFloat(qty);
     }
     if (isNaN(qty) || qty <= 0) return null;
-    return { quantity: qty, unit, ml: VOLUME_ML[unit] ? qty * VOLUME_ML[unit] : null, g: WEIGHT_G[unit] ? qty * WEIGHT_G[unit] : null };
+    return { quantity: qty, unit, rawUnit, ml: VOLUME_ML[unit] ? qty * VOLUME_ML[unit] : null, g: WEIGHT_G[unit] ? qty * WEIGHT_G[unit] : null };
 }
 
 function getConversionRatio(baseParsed, newQty, newUnit) {
@@ -3956,11 +3980,16 @@ function getConversionRatio(baseParsed, newQty, newUnit) {
 
 function recalcIngredientNutrition(index) {
     const ing = newRecipeIngredients[index];
-    if (!ing || !ing.baseNutrition || !ing.baseServingParsed) return;
-    const ratio = getConversionRatio(ing.baseServingParsed, ing.quantity, ing.unit);
+    if (!ing || !ing.baseNutrition) return;
+    let ratio, approx = false;
+    if (ing.baseServingParsed) {
+        ratio = getConversionRatio(ing.baseServingParsed, ing.quantity, ing.unit);
+        approx = (VOLUME_ML[ing.unit] && ing.baseServingParsed.g && !ing.baseServingParsed.ml) ||
+                 (WEIGHT_G[ing.unit] && ing.baseServingParsed.ml && !ing.baseServingParsed.g);
+    } else {
+        ratio = ing.quantity || 1;
+    }
     const base = ing.baseNutrition;
-    const approx = (VOLUME_ML[ing.unit] && ing.baseServingParsed.g && !ing.baseServingParsed.ml) ||
-                   (WEIGHT_G[ing.unit] && ing.baseServingParsed.ml && !ing.baseServingParsed.g);
     ing.nutrition = {
         calories: +(base.calories * ratio).toFixed(1),
         total_fat_g: +(base.total_fat_g * ratio).toFixed(2),
@@ -3968,6 +3997,7 @@ function recalcIngredientNutrition(index) {
         total_carbs_g: +(base.total_carbs_g * ratio).toFixed(2),
         fiber_g: +(base.fiber_g * ratio).toFixed(2),
         net_carbs_g: +(base.net_carbs_g * ratio).toFixed(2),
+        sugar_g: +(base.sugar_g * ratio).toFixed(2),
     };
     ing._approxConversion = approx;
     // Update nutrition fields via DOM instead of re-rendering (preserves quantity input mid-typing)
@@ -3979,6 +4009,7 @@ function recalcIngredientNutrition(index) {
         if (inputs[3]) inputs[3].value = ing.nutrition.protein_g || '';
         if (inputs[4]) inputs[4].value = ing.nutrition.total_carbs_g || '';
         if (inputs[5]) inputs[5].value = ing.nutrition.net_carbs_g || '';
+        if (inputs[6]) inputs[6].value = ing.nutrition.sugar_g || '';
     }
 }
 
@@ -4002,7 +4033,7 @@ async function searchFoodForIngredient(query, index) {
             const n = f.nutrition_per_serving || {};
             const brandTag = f.brand ? '<span class="text-xs" style="color:var(--deft-txt-2);">' + f.brand + '</span> · ' : '';
             const servingTag = f.serving_size ? '<span class="text-xs" style="color:var(--deft-txt-3);">' + f.serving_size + '</span>' : '';
-            return '<button type="button" onclick="selectFoodForIngredient(' + index + ', this)" data-name="' + f.name + '" data-brand="' + (f.brand||'') + '" data-cal="' + (n.calories||0) + '" data-fat="' + (n.total_fat_g||0) + '" data-protein="' + (n.protein_g||0) + '" data-carbs="' + (n.total_carbs_g||0) + '" data-fiber="' + (n.fiber_g||0) + '" data-netcarbs="' + (n.net_carbs_g||0) + '" data-serving="' + (f.serving_size||'') + '" class="recipe-search-item">' +
+            return '<button type="button" onclick="selectFoodForIngredient(' + index + ', this)" data-name="' + f.name + '" data-brand="' + (f.brand||'') + '" data-cal="' + (n.calories||0) + '" data-fat="' + (n.total_fat_g||0) + '" data-protein="' + (n.protein_g||0) + '" data-carbs="' + (n.total_carbs_g||0) + '" data-fiber="' + (n.fiber_g||0) + '" data-netcarbs="' + (n.net_carbs_g||0) + '" data-sugar="' + (n.sugar_g||0) + '" data-serving="' + (f.serving_size||'') + '" class="recipe-search-item">' +
                 '<span class="font-medium">' + f.name + '</span>' +
                 '<div class="flex items-center gap-1 flex-wrap">' + brandTag + servingTag + '</div>' +
                 '<span class="text-xs font-mono" style="color:var(--deft-txt-3);">' + Math.round(n.calories||0) + ' cal · ' + (n.net_carbs_g||0).toFixed(1) + 'g carbs</span>' +
@@ -4023,6 +4054,7 @@ function selectFoodForIngredient(index, btn) {
         total_carbs_g: parseFloat(btn.dataset.carbs) || 0,
         fiber_g: parseFloat(btn.dataset.fiber) || 0,
         net_carbs_g: parseFloat(btn.dataset.netcarbs) || 0,
+        sugar_g: parseFloat(btn.dataset.sugar) || 0,
     };
     ing.baseServing = btn.dataset.serving || '';
     ing.baseServingParsed = parseServingSize(btn.dataset.serving || '');
@@ -4213,11 +4245,11 @@ function renderIngredientRows() {
                 <div id="ingSuggestions-${i}" class="absolute left-0 right-0 top-full mt-1 rounded-lg border overflow-hidden" style="background: var(--deft-surface-el); border-color: var(--deft-border); z-index: 10000; display: none; max-height: 200px; overflow-y: auto;"></div>
             </div>
             <div style="width: 4rem;">
-                <input type="number" step="0.01" class="form-input text-xs py-1.5 text-center" placeholder="Qty" value="${ing.quantity}" oninput="const v=this.value; newRecipeIngredients[${i}].quantity=v===''?0:(parseFloat(v)||0); recalcIngredientNutrition(${i})">
+                <input type="number" step="any" class="form-input text-xs py-1.5 text-center" placeholder="Qty" value="${ing.quantity}" oninput="const v=this.value; newRecipeIngredients[${i}].quantity=v===''?0:(parseFloat(v)||0); recalcIngredientNutrition(${i})">
             </div>
             <div style="width: 5rem;">
                 <select class="form-input text-xs py-1.5" onchange="newRecipeIngredients[${i}].unit=this.value; recalcIngredientNutrition(${i})">
-                    ${['g','oz','cup','tbsp','tsp','piece','ml','lb'].map(u => `<option value="${u}" ${ing.unit === u ? 'selected' : ''}>${u}</option>`).join('')}
+                    ${(function(){ const units = [...INGREDIENT_UNITS]; if (ing.unit && !units.includes(ing.unit)) units.push(ing.unit); return units; })().map(u => `<option value="${u}" ${ing.unit === u ? 'selected' : ''}>${u}</option>`).join('')}
                 </select>
             </div>
             <button onclick="removeIngredientRow(${i})" class="p-1.5 rounded transition-colors flex-shrink-0" style="color: var(--deft-txt-3);" title="Remove">
@@ -4245,6 +4277,10 @@ function renderIngredientRows() {
             <div class="flex-1">
                 <div class="text-[10px] mb-0.5 font-mono" style="color: var(--deft-accent, #06D6A0); font-weight: 600;">Net C (g)</div>
                 <input type="number" step="0.1" class="form-input text-xs py-1 text-center" placeholder="0" value="${ing.nutrition.net_carbs_g || ''}" oninput="newRecipeIngredients[${i}].nutrition.net_carbs_g=parseFloat(this.value)||0" title="Net Carbs (g)" style="color: var(--deft-accent); font-weight: 600;">
+            </div>
+            <div class="flex-1">
+                <div class="text-[10px] mb-0.5 font-mono" style="color: var(--deft-txt-3);">Sugar (g)</div>
+                <input type="number" step="0.1" class="form-input text-xs py-1 text-center" placeholder="0" value="${ing.nutrition.sugar_g || ''}" oninput="newRecipeIngredients[${i}].nutrition.sugar_g=parseFloat(this.value)||0" title="Sugar (g)">
             </div>
         </div>
     </div>`).join('');
