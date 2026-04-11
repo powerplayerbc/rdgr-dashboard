@@ -58,6 +58,43 @@
             var _fs = _tc.fontScale || 1;
             _r.style.setProperty('--deft-font-scale', _fs);
         } catch(e) {}
+
+        // Async theme sync: fetch from Supabase if localStorage is empty
+        if (!_tc || !_tc.preset) {
+            window.addEventListener('DOMContentLoaded', function() {
+                var pid = _p.id || 'default';
+                if (pid === 'default') return;
+                fetch('https://yrwrswyjawmgtxrgbnim.supabase.co/rest/v1/deft_user_profiles?user_id=eq.' + pid + '&select=preferences', {
+                    headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8' }
+                }).then(function(r){return r.json()}).then(function(d) {
+                    if (d && d[0] && d[0].preferences && d[0].preferences.theme) {
+                        var tc = d[0].preferences.theme;
+                        localStorage.setItem('deft-theme-' + pid, JSON.stringify(tc));
+                        // Apply the theme without reload
+                        var presets = { forest:{accent:'#A8D65B',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans'},rdgr:{accent:'#06D6A0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans'} };
+                        var t = (tc.preset==='custom'&&tc.custom)?tc.custom:(presets[tc.preset]||null);
+                        if (t) {
+                            var r = document.documentElement;
+                            r.style.setProperty('--deft-accent',t.accent);
+                            r.style.setProperty('--deft-accent-dim',t.accent+'26');
+                            r.style.setProperty('--deft-base',t.base);
+                            r.style.setProperty('--deft-surface',t.surface);
+                            r.style.setProperty('--deft-surface-el',t.surfaceEl||t.surface);
+                            r.style.setProperty('--deft-surface-hi',t.surfaceHi||t.surfaceEl||t.surface);
+                            r.style.setProperty('--deft-border',t.border);
+                            r.style.setProperty('--deft-txt',t.txt);
+                            r.style.setProperty('--deft-txt-2',t.txt2);
+                            r.style.setProperty('--deft-txt-3',t.txt3);
+                            r.style.setProperty('--deft-heading-font',t.headingFont||'Chakra Petch');
+                            r.style.setProperty('--deft-body-font',t.bodyFont||'IBM Plex Sans');
+                            if(tc.fontScale) r.style.setProperty('--deft-font-scale',tc.fontScale);
+                            document.body.style.background=t.base;
+                            document.body.style.color=t.txt;
+                        }
+                    }
+                }).catch(function(){});
+            });
+        }
     </script>
     <style>
         html.rdgr-authed .gate-overlay { display: none !important; }

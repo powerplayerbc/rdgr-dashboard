@@ -2893,6 +2893,17 @@ function loadTheme() {
     if (saved) {
         try { return JSON.parse(saved); } catch(e) {}
     }
+    // Async fallback: fetch from Supabase if localStorage is empty
+    if (activeProfileId && activeProfileId !== 'default') {
+        fetch('https://yrwrswyjawmgtxrgbnim.supabase.co/rest/v1/deft_user_profiles?user_id=eq.' + activeProfileId + '&select=preferences', {
+            headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8' }
+        }).then(r => r.json()).then(d => {
+            if (d && d[0] && d[0].preferences && d[0].preferences.theme) {
+                localStorage.setItem(getThemeKey(), JSON.stringify(d[0].preferences.theme));
+                applyTheme(d[0].preferences.theme);
+            }
+        }).catch(() => {});
+    }
     return { preset: 'forest' };
 }
 
