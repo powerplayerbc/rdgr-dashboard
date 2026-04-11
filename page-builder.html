@@ -1,0 +1,3183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Page Builder | RDGR</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- GrapesJS -->
+    <link rel="stylesheet" href="https://unpkg.com/grapesjs@0.21.13/dist/css/grapes.min.css">
+    <script src="https://unpkg.com/grapesjs@0.21.13"></script>
+    <script src="https://unpkg.com/grapesjs-preset-webpage@1.0.3"></script>
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --ed-base: #08090D;
+            --ed-surface: #11131A;
+            --ed-surface-el: #1A1D28;
+            --ed-surface-hi: #242836;
+            --ed-border: #2A2E3D;
+            --ed-accent: #06D6A0;
+            --ed-accent-dim: rgba(6,214,160,0.15);
+            --ed-txt: #E8ECF1;
+            --ed-txt-2: #8A95A9;
+            --ed-txt-3: #525E73;
+            --ed-danger: #FF6B6B;
+            --ed-warn: #FFD93D;
+            --ed-info: #4CC9F0;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--ed-base);
+            color: var(--ed-txt);
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── App Layout ── */
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* ── Top Toolbar ── */
+        #toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            height: 48px;
+            background: var(--ed-surface);
+            border-bottom: 1px solid var(--ed-border);
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .tbar-group { display: flex; align-items: center; gap: 6px; }
+        .tbar-center { flex: 1; display: flex; justify-content: center; align-items: center; gap: 6px; }
+
+        .tb-btn {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 600; font-size: 0.68rem;
+            letter-spacing: 0.04em; text-transform: uppercase;
+            padding: 5px 10px; border-radius: 5px; cursor: pointer;
+            border: 1px solid var(--ed-border); background: transparent; color: var(--ed-txt-2);
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+            white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
+        }
+        .tb-btn:hover { background: rgba(255,255,255,0.04); color: var(--ed-txt); }
+        .tb-btn.active { background: var(--ed-accent-dim); color: var(--ed-accent); border-color: rgba(6,214,160,0.3); }
+        .tb-btn-save { background: var(--ed-accent-dim); color: var(--ed-accent); border-color: rgba(6,214,160,0.3); }
+        .tb-btn-save:hover { background: rgba(6,214,160,0.25); }
+
+        .tb-select {
+            font-family: 'IBM Plex Sans', system-ui; font-size: 0.72rem;
+            padding: 4px 8px; border-radius: 5px;
+            border: 1px solid var(--ed-border); background: var(--ed-surface-el); color: var(--ed-txt);
+            cursor: pointer; outline: none; max-width: 170px;
+        }
+        .tb-select option { background: var(--ed-surface-el); color: var(--ed-txt); }
+        .tb-sep { width: 1px; height: 22px; background: var(--ed-border); margin: 0 2px; }
+        .tb-label { font-size: 0.6rem; color: var(--ed-txt-3); text-transform: uppercase; letter-spacing: 0.06em; font-family: 'JetBrains Mono', monospace; }
+
+        /* Unsaved indicator */
+        .unsaved-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ed-warn); display: none; }
+        .unsaved-dot.show { display: block; }
+
+        /* Production warning */
+        #prodWarning {
+            display: none; align-items: center; justify-content: center; gap: 8px;
+            padding: 5px 16px; background: rgba(255,107,107,0.08);
+            border-bottom: 1px solid rgba(255,107,107,0.15);
+            font-size: 0.72rem; color: var(--ed-danger); flex-shrink: 0;
+        }
+        #prodWarning.show { display: flex; }
+
+        /* ── Main Editor Area ── */
+        #editorWrap {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Left sidebar — blocks/layers */
+        #sidebarLeft {
+            width: 240px;
+            flex-shrink: 0;
+            background: var(--ed-surface);
+            border-right: 1px solid var(--ed-border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--ed-border);
+            flex-shrink: 0;
+        }
+        .sidebar-tab {
+            flex: 1; padding: 8px 0; text-align: center;
+            font-family: 'Chakra Petch', system-ui; font-size: 0.65rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--ed-txt-3); cursor: pointer; border: none; background: none;
+            border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s;
+        }
+        .sidebar-tab:hover { color: var(--ed-txt-2); }
+        .sidebar-tab.active { color: var(--ed-accent); border-bottom-color: var(--ed-accent); }
+        .sidebar-panel {
+            flex: 1;
+            overflow-y: auto;
+            display: none;
+        }
+        .sidebar-panel.active { display: block; }
+
+        /* Right sidebar — styles/traits */
+        #sidebarRight {
+            width: 260px;
+            flex-shrink: 0;
+            background: var(--ed-surface);
+            border-left: 1px solid var(--ed-border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .right-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--ed-border);
+            flex-shrink: 0;
+        }
+        .right-tab {
+            flex: 1; padding: 8px 0; text-align: center;
+            font-family: 'Chakra Petch', system-ui; font-size: 0.65rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--ed-txt-3); cursor: pointer; border: none; background: none;
+            border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s;
+        }
+        .right-tab:hover { color: var(--ed-txt-2); }
+        .right-tab.active { color: var(--ed-accent); border-bottom-color: var(--ed-accent); }
+        .right-panel {
+            flex: 1;
+            overflow-y: auto;
+            display: none;
+        }
+        .right-panel.active { display: block; }
+
+        /* Tailwind class editor in right sidebar */
+        #classEditorPanel { padding: 10px; }
+        #classEditorPanel label {
+            display: block; font-size: 0.6rem; color: var(--ed-txt-3);
+            text-transform: uppercase; letter-spacing: 0.06em;
+            font-family: 'JetBrains Mono', monospace; margin-bottom: 6px;
+        }
+        #classesInput {
+            width: 100%; padding: 6px 8px;
+            background: var(--ed-surface-el); border: 1px solid var(--ed-border); border-radius: 4px;
+            color: var(--ed-txt); font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+            outline: none; resize: vertical; min-height: 60px;
+        }
+        #classesInput:focus { border-color: var(--ed-accent); }
+        #applyClassesBtn {
+            margin-top: 6px; width: 100%; padding: 5px;
+            font-family: 'Chakra Petch', system-ui; font-size: 0.65rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            background: var(--ed-accent-dim); color: var(--ed-accent);
+            border: 1px solid rgba(6,214,160,0.3); border-radius: 4px; cursor: pointer;
+        }
+
+        /* Canvas center area */
+        #canvasWrap {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* GrapesJS container — fills the canvas area */
+        #gjs {
+            height: 100%;
+            width: 100%;
+        }
+
+        /* ══════════════════════════════════════
+           GrapesJS Theme Overrides (Dark)
+           ══════════════════════════════════════ */
+
+        /* Hide ALL default GrapesJS panels — we use our own layout */
+        .gjs-pn-panels,
+        .gjs-pn-views-container { display: none !important; }
+
+        /* Canvas */
+        .gjs-cv-canvas {
+            width: 100% !important;
+            height: 100% !important;
+            top: 0 !important;
+            background: var(--ed-base) !important;
+        }
+        .gjs-frame-wrapper { background: var(--ed-base) !important; }
+
+        /* Selection / highlight */
+        .gjs-selected { outline: 2px solid var(--ed-accent) !important; outline-offset: -2px; }
+        .gjs-highlighter { outline-color: rgba(6,214,160,0.5) !important; }
+        .gjs-badge { background: var(--ed-accent) !important; color: #000 !important; font-size: 10px !important; }
+
+        /* Component toolbar */
+        .gjs-toolbar {
+            background: var(--ed-surface-el) !important;
+            border: 1px solid var(--ed-border) !important;
+            border-radius: 4px !important;
+        }
+        .gjs-toolbar-item { color: var(--ed-txt-2) !important; }
+        .gjs-toolbar-item:hover { color: var(--ed-accent) !important; }
+
+        /* Resizer */
+        .gjs-resizer-h { border-color: var(--ed-accent) !important; }
+
+        /* RTE toolbar */
+        .gjs-rte-toolbar {
+            background: var(--ed-surface-el) !important;
+            border: 1px solid var(--ed-border) !important;
+            border-radius: 6px !important;
+        }
+        .gjs-rte-actionbar .gjs-rte-action { color: var(--ed-txt-2) !important; }
+
+        /* ── Blocks inside our sidebar ── */
+        #blocksPanel .gjs-blocks-cs { background: transparent !important; padding: 8px; }
+        #blocksPanel .gjs-block-category .gjs-title {
+            background: var(--ed-surface-hi) !important;
+            color: var(--ed-txt-2) !important;
+            border-bottom: 1px solid var(--ed-border) !important;
+            font-family: 'Chakra Petch', system-ui !important;
+            font-size: 0.65rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.06em !important;
+            padding: 8px 10px !important;
+        }
+        #blocksPanel .gjs-block {
+            background: var(--ed-surface-el) !important;
+            border: 1px solid var(--ed-border) !important;
+            color: var(--ed-txt-2) !important;
+            border-radius: 5px !important;
+            min-height: 50px !important;
+            margin: 3px !important;
+            padding: 8px 4px !important;
+            width: calc(50% - 6px) !important;
+            transition: border-color 0.15s !important;
+            font-size: 0.65rem !important;
+        }
+        #blocksPanel .gjs-block:hover {
+            border-color: var(--ed-accent) !important;
+            color: var(--ed-txt) !important;
+        }
+        #blocksPanel .gjs-block svg { fill: var(--ed-txt-3) !important; }
+
+        /* ── Layers inside our sidebar ── */
+        #layersPanel .gjs-layers { background: transparent !important; }
+        #layersPanel .gjs-layer { background: transparent !important; border-bottom: 1px solid var(--ed-border) !important; }
+        #layersPanel .gjs-layer-name { color: var(--ed-txt-2) !important; font-size: 0.72rem !important; }
+        #layersPanel .gjs-layer.gjs-layer-selected { background: var(--ed-accent-dim) !important; }
+        #layersPanel .gjs-layer-title { padding: 6px 8px !important; }
+
+        /* ── Style Manager inside our sidebar ── */
+        #stylesPanel .gjs-sm-sectors { background: transparent !important; }
+        #stylesPanel .gjs-sm-sector { background: transparent !important; }
+        #stylesPanel .gjs-sm-sector-title {
+            color: var(--ed-txt-2) !important;
+            background: var(--ed-surface-hi) !important;
+            border-bottom: 1px solid var(--ed-border) !important;
+            font-family: 'Chakra Petch', system-ui !important;
+            font-size: 0.65rem !important;
+            text-transform: uppercase !important;
+        }
+        #stylesPanel .gjs-sm-property { color: var(--ed-txt-2) !important; }
+        #stylesPanel .gjs-sm-label { color: var(--ed-txt-3) !important; font-size: 0.65rem !important; }
+        #stylesPanel .gjs-field {
+            background: var(--ed-surface-el) !important;
+            border-color: var(--ed-border) !important;
+            color: var(--ed-txt) !important;
+        }
+        #stylesPanel .gjs-field input,
+        #stylesPanel .gjs-field select { color: var(--ed-txt) !important; }
+        #stylesPanel .gjs-sm-property .gjs-sm-btn { color: var(--ed-txt-3) !important; }
+        #stylesPanel .gjs-sm-property .gjs-sm-btn.active { color: var(--ed-accent) !important; }
+
+        /* Color picker — swatch */
+        #stylesPanel .gjs-field-color {
+            display: flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+        }
+        #stylesPanel .gjs-field-color .gjs-field-colorp {
+            border-color: var(--ed-border) !important;
+            cursor: pointer !important;
+            min-width: 22px !important;
+            min-height: 22px !important;
+            border-radius: 4px !important;
+            flex-shrink: 0 !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
+        #stylesPanel .gjs-field-color .gjs-checker-bg {
+            border-radius: 3px !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        /* Color picker — the popup panel itself */
+        .gjs-color-picker,
+        .sp-container {
+            position: fixed !important;
+            z-index: 9500 !important;
+            background: var(--ed-surface-el) !important;
+            border: 1px solid var(--ed-border) !important;
+            border-radius: 8px !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
+            padding: 8px !important;
+        }
+        /* Spectrum color picker overrides */
+        .sp-container { overflow: visible !important; }
+        .sp-picker-container { border: none !important; }
+        .sp-palette-container { border-color: var(--ed-border) !important; }
+        .sp-input {
+            background: var(--ed-surface) !important;
+            color: var(--ed-txt) !important;
+            border-color: var(--ed-border) !important;
+            border-radius: 4px !important;
+            font-family: 'JetBrains Mono', monospace !important;
+            font-size: 0.72rem !important;
+        }
+        .sp-cancel, .sp-choose {
+            font-family: 'Chakra Petch', system-ui !important;
+            font-size: 0.65rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.04em !important;
+        }
+        .sp-choose {
+            background: var(--ed-accent-dim) !important;
+            color: var(--ed-accent) !important;
+            border-color: rgba(6,214,160,0.3) !important;
+        }
+        .sp-cancel { color: var(--ed-txt-3) !important; }
+
+        /* Number input with units */
+        #stylesPanel .gjs-field-integer,
+        #stylesPanel .gjs-field-number { display: flex !important; align-items: center !important; }
+        #stylesPanel .gjs-input-unit { background: var(--ed-surface-hi) !important; color: var(--ed-txt-3) !important; border-left: 1px solid var(--ed-border) !important; }
+
+        /* Select dropdowns */
+        #stylesPanel .gjs-field select {
+            background: var(--ed-surface-el) !important;
+            color: var(--ed-txt) !important;
+            border-color: var(--ed-border) !important;
+            padding: 4px 6px !important;
+            border-radius: 4px !important;
+        }
+        #stylesPanel .gjs-field select option { background: var(--ed-surface-el) !important; }
+
+        /* Radio buttons */
+        #stylesPanel .gjs-radio-item { color: var(--ed-txt-3) !important; border-color: var(--ed-border) !important; background: var(--ed-surface-el) !important; }
+        #stylesPanel .gjs-radio-item:hover { color: var(--ed-txt-2) !important; background: var(--ed-surface-hi) !important; }
+        #stylesPanel .gjs-radio-item.active,
+        #stylesPanel .gjs-radio-item input:checked + label { background: var(--ed-accent-dim) !important; color: var(--ed-accent) !important; border-color: rgba(6,214,160,0.3) !important; }
+
+        /* Slider */
+        #stylesPanel .gjs-field-range input[type="range"] { accent-color: var(--ed-accent) !important; }
+
+        /* Composite sub-properties */
+        #stylesPanel .gjs-sm-composite .gjs-sm-property { padding: 3px 0 !important; }
+        #stylesPanel .gjs-sm-composite .gjs-sm-label { font-size: 0.6rem !important; }
+
+        /* Stack items (box-shadow) */
+        #stylesPanel .gjs-sm-stack .gjs-sm-stack-add { color: var(--ed-accent) !important; }
+        #stylesPanel .gjs-sm-stack .gjs-sm-stack-item { background: var(--ed-surface-el) !important; border-color: var(--ed-border) !important; }
+
+        /* Traits */
+        #traitsPanel .gjs-trt-traits { background: transparent !important; padding: 8px; }
+        #traitsPanel .gjs-trt-trait { border-bottom-color: var(--ed-border) !important; padding: 6px 0 !important; }
+        #traitsPanel .gjs-trt-trait .gjs-label { color: var(--ed-txt-2) !important; font-size: 0.72rem !important; }
+        #traitsPanel .gjs-field {
+            background: var(--ed-surface-el) !important;
+            border-color: var(--ed-border) !important;
+            color: var(--ed-txt) !important;
+        }
+        #traitsPanel .gjs-field input,
+        #traitsPanel .gjs-field select { color: var(--ed-txt) !important; }
+
+        /* Allow color picker popups to escape sidebar overflow */
+        #sidebarRight { overflow: visible !important; }
+        #sidebarRight .right-panel { overflow-y: auto; overflow-x: visible; }
+        #stylesPanel { overflow: visible !important; }
+        #stylesPanel .gjs-sm-sectors { overflow: visible !important; }
+        #stylesPanel .gjs-sm-sector { overflow: visible !important; }
+        #stylesPanel .gjs-sm-properties { overflow: visible !important; }
+        #stylesPanel .gjs-sm-property { overflow: visible !important; }
+        #stylesPanel .gjs-field { overflow: visible !important; }
+        #stylesPanel .gjs-field-color { overflow: visible !important; }
+
+        /* Sidebar scrollbar */
+        #sidebarLeft ::-webkit-scrollbar,
+        #sidebarRight ::-webkit-scrollbar { width: 4px; }
+        #sidebarLeft ::-webkit-scrollbar-thumb,
+        #sidebarRight ::-webkit-scrollbar-thumb { background: var(--ed-border); border-radius: 2px; }
+
+        /* Toast */
+        #toast {
+            position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+            padding: 10px 18px; border-radius: 6px; font-size: 0.78rem; font-weight: 500;
+            opacity: 0; transform: translateY(8px);
+            transition: opacity 0.2s, transform 0.2s; pointer-events: none;
+        }
+        #toast.show { opacity: 1; transform: translateY(0); }
+        #toast.success { background: rgba(6,214,160,0.2); color: #06D6A0; border: 1px solid rgba(6,214,160,0.3); }
+        #toast.error { background: rgba(255,107,107,0.2); color: #FF6B6B; border: 1px solid rgba(255,107,107,0.3); }
+        #toast.info { background: rgba(76,201,240,0.2); color: #4CC9F0; border: 1px solid rgba(76,201,240,0.3); }
+
+        /* Code modal */
+        #codeModal {
+            display: none; position: fixed; inset: 0; z-index: 500;
+            background: rgba(0,0,0,0.7); align-items: center; justify-content: center;
+        }
+        #codeModal.show { display: flex; }
+
+        /* ── Floating Tooltip ── */
+        #blockTooltip {
+            position: fixed;
+            z-index: 9000;
+            background: var(--ed-surface-hi);
+            border: 1px solid var(--ed-border);
+            color: var(--ed-txt-2);
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.72rem; font-weight: 400;
+            text-transform: none; letter-spacing: 0;
+            padding: 6px 12px;
+            border-radius: 5px;
+            white-space: nowrap;
+            pointer-events: none;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        #blockTooltip.show { opacity: 1; }
+
+        /* ── Panel Help Headers ── */
+        .panel-help {
+            padding: 8px 10px;
+            font-size: 0.65rem;
+            color: var(--ed-txt-3);
+            line-height: 1.5;
+            border-bottom: 1px solid var(--ed-border);
+            background: rgba(255,255,255,0.015);
+        }
+        .panel-help strong { color: var(--ed-txt-2); }
+
+        /* ── Quick Action Bar ── */
+        #quickBar {
+            display: none;
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 200;
+            background: var(--ed-surface-el);
+            border: 1px solid var(--ed-border);
+            border-radius: 8px;
+            padding: 4px 6px;
+            gap: 2px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            align-items: center;
+        }
+        #quickBar.show { display: flex; }
+        .qb-btn {
+            width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            border: none; background: transparent; color: var(--ed-txt-3);
+            border-radius: 4px; cursor: pointer;
+            transition: background 0.12s, color 0.12s;
+            position: relative;
+        }
+        .qb-btn:hover { background: rgba(255,255,255,0.06); color: var(--ed-txt); }
+        .qb-btn.active { background: var(--ed-accent-dim); color: var(--ed-accent); }
+        .qb-btn[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 110%; left: 50%; transform: translateX(-50%);
+            background: var(--ed-surface-hi);
+            border: 1px solid var(--ed-border);
+            color: var(--ed-txt-2);
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.62rem;
+            text-transform: none;
+            letter-spacing: 0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+        .qb-sep { width: 1px; height: 20px; background: var(--ed-border); margin: 0 3px; }
+        .qb-label { font-size: 0.58rem; color: var(--ed-txt-3); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; padding: 0 5px; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- ── Toolbar ── -->
+        <div id="toolbar">
+            <div class="tbar-group">
+                <a href="/" style="text-decoration:none;display:flex;align-items:center;gap:5px;">
+                    <div style="width:7px;height:7px;border-radius:50%;background:var(--ed-accent);opacity:0.7;"></div>
+                    <span style="font-family:'Chakra Petch',system-ui;font-weight:700;font-size:0.78rem;color:var(--ed-txt);letter-spacing:0.04em;">RDGR</span>
+                </a>
+                <div class="tb-sep"></div>
+                <span class="tb-label">Site</span>
+                <select id="siteSelect" class="tb-select" onchange="loadPages()"><option value="">Loading...</option></select>
+                <span class="tb-label">Page</span>
+                <select id="pageSelect" class="tb-select" onchange="loadPage()"><option value="">Select page...</option></select>
+                <div class="unsaved-dot" id="unsavedDot" title="Unsaved changes"></div>
+            </div>
+
+            <div class="tbar-center">
+                <button class="tb-btn active" id="devDesktop" onclick="setDevice('Desktop')">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="2" width="12" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M4 12h6M7 10v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                </button>
+                <button class="tb-btn" id="devTablet" onclick="setDevice('Tablet')">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="1" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+                </button>
+                <button class="tb-btn" id="devMobile" onclick="setDevice('Mobile')">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="3" y="1" width="8" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+                </button>
+                <div class="tb-sep"></div>
+                <button class="tb-btn" onclick="doUndo()" title="Undo">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7h7a3 3 0 010 6H8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M5 4L2 7l3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button class="tb-btn" onclick="doRedo()" title="Redo">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7H4a3 3 0 000 6h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9 4l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="tb-sep"></div>
+                <button class="tb-btn" id="btnPreview" onclick="togglePreview()">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.2"/></svg>
+                    Preview
+                </button>
+                <button class="tb-btn" onclick="viewCode()">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4.5 4L1.5 7l3 3M9.5 4l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Code
+                </button>
+            </div>
+
+            <div class="tbar-group">
+                <button class="tb-btn tb-btn-save" onclick="savePage()" id="btnSave">Save</button>
+            </div>
+        </div>
+
+        <!-- Production warning -->
+        <div id="prodWarning">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L1 13h12L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M7 5v3M7 10v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span><strong>Production page</strong> — changes affect the live site when deployed.</span>
+        </div>
+
+        <!-- ── Main Editor Area ── -->
+        <div id="editorWrap">
+            <!-- Left sidebar: Blocks + Layers -->
+            <div id="sidebarLeft">
+                <div class="sidebar-tabs">
+                    <button class="sidebar-tab active" onclick="showLeftTab('blocks')">Blocks</button>
+                    <button class="sidebar-tab" onclick="showLeftTab('layers')">Layers</button>
+                </div>
+                <div id="blocksPanel" class="sidebar-panel active">
+                    <div class="panel-help"><strong>Drag blocks</strong> onto the canvas to add sections. Hover over a block to see what it does.</div>
+                </div>
+                <div id="layersPanel" class="sidebar-panel">
+                    <div class="panel-help"><strong>Layer tree</strong> shows every element on the page. Click to select, drag to reorder, toggle visibility.</div>
+                </div>
+            </div>
+
+            <!-- Center: GrapesJS Canvas -->
+            <div id="canvasWrap">
+                <div id="gjs"></div>
+            </div>
+
+            <!-- Right sidebar: Styles + Traits + Classes -->
+            <div id="sidebarRight">
+                <div class="right-tabs">
+                    <button class="right-tab active" onclick="showRightTab('styles')">Styles</button>
+                    <button class="right-tab" onclick="showRightTab('traits')">Settings</button>
+                    <button class="right-tab" onclick="showRightTab('classes')">Classes</button>
+                </div>
+                <div id="stylesPanel" class="right-panel active">
+                    <div class="panel-help"><strong>Select an element</strong> on the canvas, then change its size, text, colors, and layout here.</div>
+                </div>
+                <div id="traitsPanel" class="right-panel">
+                    <div class="panel-help"><strong>Element settings</strong> like links, IDs, alt text, and data-module attributes.</div>
+                </div>
+                <div id="classesPanel" class="right-panel">
+                    <div id="classEditorPanel">
+                        <label>Tailwind / CSS Classes</label>
+                        <textarea id="classesInput" placeholder="e.g. text-xl font-bold text-accent mb-4" spellcheck="false"></textarea>
+                        <button id="applyClassesBtn" onclick="applyClasses()">Apply Classes</button>
+                        <div style="margin-top:10px;font-size:0.65rem;color:var(--ed-txt-3);line-height:1.5;">
+                            Select an element on the canvas, then edit its classes here. Use any Tailwind utility class.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Tooltip (positioned by JS, not clipped by sidebar overflow) -->
+    <div id="blockTooltip"></div>
+
+    <!-- Quick Action Bar (appears when an element is selected) -->
+    <div id="quickBar">
+        <span class="qb-label">Align</span>
+        <button class="qb-btn" title="Align left" onclick="qbStyle('text-align','left')">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 6h6M2 9h8M2 12h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
+        <button class="qb-btn" title="Align center" onclick="qbStyle('text-align','center')">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M4 6h6M3 9h8M4.5 12h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
+        <button class="qb-btn" title="Align right" onclick="qbStyle('text-align','right')">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M6 6h6M4 9h8M7 12h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
+        <div class="qb-sep"></div>
+        <span class="qb-label">Text</span>
+        <button class="qb-btn" title="Bold" onclick="qbStyle('font-weight','700')">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2h4a3 3 0 010 6H4V2z" stroke="currentColor" stroke-width="1.5"/><path d="M4 8h5a3 3 0 010 6H4V8z" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
+        <button class="qb-btn" title="Smaller text" onclick="qbFontSize(-2)">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 7h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><text x="1" y="4" fill="currentColor" font-size="4" font-family="sans-serif">A</text></svg>
+        </button>
+        <button class="qb-btn" title="Larger text" onclick="qbFontSize(2)">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 7h6M7 4v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><text x="0" y="4" fill="currentColor" font-size="4" font-family="sans-serif">A</text></svg>
+        </button>
+        <div class="qb-sep"></div>
+        <span class="qb-label">Layout</span>
+        <button class="qb-btn" title="Center this element (auto margins)" onclick="qbStyle('margin','0 auto')">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="4" y="3" width="6" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M1 3v8M13 3v8" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-dasharray="1.5 1.5"/></svg>
+        </button>
+        <button class="qb-btn" title="Add padding" onclick="qbStyle('padding','1.5rem')">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="1" stroke="currentColor" stroke-width="1" stroke-dasharray="2 1.5"/><rect x="3.5" y="3.5" width="7" height="7" rx="0.5" fill="currentColor" opacity="0.3"/></svg>
+        </button>
+        <div class="qb-sep"></div>
+        <button class="qb-btn" title="Duplicate element" onclick="qbDuplicate()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M5 3V2a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1h-1" stroke="currentColor" stroke-width="1.2"/></svg>
+        </button>
+        <button class="qb-btn" title="Delete element" onclick="qbDelete()" style="color:var(--ed-danger);">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5 4V3a1 1 0 011-1h2a1 1 0 011 1v1M4 4v7a1 1 0 001 1h4a1 1 0 001-1V4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </button>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
+
+    <!-- Code Modal -->
+    <div id="codeModal">
+        <div style="background:var(--ed-surface);border:1px solid var(--ed-border);border-radius:10px;width:90vw;max-width:900px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;">
+            <div style="padding:10px 14px;border-bottom:1px solid var(--ed-border);display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.04em;">HTML Source</span>
+                <div style="display:flex;gap:6px;">
+                    <button class="tb-btn" onclick="copyCode()">Copy</button>
+                    <button class="tb-btn" onclick="closeCode()">Close</button>
+                </div>
+            </div>
+            <textarea id="codeView" readonly spellcheck="false" style="flex:1;background:var(--ed-base);color:var(--ed-txt-2);border:none;padding:14px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;line-height:1.6;resize:none;outline:none;overflow:auto;min-height:300px;"></textarea>
+        </div>
+    </div>
+
+    <script>
+    /* ══════════════════════════════════════════════
+       PAGE BUILDER — Core Logic
+       ══════════════════════════════════════════════ */
+
+    const API_BASE = window.location.origin;
+    let editor = null;
+    let currentSite = '';
+    let currentPage = '';
+    let storedHead = '';
+    let storedScripts = [];
+    let hasUnsaved = false;
+    let isPreviewMode = false;
+
+    const PRODUCTION_SITES = ['bradfordcarlton'];
+    const SANDBOX_PAGE = 'builder-test.html';
+
+    /* ── Sidebar Tab Switching ── */
+
+    function showLeftTab(tab) {
+        document.querySelectorAll('#sidebarLeft .sidebar-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#sidebarLeft .sidebar-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(tab + 'Panel').classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    function showRightTab(tab) {
+        document.querySelectorAll('#sidebarRight .right-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('#sidebarRight .right-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(tab + 'Panel').classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    /* ── HTML Parser: Split & Reassemble ── */
+
+    function parseHTML(html) {
+        const headMatch = html.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
+        const headContent = headMatch ? headMatch[1] : '';
+
+        const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+        let bodyContent = bodyMatch ? bodyMatch[1] : html;
+
+        const scripts = [];
+        let idx = 0;
+        bodyContent = bodyContent.replace(/<script[\s\S]*?<\/script>/gi, (match) => {
+            scripts.push({ index: idx, content: match });
+            idx++;
+            return `<!-- __SCRIPT_${idx - 1}__ -->`;
+        });
+
+        return { headContent, bodyContent, scripts };
+    }
+
+    function reassembleHTML(headContent, bodyHtml, scripts) {
+        let body = bodyHtml;
+        scripts.forEach(s => {
+            body = body.replace(`<!-- __SCRIPT_${s.index}__ -->`, s.content);
+        });
+        body = body.replace(/<!-- __SCRIPT_\d+__ -->/g, '');
+
+        // Auto-inject interactive scripts for blocks that need them
+        let injectedScripts = '';
+
+        // VSL click-to-play
+        if (body.includes('data-module="vsl"')) {
+            injectedScripts += `\n<script>
+document.addEventListener('click',function(e){var w=e.target.closest('[data-vsl-wrapper]');if(!w)return;var p=w.closest('[data-module="vsl"]');if(!p)return;var u=p.getAttribute('data-youtube');if(!u)return;var m=u.match(/(?:youtube\\.com\\/(?:watch\\?v=|embed\\/)|youtu\\.be\\/)([a-zA-Z0-9_-]{11})/);if(!m)return;var f=document.createElement('iframe');f.src='https://www.youtube.com/embed/'+m[1]+'?autoplay=1&rel=0';f.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:none;';f.allow='accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture';f.allowFullscreen=true;w.innerHTML='';w.appendChild(f);});
+<\/script>`;
+        }
+
+        // FAQ accordion expand/collapse
+        if (body.includes('data-module="faq"')) {
+            injectedScripts += `\n<style>
+.faq-item .faq-a{max-height:0;overflow:hidden;transition:max-height 0.3s ease}
+.faq-item.open .faq-a{max-height:500px}
+.faq-item.open .faq-icon{transform:rotate(45deg)}
+<\/style>
+<script>
+document.addEventListener('click',function(e){var q=e.target.closest('.faq-q');if(!q)return;q.parentElement.classList.toggle('open');});
+<\/script>`;
+        }
+
+        // Countdown timer with zero-actions (redirect + webhook)
+        if (body.includes('data-module="countdown"')) {
+            injectedScripts += `\n<script>
+(function(){var timers=document.querySelectorAll('[data-module="countdown"]');timers.forEach(function(t){var hrs=parseFloat(t.getAttribute('data-countdown-hours'))||24;var redir=t.getAttribute('data-countdown-redirect')||'';var hook=t.getAttribute('data-countdown-webhook')||'';var key='cd_'+location.pathname+'_'+hrs;var stored=localStorage.getItem(key);var target;var fired=localStorage.getItem(key+'_fired');if(stored){target=parseInt(stored)}else{target=Date.now()+hrs*3600000;localStorage.setItem(key,target)}function onZero(){if(fired)return;localStorage.setItem(key+'_fired','1');if(hook){try{fetch(hook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event:'countdown_expired',page:location.href,timer_hours:hrs,expired_at:new Date().toISOString()}),keepalive:true})}catch(e){}}if(redir){setTimeout(function(){window.location.href=redir},500)}}function tick(){var left=Math.max(0,target-Date.now());var s=Math.floor(left/1000);var h=Math.floor(s/3600);var m=Math.floor((s%3600)/60);s=s%60;var eh=t.querySelector('[data-cd-h]');var em=t.querySelector('[data-cd-m]');var es=t.querySelector('[data-cd-s]');if(eh)eh.textContent=String(h).padStart(2,'0');if(em)em.textContent=String(m).padStart(2,'0');if(es)es.textContent=String(s).padStart(2,'0');if(left<=0){onZero()}else{requestAnimationFrame(tick)}}tick()})})();
+<\/script>`;
+        }
+
+        // ── Funnel session ID management (always inject) ──
+        injectedScripts += `\n<script>
+(function(){
+  var params=new URLSearchParams(location.search);
+  var urlSid=params.get('sid');
+  if(urlSid) localStorage.setItem('funnel_session_id',urlSid);
+  if(!localStorage.getItem('funnel_session_id')){
+    localStorage.setItem('funnel_session_id',crypto.randomUUID());
+  }
+  window.__funnelSessionId=localStorage.getItem('funnel_session_id');
+  document.addEventListener('click',function(e){
+    var a=e.target.closest('a[href]');
+    if(!a)return;
+    var href=a.getAttribute('href');
+    if(!href||href.startsWith('#')||href.startsWith('mailto:')||href.startsWith('tel:')||href.startsWith('javascript:'))return;
+    try{
+      var url=new URL(href,location.origin);
+      url.searchParams.set('sid',window.__funnelSessionId);
+      a.href=url.toString();
+    }catch(ex){}
+  });
+})();
+<\/script>`;
+
+        // ── Tracking pixel (always inject) ──
+        injectedScripts += `\n<script>
+(function(){
+  var TRACK_URL='https://n8n.carltonaiservices.com/webhook/page-track';
+  var pageId=document.querySelector('meta[name="page-id"]')?.content||'';
+  var sid=window.__funnelSessionId||'';
+  function track(event,extra){
+    var data=Object.assign({event:event,page_id:pageId,page_url:location.href,funnel_session_id:sid,timestamp:new Date().toISOString()},extra||{});
+    navigator.sendBeacon(TRACK_URL,new Blob([JSON.stringify(data)],{type:'text/plain'}));
+  }
+  track('page_view',{
+    referrer:document.referrer,
+    utm_source:new URLSearchParams(location.search).get('utm_source'),
+    utm_medium:new URLSearchParams(location.search).get('utm_medium'),
+    utm_campaign:new URLSearchParams(location.search).get('utm_campaign'),
+    user_agent:navigator.userAgent,
+    screen_width:screen.width
+  });
+  var maxScroll=0,firedMs=new Set(),milestones=[25,50,75,100],pageStart=Date.now();
+  window.addEventListener('scroll',function(){
+    var pct=Math.round((window.scrollY+window.innerHeight)/document.body.scrollHeight*100);
+    if(pct>maxScroll)maxScroll=pct;
+    milestones.forEach(function(m){
+      if(pct>=m&&!firedMs.has(m)){
+        firedMs.add(m);
+        track('scroll_depth',{depth_percent:m,max_depth_percent:maxScroll,time_on_page_seconds:Math.round((Date.now()-pageStart)/1000)});
+      }
+    });
+  });
+  document.addEventListener('click',function(e){
+    var el=e.target.closest('button,a,[data-module]');
+    if(!el)return;
+    track('element_click',{
+      element_type:el.tagName.toLowerCase(),
+      element_text:(el.textContent||'').trim().slice(0,100),
+      element_data_module:el.closest('[data-module]')?.dataset.module||''
+    });
+  });
+  window.__track=track;
+})();
+<\/script>`;
+
+        // ── Form submission handler (conditional) ──
+        if (body.includes('data-module="form"')) {
+            injectedScripts += `\n<script>
+(function(){
+  var sid=window.__funnelSessionId||'';
+  var brandId='carlton';
+
+  function postJSON(url,payload){
+    return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json()});
+  }
+
+  function getFormData(form){
+    var d={};
+    form.querySelectorAll('input,textarea,select').forEach(function(f){
+      if(f.name){
+        if(f.type==='checkbox'){d[f.name]=f.checked}
+        else{d[f.name]=f.value}
+      }
+    });
+    return d;
+  }
+
+  function splitName(fullName){
+    var parts=(fullName||'').trim().split(/\\s+/);
+    return {first_name:parts[0]||'',last_name:parts.slice(1).join(' ')||''};
+  }
+
+  function setLoading(btn,on){
+    if(!btn)return;
+    if(on){btn._origText=btn.textContent;btn.textContent='Processing...';btn.disabled=true;}
+    else{btn.textContent=btn._origText||'Submit';btn.disabled=false;}
+  }
+
+  function showError(container,msg){
+    var el=container.querySelector('.form-error');
+    if(!el){el=document.createElement('div');el.className='form-error';el.style.cssText='color:#FF6B6B;font-size:0.8rem;padding:0.5rem 0;text-align:center;';container.appendChild(el);}
+    el.textContent=msg;
+  }
+
+  function handleRedirect(redirectUrl,responseUrl){
+    var url=redirectUrl||responseUrl;
+    if(url){
+      try{var u=new URL(url,location.origin);u.searchParams.set('sid',sid);window.location.href=u.toString();}
+      catch(e){window.location.href=url;}
+    }
+  }
+
+  // Lead & checkout forms — intercept <form> submit
+  document.addEventListener('submit',function(e){
+    var form=e.target;
+    var wrapper=form.closest('[data-module="form"]');
+    if(!wrapper)return;
+    e.preventDefault();
+    var type=wrapper.getAttribute('data-type')||'lead';
+    var endpoint=wrapper.getAttribute('data-endpoint')||'';
+    if(!endpoint)return;
+    var redirect=wrapper.getAttribute('data-redirect')||'';
+    var sequence=wrapper.getAttribute('data-sequence')||'';
+    var btn=form.querySelector('button[type="submit"]');
+
+    if(type==='lead'){
+      setLoading(btn,true);
+      var fd=getFormData(form);
+      var firstName=fd.first_name||'';
+      var lastName=fd.last_name||'';
+      if(!firstName&&fd.full_name){var s=splitName(fd.full_name);firstName=s.first_name;lastName=s.last_name;}
+      var payload={data_type:'lead',email:fd.email||'',first_name:firstName,last_name:lastName,phone:fd.phone||'',page_url:location.href,funnel_session_id:sid,brand_id:brandId};
+      if(sequence)payload.data_sequence=sequence;
+      if(redirect)payload.redirect_url=redirect;
+      postJSON(endpoint,payload).then(function(res){
+        if(res.success){
+          if(window.__track)window.__track('form_submit',{});
+          handleRedirect(redirect,res.redirect_url);
+        }else{showError(wrapper,res.error||'Submission failed');setLoading(btn,false);}
+      }).catch(function(){showError(wrapper,'Network error. Please try again.');setLoading(btn,false);});
+    }
+
+    if(type==='checkout'){
+      setLoading(btn,true);
+      var fd=getFormData(form);
+      var stripeKey=wrapper.getAttribute('data-stripe-key')||'';
+      var priceCents=parseInt(wrapper.getAttribute('data-price'))||0;
+      var offerId=wrapper.getAttribute('data-product-id')||'';
+      if(!stripeKey||typeof Stripe==='undefined'){showError(wrapper,'Payment not configured.');setLoading(btn,false);return;}
+      var stripe=Stripe(stripeKey);
+      var cardEl=wrapper.querySelector('#card-element');
+      if(!cardEl._stripeMounted){
+        var elements=stripe.elements();
+        var card=elements.create('card',{style:{base:{color:'#E8ECF1',fontSize:'14px','::placeholder':{color:'#525E73'}}}});
+        card.mount(cardEl);
+        cardEl._stripeMounted=true;
+        cardEl._stripeCard=card;
+        cardEl._stripe=stripe;
+      }
+      var s=cardEl._stripe,c=cardEl._stripeCard;
+      s.createPaymentMethod({type:'card',card:c,billing_details:{name:(fd.first_name||'')+' '+(fd.last_name||''),email:fd.email||''}}).then(function(result){
+        if(result.error){
+          var errEl=wrapper.querySelector('#card-errors');
+          if(errEl)errEl.textContent=result.error.message;
+          setLoading(btn,false);
+          return;
+        }
+        var bumpEl=wrapper.closest('body')?.querySelector('[type="checkbox"][style*="accent-color:#FFD93D"]');
+        var bumpChecked=bumpEl?bumpEl.checked:false;
+        var payload={data_type:'checkout',email:fd.email||'',first_name:fd.first_name||'',last_name:fd.last_name||'',phone:fd.phone||'',payment_method_id:result.paymentMethod.id,amount_cents:priceCents,offer_id:offerId,funnel_session_id:sid,brand_id:brandId};
+        if(bumpChecked)payload.order_bump=true;
+        if(fd.ship_address){payload.ship_address=fd.ship_address;payload.ship_city=fd.ship_city||'';payload.ship_state=fd.ship_state||'';payload.ship_zip=fd.ship_zip||'';}
+        if(fd.billing_same!==undefined)payload.billing_same=fd.billing_same;
+        if(!fd.billing_same&&fd.bill_address){payload.bill_address=fd.bill_address;payload.bill_city=fd.bill_city||'';payload.bill_state=fd.bill_state||'';payload.bill_zip=fd.bill_zip||'';}
+        if(sequence)payload.data_sequence=sequence;
+        if(redirect)payload.redirect_url=redirect;
+        postJSON(endpoint,payload).then(function(res){
+          if(res.success){
+            if(window.__track)window.__track('form_submit',{});
+            handleRedirect(redirect,res.redirect_url);
+          }else{
+            var errEl=wrapper.querySelector('#card-errors');
+            if(errEl)errEl.textContent=res.error||'Payment failed';
+            showError(wrapper,res.error||'Payment failed');
+            setLoading(btn,false);
+          }
+        }).catch(function(){showError(wrapper,'Network error. Please try again.');setLoading(btn,false);});
+      });
+    }
+  });
+
+  // Mount Stripe card element immediately on checkout pages
+  document.querySelectorAll('[data-module="form"][data-type="checkout"]').forEach(function(wrapper){
+    var stripeKey=wrapper.getAttribute('data-stripe-key')||'';
+    var cardEl=wrapper.querySelector('#card-element');
+    if(!stripeKey||!cardEl||typeof Stripe==='undefined')return;
+    var stripe=Stripe(stripeKey);
+    var elements=stripe.elements();
+    var card=elements.create('card',{style:{base:{color:'#E8ECF1',fontSize:'14px','::placeholder':{color:'#525E73'}}}});
+    card.mount(cardEl);
+    cardEl._stripeMounted=true;
+    cardEl._stripeCard=card;
+    cardEl._stripe=stripe;
+    card.on('change',function(ev){
+      var errEl=wrapper.querySelector('#card-errors');
+      if(errEl)errEl.textContent=ev.error?ev.error.message:'';
+    });
+  });
+
+  // Upsell/downsell — button click handlers
+  document.querySelectorAll('[data-module="form"][data-type="upsell"],[data-module="form"][data-type="downsell"]').forEach(function(wrapper){
+    var buttons=wrapper.querySelectorAll('button');
+    var endpoint=wrapper.getAttribute('data-endpoint')||'';
+    var type=wrapper.getAttribute('data-type')||'upsell';
+    var redirect=wrapper.getAttribute('data-redirect')||'';
+    var priceCents=parseInt(wrapper.getAttribute('data-price'))||0;
+    var offerId=wrapper.getAttribute('data-product-id')||'';
+    if(!endpoint||buttons.length<2)return;
+    var acceptBtn=buttons[0],declineBtn=buttons[1];
+
+    acceptBtn.addEventListener('click',function(e){
+      e.preventDefault();
+      setLoading(acceptBtn,true);
+      postJSON(endpoint,{data_type:type,action:'accept',amount_cents:priceCents,offer_id:offerId,funnel_session_id:sid,redirect_url:redirect}).then(function(res){
+        if(res.success){handleRedirect(redirect,res.redirect_url);}
+        else{showError(wrapper,res.error||'Failed');setLoading(acceptBtn,false);}
+      }).catch(function(){showError(wrapper,'Network error.');setLoading(acceptBtn,false);});
+    });
+
+    declineBtn.addEventListener('click',function(e){
+      e.preventDefault();
+      postJSON(endpoint,{data_type:type,action:'decline',funnel_session_id:sid,redirect_url:redirect}).then(function(res){
+        handleRedirect(redirect,res.redirect_url);
+      }).catch(function(){handleRedirect(redirect);});
+    });
+  });
+})();
+<\/script>`;
+        }
+
+        // ── Stripe.js CDN (only for checkout pages) ──
+        if (body.includes('data-type="checkout"')) {
+            headContent += '\n<script src="https://js.stripe.com/v3/"><\/script>';
+        }
+
+        // ── Account management handler (conditional) ──
+        if (body.includes('data-module="account"')) {
+            injectedScripts += `\n<script>
+(function(){
+  var token=new URLSearchParams(window.location.search).get('token')||'';
+  var accountState={subscriptions:[],customer:null};
+
+  function postJSON(url,payload){
+    return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json()});
+  }
+
+  function formatDate(iso){
+    if(!iso)return '—';
+    var d=new Date(iso);
+    return d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  }
+
+  function formatPrice(cents,interval){
+    var amt=(cents/100).toFixed(2).replace(/\\.00$/,'');
+    return '$'+amt+(interval?'/'+interval:'');
+  }
+
+  function getEndpoint(){
+    var el=document.querySelector('[data-module="account"][data-endpoint]');
+    return el?el.getAttribute('data-endpoint'):'';
+  }
+
+  function updateStatusUI(sub){
+    if(!sub)return;
+    // Status badge
+    var badge=document.querySelector('[data-account="status-badge"]');
+    if(badge){
+      var isPaused=sub.pause_collection&&sub.pause_collection.behavior;
+      var isCanceling=sub.cancel_at_period_end;
+      if(isPaused){badge.textContent='PAUSED';badge.style.background='rgba(255,217,61,0.12)';badge.style.color='#FFD93D';}
+      else if(isCanceling){badge.textContent='CANCELING';badge.style.background='rgba(255,107,107,0.12)';badge.style.color='#FF6B6B';}
+      else if(sub.status==='canceled'){badge.textContent='CANCELED';badge.style.background='rgba(255,107,107,0.12)';badge.style.color='#FF6B6B';}
+      else{badge.textContent='ACTIVE';badge.style.background='rgba(6,214,160,0.12)';badge.style.color='#06D6A0';}
+    }
+    // Plan details
+    var planName=document.querySelector('[data-account="plan-name"]');
+    if(planName)planName.textContent=sub.plan_name||'Subscription';
+    var planPrice=document.querySelector('[data-account="plan-price"]');
+    if(planPrice)planPrice.textContent=formatPrice(sub.price_cents||0,sub.interval);
+    var nextBilling=document.querySelector('[data-account="next-billing"]');
+    if(nextBilling)nextBilling.textContent=formatDate(sub.current_period_end);
+    var memberSince=document.querySelector('[data-account="member-since"]');
+    if(memberSince)memberSince.textContent=formatDate(sub.created_at);
+    // Status message
+    var statusMsg=document.querySelector('[data-account="status-message"]');
+    if(statusMsg){
+      var isPaused=sub.pause_collection&&sub.pause_collection.behavior;
+      var isCanceling=sub.cancel_at_period_end;
+      if(isPaused)statusMsg.textContent='Your billing is paused. You still have full access. Resume anytime.';
+      else if(isCanceling)statusMsg.textContent='Your subscription will end on '+formatDate(sub.current_period_end)+'. You have full access until then.';
+      else if(sub.status==='canceled')statusMsg.textContent='Your subscription has ended.';
+      else statusMsg.textContent='Your subscription is active and billing normally.';
+    }
+    // Pause/Resume button visibility
+    var pauseBtn=document.querySelector('[data-account-action="pause"]');
+    var resumeBtn=document.querySelector('[data-account-action="resume"]');
+    var isPaused=sub.pause_collection&&sub.pause_collection.behavior;
+    if(pauseBtn)pauseBtn.style.display=isPaused?'none':'inline-block';
+    if(resumeBtn)resumeBtn.style.display=isPaused?'inline-block':'none';
+    // Cancel section visibility
+    var cancelSection=document.querySelector('[data-account="cancel-section"]');
+    var cancelDone=document.querySelector('[data-account="cancel-done"]');
+    var cancelConfirm=document.querySelector('[data-account="cancel-confirm"]');
+    if(sub.cancel_at_period_end){
+      if(cancelSection)cancelSection.style.display='none';
+      if(cancelConfirm)cancelConfirm.style.display='none';
+      if(cancelDone){cancelDone.style.display='block';var dateEl=cancelDone.querySelector('[data-account="access-until-done"]');if(dateEl)dateEl.textContent=formatDate(sub.current_period_end);}
+    }else{
+      if(cancelSection)cancelSection.style.display='block';
+      if(cancelDone)cancelDone.style.display='none';
+      if(cancelConfirm)cancelConfirm.style.display='none';
+    }
+    // Access-until in confirm modal
+    var accessUntil=document.querySelector('[data-account="access-until"]');
+    if(accessUntil)accessUntil.textContent=formatDate(sub.current_period_end);
+    // Reactivation CTA visibility
+    var reactivationBlock=document.querySelector('[data-module="account"][data-type="reactivation"]');
+    if(reactivationBlock){
+      reactivationBlock.style.display=(isPaused||sub.cancel_at_period_end)?'block':'none';
+    }
+    // Pause billing block visibility — hide if canceled
+    var pauseBlock=document.querySelector('[data-module="account"][data-type="pause-billing"]');
+    if(pauseBlock){
+      pauseBlock.style.display=(sub.status==='canceled')?'none':'block';
+    }
+    // Cancel block visibility — hide if canceled
+    var cancelBlock=document.querySelector('[data-module="account"][data-type="cancel-subscription"]');
+    if(cancelBlock){
+      cancelBlock.style.display=(sub.status==='canceled'||sub.cancel_at_period_end)?'none':'block';
+    }
+  }
+
+  function setButtonLoading(btn,on){
+    if(!btn)return;
+    if(on){btn._orig=btn.textContent;btn.textContent='Processing...';btn.disabled=true;btn.style.opacity='0.6';}
+    else{btn.textContent=btn._orig||'';btn.disabled=false;btn.style.opacity='1';}
+  }
+
+  // Load subscription data
+  function loadSubscriptions(){
+    var endpoint=getEndpoint();
+    if(!endpoint||!token){
+      var planName=document.querySelector('[data-account="plan-name"]');
+      if(planName)planName.textContent='Unable to load — invalid or expired link.';
+      return;
+    }
+    postJSON(endpoint,{operation:'get_customer_subscriptions',token:token,brand_id:'carlton'}).then(function(res){
+      if(res.success&&res.subscriptions&&res.subscriptions.length>0){
+        accountState.subscriptions=res.subscriptions;
+        accountState.customer=res.customer||null;
+        updateStatusUI(res.subscriptions[0]);
+      }else{
+        var planName=document.querySelector('[data-account="plan-name"]');
+        if(planName)planName.textContent=res.error||'No active subscription found.';
+      }
+    }).catch(function(){
+      var planName=document.querySelector('[data-account="plan-name"]');
+      if(planName)planName.textContent='Connection error. Please try again.';
+    });
+  }
+
+  // Action handlers
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('[data-account-action]');
+    if(!btn)return;
+    var action=btn.getAttribute('data-account-action');
+    var endpoint=getEndpoint();
+    var sub=accountState.subscriptions[0];
+    if(!endpoint||!token)return;
+
+    if(action==='pause'&&sub){
+      setButtonLoading(btn,true);
+      postJSON(endpoint,{operation:'pause_subscription',subscription_id:sub.subscription_id,token:token,brand_id:'carlton'}).then(function(res){
+        if(res.success){sub.pause_collection={behavior:'void'};updateStatusUI(sub);}
+        else{alert(res.error||'Could not pause. Please try again.');}
+        setButtonLoading(btn,false);
+      }).catch(function(){alert('Connection error.');setButtonLoading(btn,false);});
+    }
+
+    if(action==='resume'&&sub){
+      setButtonLoading(btn,true);
+      postJSON(endpoint,{operation:'resume_subscription',subscription_id:sub.subscription_id,token:token,brand_id:'carlton'}).then(function(res){
+        if(res.success){sub.pause_collection=null;updateStatusUI(sub);}
+        else{alert(res.error||'Could not resume. Please try again.');}
+        setButtonLoading(btn,false);
+      }).catch(function(){alert('Connection error.');setButtonLoading(btn,false);});
+    }
+
+    if(action==='cancel'){
+      var confirmEl=document.querySelector('[data-account="cancel-confirm"]');
+      if(confirmEl)confirmEl.style.display='block';
+    }
+
+    if(action==='cancel-back'){
+      var confirmEl=document.querySelector('[data-account="cancel-confirm"]');
+      if(confirmEl)confirmEl.style.display='none';
+    }
+
+    if(action==='confirm-cancel'&&sub){
+      setButtonLoading(btn,true);
+      postJSON(endpoint,{operation:'cancel_subscription',subscription_id:sub.subscription_id,token:token,brand_id:'carlton'}).then(function(res){
+        if(res.success){sub.cancel_at_period_end=true;updateStatusUI(sub);}
+        else{alert(res.error||'Could not cancel. Please try again.');}
+        setButtonLoading(btn,false);
+      }).catch(function(){alert('Connection error.');setButtonLoading(btn,false);});
+    }
+
+    if(action==='reactivate'&&sub){
+      setButtonLoading(btn,true);
+      var op=sub.pause_collection&&sub.pause_collection.behavior?'resume_subscription':'reactivate_subscription';
+      postJSON(endpoint,{operation:op,subscription_id:sub.subscription_id,token:token,brand_id:'carlton'}).then(function(res){
+        if(res.success){sub.cancel_at_period_end=false;sub.pause_collection=null;updateStatusUI(sub);}
+        else{alert(res.error||'Could not reactivate. Please try again.');}
+        setButtonLoading(btn,false);
+      }).catch(function(){alert('Connection error.');setButtonLoading(btn,false);});
+    }
+
+    if(action==='update-payment'){
+      setButtonLoading(btn,true);
+      var returnUrl=window.location.href;
+      postJSON(endpoint,{operation:'create_portal_session',customer_id:accountState.customer?.id||'',return_url:returnUrl,token:token,brand_id:'carlton'}).then(function(res){
+        if(res.success&&res.portal_url){window.location.href=res.portal_url;}
+        else{alert(res.error||'Could not open payment portal.');setButtonLoading(btn,false);}
+      }).catch(function(){alert('Connection error.');setButtonLoading(btn,false);});
+    }
+  });
+
+  // Init
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',loadSubscriptions);}
+  else{loadSubscriptions();}
+})();
+<\/script>`;
+        }
+
+        // ── Page-ID meta tag ──
+        if (!headContent.includes('meta name="page-id"')) {
+            var pageSlug = (typeof currentPage === 'string' ? currentPage : 'page').replace(/\.html$/, '').replace(/[^a-zA-Z0-9]/g, '_');
+            headContent += '\n<meta name="page-id" content="PAGE_' + pageSlug + '">';
+        }
+
+        // ── Confirmation page data loader (conditional) ──
+        if (body.includes('data-module="confirmation"')) {
+            headContent += '\n<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>';
+            injectedScripts += `\n<script>
+(function(){
+  var sid=window.__funnelSessionId||'';
+  if(!sid)return;
+  var sb=window.supabase.createClient('https://yrwrswyjawmgtxrgbnim.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8');
+  sb.from('offer_purchases').select('purchase_id,offer_id,amount_cents,payment_status,line_items,order_bumps,upsells').eq('funnel_session_id',sid).then(function(res){
+    if(!res.data||!res.data.length)return;
+    var orders=res.data;
+    var orderIdEl=document.querySelector('[data-confirmation="order-id"]');
+    if(orderIdEl)orderIdEl.textContent='Order ID: '+orders[0].purchase_id;
+    var itemsEl=document.querySelector('[data-confirmation="line-items"]');
+    if(itemsEl){
+      var html='';
+      var total=0;
+      orders.forEach(function(o){
+        html+='<div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span style="color:#E8ECF1;">'+o.offer_id+'</span><span style="color:#E8ECF1;">$'+(o.amount_cents/100).toFixed(2)+'</span></div>';
+        total+=o.amount_cents;
+      });
+      itemsEl.innerHTML=html;
+    }
+    var totalEl=document.querySelector('[data-confirmation="total"]');
+    if(totalEl){
+      var total=orders.reduce(function(s,o){return s+o.amount_cents},0);
+      totalEl.textContent='$'+(total/100).toFixed(2);
+    }
+  });
+})();
+<\/script>`;
+        }
+
+        return `<!DOCTYPE html>\n<html lang="en">\n<head>${headContent}</head>\n<body>\n${body}${injectedScripts}\n</body>\n</html>`;
+    }
+
+    /* ── Initialize GrapesJS ── */
+
+    function initEditor() {
+        editor = grapesjs.init({
+            container: '#gjs',
+            fromElement: false,
+            height: '100%',
+            width: 'auto',
+            storageManager: false,
+
+            // Tell GrapesJS to render blocks/layers/styles into our sidebar divs
+            blockManager: {
+                appendTo: '#blocksPanel',
+            },
+            layerManager: {
+                appendTo: '#layersPanel',
+            },
+            styleManager: {
+                appendTo: '#stylesPanel',
+                sectors: [
+                    {
+                        name: 'Size & Spacing',
+                        open: false,
+                        properties: [
+                            { property: 'width', type: 'number', label: 'Width', units: ['px','%','rem','vw','auto'], min: 0 },
+                            { property: 'max-width', type: 'number', label: 'Max Width', units: ['px','%','rem','vw','none'], min: 0 },
+                            { property: 'height', type: 'number', label: 'Height', units: ['px','%','rem','vh','auto'], min: 0 },
+                            { property: 'min-height', type: 'number', label: 'Min Height', units: ['px','%','rem','vh'], min: 0 },
+                            {
+                                property: 'padding',
+                                type: 'composite',
+                                label: 'Inner Spacing (Padding)',
+                                properties: [
+                                    { property: 'padding-top', type: 'number', units: ['px','rem','em'], label: 'Top', min: 0 },
+                                    { property: 'padding-right', type: 'number', units: ['px','rem','em'], label: 'Right', min: 0 },
+                                    { property: 'padding-bottom', type: 'number', units: ['px','rem','em'], label: 'Bottom', min: 0 },
+                                    { property: 'padding-left', type: 'number', units: ['px','rem','em'], label: 'Left', min: 0 },
+                                ],
+                            },
+                            {
+                                property: 'margin',
+                                type: 'composite',
+                                label: 'Outer Spacing (Margin)',
+                                properties: [
+                                    { property: 'margin-top', type: 'number', units: ['px','rem','em','auto'], label: 'Top' },
+                                    { property: 'margin-right', type: 'number', units: ['px','rem','em','auto'], label: 'Right' },
+                                    { property: 'margin-bottom', type: 'number', units: ['px','rem','em','auto'], label: 'Bottom' },
+                                    { property: 'margin-left', type: 'number', units: ['px','rem','em','auto'], label: 'Left' },
+                                ],
+                            },
+                        ],
+                    },
+                    {
+                        name: 'Text & Fonts',
+                        open: false,
+                        properties: [
+                            {
+                                property: 'font-family',
+                                type: 'select',
+                                label: 'Font',
+                                options: [
+                                    { id: "'Chakra Petch', system-ui, sans-serif", label: 'Chakra Petch (Headings)' },
+                                    { id: "'IBM Plex Sans', system-ui, sans-serif", label: 'IBM Plex Sans (Body)' },
+                                    { id: "'JetBrains Mono', monospace", label: 'JetBrains Mono (Code)' },
+                                    { id: 'Georgia, serif', label: 'Georgia (Serif)' },
+                                    { id: 'system-ui, sans-serif', label: 'System Default' },
+                                ],
+                            },
+                            { property: 'font-size', type: 'number', label: 'Text Size', units: ['px','rem','em'], min: 0, defaults: '16' },
+                            {
+                                property: 'font-weight',
+                                type: 'select',
+                                label: 'Weight',
+                                options: [
+                                    { id: '300', label: 'Light' },
+                                    { id: '400', label: 'Normal' },
+                                    { id: '500', label: 'Medium' },
+                                    { id: '600', label: 'Semi-Bold' },
+                                    { id: '700', label: 'Bold' },
+                                ],
+                            },
+                            { property: 'line-height', type: 'number', label: 'Line Spacing', units: ['px','','em'], min: 0, step: 0.1 },
+                            { property: 'letter-spacing', type: 'number', label: 'Letter Spacing', units: ['px','em'], step: 0.5 },
+                            { property: 'color', type: 'color', label: 'Text Color' },
+                            {
+                                property: 'text-align',
+                                type: 'radio',
+                                label: 'Text Alignment',
+                                defaults: 'left',
+                                list: [
+                                    { value: 'left', name: 'Left' },
+                                    { value: 'center', name: 'Center' },
+                                    { value: 'right', name: 'Right' },
+                                    { value: 'justify', name: 'Justify' },
+                                ],
+                            },
+                            {
+                                property: 'text-decoration',
+                                type: 'select',
+                                label: 'Decoration',
+                                options: [
+                                    { id: 'none', label: 'None' },
+                                    { id: 'underline', label: 'Underline' },
+                                    { id: 'line-through', label: 'Strikethrough' },
+                                    { id: 'overline', label: 'Overline' },
+                                ],
+                            },
+                            {
+                                property: 'text-transform',
+                                type: 'select',
+                                label: 'Case',
+                                options: [
+                                    { id: 'none', label: 'Normal' },
+                                    { id: 'uppercase', label: 'UPPERCASE' },
+                                    { id: 'lowercase', label: 'lowercase' },
+                                    { id: 'capitalize', label: 'Capitalize Each Word' },
+                                ],
+                            },
+                        ],
+                    },
+                    {
+                        name: 'Background & Borders',
+                        open: false,
+                        properties: [
+                            { property: 'background-color', type: 'color', label: 'Background Color' },
+                            { property: 'background-image', label: 'Background Image/Gradient' },
+                            { property: 'border-radius', type: 'number', label: 'Corner Rounding', units: ['px','rem','%'], min: 0 },
+                            {
+                                property: 'border',
+                                type: 'composite',
+                                label: 'Border',
+                                properties: [
+                                    { property: 'border-width', type: 'number', units: ['px'], label: 'Width', min: 0 },
+                                    {
+                                        property: 'border-style',
+                                        type: 'select',
+                                        label: 'Style',
+                                        options: [
+                                            { id: 'none', label: 'None' },
+                                            { id: 'solid', label: 'Solid' },
+                                            { id: 'dashed', label: 'Dashed' },
+                                            { id: 'dotted', label: 'Dotted' },
+                                        ],
+                                    },
+                                    { property: 'border-color', type: 'color', label: 'Color' },
+                                ],
+                            },
+                            { property: 'box-shadow', type: 'stack', label: 'Shadow' },
+                            {
+                                property: 'opacity',
+                                type: 'slider',
+                                label: 'Opacity',
+                                defaults: 1,
+                                min: 0,
+                                max: 1,
+                                step: 0.05,
+                            },
+                        ],
+                    },
+                    {
+                        name: 'Flex & Grid Layout',
+                        open: false,
+                        properties: [
+                            {
+                                property: 'display',
+                                type: 'select',
+                                label: 'Display Mode',
+                                options: [
+                                    { id: 'block', label: 'Block (stacks vertically)' },
+                                    { id: 'flex', label: 'Flex (flexible row/column)' },
+                                    { id: 'grid', label: 'Grid (columns & rows)' },
+                                    { id: 'inline-block', label: 'Inline Block' },
+                                    { id: 'inline', label: 'Inline' },
+                                    { id: 'none', label: 'Hidden' },
+                                ],
+                            },
+                            {
+                                property: 'flex-direction',
+                                type: 'radio',
+                                label: 'Direction',
+                                list: [
+                                    { value: 'row', name: 'Horizontal' },
+                                    { value: 'column', name: 'Vertical' },
+                                ],
+                            },
+                            {
+                                property: 'justify-content',
+                                type: 'select',
+                                label: 'Horizontal Alignment',
+                                options: [
+                                    { id: 'flex-start', label: 'Start (left)' },
+                                    { id: 'center', label: 'Center' },
+                                    { id: 'flex-end', label: 'End (right)' },
+                                    { id: 'space-between', label: 'Space Between' },
+                                    { id: 'space-around', label: 'Space Around' },
+                                    { id: 'space-evenly', label: 'Space Evenly' },
+                                ],
+                            },
+                            {
+                                property: 'align-items',
+                                type: 'select',
+                                label: 'Vertical Alignment',
+                                options: [
+                                    { id: 'flex-start', label: 'Top' },
+                                    { id: 'center', label: 'Center' },
+                                    { id: 'flex-end', label: 'Bottom' },
+                                    { id: 'stretch', label: 'Stretch (fill)' },
+                                    { id: 'baseline', label: 'Baseline' },
+                                ],
+                            },
+                            { property: 'gap', type: 'number', label: 'Gap Between Items', units: ['px','rem','em'], min: 0 },
+                            { property: 'grid-template-columns', label: 'Column Widths (e.g. 1fr 1fr 1fr)' },
+                            {
+                                property: 'overflow',
+                                type: 'select',
+                                label: 'Overflow',
+                                options: [
+                                    { id: 'visible', label: 'Visible (show all)' },
+                                    { id: 'hidden', label: 'Hidden (clip)' },
+                                    { id: 'auto', label: 'Auto (scroll if needed)' },
+                                    { id: 'scroll', label: 'Always Scroll' },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+            traitManager: {
+                appendTo: '#traitsPanel',
+            },
+
+            deviceManager: {
+                devices: [
+                    { name: 'Desktop', width: '' },
+                    { name: 'Tablet', width: '768px', widthMedia: '992px' },
+                    { name: 'Mobile', width: '375px', widthMedia: '768px' },
+                ],
+            },
+
+            // Remove all default panels — we handle UI ourselves
+            panels: { defaults: [] },
+
+            plugins: ['gjs-preset-webpage'],
+            pluginsOpts: {
+                'gjs-preset-webpage': {
+                    blocksBasicOpts: { flexGrid: true },
+                    navbarOpts: false,
+                    countdownOpts: false,
+                    formsOpts: false,
+                },
+            },
+
+            canvas: {
+                styles: [],
+                scripts: [],
+            },
+
+            assetManager: {
+                assets: [],
+                uploadFile: false,
+            },
+        });
+
+        // Register custom blocks
+        registerCustomBlocks();
+
+        // Track unsaved changes
+        editor.on('change:changesCount', () => {
+            if (!hasUnsaved) {
+                hasUnsaved = true;
+                document.getElementById('unsavedDot').classList.add('show');
+            }
+        });
+
+        // Update classes panel + show quick action bar when selecting a component
+        editor.on('component:selected', (component) => {
+            const el = component.getEl();
+            if (el) {
+                document.getElementById('classesInput').value = el.className || '';
+            }
+            document.getElementById('quickBar').classList.add('show');
+        });
+
+        editor.on('component:deselected', () => {
+            document.getElementById('quickBar').classList.remove('show');
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                savePage();
+            }
+        });
+    }
+
+    /* ── Custom Blocks ── */
+
+    function registerCustomBlocks() {
+        const bm = editor.BlockManager;
+
+        // ── Layout Blocks ──
+
+        bm.add('col-2', {
+            label: '2 Columns',
+            category: 'Layout',
+            attributes: { title: 'Two equal columns side by side (50/50)' },
+            content: `<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;padding:1.5rem;">
+                <div style="min-height:80px;background:rgba(42,46,61,0.2);border:1px dashed #2A2E3D;border-radius:0.5rem;padding:1rem;">
+                    <p style="color:#525E73;font-size:0.8rem;">Column 1 — drop content here</p>
+                </div>
+                <div style="min-height:80px;background:rgba(42,46,61,0.2);border:1px dashed #2A2E3D;border-radius:0.5rem;padding:1rem;">
+                    <p style="color:#525E73;font-size:0.8rem;">Column 2 — drop content here</p>
+                </div>
+            </div>`,
+        });
+
+        bm.add('col-3', {
+            label: '3 Columns',
+            category: 'Layout',
+            attributes: { title: 'Three equal columns (33/33/33)' },
+            content: `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;padding:1.5rem;">
+                <div style="min-height:80px;background:rgba(42,46,61,0.2);border:1px dashed #2A2E3D;border-radius:0.5rem;padding:1rem;">
+                    <p style="color:#525E73;font-size:0.8rem;">Column 1</p>
+                </div>
+                <div style="min-height:80px;background:rgba(42,46,61,0.2);border:1px dashed #2A2E3D;border-radius:0.5rem;padding:1rem;">
+                    <p style="color:#525E73;font-size:0.8rem;">Column 2</p>
+                </div>
+                <div style="min-height:80px;background:rgba(42,46,61,0.2);border:1px dashed #2A2E3D;border-radius:0.5rem;padding:1rem;">
+                    <p style="color:#525E73;font-size:0.8rem;">Column 3</p>
+                </div>
+            </div>`,
+        });
+
+        bm.add('col-4', {
+            label: '4 Columns',
+            category: 'Layout',
+            attributes: { title: 'Four equal columns (25/25/25/25)' },
+            content: `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;padding:1.5rem;">
+                <div style="min-height:60px;background:rgba(42,46,61,0.2);border:1px dashed #2A2E3D;border-radius:0.5rem;padding:0.75rem;">
+                    <p style="color:#525E73;font-size:0.75rem;">Col 1</p>
+                </div>
+                <div style="min-height:60px;background:rgba(42,46,61,0.2);border:1px dashed #2A2E3D;border-radius:0.5rem;padding:0.75rem;">
+                    <p style="color:#525E73;font-size:0.75rem;">Col 2</p>
+                </div>
+                <div style="min-height:60px;background:rgba(42,46,61,0.2);border:1px dashed #2A2E3D;border-radius:0.5rem;padding:0.75rem;">
+                    <p style="color:#525E73;font-size:0.75rem;">Col 3</p>
+                </div>
+                <div style="min-height:60px;background:rgba(42,46,61,0.2);border:1px dashed #2A2E3D;border-radius:0.5rem;padding:0.75rem;">
+                    <p style="color:#525E73;font-size:0.75rem;">Col 4</p>
+                </div>
+            </div>`,
+        });
+
+        bm.add('col-sidebar-l', {
+            label: 'Sidebar Left',
+            category: 'Layout',
+            attributes: { title: 'Narrow sidebar on the left, wide content right (30/70)' },
+            content: `<div style="display:grid;grid-template-columns:1fr 2.3fr;gap:1.5rem;padding:1.5rem;">
+                <div style="min-height:100px;background:rgba(42,46,61,0.2);border:1px dashed #2A2E3D;border-radius:0.5rem;padding:1rem;">
+                    <p style="color:#525E73;font-size:0.8rem;">Sidebar</p>
+                </div>
+                <div style="min-height:100px;background:rgba(42,46,61,0.2);border:1px dashed #2A2E3D;border-radius:0.5rem;padding:1rem;">
+                    <p style="color:#525E73;font-size:0.8rem;">Main content area</p>
+                </div>
+            </div>`,
+        });
+
+        bm.add('col-sidebar-r', {
+            label: 'Sidebar Right',
+            category: 'Layout',
+            attributes: { title: 'Wide content left, narrow sidebar right (70/30)' },
+            content: `<div style="display:grid;grid-template-columns:2.3fr 1fr;gap:1.5rem;padding:1.5rem;">
+                <div style="min-height:100px;background:rgba(42,46,61,0.2);border:1px dashed #2A2E3D;border-radius:0.5rem;padding:1rem;">
+                    <p style="color:#525E73;font-size:0.8rem;">Main content area</p>
+                </div>
+                <div style="min-height:100px;background:rgba(42,46,61,0.2);border:1px dashed #2A2E3D;border-radius:0.5rem;padding:1rem;">
+                    <p style="color:#525E73;font-size:0.8rem;">Sidebar</p>
+                </div>
+            </div>`,
+        });
+
+        // ── Section Blocks ──
+
+        bm.add('section-hero', {
+            label: 'Hero Section',
+            category: 'Sections',
+            attributes: { title: 'Full-width hero with headline, subtext, and CTA button' },
+            content: `<section class="relative min-h-[60vh] flex items-center justify-center overflow-hidden py-20" style="background: linear-gradient(135deg, #08090D 0%, #11131A 50%, #0D1117 100%);">
+                <div class="relative z-10 max-w-4xl mx-auto px-6 text-center">
+                    <h1 style="font-family:'Chakra Petch',system-ui;font-size:3rem;font-weight:700;margin-bottom:1.5rem;">Your Headline Here</h1>
+                    <p style="font-size:1.125rem;max-width:42rem;margin:0 auto 2rem;color:#8A95A9;">Subheading text that supports your main message.</p>
+                    <a href="#" style="display:inline-block;padding:0.75rem 2rem;border-radius:0.5rem;font-weight:600;font-size:0.875rem;background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.3);text-decoration:none;">Call to Action</a>
+                </div>
+            </section>`,
+        });
+
+        bm.add('section-two-col', {
+            label: 'Two Columns',
+            category: 'Sections',
+            attributes: { title: 'Text on the left, content card on the right' },
+            content: `<section style="padding:5rem 0;">
+                <div style="max-width:72rem;margin:0 auto;padding:0 1.5rem;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;">
+                        <div>
+                            <h2 style="font-family:'Chakra Petch',system-ui;font-size:1.875rem;font-weight:700;margin-bottom:1rem;">Section Title</h2>
+                            <p style="color:#8A95A9;line-height:1.7;">Content for the left column. Pair text with images, code, or data on the right.</p>
+                        </div>
+                        <div style="background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;padding:2rem;">
+                            <p style="color:#8A95A9;">Right column content.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>`,
+        });
+
+        bm.add('section-three-cards', {
+            label: 'Three Cards',
+            category: 'Sections',
+            attributes: { title: 'Three feature cards in a row with title and description' },
+            content: `<section style="padding:5rem 0;">
+                <div style="max-width:72rem;margin:0 auto;padding:0 1.5rem;">
+                    <div style="text-align:center;margin-bottom:3rem;">
+                        <h2 style="font-family:'Chakra Petch',system-ui;font-size:1.875rem;font-weight:700;margin-bottom:1rem;">Section Title</h2>
+                        <p style="color:#8A95A9;max-width:32rem;margin:0 auto;">Brief description of these cards.</p>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;">
+                        <div style="background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;padding:1.5rem;">
+                            <h3 style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:1.125rem;margin-bottom:0.5rem;">Card One</h3>
+                            <p style="color:#8A95A9;font-size:0.875rem;line-height:1.6;">Description for card one.</p>
+                        </div>
+                        <div style="background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;padding:1.5rem;">
+                            <h3 style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:1.125rem;margin-bottom:0.5rem;">Card Two</h3>
+                            <p style="color:#8A95A9;font-size:0.875rem;line-height:1.6;">Description for card two.</p>
+                        </div>
+                        <div style="background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;padding:1.5rem;">
+                            <h3 style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:1.125rem;margin-bottom:0.5rem;">Card Three</h3>
+                            <p style="color:#8A95A9;font-size:0.875rem;line-height:1.6;">Description for card three.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>`,
+        });
+
+        bm.add('section-cta', {
+            label: 'CTA Section',
+            category: 'Sections',
+            attributes: { title: 'Centered call-to-action with headline and buttons' },
+            content: `<section style="padding:5rem 0;">
+                <div style="max-width:48rem;margin:0 auto;padding:0 1.5rem;text-align:center;">
+                    <h2 style="font-family:'Chakra Petch',system-ui;font-size:1.875rem;font-weight:700;margin-bottom:1rem;">Ready to Get Started?</h2>
+                    <p style="color:#8A95A9;font-size:1.125rem;margin-bottom:2rem;">A compelling call to action.</p>
+                    <a href="#" style="display:inline-block;padding:0.875rem 2.5rem;border-radius:0.5rem;font-weight:600;font-size:0.875rem;background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.3);text-decoration:none;">Take Action</a>
+                </div>
+            </section>`,
+        });
+
+        bm.add('stats-bar', {
+            label: 'Stats Bar',
+            category: 'Sections',
+            attributes: { title: 'Horizontal bar with 4 key metrics/numbers' },
+            content: `<section style="padding:2rem 0;border-top:1px solid #2A2E3D;border-bottom:1px solid #2A2E3D;background:rgba(17,19,26,0.6);">
+                <div style="max-width:72rem;margin:0 auto;padding:0 1.5rem;display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;text-align:center;">
+                    <div><div style="font-size:1.875rem;font-weight:700;color:#06D6A0;margin-bottom:0.25rem;">100+</div><div style="font-size:0.875rem;color:#525E73;">Metric One</div></div>
+                    <div><div style="font-size:1.875rem;font-weight:700;color:#4CC9F0;margin-bottom:0.25rem;">50+</div><div style="font-size:0.875rem;color:#525E73;">Metric Two</div></div>
+                    <div><div style="font-size:1.875rem;font-weight:700;color:#FFD93D;margin-bottom:0.25rem;">99%</div><div style="font-size:0.875rem;color:#525E73;">Metric Three</div></div>
+                    <div><div style="font-size:1.875rem;font-weight:700;color:#FF6B6B;margin-bottom:0.25rem;">24/7</div><div style="font-size:0.875rem;color:#525E73;">Metric Four</div></div>
+                </div>
+            </section>`,
+        });
+
+        bm.add('data-table', {
+            label: 'Data Table',
+            category: 'Data Modules',
+            attributes: { title: 'Table populated by Supabase — set table name in Settings tab' },
+            content: `<div data-module="table" data-source="supabase" data-table="your_table" style="background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;overflow:hidden;">
+                <div style="padding:0.75rem 1.25rem;border-bottom:1px solid #2A2E3D;display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:0.875rem;">Table Title</span>
+                    <span style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:#525E73;">data-module: table</span>
+                </div>
+                <table style="width:100%;font-size:0.875rem;border-collapse:collapse;">
+                    <thead><tr style="background:rgba(255,255,255,0.02);">
+                        <th style="text-align:left;padding:0.75rem 1.25rem;color:#8A95A9;font-size:0.7rem;text-transform:uppercase;">Column A</th>
+                        <th style="text-align:left;padding:0.75rem 1.25rem;color:#8A95A9;font-size:0.7rem;text-transform:uppercase;">Column B</th>
+                        <th style="text-align:left;padding:0.75rem 1.25rem;color:#8A95A9;font-size:0.7rem;text-transform:uppercase;">Status</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr style="border-top:1px solid rgba(42,46,61,0.5);"><td style="padding:0.75rem 1.25rem;">Row 1</td><td style="padding:0.75rem 1.25rem;color:#8A95A9;">Value</td><td style="padding:0.75rem 1.25rem;"><span style="background:rgba(6,214,160,0.15);color:#06D6A0;padding:0.125rem 0.5rem;border-radius:0.25rem;font-size:0.7rem;">Active</span></td></tr>
+                        <tr style="border-top:1px solid rgba(42,46,61,0.5);"><td style="padding:0.75rem 1.25rem;">Row 2</td><td style="padding:0.75rem 1.25rem;color:#8A95A9;">Value</td><td style="padding:0.75rem 1.25rem;"><span style="background:rgba(255,217,61,0.15);color:#FFD93D;padding:0.125rem 0.5rem;border-radius:0.25rem;font-size:0.7rem;">Pending</span></td></tr>
+                    </tbody>
+                </table>
+            </div>`,
+        });
+
+        bm.add('stats-widget', {
+            label: 'Stats Widget',
+            category: 'Data Modules',
+            attributes: { title: 'Single big number metric — updated via webhook' },
+            content: `<div data-module="stats" data-source="webhook" style="background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;padding:1.25rem;">
+                <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:#525E73;font-family:'Chakra Petch',system-ui;margin-bottom:0.5rem;">Metric Name</div>
+                <div style="font-size:2.5rem;font-weight:700;color:#06D6A0;font-family:'Chakra Petch',system-ui;">0</div>
+                <div style="font-size:0.75rem;color:#8A95A9;margin-top:0.25rem;">Updated via webhook</div>
+            </div>`,
+        });
+
+        bm.add('lead-form', {
+            label: 'Lead Form',
+            category: 'Data Modules',
+            attributes: { title: 'Contact/lead capture form — sends to webhook endpoint' },
+            content: `<div data-module="form" data-endpoint="https://n8n.carltonaiservices.com/webhook/page-form" data-type="lead" style="background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;padding:2rem;">
+                <h3 style="font-family:'Chakra Petch',system-ui;font-size:1.25rem;font-weight:700;margin-bottom:0.5rem;">Get in Touch</h3>
+                <p style="font-size:0.875rem;color:#8A95A9;margin-bottom:1.5rem;">Fill out the form below.</p>
+                <form style="display:flex;flex-direction:column;gap:1rem;">
+                    <input type="text" name="full_name" placeholder="Full Name" style="padding:0.75rem 1rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.5rem;color:#E8ECF1;font-size:0.875rem;outline:none;">
+                    <input type="email" name="email" placeholder="Email" style="padding:0.75rem 1rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.5rem;color:#E8ECF1;font-size:0.875rem;outline:none;">
+                    <textarea name="message" placeholder="Message" rows="3" style="padding:0.75rem 1rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.5rem;color:#E8ECF1;font-size:0.875rem;outline:none;resize:vertical;"></textarea>
+                    <button type="submit" style="padding:0.75rem;background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.3);border-radius:0.5rem;font-weight:600;cursor:pointer;font-size:0.875rem;">Submit</button>
+                </form>
+            </div>`,
+        });
+
+        bm.add('text-block', {
+            label: 'Text Block',
+            category: 'Content',
+            attributes: { title: 'Heading + paragraph — double-click text to edit it' },
+            content: `<div style="max-width:48rem;margin:0 auto;padding:2rem 1.5rem;">
+                <h2 style="font-family:'Chakra Petch',system-ui;font-size:1.5rem;font-weight:700;margin-bottom:1rem;">Heading</h2>
+                <p style="color:#8A95A9;line-height:1.7;">Your paragraph text goes here. Click to edit directly.</p>
+            </div>`,
+        });
+
+        bm.add('image-block', {
+            label: 'Image',
+            category: 'Content',
+            attributes: { title: 'Image placeholder — double-click to change the source' },
+            content: `<div style="max-width:56rem;margin:0 auto;padding:2rem 1.5rem;">
+                <img src="https://placehold.co/800x400/11131A/525E73?text=Your+Image" style="width:100%;border-radius:0.75rem;" alt="Placeholder">
+            </div>`,
+        });
+
+        bm.add('testimonial', {
+            label: 'Testimonial',
+            category: 'Content',
+            attributes: { title: 'Customer quote with name and title' },
+            content: `<div style="max-width:40rem;margin:0 auto;padding:2rem 1.5rem;text-align:center;">
+                <div style="font-size:2.5rem;color:#2A2E3D;margin-bottom:1rem;">&ldquo;</div>
+                <p style="font-size:1.125rem;font-style:italic;color:#8A95A9;line-height:1.7;margin-bottom:1.5rem;">A testimonial quote from a satisfied customer.</p>
+                <div style="font-weight:600;font-size:0.875rem;">Customer Name</div>
+                <div style="font-size:0.75rem;color:#525E73;">Title, Company</div>
+            </div>`,
+        });
+
+        bm.add('spacer', {
+            label: 'Spacer',
+            category: 'Utility',
+            attributes: { title: 'Empty vertical space — resize height in Styles tab' },
+            content: '<div style="height:60px;"></div>',
+        });
+
+        bm.add('divider', {
+            label: 'Divider',
+            category: 'Utility',
+            attributes: { title: 'Horizontal line to separate content sections' },
+            content: '<hr style="border:none;border-top:1px solid #2A2E3D;margin:2rem auto;max-width:80%;">',
+        });
+
+        bm.add('ad-slot', {
+            label: 'Ad Slot',
+            category: 'Utility',
+            attributes: { title: 'Placeholder for ad placement — 728x90 banner size' },
+            content: `<div data-module="ad" style="max-width:728px;height:90px;margin:2rem auto;background:rgba(42,46,61,0.3);border:1px dashed #2A2E3D;border-radius:0.5rem;display:flex;align-items:center;justify-content:center;">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:#525E73;text-transform:uppercase;letter-spacing:0.06em;">Ad Slot (728x90)</span>
+            </div>`,
+        });
+
+        // ══════════════════════════════════════
+        // LEAD CAPTURE
+        // ══════════════════════════════════════
+
+        bm.add('email-signup', {
+            label: 'Email Signup',
+            category: 'Lead Capture',
+            attributes: { title: 'Simple name + email capture — sends to webhook' },
+            content: `<div data-module="form" data-endpoint="https://n8n.carltonaiservices.com/webhook/page-form" data-type="lead" style="max-width:480px;margin:2rem auto;padding:2rem;background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;text-align:center;">
+                <h3 style="font-family:'Chakra Petch',system-ui;font-size:1.25rem;font-weight:700;margin-bottom:0.5rem;">Stay in the Loop</h3>
+                <p style="color:#8A95A9;font-size:0.875rem;margin-bottom:1.5rem;">Get updates delivered straight to your inbox.</p>
+                <form style="display:flex;flex-direction:column;gap:0.75rem;" onsubmit="return false;">
+                    <input type="text" name="first_name" placeholder="First Name" style="padding:0.7rem 1rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.5rem;color:#E8ECF1;font-size:0.875rem;outline:none;width:100%;box-sizing:border-box;">
+                    <input type="email" name="email" placeholder="Email Address" style="padding:0.7rem 1rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.5rem;color:#E8ECF1;font-size:0.875rem;outline:none;width:100%;box-sizing:border-box;">
+                    <button type="submit" style="padding:0.75rem;background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.3);border-radius:0.5rem;font-weight:600;cursor:pointer;font-size:0.875rem;font-family:'Chakra Petch',system-ui;text-transform:uppercase;letter-spacing:0.04em;">Subscribe</button>
+                </form>
+                <p style="color:#525E73;font-size:0.65rem;margin-top:0.75rem;">No spam. Unsubscribe anytime.</p>
+            </div>`,
+        });
+
+        bm.add('lead-magnet', {
+            label: 'Lead Magnet Box',
+            category: 'Lead Capture',
+            attributes: { title: 'Freebie offer — image + bullet points + email capture form' },
+            content: `<div data-module="form" data-endpoint="https://n8n.carltonaiservices.com/webhook/page-form" data-type="lead" style="max-width:720px;margin:2rem auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;padding:2rem;background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;align-items:center;">
+                <div>
+                    <div style="background:rgba(6,214,160,0.08);border:1px solid rgba(6,214,160,0.2);border-radius:0.5rem;padding:2rem;text-align:center;min-height:180px;display:flex;align-items:center;justify-content:center;">
+                        <span style="color:#06D6A0;font-family:'Chakra Petch',system-ui;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;">Lead Magnet Image</span>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#06D6A0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">Free Download</div>
+                    <h3 style="font-family:'Chakra Petch',system-ui;font-size:1.25rem;font-weight:700;margin-bottom:0.75rem;">Your Free Guide Title</h3>
+                    <ul style="list-style:none;padding:0;margin:0 0 1.25rem 0;display:flex;flex-direction:column;gap:0.4rem;">
+                        <li style="color:#8A95A9;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#06D6A0;">&#10003;</span> Benefit number one</li>
+                        <li style="color:#8A95A9;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#06D6A0;">&#10003;</span> Benefit number two</li>
+                        <li style="color:#8A95A9;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#06D6A0;">&#10003;</span> Benefit number three</li>
+                    </ul>
+                    <form style="display:flex;flex-direction:column;gap:0.6rem;" onsubmit="return false;">
+                        <input type="email" name="email" placeholder="Your email address" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+                        <button type="submit" style="padding:0.65rem;background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.3);border-radius:0.375rem;font-weight:600;cursor:pointer;font-size:0.8rem;">Get Free Access</button>
+                    </form>
+                </div>
+            </div>`,
+        });
+
+        bm.add('content-upgrade', {
+            label: 'Content Upgrade',
+            category: 'Lead Capture',
+            attributes: { title: 'Inline blog callout — "Want the full checklist? Enter your email"' },
+            content: `<div data-module="form" data-endpoint="https://n8n.carltonaiservices.com/webhook/page-form" data-type="lead" style="max-width:600px;margin:2rem auto;padding:1.25rem 1.5rem;background:rgba(6,214,160,0.04);border:1px solid rgba(6,214,160,0.15);border-left:3px solid #06D6A0;border-radius:0.5rem;">
+                <div style="display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:1rem;">
+                    <span style="font-size:1.25rem;">&#128230;</span>
+                    <div>
+                        <h4 style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:0.95rem;margin-bottom:0.25rem;">Bonus: Download the Complete Checklist</h4>
+                        <p style="color:#8A95A9;font-size:0.8rem;line-height:1.5;">Get everything from this post in a printable, step-by-step format.</p>
+                    </div>
+                </div>
+                <form style="display:flex;gap:0.5rem;flex-wrap:wrap;" onsubmit="return false;">
+                    <input type="email" name="email" placeholder="Enter your email" style="flex:1;min-width:200px;padding:0.6rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;box-sizing:border-box;">
+                    <button type="submit" style="padding:0.6rem 1.25rem;background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.3);border-radius:0.375rem;font-weight:600;cursor:pointer;font-size:0.8rem;white-space:nowrap;">Send It</button>
+                </form>
+            </div>`,
+        });
+
+        bm.add('webinar-reg', {
+            label: 'Webinar Registration',
+            category: 'Lead Capture',
+            attributes: { title: 'Event/webinar signup with date, speaker, and countdown' },
+            content: `<div data-module="form" data-endpoint="https://n8n.carltonaiservices.com/webhook/page-form" data-type="lead" style="max-width:600px;margin:2rem auto;padding:2rem;background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;text-align:center;">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#4CC9F0;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">Free Live Training</div>
+                <h3 style="font-family:'Chakra Petch',system-ui;font-size:1.5rem;font-weight:700;margin-bottom:0.5rem;">Webinar Title Goes Here</h3>
+                <p style="color:#8A95A9;font-size:0.875rem;margin-bottom:1.25rem;">Learn the exact strategy that generated $X in Y days.</p>
+                <div style="display:flex;justify-content:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+                    <div style="background:rgba(76,201,240,0.08);border:1px solid rgba(76,201,240,0.2);border-radius:0.375rem;padding:0.5rem 1rem;text-align:center;"><div style="font-family:'Chakra Petch',system-ui;font-weight:700;font-size:1.25rem;color:#4CC9F0;">Mar</div><div style="font-size:0.7rem;color:#8A95A9;">28th</div></div>
+                    <div style="background:rgba(76,201,240,0.08);border:1px solid rgba(76,201,240,0.2);border-radius:0.375rem;padding:0.5rem 1rem;text-align:center;"><div style="font-family:'Chakra Petch',system-ui;font-weight:700;font-size:1.25rem;color:#4CC9F0;">2:00</div><div style="font-size:0.7rem;color:#8A95A9;">PM EST</div></div>
+                    <div style="background:rgba(76,201,240,0.08);border:1px solid rgba(76,201,240,0.2);border-radius:0.375rem;padding:0.5rem 1rem;text-align:center;"><div style="font-family:'Chakra Petch',system-ui;font-weight:700;font-size:1.25rem;color:#4CC9F0;">60</div><div style="font-size:0.7rem;color:#8A95A9;">Minutes</div></div>
+                </div>
+                <form style="max-width:360px;margin:0 auto;display:flex;flex-direction:column;gap:0.6rem;" onsubmit="return false;">
+                    <input type="text" name="full_name" placeholder="Your Name" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+                    <input type="email" name="email" placeholder="Your Email" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+                    <button type="submit" style="padding:0.75rem;background:rgba(76,201,240,0.15);color:#4CC9F0;border:1px solid rgba(76,201,240,0.3);border-radius:0.375rem;font-weight:600;cursor:pointer;font-size:0.875rem;font-family:'Chakra Petch',system-ui;text-transform:uppercase;">Reserve My Seat</button>
+                </form>
+                <p style="color:#525E73;font-size:0.65rem;margin-top:0.75rem;">Limited spots available. A replay will be sent if you can't make it live.</p>
+            </div>`,
+        });
+
+        // ══════════════════════════════════════
+        // SALES & SOCIAL PROOF
+        // ══════════════════════════════════════
+
+        bm.add('pricing-table', {
+            label: 'Pricing Table',
+            category: 'Sales',
+            attributes: { title: '2-3 tier pricing cards with features, highlighted "popular" tier' },
+            content: `<div style="max-width:900px;margin:2rem auto;padding:0 1rem;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;align-items:stretch;">
+                    <div style="background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;padding:1.5rem;display:flex;flex-direction:column;">
+                        <div style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:0.9rem;margin-bottom:0.25rem;">Starter</div>
+                        <div style="margin-bottom:1rem;"><span style="font-family:'Chakra Petch',system-ui;font-size:2rem;font-weight:700;">$29</span><span style="color:#525E73;font-size:0.8rem;">/mo</span></div>
+                        <ul style="list-style:none;padding:0;margin:0 0 1.5rem 0;flex:1;display:flex;flex-direction:column;gap:0.5rem;">
+                            <li style="color:#8A95A9;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#06D6A0;">&#10003;</span> Feature one</li>
+                            <li style="color:#8A95A9;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#06D6A0;">&#10003;</span> Feature two</li>
+                            <li style="color:#525E73;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#525E73;">&#10007;</span> Feature three</li>
+                        </ul>
+                        <button style="padding:0.65rem;background:transparent;color:#8A95A9;border:1px solid #2A2E3D;border-radius:0.375rem;font-weight:600;cursor:pointer;font-size:0.8rem;width:100%;">Choose Plan</button>
+                    </div>
+                    <div style="background:rgba(17,19,26,0.8);border:2px solid rgba(6,214,160,0.4);border-radius:0.75rem;padding:1.5rem;display:flex;flex-direction:column;position:relative;">
+                        <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#06D6A0;color:#000;font-family:'Chakra Petch',system-ui;font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:0.2rem 0.75rem;border-radius:1rem;">Most Popular</div>
+                        <div style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:0.9rem;margin-bottom:0.25rem;">Professional</div>
+                        <div style="margin-bottom:1rem;"><span style="font-family:'Chakra Petch',system-ui;font-size:2rem;font-weight:700;color:#06D6A0;">$79</span><span style="color:#525E73;font-size:0.8rem;">/mo</span></div>
+                        <ul style="list-style:none;padding:0;margin:0 0 1.5rem 0;flex:1;display:flex;flex-direction:column;gap:0.5rem;">
+                            <li style="color:#8A95A9;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#06D6A0;">&#10003;</span> Everything in Starter</li>
+                            <li style="color:#8A95A9;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#06D6A0;">&#10003;</span> Feature three</li>
+                            <li style="color:#8A95A9;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#06D6A0;">&#10003;</span> Priority support</li>
+                        </ul>
+                        <button style="padding:0.65rem;background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.3);border-radius:0.375rem;font-weight:600;cursor:pointer;font-size:0.8rem;width:100%;">Choose Plan</button>
+                    </div>
+                    <div style="background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;padding:1.5rem;display:flex;flex-direction:column;">
+                        <div style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:0.9rem;margin-bottom:0.25rem;">Enterprise</div>
+                        <div style="margin-bottom:1rem;"><span style="font-family:'Chakra Petch',system-ui;font-size:2rem;font-weight:700;">$199</span><span style="color:#525E73;font-size:0.8rem;">/mo</span></div>
+                        <ul style="list-style:none;padding:0;margin:0 0 1.5rem 0;flex:1;display:flex;flex-direction:column;gap:0.5rem;">
+                            <li style="color:#8A95A9;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#06D6A0;">&#10003;</span> Everything in Pro</li>
+                            <li style="color:#8A95A9;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#06D6A0;">&#10003;</span> Dedicated account rep</li>
+                            <li style="color:#8A95A9;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#06D6A0;">&#10003;</span> Custom integrations</li>
+                        </ul>
+                        <button style="padding:0.65rem;background:transparent;color:#8A95A9;border:1px solid #2A2E3D;border-radius:0.375rem;font-weight:600;cursor:pointer;font-size:0.8rem;width:100%;">Contact Sales</button>
+                    </div>
+                </div>
+            </div>`,
+        });
+
+        bm.add('product-card', {
+            label: 'Product Card',
+            category: 'Sales',
+            attributes: { title: 'Single product — image, title, price, description, buy button' },
+            content: `<div style="max-width:320px;margin:1rem;background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;overflow:hidden;">
+                <div style="background:rgba(42,46,61,0.3);height:200px;display:flex;align-items:center;justify-content:center;">
+                    <span style="color:#525E73;font-size:0.8rem;font-family:'JetBrains Mono',monospace;">Product Image</span>
+                </div>
+                <div style="padding:1.25rem;">
+                    <h4 style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:1rem;margin-bottom:0.25rem;">Product Name</h4>
+                    <div style="margin-bottom:0.75rem;"><span style="font-family:'Chakra Petch',system-ui;font-weight:700;font-size:1.25rem;color:#06D6A0;">$49</span> <span style="text-decoration:line-through;color:#525E73;font-size:0.8rem;">$79</span></div>
+                    <p style="color:#8A95A9;font-size:0.8rem;line-height:1.5;margin-bottom:1rem;">Short description of what the customer gets and why they need it.</p>
+                    <button style="width:100%;padding:0.65rem;background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.3);border-radius:0.375rem;font-weight:600;cursor:pointer;font-size:0.8rem;">Add to Cart</button>
+                </div>
+            </div>`,
+        });
+
+        bm.add('feature-comparison', {
+            label: 'Feature Comparison',
+            category: 'Sales',
+            attributes: { title: 'Side-by-side comparison table — Us vs Them, or Free vs Pro' },
+            content: `<div style="max-width:600px;margin:2rem auto;padding:0 1rem;">
+                <table style="width:100%;border-collapse:collapse;font-size:0.8rem;">
+                    <thead><tr>
+                        <th style="text-align:left;padding:0.75rem 1rem;border-bottom:1px solid #2A2E3D;color:#8A95A9;font-family:'Chakra Petch',system-ui;font-size:0.7rem;text-transform:uppercase;">Feature</th>
+                        <th style="text-align:center;padding:0.75rem 1rem;border-bottom:1px solid #2A2E3D;color:#525E73;font-family:'Chakra Petch',system-ui;font-size:0.7rem;text-transform:uppercase;">Others</th>
+                        <th style="text-align:center;padding:0.75rem 1rem;border-bottom:1px solid #2A2E3D;color:#06D6A0;font-family:'Chakra Petch',system-ui;font-size:0.7rem;text-transform:uppercase;">Us</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr><td style="padding:0.6rem 1rem;border-bottom:1px solid rgba(42,46,61,0.4);color:#E8ECF1;">Feature one</td><td style="text-align:center;padding:0.6rem;border-bottom:1px solid rgba(42,46,61,0.4);color:#FF6B6B;">&#10007;</td><td style="text-align:center;padding:0.6rem;border-bottom:1px solid rgba(42,46,61,0.4);color:#06D6A0;">&#10003;</td></tr>
+                        <tr><td style="padding:0.6rem 1rem;border-bottom:1px solid rgba(42,46,61,0.4);color:#E8ECF1;">Feature two</td><td style="text-align:center;padding:0.6rem;border-bottom:1px solid rgba(42,46,61,0.4);color:#FF6B6B;">&#10007;</td><td style="text-align:center;padding:0.6rem;border-bottom:1px solid rgba(42,46,61,0.4);color:#06D6A0;">&#10003;</td></tr>
+                        <tr><td style="padding:0.6rem 1rem;border-bottom:1px solid rgba(42,46,61,0.4);color:#E8ECF1;">Feature three</td><td style="text-align:center;padding:0.6rem;border-bottom:1px solid rgba(42,46,61,0.4);color:#06D6A0;">&#10003;</td><td style="text-align:center;padding:0.6rem;border-bottom:1px solid rgba(42,46,61,0.4);color:#06D6A0;">&#10003;</td></tr>
+                        <tr><td style="padding:0.6rem 1rem;color:#E8ECF1;">Dedicated support</td><td style="text-align:center;padding:0.6rem;color:#FF6B6B;">&#10007;</td><td style="text-align:center;padding:0.6rem;color:#06D6A0;">&#10003;</td></tr>
+                    </tbody>
+                </table>
+            </div>`,
+        });
+
+        // Register Countdown as a custom component type with hours + zero-action traits
+        editor.Components.addType('countdown-block', {
+            isComponent: el => el && el.getAttribute && el.getAttribute('data-module') === 'countdown',
+            model: {
+                defaults: {
+                    tagName: 'div',
+                    attributes: {
+                        'data-module': 'countdown',
+                        'data-countdown-hours': '24',
+                        'data-countdown-redirect': '',
+                        'data-countdown-webhook': '',
+                    },
+                    traits: [
+                        {
+                            type: 'number',
+                            name: 'data-countdown-hours',
+                            label: 'Countdown Hours',
+                            placeholder: '24',
+                            min: 0.1,
+                            step: 1,
+                        },
+                        {
+                            type: 'text',
+                            name: 'data-countdown-redirect',
+                            label: 'Redirect URL (at zero)',
+                            placeholder: 'https://yoursite.com/expired',
+                        },
+                        {
+                            type: 'text',
+                            name: 'data-countdown-webhook',
+                            label: 'Webhook URL (fires at zero)',
+                            placeholder: 'https://n8n.example.com/webhook/...',
+                        },
+                    ],
+                },
+            },
+        });
+
+        // Register VSL as a custom component type with YouTube trait
+        editor.Components.addType('vsl-player', {
+            isComponent: el => el && el.getAttribute && el.getAttribute('data-module') === 'vsl',
+            model: {
+                defaults: {
+                    tagName: 'div',
+                    attributes: { 'data-module': 'vsl', 'data-youtube': '' },
+                    traits: [
+                        {
+                            type: 'text',
+                            name: 'data-youtube',
+                            label: 'YouTube URL',
+                            placeholder: 'https://www.youtube.com/watch?v=...',
+                        },
+                    ],
+                },
+                init() {
+                    this.on('change:attributes:data-youtube', this.updateThumb);
+                },
+                updateThumb() {
+                    const url = this.getAttributes()['data-youtube'] || '';
+                    const vid = extractYouTubeId(url);
+                    const thumb = this.components().models.find(c => {
+                        const el = c.getEl();
+                        return el && el.querySelector && el.querySelector('[data-vsl-thumb]');
+                    });
+                    // Update thumbnail background if we can find the video ID
+                    if (vid && thumb) {
+                        const imgEl = thumb.getEl().querySelector('[data-vsl-thumb]');
+                        if (imgEl) imgEl.style.backgroundImage = 'url(https://img.youtube.com/vi/' + vid + '/maxresdefault.jpg)';
+                    }
+                },
+            },
+        });
+
+        // Register Form as a custom component type with backend integration traits
+        editor.Components.addType('form-block', {
+            isComponent: el => el && el.getAttribute && el.getAttribute('data-module') === 'form',
+            model: {
+                defaults: {
+                    tagName: 'div',
+                    attributes: {
+                        'data-module': 'form',
+                        'data-endpoint': 'https://n8n.carltonaiservices.com/webhook/page-form',
+                        'data-type': 'lead',
+                        'data-sequence': '',
+                        'data-product-id': '',
+                        'data-price': '',
+                        'data-funnel-name': '',
+                        'data-step': '',
+                        'data-redirect': '',
+                        'data-stripe-key': '',
+                    },
+                    traits: [
+                        {
+                            type: 'text',
+                            name: 'data-endpoint',
+                            label: 'Webhook Endpoint',
+                            placeholder: 'https://n8n.carltonaiservices.com/webhook/page-form',
+                        },
+                        {
+                            type: 'select',
+                            name: 'data-type',
+                            label: 'Form Type',
+                            options: [
+                                { id: 'lead', name: 'Lead Capture' },
+                                { id: 'checkout', name: 'Checkout' },
+                                { id: 'upsell', name: 'Upsell' },
+                                { id: 'downsell', name: 'Downsell' },
+                            ],
+                        },
+                        {
+                            type: 'text',
+                            name: 'data-sequence',
+                            label: 'Email Sequence ID',
+                            placeholder: 'seq_lead_magnet_nurture',
+                        },
+                        {
+                            type: 'text',
+                            name: 'data-product-id',
+                            label: 'Offer / Product ID',
+                            placeholder: 'OFF_260325120000',
+                        },
+                        {
+                            type: 'number',
+                            name: 'data-price',
+                            label: 'Price (cents)',
+                            placeholder: '4999',
+                            min: 0,
+                        },
+                        {
+                            type: 'text',
+                            name: 'data-funnel-name',
+                            label: 'Funnel Name',
+                            placeholder: 'spring-launch',
+                        },
+                        {
+                            type: 'text',
+                            name: 'data-step',
+                            label: 'Funnel Step',
+                            placeholder: 'checkout',
+                        },
+                        {
+                            type: 'text',
+                            name: 'data-redirect',
+                            label: 'Redirect URL (on success)',
+                            placeholder: '/thank-you',
+                        },
+                        {
+                            type: 'text',
+                            name: 'data-stripe-key',
+                            label: 'Stripe Publishable Key',
+                            placeholder: 'pk_test_...',
+                        },
+                    ],
+                },
+            },
+        });
+
+        bm.add('vsl-section', {
+            label: 'Video Sales Letter',
+            category: 'Sales',
+            attributes: { title: 'YouTube video + headline + CTA — set URL in Settings tab' },
+            content: {
+                type: 'vsl-player',
+                attributes: { 'data-module': 'vsl', 'data-youtube': '' },
+                style: { 'max-width': '720px', margin: '2rem auto', padding: '0 1rem', 'text-align': 'center' },
+                components: [
+                    {
+                        tagName: 'h2',
+                        content: 'Watch This Short Video to Learn How...',
+                        style: { 'font-family': "'Chakra Petch',system-ui", 'font-size': '1.5rem', 'font-weight': '700', 'margin-bottom': '1.25rem' },
+                    },
+                    {
+                        tagName: 'div',
+                        attributes: { 'data-vsl-wrapper': 'true' },
+                        style: { position: 'relative', 'padding-bottom': '56.25%', background: '#11131A', border: '1px solid #2A2E3D', 'border-radius': '0.75rem', overflow: 'hidden', 'margin-bottom': '1.5rem', cursor: 'pointer' },
+                        components: [{
+                            tagName: 'div',
+                            attributes: { 'data-vsl-thumb': 'true' },
+                            style: { position: 'absolute', inset: '0', display: 'flex', 'align-items': 'center', 'justify-content': 'center', 'background-size': 'cover', 'background-position': 'center' },
+                            components: [{
+                                tagName: 'div',
+                                style: { width: '68px', height: '68px', 'border-radius': '50%', background: 'rgba(6,214,160,0.2)', border: '2px solid rgba(6,214,160,0.5)', display: 'flex', 'align-items': 'center', 'justify-content': 'center', 'backdrop-filter': 'blur(4px)' },
+                                content: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M8 5l12 7-12 7V5z" fill="#06D6A0"/></svg>',
+                            }],
+                        }],
+                    },
+                    {
+                        tagName: 'p',
+                        content: 'Discover the exact system that helps businesses like yours achieve results.',
+                        style: { color: '#8A95A9', 'font-size': '1rem', 'margin-bottom': '1.5rem', 'line-height': '1.6' },
+                    },
+                    {
+                        tagName: 'button',
+                        content: 'Get Started Now',
+                        style: { padding: '0.875rem 2.5rem', background: 'rgba(6,214,160,0.15)', color: '#06D6A0', border: '1px solid rgba(6,214,160,0.3)', 'border-radius': '0.5rem', 'font-weight': '600', cursor: 'pointer', 'font-size': '1rem', 'font-family': "'Chakra Petch',system-ui", 'text-transform': 'uppercase', 'letter-spacing': '0.04em' },
+                    },
+                ],
+            },
+        });
+
+        bm.add('social-proof-bar', {
+            label: 'Social Proof Bar',
+            category: 'Sales',
+            attributes: { title: '"As seen in" logos, customer count, star ratings' },
+            content: `<div style="padding:1.5rem 1rem;border-top:1px solid rgba(42,46,61,0.4);border-bottom:1px solid rgba(42,46,61,0.4);background:rgba(17,19,26,0.4);text-align:center;">
+                <p style="color:#525E73;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;font-family:'JetBrains Mono',monospace;margin-bottom:1rem;">Trusted by 500+ businesses worldwide</p>
+                <div style="display:flex;justify-content:center;align-items:center;gap:2rem;flex-wrap:wrap;opacity:0.5;">
+                    <div style="width:100px;height:30px;background:rgba(255,255,255,0.08);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#8A95A9;">Logo 1</div>
+                    <div style="width:100px;height:30px;background:rgba(255,255,255,0.08);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#8A95A9;">Logo 2</div>
+                    <div style="width:100px;height:30px;background:rgba(255,255,255,0.08);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#8A95A9;">Logo 3</div>
+                    <div style="width:100px;height:30px;background:rgba(255,255,255,0.08);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#8A95A9;">Logo 4</div>
+                    <div style="width:100px;height:30px;background:rgba(255,255,255,0.08);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#8A95A9;">Logo 5</div>
+                </div>
+            </div>`,
+        });
+
+        bm.add('faq-accordion', {
+            label: 'FAQ Accordion',
+            category: 'Sales',
+            attributes: { title: 'Click-to-expand Q&A — double-click text to edit questions and answers' },
+            content: `<div data-module="faq" style="max-width:640px;margin:2rem auto;padding:0 1rem;">
+                <h3 style="font-family:'Chakra Petch',system-ui;font-size:1.25rem;font-weight:700;text-align:center;margin-bottom:1.5rem;">Frequently Asked Questions</h3>
+                <div class="faq-item" style="background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.5rem;margin-bottom:0.5rem;">
+                    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')" style="padding:0.875rem 1rem;cursor:pointer;font-weight:500;font-size:0.875rem;display:flex;justify-content:space-between;align-items:center;user-select:none;">
+                        <span>How does this work?</span>
+                        <span class="faq-icon" style="color:#525E73;font-size:0.8rem;transition:transform 0.2s;">+</span>
+                    </div>
+                    <div class="faq-a" style="max-height:0;overflow:hidden;transition:max-height 0.3s ease;padding:0 1rem;">
+                        <div style="padding-bottom:0.875rem;color:#8A95A9;font-size:0.8rem;line-height:1.6;">Your answer goes here. Explain clearly and concisely to remove purchase anxiety.</div>
+                    </div>
+                </div>
+                <div class="faq-item" style="background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.5rem;margin-bottom:0.5rem;">
+                    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')" style="padding:0.875rem 1rem;cursor:pointer;font-weight:500;font-size:0.875rem;display:flex;justify-content:space-between;align-items:center;user-select:none;">
+                        <span>What's included?</span>
+                        <span class="faq-icon" style="color:#525E73;font-size:0.8rem;transition:transform 0.2s;">+</span>
+                    </div>
+                    <div class="faq-a" style="max-height:0;overflow:hidden;transition:max-height 0.3s ease;padding:0 1rem;">
+                        <div style="padding-bottom:0.875rem;color:#8A95A9;font-size:0.8rem;line-height:1.6;">Detail everything the customer receives when they purchase or sign up.</div>
+                    </div>
+                </div>
+                <div class="faq-item" style="background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.5rem;margin-bottom:0.5rem;">
+                    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')" style="padding:0.875rem 1rem;cursor:pointer;font-weight:500;font-size:0.875rem;display:flex;justify-content:space-between;align-items:center;user-select:none;">
+                        <span>Is there a guarantee?</span>
+                        <span class="faq-icon" style="color:#525E73;font-size:0.8rem;transition:transform 0.2s;">+</span>
+                    </div>
+                    <div class="faq-a" style="max-height:0;overflow:hidden;transition:max-height 0.3s ease;padding:0 1rem;">
+                        <div style="padding-bottom:0.875rem;color:#8A95A9;font-size:0.8rem;line-height:1.6;">Yes! We offer a 30-day money-back guarantee. No questions asked.</div>
+                    </div>
+                </div>
+                <div class="faq-item" style="background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.5rem;">
+                    <div class="faq-q" onclick="this.parentElement.classList.toggle('open')" style="padding:0.875rem 1rem;cursor:pointer;font-weight:500;font-size:0.875rem;display:flex;justify-content:space-between;align-items:center;user-select:none;">
+                        <span>How do I get support?</span>
+                        <span class="faq-icon" style="color:#525E73;font-size:0.8rem;transition:transform 0.2s;">+</span>
+                    </div>
+                    <div class="faq-a" style="max-height:0;overflow:hidden;transition:max-height 0.3s ease;padding:0 1rem;">
+                        <div style="padding-bottom:0.875rem;color:#8A95A9;font-size:0.8rem;line-height:1.6;">Email us anytime or use the live chat. We typically respond within 2 hours.</div>
+                    </div>
+                </div>
+            </div>`,
+        });
+
+        bm.add('guarantee-badge', {
+            label: 'Guarantee Badge',
+            category: 'Sales',
+            attributes: { title: 'Money-back guarantee seal with text — reduces purchase anxiety' },
+            content: `<div style="max-width:480px;margin:2rem auto;padding:1.5rem;display:flex;align-items:center;gap:1rem;background:rgba(6,214,160,0.04);border:1px solid rgba(6,214,160,0.15);border-radius:0.75rem;">
+                <div style="flex-shrink:0;width:60px;height:60px;border-radius:50%;border:2px solid rgba(6,214,160,0.4);background:rgba(6,214,160,0.08);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">&#128170;</div>
+                <div>
+                    <h4 style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:0.9rem;margin-bottom:0.25rem;color:#06D6A0;">30-Day Money-Back Guarantee</h4>
+                    <p style="color:#8A95A9;font-size:0.78rem;line-height:1.5;">Try it risk-free. If you're not completely satisfied, we'll refund every penny. No questions asked.</p>
+                </div>
+            </div>`,
+        });
+
+        // ══════════════════════════════════════
+        // CHECKOUT
+        // ══════════════════════════════════════
+
+        bm.add('checkout-form', {
+            label: 'Checkout Form',
+            category: 'Checkout',
+            attributes: { title: 'Full checkout — contact, payment, shipping/billing. Posts to webhook.' },
+            content: `<div data-module="form" data-endpoint="https://n8n.carltonaiservices.com/webhook/page-form" data-type="checkout" style="max-width:500px;margin:1rem;background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;padding:1.5rem;">
+                <h3 style="font-family:'Chakra Petch',system-ui;font-size:1.125rem;font-weight:700;margin-bottom:1.25rem;">Complete Your Order</h3>
+                <form style="display:flex;flex-direction:column;gap:0.75rem;" onsubmit="return false;">
+                    <!-- Contact Info -->
+                    <div style="font-family:'Chakra Petch',system-ui;font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#8A95A9;margin-bottom:-0.25rem;">Contact Information</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <input type="text" name="first_name" placeholder="First Name" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+                        <input type="text" name="last_name" placeholder="Last Name" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+                    </div>
+                    <input type="email" name="email" placeholder="Email Address" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+                    <input type="tel" name="phone" placeholder="Phone Number" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+
+                    <!-- Payment (Stripe.js secure card element) -->
+                    <hr style="border:none;border-top:1px solid #2A2E3D;margin:0.25rem 0;">
+                    <div style="font-family:'Chakra Petch',system-ui;font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#8A95A9;margin-bottom:-0.25rem;display:flex;align-items:center;gap:0.4rem;"><span style="color:#06D6A0;">&#128274;</span> Payment Details</div>
+                    <div id="card-element" style="padding:0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;min-height:40px;"><span style="color:#525E73;font-size:0.75rem;">Stripe card element loads here</span></div>
+                    <div id="card-errors" style="color:#FF6B6B;font-size:0.75rem;min-height:1rem;"></div>
+
+                    <!-- Shipping Address -->
+                    <hr style="border:none;border-top:1px solid #2A2E3D;margin:0.25rem 0;">
+                    <div style="font-family:'Chakra Petch',system-ui;font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#8A95A9;margin-bottom:-0.25rem;">Shipping Address</div>
+                    <input type="text" name="ship_address" placeholder="Street Address" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+                    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:0.75rem;">
+                        <input type="text" name="ship_city" placeholder="City" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+                        <input type="text" name="ship_state" placeholder="State" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+                        <input type="text" name="ship_zip" placeholder="ZIP" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+                    </div>
+
+                    <!-- Billing Address Toggle -->
+                    <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.78rem;color:#8A95A9;margin:0.25rem 0;">
+                        <input type="checkbox" name="billing_same" checked onclick="var b=this.closest('form').querySelector('.billing-section');b.style.display=this.checked?'none':'flex';" style="accent-color:#06D6A0;width:16px;height:16px;">
+                        Billing address same as shipping
+                    </label>
+
+                    <!-- Billing Address (hidden by default) -->
+                    <div class="billing-section" style="display:none;flex-direction:column;gap:0.75rem;">
+                        <div style="font-family:'Chakra Petch',system-ui;font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#8A95A9;margin-bottom:-0.25rem;">Billing Address</div>
+                        <input type="text" name="bill_address" placeholder="Street Address" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+                        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:0.75rem;">
+                            <input type="text" name="bill_city" placeholder="City" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+                            <input type="text" name="bill_state" placeholder="State" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+                            <input type="text" name="bill_zip" placeholder="ZIP" style="padding:0.65rem 0.75rem;background:rgba(255,255,255,0.03);border:1px solid #2A2E3D;border-radius:0.375rem;color:#E8ECF1;font-size:0.8rem;outline:none;width:100%;box-sizing:border-box;">
+                        </div>
+                    </div>
+
+                    <button type="submit" style="padding:0.875rem;background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.3);border-radius:0.5rem;font-weight:700;cursor:pointer;font-size:0.9rem;font-family:'Chakra Petch',system-ui;text-transform:uppercase;letter-spacing:0.04em;margin-top:0.25rem;">Complete Purchase</button>
+                </form>
+                <div style="display:flex;justify-content:center;gap:1rem;margin-top:0.75rem;opacity:0.5;font-size:0.65rem;color:#8A95A9;">
+                    <span>&#128274; SSL Encrypted</span>
+                    <span>&#128179; Secure Payment</span>
+                </div>
+            </div>`,
+        });
+
+        bm.add('order-summary', {
+            label: 'Order Summary',
+            category: 'Checkout',
+            attributes: { title: 'Line items, subtotal, total — sits beside checkout form' },
+            content: `<div style="max-width:360px;margin:1rem;background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;padding:1.5rem;">
+                <h4 style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:0.9rem;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid #2A2E3D;">Order Summary</h4>
+                <div style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1rem;">
+                    <div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span style="color:#E8ECF1;">Product Name</span><span style="color:#E8ECF1;">$79.00</span></div>
+                    <div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span style="color:#8A95A9;">Discount</span><span style="color:#06D6A0;">-$30.00</span></div>
+                </div>
+                <div style="border-top:1px solid #2A2E3D;padding-top:0.75rem;display:flex;justify-content:space-between;font-size:0.9rem;">
+                    <span style="font-family:'Chakra Petch',system-ui;font-weight:600;">Total</span>
+                    <span style="font-family:'Chakra Petch',system-ui;font-weight:700;color:#06D6A0;">$49.00</span>
+                </div>
+            </div>`,
+        });
+
+        bm.add('order-bump', {
+            label: 'Order Bump',
+            category: 'Checkout',
+            attributes: { title: 'Checkbox add-on — "Add X for only $Y more" inside checkout' },
+            content: `<div style="max-width:480px;margin:0.75rem auto;padding:1rem;background:rgba(255,217,61,0.04);border:1px dashed rgba(255,217,61,0.3);border-radius:0.5rem;">
+                <label style="display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;">
+                    <input type="checkbox" style="margin-top:0.25rem;accent-color:#FFD93D;width:18px;height:18px;flex-shrink:0;">
+                    <div>
+                        <div style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:0.85rem;color:#FFD93D;margin-bottom:0.2rem;">YES! Add the Bonus Pack for just $19</div>
+                        <p style="color:#8A95A9;font-size:0.75rem;line-height:1.5;">Get the complete template library, cheat sheets, and video walkthroughs. Normally $49 — yours for $19 when you add it now.</p>
+                    </div>
+                </label>
+            </div>`,
+        });
+
+        bm.add('trust-strip', {
+            label: 'Trust Strip',
+            category: 'Checkout',
+            attributes: { title: 'SSL badge + payment icons + guarantee — below checkout form' },
+            content: `<div style="max-width:480px;margin:1rem auto;display:flex;justify-content:center;align-items:center;gap:1.5rem;flex-wrap:wrap;padding:0.75rem;opacity:0.6;">
+                <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.7rem;color:#8A95A9;"><span style="color:#06D6A0;">&#128274;</span> SSL Encrypted</div>
+                <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.7rem;color:#8A95A9;"><span style="color:#4CC9F0;">&#128179;</span> Secure Payment</div>
+                <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.7rem;color:#8A95A9;"><span style="color:#FFD93D;">&#9733;</span> 30-Day Guarantee</div>
+            </div>`,
+        });
+
+        bm.add('confirmation-page', {
+            label: 'Confirmation Page',
+            category: 'Checkout',
+            attributes: { title: 'Order confirmation — auto-populates with purchase data from session' },
+            content: `<div data-module="confirmation" style="max-width:600px;margin:3rem auto;padding:2.5rem;background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;text-align:center;">
+                <div style="width:64px;height:64px;margin:0 auto 1.25rem;background:rgba(6,214,160,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.75rem;">&#10003;</div>
+                <h2 style="font-family:'Chakra Petch',system-ui;font-size:1.75rem;font-weight:700;margin-bottom:0.5rem;">Thank You!</h2>
+                <p style="color:#8A95A9;font-size:0.9rem;margin-bottom:0.25rem;">Your order has been confirmed.</p>
+                <p style="color:#525E73;font-size:0.8rem;margin-bottom:2rem;" data-confirmation="order-id">Order ID: loading...</p>
+                <div style="text-align:left;background:rgba(255,255,255,0.02);border:1px solid #2A2E3D;border-radius:0.5rem;padding:1.25rem;margin-bottom:1.5rem;">
+                    <h4 style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:0.85rem;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid #2A2E3D;">Order Summary</h4>
+                    <div data-confirmation="line-items" style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1rem;">
+                        <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:#8A95A9;"><span>Loading items...</span><span></span></div>
+                    </div>
+                    <div style="border-top:1px solid #2A2E3D;padding-top:0.75rem;display:flex;justify-content:space-between;font-size:0.95rem;">
+                        <span style="font-family:'Chakra Petch',system-ui;font-weight:600;">Total</span>
+                        <span style="font-family:'Chakra Petch',system-ui;font-weight:700;color:#06D6A0;" data-confirmation="total">$0.00</span>
+                    </div>
+                </div>
+                <div style="background:rgba(6,214,160,0.04);border:1px solid rgba(6,214,160,0.15);border-radius:0.5rem;padding:1.25rem;text-align:left;">
+                    <h4 style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:0.85rem;margin-bottom:0.5rem;">What's Next</h4>
+                    <p style="color:#8A95A9;font-size:0.8rem;line-height:1.6;">Check your email for your receipt and access instructions. If you have any questions, reply to the confirmation email.</p>
+                </div>
+            </div>`,
+        });
+
+        // ══════════════════════════════════════
+        // ACCOUNT MANAGEMENT
+        // ══════════════════════════════════════
+
+        bm.add('subscription-status', {
+            label: 'Subscription Status',
+            category: 'Account',
+            attributes: { title: 'Shows plan name, price, billing date, and status — fetches from Stripe via token' },
+            content: `<div data-module="account" data-type="subscription-status" data-endpoint="https://n8n.carltonaiservices.com/webhook/stripe-manage" style="max-width:520px;margin:2rem auto;background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;padding:1.75rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+                    <h3 style="font-family:'Chakra Petch',system-ui;font-size:1rem;font-weight:700;">Your Subscription</h3>
+                    <span data-account="status-badge" style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;font-weight:600;padding:0.25rem 0.6rem;border-radius:9999px;background:rgba(6,214,160,0.12);color:#06D6A0;letter-spacing:0.03em;">ACTIVE</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.25rem;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="color:#8A95A9;font-size:0.8rem;">Plan</span>
+                        <span data-account="plan-name" style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:0.85rem;color:#E8ECF1;">Loading...</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="color:#8A95A9;font-size:0.8rem;">Price</span>
+                        <span data-account="plan-price" style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:0.85rem;color:#E8ECF1;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="color:#8A95A9;font-size:0.8rem;">Next billing date</span>
+                        <span data-account="next-billing" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:#E8ECF1;">—</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="color:#8A95A9;font-size:0.8rem;">Member since</span>
+                        <span data-account="member-since" style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:#525E73;">—</span>
+                    </div>
+                </div>
+                <div style="border-top:1px solid #2A2E3D;padding-top:1rem;">
+                    <div data-account="status-message" style="font-size:0.78rem;color:#8A95A9;line-height:1.5;"></div>
+                </div>
+            </div>`,
+        });
+
+        bm.add('pause-billing', {
+            label: 'Pause Billing',
+            category: 'Account',
+            attributes: { title: 'Friendly pause prompt — the #1 retention hack. Offer before cancel.' },
+            content: `<div data-module="account" data-type="pause-billing" data-endpoint="https://n8n.carltonaiservices.com/webhook/stripe-manage" style="max-width:520px;margin:1rem auto;padding:1.25rem 1.5rem;background:rgba(255,217,61,0.04);border:1px solid rgba(255,217,61,0.15);border-radius:0.75rem;">
+                <div style="display:flex;align-items:flex-start;gap:1rem;">
+                    <div style="flex-shrink:0;width:40px;height:40px;border-radius:0.5rem;background:rgba(255,217,61,0.1);display:flex;align-items:center;justify-content:center;font-size:1.25rem;">&#9208;</div>
+                    <div style="flex:1;">
+                        <h4 style="font-family:'Chakra Petch',system-ui;font-weight:600;font-size:0.9rem;margin-bottom:0.35rem;color:#E8ECF1;">Need a break?</h4>
+                        <p style="color:#8A95A9;font-size:0.8rem;line-height:1.6;margin-bottom:1rem;">Pause your billing instead of canceling. Your account stays safe and you can pick back up anytime — no setup needed.</p>
+                        <button data-account-action="pause" style="padding:0.6rem 1.25rem;background:rgba(255,217,61,0.12);color:#FFD93D;border:1px solid rgba(255,217,61,0.25);border-radius:0.375rem;font-weight:600;cursor:pointer;font-size:0.8rem;font-family:'Chakra Petch',system-ui;transition:opacity 0.15s;">Pause My Billing</button>
+                        <button data-account-action="resume" style="display:none;padding:0.6rem 1.25rem;background:rgba(6,214,160,0.12);color:#06D6A0;border:1px solid rgba(6,214,160,0.25);border-radius:0.375rem;font-weight:600;cursor:pointer;font-size:0.8rem;font-family:'Chakra Petch',system-ui;transition:opacity 0.15s;">Resume My Billing</button>
+                    </div>
+                </div>
+            </div>`,
+        });
+
+        bm.add('cancel-subscription', {
+            label: 'Cancel Subscription',
+            category: 'Account',
+            attributes: { title: 'Clean, visible cancel — no guilt trips, no exit maze. Shows remaining access.' },
+            content: `<div data-module="account" data-type="cancel-subscription" data-endpoint="https://n8n.carltonaiservices.com/webhook/stripe-manage" style="max-width:520px;margin:1rem auto;padding:1.25rem 1.5rem;background:rgba(17,19,26,0.6);border:1px solid #2A2E3D;border-radius:0.75rem;">
+                <div data-account="cancel-section">
+                    <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <span style="color:#8A95A9;font-size:0.8rem;">Want to cancel?</span>
+                        <button data-account-action="cancel" style="padding:0.5rem 1rem;background:transparent;color:#FF6B6B;border:1px solid rgba(255,107,107,0.25);border-radius:0.375rem;font-weight:500;cursor:pointer;font-size:0.78rem;font-family:'Chakra Petch',system-ui;transition:opacity 0.15s;">Cancel Subscription</button>
+                    </div>
+                </div>
+                <!-- Cancel confirmation modal (hidden by default) -->
+                <div data-account="cancel-confirm" style="display:none;margin-top:1rem;padding:1rem;background:rgba(255,107,107,0.04);border:1px solid rgba(255,107,107,0.15);border-radius:0.5rem;">
+                    <p style="font-size:0.85rem;color:#E8ECF1;margin-bottom:0.25rem;font-weight:500;">Are you sure?</p>
+                    <p style="font-size:0.78rem;color:#8A95A9;margin-bottom:1rem;">You'll still have full access until <span data-account="access-until" style="color:#E8ECF1;font-weight:600;">your billing period ends</span>.</p>
+                    <div style="display:flex;gap:0.5rem;">
+                        <button data-account-action="confirm-cancel" style="padding:0.5rem 1rem;background:rgba(255,107,107,0.12);color:#FF6B6B;border:1px solid rgba(255,107,107,0.25);border-radius:0.375rem;font-weight:600;cursor:pointer;font-size:0.78rem;font-family:'Chakra Petch',system-ui;">Yes, Cancel</button>
+                        <button data-account-action="cancel-back" style="padding:0.5rem 1rem;background:rgba(255,255,255,0.04);color:#8A95A9;border:1px solid #2A2E3D;border-radius:0.375rem;font-weight:500;cursor:pointer;font-size:0.78rem;font-family:'Chakra Petch',system-ui;">Go Back</button>
+                    </div>
+                </div>
+                <!-- Post-cancel state (hidden by default) -->
+                <div data-account="cancel-done" style="display:none;margin-top:1rem;">
+                    <p style="font-size:0.85rem;color:#E8ECF1;margin-bottom:0.5rem;">Subscription cancelled.</p>
+                    <p style="font-size:0.78rem;color:#8A95A9;margin-bottom:0.75rem;">You still have access until <span data-account="access-until-done" style="color:#E8ECF1;font-weight:600;"></span>.</p>
+                    <button data-account-action="reactivate" style="padding:0.5rem 1rem;background:rgba(6,214,160,0.12);color:#06D6A0;border:1px solid rgba(6,214,160,0.25);border-radius:0.375rem;font-weight:600;cursor:pointer;font-size:0.78rem;font-family:'Chakra Petch',system-ui;">Changed your mind? Reactivate</button>
+                </div>
+            </div>`,
+        });
+
+        bm.add('manage-payment', {
+            label: 'Update Payment',
+            category: 'Account',
+            attributes: { title: 'Redirects to Stripe portal for PCI-compliant card updates' },
+            content: `<div data-module="account" data-type="manage-payment" data-endpoint="https://n8n.carltonaiservices.com/webhook/stripe-manage" style="max-width:520px;margin:1rem auto;padding:1.25rem 1.5rem;background:rgba(17,19,26,0.6);border:1px solid #2A2E3D;border-radius:0.75rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div>
+                        <span style="color:#8A95A9;font-size:0.8rem;">Payment method</span>
+                        <div data-account="payment-display" style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:#525E73;margin-top:0.25rem;">**** **** **** ****</div>
+                    </div>
+                    <button data-account-action="update-payment" style="padding:0.5rem 1rem;background:rgba(76,201,240,0.1);color:#4CC9F0;border:1px solid rgba(76,201,240,0.2);border-radius:0.375rem;font-weight:500;cursor:pointer;font-size:0.78rem;font-family:'Chakra Petch',system-ui;transition:opacity 0.15s;">Update Payment Method</button>
+                </div>
+            </div>`,
+        });
+
+        bm.add('reactivation-cta', {
+            label: 'Reactivation CTA',
+            category: 'Account',
+            attributes: { title: 'Welcome-back prompt for paused or cancelled subscribers' },
+            content: `<div data-module="account" data-type="reactivation" data-endpoint="https://n8n.carltonaiservices.com/webhook/stripe-manage" style="max-width:520px;margin:2rem auto;padding:2rem;background:linear-gradient(135deg,rgba(6,214,160,0.06) 0%,rgba(76,201,240,0.06) 100%);border:1px solid rgba(6,214,160,0.15);border-radius:0.75rem;text-align:center;">
+                <div style="font-size:1.75rem;margin-bottom:0.75rem;">&#128075;</div>
+                <h3 style="font-family:'Chakra Petch',system-ui;font-size:1.125rem;font-weight:700;margin-bottom:0.5rem;">Welcome Back</h3>
+                <p style="color:#8A95A9;font-size:0.85rem;line-height:1.6;margin-bottom:1.25rem;max-width:360px;margin-left:auto;margin-right:auto;">Ready to pick up where you left off? Reactivate your subscription and get instant access again.</p>
+                <button data-account-action="reactivate" style="padding:0.75rem 2rem;background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.3);border-radius:0.5rem;font-weight:700;cursor:pointer;font-size:0.9rem;font-family:'Chakra Petch',system-ui;text-transform:uppercase;letter-spacing:0.03em;">Reactivate My Subscription</button>
+            </div>`,
+        });
+
+        // ══════════════════════════════════════
+        // UPSELL / DOWNSELL
+        // ══════════════════════════════════════
+
+        bm.add('oto-box', {
+            label: 'One-Time Offer',
+            category: 'Upsell / Offers',
+            attributes: { title: 'Upsell box — strikethrough price + urgency + Yes/No buttons' },
+            content: `<div data-module="form" data-endpoint="https://n8n.carltonaiservices.com/webhook/page-form" data-type="upsell" style="max-width:560px;margin:2rem auto;padding:2rem;background:rgba(17,19,26,0.8);border:2px solid rgba(255,217,61,0.3);border-radius:0.75rem;text-align:center;">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#FFD93D;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">&#9200; One-Time Offer — This Page Only</div>
+                <h3 style="font-family:'Chakra Petch',system-ui;font-size:1.5rem;font-weight:700;margin-bottom:0.5rem;">Upgrade Your Order</h3>
+                <p style="color:#8A95A9;font-size:0.9rem;line-height:1.6;margin-bottom:1.25rem;">Get the premium package with everything included. This special price is <strong style="color:#FFD93D;">only available right now</strong>.</p>
+                <div style="margin-bottom:1.5rem;"><span style="text-decoration:line-through;color:#525E73;font-size:1rem;">$197</span> <span style="font-family:'Chakra Petch',system-ui;font-size:2rem;font-weight:700;color:#06D6A0;margin-left:0.5rem;">$67</span></div>
+                <div style="display:flex;flex-direction:column;gap:0.5rem;max-width:320px;margin:0 auto;">
+                    <button style="padding:0.875rem;background:rgba(6,214,160,0.15);color:#06D6A0;border:1px solid rgba(6,214,160,0.3);border-radius:0.5rem;font-weight:700;cursor:pointer;font-size:0.9rem;font-family:'Chakra Petch',system-ui;text-transform:uppercase;">Yes! Upgrade My Order</button>
+                    <button style="padding:0.6rem;background:transparent;color:#525E73;border:none;cursor:pointer;font-size:0.75rem;text-decoration:underline;">No thanks, I'll pass on this deal</button>
+                </div>
+            </div>`,
+        });
+
+        bm.add('downsell-card', {
+            label: 'Downsell Card',
+            category: 'Upsell / Offers',
+            attributes: { title: 'Reduced offer — "Not ready? Get X instead for less"' },
+            content: `<div data-module="form" data-endpoint="https://n8n.carltonaiservices.com/webhook/page-form" data-type="downsell" style="max-width:480px;margin:2rem auto;padding:1.75rem;background:rgba(17,19,26,0.8);border:1px solid #2A2E3D;border-radius:0.75rem;text-align:center;">
+                <h3 style="font-family:'Chakra Petch',system-ui;font-size:1.125rem;font-weight:700;margin-bottom:0.5rem;">Wait — Here's a Lighter Option</h3>
+                <p style="color:#8A95A9;font-size:0.85rem;line-height:1.5;margin-bottom:1.25rem;">Not ready for the full package? Get the essentials at a reduced price.</p>
+                <div style="margin-bottom:1.25rem;"><span style="font-family:'Chakra Petch',system-ui;font-size:1.75rem;font-weight:700;color:#4CC9F0;">$27</span> <span style="color:#525E73;font-size:0.8rem;">one-time</span></div>
+                <ul style="list-style:none;padding:0;margin:0 auto 1.25rem;max-width:280px;display:flex;flex-direction:column;gap:0.4rem;">
+                    <li style="color:#8A95A9;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#4CC9F0;">&#10003;</span> Core feature included</li>
+                    <li style="color:#8A95A9;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#4CC9F0;">&#10003;</span> Basic templates</li>
+                    <li style="color:#8A95A9;font-size:0.8rem;display:flex;align-items:center;gap:0.5rem;"><span style="color:#4CC9F0;">&#10003;</span> Email support</li>
+                </ul>
+                <button style="padding:0.75rem 2rem;background:rgba(76,201,240,0.15);color:#4CC9F0;border:1px solid rgba(76,201,240,0.3);border-radius:0.5rem;font-weight:600;cursor:pointer;font-size:0.85rem;">Get the Essentials</button>
+            </div>`,
+        });
+
+        bm.add('countdown-timer', {
+            label: 'Countdown Timer',
+            category: 'Upsell / Offers',
+            attributes: { title: 'Live countdown — set hours in Settings tab. Counts down in real time.' },
+            content: `<div data-module="countdown" data-countdown-hours="24" style="max-width:500px;margin:1.5rem auto;text-align:center;padding:1.25rem;">
+                <p style="color:#FF6B6B;font-family:'JetBrains Mono',monospace;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">&#9200; This offer expires in</p>
+                <div style="display:flex;justify-content:center;gap:0.75rem;">
+                    <div style="background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);border-radius:0.5rem;padding:0.75rem 1rem;min-width:60px;"><div data-cd-h style="font-family:'Chakra Petch',system-ui;font-weight:700;font-size:1.75rem;color:#FF6B6B;">23</div><div style="font-size:0.6rem;color:#8A95A9;text-transform:uppercase;">Hours</div></div>
+                    <div style="background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);border-radius:0.5rem;padding:0.75rem 1rem;min-width:60px;"><div data-cd-m style="font-family:'Chakra Petch',system-ui;font-weight:700;font-size:1.75rem;color:#FF6B6B;">59</div><div style="font-size:0.6rem;color:#8A95A9;text-transform:uppercase;">Minutes</div></div>
+                    <div style="background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);border-radius:0.5rem;padding:0.75rem 1rem;min-width:60px;"><div data-cd-s style="font-family:'Chakra Petch',system-ui;font-weight:700;font-size:1.75rem;color:#FF6B6B;">59</div><div style="font-size:0.6rem;color:#8A95A9;text-transform:uppercase;">Seconds</div></div>
+                </div>
+            </div>`,
+        });
+
+        // ══════════════════════════════════════
+        // POWER / UTILITY (new additions)
+        // ══════════════════════════════════════
+
+        bm.add('custom-html', {
+            label: 'Custom HTML/JS',
+            category: 'Utility',
+            attributes: { title: 'Paste any raw HTML, script, embed, or tracking pixel — full access' },
+            content: `<div data-module="custom-code" style="padding:1.5rem;margin:1rem 0;background:rgba(42,46,61,0.15);border:1px dashed #2A2E3D;border-radius:0.5rem;min-height:80px;">
+                <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:#525E73;text-align:center;">
+                    <div style="margin-bottom:0.5rem;">&#60;/&#62; Custom HTML / JavaScript</div>
+                    <div style="font-size:0.6rem;">Double-click to edit. Paste any embed, script, or widget code.</div>
+                </div>
+            </div>`,
+        });
+
+        bm.add('sticky-banner', {
+            label: 'Sticky Banner',
+            category: 'Utility',
+            attributes: { title: 'Top-of-page bar that stays on scroll — announcements, CTAs' },
+            content: `<div style="background:rgba(6,214,160,0.1);border-bottom:1px solid rgba(6,214,160,0.2);padding:0.6rem 1rem;text-align:center;position:sticky;top:0;z-index:50;">
+                <div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;flex-wrap:wrap;">
+                    <span style="font-size:0.8rem;color:#E8ECF1;">&#127881; Limited time: <strong style="color:#06D6A0;">50% off</strong> all plans</span>
+                    <a href="#" style="font-size:0.7rem;font-weight:600;color:#06D6A0;text-decoration:none;padding:0.25rem 0.75rem;border:1px solid rgba(6,214,160,0.3);border-radius:1rem;">Claim Now &rarr;</a>
+                </div>
+            </div>`,
+        });
+
+        bm.add('progress-bar', {
+            label: 'Progress Bar',
+            category: 'Utility',
+            attributes: { title: 'Step indicator — shows progress through a multi-page funnel' },
+            content: `<div style="max-width:500px;margin:1.5rem auto;padding:0 1rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+                    <div style="display:flex;align-items:center;gap:0.4rem;"><div style="width:24px;height:24px;border-radius:50%;background:#06D6A0;color:#000;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;">1</div><span style="font-size:0.7rem;color:#06D6A0;font-weight:500;">Info</span></div>
+                    <div style="flex:1;height:2px;background:#2A2E3D;margin:0 0.5rem;position:relative;"><div style="position:absolute;inset:0;width:100%;background:#06D6A0;border-radius:1px;"></div></div>
+                    <div style="display:flex;align-items:center;gap:0.4rem;"><div style="width:24px;height:24px;border-radius:50%;background:#06D6A0;color:#000;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;">2</div><span style="font-size:0.7rem;color:#06D6A0;font-weight:500;">Payment</span></div>
+                    <div style="flex:1;height:2px;background:#2A2E3D;margin:0 0.5rem;"></div>
+                    <div style="display:flex;align-items:center;gap:0.4rem;"><div style="width:24px;height:24px;border-radius:50%;background:rgba(42,46,61,0.5);border:1px solid #2A2E3D;color:#525E73;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;">3</div><span style="font-size:0.7rem;color:#525E73;">Confirm</span></div>
+                </div>
+            </div>`,
+        });
+
+        bm.add('before-after', {
+            label: 'Before / After',
+            category: 'Utility',
+            attributes: { title: 'Side-by-side comparison — show results, transformations' },
+            content: `<div style="max-width:700px;margin:2rem auto;padding:0 1rem;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;">
+                    <div style="background:rgba(255,107,107,0.04);border:1px solid rgba(255,107,107,0.15);border-radius:0.75rem;padding:1.25rem;text-align:center;">
+                        <div style="font-family:'Chakra Petch',system-ui;font-size:0.7rem;font-weight:600;color:#FF6B6B;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;">Before</div>
+                        <div style="background:rgba(42,46,61,0.3);border-radius:0.5rem;height:160px;display:flex;align-items:center;justify-content:center;margin-bottom:0.75rem;"><span style="color:#525E73;font-size:0.75rem;">Image or content</span></div>
+                        <p style="color:#8A95A9;font-size:0.8rem;line-height:1.5;">Describe the problem state or the "before" situation.</p>
+                    </div>
+                    <div style="background:rgba(6,214,160,0.04);border:1px solid rgba(6,214,160,0.15);border-radius:0.75rem;padding:1.25rem;text-align:center;">
+                        <div style="font-family:'Chakra Petch',system-ui;font-size:0.7rem;font-weight:600;color:#06D6A0;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;">After</div>
+                        <div style="background:rgba(42,46,61,0.3);border-radius:0.5rem;height:160px;display:flex;align-items:center;justify-content:center;margin-bottom:0.75rem;"><span style="color:#525E73;font-size:0.75rem;">Image or content</span></div>
+                        <p style="color:#8A95A9;font-size:0.8rem;line-height:1.5;">Show the transformation, results, or improvement.</p>
+                    </div>
+                </div>
+            </div>`,
+        });
+    }
+
+    /* ── Floating Tooltip for Blocks ── */
+
+    function initTooltips() {
+        const tip = document.getElementById('blockTooltip');
+        let hideTimer;
+        document.getElementById('blocksPanel').addEventListener('mouseenter', (e) => {
+            const block = e.target.closest('.gjs-block');
+            if (!block || !block.getAttribute('title')) return;
+            clearTimeout(hideTimer);
+            tip.textContent = block.getAttribute('title');
+            const rect = block.getBoundingClientRect();
+            tip.style.left = (rect.right + 8) + 'px';
+            tip.style.top = (rect.top + rect.height / 2) + 'px';
+            tip.style.transform = 'translateY(-50%)';
+            tip.classList.add('show');
+        }, true);
+        document.getElementById('blocksPanel').addEventListener('mouseleave', (e) => {
+            const block = e.target.closest('.gjs-block');
+            if (!block) return;
+            hideTimer = setTimeout(() => tip.classList.remove('show'), 100);
+        }, true);
+    }
+
+    /* ── YouTube Helpers ── */
+
+    function extractYouTubeId(url) {
+        if (!url) return null;
+        // Handle: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID
+        const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        return m ? m[1] : null;
+    }
+
+    function initVSLClickToPlay() {
+        // When a VSL block is saved and viewed on the live page, this script
+        // handles the click-to-play. In the editor, we inject it into the canvas.
+        const script = `
+            document.addEventListener('click', function(e) {
+                var wrapper = e.target.closest('[data-vsl-wrapper]');
+                if (!wrapper) return;
+                var parent = wrapper.closest('[data-module="vsl"]');
+                if (!parent) return;
+                var url = parent.getAttribute('data-youtube');
+                if (!url) return;
+                var m = url.match(/(?:youtube\\.com\\/(?:watch\\?v=|embed\\/)|youtu\\.be\\/)([a-zA-Z0-9_-]{11})/);
+                if (!m) return;
+                var vid = m[1];
+                var iframe = document.createElement('iframe');
+                iframe.src = 'https://www.youtube.com/embed/' + vid + '?autoplay=1&rel=0';
+                iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:none;';
+                iframe.allow = 'accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture';
+                iframe.allowFullscreen = true;
+                wrapper.innerHTML = '';
+                wrapper.appendChild(iframe);
+            });
+        `;
+
+        // Inject into the GrapesJS canvas so click-to-play works in preview
+        editor.on('canvas:frame:load', ({ window: frameWin }) => {
+            if (!frameWin) return;
+            const doc = frameWin.document;
+            const s = doc.createElement('script');
+            s.textContent = script;
+            s.setAttribute('data-ed', '1');
+            doc.body.appendChild(s);
+        });
+
+        // Also update thumbnail when YouTube URL trait changes
+        editor.on('component:update', (component) => {
+            const attrs = component.getAttributes();
+            if (attrs['data-module'] !== 'vsl') return;
+            const url = attrs['data-youtube'];
+            const vid = extractYouTubeId(url);
+            if (!vid) return;
+            const el = component.getEl();
+            if (!el) return;
+            const thumb = el.querySelector('[data-vsl-thumb]');
+            if (thumb) {
+                thumb.style.backgroundImage = `url(https://img.youtube.com/vi/${vid}/maxresdefault.jpg)`;
+            }
+        });
+    }
+
+    /* ── Canvas Interactive Scripts (FAQ + Countdown in editor preview) ── */
+
+    function initCanvasInteractiveScripts() {
+        editor.on('canvas:frame:load', ({ window: frameWin }) => {
+            if (!frameWin) return;
+            const doc = frameWin.document;
+
+            // FAQ accordion style + click handler
+            const faqStyle = doc.createElement('style');
+            faqStyle.textContent = '.faq-item .faq-a{max-height:0;overflow:hidden;transition:max-height 0.3s ease}.faq-item.open .faq-a{max-height:500px}.faq-item.open .faq-icon{transform:rotate(45deg)}';
+            faqStyle.setAttribute('data-ed', '1');
+            doc.head.appendChild(faqStyle);
+
+            doc.addEventListener('click', (e) => {
+                const q = e.target.closest('.faq-q');
+                if (!q) return;
+                q.parentElement.classList.toggle('open');
+            });
+
+            // Countdown timer
+            function startCountdowns() {
+                const timers = doc.querySelectorAll('[data-module="countdown"]');
+                timers.forEach(t => {
+                    const hrs = parseFloat(t.getAttribute('data-countdown-hours')) || 24;
+                    const target = Date.now() + hrs * 3600000;
+                    function tick() {
+                        const left = Math.max(0, target - Date.now());
+                        const s = Math.floor(left / 1000);
+                        const h = Math.floor(s / 3600);
+                        const m = Math.floor((s % 3600) / 60);
+                        const sec = s % 60;
+                        const eh = t.querySelector('[data-cd-h]');
+                        const em = t.querySelector('[data-cd-m]');
+                        const es = t.querySelector('[data-cd-s]');
+                        if (eh) eh.textContent = String(h).padStart(2, '0');
+                        if (em) em.textContent = String(m).padStart(2, '0');
+                        if (es) es.textContent = String(sec).padStart(2, '0');
+                        if (left > 0) requestAnimationFrame(tick);
+                    }
+                    tick();
+                });
+            }
+            // Delay so components render first
+            setTimeout(startCountdowns, 1500);
+        });
+
+        // Re-run countdown when new countdown blocks are dropped
+        editor.on('block:drag:stop', (component) => {
+            if (!component) return;
+            const el = component.getEl();
+            if (!el || !el.getAttribute) return;
+            if (el.getAttribute('data-module') === 'countdown') {
+                const hrs = 24;
+                const target = Date.now() + hrs * 3600000;
+                function tick() {
+                    const left = Math.max(0, target - Date.now());
+                    const s = Math.floor(left / 1000);
+                    const h = Math.floor(s / 3600);
+                    const m = Math.floor((s % 3600) / 60);
+                    const sec = s % 60;
+                    const eh = el.querySelector('[data-cd-h]');
+                    const em = el.querySelector('[data-cd-m]');
+                    const es = el.querySelector('[data-cd-s]');
+                    if (eh) eh.textContent = String(h).padStart(2, '0');
+                    if (em) em.textContent = String(m).padStart(2, '0');
+                    if (es) es.textContent = String(sec).padStart(2, '0');
+                    if (left > 0) requestAnimationFrame(tick);
+                }
+                tick();
+            }
+        });
+    }
+
+    /* ── Color Swatch Click Fix ── */
+
+    function fixColorSwatchClicks() {
+        // Event delegation: when a color swatch area is clicked, trigger the
+        // underlying spectrum input that GrapesJS may have buried or overlapped
+        document.getElementById('sidebarRight').addEventListener('click', (e) => {
+            const colorp = e.target.closest('.gjs-field-colorp');
+            if (!colorp) return;
+            // Find the spectrum input inside the same .gjs-field-color
+            const field = colorp.closest('.gjs-field-color');
+            if (!field) return;
+            const specInput = field.querySelector('input.sp-input, input[data-colorpicker]');
+            if (specInput) {
+                specInput.click();
+                return;
+            }
+            // If there's a hidden input that triggers spectrum, try that
+            const hiddenInput = field.querySelector('input');
+            if (hiddenInput) {
+                hiddenInput.focus();
+                hiddenInput.click();
+            }
+        });
+    }
+
+    /* ── Color Picker Fix ── */
+
+    function initColorPickerFix() {
+        // MutationObserver watches for spectrum color picker popups appearing
+        const observer = new MutationObserver((mutations) => {
+            for (const m of mutations) {
+                for (const node of m.addedNodes) {
+                    if (node.nodeType !== 1) continue;
+                    // Spectrum adds .sp-container to body
+                    if (node.classList && node.classList.contains('sp-container')) {
+                        repositionColorPicker(node);
+                    }
+                }
+                // Also catch show/hide via attribute changes
+                if (m.type === 'attributes' && m.target.classList && m.target.classList.contains('sp-container')) {
+                    if (!m.target.classList.contains('sp-hidden')) {
+                        repositionColorPicker(m.target);
+                    }
+                }
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+    }
+
+    function repositionColorPicker(picker) {
+        // Find which swatch triggered this picker by looking for the most recently clicked color field
+        requestAnimationFrame(() => {
+            const allSwatches = document.querySelectorAll('#stylesPanel .gjs-field-colorp');
+            let activeSwatch = null;
+            // The active swatch is the one whose parent .gjs-field-color has the picker
+            for (const sw of allSwatches) {
+                const field = sw.closest('.gjs-field-color');
+                if (field && field.querySelector('.sp-container:not(.sp-hidden)')) {
+                    activeSwatch = sw;
+                    break;
+                }
+            }
+
+            if (!activeSwatch) {
+                // Fallback: position near the right sidebar
+                const sidebar = document.getElementById('sidebarRight');
+                if (sidebar) {
+                    const rect = sidebar.getBoundingClientRect();
+                    picker.style.position = 'fixed';
+                    picker.style.left = (rect.left - picker.offsetWidth - 10) + 'px';
+                    picker.style.top = Math.max(60, rect.top + 50) + 'px';
+                }
+                return;
+            }
+
+            const rect = activeSwatch.getBoundingClientRect();
+            picker.style.position = 'fixed';
+            picker.style.left = (rect.left - picker.offsetWidth - 10) + 'px';
+            picker.style.top = Math.max(60, rect.top - 20) + 'px';
+        });
+    }
+
+    /* ── Quick Action Bar Functions ── */
+
+    function qbStyle(prop, value) {
+        const sel = editor.getSelected();
+        if (!sel) return;
+        // Toggle behavior: if already set to this value, remove it
+        const current = sel.getStyle()[prop];
+        if (current === value) {
+            sel.addStyle({ [prop]: '' });
+        } else {
+            sel.addStyle({ [prop]: value });
+        }
+    }
+
+    function qbFontSize(delta) {
+        const sel = editor.getSelected();
+        if (!sel) return;
+        const current = sel.getStyle()['font-size'] || '16px';
+        const px = parseFloat(current) || 16;
+        sel.addStyle({ 'font-size': Math.max(8, px + delta) + 'px' });
+    }
+
+    function qbDuplicate() {
+        const sel = editor.getSelected();
+        if (!sel) return;
+        const parent = sel.parent();
+        if (parent) {
+            const idx = parent.components().indexOf(sel);
+            const clone = sel.clone();
+            parent.components().add(clone, { at: idx + 1 });
+            editor.select(clone);
+        }
+    }
+
+    function qbDelete() {
+        const sel = editor.getSelected();
+        if (!sel) return;
+        sel.remove();
+    }
+
+    /* ── API ── */
+
+    async function fetchJSON(url) {
+        const resp = await fetch(API_BASE + url);
+        if (!resp.ok) throw new Error(`API ${resp.status}`);
+        return resp.json();
+    }
+
+    async function loadSites() {
+        try {
+            const sites = await fetchJSON('/api/sites');
+            const sel = document.getElementById('siteSelect');
+            sel.innerHTML = '<option value="">Choose site...</option>';
+            sites.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.name;
+                opt.textContent = `${s.name} (${s.pages} pages)`;
+                sel.appendChild(opt);
+            });
+            // Default to sandbox (deployed) or rdgr-dashboard (local)
+            const defaultSite = sites.find(s => s.name === 'sandbox') || sites.find(s => s.name === 'rdgr-dashboard') || sites[0];
+            if (defaultSite) {
+                sel.value = defaultSite.name;
+                await loadPages();
+            }
+        } catch (err) {
+            showToast('Failed to load sites: ' + err.message, 'error');
+        }
+    }
+
+    async function loadPages() {
+        const site = document.getElementById('siteSelect').value;
+        const sel = document.getElementById('pageSelect');
+        sel.innerHTML = '<option value="">Loading...</option>';
+        if (!site) { sel.innerHTML = '<option value="">Select a site first</option>'; return; }
+
+        document.getElementById('prodWarning').classList.toggle('show', PRODUCTION_SITES.includes(site));
+
+        try {
+            const pages = await fetchJSON(`/api/sites/${site}/pages`);
+            sel.innerHTML = '<option value="">Choose page...</option>';
+            pages.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.name;
+                opt.textContent = `${p.name} (${(p.size/1024).toFixed(0)}KB)`;
+                sel.appendChild(opt);
+            });
+            currentSite = site;
+
+            // Auto-load sandbox test page
+            if (pages.find(p => p.name === SANDBOX_PAGE)) {
+                sel.value = SANDBOX_PAGE;
+                loadPage();
+            }
+        } catch (err) {
+            showToast('Failed to load pages: ' + err.message, 'error');
+        }
+    }
+
+    async function loadPage() {
+        const site = document.getElementById('siteSelect').value;
+        const page = document.getElementById('pageSelect').value;
+        if (!site || !page) return;
+
+        try {
+            showToast('Loading...', 'info');
+            const data = await fetchJSON(`/api/sites/${site}/pages/${page}`);
+            const { headContent, bodyContent, scripts } = parseHTML(data.content);
+
+            storedHead = headContent;
+            storedScripts = scripts;
+            currentPage = page;
+
+            // Load into GrapesJS
+            editor.DomComponents.clear();
+            editor.CssComposer.clear();
+            editor.setComponents(bodyContent);
+
+            // Inject Tailwind + styles into canvas
+            injectCanvasResources(headContent);
+
+            // Load brand assets
+            loadAssets(site);
+
+            hasUnsaved = false;
+            document.getElementById('unsavedDot').classList.remove('show');
+            showToast('Loaded ' + page, 'success');
+        } catch (err) {
+            showToast('Load failed: ' + err.message, 'error');
+        }
+    }
+
+    function injectCanvasResources(headContent) {
+        const frame = editor.Canvas.getFrameEl();
+        if (!frame) return;
+        const doc = frame.contentDocument;
+        if (!doc) return;
+        const head = doc.head;
+
+        // Remove previous injections
+        head.querySelectorAll('[data-ed]').forEach(el => el.remove());
+
+        // Inject stylesheets
+        const links = headContent.matchAll(/<link[^>]*href=["']([^"']+)["'][^>]*>/gi);
+        for (const m of links) {
+            const link = doc.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = m[1];
+            link.setAttribute('data-ed', '1');
+            head.appendChild(link);
+        }
+
+        // Inject <style> blocks
+        const styles = headContent.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi);
+        for (const m of styles) {
+            const style = doc.createElement('style');
+            style.textContent = m[1];
+            style.setAttribute('data-ed', '1');
+            head.appendChild(style);
+        }
+
+        // Inject Tailwind CDN
+        const tw = doc.createElement('script');
+        tw.src = 'https://cdn.tailwindcss.com';
+        tw.setAttribute('data-ed', '1');
+        head.appendChild(tw);
+
+        // Inject tailwind.config
+        const cfgMatch = headContent.match(/<script>\s*tailwind\.config\s*=\s*\{[\s\S]*?\}\s*<\/script>/i);
+        if (cfgMatch) {
+            tw.onload = () => {
+                const cfgScript = doc.createElement('script');
+                cfgScript.textContent = cfgMatch[0].replace(/<\/?script>/gi, '');
+                cfgScript.setAttribute('data-ed', '1');
+                head.appendChild(cfgScript);
+            };
+        }
+
+        // Inject Google Fonts
+        const fonts = headContent.matchAll(/<link[^>]*fonts\.googleapis\.com[^>]*>/gi);
+        for (const m of fonts) {
+            const tmp = doc.createElement('div');
+            tmp.innerHTML = m[0];
+            const link = tmp.firstChild;
+            if (link) { link.setAttribute('data-ed', '1'); head.appendChild(link); }
+        }
+    }
+
+    async function loadAssets(site) {
+        try {
+            const assets = await fetchJSON(`/api/sites/${site}/assets`);
+            if (assets.length > 0) {
+                editor.AssetManager.add(assets.map(a => ({
+                    src: `${API_BASE}/sites/${site}/${a.path}`,
+                    name: a.name,
+                    type: 'image',
+                })));
+            }
+        } catch (e) { /* no assets is fine */ }
+    }
+
+    /* ── Save ── */
+
+    async function savePage() {
+        if (!currentSite || !currentPage) return showToast('No page loaded', 'error');
+        const btn = document.getElementById('btnSave');
+        btn.textContent = 'Saving...';
+        btn.disabled = true;
+        try {
+            const bodyHtml = editor.getHtml();
+            const fullHtml = reassembleHTML(storedHead, bodyHtml, storedScripts);
+            const resp = await fetch(`${API_BASE}/api/sites/${currentSite}/pages/${currentPage}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: fullHtml }),
+            });
+            if (!resp.ok) throw new Error('Save failed');
+            hasUnsaved = false;
+            document.getElementById('unsavedDot').classList.remove('show');
+            showToast('Saved ' + currentPage, 'success');
+        } catch (err) {
+            showToast('Save failed: ' + err.message, 'error');
+        } finally {
+            btn.textContent = 'Save';
+            btn.disabled = false;
+        }
+    }
+
+    /* ── Device Switching ── */
+
+    function setDevice(name) {
+        editor.setDevice(name);
+        ['Desktop','Tablet','Mobile'].forEach(d => {
+            document.getElementById('dev'+d).classList.toggle('active', d === name);
+        });
+    }
+
+    /* ── Undo/Redo ── */
+    function doUndo() { editor.UndoManager.undo(); }
+    function doRedo() { editor.UndoManager.redo(); }
+
+    /* ── Preview ── */
+    function togglePreview() {
+        if (isPreviewMode) {
+            editor.stopCommand('preview');
+            document.getElementById('btnPreview').classList.remove('active');
+            document.getElementById('sidebarLeft').style.display = '';
+            document.getElementById('sidebarRight').style.display = '';
+        } else {
+            editor.runCommand('preview');
+            document.getElementById('btnPreview').classList.add('active');
+            document.getElementById('sidebarLeft').style.display = 'none';
+            document.getElementById('sidebarRight').style.display = 'none';
+        }
+        isPreviewMode = !isPreviewMode;
+    }
+
+    /* ── Classes Editor ── */
+    function applyClasses() {
+        const selected = editor.getSelected();
+        if (!selected) return showToast('Select an element first', 'error');
+        const val = document.getElementById('classesInput').value.trim();
+        selected.setAttributes({ ...selected.getAttributes(), class: val });
+        showToast('Classes applied', 'success');
+    }
+
+    /* ── Code Viewer ── */
+    function viewCode() {
+        const bodyHtml = editor.getHtml();
+        const fullHtml = reassembleHTML(storedHead, bodyHtml, storedScripts);
+        document.getElementById('codeView').value = fullHtml;
+        document.getElementById('codeModal').classList.add('show');
+    }
+    function closeCode() { document.getElementById('codeModal').classList.remove('show'); }
+    function copyCode() {
+        navigator.clipboard.writeText(document.getElementById('codeView').value);
+        showToast('Copied to clipboard', 'success');
+    }
+
+    /* ── Toast ── */
+    let toastTimer;
+    function showToast(msg, type) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'show ' + type;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.className = '', 3000);
+    }
+
+    /* ── Boot ── */
+    document.addEventListener('DOMContentLoaded', () => {
+        initEditor();
+        loadSites();
+        // Delay tooltip init so GrapesJS has rendered blocks
+        setTimeout(initTooltips, 1000);
+        // Fix color picker positioning + ensure swatches are clickable
+        initColorPickerFix();
+        fixColorSwatchClicks();
+        // Interactive block scripts (VSL, FAQ, Countdown)
+        initVSLClickToPlay();
+        initCanvasInteractiveScripts();
+    });
+    </script>
+</body>
+</html>

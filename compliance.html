@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Compliance Dashboard | Carlton AI</title>
+
+    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://yrwrswyjawmgtxrgbnim.supabase.co">
+    <script>
+        // Instant auth check + theme application — runs before body renders
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _presets = {
+                forest:     { accent:'#A8D65B',accentWarm:'#F0A830',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                sunrise:    { accent:'#F0A830',accentWarm:'#E85D5D',base:'#100D08',surface:'#1C1810',surfaceEl:'#272118',surfaceHi:'#322B20',border:'#3F382C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                ocean:      { accent:'#38BDF8',accentWarm:'#06D6A0',base:'#080D10',surface:'#10161C',surfaceEl:'#182027',surfaceHi:'#202A32',border:'#2C363F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E0E8EA',txt2:'#8C9BA0',txt3:'#586B6B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                berry:      { accent:'#C084FC',accentWarm:'#FB7185',base:'#0D0810',surface:'#16101C',surfaceEl:'#201827',surfaceHi:'#2A2032',border:'#3A2C3F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E0EA',txt2:'#A08CA0',txt3:'#6B586B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                rdgr:       { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' },
+                monochrome: { accent:'#E8E8E8',accentWarm:'#A0A0A0',base:'#000000',surface:'#0A0A0A',surfaceEl:'#141414',surfaceHi:'#1E1E1E',border:'#2A2A2A',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E8E8',txt2:'#A0A0A0',txt3:'#666666',headingFont:'Nunito',bodyFont:'DM Sans' },
+            };
+            var _t = (_tc.preset === 'custom' && _tc.custom) ? _tc.custom : (_presets[_tc.preset] || _presets.rdgr);
+            if (_tc.statusOverrides) {
+                if (_tc.statusOverrides.success) _t.success = _tc.statusOverrides.success;
+                if (_tc.statusOverrides.warning) _t.warning = _tc.statusOverrides.warning;
+                if (_tc.statusOverrides.danger) _t.danger = _tc.statusOverrides.danger;
+            }
+            var _r = document.documentElement;
+            _r.style.setProperty('--deft-accent', _t.accent);
+            _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+            _r.style.setProperty('--deft-accent-warm', _t.accentWarm || _t.accent);
+            _r.style.setProperty('--deft-base', _t.base);
+            _r.style.setProperty('--deft-surface', _t.surface);
+            _r.style.setProperty('--deft-surface-el', _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-surface-hi', _t.surfaceHi || _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-border', _t.border);
+            _r.style.setProperty('--deft-success', _t.success || '#6BCB77');
+            _r.style.setProperty('--deft-success-dim', (_t.success || '#6BCB77') + '26');
+            _r.style.setProperty('--deft-warning', _t.warning || '#F0A830');
+            _r.style.setProperty('--deft-warning-dim', (_t.warning || '#F0A830') + '26');
+            _r.style.setProperty('--deft-danger', _t.danger || '#E85D5D');
+            _r.style.setProperty('--deft-danger-dim', (_t.danger || '#E85D5D') + '26');
+            _r.style.setProperty('--deft-txt', _t.txt);
+            _r.style.setProperty('--deft-txt-2', _t.txt2 || '#8A95A9');
+            _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
+            _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
+            _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+            var _fs = _tc.fontScale || 1;
+            _r.style.setProperty('--deft-font-scale', _fs);
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent { opacity: 1 !important; }
+
+        /* Universal theme */
+        body {
+            background: var(--deft-base, #08090D) !important;
+            color: var(--deft-txt, #E8ECF1) !important;
+            font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important;
+        }
+        .font-heading, h1, h2, h3 {
+            font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important;
+        }
+        nav {
+            background: color-mix(in srgb, var(--deft-base, #08090D) 92%, transparent) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel, .stat-chip {
+            background: var(--deft-surface, #11131A) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel-header { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input:focus {
+            border-color: var(--deft-accent, #06D6A0) !important;
+            box-shadow: 0 0 0 2px var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+        }
+        .text-accent { color: var(--deft-accent, #06D6A0) !important; }
+        .bg-accent { background-color: var(--deft-accent, #06D6A0) !important; }
+        .task-tab.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+        /* ── Mobile Nav System ── */
+        .mobile-menu-btn {
+            display: none;
+            align-items: center; justify-content: center;
+            width: 32px; height: 32px;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.375rem;
+            background: transparent;
+            color: var(--deft-txt-2, #8A95A9);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            flex-shrink: 0;
+        }
+        .mobile-menu-btn:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        @media (max-width: 639px) { .mobile-menu-btn { display: flex; } }
+        #mobileNavOverlay {
+            position: fixed; inset: 0; z-index: 200;
+            display: none; opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        #mobileNavOverlay.open { display: flex; opacity: 1; }
+        .mobile-nav-backdrop {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.5);
+        }
+        .mobile-nav-sidebar {
+            position: relative; z-index: 1;
+            width: 280px; max-width: 85vw; height: 100vh;
+            background: var(--deft-base, #11131A);
+            border-right: 1px solid var(--deft-border, #2A2E3D);
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            padding: 0.75rem 0;
+        }
+        #mobileNavOverlay.open .mobile-nav-sidebar { transform: translateX(0); }
+        .mobile-nav-close {
+            display: flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px;
+            border: none; background: transparent;
+            color: var(--deft-txt-3, #525E73);
+            cursor: pointer; font-size: 1.1rem;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+        }
+        .mobile-nav-close:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link {
+            display: block;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.75rem; font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            transition: background 0.12s, color 0.12s;
+        }
+        .mobile-nav-link:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        .mobile-nav-group-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 0.5rem 1.25rem;
+            font-size: 0.75rem; font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            background: transparent; border: none;
+            cursor: pointer;
+            transition: background 0.12s, color 0.12s;
+            text-align: left;
+        }
+        .mobile-nav-group-btn:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-group-btn.active { color: var(--deft-accent, #06D6A0); }
+        .mobile-nav-group-btn .mn-chevron {
+            transition: transform 0.2s; opacity: 0.5;
+        }
+        .mobile-nav-group-btn.expanded .mn-chevron { transform: rotate(180deg); opacity: 0.8; }
+        .mobile-nav-children {
+            display: none;
+            padding-left: 1rem;
+        }
+        .mobile-nav-children.open { display: block; }
+        .mobile-nav-divider {
+            height: 1px;
+            background: var(--deft-border, #2A2E3D);
+            margin: 0.375rem 1rem;
+        }
+        .btn-primary {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent) !important;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent) !important;
+        }
+        .btn-ghost { border-color: var(--deft-border, #2A2E3D) !important; }
+        .text-info { color: var(--deft-accent, #06D6A0) !important; }
+        .badge-in_progress { background: var(--deft-accent-dim) !important; color: var(--deft-accent) !important; }
+        .badge-completed { background: var(--deft-success-dim, rgba(34,197,94,0.15)) !important; color: var(--deft-success, #22C55E) !important; }
+        .badge-failed { background: var(--deft-danger-dim, rgba(255,107,107,0.15)) !important; color: var(--deft-danger, #FF6B6B) !important; }
+        .badge-blocked, .badge-review { background: var(--deft-warning-dim, rgba(255,217,61,0.15)) !important; color: var(--deft-warning, #FFD93D) !important; }
+        .btn-approve { background: var(--deft-success-dim) !important; color: var(--deft-success) !important; border-color: color-mix(in srgb, var(--deft-success) 25%, transparent) !important; }
+        .btn-deny { background: var(--deft-danger-dim) !important; color: var(--deft-danger) !important; border-color: color-mix(in srgb, var(--deft-danger) 25%, transparent) !important; }
+        .text-alert { color: var(--deft-danger, #FF6B6B) !important; }
+        .text-warn { color: var(--deft-warning, #FFD93D) !important; }
+        .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+        .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+        .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+        ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D) !important; }
+        .pulse-dot { background: var(--deft-accent, #06D6A0) !important; }
+        .gate-input:focus {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent) !important;
+        }
+        select.form-input option { background: var(--deft-surface-el, #1A1D28) !important; color: var(--deft-txt, #E8ECF1) !important; }
+        /* Font scale */
+        body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
+        .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
+        .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
+        .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
+        .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
+        .text-3xl { font-size: calc(1.875rem * var(--deft-font-scale, 1)) !important; }
+
+        /* Nav Dropdown System */
+        .nav-group { position: relative; }
+        .nav-group-btn {
+            display: flex; align-items: center; gap: 0.25rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem; font-weight: 500;
+            color: #8A95A9;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+            border: none; background: transparent;
+        }
+        .nav-group-btn:hover { color: #E8ECF1; }
+        .nav-group-btn.active {
+            background: rgba(6,214,160,0.12);
+            color: #06D6A0;
+        }
+        .nav-group-btn .chevron {
+            transition: transform 0.2s;
+            opacity: 0.5;
+        }
+        .nav-group:hover .nav-group-btn .chevron { transform: rotate(180deg); opacity: 0.8; }
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 150px;
+            padding: 0.375rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: opacity 0.15s, visibility 0.15s, transform 0.15s;
+            z-index: 70;
+        }
+        .nav-group:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .nav-dropdown a {
+            display: block;
+            padding: 0.4rem 0.625rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+        .nav-dropdown a:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--deft-txt, #E8ECF1);
+        }
+        .nav-dropdown a.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        /* Theme overrides for nav */
+        .nav-group-btn.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deft-base': '#08090D',
+                        surface: '#11131A',
+                        'surface-el': '#1A1D28',
+                        'surface-hi': '#242836',
+                        border: '#2A2E3D',
+                        accent: '#06D6A0',
+                        'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B',
+                        'alert-dim': 'rgba(255,107,107,0.15)',
+                        warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)',
+                        info: '#4CC9F0',
+                        'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1',
+                        'txt-2': '#8A95A9',
+                        'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #08090D;
+            color: #E8ECF1;
+        }
+
+        /* Grain */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3A3E4D; }
+
+        /* Gate */
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: #E8ECF1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            width: 100%;
+        }
+        .gate-input::placeholder { color: #525E73; }
+        .gate-error { color: #FF6B6B; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        /* Pulse */
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #06D6A0;
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+
+        /* Nav tabs */
+        .task-tab {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #8A95A9;
+            border-radius: 0.375rem;
+            transition: background 0.15s, color 0.15s;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .task-tab:hover { color: #E8ECF1; }
+        .task-tab.active {
+            background: rgba(6,214,160,0.12);
+            color: #06D6A0;
+        }
+
+        /* Panels */
+        .panel {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid #1E2130;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel-body { padding: 1rem 1.25rem; }
+
+        /* Badges */
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        .badge-not_started { background: rgba(82,94,115,0.2); color: #8A95A9; }
+        .badge-in_progress { background: rgba(6,214,160,0.15); color: #06D6A0; }
+        .badge-completed, .badge-complete { background: rgba(34,197,94,0.15); color: #22C55E; }
+
+        /* Buttons */
+        .btn {
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s, opacity 0.15s;
+            display: inline-flex; align-items: center; gap: 0.375rem;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .btn-primary {
+            background: rgba(6,214,160,0.15);
+            color: #06D6A0;
+            border-color: rgba(6,214,160,0.3);
+        }
+        .btn-primary:hover:not(:disabled) { background: rgba(6,214,160,0.25); }
+        .btn-ghost {
+            background: transparent;
+            color: #8A95A9;
+            border-color: #2A2E3D;
+        }
+        .btn-ghost:hover { background: rgba(255,255,255,0.04); color: #E8ECF1; }
+
+        /* Toast */
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-family: 'IBM Plex Sans', system-ui;
+            animation: toast-in 0.3s ease forwards;
+            max-width: 380px;
+        }
+        .toast-success { background: rgba(6,214,160,0.15); border: 1px solid rgba(6,214,160,0.3); color: #06D6A0; }
+        .toast-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #FF6B6B; }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Stat chips */
+        .stat-chip {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.5rem;
+            padding: 0.625rem 1rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .stat-value { font-family: 'Chakra Petch', system-ui; font-weight: 700; font-size: 1.4rem; line-height: 1; }
+        .stat-label { font-size: 0.7rem; color: #8A95A9; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+
+        /* Form input */
+        .form-input {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2A2E3D;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            color: #E8ECF1;
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            resize: vertical;
+        }
+        .form-input:focus {
+            border-color: rgba(6,214,160,0.5);
+            box-shadow: 0 0 0 2px rgba(6,214,160,0.1);
+        }
+        .form-input::placeholder { color: #525E73; }
+
+        /* Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.5s ease-in-out infinite;
+            border-radius: 0.5rem;
+        }
+        @keyframes skeleton-shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ═══ COMPLIANCE-SPECIFIC ═══ */
+
+        /* Table styles */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th {
+            text-align: left; padding: 0.625rem 0.75rem;
+            font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--deft-txt-3, #525E73);
+            border-bottom: 1px solid var(--deft-border, #2A2E3D);
+        }
+        .data-table td {
+            padding: 0.625rem 0.75rem; font-size: 0.8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            color: var(--deft-txt-2, #8A95A9);
+        }
+        .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+        .data-table .expandable-row { cursor: pointer; }
+        .data-table .detail-row { display: none; }
+        .data-table .detail-row.open { display: table-row; }
+        .data-table .detail-row td {
+            padding: 0.75rem 1rem; background: var(--deft-surface-el, #1A1D28);
+            border-bottom: 1px solid var(--deft-border, #2A2E3D);
+        }
+
+        /* Filter bar */
+        .filter-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .filter-select {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.375rem; padding: 0.4rem 0.625rem; color: var(--deft-txt, #E8ECF1);
+            font-size: 0.75rem; outline: none; cursor: pointer;
+        }
+        .filter-select:focus { border-color: var(--deft-accent, #06D6A0); }
+        .filter-select option { background: var(--deft-surface-el, #1A1D28); color: var(--deft-txt, #E8ECF1); }
+        .filter-search {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.375rem; padding: 0.4rem 0.625rem; color: var(--deft-txt, #E8ECF1);
+            font-size: 0.75rem; outline: none; flex: 1; min-width: 150px;
+        }
+        .filter-search:focus { border-color: var(--deft-accent, #06D6A0); }
+        .filter-search::placeholder { color: var(--deft-txt-3, #525E73); }
+
+        /* Question renderers (for pending preferences) */
+        .option-card {
+            background: var(--deft-surface-el, #1A1D28);
+            border: 2px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
+            text-align: center;
+            flex: 1;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .option-card:hover {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent);
+            background: var(--deft-surface-hi, #242836);
+        }
+        .option-card:active { transform: scale(0.97); }
+        .option-card.selected {
+            border-color: var(--deft-accent, #06D6A0);
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, var(--deft-surface-el, #1A1D28));
+            box-shadow: 0 0 20px color-mix(in srgb, var(--deft-accent, #06D6A0) 10%, transparent);
+        }
+
+        .verdict-btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s;
+            border: 1px solid transparent;
+            flex: 1;
+            text-align: center;
+        }
+        .verdict-btn:active { transform: scale(0.97); }
+        .verdict-approve {
+            background: rgba(34,197,94,0.1);
+            color: var(--deft-success, #22C55E);
+            border-color: rgba(34,197,94,0.2);
+        }
+        .verdict-approve:hover { background: rgba(34,197,94,0.2); }
+        .verdict-approve.selected { background: rgba(34,197,94,0.25); border-color: var(--deft-success, #22C55E); }
+        .verdict-close {
+            background: rgba(255,217,61,0.1);
+            color: var(--deft-warning, #FFD93D);
+            border-color: rgba(255,217,61,0.2);
+        }
+        .verdict-close:hover { background: rgba(255,217,61,0.2); }
+        .verdict-close.selected { background: rgba(255,217,61,0.25); border-color: var(--deft-warning, #FFD93D); }
+        .verdict-wrong {
+            background: rgba(255,107,107,0.1);
+            color: var(--deft-danger, #FF6B6B);
+            border-color: rgba(255,107,107,0.2);
+        }
+        .verdict-wrong:hover { background: rgba(255,107,107,0.2); }
+        .verdict-wrong.selected { background: rgba(255,107,107,0.25); border-color: var(--deft-danger, #FF6B6B); }
+
+        .rank-item {
+            background: var(--deft-surface-el, #1A1D28);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            cursor: grab;
+            transition: background 0.15s, border-color 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            user-select: none;
+        }
+        .rank-item:active { cursor: grabbing; }
+        .rank-item:hover { background: var(--deft-surface-hi, #242836); }
+        .rank-item.sortable-ghost { opacity: 0.5; border-color: var(--deft-accent, #06D6A0); }
+        .rank-item.sortable-chosen { background: var(--deft-surface-hi, #242836); border-color: var(--deft-accent, #06D6A0); }
+
+        .adjustment-area {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, margin-top 0.3s ease;
+        }
+        .adjustment-area.open {
+            max-height: 200px;
+            margin-top: 0.75rem;
+        }
+
+        /* Question card animation */
+        .question-card {
+            animation: fadeSlideIn 0.35s ease forwards;
+        }
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Collapsible panel */
+        .collapsible-toggle {
+            cursor: pointer;
+            user-select: none;
+        }
+        .collapsible-toggle .chevron-icon {
+            transition: transform 0.2s;
+        }
+        .collapsible-toggle.collapsed .chevron-icon {
+            transform: rotate(-90deg);
+        }
+        .collapsible-body {
+            transition: max-height 0.3s ease, opacity 0.2s ease;
+            overflow: hidden;
+        }
+        .collapsible-body.collapsed {
+            max-height: 0 !important;
+            opacity: 0;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 767px) {
+            .option-cards-row { flex-direction: column !important; }
+            .verdict-row { flex-direction: column !important; }
+            .data-table { font-size: 0.7rem; }
+            .data-table th, .data-table td { padding: 0.4rem 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ PASSWORD GATE ═══ -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+            </div>
+            <div id="gateProfiles" class="flex justify-center gap-3 mb-6">
+                <div class="text-center text-xs text-txt-3">Loading profiles...</div>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- Top Nav -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <button class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Open menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/" class="nav-group-btn">Dashboard</a>
+                        <div class="nav-group">
+                            <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/chat">Rodger</a>
+                                <a href="/council">Council</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/crm" class="nav-group-btn">Outreach <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/crm">CRM</a>
+                                <a href="/email-outreach">Email</a>
+                                <a href="/social-dashboard">Social</a>
+                                <a href="/social-content">Social Content</a>
+                                <a href="/offer-studio">Offers</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/finance" class="nav-group-btn">Finance <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/finance">Dashboard</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brand-discovery" class="nav-group-btn">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brand-discovery">Discovery</a>
+                                <a href="/brand-voice">Voice</a>
+                                <a href="/template-studio">Templates</a>
+                                <a href="/brand-documents">Docs</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/bsi-discovery" class="nav-group-btn active">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/bsi-discovery">Discovery</a>
+                                <a href="/compliance" class="active">Compliance</a>
+                                <a href="/bsi-documents">Documents</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/content" class="nav-group-btn">Content <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/content">Publishing</a>
+                                <a href="/media">Media</a>
+                            </div>
+                        </div>
+                        <a href="/partnerships" class="nav-group-btn">Partnerships</a>
+                        <div class="nav-group">
+                            <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brain">BRAIN</a>
+                                <a href="/deft">DEFT</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/trading-desk" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/trading-desk">Trading Desk</a>
+                                <a href="/trading-bot">Bot Dashboard</a>
+                                <a href="/trading-strategies">Strategies</a>
+                                <a href="/trading-monitor">Monitor</a>
+                                <a href="/trading-research">Research</a>
+                                <a href="/trading-discovery">Discovery</a>
+                                <a href="/trading-cross-pairs">Cross-Pairs</a>
+                                <a href="/trading-exchanges">Exchanges</a>
+                                <a href="/trading-config">Config</a>
+                                <a href="/trading-reports">Reports</a>
+                            </div>
+                        </div>
+                        <a href="/meetings" class="nav-group-btn">Meetings</a>
+                        <div class="nav-group">
+                            <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/our-workflows">Workflows</a>
+                                <a href="/org-chart">Org Map</a>
+                                <a href="/hub">HUB</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 100;" id="profileDropdown"></div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2" title="Settings">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                </div>
+            </div>
+
+        <!-- Mobile Nav Overlay -->
+        <div id="mobileNavOverlay">
+            <div class="mobile-nav-backdrop"></div>
+            <div class="mobile-nav-sidebar">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 1rem 0.75rem;">
+                    <span style="font-size:0.8rem;font-weight:700;color:var(--deft-txt,#E8ECF1);">Menu</span>
+                    <button class="mobile-nav-close" onclick="toggleMobileNav()">&times;</button>
+                </div>
+                <div class="mobile-nav-divider"></div>
+                <a href="/" class="mobile-nav-link">Dashboard</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Rodger <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/chat" class="mobile-nav-link">Rodger</a>
+    <a href="/council" class="mobile-nav-link">Council</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Outreach <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/crm" class="mobile-nav-link">CRM</a>
+    <a href="/email-outreach" class="mobile-nav-link">Email</a>
+    <a href="/social-dashboard" class="mobile-nav-link">Social</a>
+    <a href="/social-content" class="mobile-nav-link">Social Content</a>
+    <a href="/offer-studio" class="mobile-nav-link">Offers</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Finance <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/finance" class="mobile-nav-link">Dashboard</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Brand <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/brand-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/template-studio" class="mobile-nav-link">Templates</a>
+    <a href="/brand-documents" class="mobile-nav-link">Docs</a>
+</div>
+<button class="mobile-nav-group-btn active expanded" onclick="toggleMobileAccordion(this)">Policy <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children open">
+    <a href="/bsi-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/compliance" class="mobile-nav-link active">Compliance</a>
+    <a href="/bsi-documents" class="mobile-nav-link">Documents</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Content <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/content" class="mobile-nav-link">Publishing</a>
+    <a href="/media" class="mobile-nav-link">Media</a>
+</div>
+<a href="/partnerships" class="mobile-nav-link">Partnerships</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">BRAIN <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/brain" class="mobile-nav-link">BRAIN</a>
+    <a href="/deft" class="mobile-nav-link">DEFT</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Trading <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/trading-desk" class="mobile-nav-link">Trading Desk</a>
+    <a href="/trading-bot" class="mobile-nav-link">Bot Dashboard</a>
+    <a href="/trading-strategies" class="mobile-nav-link">Strategies</a>
+    <a href="/trading-monitor" class="mobile-nav-link">Monitor</a>
+    <a href="/trading-research" class="mobile-nav-link">Research</a>
+    <a href="/trading-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/trading-cross-pairs" class="mobile-nav-link">Cross-Pairs</a>
+    <a href="/trading-exchanges" class="mobile-nav-link">Exchanges</a>
+    <a href="/trading-config" class="mobile-nav-link">Config</a>
+    <a href="/trading-reports" class="mobile-nav-link">Reports</a>
+</div>
+<a href="/meetings" class="mobile-nav-link">Meetings</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">System <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/our-workflows" class="mobile-nav-link">Workflows</a>
+    <a href="/org-chart" class="mobile-nav-link">Org Map</a>
+    <a href="/hub" class="mobile-nav-link">HUB</a>
+</div>
+
+            </div>
+        </div>
+        </nav>
+        <script>
+function toggleMobileNav(){var o=document.getElementById('mobileNavOverlay');if(o.classList.contains('open')){o.style.opacity='0';o.querySelector('.mobile-nav-sidebar').style.transform='translateX(-100%)';setTimeout(function(){o.classList.remove('open');o.style.display='none';},250);}else{o.style.display='flex';requestAnimationFrame(function(){o.classList.add('open');o.style.opacity='1';o.querySelector('.mobile-nav-sidebar').style.transform='translateX(0)';});}}
+function toggleMobileAccordion(btn){btn.classList.toggle('expanded');var ch=btn.nextElementSibling;ch.classList.toggle('open');}
+document.getElementById('mobileNavOverlay')?.querySelector('.mobile-nav-backdrop')?.addEventListener('click',function(){toggleMobileNav();});
+document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function(a){a.addEventListener('click',function(){toggleMobileNav();});});
+</script>
+        <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
+
+        <!-- Page Content -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
+
+            <!-- Page Heading -->
+            <div class="mb-6">
+                <h2 class="font-heading font-bold text-xl tracking-wide flex items-center gap-2">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1l2.5 1.5V5L10 6.5 7.5 5V2.5L10 1z" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M3 8v6a1 1 0 001 1h12a1 1 0 001-1V8" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M6 11h8M6 14h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M10 6.5V8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    Compliance Dashboard
+                </h2>
+                <p class="text-sm text-txt-2 mt-1">Policy enforcement, content checks, and business rule management</p>
+            </div>
+
+            <!-- Section 1: Status Bar -->
+            <div class="flex gap-3 overflow-x-auto pb-1 mb-6">
+                <div class="stat-chip flex-1 min-w-[130px]">
+                    <div>
+                        <div class="stat-value text-accent" id="statTotalChecks">--</div>
+                        <div class="stat-label">Total Checks</div>
+                    </div>
+                </div>
+                <div class="stat-chip flex-1 min-w-[130px]">
+                    <div>
+                        <div class="stat-value" style="color: var(--deft-success, #22C55E);" id="statPassRate">--</div>
+                        <div class="stat-label">Pass Rate %</div>
+                    </div>
+                </div>
+                <div class="stat-chip flex-1 min-w-[130px]" style="cursor:pointer;" onclick="scrollToViolations()" title="Click to view violations">
+                    <div>
+                        <div class="stat-value" style="color: var(--deft-danger, #FF6B6B);" id="statViolations">--</div>
+                        <div class="stat-label">Violations (7d)</div>
+                    </div>
+                </div>
+                <div class="stat-chip flex-1 min-w-[130px]">
+                    <div>
+                        <div class="stat-value" style="color: var(--deft-accent-warm, #4CC9F0);" id="statActiveRules">--</div>
+                        <div class="stat-label">Active Rules</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Needs Your Input -->
+            <div class="panel mb-6" id="pendingPanel" style="display:none;">
+                <div class="panel-header collapsible-toggle" onclick="togglePendingPanel()">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1a7 7 0 100 14A7 7 0 008 1z" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M8 5v3M8 10.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span class="font-heading font-semibold text-sm">Needs Your Input</span>
+                        <span class="badge" style="background: var(--deft-warning-dim); color: var(--deft-warning);" id="pendingBadge">0</span>
+                    </div>
+                    <svg class="chevron-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                </div>
+                <div class="panel-body" id="pendingBody">
+                    <div id="pendingQuestions"></div>
+                </div>
+            </div>
+
+            <!-- Empty state for no pending questions -->
+            <div class="panel mb-6" id="pendingEmptyPanel" style="display:none;">
+                <div class="panel-body text-center py-6">
+                    <div class="text-2xl mb-2" style="color: var(--deft-success, #22C55E);">&#10003;</div>
+                    <p class="text-sm text-txt-2">No pending questions</p>
+                    <p class="text-xs text-txt-3 mt-1">All preference questions have been answered</p>
+                </div>
+            </div>
+
+            <!-- Section 3: Active Rules -->
+            <div class="panel mb-6">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.1" fill="none"/><path d="M5 6h6M5 8.5h6M5 11h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+                        <span class="font-heading font-semibold text-sm">Active Rules</span>
+                        <span class="text-xs text-txt-3" id="rulesCount"></span>
+                    </div>
+                    <button onclick="loadRules()" class="btn btn-ghost text-xs py-1.5 px-2.5">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Refresh
+                    </button>
+                </div>
+                <div class="panel-body">
+                    <!-- Filter bar -->
+                    <div class="filter-bar">
+                        <select class="filter-select" id="filterCategory" onchange="applyRuleFilters()">
+                            <option value="">All Categories</option>
+                            <option value="service_scope">Service Scope</option>
+                            <option value="non_negotiables">Non-Negotiables</option>
+                            <option value="contract_terms">Contract Terms</option>
+                            <option value="pricing_philosophy">Pricing Philosophy</option>
+                            <option value="client_engagement">Client Engagement</option>
+                            <option value="communication_protocols">Communication Protocols</option>
+                            <option value="quality_standards">Quality Standards</option>
+                            <option value="hr_policies">HR Policies</option>
+                            <option value="legal_compliance">Legal Compliance</option>
+                            <option value="business_methods">Business Methods</option>
+                            <option value="data_handling">Data Handling</option>
+                            <option value="risk_management">Risk Management</option>
+                        </select>
+                        <select class="filter-select" id="filterType" onchange="applyRuleFilters()">
+                            <option value="">All Types</option>
+                            <option value="must_do">Must Do</option>
+                            <option value="must_not_do">Must Not Do</option>
+                            <option value="conditional">Conditional</option>
+                            <option value="preference">Preference</option>
+                        </select>
+                        <select class="filter-select" id="filterSeverity" onchange="applyRuleFilters()">
+                            <option value="">All Severities</option>
+                            <option value="critical">Critical</option>
+                            <option value="standard">Standard</option>
+                            <option value="advisory">Advisory</option>
+                        </select>
+                        <input type="text" class="filter-search" id="filterSearch" placeholder="Search rules..." oninput="applyRuleFilters()">
+                    </div>
+                    <!-- Table -->
+                    <div style="overflow-x:auto;">
+                        <table class="data-table" id="rulesTable">
+                            <thead>
+                                <tr>
+                                    <th style="min-width:280px;">Rule</th>
+                                    <th>Category</th>
+                                    <th>Type</th>
+                                    <th>Severity</th>
+                                    <th>Enforcement</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rulesTableBody">
+                                <tr><td colspan="5" class="text-center text-txt-3 py-8"><div class="skeleton h-6 w-48 mx-auto rounded"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Recent Compliance Checks -->
+            <div class="panel mb-6">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 8a6 6 0 11-12 0 6 6 0 0112 0z" stroke="currentColor" stroke-width="1.1" fill="none"/></svg>
+                        <span class="font-heading font-semibold text-sm">Recent Compliance Checks</span>
+                    </div>
+                </div>
+                <div class="panel-body" style="padding:0;">
+                    <div style="overflow-x:auto;">
+                        <table class="data-table" id="checksTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Content Type</th>
+                                    <th>Entity ID</th>
+                                    <th>Verdict</th>
+                                    <th>Checked</th>
+                                    <th>Failed</th>
+                                </tr>
+                            </thead>
+                            <tbody id="checksTableBody">
+                                <tr><td colspan="6" class="text-center text-txt-3 py-8"><div class="skeleton h-6 w-48 mx-auto rounded"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 5: Compliance Queue -->
+            <div class="panel mb-6">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        <span class="font-heading font-semibold text-sm">Compliance Queue</span>
+                    </div>
+                </div>
+                <div class="panel-body" style="padding:0;">
+                    <div style="overflow-x:auto;">
+                        <table class="data-table" id="queueTable">
+                            <thead>
+                                <tr>
+                                    <th>Submitted</th>
+                                    <th>Content Type</th>
+                                    <th>Status</th>
+                                    <th>Source Workflow</th>
+                                </tr>
+                            </thead>
+                            <tbody id="queueTableBody">
+                                <tr><td colspan="4" class="text-center text-txt-3 py-8"><div class="skeleton h-6 w-48 mx-auto rounded"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toasts"></div>
+
+    <script>
+    // ═══════════════════════════════════════
+    // CONSTANTS
+    // ═══════════════════════════════════════
+    const BRAND_ID = 'carlton';
+    const BSI_WEBHOOK = 'https://n8n.carltonaiservices.com/webhook/bsi-discovery';
+    const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+
+    // ═══════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════
+    let allRules = [];
+    let pendingState = {
+        selectedVerdict: null,
+        selectedOption: null,
+        rankingOrder: [],
+        sortableInstance: null,
+    };
+
+    let activeProfileId = null;
+    try { activeProfileId = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}').id; } catch(e) {}
+
+    // ═══════════════════════════════════════
+    // UTILITIES
+    // ═══════════════════════════════════════
+    function esc(str) {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+
+    function toast(message, type = 'success') {
+        const container = document.getElementById('toasts');
+        const el = document.createElement('div');
+        el.className = `toast toast-${type}`;
+        el.textContent = message;
+        container.appendChild(el);
+        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 4000);
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '--';
+        return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    async function fetchJSON(url, body, { retries = 0, backoff = 2000 } = {}) {
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+            });
+            if (res.status >= 500 && retries < 2) {
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchJSON(url, body, { retries: retries + 1, backoff: backoff * 2 });
+            }
+            return await res.json();
+        } catch (err) {
+            if (retries < 1) {
+                await new Promise(r => setTimeout(r, 2000));
+                return fetchJSON(url, body, { retries: retries + 1, backoff });
+            }
+            console.error('Fetch error:', url, err);
+            return null;
+        }
+    }
+
+    async function supabaseSelect(table, query = '') {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
+        try {
+            const res = await fetch(url, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                }
+            });
+            if (!res.ok) { console.error('Supabase error:', res.status, await res.text()); return null; }
+            return await res.json();
+        } catch (err) { console.error('Supabase fetch error:', table, err); return null; }
+    }
+
+    async function supabaseCount(table, query = '') {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?${query}&select=id`;
+        try {
+            const res = await fetch(url, {
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Prefer': 'count=exact',
+                    'Range-Unit': 'items',
+                    'Range': '0-0',
+                }
+            });
+            if (!res.ok) { console.error('Supabase count error:', res.status); return 0; }
+            const range = res.headers.get('content-range');
+            if (range) {
+                const total = range.split('/')[1];
+                return total === '*' ? 0 : parseInt(total, 10);
+            }
+            return 0;
+        } catch (err) { console.error('Supabase count error:', table, err); return 0; }
+    }
+
+    // ═══════════════════════════════════════
+    // SECTION 1: STATUS BAR
+    // ═══════════════════════════════════════
+    async function loadStats() {
+        const [totalChecks, activeRulesCount, allChecks] = await Promise.all([
+            supabaseCount('compliance_checks', 'brand_id=eq.carlton'),
+            supabaseCount('bsi_policy_rules', 'brand_id=eq.carlton&is_active=eq.true'),
+            supabaseSelect('compliance_checks', 'brand_id=eq.carlton&select=verdict,created_at'),
+        ]);
+
+        document.getElementById('statTotalChecks').textContent = totalChecks || 0;
+        document.getElementById('statActiveRules').textContent = activeRulesCount || 0;
+
+        if (allChecks && allChecks.length > 0) {
+            const compliant = allChecks.filter(c => c.verdict === 'compliant').length;
+            const passRate = Math.round((compliant / allChecks.length) * 100);
+            document.getElementById('statPassRate').textContent = passRate + '%';
+
+            // Violations in last 7 days
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            const violations = allChecks.filter(c => c.verdict !== 'compliant' && new Date(c.created_at) >= weekAgo).length;
+            document.getElementById('statViolations').textContent = violations;
+        } else {
+            document.getElementById('statPassRate').textContent = '--';
+            document.getElementById('statViolations').textContent = '0';
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // SECTION 2: NEEDS YOUR INPUT
+    // ═══════════════════════════════════════
+    async function loadPendingPreferences() {
+        const result = await fetchJSON(BSI_WEBHOOK, { operation: 'pending_preferences', brand_id: BRAND_ID });
+
+        if (!result || !result.total_pending || result.total_pending === 0) {
+            document.getElementById('pendingPanel').style.display = 'none';
+            document.getElementById('pendingEmptyPanel').style.display = '';
+            return;
+        }
+
+        document.getElementById('pendingPanel').style.display = '';
+        document.getElementById('pendingEmptyPanel').style.display = 'none';
+        document.getElementById('pendingBadge').textContent = result.total_pending;
+
+        const container = document.getElementById('pendingQuestions');
+        const questions = result.pending_questions || [];
+
+        if (questions.length === 0) {
+            container.innerHTML = '<p class="text-sm text-txt-3 text-center py-4">No pending questions</p>';
+            return;
+        }
+
+        container.innerHTML = questions.map((q, idx) => renderPendingQuestion(q, idx)).join('');
+
+        // Init sortable for any ranking questions
+        questions.forEach((q, idx) => {
+            if (q.type === 'ranking') {
+                initPendingSortable(idx);
+            }
+        });
+    }
+
+    function renderPendingQuestion(question, idx) {
+        if (!question) return '';
+        const contextHtml = question.context ? `<p class="text-xs text-txt-3 mt-1 mb-4">${esc(question.context)}</p>` : '<div class="mb-4"></div>';
+        const sessionId = question.session_id || '';
+
+        switch (question.type) {
+            case 'open':
+                return `
+                    <div class="question-card mb-4" id="pendingQ${idx}">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
+                                ${contextHtml}
+                                <textarea class="form-input" id="pendingAnswer${idx}" rows="4" placeholder="Share your thoughts..."></textarea>
+                                <div class="flex justify-end mt-3">
+                                    <button onclick="submitPendingAnswer(${idx}, '${esc(sessionId)}', 'open')" class="btn btn-primary" id="pendingSubmit${idx}">Submit Answer</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+
+            case 'this_or_that': {
+                const opts = question.options || {};
+                return `
+                    <div class="question-card mb-4" id="pendingQ${idx}">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
+                                ${contextHtml}
+                                <div class="flex gap-4 option-cards-row">
+                                    <div class="option-card" onclick="selectPendingOption(${idx}, 'a', this)">
+                                        <span class="text-xs font-mono text-txt-3 mb-1">A</span>
+                                        <span class="text-sm font-medium">${esc(opts.a || 'Option A')}</span>
+                                    </div>
+                                    <div class="option-card" onclick="selectPendingOption(${idx}, 'b', this)">
+                                        <span class="text-xs font-mono text-txt-3 mb-1">B</span>
+                                        <span class="text-sm font-medium">${esc(opts.b || 'Option B')}</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-end mt-3">
+                                    <button onclick="submitPendingAnswer(${idx}, '${esc(sessionId)}', 'this_or_that')" class="btn btn-primary" id="pendingSubmit${idx}" disabled>Select an option</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+
+            case 'approve_deny':
+                return `
+                    <div class="question-card mb-4" id="pendingQ${idx}">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
+                                ${contextHtml}
+                                <div class="flex gap-3 verdict-row">
+                                    <button class="verdict-btn verdict-approve" onclick="selectPendingVerdict(${idx}, 'approve', this)">Approve</button>
+                                    <button class="verdict-btn verdict-close" onclick="selectPendingVerdict(${idx}, 'close_but', this)">Close, But...</button>
+                                    <button class="verdict-btn verdict-wrong" onclick="selectPendingVerdict(${idx}, 'wrong_direction', this)">Wrong Direction</button>
+                                </div>
+                                <div class="adjustment-area" id="pendingAdjustment${idx}">
+                                    <textarea class="form-input" id="pendingAdjText${idx}" rows="3" placeholder="What would you adjust?"></textarea>
+                                </div>
+                                <div class="flex justify-end mt-3">
+                                    <button onclick="submitPendingAnswer(${idx}, '${esc(sessionId)}', 'approve_deny')" class="btn btn-primary" id="pendingSubmit${idx}" disabled>Select a verdict</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+
+            case 'ranking': {
+                const items = question.options || [];
+                return `
+                    <div class="question-card mb-4" id="pendingQ${idx}">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <p class="font-heading font-semibold text-base mb-0.5">${esc(question.question)}</p>
+                                ${contextHtml}
+                                <p class="text-xs text-txt-2 mb-3">Drag to reorder from most to least important:</p>
+                                <div id="pendingRankList${idx}" class="space-y-2">
+                                    ${items.map((item, i) => `
+                                        <div class="rank-item" data-value="${esc(item)}">
+                                            <span class="text-txt-3 text-sm select-none" style="min-width:18px;">&#9776;</span>
+                                            <span class="rank-number text-xs font-mono text-accent" style="min-width:22px;">${i + 1}.</span>
+                                            <span class="text-sm">${esc(item)}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div class="flex justify-end mt-3">
+                                    <button onclick="submitPendingAnswer(${idx}, '${esc(sessionId)}', 'ranking')" class="btn btn-primary" id="pendingSubmit${idx}">Submit Rankings</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+
+            default:
+                return `<div class="panel mb-4"><div class="panel-body text-txt-2 text-sm">Unknown question type: ${esc(question.type)}</div></div>`;
+        }
+    }
+
+    // Pending question interaction state (per-question)
+    const pendingSelections = {};
+
+    function selectPendingOption(idx, opt, el) {
+        pendingSelections[idx] = { type: 'option', value: opt };
+        const card = document.getElementById(`pendingQ${idx}`);
+        card.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        const btn = document.getElementById(`pendingSubmit${idx}`);
+        btn.disabled = false;
+        btn.textContent = 'Submit Answer';
+    }
+
+    function selectPendingVerdict(idx, verdict, el) {
+        pendingSelections[idx] = { type: 'verdict', value: verdict };
+        const card = document.getElementById(`pendingQ${idx}`);
+        card.querySelectorAll('.verdict-btn').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+
+        const area = document.getElementById(`pendingAdjustment${idx}`);
+        if (verdict === 'close_but' || verdict === 'wrong_direction') {
+            area.classList.add('open');
+            setTimeout(() => document.getElementById(`pendingAdjText${idx}`)?.focus(), 300);
+        } else {
+            area.classList.remove('open');
+        }
+
+        const btn = document.getElementById(`pendingSubmit${idx}`);
+        btn.disabled = false;
+        btn.textContent = verdict === 'approve' ? 'Submit Approval' : 'Submit Answer';
+    }
+
+    function initPendingSortable(idx) {
+        const el = document.getElementById(`pendingRankList${idx}`);
+        if (!el || typeof Sortable === 'undefined') return;
+        new Sortable(el, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: () => {
+                const items = el.querySelectorAll('.rank-item');
+                const order = [];
+                items.forEach((item, i) => {
+                    item.querySelector('.rank-number').textContent = (i + 1) + '.';
+                    order.push(item.getAttribute('data-value'));
+                });
+                pendingSelections[idx] = { type: 'ranking', value: order };
+            }
+        });
+    }
+
+    async function submitPendingAnswer(idx, sessionId, questionType) {
+        const btn = document.getElementById(`pendingSubmit${idx}`);
+        if (!btn || btn.disabled) return;
+
+        let payload = { operation: 'submit_answer', brand_id: BRAND_ID, session_id: sessionId };
+
+        switch (questionType) {
+            case 'open': {
+                const text = document.getElementById(`pendingAnswer${idx}`)?.value?.trim();
+                if (!text) { toast('Please enter an answer', 'error'); return; }
+                payload.answer = text;
+                break;
+            }
+            case 'this_or_that': {
+                const sel = pendingSelections[idx];
+                if (!sel || sel.type !== 'option') { toast('Please select an option', 'error'); return; }
+                payload.selected = sel.value;
+                break;
+            }
+            case 'approve_deny': {
+                const sel = pendingSelections[idx];
+                if (!sel || sel.type !== 'verdict') { toast('Please select a verdict', 'error'); return; }
+                payload.verdict = sel.value;
+                if (sel.value !== 'approve') {
+                    const adj = document.getElementById(`pendingAdjText${idx}`)?.value?.trim();
+                    if (adj) payload.adjustment = adj;
+                }
+                break;
+            }
+            case 'ranking': {
+                const sel = pendingSelections[idx];
+                const rankEl = document.getElementById(`pendingRankList${idx}`);
+                if (sel && sel.type === 'ranking') {
+                    payload.rankings = sel.value;
+                } else if (rankEl) {
+                    // Use current DOM order
+                    const items = rankEl.querySelectorAll('.rank-item');
+                    payload.rankings = Array.from(items).map(item => item.getAttribute('data-value'));
+                }
+                break;
+            }
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+
+        const result = await fetchJSON(BSI_WEBHOOK, payload);
+
+        if (!result || !result.success) {
+            toast('Failed to submit: ' + (result?.error || 'Connection error'), 'error');
+            btn.disabled = false;
+            btn.textContent = 'Submit Answer';
+            return;
+        }
+
+        toast('Answer submitted successfully');
+
+        // Fade out the question card
+        const card = document.getElementById(`pendingQ${idx}`);
+        if (card) {
+            card.style.transition = 'opacity 0.3s, transform 0.3s';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(-12px)';
+            setTimeout(() => {
+                card.remove();
+                // Reload pending to update badge/state
+                loadPendingPreferences();
+            }, 300);
+        }
+    }
+
+    function togglePendingPanel() {
+        const toggle = document.querySelector('#pendingPanel .collapsible-toggle');
+        const body = document.getElementById('pendingBody');
+        toggle.classList.toggle('collapsed');
+        body.classList.toggle('collapsed');
+    }
+
+    // ═══════════════════════════════════════
+    // SECTION 3: ACTIVE RULES
+    // ═══════════════════════════════════════
+    async function loadRules() {
+        const rules = await supabaseSelect('bsi_policy_rules', 'brand_id=eq.carlton&is_active=eq.true&order=severity&select=id,rule_text,category,rule_type,severity,enforcement');
+        if (!rules) {
+            document.getElementById('rulesTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-txt-3 py-6">Failed to load rules</td></tr>';
+            return;
+        }
+
+        allRules = rules;
+        document.getElementById('rulesCount').textContent = `(${rules.length})`;
+        renderRulesTable(rules);
+    }
+
+    function applyRuleFilters() {
+        const category = document.getElementById('filterCategory').value;
+        const type = document.getElementById('filterType').value;
+        const severity = document.getElementById('filterSeverity').value;
+        const search = document.getElementById('filterSearch').value.toLowerCase().trim();
+
+        let filtered = allRules;
+        if (category) filtered = filtered.filter(r => r.category === category);
+        if (type) filtered = filtered.filter(r => r.rule_type === type);
+        if (severity) filtered = filtered.filter(r => r.severity === severity);
+        if (search) filtered = filtered.filter(r => (r.rule_text || '').toLowerCase().includes(search));
+
+        renderRulesTable(filtered);
+    }
+
+    function renderRulesTable(rules) {
+        const tbody = document.getElementById('rulesTableBody');
+        if (!rules || rules.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-txt-3 py-6">No rules match your filters</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = rules.map(rule => {
+            const ruleText = (rule.rule_text || '').length > 100 ? rule.rule_text.substring(0, 100) + '...' : (rule.rule_text || '');
+            const categoryLabel = (rule.category || '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const typeLabel = (rule.rule_type || '').replace(/_/g, ' ');
+
+            // Type badge colors
+            let typeBadge = '';
+            switch (rule.rule_type) {
+                case 'must_do':
+                    typeBadge = `<span class="badge" style="background: var(--deft-success-dim); color: var(--deft-success);">${esc(typeLabel)}</span>`;
+                    break;
+                case 'must_not_do':
+                    typeBadge = `<span class="badge" style="background: var(--deft-danger-dim); color: var(--deft-danger);">${esc(typeLabel)}</span>`;
+                    break;
+                case 'conditional':
+                    typeBadge = `<span class="badge" style="background: var(--deft-warning-dim); color: var(--deft-warning);">${esc(typeLabel)}</span>`;
+                    break;
+                case 'preference':
+                    typeBadge = `<span class="badge" style="background: rgba(76,201,240,0.15); color: #4CC9F0;">${esc(typeLabel)}</span>`;
+                    break;
+                default:
+                    typeBadge = `<span class="badge badge-not_started">${esc(typeLabel)}</span>`;
+            }
+
+            // Severity badge colors
+            let severityBadge = '';
+            switch (rule.severity) {
+                case 'critical':
+                    severityBadge = `<span class="badge" style="background: var(--deft-danger-dim); color: var(--deft-danger);">critical</span>`;
+                    break;
+                case 'standard':
+                    severityBadge = `<span class="badge badge-not_started">standard</span>`;
+                    break;
+                case 'advisory':
+                    severityBadge = `<span class="badge" style="background: rgba(82,94,115,0.15); color: var(--deft-txt-3);">advisory</span>`;
+                    break;
+                default:
+                    severityBadge = `<span class="badge badge-not_started">${esc(rule.severity || '--')}</span>`;
+            }
+
+            const enforcement = (rule.enforcement || '--').replace(/_/g, ' ');
+
+            return `<tr>
+                <td style="color: var(--deft-txt);" title="${esc(rule.rule_text)}">${esc(ruleText)}</td>
+                <td><span class="text-xs">${esc(categoryLabel)}</span></td>
+                <td>${typeBadge}</td>
+                <td>${severityBadge}</td>
+                <td><span class="text-xs">${esc(enforcement)}</span></td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // SECTION 4: RECENT COMPLIANCE CHECKS
+    // ═══════════════════════════════════════
+    async function loadChecks() {
+        const checks = await supabaseSelect('compliance_checks', 'brand_id=eq.carlton&order=created_at.desc&limit=50&select=id,created_at,content_type,entity_id,verdict,rules_checked,rules_failed,violations');
+        const tbody = document.getElementById('checksTableBody');
+
+        if (!checks || checks.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-txt-3 py-6">No compliance checks yet</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = checks.map((check, idx) => {
+            // Verdict badge
+            let verdictBadge = '';
+            switch (check.verdict) {
+                case 'compliant':
+                    verdictBadge = `<span class="badge" style="background: var(--deft-success-dim); color: var(--deft-success);">compliant</span>`;
+                    break;
+                case 'minor_issues':
+                    verdictBadge = `<span class="badge" style="background: var(--deft-warning-dim); color: var(--deft-warning);">minor issues</span>`;
+                    break;
+                case 'major_issues':
+                case 'legal_concern':
+                case 'financial_concern':
+                    verdictBadge = `<span class="badge" style="background: var(--deft-danger-dim); color: var(--deft-danger);">${esc((check.verdict || '').replace(/_/g, ' '))}</span>`;
+                    break;
+                default:
+                    verdictBadge = `<span class="badge badge-not_started">${esc(check.verdict || '--')}</span>`;
+            }
+
+            const rulesChecked = check.rules_checked ?? '--';
+            const rulesFailed = check.rules_failed ?? 0;
+            const failedStyle = rulesFailed > 0 ? 'color: var(--deft-danger);' : '';
+
+            const hasDetails = (check.violations && check.violations.length > 0);
+
+            return `
+                <tr class="${hasDetails ? 'expandable-row' : ''}" ${hasDetails ? `onclick="toggleCheckDetail('checkDetail${idx}')"` : ''}>
+                    <td>${formatDate(check.created_at)}</td>
+                    <td>${esc(check.content_type || '--')}</td>
+                    <td><span class="font-mono text-xs">${esc((check.entity_id || '--').substring(0, 12))}</span></td>
+                    <td>${verdictBadge}</td>
+                    <td>${rulesChecked}</td>
+                    <td style="${failedStyle}">${rulesFailed}</td>
+                </tr>
+                ${hasDetails ? `
+                <tr class="detail-row" id="checkDetail${idx}">
+                    <td colspan="6">
+                        ${check.violations && check.violations.length > 0 ? `
+                            <div class="mt-2">
+                                <strong class="text-xs text-txt-3 uppercase">Violations:</strong>
+                                <ul class="mt-1 space-y-1">
+                                    ${check.violations.map(v => `<li class="text-xs flex items-start gap-2">
+                                        <span style="color: var(--deft-danger);">&#8226;</span>
+                                        <span>${esc(typeof v === 'string' ? v : (v.rule_text || v.description || JSON.stringify(v)))}</span>
+                                    </li>`).join('')}
+                                </ul>
+                            </div>
+                        ` : ''}
+                    </td>
+                </tr>
+                ` : ''}
+            `;
+        }).join('');
+    }
+
+    function toggleCheckDetail(id) {
+        const row = document.getElementById(id);
+        if (row) row.classList.toggle('open');
+    }
+
+    function scrollToViolations() {
+        const checksSection = document.getElementById('checksTableBody');
+        if (checksSection) {
+            checksSection.closest('.panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Highlight non-compliant rows briefly
+            checksSection.querySelectorAll('.expandable-row').forEach(row => {
+                row.style.transition = 'background 0.3s';
+                row.style.background = 'rgba(255,107,107,0.15)';
+                setTimeout(() => { row.style.background = ''; }, 2000);
+            });
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // SECTION 5: COMPLIANCE QUEUE
+    // ═══════════════════════════════════════
+    async function loadQueue() {
+        const queue = await supabaseSelect('compliance_queue', 'brand_id=eq.carlton&order=submitted_at.desc&limit=50&select=id,submitted_at,content_type,status,source_workflow');
+        const tbody = document.getElementById('queueTableBody');
+
+        if (!queue || queue.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-txt-3 py-6">No items in compliance queue</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = queue.map(item => {
+            // Status badge
+            let statusBadge = '';
+            switch (item.status) {
+                case 'pending_review':
+                    statusBadge = `<span class="badge badge-not_started">pending review</span>`;
+                    break;
+                case 'processing':
+                    statusBadge = `<span class="badge" style="background: var(--deft-accent-dim); color: var(--deft-accent);">processing</span>`;
+                    break;
+                case 'compliant':
+                    statusBadge = `<span class="badge" style="background: var(--deft-success-dim); color: var(--deft-success);">compliant</span>`;
+                    break;
+                case 'non_compliant':
+                    statusBadge = `<span class="badge" style="background: var(--deft-danger-dim); color: var(--deft-danger);">non compliant</span>`;
+                    break;
+                case 'redrafting':
+                case 'routed_to_human':
+                    statusBadge = `<span class="badge" style="background: var(--deft-warning-dim); color: var(--deft-warning);">${esc((item.status || '').replace(/_/g, ' '))}</span>`;
+                    break;
+                case 'routed_to_attorney':
+                case 'routed_to_accountant':
+                case 'failed':
+                    statusBadge = `<span class="badge" style="background: var(--deft-danger-dim); color: var(--deft-danger);">${esc((item.status || '').replace(/_/g, ' '))}</span>`;
+                    break;
+                default:
+                    statusBadge = `<span class="badge badge-not_started">${esc((item.status || '--').replace(/_/g, ' '))}</span>`;
+            }
+
+            return `<tr>
+                <td>${formatDate(item.submitted_at)}</td>
+                <td>${esc(item.content_type || '--')}</td>
+                <td>${statusBadge}</td>
+                <td><span class="text-xs">${esc(item.source_workflow || '--')}</span></td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // POLLING
+    // ═══════════════════════════════════════
+    setInterval(() => { loadChecks(); loadQueue(); }, 30000);
+
+    // ═══════════════════════════════════════
+    // AUTH GATE
+    // ═══════════════════════════════════════
+    let gateSelectedProfile = null;
+
+    function getCachedProfiles(callback) {
+        var CACHE_KEY = 'rdgr-profiles-cache';
+        var CACHE_TTL = 300000;
+        try {
+            var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+            if (cached.profiles && cached.ts && (Date.now() - cached.ts) < CACHE_TTL) {
+                callback(cached.profiles);
+                return;
+            }
+        } catch(e) {}
+        fetch(`${SUPABASE_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+        }).then(r => r.json()).then(profiles => {
+            if (profiles && Array.isArray(profiles) && profiles.length > 0) {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ profiles: profiles, ts: Date.now() }));
+            }
+            callback(profiles);
+        }).catch(() => callback([]));
+    }
+
+    function loadGateProfiles() {
+        getCachedProfiles(function(profiles) {
+            const container = document.getElementById('gateProfiles');
+            if (!container || !profiles || !profiles.length) return;
+            const saved = localStorage.getItem('rdgr-active-profile');
+            let savedId = null;
+            if (saved) { try { savedId = JSON.parse(saved).id; } catch(e) {} }
+            container.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?';
+                const initial = name[0].toUpperCase();
+                const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+                const color = colors[name] || '#8A95A9';
+                return `<button type="button" onclick="selectGateProfile('${p.user_id}','${name.replace(/'/g, '&#39;')}',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="if(!this.classList.contains('selected'))this.style.background='rgba(255,255,255,0.02)'">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:${color}20;color:${color};border:2px solid transparent;">${initial}</div>
+                    <span class="text-xs" style="color:#8A95A9;">${name}</span>
+                </button>`;
+            }).join('');
+            if (savedId) {
+                const btns = container.querySelectorAll('.gate-profile-btn');
+                btns.forEach(btn => {
+                    if (btn.getAttribute('onclick').includes(savedId)) btn.click();
+                });
+            }
+        });
+    }
+
+    function selectGateProfile(userId, name, el) {
+        gateSelectedProfile = { id: userId, name: name };
+        document.querySelectorAll('.gate-profile-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            btn.style.background = 'rgba(255,255,255,0.02)';
+            btn.style.borderColor = 'transparent';
+            btn.querySelector('.w-10').style.borderColor = 'transparent';
+        });
+        el.classList.add('selected');
+        el.style.background = 'rgba(255,255,255,0.06)';
+        el.style.borderColor = 'rgba(6,214,160,0.4)';
+        el.querySelector('.w-10').style.borderColor = el.querySelector('.w-10').style.color;
+        const btn = document.getElementById('gateSubmitBtn');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.textContent = 'Sign In as ' + name;
+        document.getElementById('gateInput').focus();
+    }
+
+    function handleGate(e) {
+        e.preventDefault();
+        const input = document.getElementById('gateInput').value;
+        if (input === 'Advance1!') {
+            localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+            if (gateSelectedProfile) {
+                localStorage.setItem('rdgr-active-profile', JSON.stringify(gateSelectedProfile));
+                activeProfileId = gateSelectedProfile.id;
+            }
+            document.getElementById('gate').classList.add('hidden');
+            document.getElementById('mainContent').style.opacity = '1';
+            initPage();
+            return false;
+        }
+        document.getElementById('gateError').classList.add('show');
+        document.getElementById('gateInput').value = '';
+        document.getElementById('gateInput').focus();
+        setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+        return false;
+    }
+
+    // ═══════════════════════════════════════
+    // PROFILE DROPDOWN
+    // ═══════════════════════════════════════
+    (function populateProfileDD() {
+        getCachedProfiles(function(profiles) {
+            const dd = document.getElementById('profileDropdown');
+            if (!dd || !profiles || !profiles.length) return;
+            const activeId = activeProfileId;
+            dd.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?';
+                const initial = name[0].toUpperCase();
+                const isActive = p.user_id === activeId;
+                return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, '&#39;')}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                    <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive ? 'rgba(6,214,160,0.15)' : 'rgba(255,255,255,0.06)'};color:${isActive ? '#06D6A0' : '#8A95A9'};">${initial}</div>
+                    <span>${name}</span>
+                    ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+                </button>`;
+            }).join('');
+            dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+        });
+    })();
+
+    function toggleProfileDD() {
+        const dd = document.getElementById('profileDropdown');
+        dd.classList.toggle('hidden');
+        if (!dd.classList.contains('hidden')) {
+            setTimeout(() => document.addEventListener('click', function closePDD(e) {
+                if (!document.getElementById('profileSwitcher').contains(e.target)) {
+                    dd.classList.add('hidden');
+                }
+                document.removeEventListener('click', closePDD);
+            }), 0);
+        }
+    }
+
+    function selectProfileGlobal(userId, name) {
+        localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+        location.reload();
+    }
+
+    function signOut() {
+        localStorage.removeItem('rdgr-session');
+        localStorage.removeItem('rdgr-active-profile');
+        location.reload();
+    }
+
+    // ═══════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════
+    function initPage() {
+        loadStats();
+        loadPendingPreferences();
+        loadRules();
+        loadChecks();
+        loadQueue();
+    }
+
+    if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity = '1';
+        initPage();
+    }
+
+    if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+        loadGateProfiles();
+    }
+
+    // Update profile display from localStorage
+    try {
+        const _ap = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+        if (_ap.name) {
+            document.getElementById('profileName').textContent = _ap.name;
+            document.getElementById('profileAvatar').textContent = _ap.name[0].toUpperCase();
+            const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+            const c = colors[_ap.name] || '#8A95A9';
+            document.getElementById('profileAvatar').style.background = c + '26';
+            document.getElementById('profileAvatar').style.color = c;
+        }
+    } catch(e) {}
+
+    </script>
+</body>
+</html>

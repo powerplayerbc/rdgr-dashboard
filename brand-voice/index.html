@@ -563,7 +563,7 @@
                             <span class="hidden sm:inline" id="profileName">Bradford</span>
                             <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
                         </button>
-                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown"></div>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 100;" id="profileDropdown"></div>
                     </div>
                     <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2" title="Settings">
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -602,6 +602,7 @@
                 </div>
             </div>
         </nav>
+        <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
 
         <!-- Page Content -->
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 space-y-6">
@@ -792,6 +793,71 @@
                     <button type="submit" class="btn btn-primary" id="saveAssetBtn">Save Changes</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div id="rejectModal" class="modal-backdrop" onclick="if(event.target===this) closeRejectModal()">
+        <div class="modal-box" style="max-width:480px;">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-heading text-lg font-semibold">Reject Asset</h3>
+                <button onclick="closeRejectModal()" class="text-txt-3 hover:text-txt transition-colors" style="background:none;border:none;cursor:pointer;font-size:1.2rem;">&times;</button>
+            </div>
+            <div class="text-sm text-txt-2 mb-3 p-3 rounded-lg" style="background:rgba(255,255,255,0.03);max-height:100px;overflow-y:auto;" id="rejectPreview"></div>
+            <div class="space-y-4">
+                <div>
+                    <label class="form-label">Reason</label>
+                    <select id="rejectReason" class="form-input">
+                        <option value="poor_quality">Poor quality / not reusable</option>
+                        <option value="wrong_type">Wrong asset type</option>
+                        <option value="duplicate">Duplicate of another asset</option>
+                        <option value="tactical_instruction">Reads like a tactical instruction</option>
+                        <option value="too_generic">Too generic / not brand-specific</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Feedback (optional)</label>
+                    <textarea id="rejectFeedback" class="form-input" rows="2" placeholder="What should this asset look like instead?"></textarea>
+                </div>
+                <div>
+                    <label class="form-label">After rejecting:</label>
+                    <div class="space-y-2 mt-1">
+                        <label class="flex items-center gap-2 text-sm text-txt-2 cursor-pointer">
+                            <input type="radio" name="rejectMode" value="reject_only" checked style="accent-color:var(--deft-accent);"> Just reject (remove from library)
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-txt-2 cursor-pointer">
+                            <input type="radio" name="rejectMode" value="fix_single"> Fix this asset (AI generates a replacement)
+                        </label>
+                        <label class="flex items-center gap-2 text-sm text-txt-2 cursor-pointer">
+                            <input type="radio" name="rejectMode" value="review_question"> Review all assets from this source question
+                        </label>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeRejectModal()" class="btn btn-ghost">Cancel</button>
+                    <button onclick="confirmReject()" class="btn text-xs" style="background:rgba(255,107,107,0.15);color:#FF6B6B;border-color:rgba(255,107,107,0.3);" id="confirmRejectBtn">Reject Asset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Re-extract Results Modal -->
+    <div id="reextractModal" class="modal-backdrop" onclick="if(event.target===this) closeReextractModal()">
+        <div class="modal-box" style="max-width:540px;">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-heading text-lg font-semibold">Re-extraction Results</h3>
+                <button onclick="closeReextractModal()" class="text-txt-3 hover:text-txt transition-colors" style="background:none;border:none;cursor:pointer;font-size:1.2rem;">&times;</button>
+            </div>
+            <div id="reextractContent" class="text-sm text-txt-2">
+                <div class="flex items-center gap-3 py-6 justify-center">
+                    <div class="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+                    <span>Re-extracting assets...</span>
+                </div>
+            </div>
+            <div class="flex justify-end mt-4">
+                <button onclick="closeReextractModal()" class="btn btn-primary text-xs">Done</button>
+            </div>
         </div>
     </div>
 
@@ -1155,7 +1221,8 @@ function renderAssets(assets) {
             ${a.context ? `<div class="text-xs text-txt-3 mb-1"><strong>Context:</strong> ${esc(a.context)}</div>` : ''}
             ${a.emotional_tone ? `<div class="text-xs text-txt-3 mb-1"><strong>Tone:</strong> ${esc(a.emotional_tone)}</div>` : ''}
             ${a.suitable_channels && a.suitable_channels.length ? `<div class="text-xs text-txt-3 mb-1"><strong>Channels:</strong> ${a.suitable_channels.map(c => esc(CHANNEL_LABELS[c] || c)).join(', ')}</div>` : ''}
-            <div class="flex justify-end mt-3">
+            <div class="flex justify-end mt-3 gap-2">
+                <button class="btn text-xs" style="color:#FF6B6B;border-color:rgba(255,107,107,0.3);background:rgba(255,107,107,0.08);" onclick="event.stopPropagation(); rejectAsset(${idx})">Reject</button>
                 <button class="btn btn-primary text-xs" onclick="event.stopPropagation(); openEditModal(${idx})">Edit Asset</button>
             </div>
         </div>`;
@@ -1218,6 +1285,20 @@ function getFilteredAsset(idx) {
     return filtered[idx];
 }
 
+function getFilteredList() {
+    const typeFilter = $('filterType').value;
+    const search = $('filterSearch').value.toLowerCase().trim();
+    let filtered = allAssets;
+    if (typeFilter) filtered = filtered.filter(a => a.asset_type === typeFilter);
+    if (search) {
+        filtered = filtered.filter(a => {
+            const haystack = [a.content, a.content_short, a.content_micro, a.context, a.asset_type, a.source_category, (a.tags||[]).join(' ')].filter(Boolean).join(' ').toLowerCase();
+            return haystack.includes(search);
+        });
+    }
+    return filtered;
+}
+
 async function saveAsset(e) {
     e.preventDefault();
     const btn = $('saveAssetBtn');
@@ -1246,9 +1327,34 @@ async function saveAsset(e) {
             p_updates: updates
         });
         toast('Asset updated successfully', 'success');
+
+        // Preserve filter state and edited asset ID
+        const savedType = $('filterType').value;
+        const savedSearch = $('filterSearch').value;
+        const editedId = $('editId').value;
+
         closeEditModal();
         await loadAssets();
         await loadStats();
+
+        // Re-apply filters
+        if (savedType) $('filterType').value = savedType;
+        if (savedSearch) $('filterSearch').value = savedSearch;
+        if (savedType || savedSearch) filterAssets();
+
+        // Scroll to the edited asset
+        if (editedId) {
+            const list = savedType || savedSearch ? getFilteredList() : allAssets;
+            const idx = list.findIndex(a => a.id === editedId);
+            if (idx >= 0) {
+                const row = $('arow-' + idx);
+                if (row) {
+                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    row.style.outline = '1px solid var(--deft-accent)';
+                    setTimeout(() => { row.style.outline = ''; }, 2000);
+                }
+            }
+        }
     } catch(err) {
         console.error('Save error:', err);
         toast('Failed to save: ' + err.message, 'error');
@@ -1257,6 +1363,132 @@ async function saveAsset(e) {
         btn.textContent = 'Save Changes';
     }
     return false;
+}
+
+// ──────────────── SECTION 4B: REJECT ASSET ────────────────
+let rejectIdx = null;
+let rejectAssetData = null;
+
+function rejectAsset(idx) {
+    const a = getFilteredAsset(idx);
+    if (!a) return;
+    rejectIdx = idx;
+    rejectAssetData = a;
+    $('rejectPreview').textContent = truncate(a.content, 150);
+    $('rejectReason').value = 'poor_quality';
+    $('rejectFeedback').value = '';
+    document.querySelector('input[name="rejectMode"][value="reject_only"]').checked = true;
+    $('rejectModal').classList.add('active');
+}
+
+function closeRejectModal() {
+    $('rejectModal').classList.remove('active');
+    rejectIdx = null;
+    rejectAssetData = null;
+}
+
+function closeReextractModal() {
+    $('reextractModal').classList.remove('active');
+}
+
+async function confirmReject() {
+    if (!rejectAssetData) return;
+    const a = rejectAssetData;
+
+    const btn = $('confirmRejectBtn');
+    btn.disabled = true;
+    btn.textContent = 'Rejecting...';
+    const reason = $('rejectReason').value;
+    const feedback = $('rejectFeedback').value.trim();
+    const mode = document.querySelector('input[name="rejectMode"]:checked').value;
+
+    try {
+        const newScore = Math.max(0, (a.performance_score || 0.5) - 0.2);
+
+        // Reject the asset via direct PATCH (more reliable than RPC for these fields)
+        const patchRes = await fetch(
+            SUPABASE_URL + '/rest/v1/brand_content_assets?id=eq.' + a.id + '&brand_id=eq.' + BRAND_ID,
+            {
+                method: 'PATCH',
+                headers: { ...HEADERS, 'Prefer': 'return=minimal' },
+                body: JSON.stringify({
+                    is_active: false,
+                    rejection_count: (a.rejection_count || 0) + 1,
+                    performance_score: newScore,
+                    retired_at: new Date().toISOString(),
+                    retired_reason: reason
+                })
+            }
+        );
+        if (!patchRes.ok) throw new Error('PATCH failed: ' + patchRes.status);
+
+        toast('Asset rejected', 'success');
+        closeRejectModal();
+
+        // Preserve filter state
+        const savedType = $('filterType').value;
+        const savedSearch = $('filterSearch').value;
+        await loadAssets();
+        await loadStats();
+        if (savedType) $('filterType').value = savedType;
+        if (savedSearch) $('filterSearch').value = savedSearch;
+        if (savedType || savedSearch) filterAssets();
+
+        // Trigger re-extraction if requested
+        if (mode === 'fix_single' || mode === 'review_question') {
+            triggerReextract(a, reason, feedback, mode);
+        }
+
+    } catch(err) {
+        console.error('Reject error:', err);
+        toast('Failed to reject: ' + err.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Reject Asset';
+    }
+}
+
+async function triggerReextract(asset, reason, feedback, mode) {
+    $('reextractModal').classList.add('active');
+    $('reextractContent').innerHTML = '<div class="flex items-center gap-3 py-6 justify-center"><div class="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin"></div><span>Re-extracting assets...</span></div>';
+
+    try {
+        const payload = {
+            brand_id: BRAND_ID,
+            mode: mode === 'fix_single' ? 'single_asset' : 'full_question',
+            asset_id: asset.id,
+            source_category: asset.source_category,
+            source_question_index: asset.source_question_index,
+            rejection_reasons: [reason],
+            rejection_feedback: feedback || 'No additional feedback provided',
+            asset_type: asset.asset_type
+        };
+
+        const res = await fetch('https://n8n.carltonaiservices.com/webhook/asset-surgical-reextract', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await res.json();
+
+        if (result.success || result.replaced || result.new) {
+            const msg = mode === 'fix_single'
+                ? `Replacement asset created successfully.`
+                : `Re-extraction complete: ${result.retired || 0} retired, ${result.new || 0} new assets created.`;
+            $('reextractContent').innerHTML = `<div class="text-center py-4"><div class="text-accent text-lg mb-2">&#10003;</div><p>${esc(msg)}</p>${result.lesson_saved ? '<p class="text-txt-3 text-xs mt-2">Lesson saved for future extractions.</p>' : ''}</div>`;
+            await loadAssets();
+            await loadStats();
+            const savedType = $('filterType').value;
+            const savedSearch = $('filterSearch').value;
+            if (savedType || savedSearch) filterAssets();
+        } else {
+            $('reextractContent').innerHTML = `<div class="text-center py-4"><p class="text-txt-3">${esc(result.error || result.message || 'Re-extraction returned no results. The workflow may not be deployed yet.')}</p></div>`;
+        }
+    } catch(err) {
+        console.error('Re-extract error:', err);
+        $('reextractContent').innerHTML = `<div class="text-center py-4"><p class="text-txt-3">Re-extraction failed: ${esc(err.message)}</p><p class="text-xs text-txt-3 mt-1">The surgical re-extraction workflow may not be deployed yet.</p></div>`;
+    }
 }
 
 // ──────────────── SECTION 5: FIND & REPLACE ────────────────

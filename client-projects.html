@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Client Projects | RDGR</title>
+
+    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://yrwrswyjawmgtxrgbnim.supabase.co">
+    <script>
+        // Instant auth check + theme application — runs before body renders
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _presets = {
+                forest:     { accent:'#A8D65B',accentWarm:'#F0A830',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                sunrise:    { accent:'#F0A830',accentWarm:'#E85D5D',base:'#100D08',surface:'#1C1810',surfaceEl:'#272118',surfaceHi:'#322B20',border:'#3F382C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                ocean:      { accent:'#38BDF8',accentWarm:'#06D6A0',base:'#080D10',surface:'#10161C',surfaceEl:'#182027',surfaceHi:'#202A32',border:'#2C363F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E0E8EA',txt2:'#8C9BA0',txt3:'#586B6B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                berry:      { accent:'#C084FC',accentWarm:'#FB7185',base:'#0D0810',surface:'#16101C',surfaceEl:'#201827',surfaceHi:'#2A2032',border:'#3A2C3F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E0EA',txt2:'#A08CA0',txt3:'#6B586B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                rdgr:       { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' },
+                monochrome: { accent:'#E8E8E8',accentWarm:'#A0A0A0',base:'#000000',surface:'#0A0A0A',surfaceEl:'#141414',surfaceHi:'#1E1E1E',border:'#2A2A2A',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E8E8',txt2:'#A0A0A0',txt3:'#666666',headingFont:'Nunito',bodyFont:'DM Sans' },
+            };
+            var _t = (_tc.preset === 'custom' && _tc.custom) ? _tc.custom : (_presets[_tc.preset] || _presets.rdgr);
+            // Apply status color overrides if present
+            if (_tc.statusOverrides) {
+                if (_tc.statusOverrides.success) _t.success = _tc.statusOverrides.success;
+                if (_tc.statusOverrides.warning) _t.warning = _tc.statusOverrides.warning;
+                if (_tc.statusOverrides.danger) _t.danger = _tc.statusOverrides.danger;
+            }
+            var _r = document.documentElement;
+            _r.style.setProperty('--deft-accent', _t.accent);
+            _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+            _r.style.setProperty('--deft-accent-warm', _t.accentWarm || _t.accent);
+            _r.style.setProperty('--deft-base', _t.base);
+            _r.style.setProperty('--deft-surface', _t.surface);
+            _r.style.setProperty('--deft-surface-el', _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-surface-hi', _t.surfaceHi || _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-border', _t.border);
+            _r.style.setProperty('--deft-success', _t.success || '#6BCB77');
+            _r.style.setProperty('--deft-success-dim', (_t.success || '#6BCB77') + '26');
+            _r.style.setProperty('--deft-warning', _t.warning || '#F0A830');
+            _r.style.setProperty('--deft-warning-dim', (_t.warning || '#F0A830') + '26');
+            _r.style.setProperty('--deft-danger', _t.danger || '#E85D5D');
+            _r.style.setProperty('--deft-danger-dim', (_t.danger || '#E85D5D') + '26');
+            _r.style.setProperty('--deft-txt', _t.txt);
+            _r.style.setProperty('--deft-txt-2', _t.txt2 || '#8A95A9');
+            _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
+            _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
+            _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+            var _fs = _tc.fontScale || 1;
+            _r.style.setProperty('--deft-font-scale', _fs);
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent,
+        html.rdgr-authed #deftApp,
+        html.rdgr-authed #brainApp,
+        html.rdgr-authed #settingsApp { opacity: 1 !important; }
+
+        /* Universal theme */
+        body {
+            background: var(--deft-base, #08090D) !important;
+            color: var(--deft-txt, #E8ECF1) !important;
+            font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important;
+        }
+        .font-heading, h1, h2, h3 {
+            font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important;
+        }
+        nav {
+            background: color-mix(in srgb, var(--deft-base, #08090D) 92%, transparent) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel, .stat-chip {
+            background: var(--deft-surface, #11131A) !important;
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        .panel-header { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input { border-color: var(--deft-border, #2A2E3D) !important; }
+        .form-input:focus {
+            border-color: var(--deft-accent, #06D6A0) !important;
+            box-shadow: 0 0 0 2px var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+        }
+        /* Accent color */
+        .text-accent { color: var(--deft-accent, #06D6A0) !important; }
+        .bg-accent { background-color: var(--deft-accent, #06D6A0) !important; }
+        .task-tab.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+        /* Mobile Nav System */
+        .mobile-menu-btn {
+            display: none;
+            align-items: center; justify-content: center;
+            width: 32px; height: 32px;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.375rem;
+            background: transparent;
+            color: var(--deft-txt-2, #8A95A9);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            flex-shrink: 0;
+        }
+        .mobile-menu-btn:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        @media (max-width: 639px) { .mobile-menu-btn { display: flex; } }
+        #mobileNavOverlay {
+            position: fixed; inset: 0; z-index: 200;
+            display: none; opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        #mobileNavOverlay.open { display: flex; opacity: 1; }
+        .mobile-nav-backdrop {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.5);
+        }
+        .mobile-nav-sidebar {
+            position: relative; z-index: 1;
+            width: 280px; max-width: 85vw; height: 100vh;
+            background: var(--deft-base, #11131A);
+            border-right: 1px solid var(--deft-border, #2A2E3D);
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            padding: 0.75rem 0;
+        }
+        #mobileNavOverlay.open .mobile-nav-sidebar { transform: translateX(0); }
+        .mobile-nav-close {
+            display: flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px;
+            border: none; background: transparent;
+            color: var(--deft-txt-3, #525E73);
+            cursor: pointer; font-size: 1.1rem;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+        }
+        .mobile-nav-close:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link {
+            display: block;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.75rem; font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            transition: background 0.12s, color 0.12s;
+        }
+        .mobile-nav-link:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        .mobile-nav-group-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 0.5rem 1.25rem;
+            font-size: 0.75rem; font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            background: transparent; border: none;
+            cursor: pointer;
+            transition: background 0.12s, color 0.12s;
+            text-align: left;
+        }
+        .mobile-nav-group-btn:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-group-btn.active { color: var(--deft-accent, #06D6A0); }
+        .mobile-nav-group-btn .mn-chevron {
+            transition: transform 0.2s; opacity: 0.5;
+        }
+        .mobile-nav-group-btn.expanded .mn-chevron { transform: rotate(180deg); opacity: 0.8; }
+        .mobile-nav-children {
+            display: none;
+            padding-left: 1rem;
+        }
+        .mobile-nav-children.open { display: block; }
+        .mobile-nav-divider {
+            height: 1px;
+            background: var(--deft-border, #2A2E3D);
+            margin: 0.375rem 1rem;
+        }
+        .btn-primary {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.15)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent) !important;
+        }
+        .btn-primary:hover {
+            background: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent) !important;
+        }
+        .btn-ghost { border-color: var(--deft-border, #2A2E3D) !important; }
+        /* Status colors */
+        .text-info { color: var(--deft-accent, #06D6A0) !important; }
+        .badge-in_progress, .badge-approve-type { background: var(--deft-accent-dim) !important; color: var(--deft-accent) !important; }
+        .badge-completed { background: var(--deft-success-dim, rgba(34,197,94,0.15)) !important; color: var(--deft-success, #22C55E) !important; }
+        .badge-failed, .badge-risk-high { background: var(--deft-danger-dim, rgba(255,107,107,0.15)) !important; color: var(--deft-danger, #FF6B6B) !important; }
+        .badge-blocked, .badge-review { background: var(--deft-warning-dim, rgba(255,217,61,0.15)) !important; color: var(--deft-warning, #FFD93D) !important; }
+        .btn-approve { background: var(--deft-success-dim) !important; color: var(--deft-success) !important; border-color: color-mix(in srgb, var(--deft-success) 25%, transparent) !important; }
+        .btn-deny { background: var(--deft-danger-dim) !important; color: var(--deft-danger) !important; border-color: color-mix(in srgb, var(--deft-danger) 25%, transparent) !important; }
+        .text-alert { color: var(--deft-danger, #FF6B6B) !important; }
+        .text-warn { color: var(--deft-warning, #FFD93D) !important; }
+        /* Secondary text */
+        .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+        .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+        .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+        ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D) !important; }
+        .pulse-dot { background: var(--deft-accent, #06D6A0) !important; }
+        .gate-input:focus {
+            border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent) !important;
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent) !important;
+        }
+        /* Surface elevation */
+        .review-card, .directive-card, .human-task-card, .wf-card, .thread-item {
+            border-color: var(--deft-border, #2A2E3D) !important;
+        }
+        select.form-input option { background: var(--deft-surface-el, #1A1D28) !important; color: var(--deft-txt, #E8ECF1) !important; }
+        /* Font scale */
+        body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
+        .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
+        .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
+        .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
+        .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
+        .text-3xl { font-size: calc(1.875rem * var(--deft-font-scale, 1)) !important; }
+
+        /* Nav Dropdown System */
+        .nav-group { position: relative; }
+        .nav-group-btn {
+            display: flex; align-items: center; gap: 0.25rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem; font-weight: 500;
+            color: #8A95A9;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+            border: none; background: transparent;
+        }
+        .nav-group-btn:hover { color: #E8ECF1; }
+        .nav-group-btn.active {
+            background: rgba(6,214,160,0.12);
+            color: #06D6A0;
+        }
+        .nav-group-btn .chevron {
+            transition: transform 0.2s;
+            opacity: 0.5;
+        }
+        .nav-group:hover .nav-group-btn .chevron { transform: rotate(180deg); opacity: 0.8; }
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 150px;
+            padding: 0.375rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: opacity 0.15s, visibility 0.15s, transform 0.15s;
+            z-index: 70;
+        }
+        .nav-group:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .nav-dropdown a {
+            display: block;
+            padding: 0.4rem 0.625rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+        .nav-dropdown a:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--deft-txt, #E8ECF1);
+        }
+        .nav-dropdown a.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        /* Theme overrides for nav */
+        .nav-group-btn.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deft-base': '#08090D',
+                        surface: '#11131A',
+                        'surface-el': '#1A1D28',
+                        'surface-hi': '#242836',
+                        border: '#2A2E3D',
+                        accent: '#06D6A0',
+                        'accent-dim': 'rgba(6,214,160,0.15)',
+                        alert: '#FF6B6B',
+                        'alert-dim': 'rgba(255,107,107,0.15)',
+                        warn: '#FFD93D',
+                        'warn-dim': 'rgba(255,217,61,0.15)',
+                        info: '#4CC9F0',
+                        'info-dim': 'rgba(76,201,240,0.15)',
+                        txt: '#E8ECF1',
+                        'txt-2': '#8A95A9',
+                        'txt-3': '#525E73',
+                    },
+                    fontFamily: {
+                        heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                        body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: #08090D;
+            color: #E8ECF1;
+        }
+
+        /* Grain */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3A3E4D; }
+
+        /* Gate */
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: #E8ECF1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            width: 100%;
+        }
+        .gate-input:focus {
+            border-color: rgba(6,214,160,0.4);
+            box-shadow: 0 0 0 3px rgba(6,214,160,0.08);
+        }
+        .gate-input::placeholder { color: #525E73; }
+        .gate-error { color: #FF6B6B; font-size: 0.8rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        /* Pulse */
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #06D6A0;
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+
+        /* Cards */
+        .panel {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid #1E2130;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel-body { padding: 1rem 1.25rem; }
+
+        /* Status badges */
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        .badge-questionnaire_pending { background: rgba(255,217,61,0.15); color: #FFD93D; }
+        .badge-extracting_data { background: rgba(56,189,248,0.15); color: #38BDF8; }
+        .badge-generating_brand { background: rgba(56,189,248,0.15); color: #38BDF8; }
+        .badge-generating_pages { background: rgba(56,189,248,0.15); color: #38BDF8; }
+        .badge-operator_review { background: rgba(251,146,60,0.15); color: #FB923C; }
+        .badge-client_review { background: rgba(168,85,247,0.15); color: #A855F7; }
+        .badge-deploying { background: rgba(56,189,248,0.15); color: #38BDF8; }
+        .badge-live { background: rgba(34,197,94,0.15); color: #22C55E; }
+        .badge-cancelled { background: rgba(255,107,107,0.15); color: #FF6B6B; }
+        .badge-approved { background: rgba(6,214,160,0.15); color: #06D6A0; }
+        .badge-pending { background: rgba(255,217,61,0.15); color: #FFD93D; }
+        .badge-draft { background: rgba(138,149,169,0.15); color: #8A95A9; }
+        .badge-generating { background: rgba(76,201,240,0.15); color: #4CC9F0; }
+        .badge-revision_requested { background: rgba(255,165,0,0.15); color: #FFA500; }
+
+        /* Buttons */
+        .btn {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.03em;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            text-transform: uppercase;
+        }
+        .btn-approve { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.25); }
+        .btn-approve:hover { background: rgba(6,214,160,0.25); box-shadow: 0 0 12px rgba(6,214,160,0.15); }
+        .btn-deny { background: rgba(255,107,107,0.15); color: #FF6B6B; border: 1px solid rgba(255,107,107,0.25); }
+        .btn-deny:hover { background: rgba(255,107,107,0.25); box-shadow: 0 0 12px rgba(255,107,107,0.15); }
+        .btn-modify { background: rgba(76,201,240,0.15); color: #4CC9F0; border: 1px solid rgba(76,201,240,0.25); }
+        .btn-modify:hover { background: rgba(76,201,240,0.25); box-shadow: 0 0 12px rgba(76,201,240,0.15); }
+        .btn-primary { background: rgba(6,214,160,0.15); color: #06D6A0; border: 1px solid rgba(6,214,160,0.3); }
+        .btn-primary:hover { background: rgba(6,214,160,0.25); }
+        .btn-ghost { background: transparent; color: #8A95A9; border: 1px solid #2A2E3D; }
+        .btn-ghost:hover { background: rgba(255,255,255,0.03); color: #E8ECF1; }
+        .btn-warn { background: rgba(255,159,67,0.15); color: #FF9F43; border: 1px solid rgba(255,159,67,0.25); }
+        .btn-warn:hover { background: rgba(255,159,67,0.25); box-shadow: 0 0 12px rgba(255,159,67,0.15); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Form inputs */
+        .form-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid #2A2E3D;
+            border-radius: 0.375rem;
+            padding: 0.625rem 0.75rem;
+            color: #E8ECF1;
+            font-family: 'IBM Plex Sans', system-ui;
+            font-size: 0.875rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            border-color: rgba(6,214,160,0.4);
+            box-shadow: 0 0 0 2px rgba(6,214,160,0.08);
+        }
+        .form-input::placeholder { color: #525E73; }
+        select.form-input { cursor: pointer; }
+        select.form-input option { background: #1A1D28; color: #E8ECF1; }
+        textarea.form-input { resize: vertical; min-height: 80px; }
+
+        /* Modal */
+        .modal-backdrop {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.25s, visibility 0.25s;
+        }
+        .modal-backdrop.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: #11131A; border: 1px solid #2A2E3D; border-radius: 0.75rem;
+            width: 90%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+            transform: translateY(20px); transition: transform 0.25s ease;
+        }
+        .modal-backdrop.active .modal-content { transform: translateY(0); }
+
+        /* Toast */
+        .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-family: 'IBM Plex Sans', system-ui;
+            animation: toast-in 0.3s ease forwards;
+            max-width: 380px;
+        }
+        .toast-success { background: rgba(6,214,160,0.15); border: 1px solid rgba(6,214,160,0.3); color: #06D6A0; }
+        .toast-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #FF6B6B; }
+        .toast-info { background: rgba(76,201,240,0.15); border: 1px solid rgba(76,201,240,0.3); color: #4CC9F0; }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Stat chip */
+        .stat-chip {
+            background: #11131A;
+            border: 1px solid #1E2130;
+            border-radius: 0.5rem;
+            padding: 0.625rem 1rem;
+            display: flex; flex-direction: column; gap: 0.25rem;
+        }
+        .stat-value { font-family: 'Chakra Petch', system-ui; font-weight: 700; font-size: 1.4rem; line-height: 1; }
+        .stat-label { font-size: 0.7rem; color: #8A95A9; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+
+        /* Progress bar */
+        .progress-bar {
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            height: 6px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #06D6A0, #4CC9F0);
+            transition: width 0.6s ease;
+        }
+
+        /* Loading skeleton */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #1A1D28 25%, #242836 50%, #1A1D28 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 0.25rem;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center; padding: 2rem 1rem; color: #525E73;
+            font-size: 0.85rem;
+        }
+
+        /* Task type tabs */
+        .task-tab {
+            flex: 1;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-align: center;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            color: #8A95A9;
+            background: transparent;
+            transition: background 0.2s, color 0.2s;
+        }
+        .task-tab:hover { color: #E8ECF1; }
+        .task-tab.active {
+            background: rgba(6,214,160,0.12);
+            color: #06D6A0;
+        }
+
+        /* Build card */
+        .build-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid #1E2130;
+            border-radius: 0.5rem;
+            padding: 1rem 1.25rem;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .build-card:hover { border-color: #2A2E3D; background: #151824; }
+
+        /* Page status dots */
+        .page-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            border: 1.5px solid rgba(255,255,255,0.15);
+            transition: all 0.2s;
+        }
+        .page-dot.approved { background: #22C55E; border-color: #22C55E; }
+        .page-dot.generating { background: #38BDF8; border-color: #38BDF8; animation: pulse-live 2s ease-in-out infinite; }
+        .page-dot.review { background: #FB923C; border-color: #FB923C; }
+        .page-dot.draft { background: #8A95A9; border-color: #8A95A9; }
+        .page-dot.pending { background: transparent; }
+
+        /* Pipeline stages */
+        .pipeline-stage {
+            display: flex; flex-direction: column; align-items: center; gap: 0.375rem;
+            flex: 1; padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: background 0.2s;
+        }
+        .pipeline-stage.active-stage { background: rgba(255,255,255,0.03); }
+        .pipeline-count {
+            font-family: 'Chakra Petch', system-ui;
+            font-weight: 700; font-size: 1.25rem;
+            line-height: 1;
+        }
+        .pipeline-label {
+            font-size: 0.65rem; text-transform: uppercase;
+            letter-spacing: 0.06em; font-weight: 500;
+            color: #8A95A9; text-align: center;
+        }
+        .pipeline-connector {
+            width: 24px; height: 2px;
+            background: rgba(255,255,255,0.08);
+            margin-top: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        /* Preview frame */
+        .preview-frame {
+            background: #fff;
+            border: 1px solid #2A2E3D;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            width: 100%;
+            min-height: 500px;
+        }
+        .preview-frame iframe {
+            width: 100%; height: 600px; border: none;
+        }
+
+        /* Activity feed */
+        .activity-item {
+            display: flex; gap: 0.75rem; align-items: flex-start;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(30,33,48,0.5);
+            font-size: 0.8rem;
+        }
+        .activity-item:last-child { border-bottom: none; }
+        .activity-dot {
+            width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0;
+        }
+
+        /* Deploy status indicator */
+        .deploy-indicator {
+            display: inline-flex; align-items: center; gap: 0.375rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: 0.25rem;
+            font-size: 0.7rem; font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .deploy-ready { background: rgba(34,197,94,0.15); color: #22C55E; }
+        .deploy-pending { background: rgba(255,217,61,0.15); color: #FFD93D; }
+        .deploy-not-ready { background: rgba(138,149,169,0.1); color: #8A95A9; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Auth Gate -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+            </div>
+            <div id="gateProfiles" class="flex justify-center gap-3 mb-6">
+                <div class="text-center text-xs text-txt-3">Loading profiles...</div>
+            </div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- Top Nav -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot" id="systemPulse"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <button class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Open menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/" class="nav-group-btn active">Dashboard</a>
+                        <div class="nav-group">
+                            <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/chat">Rodger</a>
+                                <a href="/council">Council</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/crm" class="nav-group-btn">Outreach <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/crm">CRM</a>
+                                <a href="/email-outreach">Email</a>
+                                <a href="/social-dashboard">Social</a>
+                                <a href="/social-content">Social Content</a>
+                                <a href="/offer-studio">Offers</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/finance" class="nav-group-btn">Finance <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/finance">Dashboard</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brand-discovery" class="nav-group-btn">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brand-discovery">Discovery</a>
+                                <a href="/brand-voice">Voice</a>
+                                <a href="/template-studio">Templates</a>
+                                <a href="/brand-documents">Docs</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/bsi-discovery" class="nav-group-btn">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/bsi-discovery">Discovery</a>
+                                <a href="/compliance">Compliance</a>
+                                <a href="/bsi-documents">Documents</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/content" class="nav-group-btn">Content <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/content">Publishing</a>
+                                <a href="/media">Media</a>
+                            </div>
+                        </div>
+                        <a href="/partnerships" class="nav-group-btn">Partnerships</a>
+                        <div class="nav-group">
+                            <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brain">BRAIN</a>
+                                <a href="/deft">DEFT</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/trading-desk" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/trading-desk">Trading Desk</a>
+                                <a href="/trading-bot">Bot Dashboard</a>
+                                <a href="/trading-strategies">Strategies</a>
+                                <a href="/trading-monitor">Monitor</a>
+                                <a href="/trading-research">Research</a>
+                                <a href="/trading-discovery">Discovery</a>
+                                <a href="/trading-cross-pairs">Cross-Pairs</a>
+                                <a href="/trading-exchanges">Exchanges</a>
+                                <a href="/trading-config">Config</a>
+                                <a href="/trading-reports">Reports</a>
+                            </div>
+                        </div>
+                        <a href="/meetings" class="nav-group-btn">Meetings</a>
+                        <div class="nav-group">
+                            <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/our-workflows">Workflows</a>
+                                <a href="/org-chart">Org Map</a>
+                                <a href="/hub">HUB</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Profile Switcher -->
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 100;" id="profileDropdown">
+                        </div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2 relative" title="Settings" id="settingsLink">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </a>
+                    <span class="text-xs text-txt-3 font-mono hidden sm:block" id="lastRefresh">--</span>
+                    <button onclick="refreshAll()" class="btn btn-ghost text-xs py-2 px-3 flex items-center gap-1.5" id="refreshBtn">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+        <!-- Mobile Nav Overlay -->
+        <div id="mobileNavOverlay">
+            <div class="mobile-nav-backdrop"></div>
+            <div class="mobile-nav-sidebar">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 1rem 0.75rem;">
+                    <span style="font-size:0.8rem;font-weight:700;color:var(--deft-txt,#E8ECF1);">Menu</span>
+                    <button class="mobile-nav-close" onclick="toggleMobileNav()">&times;</button>
+                </div>
+                <div class="mobile-nav-divider"></div>
+                <a href="/" class="mobile-nav-link">Dashboard</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Rodger <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/chat" class="mobile-nav-link">Rodger</a>
+    <a href="/council" class="mobile-nav-link">Council</a>
+</div>
+<button class="mobile-nav-group-btn active expanded" onclick="toggleMobileAccordion(this)">Outreach <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children open">
+    <a href="/crm" class="mobile-nav-link">CRM</a>
+    <a href="/email-outreach" class="mobile-nav-link">Email</a>
+    <a href="/social-dashboard" class="mobile-nav-link">Social</a>
+    <a href="/social-content" class="mobile-nav-link">Social Content</a>
+    <a href="/offer-studio" class="mobile-nav-link">Offers</a>
+    <a href="/client-projects" class="mobile-nav-link active">Client Projects</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Finance <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/finance" class="mobile-nav-link">Dashboard</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Brand <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/brand-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/template-studio" class="mobile-nav-link">Templates</a>
+    <a href="/brand-documents" class="mobile-nav-link">Docs</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Policy <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/bsi-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/compliance" class="mobile-nav-link">Compliance</a>
+    <a href="/bsi-documents" class="mobile-nav-link">Documents</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Content <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/content" class="mobile-nav-link">Publishing</a>
+    <a href="/media" class="mobile-nav-link">Media</a>
+</div>
+<a href="/partnerships" class="mobile-nav-link">Partnerships</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">BRAIN <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/brain" class="mobile-nav-link">BRAIN</a>
+    <a href="/deft" class="mobile-nav-link">DEFT</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Trading <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/trading-desk" class="mobile-nav-link">Trading Desk</a>
+    <a href="/trading-bot" class="mobile-nav-link">Bot Dashboard</a>
+    <a href="/trading-strategies" class="mobile-nav-link">Strategies</a>
+    <a href="/trading-monitor" class="mobile-nav-link">Monitor</a>
+    <a href="/trading-research" class="mobile-nav-link">Research</a>
+    <a href="/trading-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/trading-cross-pairs" class="mobile-nav-link">Cross-Pairs</a>
+    <a href="/trading-exchanges" class="mobile-nav-link">Exchanges</a>
+    <a href="/trading-config" class="mobile-nav-link">Config</a>
+    <a href="/trading-reports" class="mobile-nav-link">Reports</a>
+</div>
+<a href="/meetings" class="mobile-nav-link">Meetings</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">System <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/our-workflows" class="mobile-nav-link">Workflows</a>
+    <a href="/org-chart" class="mobile-nav-link">Org Map</a>
+    <a href="/hub" class="mobile-nav-link">HUB</a>
+</div>
+
+            </div>
+        </div>
+        </nav>
+        <script>
+function toggleMobileNav(){var o=document.getElementById('mobileNavOverlay');if(o.classList.contains('open')){o.style.opacity='0';o.querySelector('.mobile-nav-sidebar').style.transform='translateX(-100%)';setTimeout(function(){o.classList.remove('open');o.style.display='none';},250);}else{o.style.display='flex';requestAnimationFrame(function(){o.classList.add('open');o.style.opacity='1';o.querySelector('.mobile-nav-sidebar').style.transform='translateX(0)';});}}
+function toggleMobileAccordion(btn){btn.classList.toggle('expanded');var ch=btn.nextElementSibling;ch.classList.toggle('open');}
+document.getElementById('mobileNavOverlay')?.querySelector('.mobile-nav-backdrop')?.addEventListener('click',function(){toggleMobileNav();});
+document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function(a){a.addEventListener('click',function(){toggleMobileNav();});});
+</script>
+        <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
+
+        <!-- Page Content -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
+
+            <!-- Page Header -->
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="font-heading text-xl font-bold tracking-wide">Client Projects</h2>
+                    <p class="text-txt-3 text-sm mt-0.5">Manage website builds from questionnaire to deployment</p>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-1 p-0.5 rounded-lg mb-6" style="background: rgba(255,255,255,0.04);">
+                <button class="task-tab active" data-tab="overview" onclick="switchTab('overview')">Overview</button>
+                <button class="task-tab" data-tab="builds" onclick="switchTab('builds')">Active Builds</button>
+                <button class="task-tab" data-tab="preview" onclick="switchTab('preview')">Page Preview</button>
+                <button class="task-tab" data-tab="config" onclick="switchTab('config')">Deploy &amp; Config</button>
+            </div>
+
+            <!-- ════════════════════════════════════════ -->
+            <!-- TAB 1: OVERVIEW                         -->
+            <!-- ════════════════════════════════════════ -->
+            <div id="tab-overview" class="tab-content">
+
+                <!-- Stat Chips -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+                    <div class="stat-chip">
+                        <div class="stat-value" id="stat-total">--</div>
+                        <div class="stat-label">Total Builds</div>
+                    </div>
+                    <div class="stat-chip">
+                        <div class="stat-value text-warn" id="stat-awaiting">--</div>
+                        <div class="stat-label">Awaiting Docs</div>
+                    </div>
+                    <div class="stat-chip">
+                        <div class="stat-value text-info" id="stat-inprogress">--</div>
+                        <div class="stat-label">In Progress</div>
+                    </div>
+                    <div class="stat-chip">
+                        <div class="stat-value" style="color: #FB923C;" id="stat-review">--</div>
+                        <div class="stat-label">In Review</div>
+                    </div>
+                    <div class="stat-chip">
+                        <div class="stat-value" style="color: #22C55E;" id="stat-live">--</div>
+                        <div class="stat-label">Live Sites</div>
+                    </div>
+                </div>
+
+                <!-- Pipeline Visualization -->
+                <div class="panel mb-6">
+                    <div class="panel-header">
+                        <span class="font-heading text-sm font-semibold">Build Pipeline</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="flex items-start justify-between overflow-x-auto gap-0" id="pipelineFlow">
+                            <div class="text-center text-xs text-txt-3 py-4">Loading pipeline...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Feed -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="font-heading text-sm font-semibold">Recent Activity</span>
+                        <span class="text-xs text-txt-3 font-mono" id="activityCount">--</span>
+                    </div>
+                    <div class="panel-body" id="activityFeed">
+                        <div class="empty-state">Loading activity...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ════════════════════════════════════════ -->
+            <!-- TAB 2: ACTIVE BUILDS                    -->
+            <!-- ════════════════════════════════════════ -->
+            <div id="tab-builds" class="tab-content" style="display:none;">
+                <div id="buildsGrid" class="grid gap-4">
+                    <div class="empty-state">Loading builds...</div>
+                </div>
+            </div>
+
+            <!-- ════════════════════════════════════════ -->
+            <!-- TAB 3: PAGE PREVIEW                     -->
+            <!-- ════════════════════════════════════════ -->
+            <div id="tab-preview" class="tab-content" style="display:none;">
+                <!-- Build Selector -->
+                <div class="flex flex-col sm:flex-row gap-3 mb-4">
+                    <div class="flex-1">
+                        <label class="text-xs text-txt-3 uppercase tracking-wide font-medium mb-1 block">Select Build</label>
+                        <select class="form-input" id="previewBuildSelect" onchange="onPreviewBuildChange()">
+                            <option value="">-- Choose a build --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Page Type Tabs -->
+                <div class="flex gap-1 p-0.5 rounded-lg mb-4" style="background: rgba(255,255,255,0.04);" id="pageTypeTabs">
+                    <button class="task-tab active" data-pagetype="homepage" onclick="switchPageType('homepage')">Homepage</button>
+                    <button class="task-tab" data-pagetype="lead_magnet" onclick="switchPageType('lead_magnet')">Lead Magnet</button>
+                    <button class="task-tab" data-pagetype="lm_thank_you" onclick="switchPageType('lm_thank_you')">LM Thank You</button>
+                    <button class="task-tab" data-pagetype="sales" onclick="switchPageType('sales')">Sales</button>
+                    <button class="task-tab" data-pagetype="sales_thank_you" onclick="switchPageType('sales_thank_you')">Sales Thank You</button>
+                </div>
+
+                <!-- Preview Area -->
+                <div class="panel mb-4" id="previewPanel">
+                    <div class="panel-header">
+                        <span class="font-heading text-sm font-semibold" id="previewTitle">Select a build and page to preview</span>
+                        <span class="badge" id="previewPageStatus" style="display:none;"></span>
+                    </div>
+                    <div id="previewContainer" style="background:#fff; border-radius: 0 0 0.75rem 0.75rem; min-height: 400px;">
+                        <div class="empty-state" style="padding: 4rem 1rem; color: #525E73;">
+                            Choose a build from the dropdown above to preview pages
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div class="flex flex-wrap gap-2" id="previewActions" style="display:none;">
+                    <button class="btn btn-approve" onclick="approvePage()" id="btnApprovePage">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="inline mr-1"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Approve
+                    </button>
+                    <button class="btn btn-warn" onclick="openRevisionModal()" id="btnRevision">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="inline mr-1"><path d="M7 1.5L10.5 5 4 11.5H.5V8L7 1.5z" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Request Revision
+                    </button>
+                    <button class="btn btn-modify" onclick="regeneratePage()" id="btnRegenerate">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="inline mr-1"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Regenerate
+                    </button>
+                </div>
+            </div>
+
+            <!-- ════════════════════════════════════════ -->
+            <!-- TAB 4: DEPLOY & CONFIG                  -->
+            <!-- ════════════════════════════════════════ -->
+            <div id="tab-config" class="tab-content" style="display:none;">
+                <!-- Build Selector -->
+                <div class="mb-6">
+                    <label class="text-xs text-txt-3 uppercase tracking-wide font-medium mb-1 block">Select Build</label>
+                    <select class="form-input" id="configBuildSelect" onchange="onConfigBuildChange()" style="max-width: 400px;">
+                        <option value="">-- Choose a build --</option>
+                    </select>
+                </div>
+
+                <div id="configContent" style="display:none;">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Config Form -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <span class="font-heading text-sm font-semibold">Build Configuration</span>
+                            </div>
+                            <div class="panel-body space-y-4">
+                                <div>
+                                    <label class="text-xs text-txt-3 uppercase tracking-wide font-medium mb-1 block">Client Domain</label>
+                                    <input type="text" class="form-input" id="configDomain" placeholder="e.g. clientname.com">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-txt-3 uppercase tracking-wide font-medium mb-1 block">SendGrid List ID</label>
+                                    <input type="text" class="form-input" id="configSendgridList" placeholder="e.g. d-abc123...">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-txt-3 uppercase tracking-wide font-medium mb-1 block">SendGrid Form URL</label>
+                                    <input type="url" class="form-input" id="configSendgridForm" placeholder="https://...">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-txt-3 uppercase tracking-wide font-medium mb-1 block">Lead Magnet File URL</label>
+                                    <input type="url" class="form-input" id="configLeadMagnet" placeholder="https://drive.google.com/...">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-txt-3 uppercase tracking-wide font-medium mb-1 block">Stripe Payment Link</label>
+                                    <input type="url" class="form-input" id="configStripeLink" placeholder="https://buy.stripe.com/...">
+                                </div>
+                                <div class="flex gap-2 pt-2">
+                                    <button class="btn btn-primary" onclick="saveConfig()" id="btnSaveConfig">Save Config</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Deploy Status -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <span class="font-heading text-sm font-semibold">Deploy Status</span>
+                            </div>
+                            <div class="panel-body space-y-4">
+                                <div class="flex items-center justify-between py-2 border-b" style="border-color: rgba(30,33,48,0.5);">
+                                    <span class="text-sm text-txt-2">GitHub Repo</span>
+                                    <span class="text-sm font-mono" id="deployGithub">--</span>
+                                </div>
+                                <div class="flex items-center justify-between py-2 border-b" style="border-color: rgba(30,33,48,0.5);">
+                                    <span class="text-sm text-txt-2">Coolify UUID</span>
+                                    <span class="text-sm font-mono" id="deployCoolify">--</span>
+                                </div>
+                                <div class="flex items-center justify-between py-2 border-b" style="border-color: rgba(30,33,48,0.5);">
+                                    <span class="text-sm text-txt-2">Domain</span>
+                                    <span class="text-sm font-mono" id="deployDomain">--</span>
+                                </div>
+                                <div class="flex items-center justify-between py-2 border-b" style="border-color: rgba(30,33,48,0.5);">
+                                    <span class="text-sm text-txt-2">Page Approval</span>
+                                    <span id="deployApprovalStatus">--</span>
+                                </div>
+                                <div class="flex items-center justify-between py-2">
+                                    <span class="text-sm text-txt-2">Build Status</span>
+                                    <span class="badge" id="deployBuildStatus">--</span>
+                                </div>
+
+                                <div class="pt-2">
+                                    <button class="btn btn-approve w-full" onclick="deployBuild()" id="btnDeploy" disabled>
+                                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="inline mr-1"><path d="M7 1v12M1 7l6 6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                        Deploy to Production
+                                    </button>
+                                    <p class="text-xs text-txt-3 mt-2 text-center" id="deployNote">All pages must be approved before deployment</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="configEmpty" class="empty-state">Select a build above to view configuration</div>
+            </div>
+
+        </div><!-- /max-w container -->
+    </div><!-- /mainContent -->
+
+    <!-- Revision Modal -->
+    <div class="modal-backdrop" id="revisionModal">
+        <div class="modal-content">
+            <div class="p-4 border-b" style="border-color: #2A2E3D;">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-heading font-semibold text-sm">Request Revision</h3>
+                    <button onclick="closeRevisionModal()" class="text-txt-3 hover:text-txt transition-colors" style="background:none;border:none;cursor:pointer;font-size:1.2rem;">&times;</button>
+                </div>
+            </div>
+            <div class="p-4 space-y-4">
+                <div>
+                    <label class="text-xs text-txt-3 uppercase tracking-wide font-medium mb-1 block">Revision Notes</label>
+                    <textarea class="form-input" id="revisionNotes" placeholder="Describe what changes are needed..." rows="4"></textarea>
+                </div>
+                <div class="flex gap-2 justify-end">
+                    <button class="btn btn-ghost" onclick="closeRevisionModal()">Cancel</button>
+                    <button class="btn btn-warn" onclick="submitRevision()">Submit Revision Request</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- MAIN SCRIPT                            -->
+    <!-- ═══════════════════════════════════════ -->
+    <script>
+    // ═══════════════════════════════════════
+    // CONFIG
+    // ═══════════════════════════════════════
+    const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    const WB_BRIDGE = 'https://n8n.carltonaiservices.com/webhook/wb-bridge';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const sbHeaders = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+
+    let activeProfileId = null;
+    let currentTab = 'overview';
+    let currentPageType = 'homepage';
+    let allBuilds = [];
+    let allPages = [];
+    let selectedPreviewBuildId = null;
+    let selectedConfigBuildId = null;
+    let refreshInterval = null;
+
+    // Status config
+    const STATUS_COLORS = {
+        questionnaire_pending: { bg: 'rgba(255,217,61,0.15)', text: '#FFD93D', label: 'Awaiting Docs' },
+        extracting_data: { bg: 'rgba(56,189,248,0.15)', text: '#38BDF8', label: 'Extracting' },
+        generating_brand: { bg: 'rgba(56,189,248,0.15)', text: '#38BDF8', label: 'Brand Gen' },
+        generating_pages: { bg: 'rgba(56,189,248,0.15)', text: '#38BDF8', label: 'Page Gen' },
+        operator_review: { bg: 'rgba(251,146,60,0.15)', text: '#FB923C', label: 'Review' },
+        client_review: { bg: 'rgba(168,85,247,0.15)', text: '#A855F7', label: 'Client Review' },
+        deploying: { bg: 'rgba(56,189,248,0.15)', text: '#38BDF8', label: 'Deploying' },
+        live: { bg: 'rgba(34,197,94,0.15)', text: '#22C55E', label: 'Live' },
+        cancelled: { bg: 'rgba(255,107,107,0.15)', text: '#FF6B6B', label: 'Cancelled' },
+    };
+
+    const STATUS_ORDER = [
+        'questionnaire_pending', 'extracting_data', 'generating_brand',
+        'generating_pages', 'operator_review', 'client_review', 'deploying', 'live'
+    ];
+
+    const PAGE_TYPES = ['homepage', 'lead_magnet', 'lm_thank_you', 'sales', 'sales_thank_you'];
+    const PAGE_TYPE_LABELS = {
+        homepage: 'Homepage',
+        lead_magnet: 'Lead Magnet',
+        lm_thank_you: 'LM Thank You',
+        sales: 'Sales Page',
+        sales_thank_you: 'Sales Thank You'
+    };
+
+    // ═══════════════════════════════════════
+    // DATA LAYER
+    // ═══════════════════════════════════════
+    async function supabaseSelect(table, filters = '') {
+        const url = `${SUPABASE_URL}/rest/v1/${table}?${filters}`;
+        const res = await fetch(url, { headers: sbHeaders });
+        return res.json();
+    }
+
+    async function supabaseRpc(fn, params = {}) {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+            method: 'POST',
+            headers: { ...sbHeaders, 'Content-Type': 'application/json' },
+            body: JSON.stringify(params)
+        });
+        return res.json();
+    }
+
+    async function wbAction(operation, params = {}) {
+        const res = await fetch(WB_BRIDGE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ operation, brand_id: 'carlton', ...params })
+        });
+        return res.json();
+    }
+
+    // ═══════════════════════════════════════
+    // TOAST
+    // ═══════════════════════════════════════
+    function toast(msg, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast toast-${type === 'error' ? 'error' : type === 'success' ? 'success' : 'info'}`;
+        t.textContent = msg;
+        container.appendChild(t);
+        setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(10px)'; setTimeout(() => t.remove(), 300); }, 4000);
+    }
+
+    // ═══════════════════════════════════════
+    // TAB SWITCHING
+    // ═══════════════════════════════════════
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('[data-tab]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tab);
+        });
+        document.querySelectorAll('.tab-content').forEach(el => {
+            el.style.display = 'none';
+        });
+        const target = document.getElementById(`tab-${tab}`);
+        if (target) target.style.display = '';
+    }
+
+    function switchPageType(pageType) {
+        currentPageType = pageType;
+        document.querySelectorAll('#pageTypeTabs .task-tab').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.pagetype === pageType);
+        });
+        renderPreview();
+    }
+
+    // ═══════════════════════════════════════
+    // FETCH DATA
+    // ═══════════════════════════════════════
+    async function fetchBuilds() {
+        try {
+            allBuilds = await supabaseSelect('website_builds', 'select=*&order=created_at.desc');
+            if (!Array.isArray(allBuilds)) allBuilds = [];
+        } catch (e) {
+            console.error('Failed to fetch builds:', e);
+            allBuilds = [];
+        }
+    }
+
+    async function fetchPages() {
+        try {
+            allPages = await supabaseSelect('website_pages', 'select=*&order=created_at.desc');
+            if (!Array.isArray(allPages)) allPages = [];
+        } catch (e) {
+            console.error('Failed to fetch pages:', e);
+            allPages = [];
+        }
+    }
+
+    async function fetchActivity() {
+        try {
+            const logs = await supabaseSelect('website_build_log', 'select=*&order=created_at.desc&limit=20');
+            renderActivity(Array.isArray(logs) ? logs : []);
+        } catch (e) {
+            console.error('Failed to fetch activity:', e);
+            renderActivity([]);
+        }
+    }
+
+    async function fetchDashboard() {
+        try {
+            const data = await supabaseRpc('website_build_dashboard', { p_brand_id: 'carlton' });
+            if (data && !data.error) {
+                renderDashboardStats(data);
+            }
+        } catch (e) {
+            console.error('Failed to fetch dashboard:', e);
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // RENDER: OVERVIEW TAB
+    // ═══════════════════════════════════════
+    function renderDashboardStats(data) {
+        // If data is an object with counts, use it. Otherwise derive from allBuilds
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+            document.getElementById('stat-total').textContent = data.total_builds ?? allBuilds.length;
+            document.getElementById('stat-awaiting').textContent = data.awaiting_docs ?? 0;
+            document.getElementById('stat-inprogress').textContent = data.in_progress ?? 0;
+            document.getElementById('stat-review').textContent = data.in_review ?? 0;
+            document.getElementById('stat-live').textContent = data.live_sites ?? 0;
+        }
+    }
+
+    function renderStatsFromBuilds() {
+        const total = allBuilds.length;
+        const awaiting = allBuilds.filter(b => b.status === 'questionnaire_pending').length;
+        const inProgress = allBuilds.filter(b =>
+            ['extracting_data', 'generating_brand', 'generating_pages'].includes(b.status)
+        ).length;
+        const inReview = allBuilds.filter(b =>
+            ['operator_review', 'client_review'].includes(b.status)
+        ).length;
+        const live = allBuilds.filter(b => b.status === 'live').length;
+
+        document.getElementById('stat-total').textContent = total;
+        document.getElementById('stat-awaiting').textContent = awaiting;
+        document.getElementById('stat-inprogress').textContent = inProgress;
+        document.getElementById('stat-review').textContent = inReview;
+        document.getElementById('stat-live').textContent = live;
+    }
+
+    function renderPipeline() {
+        const container = document.getElementById('pipelineFlow');
+        const stages = [
+            { key: 'questionnaire_pending', label: 'Awaiting Docs' },
+            { key: 'extracting_data', label: 'Extracting' },
+            { key: 'generating_brand', label: 'Brand Gen' },
+            { key: 'generating_pages', label: 'Page Gen' },
+            { key: 'operator_review', label: 'Review' },
+            { key: 'client_review', label: 'Client Review' },
+            { key: 'deploying', label: 'Deploying' },
+            { key: 'live', label: 'Live' },
+        ];
+
+        const counts = {};
+        allBuilds.forEach(b => {
+            if (b.status && b.status !== 'cancelled') {
+                counts[b.status] = (counts[b.status] || 0) + 1;
+            }
+        });
+
+        let html = '';
+        stages.forEach((stage, i) => {
+            const count = counts[stage.key] || 0;
+            const sc = STATUS_COLORS[stage.key] || { text: '#8A95A9' };
+            const isActive = count > 0;
+
+            if (i > 0) {
+                html += `<div class="pipeline-connector"></div>`;
+            }
+            html += `
+                <div class="pipeline-stage ${isActive ? 'active-stage' : ''}">
+                    <div class="pipeline-count" style="color: ${isActive ? sc.text : '#525E73'};">${count}</div>
+                    <div class="pipeline-label">${stage.label}</div>
+                    <div style="width:100%;height:3px;border-radius:2px;background:rgba(255,255,255,0.05);margin-top:0.25rem;">
+                        <div style="width:${count > 0 ? '100' : '0'}%;height:100%;border-radius:2px;background:${sc.text};opacity:0.6;transition:width 0.6s ease;"></div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    function renderActivity(logs) {
+        const container = document.getElementById('activityFeed');
+        const countEl = document.getElementById('activityCount');
+        if (countEl) countEl.textContent = `${logs.length} events`;
+
+        if (!logs.length) {
+            container.innerHTML = '<div class="empty-state">No recent activity</div>';
+            return;
+        }
+
+        container.innerHTML = logs.map(log => {
+            const eventColors = {
+                build_created: '#06D6A0',
+                status_changed: '#4CC9F0',
+                page_generated: '#38BDF8',
+                page_approved: '#22C55E',
+                page_revision: '#FB923C',
+                deployed: '#22C55E',
+                error: '#FF6B6B'
+            };
+            const dotColor = eventColors[log.event_type] || '#8A95A9';
+            const timeAgo = getTimeAgo(log.created_at);
+            const message = log.message || log.event_type || 'Event';
+
+            return `
+                <div class="activity-item">
+                    <div class="activity-dot" style="background:${dotColor};"></div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm" style="color: var(--deft-txt, #E8ECF1);">${escapeHtml(message)}</div>
+                        ${log.build_id ? `<div class="text-xs text-txt-3 mt-0.5">Build: ${log.build_id.slice(0,8)}...</div>` : ''}
+                    </div>
+                    <div class="text-xs text-txt-3 whitespace-nowrap">${timeAgo}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ═══════════════════════════════════════
+    // RENDER: ACTIVE BUILDS TAB
+    // ═══════════════════════════════════════
+    function renderBuilds() {
+        const container = document.getElementById('buildsGrid');
+        const activeBuilds = allBuilds.filter(b => b.status !== 'cancelled');
+
+        if (!activeBuilds.length) {
+            container.innerHTML = '<div class="empty-state">No active builds found</div>';
+            return;
+        }
+
+        container.innerHTML = activeBuilds.map(build => {
+            const sc = STATUS_COLORS[build.status] || { bg: 'rgba(138,149,169,0.15)', text: '#8A95A9', label: build.status };
+            const buildPages = allPages.filter(p => p.build_id === build.id);
+            const progress = getProgressPercent(build.status);
+            const clientName = build.client_name || build.contact_name || 'Unknown Client';
+            const clientEmail = build.client_email || build.contact_email || '';
+
+            // Page status dots
+            const pageDots = PAGE_TYPES.map(pt => {
+                const page = buildPages.find(p => p.page_type === pt);
+                let dotClass = 'pending';
+                let dotTitle = PAGE_TYPE_LABELS[pt] + ': Not started';
+                if (page) {
+                    if (page.status === 'approved') { dotClass = 'approved'; dotTitle = PAGE_TYPE_LABELS[pt] + ': Approved'; }
+                    else if (page.status === 'generating') { dotClass = 'generating'; dotTitle = PAGE_TYPE_LABELS[pt] + ': Generating'; }
+                    else if (page.status === 'operator_review' || page.status === 'client_review') { dotClass = 'review'; dotTitle = PAGE_TYPE_LABELS[pt] + ': In Review'; }
+                    else if (page.status === 'draft') { dotClass = 'draft'; dotTitle = PAGE_TYPE_LABELS[pt] + ': Draft'; }
+                }
+                return `<div class="page-dot ${dotClass}" title="${dotTitle}"></div>`;
+            }).join('');
+
+            // Quick links
+            const gdocLink = build.google_doc_url ? `<a href="${build.google_doc_url}" target="_blank" class="text-txt-3 hover:text-accent transition-colors" title="Google Doc"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8 1H3.5A1.5 1.5 0 002 2.5v9A1.5 1.5 0 003.5 13h7a1.5 1.5 0 001.5-1.5V5L8 1z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 1v4h4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></a>` : '';
+            const driveLink = build.drive_folder_url ? `<a href="${build.drive_folder_url}" target="_blank" class="text-txt-3 hover:text-accent transition-colors" title="Drive Folder"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1.75 10.5V4.08a1.17 1.17 0 011.17-1.17h3.03L7 4.08h4.08a1.17 1.17 0 011.17 1.17V10.5a1.17 1.17 0 01-1.17 1.17H2.92a1.17 1.17 0 01-1.17-1.17z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></a>` : '';
+            const crmLink = build.contact_id ? `<a href="/crm?contact=${build.contact_id}" class="text-txt-3 hover:text-accent transition-colors" title="CRM Contact"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4.5" r="2.5" stroke="currentColor" stroke-width="1.1"/><path d="M2.5 12.5c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg></a>` : '';
+
+            // Action button
+            let actionBtn = '';
+            if (build.status === 'questionnaire_pending') {
+                actionBtn = `<button class="btn btn-primary text-xs py-1.5 px-3" onclick="triggerExtract('${build.id}')">Start Build</button>`;
+            } else if (build.status === 'operator_review') {
+                actionBtn = `<button class="btn btn-modify text-xs py-1.5 px-3" onclick="switchTab('preview'); document.getElementById('previewBuildSelect').value='${build.id}'; onPreviewBuildChange();">Review Pages</button>`;
+            } else if (build.status === 'client_review') {
+                actionBtn = `<button class="btn btn-approve text-xs py-1.5 px-3" onclick="switchTab('config'); document.getElementById('configBuildSelect').value='${build.id}'; onConfigBuildChange();">Deploy</button>`;
+            }
+
+            return `
+                <div class="build-card">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <div class="font-heading font-semibold text-sm">${escapeHtml(clientName)}</div>
+                            ${clientEmail ? `<div class="text-xs text-txt-3 mt-0.5">${escapeHtml(clientEmail)}</div>` : ''}
+                        </div>
+                        <span class="badge badge-${build.status}">${sc.label}</span>
+                    </div>
+
+                    <!-- Progress bar -->
+                    <div class="mb-3">
+                        <div class="flex justify-between text-xs text-txt-3 mb-1">
+                            <span>Progress</span>
+                            <span>${progress}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Page status dots -->
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-xs text-txt-3 mr-1">Pages:</span>
+                        ${pageDots}
+                    </div>
+
+                    <!-- Bottom row: links + action -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            ${gdocLink}
+                            ${driveLink}
+                            ${crmLink}
+                        </div>
+                        ${actionBtn}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function getProgressPercent(status) {
+        const map = {
+            questionnaire_pending: 5,
+            extracting_data: 20,
+            generating_brand: 35,
+            generating_pages: 50,
+            operator_review: 70,
+            client_review: 85,
+            deploying: 95,
+            live: 100,
+            cancelled: 0
+        };
+        return map[status] || 0;
+    }
+
+    // ═══════════════════════════════════════
+    // RENDER: PREVIEW TAB
+    // ═══════════════════════════════════════
+    function populateBuildSelectors() {
+        const options = allBuilds
+            .filter(b => b.status !== 'cancelled')
+            .map(b => {
+                const name = b.client_name || b.contact_name || 'Build';
+                const sc = STATUS_COLORS[b.status] || {};
+                return `<option value="${b.id}">${escapeHtml(name)} - ${sc.label || b.status}</option>`;
+            }).join('');
+
+        const previewSel = document.getElementById('previewBuildSelect');
+        const configSel = document.getElementById('configBuildSelect');
+        const placeholder = '<option value="">-- Choose a build --</option>';
+
+        previewSel.innerHTML = placeholder + options;
+        configSel.innerHTML = placeholder + options;
+
+        // Restore selections
+        if (selectedPreviewBuildId) previewSel.value = selectedPreviewBuildId;
+        if (selectedConfigBuildId) configSel.value = selectedConfigBuildId;
+    }
+
+    function onPreviewBuildChange() {
+        const buildId = document.getElementById('previewBuildSelect').value;
+        selectedPreviewBuildId = buildId || null;
+        renderPreview();
+    }
+
+    function renderPreview() {
+        const container = document.getElementById('previewContainer');
+        const title = document.getElementById('previewTitle');
+        const statusBadge = document.getElementById('previewPageStatus');
+        const actions = document.getElementById('previewActions');
+
+        if (!selectedPreviewBuildId) {
+            container.innerHTML = '<div class="empty-state" style="padding:4rem 1rem;color:#525E73;">Choose a build from the dropdown above to preview pages</div>';
+            title.textContent = 'Select a build and page to preview';
+            statusBadge.style.display = 'none';
+            actions.style.display = 'none';
+            return;
+        }
+
+        const page = allPages.find(p => p.build_id === selectedPreviewBuildId && p.page_type === currentPageType);
+        const build = allBuilds.find(b => b.id === selectedPreviewBuildId);
+        const buildName = build ? (build.client_name || build.contact_name || 'Build') : 'Build';
+
+        title.textContent = `${buildName} - ${PAGE_TYPE_LABELS[currentPageType] || currentPageType}`;
+
+        if (!page) {
+            container.innerHTML = `<div class="empty-state" style="padding:4rem 1rem;color:#525E73;">No ${PAGE_TYPE_LABELS[currentPageType] || currentPageType} page generated yet for this build</div>`;
+            statusBadge.style.display = 'none';
+            actions.style.display = 'none';
+            return;
+        }
+
+        // Status badge
+        const pageStatusMap = {
+            draft: { bg: 'rgba(138,149,169,0.15)', text: '#8A95A9', label: 'Draft' },
+            generating: { bg: 'rgba(56,189,248,0.15)', text: '#38BDF8', label: 'Generating' },
+            operator_review: { bg: 'rgba(251,146,60,0.15)', text: '#FB923C', label: 'Operator Review' },
+            client_review: { bg: 'rgba(168,85,247,0.15)', text: '#A855F7', label: 'Client Review' },
+            approved: { bg: 'rgba(34,197,94,0.15)', text: '#22C55E', label: 'Approved' },
+            revision_requested: { bg: 'rgba(255,165,0,0.15)', text: '#FFA500', label: 'Revision Requested' },
+        };
+        const psc = pageStatusMap[page.status] || { bg: 'rgba(138,149,169,0.15)', text: '#8A95A9', label: page.status };
+        statusBadge.style.display = '';
+        statusBadge.style.background = psc.bg;
+        statusBadge.style.color = psc.text;
+        statusBadge.textContent = psc.label;
+
+        // Render iframe
+        if (page.html_content) {
+            container.innerHTML = `<iframe id="previewIframe" style="width:100%;height:600px;border:none;border-radius:0 0 0.75rem 0.75rem;" sandbox="allow-same-origin"></iframe>`;
+            const iframe = document.getElementById('previewIframe');
+            iframe.srcdoc = page.html_content;
+        } else {
+            container.innerHTML = `<div class="empty-state" style="padding:4rem 1rem;color:#525E73;">Page content not yet generated</div>`;
+        }
+
+        // Show actions if page is reviewable
+        const reviewable = ['operator_review', 'client_review', 'draft', 'revision_requested'].includes(page.status);
+        actions.style.display = reviewable ? 'flex' : 'none';
+    }
+
+    // ═══════════════════════════════════════
+    // RENDER: CONFIG TAB
+    // ═══════════════════════════════════════
+    function onConfigBuildChange() {
+        const buildId = document.getElementById('configBuildSelect').value;
+        selectedConfigBuildId = buildId || null;
+        renderConfig();
+    }
+
+    function renderConfig() {
+        const content = document.getElementById('configContent');
+        const empty = document.getElementById('configEmpty');
+
+        if (!selectedConfigBuildId) {
+            content.style.display = 'none';
+            empty.style.display = '';
+            return;
+        }
+
+        content.style.display = '';
+        empty.style.display = 'none';
+
+        const build = allBuilds.find(b => b.id === selectedConfigBuildId);
+        if (!build) return;
+
+        const config = build.config || build.deploy_config || {};
+
+        // Populate form
+        document.getElementById('configDomain').value = config.domain || build.client_domain || '';
+        document.getElementById('configSendgridList').value = config.sendgrid_list_id || '';
+        document.getElementById('configSendgridForm').value = config.sendgrid_form_url || '';
+        document.getElementById('configLeadMagnet').value = config.lead_magnet_url || '';
+        document.getElementById('configStripeLink').value = config.stripe_payment_link || '';
+
+        // Deploy status
+        document.getElementById('deployGithub').textContent = config.github_repo || build.github_repo || 'Not set';
+        document.getElementById('deployCoolify').textContent = config.coolify_uuid || build.coolify_uuid || 'Not set';
+        document.getElementById('deployDomain').textContent = config.domain || build.client_domain || 'Not set';
+
+        // Page approval status
+        const buildPages = allPages.filter(p => p.build_id === selectedConfigBuildId);
+        const approvedCount = buildPages.filter(p => p.status === 'approved').length;
+        const totalExpected = PAGE_TYPES.length;
+        const allApproved = approvedCount >= totalExpected;
+
+        const approvalEl = document.getElementById('deployApprovalStatus');
+        if (allApproved) {
+            approvalEl.innerHTML = `<span class="deploy-indicator deploy-ready">${approvedCount}/${totalExpected} Approved</span>`;
+        } else if (approvedCount > 0) {
+            approvalEl.innerHTML = `<span class="deploy-indicator deploy-pending">${approvedCount}/${totalExpected} Approved</span>`;
+        } else {
+            approvalEl.innerHTML = `<span class="deploy-indicator deploy-not-ready">0/${totalExpected} Approved</span>`;
+        }
+
+        // Build status badge
+        const sc = STATUS_COLORS[build.status] || { bg: 'rgba(138,149,169,0.15)', text: '#8A95A9', label: build.status };
+        const buildStatusEl = document.getElementById('deployBuildStatus');
+        buildStatusEl.textContent = sc.label;
+        buildStatusEl.style.background = sc.bg;
+        buildStatusEl.style.color = sc.text;
+
+        // Deploy button
+        const deployBtn = document.getElementById('btnDeploy');
+        const deployNote = document.getElementById('deployNote');
+        if (allApproved && build.status !== 'live') {
+            deployBtn.disabled = false;
+            deployNote.textContent = 'All pages approved -- ready to deploy';
+            deployNote.style.color = '#22C55E';
+        } else if (build.status === 'live') {
+            deployBtn.disabled = true;
+            deployNote.textContent = 'This build is already live';
+            deployNote.style.color = '#22C55E';
+        } else {
+            deployBtn.disabled = true;
+            deployNote.textContent = 'All pages must be approved before deployment';
+            deployNote.style.color = '';
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // ACTIONS
+    // ═══════════════════════════════════════
+    async function triggerExtract(buildId) {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.textContent = 'Starting...';
+        try {
+            await wbAction('trigger_extract', { build_id: buildId });
+            toast('Build extraction started', 'success');
+            await refreshAll();
+        } catch (e) {
+            toast('Failed to start extraction: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Start Build';
+        }
+    }
+
+    async function approvePage() {
+        if (!selectedPreviewBuildId || !currentPageType) return;
+        const page = allPages.find(p => p.build_id === selectedPreviewBuildId && p.page_type === currentPageType);
+        if (!page) { toast('No page found to approve', 'error'); return; }
+
+        const btn = document.getElementById('btnApprovePage');
+        btn.disabled = true;
+        try {
+            await supabaseRpc('website_page_approve', { p_page_id: page.id, p_actor: 'operator' });
+            toast(`${PAGE_TYPE_LABELS[currentPageType]} approved`, 'success');
+            await refreshAll();
+        } catch (e) {
+            toast('Failed to approve page: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    function openRevisionModal() {
+        document.getElementById('revisionModal').classList.add('active');
+        document.getElementById('revisionNotes').value = '';
+        document.getElementById('revisionNotes').focus();
+    }
+
+    function closeRevisionModal() {
+        document.getElementById('revisionModal').classList.remove('active');
+    }
+
+    async function submitRevision() {
+        if (!selectedPreviewBuildId || !currentPageType) return;
+        const page = allPages.find(p => p.build_id === selectedPreviewBuildId && p.page_type === currentPageType);
+        if (!page) { toast('No page found', 'error'); return; }
+        const notes = document.getElementById('revisionNotes').value.trim();
+        if (!notes) { toast('Please enter revision notes', 'error'); return; }
+
+        try {
+            await wbAction('request_revision', {
+                build_id: selectedPreviewBuildId,
+                page_id: page.id,
+                page_type: currentPageType,
+                notes: notes
+            });
+            toast('Revision requested', 'success');
+            closeRevisionModal();
+            await refreshAll();
+        } catch (e) {
+            toast('Failed to request revision: ' + e.message, 'error');
+        }
+    }
+
+    async function regeneratePage() {
+        if (!selectedPreviewBuildId || !currentPageType) return;
+        const page = allPages.find(p => p.build_id === selectedPreviewBuildId && p.page_type === currentPageType);
+        const btn = document.getElementById('btnRegenerate');
+        btn.disabled = true;
+        try {
+            await wbAction('regenerate_page', {
+                build_id: selectedPreviewBuildId,
+                page_id: page ? page.id : null,
+                page_type: currentPageType
+            });
+            toast(`Regenerating ${PAGE_TYPE_LABELS[currentPageType]}...`, 'info');
+            await refreshAll();
+        } catch (e) {
+            toast('Failed to regenerate: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    async function saveConfig() {
+        if (!selectedConfigBuildId) return;
+        const btn = document.getElementById('btnSaveConfig');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        try {
+            await wbAction('update_config', {
+                build_id: selectedConfigBuildId,
+                domain: document.getElementById('configDomain').value.trim(),
+                sendgrid_list_id: document.getElementById('configSendgridList').value.trim(),
+                sendgrid_form_url: document.getElementById('configSendgridForm').value.trim(),
+                lead_magnet_url: document.getElementById('configLeadMagnet').value.trim(),
+                stripe_payment_link: document.getElementById('configStripeLink').value.trim(),
+            });
+            toast('Configuration saved', 'success');
+            await refreshAll();
+        } catch (e) {
+            toast('Failed to save config: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Save Config';
+        }
+    }
+
+    async function deployBuild() {
+        if (!selectedConfigBuildId) return;
+        const btn = document.getElementById('btnDeploy');
+        btn.disabled = true;
+        btn.textContent = 'Deploying...';
+
+        try {
+            await wbAction('deploy', { build_id: selectedConfigBuildId });
+            toast('Deployment started', 'success');
+            await refreshAll();
+        } catch (e) {
+            toast('Deployment failed: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="inline mr-1"><path d="M7 1v12M1 7l6 6 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Deploy to Production';
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // UTILITIES
+    // ═══════════════════════════════════════
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function getTimeAgo(dateStr) {
+        if (!dateStr) return '';
+        const diff = Date.now() - new Date(dateStr).getTime();
+        const mins = Math.floor(diff / 60000);
+        if (mins < 1) return 'just now';
+        if (mins < 60) return `${mins}m ago`;
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return `${hrs}h ago`;
+        const days = Math.floor(hrs / 24);
+        return `${days}d ago`;
+    }
+
+    // ═══════════════════════════════════════
+    // AUTH GATE
+    // ═══════════════════════════════════════
+    let gateSelectedProfile = null;
+
+    function getCachedProfiles(callback) {
+        var CACHE_KEY = 'rdgr-profiles-cache';
+        var CACHE_TTL = 300000; // 5 minutes
+        try {
+            var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+            if (cached.profiles && cached.ts && (Date.now() - cached.ts) < CACHE_TTL) {
+                callback(cached.profiles);
+                return;
+            }
+        } catch(e) {}
+        var _SB_URL = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+        var _SB_KEY = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+        fetch(`${_SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+            headers: { 'apikey': _SB_KEY, 'Authorization': `Bearer ${_SB_KEY}` }
+        }).then(r => r.json()).then(profiles => {
+            if (profiles && Array.isArray(profiles) && profiles.length > 0) {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ profiles: profiles, ts: Date.now() }));
+            }
+            callback(profiles);
+        }).catch(() => callback([]));
+    }
+
+    function loadGateProfiles() {
+        getCachedProfiles(function(profiles) {
+            const container = document.getElementById('gateProfiles');
+            if (!container || !profiles || !profiles.length) return;
+            const saved = localStorage.getItem('rdgr-active-profile');
+            let savedId = null;
+            if (saved) { try { savedId = JSON.parse(saved).id; } catch(e) {} }
+            container.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?';
+                const initial = name[0].toUpperCase();
+                const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+                const color = colors[name] || '#8A95A9';
+                return `<button type="button" onclick="selectGateProfile('${p.user_id}','${name.replace(/'/g, '&#39;')}',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="if(!this.classList.contains('selected'))this.style.background='rgba(255,255,255,0.02)'">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:${color}20;color:${color};border:2px solid transparent;">${initial}</div>
+                    <span class="text-xs" style="color:#8A95A9;">${name}</span>
+                </button>`;
+            }).join('');
+            if (savedId) {
+                const btns = container.querySelectorAll('.gate-profile-btn');
+                btns.forEach(btn => {
+                    if (btn.getAttribute('onclick').includes(savedId)) {
+                        btn.click();
+                    }
+                });
+            }
+        });
+    }
+
+    function selectGateProfile(userId, name, el) {
+        gateSelectedProfile = { id: userId, name: name };
+        document.querySelectorAll('.gate-profile-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            btn.style.background = 'rgba(255,255,255,0.02)';
+            btn.style.borderColor = 'transparent';
+            btn.querySelector('.w-10').style.borderColor = 'transparent';
+        });
+        el.classList.add('selected');
+        el.style.background = 'rgba(255,255,255,0.06)';
+        el.style.borderColor = 'rgba(6,214,160,0.4)';
+        el.querySelector('.w-10').style.borderColor = el.querySelector('.w-10').style.color;
+        const btn = document.getElementById('gateSubmitBtn');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.textContent = 'Sign In as ' + name;
+        document.getElementById('gateInput').focus();
+    }
+
+    function handleGate(e) {
+        e.preventDefault();
+        const input = document.getElementById('gateInput').value;
+        if (input === 'Advance1!') {
+            localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+            if (gateSelectedProfile) {
+                localStorage.setItem('rdgr-active-profile', JSON.stringify(gateSelectedProfile));
+                activeProfileId = gateSelectedProfile.id;
+            }
+            document.getElementById('gate').classList.add('hidden');
+            document.getElementById('mainContent').style.opacity = '1';
+            initClientProjects();
+            return false;
+        }
+        document.getElementById('gateError').classList.add('show');
+        document.getElementById('gateInput').value = '';
+        document.getElementById('gateInput').focus();
+        setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+        return false;
+    }
+
+    if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity = '1';
+        initClientProjects();
+    }
+
+    // Load gate profiles on page load (only if gate is visible)
+    if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+        loadGateProfiles();
+    }
+
+    // ═══════════════════════════════════════
+    // INIT + REFRESH
+    // ═══════════════════════════════════════
+    function initClientProjects() {
+        refreshAll();
+        // Auto-refresh every 30 seconds
+        if (refreshInterval) clearInterval(refreshInterval);
+        refreshInterval = setInterval(refreshAll, 30000);
+    }
+
+    async function refreshAll() {
+        const el = document.getElementById('lastRefresh');
+        const btn = document.getElementById('refreshBtn');
+        if (el) el.textContent = 'Refreshing...';
+        if (btn) btn.disabled = true;
+
+        try {
+            await Promise.all([
+                fetchBuilds(),
+                fetchPages(),
+                fetchActivity(),
+                fetchDashboard(),
+            ]);
+
+            // Render all views with fresh data
+            renderStatsFromBuilds();
+            renderPipeline();
+            renderBuilds();
+            populateBuildSelectors();
+            renderPreview();
+            renderConfig();
+        } catch (e) {
+            console.error('Refresh failed:', e);
+        }
+
+        if (el) el.textContent = new Date().toLocaleTimeString();
+        if (btn) btn.disabled = false;
+    }
+
+    // ═══════════════════════════════════════
+    // REALTIME SUBSCRIPTIONS
+    // ═══════════════════════════════════════
+    (function setupRealtime() {
+        const buildCh = supabaseClient
+            .channel('client-projects-builds')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'website_builds' }, () => refreshAll())
+            .subscribe();
+
+        const pageCh = supabaseClient
+            .channel('client-projects-pages')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'website_pages' }, () => refreshAll())
+            .subscribe();
+
+        const logCh = supabaseClient
+            .channel('client-projects-logs')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'website_build_log' }, (payload) => {
+                if (payload.new && payload.new.message) {
+                    toast(payload.new.message, 'info');
+                }
+                fetchActivity();
+            })
+            .subscribe();
+    })();
+
+    // ═══════════════════════════════════════
+    // PROFILE SWITCHER
+    // ═══════════════════════════════════════
+    (function initProfileSwitcher() {
+        const saved = localStorage.getItem('rdgr-active-profile');
+        if (saved) {
+            try {
+                const p = JSON.parse(saved);
+                activeProfileId = p.id;
+                const nameEl = document.getElementById('profileName');
+                const avatarEl = document.getElementById('profileAvatar');
+                if (nameEl) nameEl.textContent = p.name;
+                if (avatarEl) avatarEl.textContent = (p.name || 'B')[0].toUpperCase();
+            } catch(e) {}
+        }
+        getCachedProfiles(function(profiles) {
+            const dd = document.getElementById('profileDropdown');
+            if (!dd || !profiles || profiles.length === 0) return;
+            const activeId = saved ? JSON.parse(saved).id : null;
+            dd.innerHTML = profiles.map(p => {
+                const name = p.display_name || p.email || '?';
+                const initial = name[0].toUpperCase();
+                const isActive = p.user_id === activeId;
+                return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g, '&#39;')}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                    <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div>
+                    <span>${name}</span>
+                    ${isActive ? '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+                </button>`;
+            }).join('');
+            dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button></div>';
+        });
+    })();
+
+    function signOut() {
+        localStorage.removeItem('rdgr-session');
+        localStorage.removeItem('rdgr-active-profile');
+        location.reload();
+    }
+
+    function toggleProfileDD() {
+        const dd = document.getElementById('profileDropdown');
+        dd.classList.toggle('hidden');
+        if (!dd.classList.contains('hidden')) {
+            setTimeout(() => document.addEventListener('click', function closePDD(e) {
+                if (!document.getElementById('profileSwitcher').contains(e.target)) {
+                    dd.classList.add('hidden');
+                }
+                document.removeEventListener('click', closePDD);
+            }), 0);
+        }
+    }
+
+    function selectProfileGlobal(userId, name) {
+        localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+        location.reload();
+    }
+
+    </script>
+
+</body>
+</html>

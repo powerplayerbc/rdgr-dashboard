@@ -32,6 +32,7 @@ const NAV_GROUPS = [
     ]},
     { label: 'Brand', href: '/brand-discovery', items: [
         { label: 'Discovery', href: '/brand-discovery' },
+        { label: 'Voice', href: '/brand-voice' },
         { label: 'Templates', href: '/template-studio' },
         { label: 'Docs', href: '/brand-documents' },
     ]},
@@ -115,6 +116,7 @@ const PAGE_URL_MAP = {
     'subscribers.html': '/subscribers',
     'partnerships.html': '/partnerships',
     'finance/index.html': '/finance',
+    'brand-voice/index.html': '/brand-voice',
 };
 
 // ═══ CSS FOR DROPDOWN NAV ═══
@@ -375,6 +377,10 @@ const files = fs.readdirSync(dir).filter(f => f.endsWith('.html') && !skip.inclu
 const financePath = path.join(dir, 'finance', 'index.html');
 if (fs.existsSync(financePath)) {
     files.push('finance/index.html');
+}
+const brandVoicePath = path.join(dir, 'brand-voice', 'index.html');
+if (fs.existsSync(brandVoicePath)) {
+    files.push('brand-voice/index.html');
 }
 
 let updated = 0;
