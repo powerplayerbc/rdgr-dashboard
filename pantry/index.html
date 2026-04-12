@@ -2475,7 +2475,7 @@ async function loadPreparedMeals() {
     if (!activeProfileId) return;
     const meals = await supabaseSelect('deft_prepared_meals',
         `user_id=eq.${activeProfileId}&select=*&order=prepared_date.desc`);
-    preparedMeals = meals || [];
+    preparedMeals = (meals || []).map(m => ({ ...m, id: m.prepared_id || m.id }));
     renderPreparedMeals();
 }
 
@@ -2666,7 +2666,7 @@ async function loadShoppingList() {
     // Fetch active (non-completed) shopping lists
     const lists = await supabaseSelect('deft_shopping_lists',
         `user_id=eq.${activeProfileId}&status=eq.active&select=*&order=created_at.desc`);
-    shoppingLists = lists || [];
+    shoppingLists = (lists || []).map(l => ({ ...l, id: l.list_id || l.id }));
 
     // Populate list selector
     const selector = document.getElementById('shoppingListSelector');
@@ -2698,7 +2698,7 @@ async function loadShoppingItems() {
     if (!activeShoppingList) { shoppingItems = []; renderShoppingList(); return; }
     const items = await supabaseSelect('deft_shopping_items',
         `list_id=eq.${activeShoppingList.id}&select=*&order=checked.asc,category.asc,name.asc`);
-    shoppingItems = items || [];
+    shoppingItems = (items || []).map(i => ({ ...i, id: i.item_id || i.id }));
     renderShoppingList();
 }
 
@@ -2817,12 +2817,9 @@ async function addShoppingItem() {
     const quantity = parseFloat(document.getElementById('addShoppingItemQty').value) || 1;
     const unit = document.getElementById('addShoppingItemUnit').value;
 
-    const result = await supabaseWrite('deft_shopping_items', 'POST', {
+    const result = await deftApi('add_shopping_items', {
         list_id: activeShoppingList.id,
-        name,
-        quantity,
-        unit,
-        checked: false
+        items: [{ name, quantity, unit }]
     });
 
     if (result) {
@@ -2859,8 +2856,8 @@ async function saveShoppingList() {
         toast('Shopping list created', 'success');
         closeModal('createListModal');
         // Set the new list as active
-        if (result.data && result.data.id) {
-            activeShoppingList = result.data;
+        if (result.data && (result.data.list_id || result.data.id)) {
+            activeShoppingList = { ...result.data, id: result.data.list_id || result.data.id };
         }
         await loadShoppingList();
     } else {
@@ -2973,7 +2970,10 @@ async function loadShoppingHistory() {
     const freqItems = await supabaseSelect('deft_shopping_history',
         `user_id=eq.${activeProfileId}&select=*&order=purchase_count.desc&limit=50`);
 
-    renderShoppingHistory(lists || [], freqItems || []);
+    renderShoppingHistory(
+        (lists || []).map(l => ({ ...l, id: l.list_id || l.id })),
+        (freqItems || []).map(f => ({ ...f, id: f.history_id || f.id }))
+    );
 }
 
 function renderShoppingHistory(lists, freqItems) {
