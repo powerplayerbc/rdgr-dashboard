@@ -1250,7 +1250,17 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Expiry Date</label>
+                        <label class="form-label">Storage Type</label>
+                        <select id="pantryItemStorageType" class="form-input">
+                            <option value="regular">Regular (fresh groceries ~7 days)</option>
+                            <option value="frozen">Frozen (~90 days)</option>
+                            <option value="meal_prep">Meal Prep (~4 days)</option>
+                            <option value="bulk">Bulk / Pantry Staple (~30 days)</option>
+                        </select>
+                        <span class="text-xs mt-1 block" style="color: var(--deft-txt-3);">Sets default expiry if no date is provided</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Expiry Date <span class="text-xs" style="color: var(--deft-txt-3);">(auto-set if blank)</span></label>
                         <input type="date" id="pantryItemExpiry" class="form-input">
                     </div>
                     <div class="form-group">
@@ -2020,12 +2030,17 @@ function renderPantry() {
     }
 
     grid.innerHTML = filtered.map(item => {
+        const itemId = item.item_id || item.id;
         const expiry = getExpiryStatus(item.expiry_date);
         const qtyStr = item.quantity ? `${item.quantity} ${item.unit || ''}` : '';
         const locStr = item.location ? item.location.charAt(0).toUpperCase() + item.location.slice(1) : '';
         const subline = [qtyStr, locStr].filter(Boolean).join(' - ');
+        const storageLabels = { regular: '', frozen: 'Frozen', meal_prep: 'Meal Prep', bulk: 'Bulk' };
+        const storageBadge = item.storage_type && item.storage_type !== 'regular'
+            ? `<span class="text-xs px-1.5 py-0.5 rounded" style="background: rgba(100,149,237,0.15); color: #6495ED;">${storageLabels[item.storage_type] || item.storage_type}</span>`
+            : '';
 
-        return `<div class="panel p-3 cursor-pointer transition-all hover:border-opacity-60" onclick="editPantryItem('${item.id}')" style="border-color: var(--deft-border);" onmouseenter="this.style.borderColor='var(--deft-surface-hi)'" onmouseleave="this.style.borderColor='var(--deft-border)'">
+        return `<div class="panel p-3 cursor-pointer transition-all hover:border-opacity-60" onclick="editPantryItem('${itemId}')" style="border-color: var(--deft-border);" onmouseenter="this.style.borderColor='var(--deft-surface-hi)'" onmouseleave="this.style.borderColor='var(--deft-border)'">
             <div class="flex items-start justify-between mb-2">
                 <div>
                     <h3 class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${escapeHtml(item.name || 'Unnamed')}</h3>
@@ -2036,6 +2051,7 @@ function renderPantry() {
             ${item.expiry_date ? `<div class="text-xs font-mono mb-2" style="color: var(--deft-txt-3);">Exp: ${formatDate(item.expiry_date)}</div>` : ''}
             <div class="flex gap-2 mt-2 flex-wrap">
                 ${item.category ? `<span class="text-xs px-1.5 py-0.5 rounded" style="background: rgba(255,255,255,0.04); color: var(--deft-txt-3);">${escapeHtml(item.category)}</span>` : ''}
+                ${storageBadge}
             </div>
         </div>`;
     }).join('');
@@ -2074,10 +2090,19 @@ function addPantryItem() {
     document.getElementById('pantryItemUnit').value = 'each';
     document.getElementById('pantryItemCategory').value = 'other';
     document.querySelectorAll('input[name="pantryLocation"]').forEach(r => r.checked = r.value === 'fridge');
+    document.getElementById('pantryItemStorageType').value = 'regular';
     document.getElementById('pantryItemExpiry').value = '';
     document.getElementById('pantryItemNotes').value = '';
     document.getElementById('removePantryBtn').style.display = 'none';
     document.getElementById('savePantryBtn').textContent = 'Save Item';
+    // Auto-set storage type when location changes
+    document.querySelectorAll('input[name="pantryLocation"]').forEach(r => {
+        r.onchange = () => {
+            const st = document.getElementById('pantryItemStorageType');
+            if (r.value === 'freezer') st.value = 'frozen';
+            else if (st.value === 'frozen') st.value = 'regular';
+        };
+    });
     openModal('addPantryModal');
 }
 
@@ -2093,6 +2118,7 @@ function editPantryItem(id) {
     document.getElementById('pantryItemCategory').value = item.category || 'other';
     document.querySelectorAll('input[name="pantryLocation"]').forEach(r => r.checked = r.value === (item.location || 'fridge'));
     document.getElementById('pantryItemExpiry').value = item.expiry_date || '';
+    document.getElementById('pantryItemStorageType').value = item.storage_type || 'regular';
     document.getElementById('pantryItemNotes').value = item.notes || '';
     document.getElementById('removePantryBtn').style.display = '';
     document.getElementById('savePantryBtn').textContent = 'Update Item';
@@ -2107,10 +2133,11 @@ async function savePantryItem() {
     const unit = document.getElementById('pantryItemUnit').value;
     const category = document.getElementById('pantryItemCategory').value;
     const location = document.querySelector('input[name="pantryLocation"]:checked')?.value || 'fridge';
+    const storage_type = document.getElementById('pantryItemStorageType').value;
     const expiry_date = document.getElementById('pantryItemExpiry').value || null;
     const notes = document.getElementById('pantryItemNotes').value.trim() || null;
 
-    const data = { name, quantity, unit, category, location, expiry_date, notes };
+    const data = { name, quantity, unit, category, location, storage_type, expiry_date, notes };
 
     let result;
     if (editingPantryItem) {
