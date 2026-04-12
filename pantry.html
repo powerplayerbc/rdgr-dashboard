@@ -1250,19 +1250,85 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Storage Type</label>
-                        <select id="pantryItemStorageType" class="form-input">
-                            <option value="regular">Regular (fresh groceries ~7 days)</option>
-                            <option value="frozen">Frozen (~90 days)</option>
-                            <option value="meal_prep">Meal Prep (~4 days)</option>
-                            <option value="bulk">Bulk / Pantry Staple (~30 days)</option>
-                        </select>
-                        <span class="text-xs mt-1 block" style="color: var(--deft-txt-3);">Sets default expiry if no date is provided</span>
+                        <label class="form-label">Storage Type & Shelf Life</label>
+                        <div class="flex gap-2">
+                            <select id="pantryItemStorageType" class="form-input flex-1" onchange="onStorageTypeChange()">
+                                <option value="regular">Regular (fresh)</option>
+                                <option value="frozen">Frozen</option>
+                                <option value="meal_prep">Meal Prep</option>
+                                <option value="bulk">Bulk / Staple</option>
+                            </select>
+                            <div class="flex items-center gap-1" style="min-width: 120px;">
+                                <input type="number" id="pantryItemShelfDays" class="form-input" style="width: 70px;" min="1" max="365" value="7" onchange="onShelfDaysChange()">
+                                <span class="text-xs" style="color: var(--deft-txt-3);">days</span>
+                            </div>
+                        </div>
+                        <span class="text-xs mt-1 block" style="color: var(--deft-txt-3);">Adjust shelf life for this item - expiry auto-calculates below</span>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Expiry Date <span class="text-xs" style="color: var(--deft-txt-3);">(auto-set if blank)</span></label>
+                        <label class="form-label">Expiry Date</label>
                         <input type="date" id="pantryItemExpiry" class="form-input">
+                        <span class="text-xs mt-1 block" style="color: var(--deft-txt-3);">Auto-set from shelf days, or pick a specific date</span>
                     </div>
+
+                    <!-- Nutrition Label Scanner -->
+                    <div class="form-group" style="border-top: 1px solid var(--deft-border); padding-top: 0.75rem; margin-top: 0.5rem;">
+                        <label class="form-label">Nutrition Info</label>
+                        <div id="nutritionPreview" style="display: none;" class="mb-2 p-2 rounded-lg" style="background: rgba(255,255,255,0.02);">
+                            <div class="grid grid-cols-4 gap-2 text-xs font-mono" style="color: var(--deft-txt-2);">
+                                <div><span style="color: var(--deft-txt-3);">Cal</span><br><span id="nutPreviewCal">-</span></div>
+                                <div><span style="color: var(--deft-txt-3);">Fat</span><br><span id="nutPreviewFat">-</span>g</div>
+                                <div><span style="color: var(--deft-txt-3);">Protein</span><br><span id="nutPreviewProtein">-</span>g</div>
+                                <div><span style="color: var(--deft-txt-3);">Net Carbs</span><br><span id="nutPreviewCarbs">-</span>g</div>
+                            </div>
+                            <button class="btn btn-ghost text-xs mt-2 w-full" onclick="editNutritionManually()">Edit Values</button>
+                        </div>
+                        <div id="nutritionManualFields" style="display: none;" class="grid grid-cols-2 gap-2 mb-2">
+                            <div>
+                                <label class="text-xs" style="color: var(--deft-txt-3);">Serving Size</label>
+                                <input type="text" id="nutServingSize" class="form-input text-xs" placeholder="e.g., 4 oz">
+                            </div>
+                            <div>
+                                <label class="text-xs" style="color: var(--deft-txt-3);">Calories</label>
+                                <input type="number" id="nutCalories" class="form-input text-xs" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="text-xs" style="color: var(--deft-txt-3);">Total Fat (g)</label>
+                                <input type="number" id="nutFat" class="form-input text-xs" step="0.1" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="text-xs" style="color: var(--deft-txt-3);">Protein (g)</label>
+                                <input type="number" id="nutProtein" class="form-input text-xs" step="0.1" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="text-xs" style="color: var(--deft-txt-3);">Total Carbs (g)</label>
+                                <input type="number" id="nutTotalCarbs" class="form-input text-xs" step="0.1" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="text-xs" style="color: var(--deft-txt-3);">Fiber (g)</label>
+                                <input type="number" id="nutFiber" class="form-input text-xs" step="0.1" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="text-xs" style="color: var(--deft-txt-3);">Sugar (g)</label>
+                                <input type="number" id="nutSugar" class="form-input text-xs" step="0.1" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="text-xs" style="color: var(--deft-txt-3);">Sodium (mg)</label>
+                                <input type="number" id="nutSodium" class="form-input text-xs" placeholder="0">
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-warm text-xs flex-1" onclick="scanNutritionLabel()">
+                                <span id="scanBtnText">Scan Nutrition Label</span>
+                            </button>
+                            <button class="btn btn-ghost text-xs" onclick="toggleNutritionManual()">Enter Manually</button>
+                        </div>
+                        <input type="file" id="nutritionLabelFile" accept="image/*" capture="environment" style="display:none;" onchange="handleNutritionLabelUpload(event)">
+                        <div id="labelPreviewImg" style="display:none;" class="mt-2">
+                            <img id="labelImg" style="max-height: 120px; border-radius: 0.375rem; border: 1px solid var(--deft-border);">
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label class="form-label">Notes</label>
                         <textarea id="pantryItemNotes" class="form-input" placeholder="Optional notes..." rows="2" style="min-height: 60px;"></textarea>
@@ -2081,6 +2147,125 @@ function searchPantry(query) {
     renderPantry();
 }
 
+// Shelf life defaults (user-adjustable per item)
+const SHELF_DEFAULTS = { regular: 7, frozen: 90, meal_prep: 4, bulk: 30 };
+let scannedNutrition = null;
+
+function onStorageTypeChange() {
+    const st = document.getElementById('pantryItemStorageType').value;
+    const shelfInput = document.getElementById('pantryItemShelfDays');
+    shelfInput.value = SHELF_DEFAULTS[st] || 7;
+    onShelfDaysChange();
+}
+
+function onShelfDaysChange() {
+    const days = parseInt(document.getElementById('pantryItemShelfDays').value) || 7;
+    const expiry = new Date();
+    expiry.setDate(expiry.getDate() + days);
+    document.getElementById('pantryItemExpiry').value = expiry.toISOString().split('T')[0];
+}
+
+function resetNutritionFields() {
+    scannedNutrition = null;
+    document.getElementById('nutritionPreview').style.display = 'none';
+    document.getElementById('nutritionManualFields').style.display = 'none';
+    document.getElementById('labelPreviewImg').style.display = 'none';
+    document.getElementById('scanBtnText').textContent = 'Scan Nutrition Label';
+    ['nutServingSize','nutCalories','nutFat','nutProtein','nutTotalCarbs','nutFiber','nutSugar','nutSodium'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+}
+
+function populateNutritionFields(n) {
+    scannedNutrition = n;
+    document.getElementById('nutServingSize').value = n.serving_size || '';
+    document.getElementById('nutCalories').value = n.calories || '';
+    document.getElementById('nutFat').value = n.total_fat_g || '';
+    document.getElementById('nutProtein').value = n.protein_g || '';
+    document.getElementById('nutTotalCarbs').value = n.total_carbs_g || '';
+    document.getElementById('nutFiber').value = n.fiber_g || '';
+    document.getElementById('nutSugar').value = n.sugar_g || '';
+    document.getElementById('nutSodium').value = n.sodium_mg || '';
+    // Show preview
+    document.getElementById('nutPreviewCal').textContent = Math.round(n.calories || 0);
+    document.getElementById('nutPreviewFat').textContent = Math.round(n.total_fat_g || 0);
+    document.getElementById('nutPreviewProtein').textContent = Math.round(n.protein_g || 0);
+    document.getElementById('nutPreviewCarbs').textContent = Math.round((n.total_carbs_g || 0) - (n.fiber_g || 0));
+    document.getElementById('nutritionPreview').style.display = '';
+}
+
+function editNutritionManually() {
+    document.getElementById('nutritionManualFields').style.display = '';
+}
+
+function toggleNutritionManual() {
+    const fields = document.getElementById('nutritionManualFields');
+    fields.style.display = fields.style.display === 'none' ? '' : 'none';
+}
+
+function collectNutritionFromFields() {
+    const cal = parseFloat(document.getElementById('nutCalories').value);
+    if (!cal && cal !== 0) return null;
+    return {
+        serving_size: document.getElementById('nutServingSize').value || null,
+        calories: cal || 0,
+        total_fat_g: parseFloat(document.getElementById('nutFat').value) || 0,
+        protein_g: parseFloat(document.getElementById('nutProtein').value) || 0,
+        total_carbs_g: parseFloat(document.getElementById('nutTotalCarbs').value) || 0,
+        fiber_g: parseFloat(document.getElementById('nutFiber').value) || 0,
+        sugar_g: parseFloat(document.getElementById('nutSugar').value) || 0,
+        net_carbs_g: (parseFloat(document.getElementById('nutTotalCarbs').value) || 0) - (parseFloat(document.getElementById('nutFiber').value) || 0),
+        sodium_mg: parseFloat(document.getElementById('nutSodium').value) || 0
+    };
+}
+
+function scanNutritionLabel() {
+    document.getElementById('nutritionLabelFile').click();
+}
+
+async function handleNutritionLabelUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Show image preview
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const base64 = e.target.result;
+        document.getElementById('labelImg').src = base64;
+        document.getElementById('labelPreviewImg').style.display = '';
+        document.getElementById('scanBtnText').textContent = 'Analyzing...';
+
+        // Send to AI for analysis
+        try {
+            const result = await deftApi('analyze_nutrition_label', { image_base64: base64 });
+            if (result && result.success !== false && result.data) {
+                const data = result.data;
+                populateNutritionFields(data);
+                document.getElementById('nutritionManualFields').style.display = '';
+                // Auto-fill name if blank
+                if (data.food_name && !document.getElementById('pantryItemName').value) {
+                    document.getElementById('pantryItemName').value = data.food_name;
+                }
+                // Auto-fill brand in notes if available
+                if (data.brand) {
+                    const notes = document.getElementById('pantryItemNotes');
+                    if (!notes.value) notes.value = 'Brand: ' + data.brand;
+                }
+                toast('Nutrition label scanned', 'success');
+            } else {
+                toast('Could not read label - enter manually', 'error');
+                document.getElementById('nutritionManualFields').style.display = '';
+            }
+        } catch (err) {
+            toast('Scan failed - enter manually', 'error');
+            document.getElementById('nutritionManualFields').style.display = '';
+        }
+        document.getElementById('scanBtnText').textContent = 'Scan Nutrition Label';
+    };
+    reader.readAsDataURL(file);
+}
+
 function addPantryItem() {
     editingPantryItem = null;
     document.getElementById('pantryModalTitle').textContent = 'Add Pantry Item';
@@ -2091,23 +2276,25 @@ function addPantryItem() {
     document.getElementById('pantryItemCategory').value = 'other';
     document.querySelectorAll('input[name="pantryLocation"]').forEach(r => r.checked = r.value === 'fridge');
     document.getElementById('pantryItemStorageType').value = 'regular';
+    document.getElementById('pantryItemShelfDays').value = SHELF_DEFAULTS.regular;
     document.getElementById('pantryItemExpiry').value = '';
     document.getElementById('pantryItemNotes').value = '';
+    resetNutritionFields();
     document.getElementById('removePantryBtn').style.display = 'none';
     document.getElementById('savePantryBtn').textContent = 'Save Item';
     // Auto-set storage type when location changes
     document.querySelectorAll('input[name="pantryLocation"]').forEach(r => {
         r.onchange = () => {
             const st = document.getElementById('pantryItemStorageType');
-            if (r.value === 'freezer') st.value = 'frozen';
-            else if (st.value === 'frozen') st.value = 'regular';
+            if (r.value === 'freezer' && st.value !== 'frozen') { st.value = 'frozen'; onStorageTypeChange(); }
+            else if (r.value !== 'freezer' && st.value === 'frozen') { st.value = 'regular'; onStorageTypeChange(); }
         };
     });
     openModal('addPantryModal');
 }
 
 function editPantryItem(id) {
-    const item = pantryItems.find(i => i.id === id);
+    const item = pantryItems.find(i => (i.item_id || i.id) === id);
     if (!item) return;
     editingPantryItem = id;
     document.getElementById('pantryModalTitle').textContent = 'Edit Pantry Item';
@@ -2117,11 +2304,25 @@ function editPantryItem(id) {
     document.getElementById('pantryItemUnit').value = item.unit || 'each';
     document.getElementById('pantryItemCategory').value = item.category || 'other';
     document.querySelectorAll('input[name="pantryLocation"]').forEach(r => r.checked = r.value === (item.location || 'fridge'));
-    document.getElementById('pantryItemExpiry').value = item.expiry_date || '';
     document.getElementById('pantryItemStorageType').value = item.storage_type || 'regular';
+    document.getElementById('pantryItemShelfDays').value = item.default_shelf_days || SHELF_DEFAULTS[item.storage_type || 'regular'] || 7;
+    document.getElementById('pantryItemExpiry').value = item.expiry_date || '';
     document.getElementById('pantryItemNotes').value = item.notes || '';
+    resetNutritionFields();
+    if (item.nutrition_per_unit) {
+        populateNutritionFields(item.nutrition_per_unit);
+        document.getElementById('nutritionManualFields').style.display = '';
+    }
     document.getElementById('removePantryBtn').style.display = '';
     document.getElementById('savePantryBtn').textContent = 'Update Item';
+    // Set location change handler
+    document.querySelectorAll('input[name="pantryLocation"]').forEach(r => {
+        r.onchange = () => {
+            const st = document.getElementById('pantryItemStorageType');
+            if (r.value === 'freezer' && st.value !== 'frozen') { st.value = 'frozen'; onStorageTypeChange(); }
+            else if (r.value !== 'freezer' && st.value === 'frozen') { st.value = 'regular'; onStorageTypeChange(); }
+        };
+    });
     openModal('addPantryModal');
 }
 
@@ -2134,10 +2335,18 @@ async function savePantryItem() {
     const category = document.getElementById('pantryItemCategory').value;
     const location = document.querySelector('input[name="pantryLocation"]:checked')?.value || 'fridge';
     const storage_type = document.getElementById('pantryItemStorageType').value;
+    const default_shelf_days = parseInt(document.getElementById('pantryItemShelfDays').value) || null;
     const expiry_date = document.getElementById('pantryItemExpiry').value || null;
     const notes = document.getElementById('pantryItemNotes').value.trim() || null;
+    const nutrition_per_unit = collectNutritionFromFields();
 
-    const data = { name, quantity, unit, category, location, storage_type, expiry_date, notes };
+    const data = { name, quantity, unit, category, location, storage_type, default_shelf_days, expiry_date, notes };
+    if (nutrition_per_unit) data.nutrition_per_unit = nutrition_per_unit;
+
+    // If nutrition was provided and item doesn't exist in food database, offer to create it
+    if (nutrition_per_unit && !editingPantryItem) {
+        createFoodDatabaseEntry(name, nutrition_per_unit);
+    }
 
     let result;
     if (editingPantryItem) {
@@ -2151,6 +2360,42 @@ async function savePantryItem() {
         closeModal('addPantryModal');
         editingPantryItem = null;
         await loadPantry();
+    }
+}
+
+async function createFoodDatabaseEntry(name, nutrition) {
+    // Check if food already exists in database
+    try {
+        const existing = await supabaseSelect('deft_food_database',
+            `name=ilike.${encodeURIComponent(name)}&select=food_id,name&limit=1`);
+        if (existing && existing.length > 0) return; // Already exists
+
+        // Create new food database entry
+        const foodEntry = {
+            name: name,
+            brand: nutrition.brand || null,
+            serving_size: nutrition.serving_size || '1 serving',
+            nutrition_per_serving: {
+                calories: nutrition.calories || 0,
+                total_fat_g: nutrition.total_fat_g || 0,
+                saturated_fat_g: nutrition.saturated_fat_g || 0,
+                protein_g: nutrition.protein_g || 0,
+                total_carbs_g: nutrition.total_carbs_g || 0,
+                fiber_g: nutrition.fiber_g || 0,
+                sugar_g: nutrition.sugar_g || 0,
+                net_carbs_g: (nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0),
+                sodium_mg: nutrition.sodium_mg || 0,
+                cholesterol_mg: nutrition.cholesterol_mg || 0
+            },
+            category: 'other',
+            is_keto_friendly: ((nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0)) <= 10,
+            keto_tier: ((nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0)) <= 3 ? 'excellent'
+                : ((nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0)) <= 6 ? 'good'
+                : ((nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0)) <= 12 ? 'moderate' : 'avoid'
+        };
+        await supabaseWrite('deft_food_database', 'POST', foodEntry);
+    } catch (e) {
+        // Non-critical - don't block pantry item save
     }
 }
 
