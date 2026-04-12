@@ -1072,8 +1072,10 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                             <option value="">No lists</option>
                         </select>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                         <button class="btn btn-ghost text-xs" onclick="createShoppingList()">New List</button>
+                        <button class="btn btn-warm text-xs" onclick="openTemplateSelector()">Load Template</button>
+                        <button class="btn btn-ghost text-xs" onclick="saveAsTemplate()">Save as Template</button>
                         <button class="btn btn-primary text-xs" id="completeListBtn" onclick="completeShoppingList()" disabled>Complete List</button>
                     </div>
                 </div>
@@ -1443,23 +1445,80 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         </div>
     </div>
 
-    <!-- Edit Shopping Item Modal -->
+    <!-- Edit Shopping Item Modal (full edit) -->
     <div id="editShoppingItemModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('editShoppingItemModal')">
-        <div class="modal-content" style="max-width: 420px;">
+        <div class="modal-content" style="max-width: 480px;">
             <div class="panel-header">
-                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Edit Item Notes</span>
+                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Edit Item</span>
                 <button class="btn btn-ghost text-xs" onclick="closeModal('editShoppingItemModal')">Close</button>
             </div>
             <div class="panel-body">
-                <div class="space-y-4">
+                <div class="space-y-3">
+                    <input type="hidden" id="editShoppingItemId">
+                    <div class="form-group">
+                        <label class="form-label">Item Name</label>
+                        <input type="text" id="editShoppingItemName" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Brand</label>
+                        <input type="text" id="editShoppingItemBrand" class="form-input" placeholder="e.g. Kerrygold, Costco Kirkland...">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="form-group">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" id="editShoppingItemQty" class="form-input" min="0" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Unit</label>
+                            <select id="editShoppingItemUnit" class="form-input">
+                                <option value="each">each</option><option value="lbs">lbs</option><option value="oz">oz</option><option value="kg">kg</option><option value="g">g</option><option value="cups">cups</option><option value="pack">pack</option><option value="bag">bag</option><option value="can">can</option><option value="bottle">bottle</option><option value="box">box</option><option value="dozen">dozen</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select id="editShoppingItemCategory" class="form-input">
+                                <option value="other">Other</option><option value="protein">Protein</option><option value="dairy">Dairy</option><option value="produce">Produce</option><option value="fat">Fat</option><option value="grains">Grains</option><option value="condiments">Condiments</option><option value="beverages">Beverages</option><option value="snacks">Snacks</option><option value="frozen">Frozen</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Goes to</label>
+                            <select id="editShoppingItemPantryLoc" class="form-input">
+                                <option value="fridge">Fridge</option><option value="pantry">Pantry</option><option value="freezer">Freezer</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label class="form-label">Notes</label>
-                        <textarea id="editShoppingItemNotes" class="form-input" placeholder="Add notes for this item..." rows="3"></textarea>
+                        <textarea id="editShoppingItemNotes" class="form-input" placeholder="Add notes..." rows="2" style="min-height: 50px;"></textarea>
                     </div>
-                    <input type="hidden" id="editShoppingItemId">
                     <div class="flex gap-2 justify-end pt-2">
+                        <button class="btn btn-danger text-xs" onclick="deleteEditingShoppingItem()">Remove from List</button>
                         <button class="btn btn-ghost text-xs" onclick="closeModal('editShoppingItemModal')">Cancel</button>
-                        <button class="btn btn-primary text-xs" onclick="saveShoppingItemNotes()">Save</button>
+                        <button class="btn btn-primary text-xs" onclick="saveShoppingItemEdits()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Selector Modal -->
+    <div id="templateSelectorModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('templateSelectorModal')">
+        <div class="modal-content" style="max-width: 520px;">
+            <div class="panel-header">
+                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Shopping Templates</span>
+                <button class="btn btn-ghost text-xs" onclick="closeModal('templateSelectorModal')">Close</button>
+            </div>
+            <div class="panel-body">
+                <div id="templateList" class="space-y-2 mb-4">
+                    <div class="empty-state text-xs">Loading templates...</div>
+                </div>
+                <div style="border-top: 1px solid var(--deft-border); padding-top: 0.75rem;">
+                    <p class="text-xs mb-2" style="color: var(--deft-txt-3);">Or create a new list from previously purchased items:</p>
+                    <div class="relative">
+                        <input type="text" id="templateSearchInput" class="form-input" placeholder="Search your purchase history..." oninput="searchPurchaseHistory(this.value)">
+                        <div id="purchaseHistoryResults" class="mt-2 max-h-48 overflow-y-auto"></div>
                     </div>
                 </div>
             </div>
@@ -2533,6 +2592,7 @@ function renderPreparedMeals() {
 
 function addPreparedMeal() {
     editingPreparedMeal = null;
+    selectedRecipeId = null;
     document.getElementById('preparedModalTitle').textContent = 'Add Prepared Meal';
     document.getElementById('preparedMealName').value = '';
     document.getElementById('preparedRecipeSearch').value = '';
@@ -2587,6 +2647,7 @@ async function savePreparedMeal() {
     };
 
     const data = { name, total_servings, location, expiry_date, notes, nutrition_per_serving };
+    if (selectedRecipeId && !editingPreparedMeal) data.recipe_id = selectedRecipeId;
 
     let result;
     if (editingPreparedMeal) {
@@ -2622,6 +2683,8 @@ async function discardPrepared(id) {
 
 // Recipe autocomplete
 let recipeSearchTimeout = null;
+let selectedRecipeId = null;
+
 async function searchRecipes(query) {
     clearTimeout(recipeSearchTimeout);
     const dropdown = document.getElementById('recipeSearchResults');
@@ -2629,32 +2692,38 @@ async function searchRecipes(query) {
 
     recipeSearchTimeout = setTimeout(async () => {
         const results = await supabaseSelect('deft_recipes',
-            `name=ilike.*${encodeURIComponent(query)}*&select=id,name,nutrition_per_serving&limit=8`);
+            `user_id=eq.${activeProfileId}&name=ilike.*${encodeURIComponent(query)}*&status=eq.active&select=recipe_id,name,servings,nutrition_per_serving&limit=8`);
         if (results && results.length > 0) {
             dropdown.innerHTML = results.map(r => {
                 const n = r.nutrition_per_serving || {};
-                return `<div class="autocomplete-item" onclick="selectRecipeForPrepared('${escapeHtml(r.name)}', ${JSON.stringify(n).replace(/"/g, '&quot;')})">
-                    <span>${escapeHtml(r.name)}</span>
-                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${n.calories || '?'} cal</span>
+                const dataAttr = JSON.stringify({ recipe_id: r.recipe_id, name: r.name, servings: r.servings, nutrition: n }).replace(/"/g, '&quot;');
+                return `<div class="autocomplete-item" onclick="selectRecipeForPrepared(${dataAttr})">
+                    <div class="flex justify-between w-full">
+                        <span>${escapeHtml(r.name)}</span>
+                        <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${n.calories || '?'} cal &middot; ${r.servings || '?'} servings</span>
+                    </div>
                 </div>`;
             }).join('');
             dropdown.classList.add('open');
         } else {
-            dropdown.classList.remove('open');
+            dropdown.innerHTML = '<div class="autocomplete-item" style="color: var(--deft-txt-3);">No recipes found</div>';
+            dropdown.classList.add('open');
         }
     }, 300);
 }
 
-function selectRecipeForPrepared(name, nutrition) {
-    document.getElementById('preparedMealName').value = name;
+function selectRecipeForPrepared(data) {
+    selectedRecipeId = data.recipe_id || null;
+    document.getElementById('preparedMealName').value = data.name || '';
     document.getElementById('recipeSearchResults').classList.remove('open');
-    document.getElementById('preparedRecipeSearch').value = '';
-    if (nutrition) {
-        document.getElementById('preparedCalories').value = nutrition.calories || '';
-        document.getElementById('preparedFat').value = nutrition.fat_g || nutrition.total_fat_g || '';
-        document.getElementById('preparedProtein').value = nutrition.protein_g || '';
-        document.getElementById('preparedNetCarbs').value = nutrition.net_carbs_g || '';
-    }
+    document.getElementById('preparedRecipeSearch').value = data.name || '';
+    if (data.servings) document.getElementById('preparedServings').value = data.servings;
+    const n = data.nutrition || {};
+    document.getElementById('preparedCalories').value = n.calories || '';
+    document.getElementById('preparedFat').value = n.fat_g || n.total_fat_g || '';
+    document.getElementById('preparedProtein').value = n.protein_g || '';
+    document.getElementById('preparedNetCarbs').value = n.net_carbs_g || '';
+    toast('Recipe loaded - nutrition auto-filled', 'success');
 }
 
 // ═══════════════════════════════════════
@@ -2748,19 +2817,17 @@ function renderShoppingItem(item, isChecked) {
     };
     const catColor = categoryColors[(item.category || '').toLowerCase()] || categoryColors.other;
 
+    const brandStr = item.brand ? ` <span class="text-xs" style="color: var(--deft-txt-3);">(${escapeHtml(item.brand)})</span>` : '';
     return `<div class="shopping-item ${isChecked ? 'checked-item' : ''} flex items-center gap-3 px-4 py-3" style="border-bottom: 1px solid var(--deft-border);">
         <div class="shopping-check ${isChecked ? 'checked' : ''}" onclick="toggleShoppingItem('${item.id}', ${!isChecked})" role="checkbox" aria-checked="${isChecked}" tabindex="0" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();toggleShoppingItem('${item.id}',${!isChecked});}"></div>
-        <div class="flex-1 min-w-0">
-            <span class="item-name text-sm font-medium" style="color: var(--deft-txt);">${escapeHtml(item.name || 'Item')}</span>
+        <div class="flex-1 min-w-0 cursor-pointer" onclick="editShoppingItemNotes('${item.id}')">
+            <span class="item-name text-sm font-medium" style="color: var(--deft-txt);">${escapeHtml(item.name || 'Item')}${brandStr}</span>
             <span class="text-xs font-mono ml-2" style="color: var(--deft-txt-3);">${item.quantity || ''} ${item.unit || ''}</span>
             ${item.notes ? `<p class="text-xs mt-0.5" style="color: var(--deft-txt-3);">${escapeHtml(item.notes)}</p>` : ''}
         </div>
-        ${item.category ? `<span class="text-xs px-1.5 py-0.5 rounded font-mono" style="background: ${catColor}15; color: ${catColor};">${escapeHtml(item.category)}</span>` : ''}
-        <button class="p-1 rounded transition-colors" style="color: var(--deft-txt-3);" onclick="editShoppingItemNotes('${item.id}')" title="Edit notes" onmouseenter="this.style.color='var(--deft-txt)'" onmouseleave="this.style.color='var(--deft-txt-3)'">
+        ${item.category ? `<span class="text-xs px-1.5 py-0.5 rounded font-mono hidden sm:inline" style="background: ${catColor}15; color: ${catColor};">${escapeHtml(item.category)}</span>` : ''}
+        <button class="p-1 rounded transition-colors" style="color: var(--deft-txt-3);" onclick="editShoppingItemNotes('${item.id}')" title="Edit item" onmouseenter="this.style.color='var(--deft-txt)'" onmouseleave="this.style.color='var(--deft-txt-3)'">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10 2l2 2-7 7H3v-2l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <button class="p-1 rounded transition-colors" style="color: var(--deft-txt-3);" onclick="removeShoppingItem('${item.id}')" title="Remove" onmouseenter="this.style.color='var(--deft-danger)'" onmouseleave="this.style.color='var(--deft-txt-3)'">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </button>
     </div>`;
 }
@@ -2783,31 +2850,156 @@ async function toggleShoppingItem(id, checked) {
 }
 
 async function removeShoppingItem(id) {
-    const result = await supabaseWrite('deft_shopping_items', 'DELETE', null, `id=eq.${id}`);
-    if (result !== null) {
-        shoppingItems = shoppingItems.filter(i => i.id !== id);
-        renderShoppingList();
-        toast('Item removed', 'success');
-    }
+    const itemId = shoppingItems.find(i => i.id === id)?.item_id || id;
+    await supabaseWrite('deft_shopping_items', 'DELETE', null, `item_id=eq.${itemId}`);
+    shoppingItems = shoppingItems.filter(i => i.id !== id);
+    renderShoppingList();
+    toast('Item removed', 'success');
 }
 
 function editShoppingItemNotes(id) {
     const item = shoppingItems.find(i => i.id === id);
     if (!item) return;
-    document.getElementById('editShoppingItemId').value = id;
+    document.getElementById('editShoppingItemId').value = item.item_id || id;
+    document.getElementById('editShoppingItemName').value = item.name || '';
+    document.getElementById('editShoppingItemBrand').value = item.brand || '';
+    document.getElementById('editShoppingItemQty').value = item.quantity || 1;
+    document.getElementById('editShoppingItemUnit').value = item.unit || 'each';
+    document.getElementById('editShoppingItemCategory').value = item.category || 'other';
+    document.getElementById('editShoppingItemPantryLoc').value = item.pantry_location || 'fridge';
     document.getElementById('editShoppingItemNotes').value = item.notes || '';
     openModal('editShoppingItemModal');
 }
 
-async function saveShoppingItemNotes() {
-    const id = document.getElementById('editShoppingItemId').value;
-    const notes = document.getElementById('editShoppingItemNotes').value.trim();
-    await supabaseWrite('deft_shopping_items', 'PATCH', { notes: notes || null }, `id=eq.${id}`);
-    const item = shoppingItems.find(i => i.id === id);
-    if (item) item.notes = notes || null;
+async function saveShoppingItemEdits() {
+    const itemId = document.getElementById('editShoppingItemId').value;
+    const updates = {
+        name: document.getElementById('editShoppingItemName').value.trim(),
+        brand: document.getElementById('editShoppingItemBrand').value.trim() || null,
+        quantity: parseFloat(document.getElementById('editShoppingItemQty').value) || 1,
+        unit: document.getElementById('editShoppingItemUnit').value,
+        category: document.getElementById('editShoppingItemCategory').value,
+        pantry_location: document.getElementById('editShoppingItemPantryLoc').value,
+        notes: document.getElementById('editShoppingItemNotes').value.trim() || null
+    };
+    await supabaseWrite('deft_shopping_items', 'PATCH', updates, `item_id=eq.${itemId}`);
+    const item = shoppingItems.find(i => (i.item_id || i.id) === itemId);
+    if (item) Object.assign(item, updates);
     renderShoppingList();
     closeModal('editShoppingItemModal');
-    toast('Notes updated', 'success');
+    toast('Item updated', 'success');
+}
+
+async function deleteEditingShoppingItem() {
+    const itemId = document.getElementById('editShoppingItemId').value;
+    if (!confirm('Remove this item from the list?')) return;
+    await supabaseWrite('deft_shopping_items', 'DELETE', null, `item_id=eq.${itemId}`);
+    shoppingItems = shoppingItems.filter(i => (i.item_id || i.id) !== itemId);
+    renderShoppingList();
+    closeModal('editShoppingItemModal');
+    toast('Item removed', 'success');
+}
+
+// ── Shopping Templates ──
+async function openTemplateSelector() {
+    const templates = await supabaseSelect('deft_shopping_templates',
+        `user_id=eq.${activeProfileId}&select=*&order=is_default.desc,name`);
+    const list = document.getElementById('templateList');
+    if (!templates || templates.length === 0) {
+        list.innerHTML = '<div class="empty-state text-xs">No templates yet. Save your current list as a template to get started.</div>';
+    } else {
+        list.innerHTML = templates.map(t => {
+            const items = t.items || [];
+            return `<div class="flex items-center justify-between p-3 rounded-lg" style="background: rgba(255,255,255,0.02); border: 1px solid var(--deft-border);">
+                <div>
+                    <div class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${escapeHtml(t.name)}${t.is_default ? ' <span class="text-xs px-1.5 py-0.5 rounded" style="background: var(--deft-accent-dim); color: var(--deft-accent);">Default</span>' : ''}</div>
+                    <div class="text-xs font-mono" style="color: var(--deft-txt-3);">${items.length} items</div>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-primary text-xs" onclick="loadTemplate('${t.template_id}')">Load</button>
+                    <button class="btn btn-danger text-xs" onclick="deleteTemplate('${t.template_id}')">Delete</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+    document.getElementById('purchaseHistoryResults').innerHTML = '';
+    document.getElementById('templateSearchInput').value = '';
+    openModal('templateSelectorModal');
+}
+
+async function loadTemplate(templateId) {
+    if (!activeShoppingList) {
+        toast('Create a shopping list first', 'error');
+        return;
+    }
+    const templates = await supabaseSelect('deft_shopping_templates',
+        `template_id=eq.${templateId}&select=items`);
+    if (!templates || !templates[0]) return;
+    const items = templates[0].items || [];
+    if (!items.length) { toast('Template is empty', 'error'); return; }
+
+    const result = await deftApi('add_shopping_items', {
+        list_id: activeShoppingList.id,
+        items: items.map(i => ({ name: i.name, quantity: i.quantity, unit: i.unit, category: i.category, brand: i.brand, pantry_location: i.pantry_location }))
+    });
+    if (result) {
+        toast(`Loaded ${items.length} items from template`, 'success');
+        closeModal('templateSelectorModal');
+        await loadShoppingItems();
+    }
+}
+
+async function saveAsTemplate() {
+    if (!activeShoppingList || shoppingItems.length === 0) {
+        toast('No items to save as template', 'error');
+        return;
+    }
+    const name = prompt('Template name (e.g., "Weekly Staples", "Costco Run"):');
+    if (!name) return;
+    const templateItems = shoppingItems.map(i => ({
+        name: i.name, quantity: i.quantity, unit: i.unit,
+        category: i.category, brand: i.brand, pantry_location: i.pantry_location
+    }));
+    await supabaseWrite('deft_shopping_templates', 'POST', {
+        user_id: activeProfileId, name, items: templateItems
+    });
+    toast(`Template "${name}" saved with ${templateItems.length} items`, 'success');
+}
+
+async function deleteTemplate(templateId) {
+    if (!confirm('Delete this template?')) return;
+    await supabaseWrite('deft_shopping_templates', 'DELETE', null, `template_id=eq.${templateId}`);
+    toast('Template deleted', 'success');
+    openTemplateSelector(); // Refresh the list
+}
+
+async function searchPurchaseHistory(query) {
+    const results = document.getElementById('purchaseHistoryResults');
+    if (!query || query.length < 2) { results.innerHTML = ''; return; }
+    const items = await supabaseSelect('deft_shopping_history',
+        `user_id=eq.${activeProfileId}&name=ilike.*${encodeURIComponent(query)}*&select=*&order=purchase_count.desc&limit=15`);
+    if (!items || items.length === 0) {
+        results.innerHTML = '<div class="text-xs py-2" style="color: var(--deft-txt-3);">No matches found</div>';
+        return;
+    }
+    results.innerHTML = items.map(i => `
+        <div class="flex items-center justify-between py-1.5 px-2 rounded cursor-pointer transition-colors hover:bg-white/5" onclick="addHistoryItemToCurrentList('${escapeHtml(i.name)}', ${i.typical_quantity || 1}, '${i.unit || 'each'}', '${i.category || 'other'}', '${i.pantry_location || 'fridge'}')">
+            <span class="text-sm" style="color: var(--deft-txt);">${escapeHtml(i.name)}${i.brand ? ' <span class=\"text-xs\" style=\"color: var(--deft-txt-3);\">(' + escapeHtml(i.brand) + ')</span>' : ''}</span>
+            <span class="text-xs font-mono" style="color: var(--deft-txt-3);">bought ${i.purchase_count}x</span>
+        </div>
+    `).join('');
+}
+
+async function addHistoryItemToCurrentList(name, qty, unit, category, pantryLoc) {
+    if (!activeShoppingList) { toast('Create a list first', 'error'); return; }
+    const result = await deftApi('add_shopping_items', {
+        list_id: activeShoppingList.id,
+        items: [{ name, quantity: qty, unit, category, pantry_location: pantryLoc }]
+    });
+    if (result) {
+        toast(`Added ${name}`, 'success');
+        await loadShoppingItems();
+    }
 }
 
 async function addShoppingItem() {
