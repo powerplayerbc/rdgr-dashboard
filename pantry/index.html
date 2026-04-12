@@ -1,0 +1,2833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Pantry & Shopping | Carlton AI</title>
+
+    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://yrwrswyjawmgtxrgbnim.supabase.co">
+    <script>
+        // Instant auth check — prevents gate flash on authenticated page loads
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent,
+        html.rdgr-authed #deftApp,
+        html.rdgr-authed #brainApp,
+        html.rdgr-authed #settingsApp,
+        html.rdgr-authed #pantryApp { opacity: 1 !important; }
+
+        /* ── Nav Dropdown System ── */
+        .nav-group { position: relative; }
+        .nav-group-btn {
+            display: flex; align-items: center; gap: 0.25rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem; font-weight: 500;
+            color: #8A95A9;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+            border: none; background: transparent;
+        }
+        .nav-group-btn:hover { color: #E8ECF1; }
+        .nav-group-btn.active {
+            background: rgba(6,214,160,0.12);
+            color: #06D6A0;
+        }
+        .nav-group-btn .chevron {
+            transition: transform 0.2s;
+            opacity: 0.5;
+        }
+        .nav-group:hover .nav-group-btn .chevron { transform: rotate(180deg); opacity: 0.8; }
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 150px;
+            padding: 0.375rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: opacity 0.15s, visibility 0.15s, transform 0.15s;
+            z-index: 70;
+        }
+        .nav-group:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .nav-dropdown a {
+            display: block;
+            padding: 0.4rem 0.625rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+        .nav-dropdown a:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--deft-txt, #E8ECF1);
+        }
+        .nav-dropdown a.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        /* Theme overrides for nav */
+        .nav-group-btn.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+        /* ── Mobile Nav System ── */
+        .mobile-menu-btn {
+            display: none;
+            align-items: center; justify-content: center;
+            width: 32px; height: 32px;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.375rem;
+            background: transparent;
+            color: var(--deft-txt-2, #8A95A9);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            flex-shrink: 0;
+        }
+        .mobile-menu-btn:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        @media (max-width: 639px) { .mobile-menu-btn { display: flex; } }
+        #mobileNavOverlay {
+            position: fixed; inset: 0; z-index: 200;
+            display: none; opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        #mobileNavOverlay.open { display: flex; opacity: 1; }
+        .mobile-nav-backdrop {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.5);
+        }
+        .mobile-nav-sidebar {
+            position: relative; z-index: 1;
+            width: 280px; max-width: 85vw; height: 100vh;
+            background: var(--deft-base, #11131A);
+            border-right: 1px solid var(--deft-border, #2A2E3D);
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            padding: 0.75rem 0;
+        }
+        #mobileNavOverlay.open .mobile-nav-sidebar { transform: translateX(0); }
+        .mobile-nav-close {
+            display: flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px;
+            border: none; background: transparent;
+            color: var(--deft-txt-3, #525E73);
+            cursor: pointer; font-size: 1.1rem;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+        }
+        .mobile-nav-close:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link {
+            display: block;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.75rem; font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            transition: background 0.12s, color 0.12s;
+        }
+        .mobile-nav-link:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        .mobile-nav-group-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 0.5rem 1.25rem;
+            font-size: 0.75rem; font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            background: transparent; border: none;
+            cursor: pointer;
+            transition: background 0.12s, color 0.12s;
+            text-align: left;
+        }
+        .mobile-nav-group-btn:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-group-btn.active { color: var(--deft-accent, #06D6A0); }
+        .mobile-nav-group-btn .mn-chevron {
+            transition: transform 0.2s; opacity: 0.5;
+        }
+        .mobile-nav-group-btn.expanded .mn-chevron { transform: rotate(180deg); opacity: 0.8; }
+        .mobile-nav-children {
+            display: none;
+            padding-left: 1rem;
+        }
+        .mobile-nav-children.open { display: block; }
+        .mobile-nav-divider {
+            height: 1px;
+            background: var(--deft-border, #2A2E3D);
+            margin: 0.375rem 1rem;
+        }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link id="deft-fonts" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deft-base': 'var(--deft-base)',
+                        surface: 'var(--deft-surface)',
+                        'surface-el': 'var(--deft-surface-el)',
+                        'surface-hi': 'var(--deft-surface-hi)',
+                        border: 'var(--deft-border)',
+                        accent: 'var(--deft-accent)',
+                        'accent-dim': 'var(--deft-accent-dim)',
+                        'accent-warm': 'var(--deft-accent-warm)',
+                        'accent-warm-dim': 'var(--deft-accent-warm-dim)',
+                        success: 'var(--deft-success)',
+                        'success-dim': 'var(--deft-success-dim)',
+                        warning: 'var(--deft-warning)',
+                        'warning-dim': 'var(--deft-warning-dim)',
+                        danger: 'var(--deft-danger)',
+                        'danger-dim': 'var(--deft-danger-dim)',
+                        txt: 'var(--deft-txt)',
+                        'txt-2': 'var(--deft-txt-2)',
+                        'txt-3': 'var(--deft-txt-3)',
+                    },
+                    fontFamily: {
+                        heading: ['var(--deft-heading-font)', 'system-ui', 'sans-serif'],
+                        body: ['var(--deft-body-font)', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ═══════════════════════════════════════
+           CSS CUSTOM PROPERTIES — Forest Theme
+           ═══════════════════════════════════════ */
+        :root {
+            --deft-base: #0F1008;
+            --deft-surface: #191C10;
+            --deft-surface-el: #232718;
+            --deft-surface-hi: #2D3220;
+            --deft-border: #3A3F2C;
+            --deft-accent: #A8D65B;
+            --deft-accent-dim: rgba(168,214,91,0.15);
+            --deft-accent-warm: #F0A830;
+            --deft-accent-warm-dim: rgba(240,168,48,0.15);
+            --deft-success: #6BCB77;
+            --deft-success-dim: rgba(107,203,119,0.15);
+            --deft-warning: #F0A830;
+            --deft-warning-dim: rgba(240,168,48,0.15);
+            --deft-danger: #E85D5D;
+            --deft-danger-dim: rgba(232,93,93,0.15);
+            --deft-txt: #EAE8E0;
+            --deft-txt-2: #A09B8C;
+            --deft-txt-3: #6B6758;
+            --deft-heading-font: 'Nunito';
+            --deft-body-font: 'DM Sans';
+            --deft-font-scale: 1;
+            --deft-radius: 0.875rem;
+            --deft-bg-image: none;
+            --deft-bg-overlay-opacity: 0.85;
+        }
+
+        /* ═══════════════════════════════════════
+           BASE STYLES
+           ═══════════════════════════════════════ */
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--deft-body-font), system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: var(--deft-base);
+            color: var(--deft-txt);
+        }
+
+        /* ── Grain Overlay ── */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.02;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 256px 256px;
+        }
+
+        /* ── Custom Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--deft-border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--deft-accent); }
+
+        /* ═══════════════════════════════════════
+           GATE OVERLAY
+           ═══════════════════════════════════════ */
+        .gate-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(ellipse at center, #141408 0%, #0F1008 70%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .gate-overlay.hidden { display: none; }
+        .gate-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            color: var(--deft-txt);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            width: 100%;
+        }
+        .gate-input:focus {
+            border-color: rgba(168,214,91,0.4);
+            box-shadow: 0 0 0 3px rgba(168,214,91,0.08);
+        }
+        .gate-input::placeholder { color: var(--deft-txt-3); }
+        .gate-error { color: var(--deft-danger); font-size: 0.8rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+
+        /* ═══════════════════════════════════════
+           PULSE DOT
+           ═══════════════════════════════════════ */
+        /* ── Nav bar uses FIXED RDGR colors (never themed) ── */
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #06D6A0;
+            animation: pulse-live 2s ease-in-out infinite;
+        }
+
+        /* ═══════════════════════════════════════
+           NAV TABS (RDGR fixed styling)
+           ═══════════════════════════════════════ */
+        .task-tab {
+            flex: 1; padding: 0.4rem 0.75rem; font-size: 0.75rem; font-weight: 500;
+            text-align: center; border-radius: 0.375rem; cursor: pointer;
+            color: rgba(255,255,255,0.45); background: transparent; border: none;
+            transition: color 0.2s ease, background 0.2s ease;
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+        }
+        .task-tab:hover { color: #E8ECF1; }
+        .task-tab.active { background: rgba(6,214,160,0.12); color: #06D6A0; }
+
+        /* ═══════════════════════════════════════
+           DEFT SUB-TABS
+           ═══════════════════════════════════════ */
+        .deft-tab {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            font-family: var(--deft-heading-font), system-ui, sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            color: var(--deft-txt-2);
+            background: transparent;
+            transition: background 0.2s ease, color 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+        .deft-tab:hover { color: var(--deft-txt); }
+        .deft-tab.active {
+            background: var(--deft-accent-dim);
+            color: var(--deft-accent);
+        }
+
+        /* ═══════════════════════════════════════
+           PANELS
+           ═══════════════════════════════════════ */
+        .panel {
+            background: var(--deft-surface);
+            border: 1px solid var(--deft-border);
+            border-radius: var(--deft-radius);
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.2), 0 0 0 1px rgba(168,214,91,0.02);
+        }
+        .panel-header {
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid var(--deft-border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel-body { padding: 1rem 1.25rem; }
+
+        /* ═══════════════════════════════════════
+           BUTTONS
+           ═══════════════════════════════════════ */
+        .btn {
+            font-family: var(--deft-heading-font), system-ui;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.03em;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            border: none;
+            text-transform: uppercase;
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-primary {
+            background: var(--deft-accent-dim);
+            color: var(--deft-accent);
+            border: 1px solid rgba(168,214,91,0.3);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: rgba(168,214,91,0.25);
+            box-shadow: 0 0 16px rgba(168,214,91,0.12);
+        }
+        .btn-primary:focus-visible {
+            outline: 2px solid var(--deft-accent);
+            outline-offset: 2px;
+        }
+        .btn-ghost {
+            background: transparent;
+            color: var(--deft-txt-2);
+            border: 1px solid var(--deft-border);
+        }
+        .btn-ghost:hover:not(:disabled) {
+            background: rgba(255,255,255,0.03);
+            color: var(--deft-txt);
+        }
+        .btn-ghost:focus-visible {
+            outline: 2px solid var(--deft-accent);
+            outline-offset: 2px;
+        }
+        .btn-danger {
+            background: var(--deft-danger-dim);
+            color: var(--deft-danger);
+            border: 1px solid rgba(232,93,93,0.3);
+        }
+        .btn-danger:hover:not(:disabled) {
+            background: rgba(232,93,93,0.25);
+            box-shadow: 0 0 12px rgba(232,93,93,0.12);
+        }
+        .btn-danger:focus-visible {
+            outline: 2px solid var(--deft-danger);
+            outline-offset: 2px;
+        }
+        .btn-warm {
+            background: var(--deft-accent-warm-dim);
+            color: var(--deft-accent-warm);
+            border: 1px solid rgba(240,168,48,0.3);
+        }
+        .btn-warm:hover:not(:disabled) {
+            background: rgba(240,168,48,0.25);
+            box-shadow: 0 0 12px rgba(240,168,48,0.12);
+        }
+        .btn-warm:focus-visible {
+            outline: 2px solid var(--deft-accent-warm);
+            outline-offset: 2px;
+        }
+
+        /* ═══════════════════════════════════════
+           FORM INPUTS
+           ═══════════════════════════════════════ */
+        .form-input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--deft-border);
+            border-radius: 0.375rem;
+            padding: 0.625rem 0.75rem;
+            color: var(--deft-txt);
+            font-family: var(--deft-body-font), system-ui;
+            font-size: 0.875rem;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .form-input:focus {
+            border-color: rgba(168,214,91,0.4);
+            box-shadow: 0 0 0 2px rgba(168,214,91,0.08);
+        }
+        .form-input::placeholder { color: var(--deft-txt-3); }
+        select.form-input { cursor: pointer; }
+        select.form-input option { background: var(--deft-surface-el); color: var(--deft-txt); }
+        textarea.form-input { resize: vertical; min-height: 80px; }
+
+        /* ═══════════════════════════════════════
+           MODALS
+           ═══════════════════════════════════════ */
+        .modal-backdrop {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+        .modal-backdrop.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: var(--deft-surface);
+            border: 1px solid var(--deft-border);
+            border-radius: var(--deft-radius);
+            width: 90%; max-width: 560px; max-height: 90vh; overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-backdrop.active .modal-content { transform: translateY(0); }
+
+        /* ═══════════════════════════════════════
+           TOASTS
+           ═══════════════════════════════════════ */
+        .toast-container {
+            position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200;
+            display: flex; flex-direction: column; gap: 0.5rem;
+        }
+        .toast {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-family: var(--deft-body-font), system-ui;
+            animation: toast-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            max-width: 380px;
+            transition: opacity 0.3s ease;
+        }
+        .toast-success {
+            background: var(--deft-success-dim);
+            border: 1px solid rgba(107,203,119,0.3);
+            color: var(--deft-success);
+        }
+        .toast-error {
+            background: var(--deft-danger-dim);
+            border: 1px solid rgba(232,93,93,0.3);
+            color: var(--deft-danger);
+        }
+        @keyframes toast-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ═══════════════════════════════════════
+           BADGES
+           ═══════════════════════════════════════ */
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        /* ═══════════════════════════════════════
+           EMPTY STATE
+           ═══════════════════════════════════════ */
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: var(--deft-txt-3);
+            font-size: 0.85rem;
+        }
+
+        /* ═══════════════════════════════════════
+           SKELETON LOADING
+           ═══════════════════════════════════════ */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, var(--deft-surface-el) 25%, var(--deft-surface-hi) 50%, var(--deft-surface-el) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 0.25rem;
+        }
+
+        /* ═══════════════════════════════════════
+           FORM GROUPS
+           ═══════════════════════════════════════ */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.375rem;
+        }
+        .form-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--deft-txt-2);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-family: var(--deft-heading-font), system-ui;
+        }
+
+        /* ═══════════════════════════════════════
+           PROFILE SWITCHER DROPDOWN
+           ═══════════════════════════════════════ */
+        #profileDropdown {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
+        }
+
+        /* ═══════════════════════════════════════
+           BACKGROUND IMAGE SUPPORT
+           ═══════════════════════════════════════ */
+        #pantryApp {
+            position: relative;
+            min-height: 100vh;
+        }
+        #pantryApp::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: var(--deft-bg-image);
+            background-size: cover;
+            background-position: center;
+            opacity: calc(1 - var(--deft-bg-overlay-opacity));
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* ═══════════════════════════════════════
+           STAGGERED REVEAL ANIMATION
+           ═══════════════════════════════════════ */
+        @keyframes deft-reveal {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .deft-reveal {
+            opacity: 0;
+            animation: deft-reveal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        .deft-reveal-1 { animation-delay: 0.05s; }
+        .deft-reveal-2 { animation-delay: 0.1s; }
+        .deft-reveal-3 { animation-delay: 0.15s; }
+        .deft-reveal-4 { animation-delay: 0.2s; }
+        .deft-reveal-5 { animation-delay: 0.25s; }
+        .deft-reveal-6 { animation-delay: 0.3s; }
+
+        /* ═══════════════════════════════════════
+           PANTRY-SPECIFIC: Location/Category Filter Pills
+           ═══════════════════════════════════════ */
+        .filter-pill {
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            border-radius: 0.375rem;
+            border: none;
+            cursor: pointer;
+            color: var(--deft-txt-3);
+            background: transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-family: var(--deft-heading-font), system-ui;
+        }
+        .filter-pill:hover { color: var(--deft-txt); }
+        .filter-pill.active {
+            background: var(--deft-accent-dim);
+            color: var(--deft-accent);
+        }
+
+        /* ═══════════════════════════════════════
+           SHOPPING LIST CHECKBOX
+           ═══════════════════════════════════════ */
+        .shopping-check {
+            width: 18px; height: 18px;
+            border: 2px solid var(--deft-border);
+            border-radius: 4px;
+            background: transparent;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .shopping-check:hover { border-color: var(--deft-accent); }
+        .shopping-check.checked {
+            background: var(--deft-accent);
+            border-color: var(--deft-accent);
+        }
+        .shopping-check.checked::after {
+            content: '';
+            width: 6px; height: 10px;
+            border: solid var(--deft-base); border-width: 0 2px 2px 0;
+            transform: rotate(45deg) translate(-1px, -1px);
+        }
+        .shopping-item.checked-item {
+            opacity: 0.45;
+        }
+        .shopping-item.checked-item .item-name {
+            text-decoration: line-through;
+        }
+
+        /* ═══════════════════════════════════════
+           AUTOCOMPLETE DROPDOWN
+           ═══════════════════════════════════════ */
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0; right: 0;
+            z-index: 80;
+            background: var(--deft-surface-el);
+            border: 1px solid var(--deft-border);
+            border-radius: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        .autocomplete-dropdown.open { display: block; }
+        .autocomplete-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+            color: var(--deft-txt);
+            cursor: pointer;
+            transition: background 0.12s;
+        }
+        .autocomplete-item:hover { background: rgba(255,255,255,0.04); }
+
+        /* ═══════════════════════════════════════
+           AI CARD FOR "WHAT CAN I MAKE"
+           ═══════════════════════════════════════ */
+        .ai-card {
+            background: linear-gradient(135deg, rgba(168,130,214,0.06), rgba(168,130,214,0.02));
+            border: 1px solid rgba(168,130,214,0.15);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            transition: border-color 0.2s;
+        }
+        .ai-card:hover { border-color: rgba(168,130,214,0.3); }
+        @keyframes aiPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .ai-loading { animation: aiPulse 1.5s ease-in-out infinite; }
+
+        /* ═══════════════════════════════════════
+           RESPONSIVE
+           ═══════════════════════════════════════ */
+        @media (max-width: 640px) {
+            .filter-pill { font-size: 0.65rem; padding: 0.25rem 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     PASSWORD GATE
+     ═══════════════════════════════════════ -->
+<div id="gate" class="gate-overlay">
+    <div class="max-w-sm w-full px-6">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center gap-2 mb-4">
+                <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+            </div>
+            <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+            <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+        </div>
+        <div id="gateProfiles" class="flex justify-center gap-3 mb-6">
+            <div class="text-center text-xs text-txt-3">Loading profiles...</div>
+        </div>
+        <form id="gateForm" onsubmit="return handleGate(event)">
+            <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+            <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+            <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+        </form>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MAIN APPLICATION
+     ═══════════════════════════════════════ -->
+<div id="pantryApp" style="opacity: 0;">
+
+    <!-- ── TOP NAV BAR ── -->
+    <nav class="sticky top-0 z-50 border-b" style="border-color: #2A2E3D; background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="pulse-dot"></div>
+                <h1 style="font-family: 'Chakra Petch', system-ui, sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.025em; color: #E8ECF1;">RDGR <span style="color: #525E73; font-weight: 400;">Command Center</span></h1>
+                <button class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Open menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/" class="nav-group-btn">Dashboard</a>
+                        <div class="nav-group">
+                            <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/chat">Rodger</a>
+                                <a href="/council">Council</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/crm" class="nav-group-btn">Outreach <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/crm">CRM</a>
+                                <a href="/email-outreach">Email</a>
+                                <a href="/social-dashboard">Social</a>
+                                <a href="/social-content">Social Content</a>
+                                <a href="/offer-studio">Offers</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/finance" class="nav-group-btn">Finance <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/finance">Dashboard</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brand-discovery" class="nav-group-btn">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brand-discovery">Discovery</a>
+                                <a href="/brand-voice">Voice</a>
+                                <a href="/template-studio">Templates</a>
+                                <a href="/brand-documents">Docs</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/bsi-discovery" class="nav-group-btn">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/bsi-discovery">Discovery</a>
+                                <a href="/compliance">Compliance</a>
+                                <a href="/bsi-documents">Documents</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/content" class="nav-group-btn">Content <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/content">Publishing</a>
+                                <a href="/media">Media</a>
+                            </div>
+                        </div>
+                        <a href="/partnerships" class="nav-group-btn">Partnerships</a>
+                        <div class="nav-group">
+                            <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brain">BRAIN</a>
+                                <a href="/deft">DEFT</a>
+                                <a href="/pantry">Pantry</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/trading-desk" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/trading-desk">Trading Desk</a>
+                                <a href="/trading-bot">Bot Dashboard</a>
+                                <a href="/trading-strategies">Strategies</a>
+                                <a href="/trading-monitor">Monitor</a>
+                                <a href="/trading-research">Research</a>
+                                <a href="/trading-discovery">Discovery</a>
+                                <a href="/trading-cross-pairs">Cross-Pairs</a>
+                                <a href="/trading-exchanges">Exchanges</a>
+                                <a href="/trading-config">Config</a>
+                                <a href="/trading-reports">Reports</a>
+                            </div>
+                        </div>
+                        <a href="/meetings" class="nav-group-btn">Meetings</a>
+                        <div class="nav-group">
+                            <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/our-workflows">Workflows</a>
+                                <a href="/org-chart">Org Map</a>
+                                <a href="/hub">HUB</a>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- PROFILE SWITCHER -->
+                <div class="relative" id="profileSwitcher">
+                    <button onclick="toggleProfileDropdown()" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-colors" style="background: rgba(255,255,255,0.04);" id="profileBtn" aria-label="Switch profile" aria-expanded="false" aria-haspopup="true">
+                        <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                        <span class="text-xs font-medium hidden sm:block" id="profileName">Bradford</span>
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    </button>
+                    <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 180px; z-index: 10000;" id="profileDropdown" role="menu">
+                        <!-- Profiles populated by JS -->
+                    </div>
+                </div>
+                <!-- Settings link -->
+                <a href="/settings" class="hover:opacity-80 transition-opacity p-2" title="Settings" style="color: #525E73;" aria-label="Settings">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 10a2 2 0 100-4 2 2 0 000 4z" stroke="currentColor" stroke-width="1.2"/><path d="M13.5 8a5.5 5.5 0 01-.08.92l1.47 1.15a.35.35 0 01.08.45l-1.4 2.42a.35.35 0 01-.43.15l-1.73-.7a5.4 5.4 0 01-1.59.92l-.26 1.84a.35.35 0 01-.35.3H7.29a.35.35 0 01-.35-.3l-.26-1.84a5.4 5.4 0 01-1.59-.92l-1.73.7a.35.35 0 01-.43-.15l-1.4-2.42a.35.35 0 01.08-.45l1.47-1.15A5.6 5.6 0 012.5 8c0-.31.03-.62.08-.92L1.11 5.93a.35.35 0 01-.08-.45l1.4-2.42a.35.35 0 01.43-.15l1.73.7a5.4 5.4 0 011.59-.92l.26-1.84A.35.35 0 016.79.55h1.42c.17 0 .32.13.35.3l.26 1.84c.58.2 1.12.52 1.59.92l1.73-.7a.35.35 0 01.43.15l1.4 2.42a.35.35 0 01-.08.45l-1.47 1.15c.05.3.08.61.08.92z" stroke="currentColor" stroke-width="1.2"/></svg>
+                </a>
+            </div>
+        </div>
+        <!-- Mobile Nav Overlay -->
+        <div id="mobileNavOverlay">
+            <div class="mobile-nav-backdrop"></div>
+            <div class="mobile-nav-sidebar">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 1rem 0.75rem;">
+                    <span style="font-size:0.8rem;font-weight:700;color:var(--deft-txt,#E8ECF1);">Menu</span>
+                    <button class="mobile-nav-close" onclick="toggleMobileNav()">&times;</button>
+                </div>
+                <div class="mobile-nav-divider"></div>
+                <a href="/" class="mobile-nav-link">Dashboard</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Rodger <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/chat" class="mobile-nav-link">Rodger</a>
+    <a href="/council" class="mobile-nav-link">Council</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Outreach <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/crm" class="mobile-nav-link">CRM</a>
+    <a href="/email-outreach" class="mobile-nav-link">Email</a>
+    <a href="/social-dashboard" class="mobile-nav-link">Social</a>
+    <a href="/social-content" class="mobile-nav-link">Social Content</a>
+    <a href="/offer-studio" class="mobile-nav-link">Offers</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Finance <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/finance" class="mobile-nav-link">Dashboard</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Brand <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/brand-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/brand-voice/" class="mobile-nav-link">Voice</a>
+    <a href="/brand-voice/calibration/" class="mobile-nav-link">Calibration</a>
+    <a href="/template-studio" class="mobile-nav-link">Templates</a>
+    <a href="/brand-documents" class="mobile-nav-link">Docs</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Policy <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/bsi-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/compliance" class="mobile-nav-link">Compliance</a>
+    <a href="/bsi-documents" class="mobile-nav-link">Documents</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Content <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/content" class="mobile-nav-link">Publishing</a>
+    <a href="/media" class="mobile-nav-link">Media</a>
+</div>
+<a href="/partnerships" class="mobile-nav-link">Partnerships</a>
+<button class="mobile-nav-group-btn active expanded" onclick="toggleMobileAccordion(this)">BRAIN <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children open">
+    <a href="/brain" class="mobile-nav-link">BRAIN</a>
+    <a href="/deft" class="mobile-nav-link">DEFT</a>
+    <a href="/pantry" class="mobile-nav-link active">Pantry</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Trading <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/trading-desk" class="mobile-nav-link">Trading Desk</a>
+    <a href="/trading-bot" class="mobile-nav-link">Bot Dashboard</a>
+    <a href="/trading-strategies" class="mobile-nav-link">Strategies</a>
+    <a href="/trading-monitor" class="mobile-nav-link">Monitor</a>
+    <a href="/trading-research" class="mobile-nav-link">Research</a>
+    <a href="/trading-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/trading-cross-pairs" class="mobile-nav-link">Cross-Pairs</a>
+    <a href="/trading-exchanges" class="mobile-nav-link">Exchanges</a>
+    <a href="/trading-config" class="mobile-nav-link">Config</a>
+    <a href="/trading-reports" class="mobile-nav-link">Reports</a>
+</div>
+<a href="/meetings" class="mobile-nav-link">Meetings</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">System <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/our-workflows" class="mobile-nav-link">Workflows</a>
+    <a href="/org-chart" class="mobile-nav-link">Org Map</a>
+    <a href="/hub" class="mobile-nav-link">HUB</a>
+</div>
+
+            </div>
+        </div>
+        </nav>
+        <script>
+function toggleMobileNav(){var o=document.getElementById('mobileNavOverlay');if(o.classList.contains('open')){o.style.opacity='0';o.querySelector('.mobile-nav-sidebar').style.transform='translateX(-100%)';setTimeout(function(){o.classList.remove('open');o.style.display='none';},250);}else{o.style.display='flex';requestAnimationFrame(function(){o.classList.add('open');o.style.opacity='1';o.querySelector('.mobile-nav-sidebar').style.transform='translateX(0)';});}}
+function toggleMobileAccordion(btn){btn.classList.toggle('expanded');var ch=btn.nextElementSibling;ch.classList.toggle('open');}
+document.getElementById('mobileNavOverlay')?.querySelector('.mobile-nav-backdrop')?.addEventListener('click',function(){toggleMobileNav();});
+document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function(a){a.addEventListener('click',function(){toggleMobileNav();});});
+</script>
+        <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
+
+    <!-- ── PANTRY SUB-TAB BAR ── -->
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pt-4 pb-4">
+        <div class="flex gap-1 p-0.5 rounded-lg overflow-x-auto" style="background: rgba(255,255,255,0.04);" role="tablist" aria-label="Pantry sections">
+            <button class="deft-tab active" id="tab-pantry" onclick="switchView('pantry')" role="tab" aria-selected="true" aria-controls="view-pantry">Pantry</button>
+            <button class="deft-tab" id="tab-prepared" onclick="switchView('prepared')" role="tab" aria-selected="false" aria-controls="view-prepared">Prepared Meals</button>
+            <button class="deft-tab" id="tab-shopping" onclick="switchView('shopping')" role="tab" aria-selected="false" aria-controls="view-shopping">Shopping List</button>
+            <button class="deft-tab" id="tab-history" onclick="switchView('history')" role="tab" aria-selected="false" aria-controls="view-history">History</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: PANTRY
+         ═══════════════════════════════════════ -->
+    <div id="view-pantry" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" role="tabpanel" aria-labelledby="tab-pantry">
+
+        <!-- Header row -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 deft-reveal deft-reveal-1">
+            <div class="flex items-center gap-3">
+                <h2 class="font-heading font-bold text-lg" style="color: var(--deft-txt);">My Pantry</h2>
+                <span id="pantryCount" class="badge" style="background: var(--deft-accent-dim); color: var(--deft-accent);">0 items</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <input type="text" id="pantrySearch" class="form-input" style="max-width: 200px; padding: 0.4rem 0.75rem; font-size: 0.8rem;" placeholder="Search pantry..." oninput="searchPantry(this.value)">
+                <button class="btn btn-primary text-xs" onclick="addPantryItem()">Add Item</button>
+                <button class="btn btn-warm text-xs" onclick="whatCanIMake()">What Can I Make?</button>
+            </div>
+        </div>
+
+        <!-- Location filter pills -->
+        <div class="flex flex-wrap gap-1 mb-3 deft-reveal deft-reveal-2">
+            <button class="filter-pill active" onclick="filterPantryLocation('all', this)">All</button>
+            <button class="filter-pill" onclick="filterPantryLocation('fridge', this)">Fridge</button>
+            <button class="filter-pill" onclick="filterPantryLocation('pantry', this)">Pantry</button>
+            <button class="filter-pill" onclick="filterPantryLocation('freezer', this)">Freezer</button>
+        </div>
+
+        <!-- Category filter pills -->
+        <div class="flex flex-wrap gap-1 mb-4 deft-reveal deft-reveal-3">
+            <button class="filter-pill active" onclick="filterPantryCategory('all', this)">All</button>
+            <button class="filter-pill" onclick="filterPantryCategory('protein', this)">Protein</button>
+            <button class="filter-pill" onclick="filterPantryCategory('dairy', this)">Dairy</button>
+            <button class="filter-pill" onclick="filterPantryCategory('produce', this)">Produce</button>
+            <button class="filter-pill" onclick="filterPantryCategory('grains', this)">Grains</button>
+            <button class="filter-pill" onclick="filterPantryCategory('condiments', this)">Condiments</button>
+            <button class="filter-pill" onclick="filterPantryCategory('beverages', this)">Beverages</button>
+            <button class="filter-pill" onclick="filterPantryCategory('snacks', this)">Snacks</button>
+            <button class="filter-pill" onclick="filterPantryCategory('other', this)">Other</button>
+        </div>
+
+        <!-- What Can I Make Panel (hidden by default) -->
+        <div id="whatCanIMakePanel" class="mb-4" style="display: none;">
+            <div class="ai-card">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 5h5l-4 3 1.5 5L8 11l-4.5 3L5 9 1 6h5l2-5z" fill="#A882D6"/></svg>
+                        <span class="font-heading font-bold text-sm" style="color: #A882D6;">AI Suggestions</span>
+                    </div>
+                    <button class="btn btn-ghost text-xs" onclick="document.getElementById('whatCanIMakePanel').style.display='none'">Close</button>
+                </div>
+                <div id="whatCanIMakeContent" class="text-sm" style="color: var(--deft-txt-2);">
+                    <p class="ai-loading">Analyzing your pantry...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantry grid -->
+        <div id="pantryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 deft-reveal deft-reveal-4">
+            <div class="empty-state col-span-full">
+                <p>No items in your pantry yet</p>
+                <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Click "Add Item" to start tracking your food storage</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: PREPARED MEALS
+         ═══════════════════════════════════════ -->
+    <div id="view-prepared" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-prepared">
+
+        <!-- Header -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 deft-reveal deft-reveal-1">
+            <div class="flex items-center gap-3">
+                <h2 class="font-heading font-bold text-lg" style="color: var(--deft-txt);">Prepared Meals</h2>
+                <span id="preparedCount" class="badge" style="background: var(--deft-accent-warm-dim); color: var(--deft-accent-warm);">0</span>
+            </div>
+            <button class="btn btn-primary text-xs" onclick="addPreparedMeal()">Add Prepared Meal</button>
+        </div>
+
+        <!-- Prepared meals grid -->
+        <div id="preparedGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 deft-reveal deft-reveal-2">
+            <div class="empty-state col-span-full">
+                <p>No prepared meals tracked</p>
+                <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Add meals you've prepped to track servings and freshness</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: SHOPPING LIST
+         ═══════════════════════════════════════ -->
+    <div id="view-shopping" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-shopping">
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Left: Active shopping list -->
+            <div class="lg:col-span-2">
+                <!-- List header -->
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4 deft-reveal deft-reveal-1">
+                    <div class="flex items-center gap-3">
+                        <h2 class="font-heading font-bold text-lg" style="color: var(--deft-txt);">Shopping List</h2>
+                        <select id="shoppingListSelector" class="form-input" style="max-width: 200px; padding: 0.35rem 0.5rem; font-size: 0.75rem;" onchange="switchShoppingList(this.value)">
+                            <option value="">No lists</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="btn btn-ghost text-xs" onclick="createShoppingList()">New List</button>
+                        <button class="btn btn-primary text-xs" id="completeListBtn" onclick="completeShoppingList()" disabled>Complete List</button>
+                    </div>
+                </div>
+
+                <!-- Shopping items panel -->
+                <div class="panel deft-reveal deft-reveal-2">
+                    <div id="shoppingItems" class="divide-y" style="border-color: var(--deft-border);">
+                        <div class="empty-state">
+                            <p>No items on this list</p>
+                            <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Add items below or select a different list</p>
+                        </div>
+                    </div>
+                    <!-- Add item row -->
+                    <div class="p-3 border-t" style="border-color: var(--deft-border);">
+                        <div class="flex gap-2 items-center">
+                            <div class="relative flex-1">
+                                <input type="text" id="addShoppingItemInput" class="form-input" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;" placeholder="Add item..." oninput="searchShoppingHistory(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();addShoppingItem();}">
+                                <div id="shoppingAutocomplete" class="autocomplete-dropdown"></div>
+                            </div>
+                            <input type="number" id="addShoppingItemQty" class="form-input" style="width: 60px; padding: 0.4rem 0.5rem; font-size: 0.8rem; text-align: center;" placeholder="Qty" value="1" min="0" step="0.5">
+                            <select id="addShoppingItemUnit" class="form-input" style="width: 80px; padding: 0.4rem 0.5rem; font-size: 0.75rem;">
+                                <option value="each">each</option>
+                                <option value="lbs">lbs</option>
+                                <option value="oz">oz</option>
+                                <option value="kg">kg</option>
+                                <option value="g">g</option>
+                                <option value="cups">cups</option>
+                                <option value="tbsp">tbsp</option>
+                                <option value="tsp">tsp</option>
+                                <option value="ml">ml</option>
+                                <option value="L">L</option>
+                                <option value="pack">pack</option>
+                                <option value="bag">bag</option>
+                                <option value="can">can</option>
+                                <option value="bottle">bottle</option>
+                                <option value="box">box</option>
+                                <option value="dozen">dozen</option>
+                            </select>
+                            <button class="btn btn-primary text-xs" onclick="addShoppingItem()">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Quick-add from history -->
+            <div class="deft-reveal deft-reveal-3">
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-2);">Frequently Bought</span>
+                    </div>
+                    <div id="frequentItemsList" class="max-h-96 overflow-y-auto">
+                        <div class="empty-state text-xs">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: HISTORY
+         ═══════════════════════════════════════ -->
+    <div id="view-history" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-history">
+
+        <!-- Completed Lists -->
+        <div class="mb-6 deft-reveal deft-reveal-1">
+            <h2 class="font-heading font-bold text-lg mb-4" style="color: var(--deft-txt);">Completed Lists</h2>
+            <div id="completedLists" class="space-y-3">
+                <div class="empty-state">
+                    <p>No completed shopping lists yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Frequently Bought Table -->
+        <div class="deft-reveal deft-reveal-2">
+            <h2 class="font-heading font-bold text-lg mb-4" style="color: var(--deft-txt);">Frequently Bought</h2>
+            <div class="panel">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm" id="frequentTable">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--deft-border);">
+                                <th class="text-left px-4 py-3 font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-2);">Item</th>
+                                <th class="text-center px-4 py-3 font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-2);">Times Bought</th>
+                                <th class="text-center px-4 py-3 font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-2);">Last Bought</th>
+                                <th class="text-center px-4 py-3 font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-2);">Avg Price</th>
+                                <th class="text-center px-4 py-3 font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-2);">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="frequentTableBody">
+                            <tr><td colspan="5" class="empty-state">No purchase history yet</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         MODALS
+         ═══════════════════════════════════════ -->
+
+    <!-- Add/Edit Pantry Item Modal -->
+    <div id="addPantryModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('addPantryModal')">
+        <div class="modal-content">
+            <div class="panel-header">
+                <span id="pantryModalTitle" class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Add Pantry Item</span>
+                <button class="btn btn-ghost text-xs" onclick="closeModal('addPantryModal')">Close</button>
+            </div>
+            <div class="panel-body">
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label">Item Name</label>
+                        <input type="text" id="pantryItemName" class="form-input" placeholder="e.g. Chicken Breast">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Search Food Database</label>
+                        <div class="relative">
+                            <input type="text" id="pantryFoodSearch" class="form-input" placeholder="Search foods..." oninput="searchFoodDatabase(this.value)">
+                            <div id="foodSearchResults" class="autocomplete-dropdown"></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="form-group">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" id="pantryItemQty" class="form-input" placeholder="e.g. 2" min="0" step="0.25">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Unit</label>
+                            <select id="pantryItemUnit" class="form-input">
+                                <option value="each">each</option>
+                                <option value="lbs">lbs</option>
+                                <option value="oz">oz</option>
+                                <option value="kg">kg</option>
+                                <option value="g">g</option>
+                                <option value="cups">cups</option>
+                                <option value="tbsp">tbsp</option>
+                                <option value="tsp">tsp</option>
+                                <option value="ml">ml</option>
+                                <option value="L">L</option>
+                                <option value="pack">pack</option>
+                                <option value="bag">bag</option>
+                                <option value="can">can</option>
+                                <option value="bottle">bottle</option>
+                                <option value="box">box</option>
+                                <option value="dozen">dozen</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select id="pantryItemCategory" class="form-input">
+                            <option value="protein">Protein</option>
+                            <option value="dairy">Dairy</option>
+                            <option value="produce">Produce</option>
+                            <option value="grains">Grains</option>
+                            <option value="condiments">Condiments</option>
+                            <option value="beverages">Beverages</option>
+                            <option value="snacks">Snacks</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Location</label>
+                        <div class="flex gap-3 mt-1">
+                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
+                                <input type="radio" name="pantryLocation" value="fridge" checked style="accent-color: var(--deft-accent);"> Fridge
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
+                                <input type="radio" name="pantryLocation" value="pantry" style="accent-color: var(--deft-accent);"> Pantry
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
+                                <input type="radio" name="pantryLocation" value="freezer" style="accent-color: var(--deft-accent);"> Freezer
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Expiry Date</label>
+                        <input type="date" id="pantryItemExpiry" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <textarea id="pantryItemNotes" class="form-input" placeholder="Optional notes..." rows="2" style="min-height: 60px;"></textarea>
+                    </div>
+                    <div class="flex gap-2 justify-end pt-2">
+                        <button class="btn btn-ghost text-xs" onclick="closeModal('addPantryModal')">Cancel</button>
+                        <button class="btn btn-danger text-xs" id="removePantryBtn" onclick="removePantryItem(editingPantryItem, 'used_up')" style="display: none;">Remove</button>
+                        <button class="btn btn-primary text-xs" id="savePantryBtn" onclick="savePantryItem()">Save Item</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Prepared Meal Modal -->
+    <div id="addPreparedModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('addPreparedModal')">
+        <div class="modal-content">
+            <div class="panel-header">
+                <span id="preparedModalTitle" class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Add Prepared Meal</span>
+                <button class="btn btn-ghost text-xs" onclick="closeModal('addPreparedModal')">Close</button>
+            </div>
+            <div class="panel-body">
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label">Meal Name</label>
+                        <input type="text" id="preparedMealName" class="form-input" placeholder="e.g. Chicken Stir Fry">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Search Recipes</label>
+                        <div class="relative">
+                            <input type="text" id="preparedRecipeSearch" class="form-input" placeholder="Search recipes..." oninput="searchRecipes(this.value)">
+                            <div id="recipeSearchResults" class="autocomplete-dropdown"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Total Servings</label>
+                        <input type="number" id="preparedServings" class="form-input" placeholder="e.g. 6" min="1" value="4">
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="form-group">
+                            <label class="form-label">Calories</label>
+                            <input type="number" id="preparedCalories" class="form-input" placeholder="per serving" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Fat (g)</label>
+                            <input type="number" id="preparedFat" class="form-input" placeholder="per serving" min="0" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Protein (g)</label>
+                            <input type="number" id="preparedProtein" class="form-input" placeholder="per serving" min="0" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Net Carbs (g)</label>
+                            <input type="number" id="preparedNetCarbs" class="form-input" placeholder="per serving" min="0" step="0.1">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Location</label>
+                        <div class="flex gap-3 mt-1">
+                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
+                                <input type="radio" name="preparedLocation" value="fridge" checked style="accent-color: var(--deft-accent);"> Fridge
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
+                                <input type="radio" name="preparedLocation" value="freezer" style="accent-color: var(--deft-accent);"> Freezer
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Expiry Date</label>
+                        <input type="date" id="preparedExpiry" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <textarea id="preparedNotes" class="form-input" placeholder="Optional notes..." rows="2" style="min-height: 60px;"></textarea>
+                    </div>
+                    <div class="flex gap-2 justify-end pt-2">
+                        <button class="btn btn-ghost text-xs" onclick="closeModal('addPreparedModal')">Cancel</button>
+                        <button class="btn btn-primary text-xs" id="savePreparedBtn" onclick="savePreparedMeal()">Save Meal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Shopping List Modal -->
+    <div id="createListModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('createListModal')">
+        <div class="modal-content" style="max-width: 420px;">
+            <div class="panel-header">
+                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">New Shopping List</span>
+                <button class="btn btn-ghost text-xs" onclick="closeModal('createListModal')">Close</button>
+            </div>
+            <div class="panel-body">
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label">List Name</label>
+                        <input type="text" id="newListName" class="form-input" placeholder="e.g. Weekly Groceries">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Store (optional)</label>
+                        <input type="text" id="newListStore" class="form-input" placeholder="e.g. Costco, Walmart">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes (optional)</label>
+                        <textarea id="newListNotes" class="form-input" placeholder="Any notes..." rows="2" style="min-height: 60px;"></textarea>
+                    </div>
+                    <div class="flex gap-2 justify-end pt-2">
+                        <button class="btn btn-ghost text-xs" onclick="closeModal('createListModal')">Cancel</button>
+                        <button class="btn btn-primary text-xs" onclick="saveShoppingList()">Create List</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Shopping Item Modal -->
+    <div id="editShoppingItemModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('editShoppingItemModal')">
+        <div class="modal-content" style="max-width: 420px;">
+            <div class="panel-header">
+                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Edit Item Notes</span>
+                <button class="btn btn-ghost text-xs" onclick="closeModal('editShoppingItemModal')">Close</button>
+            </div>
+            <div class="panel-body">
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <textarea id="editShoppingItemNotes" class="form-input" placeholder="Add notes for this item..." rows="3"></textarea>
+                    </div>
+                    <input type="hidden" id="editShoppingItemId">
+                    <div class="flex gap-2 justify-end pt-2">
+                        <button class="btn btn-ghost text-xs" onclick="closeModal('editShoppingItemModal')">Cancel</button>
+                        <button class="btn btn-primary text-xs" onclick="saveShoppingItemNotes()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Profile Modal (for profile switcher) -->
+    <div id="createProfileModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('createProfileModal')">
+        <div class="modal-content" style="max-width: 420px;">
+            <div class="panel-header">
+                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">New Profile</span>
+                <button class="btn btn-ghost text-xs" onclick="closeModal('createProfileModal')">Close</button>
+            </div>
+            <div class="panel-body">
+                <div class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label">Name</label>
+                        <input type="text" id="newProfileName" class="form-input" placeholder="Display name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email (optional)</label>
+                        <input type="email" id="newProfileEmail" class="form-input" placeholder="Email address">
+                    </div>
+                    <div class="flex gap-2 justify-end pt-2">
+                        <button class="btn btn-ghost text-xs" onclick="closeModal('createProfileModal')">Cancel</button>
+                        <button class="btn btn-primary text-xs" id="createProfileBtn" onclick="createNewProfile()">Create Profile</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toasts" aria-live="polite"></div>
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════ -->
+<script>
+// Migrate old localStorage key
+if (!localStorage.getItem('rdgr-active-profile') && localStorage.getItem('rdgr-active-profile')) {
+    localStorage.setItem('rdgr-active-profile', localStorage.getItem('rdgr-active-profile'));
+    localStorage.removeItem('rdgr-active-profile');
+}
+
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+const DEFT_BRIDGE_URL = 'https://n8n.carltonaiservices.com/webhook/deft-bridge';
+
+// ═══════════════════════════════════════
+// THEME ENGINE
+// ═══════════════════════════════════════
+const THEMES = {
+    forest: {
+        name: 'Forest',
+        accent: '#A8D65B', accentWarm: '#F0A830',
+        base: '#0F1008', surface: '#191C10', surfaceEl: '#232718', surfaceHi: '#2D3220',
+        border: '#3A3F2C', success: '#6BCB77', warning: '#F0A830', danger: '#E85D5D',
+        txt: '#EAE8E0', txt2: '#A09B8C', txt3: '#6B6758',
+        headingFont: 'Nunito', bodyFont: 'DM Sans',
+    },
+    sunrise: {
+        name: 'Sunrise',
+        accent: '#F0A830', accentWarm: '#E85D5D',
+        base: '#100D08', surface: '#1C1810', surfaceEl: '#272118', surfaceHi: '#322B20',
+        border: '#3F382C', success: '#6BCB77', warning: '#F0A830', danger: '#E85D5D',
+        txt: '#EAE8E0', txt2: '#A09B8C', txt3: '#6B6758',
+        headingFont: 'Nunito', bodyFont: 'DM Sans',
+    },
+    ocean: {
+        name: 'Ocean',
+        accent: '#38BDF8', accentWarm: '#06D6A0',
+        base: '#080D10', surface: '#10161C', surfaceEl: '#182027', surfaceHi: '#202A32',
+        border: '#2C363F', success: '#6BCB77', warning: '#F0A830', danger: '#E85D5D',
+        txt: '#E0E8EA', txt2: '#8C9BA0', txt3: '#586B6B',
+        headingFont: 'Nunito', bodyFont: 'DM Sans',
+    },
+    berry: {
+        name: 'Berry',
+        accent: '#C084FC', accentWarm: '#FB7185',
+        base: '#0D0810', surface: '#16101C', surfaceEl: '#201827', surfaceHi: '#2A2032',
+        border: '#3A2C3F', success: '#6BCB77', warning: '#F0A830', danger: '#E85D5D',
+        txt: '#E8E0EA', txt2: '#A08CA0', txt3: '#6B586B',
+        headingFont: 'Nunito', bodyFont: 'DM Sans',
+    },
+    rdgr: {
+        name: 'RDGR',
+        accent: '#06D6A0', accentWarm: '#4CC9F0',
+        base: '#08090D', surface: '#11131A', surfaceEl: '#1A1D28', surfaceHi: '#242836',
+        border: '#2A2E3D', success: '#06D6A0', warning: '#FFD93D', danger: '#FF6B6B',
+        txt: '#E8ECF1', txt2: '#8A95A9', txt3: '#525E73',
+        headingFont: 'Chakra Petch', bodyFont: 'IBM Plex Sans',
+    },
+    monochrome: {
+        name: 'Monochrome',
+        accent: '#E8E8E8', accentWarm: '#A0A0A0',
+        base: '#000000', surface: '#0A0A0A', surfaceEl: '#141414', surfaceHi: '#1E1E1E',
+        border: '#2A2A2A', success: '#6BCB77', warning: '#F0A830', danger: '#E85D5D',
+        txt: '#E8E8E8', txt2: '#A0A0A0', txt3: '#666666',
+        headingFont: 'Nunito', bodyFont: 'DM Sans',
+    },
+};
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let activeProfileId = null;
+let activeProfileName = 'Bradford';
+let currentView = 'pantry';
+let pantryItems = [];
+let pantryLocationFilter = 'all';
+let pantryCategoryFilter = 'all';
+let pantrySearchQuery = '';
+let preparedMeals = [];
+let shoppingLists = [];
+let activeShoppingList = null;
+let shoppingItems = [];
+let shoppingHistory = [];
+let editingPantryItem = null;
+let editingPreparedMeal = null;
+
+// ═══════════════════════════════════════
+// THEME MANAGEMENT
+// ═══════════════════════════════════════
+function getThemeKey() {
+    return `deft-theme-${activeProfileId || 'default'}`;
+}
+
+function loadTheme() {
+    const saved = localStorage.getItem(getThemeKey());
+    if (saved) {
+        try { return JSON.parse(saved); } catch(e) {}
+    }
+    if (activeProfileId && activeProfileId !== 'default') {
+        fetch(`${SUPABASE_URL}/rest/v1/deft_user_profiles?user_id=eq.${activeProfileId}&select=preferences`, {
+            headers: { 'apikey': SUPABASE_ANON_KEY }
+        }).then(r => r.json()).then(d => {
+            if (d && d[0] && d[0].preferences && d[0].preferences.theme) {
+                localStorage.setItem(getThemeKey(), JSON.stringify(d[0].preferences.theme));
+                applyTheme(d[0].preferences.theme);
+            }
+        }).catch(() => {});
+    }
+    return { preset: 'forest' };
+}
+
+function applyTheme(config) {
+    const theme = config.preset === 'custom' ? config.custom : THEMES[config.preset] || THEMES.forest;
+    const app = document.documentElement;
+    app.style.setProperty('--deft-accent', theme.accent);
+    app.style.setProperty('--deft-accent-dim', hexToRGBA(theme.accent, 0.15));
+    app.style.setProperty('--deft-accent-warm', theme.accentWarm);
+    app.style.setProperty('--deft-accent-warm-dim', hexToRGBA(theme.accentWarm, 0.15));
+    app.style.setProperty('--deft-base', theme.base);
+    app.style.setProperty('--deft-surface', theme.surface);
+    app.style.setProperty('--deft-surface-el', theme.surfaceEl);
+    app.style.setProperty('--deft-surface-hi', theme.surfaceHi);
+    app.style.setProperty('--deft-border', theme.border);
+    const so = config.statusOverrides || {};
+    const successColor = so.success || theme.success;
+    const warningColor = so.warning || theme.warning;
+    const dangerColor = so.danger || theme.danger;
+    app.style.setProperty('--deft-success', successColor);
+    app.style.setProperty('--deft-success-dim', hexToRGBA(successColor, 0.15));
+    app.style.setProperty('--deft-warning', warningColor);
+    app.style.setProperty('--deft-warning-dim', hexToRGBA(warningColor, 0.15));
+    app.style.setProperty('--deft-danger', dangerColor);
+    app.style.setProperty('--deft-danger-dim', hexToRGBA(dangerColor, 0.15));
+    app.style.setProperty('--deft-txt', theme.txt);
+    app.style.setProperty('--deft-txt-2', theme.txt2);
+    app.style.setProperty('--deft-txt-3', theme.txt3);
+    app.style.setProperty('--deft-heading-font', theme.headingFont);
+    app.style.setProperty('--deft-body-font', theme.bodyFont);
+    document.body.style.background = theme.base;
+    document.body.style.color = theme.txt;
+    document.body.style.fontFamily = `${theme.bodyFont}, system-ui, sans-serif`;
+    loadFonts(theme.headingFont, theme.bodyFont);
+}
+
+function hexToRGBA(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function loadFonts(headingFont, bodyFont) {
+    const fonts = new Set([headingFont, bodyFont, 'JetBrains Mono']);
+    const families = Array.from(fonts).map(f => f.replace(/ /g, '+') + ':wght@400;500;600;700;800').join('&family=');
+    const existing = document.getElementById('deft-fonts');
+    if (existing) existing.remove();
+    const link = document.createElement('link');
+    link.id = 'deft-fonts';
+    link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${families}&display=swap`;
+    document.head.appendChild(link);
+}
+
+// ═══════════════════════════════════════
+// PROFILE SWITCHER
+// ═══════════════════════════════════════
+async function loadProfiles() {
+    const profiles = await supabaseSelect('deft_user_profiles', 'select=user_id,display_name,email&order=display_name');
+    const dropdown = document.getElementById('profileDropdown');
+    dropdown.innerHTML = '';
+
+    if (profiles && profiles.length > 0) {
+        profiles.forEach(p => {
+            const btn = document.createElement('button');
+            btn.className = 'w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2';
+            btn.style.cssText = 'color: #E8ECF1; background: transparent;';
+            btn.onmouseenter = () => btn.style.background = 'rgba(255,255,255,0.04)';
+            btn.onmouseleave = () => btn.style.background = 'transparent';
+            const initial = (p.display_name || p.email || '?')[0].toUpperCase();
+            const isActive = p.user_id === activeProfileId;
+            btn.innerHTML = `
+                <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                     style="background: ${isActive ? 'rgba(6,214,160,0.15)' : 'rgba(255,255,255,0.06)'}; color: ${isActive ? '#06D6A0' : '#8A95A9'};">
+                    ${initial}
+                </div>
+                <span>${p.display_name || p.email}</span>
+                ${isActive ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="ml-auto"><path d="M2 6l3 3 5-5" stroke="#06D6A0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+            `;
+            btn.setAttribute('role', 'menuitem');
+            btn.onclick = () => selectProfile(p.user_id, p.display_name || p.email);
+            dropdown.appendChild(btn);
+        });
+    }
+
+    const divider = document.createElement('div');
+    divider.style.cssText = 'border-top: 1px solid #2A2E3D; margin: 4px 0;';
+    dropdown.appendChild(divider);
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2';
+    addBtn.style.cssText = 'color: #06D6A0; background: transparent;';
+    addBtn.onmouseenter = () => addBtn.style.background = 'rgba(255,255,255,0.04)';
+    addBtn.onmouseleave = () => addBtn.style.background = 'transparent';
+    addBtn.innerHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;">+</div><span>New Profile</span>';
+    addBtn.setAttribute('role', 'menuitem');
+    addBtn.onclick = () => { dropdown.classList.add('hidden'); openModal('createProfileModal'); };
+    dropdown.appendChild(addBtn);
+
+    const signOutDiv = document.createElement('div');
+    signOutDiv.style.cssText = 'border-top: 1px solid #2A2E3D; margin-top: 0.25rem; padding-top: 0.25rem;';
+    signOutDiv.innerHTML = '<button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;" onmouseenter="this.style.background=\'rgba(255,107,107,0.06)\'" onmouseleave="this.style.background=\'transparent\'"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4.5 10.5H2.5a1 1 0 01-1-1v-7a1 1 0 011-1h2M8 8.5l2.5-2.5L8 3.5M10.5 6h-6" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Sign Out</span></button>';
+    dropdown.appendChild(signOutDiv);
+}
+
+function signOut() {
+    localStorage.removeItem('rdgr-session');
+    localStorage.removeItem('rdgr-active-profile');
+    location.reload();
+}
+
+async function createNewProfile() {
+    const name = document.getElementById('newProfileName').value.trim();
+    const email = document.getElementById('newProfileEmail').value.trim();
+    if (!name) { toast('Name is required', 'error'); return; }
+    const userId = crypto.randomUUID();
+    const btn = document.getElementById('createProfileBtn');
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+    const result = await supabaseWrite('deft_user_profiles', 'POST', {
+        user_id: userId, display_name: name, email: email || null,
+        height_inches: 68, current_weight_lbs: 170, target_weight_lbs: 160,
+        age: 30, sex: 'male', activity_level: 'moderately_active', diet_type: 'keto',
+        meal_count_default: 3, macro_targets: { calories: 2000, fat_g: 155, protein_g: 130, net_carbs_g: 20 },
+        preferences: { timezone: 'America/New_York', unit_system: 'imperial', allergens: [], avoid_ingredients: [] }
+    });
+    btn.disabled = false;
+    btn.textContent = 'Create Profile';
+    if (result) {
+        toast('Profile "' + name + '" created!', 'success');
+        closeModal('createProfileModal');
+        document.getElementById('newProfileName').value = '';
+        document.getElementById('newProfileEmail').value = '';
+        await loadProfiles();
+        selectProfile(userId, name);
+    }
+}
+
+function selectProfile(userId, name) {
+    localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
+    location.reload();
+}
+
+function toggleProfileDropdown() {
+    const dd = document.getElementById('profileDropdown');
+    const btn = document.getElementById('profileBtn');
+    dd.classList.toggle('hidden');
+    btn.setAttribute('aria-expanded', !dd.classList.contains('hidden'));
+    if (!dd.classList.contains('hidden')) {
+        setTimeout(() => {
+            document.addEventListener('click', closeProfileDropdown, { once: true });
+        }, 0);
+    }
+}
+
+function closeProfileDropdown(e) {
+    const dd = document.getElementById('profileDropdown');
+    if (!document.getElementById('profileSwitcher').contains(e.target)) {
+        dd.classList.add('hidden');
+        document.getElementById('profileBtn').setAttribute('aria-expanded', 'false');
+    }
+}
+
+// ═══════════════════════════════════════
+// SUPABASE HELPERS
+// ═══════════════════════════════════════
+async function supabaseSelect(table, query = '') {
+    const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
+    try {
+        const res = await fetch(url, {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+        });
+        if (!res.ok) { console.error('Supabase error:', res.status, await res.text()); return null; }
+        return await res.json();
+    } catch (err) { console.error('Supabase fetch error:', table, err); return null; }
+}
+
+async function supabaseWrite(table, method, body, matchQuery = '') {
+    const url = `${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`;
+    try {
+        const res = await fetch(url, {
+            method,
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            },
+            body: method === 'DELETE' ? undefined : JSON.stringify(body)
+        });
+        if (!res.ok) { console.error('Supabase write error:', res.status, await res.text()); return null; }
+        const text = await res.text();
+        return text ? JSON.parse(text) : true;
+    } catch (err) { console.error('Supabase write error:', err); return null; }
+}
+
+// ═══════════════════════════════════════
+// DEFT-BRIDGE API
+// ═══════════════════════════════════════
+async function deftApi(operation, data = {}, { silent = false } = {}) {
+    if (!activeProfileId) {
+        if (!silent) toast('Please select a profile first', 'error');
+        return null;
+    }
+    try {
+        const res = await fetch(DEFT_BRIDGE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ operation, user_id: activeProfileId, data })
+        });
+        const text = await res.text();
+        if (!text) {
+            console.warn(`deftApi(${operation}): empty response`);
+            return null;
+        }
+        let result;
+        try { result = JSON.parse(text); } catch(e) {
+            console.warn(`deftApi(${operation}): non-JSON response:`, text.substring(0, 200));
+            return null;
+        }
+        if (result && result.success === false) {
+            if (!silent) toast(result.error || 'Something went wrong', 'error');
+            return null;
+        }
+        return result;
+    } catch (err) {
+        console.warn(`deftApi(${operation}) error:`, err.message);
+        if (!silent) toast('Connection error — check if the backend is running', 'error');
+        return null;
+    }
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function toast(message, type = 'success') {
+    const container = document.getElementById('toasts');
+    const el = document.createElement('div');
+    el.className = `toast toast-${type}`;
+    el.textContent = message;
+    el.setAttribute('role', 'status');
+    container.appendChild(el);
+    setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+    }, 4000);
+}
+
+// ═══════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════
+function openModal(id) {
+    document.getElementById(id).classList.add('active');
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+}
+
+// ═══════════════════════════════════════
+// AUTH GATE
+// ═══════════════════════════════════════
+let gateSelectedProfile = null;
+
+function getCachedProfiles(callback) {
+    var CACHE_KEY = 'rdgr-profiles-cache';
+    var CACHE_TTL = 300000;
+    try {
+        var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+        if (cached.profiles && cached.ts && (Date.now() - cached.ts) < CACHE_TTL) {
+            callback(cached.profiles);
+            return;
+        }
+    } catch(e) {}
+    var _SB_URL = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+    var _SB_KEY = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    fetch(`${_SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+        headers: { 'apikey': _SB_KEY, 'Authorization': `Bearer ${_SB_KEY}` }
+    }).then(r => r.json()).then(profiles => {
+        if (profiles && Array.isArray(profiles) && profiles.length > 0) {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ profiles: profiles, ts: Date.now() }));
+        }
+        callback(profiles);
+    }).catch(() => callback([]));
+}
+
+function loadGateProfiles() {
+    getCachedProfiles(function(profiles) {
+        const container = document.getElementById('gateProfiles');
+                if (!container || !profiles || !profiles.length) return;
+                const saved = localStorage.getItem('rdgr-active-profile');
+                let savedId = null;
+                if (saved) { try { savedId = JSON.parse(saved).id; } catch(e) {} }
+                container.innerHTML = profiles.map(p => {
+                    const name = p.display_name || p.email || '?';
+                    const initial = name[0].toUpperCase();
+                    const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
+                    const color = colors[name] || '#8A95A9';
+                    return `<button type="button" onclick="selectGateProfile('${p.user_id}','${name.replace(/'/g, '&#39;')}',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="if(!this.classList.contains('selected'))this.style.background='rgba(255,255,255,0.02)'">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:${color}20;color:${color};border:2px solid transparent;">${initial}</div>
+                        <span class="text-xs" style="color:#8A95A9;">${name}</span>
+                    </button>`;
+                }).join('');
+                if (savedId) {
+                    const btns = container.querySelectorAll('.gate-profile-btn');
+                    btns.forEach(btn => {
+                        if (btn.getAttribute('onclick').includes(savedId)) {
+                            btn.click();
+                        }
+                    });
+                }
+    });
+}
+
+function selectGateProfile(userId, name, el) {
+    gateSelectedProfile = { id: userId, name: name };
+    document.querySelectorAll('.gate-profile-btn').forEach(btn => {
+        btn.classList.remove('selected');
+        btn.style.background = 'rgba(255,255,255,0.02)';
+        btn.style.borderColor = 'transparent';
+        btn.querySelector('.w-10').style.borderColor = 'transparent';
+    });
+    el.classList.add('selected');
+    el.style.background = 'rgba(255,255,255,0.06)';
+    el.style.borderColor = 'rgba(6,214,160,0.4)';
+    el.querySelector('.w-10').style.borderColor = el.querySelector('.w-10').style.color;
+    const btn = document.getElementById('gateSubmitBtn');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.textContent = 'Sign In as ' + name;
+    document.getElementById('gateInput').focus();
+}
+
+function handleGate(e) {
+    e.preventDefault();
+    const input = document.getElementById('gateInput').value;
+    if (input === 'Advance1!') {
+        localStorage.setItem('rdgr-session', JSON.stringify({ authenticated: true, ts: Date.now() }));
+        if (gateSelectedProfile) {
+            localStorage.setItem('rdgr-active-profile', JSON.stringify(gateSelectedProfile));
+            activeProfileId = gateSelectedProfile.id;
+        }
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('pantryApp').style.opacity = '1';
+        initPantry();
+        return false;
+    }
+    document.getElementById('gateError').classList.add('show');
+    document.getElementById('gateInput').value = '';
+    document.getElementById('gateInput').focus();
+    setTimeout(() => document.getElementById('gateError').classList.remove('show'), 2000);
+    return false;
+}
+
+if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('pantryApp').style.opacity = '1';
+    initPantry();
+}
+
+if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+    loadGateProfiles();
+}
+
+// ═══════════════════════════════════════
+// VIEW SWITCHING
+// ═══════════════════════════════════════
+function switchView(view) {
+    currentView = view;
+    const views = ['pantry', 'prepared', 'shopping', 'history'];
+    views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.style.display = v === view ? '' : 'none';
+        const tab = document.getElementById(`tab-${v}`);
+        if (tab) {
+            tab.classList.toggle('active', v === view);
+            tab.setAttribute('aria-selected', v === view ? 'true' : 'false');
+        }
+    });
+
+    // Re-trigger reveal animations
+    const activeView = document.getElementById(`view-${view}`);
+    if (activeView) {
+        const revealEls = activeView.querySelectorAll('.deft-reveal');
+        revealEls.forEach(el => {
+            el.style.animation = 'none';
+            el.offsetHeight;
+            el.style.animation = '';
+        });
+    }
+
+    // Lazy-load data for views
+    if (view === 'pantry') loadPantry();
+    if (view === 'prepared') loadPreparedMeals();
+    if (view === 'shopping') loadShoppingList();
+    if (view === 'history') loadShoppingHistory();
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+async function initPantry() {
+    const savedProfile = localStorage.getItem('rdgr-active-profile');
+    if (savedProfile) {
+        try {
+            const p = JSON.parse(savedProfile);
+            activeProfileId = p.id;
+            activeProfileName = p.name;
+            document.getElementById('profileName').textContent = p.name;
+            document.getElementById('profileAvatar').textContent = p.name[0].toUpperCase();
+        } catch(e) {}
+    }
+
+    const themeConfig = loadTheme();
+    applyTheme(themeConfig);
+
+    await loadProfiles();
+
+    if (!activeProfileId) {
+        const profiles = await supabaseSelect('deft_user_profiles', 'select=user_id,display_name,email&order=display_name&limit=1');
+        if (profiles && profiles.length > 0) {
+            const p = profiles[0];
+            selectProfile(p.user_id, p.display_name || p.email);
+        }
+    }
+
+    if (activeProfileId) {
+        await loadPantry();
+    }
+}
+
+// ═══════════════════════════════════════
+// PANTRY FUNCTIONS
+// ═══════════════════════════════════════
+async function loadPantry() {
+    if (!activeProfileId) return;
+    const items = await supabaseSelect('deft_pantry_items',
+        `user_id=eq.${activeProfileId}&select=*&order=expiry_date.asc.nullslast`);
+    pantryItems = items || [];
+    renderPantry();
+}
+
+function getExpiryStatus(expiryDate) {
+    if (!expiryDate) return { cls: 'fresh', label: 'No Expiry', bgColor: 'var(--deft-success-dim)', textColor: 'var(--deft-success)' };
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const exp = new Date(expiryDate + 'T00:00:00');
+    const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 0) {
+        return { cls: 'expired', label: 'Expired', bgColor: 'var(--deft-danger-dim)', textColor: 'var(--deft-danger)' };
+    } else if (diffDays <= 2) {
+        return { cls: 'expiring', label: 'Exp Soon', bgColor: 'var(--deft-warning-dim)', textColor: 'var(--deft-warning)' };
+    } else {
+        return { cls: 'fresh', label: 'Fresh', bgColor: 'var(--deft-success-dim)', textColor: 'var(--deft-success)' };
+    }
+}
+
+function renderPantry() {
+    const grid = document.getElementById('pantryGrid');
+    let filtered = pantryItems;
+
+    // Apply location filter
+    if (pantryLocationFilter !== 'all') {
+        filtered = filtered.filter(i => (i.location || '').toLowerCase() === pantryLocationFilter);
+    }
+    // Apply category filter
+    if (pantryCategoryFilter !== 'all') {
+        filtered = filtered.filter(i => (i.category || '').toLowerCase() === pantryCategoryFilter);
+    }
+    // Apply search
+    if (pantrySearchQuery) {
+        const q = pantrySearchQuery.toLowerCase();
+        filtered = filtered.filter(i => (i.name || '').toLowerCase().includes(q) || (i.notes || '').toLowerCase().includes(q));
+    }
+
+    // Update count badge
+    document.getElementById('pantryCount').textContent = `${filtered.length} item${filtered.length !== 1 ? 's' : ''}`;
+
+    if (filtered.length === 0) {
+        grid.innerHTML = `<div class="empty-state col-span-full">
+            <p>${pantrySearchQuery || pantryLocationFilter !== 'all' || pantryCategoryFilter !== 'all' ? 'No items match your filters' : 'No items in your pantry yet'}</p>
+            <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Click "Add Item" to start tracking your food storage</p>
+        </div>`;
+        return;
+    }
+
+    grid.innerHTML = filtered.map(item => {
+        const expiry = getExpiryStatus(item.expiry_date);
+        const qtyStr = item.quantity ? `${item.quantity} ${item.unit || ''}` : '';
+        const locStr = item.location ? item.location.charAt(0).toUpperCase() + item.location.slice(1) : '';
+        const subline = [qtyStr, locStr].filter(Boolean).join(' - ');
+
+        return `<div class="panel p-3 cursor-pointer transition-all hover:border-opacity-60" onclick="editPantryItem('${item.id}')" style="border-color: var(--deft-border);" onmouseenter="this.style.borderColor='var(--deft-surface-hi)'" onmouseleave="this.style.borderColor='var(--deft-border)'">
+            <div class="flex items-start justify-between mb-2">
+                <div>
+                    <h3 class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${escapeHtml(item.name || 'Unnamed')}</h3>
+                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${escapeHtml(subline)}</span>
+                </div>
+                <span class="text-xs px-2 py-0.5 rounded-full font-mono" style="background: ${expiry.bgColor}; color: ${expiry.textColor};">${expiry.label}</span>
+            </div>
+            ${item.expiry_date ? `<div class="text-xs font-mono mb-2" style="color: var(--deft-txt-3);">Exp: ${formatDate(item.expiry_date)}</div>` : ''}
+            <div class="flex gap-2 mt-2 flex-wrap">
+                ${item.category ? `<span class="text-xs px-1.5 py-0.5 rounded" style="background: rgba(255,255,255,0.04); color: var(--deft-txt-3);">${escapeHtml(item.category)}</span>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function filterPantryLocation(loc, el) {
+    pantryLocationFilter = loc;
+    // Update active pills
+    if (el) {
+        el.closest('.flex').querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+    }
+    renderPantry();
+}
+
+function filterPantryCategory(cat, el) {
+    pantryCategoryFilter = cat;
+    if (el) {
+        el.closest('.flex').querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+        el.classList.add('active');
+    }
+    renderPantry();
+}
+
+function searchPantry(query) {
+    pantrySearchQuery = query;
+    renderPantry();
+}
+
+function addPantryItem() {
+    editingPantryItem = null;
+    document.getElementById('pantryModalTitle').textContent = 'Add Pantry Item';
+    document.getElementById('pantryItemName').value = '';
+    document.getElementById('pantryFoodSearch').value = '';
+    document.getElementById('pantryItemQty').value = '';
+    document.getElementById('pantryItemUnit').value = 'each';
+    document.getElementById('pantryItemCategory').value = 'other';
+    document.querySelectorAll('input[name="pantryLocation"]').forEach(r => r.checked = r.value === 'fridge');
+    document.getElementById('pantryItemExpiry').value = '';
+    document.getElementById('pantryItemNotes').value = '';
+    document.getElementById('removePantryBtn').style.display = 'none';
+    document.getElementById('savePantryBtn').textContent = 'Save Item';
+    openModal('addPantryModal');
+}
+
+function editPantryItem(id) {
+    const item = pantryItems.find(i => i.id === id);
+    if (!item) return;
+    editingPantryItem = id;
+    document.getElementById('pantryModalTitle').textContent = 'Edit Pantry Item';
+    document.getElementById('pantryItemName').value = item.name || '';
+    document.getElementById('pantryFoodSearch').value = '';
+    document.getElementById('pantryItemQty').value = item.quantity || '';
+    document.getElementById('pantryItemUnit').value = item.unit || 'each';
+    document.getElementById('pantryItemCategory').value = item.category || 'other';
+    document.querySelectorAll('input[name="pantryLocation"]').forEach(r => r.checked = r.value === (item.location || 'fridge'));
+    document.getElementById('pantryItemExpiry').value = item.expiry_date || '';
+    document.getElementById('pantryItemNotes').value = item.notes || '';
+    document.getElementById('removePantryBtn').style.display = '';
+    document.getElementById('savePantryBtn').textContent = 'Update Item';
+    openModal('addPantryModal');
+}
+
+async function savePantryItem() {
+    const name = document.getElementById('pantryItemName').value.trim();
+    if (!name) { toast('Item name is required', 'error'); return; }
+
+    const quantity = parseFloat(document.getElementById('pantryItemQty').value) || null;
+    const unit = document.getElementById('pantryItemUnit').value;
+    const category = document.getElementById('pantryItemCategory').value;
+    const location = document.querySelector('input[name="pantryLocation"]:checked')?.value || 'fridge';
+    const expiry_date = document.getElementById('pantryItemExpiry').value || null;
+    const notes = document.getElementById('pantryItemNotes').value.trim() || null;
+
+    const data = { name, quantity, unit, category, location, expiry_date, notes };
+
+    let result;
+    if (editingPantryItem) {
+        result = await deftApi('update_pantry_item', { item_id: editingPantryItem, ...data });
+    } else {
+        result = await deftApi('add_pantry_item', data);
+    }
+
+    if (result) {
+        toast(editingPantryItem ? 'Item updated' : 'Item added to pantry', 'success');
+        closeModal('addPantryModal');
+        editingPantryItem = null;
+        await loadPantry();
+    }
+}
+
+async function removePantryItem(id, reason) {
+    if (!id) return;
+    if (!confirm('Remove this item from your pantry?')) return;
+    const result = await deftApi('remove_pantry_item', { item_id: id, reason: reason || 'used_up' });
+    if (result) {
+        toast('Item removed', 'success');
+        closeModal('addPantryModal');
+        editingPantryItem = null;
+        await loadPantry();
+    }
+}
+
+async function whatCanIMake() {
+    const panel = document.getElementById('whatCanIMakePanel');
+    const content = document.getElementById('whatCanIMakeContent');
+    panel.style.display = '';
+    content.innerHTML = '<p class="ai-loading">Analyzing your pantry items and suggesting recipes...</p>';
+
+    const result = await deftApi('what_can_i_make', {});
+    if (result && result.data) {
+        const suggestions = result.data.suggestions || result.data;
+        if (Array.isArray(suggestions) && suggestions.length > 0) {
+            content.innerHTML = suggestions.map(s => `
+                <div class="mb-3 p-3 rounded-lg" style="background: rgba(168,130,214,0.05); border: 1px solid rgba(168,130,214,0.1);">
+                    <h4 class="font-heading font-bold text-sm mb-1" style="color: #A882D6;">${escapeHtml(s.name || s.title || 'Suggestion')}</h4>
+                    <p class="text-xs mb-2" style="color: var(--deft-txt-2);">${escapeHtml(s.description || s.reason || '')}</p>
+                    ${s.ingredients ? `<p class="text-xs font-mono" style="color: var(--deft-txt-3);">Uses: ${escapeHtml(Array.isArray(s.ingredients) ? s.ingredients.join(', ') : s.ingredients)}</p>` : ''}
+                </div>
+            `).join('');
+        } else if (typeof suggestions === 'string') {
+            content.innerHTML = `<div class="text-sm" style="color: var(--deft-txt-2); white-space: pre-wrap;">${escapeHtml(suggestions)}</div>`;
+        } else {
+            content.innerHTML = '<p style="color: var(--deft-txt-3);">No suggestions available. Try adding more items to your pantry.</p>';
+        }
+    } else {
+        content.innerHTML = '<p style="color: var(--deft-txt-3);">Could not generate suggestions right now. Please try again later.</p>';
+    }
+}
+
+// Food database autocomplete
+let foodSearchTimeout = null;
+async function searchFoodDatabase(query) {
+    clearTimeout(foodSearchTimeout);
+    const dropdown = document.getElementById('foodSearchResults');
+    if (!query || query.length < 2) { dropdown.classList.remove('open'); return; }
+
+    foodSearchTimeout = setTimeout(async () => {
+        const results = await supabaseSelect('deft_food_database',
+            `name=ilike.*${encodeURIComponent(query)}*&select=id,name,calories_per_serving,serving_size,serving_unit&limit=8`);
+        if (results && results.length > 0) {
+            dropdown.innerHTML = results.map(f => `
+                <div class="autocomplete-item" onclick="selectFoodItem('${escapeHtml(f.name)}')">
+                    <span>${escapeHtml(f.name)}</span>
+                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${f.calories_per_serving || '?'} cal / ${f.serving_size || ''} ${f.serving_unit || ''}</span>
+                </div>
+            `).join('');
+            dropdown.classList.add('open');
+        } else {
+            dropdown.classList.remove('open');
+        }
+    }, 300);
+}
+
+function selectFoodItem(name) {
+    document.getElementById('pantryItemName').value = name;
+    document.getElementById('foodSearchResults').classList.remove('open');
+    document.getElementById('pantryFoodSearch').value = '';
+}
+
+// ═══════════════════════════════════════
+// PREPARED MEALS FUNCTIONS
+// ═══════════════════════════════════════
+async function loadPreparedMeals() {
+    if (!activeProfileId) return;
+    const meals = await supabaseSelect('deft_prepared_meals',
+        `user_id=eq.${activeProfileId}&select=*&order=prepared_date.desc`);
+    preparedMeals = meals || [];
+    renderPreparedMeals();
+}
+
+function renderPreparedMeals() {
+    const grid = document.getElementById('preparedGrid');
+    document.getElementById('preparedCount').textContent = preparedMeals.length;
+
+    if (preparedMeals.length === 0) {
+        grid.innerHTML = `<div class="empty-state col-span-full">
+            <p>No prepared meals tracked</p>
+            <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Add meals you've prepped to track servings and freshness</p>
+        </div>`;
+        return;
+    }
+
+    grid.innerHTML = preparedMeals.map(meal => {
+        const servingsUsed = meal.servings_consumed || 0;
+        const totalServings = meal.total_servings || 1;
+        const remaining = Math.max(totalServings - servingsUsed, 0);
+        const pct = Math.round((remaining / totalServings) * 100);
+        const nutrition = meal.nutrition_per_serving || {};
+        const locStr = meal.location ? meal.location.charAt(0).toUpperCase() + meal.location.slice(1) : '';
+        const dateStr = meal.prepared_date ? formatDate(meal.prepared_date) : '';
+        const subline = ['Prepared ' + dateStr, locStr].filter(Boolean).join(' - ');
+
+        return `<div class="panel p-4">
+            <div class="flex items-start justify-between mb-3">
+                <div>
+                    <h3 class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${escapeHtml(meal.name || 'Unnamed')}</h3>
+                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${escapeHtml(subline)}</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="flex justify-between text-xs mb-1" style="color: var(--deft-txt-2);">
+                    <span>Servings</span><span class="font-mono font-bold">${remaining} / ${totalServings}</span>
+                </div>
+                <div class="w-full h-2 rounded-full" style="background: var(--deft-border);">
+                    <div class="h-full rounded-full transition-all" style="width: ${pct}%; background: var(--deft-accent);"></div>
+                </div>
+            </div>
+            <div class="flex gap-3 text-xs font-mono mb-3" style="color: var(--deft-txt-2);">
+                <span>${nutrition.calories || '?'} cal</span>
+                <span>${nutrition.fat_g || '?'}g F</span>
+                <span>${nutrition.protein_g || '?'}g P</span>
+                <span>${nutrition.net_carbs_g || '?'}g C</span>
+            </div>
+            <div class="flex gap-2">
+                <button class="btn btn-primary text-xs flex-1" onclick="consumePrepared('${meal.id}')" ${remaining <= 0 ? 'disabled' : ''}>Eat 1 Serving</button>
+                <button class="btn btn-ghost text-xs" onclick="editPrepared('${meal.id}')">Edit</button>
+                <button class="btn btn-danger text-xs" onclick="discardPrepared('${meal.id}')">Discard</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function addPreparedMeal() {
+    editingPreparedMeal = null;
+    document.getElementById('preparedModalTitle').textContent = 'Add Prepared Meal';
+    document.getElementById('preparedMealName').value = '';
+    document.getElementById('preparedRecipeSearch').value = '';
+    document.getElementById('preparedServings').value = '4';
+    document.getElementById('preparedCalories').value = '';
+    document.getElementById('preparedFat').value = '';
+    document.getElementById('preparedProtein').value = '';
+    document.getElementById('preparedNetCarbs').value = '';
+    document.querySelectorAll('input[name="preparedLocation"]').forEach(r => r.checked = r.value === 'fridge');
+    // Default expiry to 5 days from now
+    const defaultExpiry = new Date();
+    defaultExpiry.setDate(defaultExpiry.getDate() + 5);
+    document.getElementById('preparedExpiry').value = defaultExpiry.toISOString().split('T')[0];
+    document.getElementById('preparedNotes').value = '';
+    document.getElementById('savePreparedBtn').textContent = 'Save Meal';
+    openModal('addPreparedModal');
+}
+
+function editPrepared(id) {
+    const meal = preparedMeals.find(m => m.id === id);
+    if (!meal) return;
+    editingPreparedMeal = id;
+    document.getElementById('preparedModalTitle').textContent = 'Edit Prepared Meal';
+    document.getElementById('preparedMealName').value = meal.name || '';
+    document.getElementById('preparedRecipeSearch').value = '';
+    document.getElementById('preparedServings').value = meal.total_servings || 4;
+    const n = meal.nutrition_per_serving || {};
+    document.getElementById('preparedCalories').value = n.calories || '';
+    document.getElementById('preparedFat').value = n.fat_g || '';
+    document.getElementById('preparedProtein').value = n.protein_g || '';
+    document.getElementById('preparedNetCarbs').value = n.net_carbs_g || '';
+    document.querySelectorAll('input[name="preparedLocation"]').forEach(r => r.checked = r.value === (meal.location || 'fridge'));
+    document.getElementById('preparedExpiry').value = meal.expiry_date || '';
+    document.getElementById('preparedNotes').value = meal.notes || '';
+    document.getElementById('savePreparedBtn').textContent = 'Update Meal';
+    openModal('addPreparedModal');
+}
+
+async function savePreparedMeal() {
+    const name = document.getElementById('preparedMealName').value.trim();
+    if (!name) { toast('Meal name is required', 'error'); return; }
+
+    const total_servings = parseInt(document.getElementById('preparedServings').value) || 4;
+    const location = document.querySelector('input[name="preparedLocation"]:checked')?.value || 'fridge';
+    const expiry_date = document.getElementById('preparedExpiry').value || null;
+    const notes = document.getElementById('preparedNotes').value.trim() || null;
+    const nutrition_per_serving = {
+        calories: parseFloat(document.getElementById('preparedCalories').value) || 0,
+        fat_g: parseFloat(document.getElementById('preparedFat').value) || 0,
+        protein_g: parseFloat(document.getElementById('preparedProtein').value) || 0,
+        net_carbs_g: parseFloat(document.getElementById('preparedNetCarbs').value) || 0,
+    };
+
+    const data = { name, total_servings, location, expiry_date, notes, nutrition_per_serving };
+
+    let result;
+    if (editingPreparedMeal) {
+        result = await deftApi('update_prepared_meal', { prepared_id: editingPreparedMeal, ...data });
+    } else {
+        result = await deftApi('add_prepared_meal', data);
+    }
+
+    if (result) {
+        toast(editingPreparedMeal ? 'Meal updated' : 'Prepared meal added', 'success');
+        closeModal('addPreparedModal');
+        editingPreparedMeal = null;
+        await loadPreparedMeals();
+    }
+}
+
+async function consumePrepared(id) {
+    const result = await deftApi('consume_prepared', { prepared_id: id, servings: 1 });
+    if (result) {
+        toast('Serving consumed! Logged to today\'s meals.', 'success');
+        await loadPreparedMeals();
+    }
+}
+
+async function discardPrepared(id) {
+    if (!confirm('Discard this prepared meal? This cannot be undone.')) return;
+    const result = await deftApi('discard_prepared', { prepared_id: id });
+    if (result) {
+        toast('Meal discarded', 'success');
+        await loadPreparedMeals();
+    }
+}
+
+// Recipe autocomplete
+let recipeSearchTimeout = null;
+async function searchRecipes(query) {
+    clearTimeout(recipeSearchTimeout);
+    const dropdown = document.getElementById('recipeSearchResults');
+    if (!query || query.length < 2) { dropdown.classList.remove('open'); return; }
+
+    recipeSearchTimeout = setTimeout(async () => {
+        const results = await supabaseSelect('deft_recipes',
+            `name=ilike.*${encodeURIComponent(query)}*&select=id,name,nutrition_per_serving&limit=8`);
+        if (results && results.length > 0) {
+            dropdown.innerHTML = results.map(r => {
+                const n = r.nutrition_per_serving || {};
+                return `<div class="autocomplete-item" onclick="selectRecipeForPrepared('${escapeHtml(r.name)}', ${JSON.stringify(n).replace(/"/g, '&quot;')})">
+                    <span>${escapeHtml(r.name)}</span>
+                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${n.calories || '?'} cal</span>
+                </div>`;
+            }).join('');
+            dropdown.classList.add('open');
+        } else {
+            dropdown.classList.remove('open');
+        }
+    }, 300);
+}
+
+function selectRecipeForPrepared(name, nutrition) {
+    document.getElementById('preparedMealName').value = name;
+    document.getElementById('recipeSearchResults').classList.remove('open');
+    document.getElementById('preparedRecipeSearch').value = '';
+    if (nutrition) {
+        document.getElementById('preparedCalories').value = nutrition.calories || '';
+        document.getElementById('preparedFat').value = nutrition.fat_g || nutrition.total_fat_g || '';
+        document.getElementById('preparedProtein').value = nutrition.protein_g || '';
+        document.getElementById('preparedNetCarbs').value = nutrition.net_carbs_g || '';
+    }
+}
+
+// ═══════════════════════════════════════
+// SHOPPING LIST FUNCTIONS
+// ═══════════════════════════════════════
+async function loadShoppingList() {
+    if (!activeProfileId) return;
+
+    // Fetch active (non-completed) shopping lists
+    const lists = await supabaseSelect('deft_shopping_lists',
+        `user_id=eq.${activeProfileId}&status=eq.active&select=*&order=created_at.desc`);
+    shoppingLists = lists || [];
+
+    // Populate list selector
+    const selector = document.getElementById('shoppingListSelector');
+    if (shoppingLists.length === 0) {
+        selector.innerHTML = '<option value="">No lists yet</option>';
+        activeShoppingList = null;
+        shoppingItems = [];
+        renderShoppingList();
+        loadFrequentItems();
+        return;
+    }
+
+    selector.innerHTML = shoppingLists.map(l =>
+        `<option value="${l.id}" ${l.id === (activeShoppingList?.id || shoppingLists[0].id) ? 'selected' : ''}>${escapeHtml(l.name || 'Untitled')}${l.store_name ? ' (' + escapeHtml(l.store_name) + ')' : ''}</option>`
+    ).join('');
+
+    // Set active list
+    if (!activeShoppingList || !shoppingLists.find(l => l.id === activeShoppingList.id)) {
+        activeShoppingList = shoppingLists[0];
+    }
+    selector.value = activeShoppingList.id;
+
+    // Load items for active list
+    await loadShoppingItems();
+    loadFrequentItems();
+}
+
+async function loadShoppingItems() {
+    if (!activeShoppingList) { shoppingItems = []; renderShoppingList(); return; }
+    const items = await supabaseSelect('deft_shopping_items',
+        `list_id=eq.${activeShoppingList.id}&select=*&order=checked.asc,category.asc,name.asc`);
+    shoppingItems = items || [];
+    renderShoppingList();
+}
+
+function renderShoppingList() {
+    const container = document.getElementById('shoppingItems');
+    const completeBtn = document.getElementById('completeListBtn');
+
+    if (!activeShoppingList || shoppingItems.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+            <p>${activeShoppingList ? 'No items on this list' : 'Create a shopping list to get started'}</p>
+            <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Add items below or select a different list</p>
+        </div>`;
+        completeBtn.disabled = true;
+        return;
+    }
+
+    completeBtn.disabled = false;
+
+    const unchecked = shoppingItems.filter(i => !i.checked);
+    const checked = shoppingItems.filter(i => i.checked);
+
+    let html = '';
+
+    // Unchecked items
+    unchecked.forEach(item => {
+        html += renderShoppingItem(item, false);
+    });
+
+    // Checked items section
+    if (checked.length > 0) {
+        html += `<div class="px-4 py-2" style="background: rgba(255,255,255,0.02);">
+            <span class="text-xs font-heading font-bold uppercase tracking-wide" style="color: var(--deft-txt-3);">Checked (${checked.length})</span>
+        </div>`;
+        checked.forEach(item => {
+            html += renderShoppingItem(item, true);
+        });
+    }
+
+    container.innerHTML = html;
+}
+
+function renderShoppingItem(item, isChecked) {
+    const categoryColors = {
+        protein: 'var(--deft-accent-warm)', dairy: '#38BDF8', produce: 'var(--deft-success)',
+        grains: '#F0A830', condiments: '#C084FC', beverages: '#4CC9F0',
+        snacks: '#FB7185', other: 'var(--deft-txt-3)'
+    };
+    const catColor = categoryColors[(item.category || '').toLowerCase()] || categoryColors.other;
+
+    return `<div class="shopping-item ${isChecked ? 'checked-item' : ''} flex items-center gap-3 px-4 py-3" style="border-bottom: 1px solid var(--deft-border);">
+        <div class="shopping-check ${isChecked ? 'checked' : ''}" onclick="toggleShoppingItem('${item.id}', ${!isChecked})" role="checkbox" aria-checked="${isChecked}" tabindex="0" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();toggleShoppingItem('${item.id}',${!isChecked});}"></div>
+        <div class="flex-1 min-w-0">
+            <span class="item-name text-sm font-medium" style="color: var(--deft-txt);">${escapeHtml(item.name || 'Item')}</span>
+            <span class="text-xs font-mono ml-2" style="color: var(--deft-txt-3);">${item.quantity || ''} ${item.unit || ''}</span>
+            ${item.notes ? `<p class="text-xs mt-0.5" style="color: var(--deft-txt-3);">${escapeHtml(item.notes)}</p>` : ''}
+        </div>
+        ${item.category ? `<span class="text-xs px-1.5 py-0.5 rounded font-mono" style="background: ${catColor}15; color: ${catColor};">${escapeHtml(item.category)}</span>` : ''}
+        <button class="p-1 rounded transition-colors" style="color: var(--deft-txt-3);" onclick="editShoppingItemNotes('${item.id}')" title="Edit notes" onmouseenter="this.style.color='var(--deft-txt)'" onmouseleave="this.style.color='var(--deft-txt-3)'">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10 2l2 2-7 7H3v-2l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="p-1 rounded transition-colors" style="color: var(--deft-txt-3);" onclick="removeShoppingItem('${item.id}')" title="Remove" onmouseenter="this.style.color='var(--deft-danger)'" onmouseleave="this.style.color='var(--deft-txt-3)'">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+    </div>`;
+}
+
+async function toggleShoppingItem(id, checked) {
+    const operation = checked ? 'check_off_item' : 'uncheck_item';
+    const result = await deftApi(operation, { item_id: id }, { silent: true });
+    if (result) {
+        // Optimistic update
+        const item = shoppingItems.find(i => i.id === id);
+        if (item) item.checked = checked;
+        renderShoppingList();
+    } else {
+        // Fallback: direct Supabase write
+        await supabaseWrite('deft_shopping_items', 'PATCH', { checked }, `id=eq.${id}`);
+        const item = shoppingItems.find(i => i.id === id);
+        if (item) item.checked = checked;
+        renderShoppingList();
+    }
+}
+
+async function removeShoppingItem(id) {
+    const result = await supabaseWrite('deft_shopping_items', 'DELETE', null, `id=eq.${id}`);
+    if (result !== null) {
+        shoppingItems = shoppingItems.filter(i => i.id !== id);
+        renderShoppingList();
+        toast('Item removed', 'success');
+    }
+}
+
+function editShoppingItemNotes(id) {
+    const item = shoppingItems.find(i => i.id === id);
+    if (!item) return;
+    document.getElementById('editShoppingItemId').value = id;
+    document.getElementById('editShoppingItemNotes').value = item.notes || '';
+    openModal('editShoppingItemModal');
+}
+
+async function saveShoppingItemNotes() {
+    const id = document.getElementById('editShoppingItemId').value;
+    const notes = document.getElementById('editShoppingItemNotes').value.trim();
+    await supabaseWrite('deft_shopping_items', 'PATCH', { notes: notes || null }, `id=eq.${id}`);
+    const item = shoppingItems.find(i => i.id === id);
+    if (item) item.notes = notes || null;
+    renderShoppingList();
+    closeModal('editShoppingItemModal');
+    toast('Notes updated', 'success');
+}
+
+async function addShoppingItem() {
+    if (!activeShoppingList) { toast('Create a shopping list first', 'error'); return; }
+    const name = document.getElementById('addShoppingItemInput').value.trim();
+    if (!name) return;
+    const quantity = parseFloat(document.getElementById('addShoppingItemQty').value) || 1;
+    const unit = document.getElementById('addShoppingItemUnit').value;
+
+    const result = await supabaseWrite('deft_shopping_items', 'POST', {
+        list_id: activeShoppingList.id,
+        name,
+        quantity,
+        unit,
+        checked: false
+    });
+
+    if (result) {
+        document.getElementById('addShoppingItemInput').value = '';
+        document.getElementById('addShoppingItemQty').value = '1';
+        document.getElementById('addShoppingItemUnit').value = 'each';
+        document.getElementById('shoppingAutocomplete').classList.remove('open');
+        await loadShoppingItems();
+        toast('Item added', 'success');
+    }
+}
+
+function switchShoppingList(listId) {
+    activeShoppingList = shoppingLists.find(l => l.id === listId) || null;
+    loadShoppingItems();
+}
+
+function createShoppingList() {
+    document.getElementById('newListName').value = '';
+    document.getElementById('newListStore').value = '';
+    document.getElementById('newListNotes').value = '';
+    openModal('createListModal');
+}
+
+async function saveShoppingList() {
+    const name = document.getElementById('newListName').value.trim();
+    if (!name) { toast('List name is required', 'error'); return; }
+    const store_name = document.getElementById('newListStore').value.trim() || null;
+    const notes = document.getElementById('newListNotes').value.trim() || null;
+
+    const result = await deftApi('create_shopping_list', { name, store_name, notes });
+
+    if (result) {
+        toast('Shopping list created', 'success');
+        closeModal('createListModal');
+        // Set the new list as active
+        if (result.data && result.data.id) {
+            activeShoppingList = result.data;
+        }
+        await loadShoppingList();
+    } else {
+        // Fallback: create directly in Supabase
+        const directResult = await supabaseWrite('deft_shopping_lists', 'POST', {
+            user_id: activeProfileId, name, store_name, notes, status: 'active'
+        });
+        if (directResult && directResult[0]) {
+            toast('Shopping list created', 'success');
+            closeModal('createListModal');
+            activeShoppingList = directResult[0];
+            await loadShoppingList();
+        }
+    }
+}
+
+async function completeShoppingList() {
+    if (!activeShoppingList) return;
+    if (!confirm('Mark this shopping list as complete? Items will be added to your purchase history.')) return;
+
+    const result = await deftApi('complete_list', { list_id: activeShoppingList.id });
+    if (result) {
+        toast('Shopping list completed!', 'success');
+        activeShoppingList = null;
+        await loadShoppingList();
+    } else {
+        // Fallback: update status directly
+        await supabaseWrite('deft_shopping_lists', 'PATCH', {
+            status: 'completed', completed_at: new Date().toISOString()
+        }, `id=eq.${activeShoppingList.id}`);
+        toast('Shopping list completed!', 'success');
+        activeShoppingList = null;
+        await loadShoppingList();
+    }
+}
+
+// Shopping history autocomplete
+let shoppingHistoryTimeout = null;
+async function searchShoppingHistory(query) {
+    clearTimeout(shoppingHistoryTimeout);
+    const dropdown = document.getElementById('shoppingAutocomplete');
+    if (!query || query.length < 2) { dropdown.classList.remove('open'); return; }
+
+    shoppingHistoryTimeout = setTimeout(async () => {
+        const results = await supabaseSelect('deft_shopping_history',
+            `user_id=eq.${activeProfileId}&item_name=ilike.*${encodeURIComponent(query)}*&select=item_name,purchase_count&order=purchase_count.desc&limit=8`);
+        if (results && results.length > 0) {
+            dropdown.innerHTML = results.map(r => `
+                <div class="autocomplete-item" onclick="document.getElementById('addShoppingItemInput').value='${escapeHtml(r.item_name)}';document.getElementById('shoppingAutocomplete').classList.remove('open');">
+                    <span>${escapeHtml(r.item_name)}</span>
+                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">bought ${r.purchase_count}x</span>
+                </div>
+            `).join('');
+            dropdown.classList.add('open');
+        } else {
+            dropdown.classList.remove('open');
+        }
+    }, 300);
+}
+
+// Load frequent items for sidebar
+async function loadFrequentItems() {
+    if (!activeProfileId) return;
+    const items = await supabaseSelect('deft_shopping_history',
+        `user_id=eq.${activeProfileId}&select=id,item_name,purchase_count&order=purchase_count.desc&limit=20`);
+    const container = document.getElementById('frequentItemsList');
+
+    if (!items || items.length === 0) {
+        container.innerHTML = '<div class="empty-state text-xs">No purchase history yet</div>';
+        return;
+    }
+
+    container.innerHTML = items.map(item => `
+        <div class="flex items-center justify-between px-3 py-2 cursor-pointer transition-colors" style="border-bottom: 1px solid var(--deft-border);" onclick="addHistoryItemToList('${escapeHtml(item.item_name)}')" onmouseenter="this.style.background='rgba(255,255,255,0.03)'" onmouseleave="this.style.background='transparent'">
+            <span class="text-xs" style="color: var(--deft-txt);">${escapeHtml(item.item_name)}</span>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${item.purchase_count}x</span>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="color: var(--deft-accent); opacity: 0.6;"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function addHistoryItemToList(itemName) {
+    if (!activeShoppingList) { toast('Create a shopping list first', 'error'); return; }
+    const result = await supabaseWrite('deft_shopping_items', 'POST', {
+        list_id: activeShoppingList.id,
+        name: itemName,
+        quantity: 1,
+        unit: 'each',
+        checked: false
+    });
+    if (result) {
+        await loadShoppingItems();
+        toast(`Added "${itemName}"`, 'success');
+    }
+}
+
+// ═══════════════════════════════════════
+// SHOPPING HISTORY FUNCTIONS
+// ═══════════════════════════════════════
+async function loadShoppingHistory() {
+    if (!activeProfileId) return;
+
+    // Load completed lists
+    const lists = await supabaseSelect('deft_shopping_lists',
+        `user_id=eq.${activeProfileId}&status=eq.completed&select=*&order=completed_at.desc&limit=20`);
+
+    // Load frequent items
+    const freqItems = await supabaseSelect('deft_shopping_history',
+        `user_id=eq.${activeProfileId}&select=*&order=purchase_count.desc&limit=50`);
+
+    renderShoppingHistory(lists || [], freqItems || []);
+}
+
+function renderShoppingHistory(lists, freqItems) {
+    // Render completed lists
+    const listContainer = document.getElementById('completedLists');
+    if (lists.length === 0) {
+        listContainer.innerHTML = '<div class="empty-state"><p>No completed shopping lists yet</p></div>';
+    } else {
+        listContainer.innerHTML = lists.map(list => {
+            const dateStr = list.completed_at ? formatDate(list.completed_at.split('T')[0]) : 'Unknown date';
+            const itemCount = list.item_count || '?';
+            return `<div class="panel">
+                <div class="panel-header cursor-pointer" onclick="toggleHistoryList('${list.id}', this)">
+                    <div>
+                        <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${escapeHtml(list.name || 'Untitled')}</span>
+                        <span class="text-xs font-mono ml-2" style="color: var(--deft-txt-3);">${dateStr}${list.store_name ? ' - ' + escapeHtml(list.store_name) : ''}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge" style="background: var(--deft-accent-dim); color: var(--deft-accent);">${itemCount} items</span>
+                        <svg class="history-chevron transition-transform" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    </div>
+                </div>
+                <div class="history-items" id="history-items-${list.id}" style="display: none;"></div>
+            </div>`;
+        }).join('');
+    }
+
+    // Render frequent items table
+    const tableBody = document.getElementById('frequentTableBody');
+    if (freqItems.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="empty-state">No purchase history yet</td></tr>';
+    } else {
+        tableBody.innerHTML = freqItems.map(item => {
+            const lastBought = item.last_purchased ? formatDate(item.last_purchased.split('T')[0]) : 'N/A';
+            const avgPrice = item.avg_price ? '$' + item.avg_price.toFixed(2) : 'N/A';
+            return `<tr style="border-bottom: 1px solid var(--deft-border);">
+                <td class="px-4 py-3 text-sm" style="color: var(--deft-txt);">${escapeHtml(item.item_name || 'Item')}</td>
+                <td class="px-4 py-3 text-center text-sm font-mono" style="color: var(--deft-accent);">${item.purchase_count || 0}</td>
+                <td class="px-4 py-3 text-center text-xs font-mono" style="color: var(--deft-txt-3);">${lastBought}</td>
+                <td class="px-4 py-3 text-center text-xs font-mono" style="color: var(--deft-txt-2);">${avgPrice}</td>
+                <td class="px-4 py-3 text-center">
+                    <button class="btn btn-ghost text-xs" onclick="addHistoryItemToList('${escapeHtml(item.item_name)}')">+ Add to List</button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+}
+
+async function toggleHistoryList(listId, headerEl) {
+    const itemsDiv = document.getElementById(`history-items-${listId}`);
+    const chevron = headerEl.querySelector('.history-chevron');
+
+    if (itemsDiv.style.display === 'none') {
+        // Expand - load items
+        itemsDiv.style.display = '';
+        chevron.style.transform = 'rotate(180deg)';
+
+        if (!itemsDiv.innerHTML || itemsDiv.innerHTML === '') {
+            itemsDiv.innerHTML = '<div class="p-3 text-center text-xs" style="color: var(--deft-txt-3);">Loading...</div>';
+            const items = await supabaseSelect('deft_shopping_items',
+                `list_id=eq.${listId}&select=name,quantity,unit,checked&order=name.asc`);
+
+            if (items && items.length > 0) {
+                itemsDiv.innerHTML = `<div class="px-4 py-2 space-y-1" style="border-top: 1px solid var(--deft-border);">
+                    ${items.map(i => `<div class="flex items-center gap-2 py-1">
+                        <span class="text-xs" style="color: ${i.checked ? 'var(--deft-success)' : 'var(--deft-txt-3)'};">${i.checked ? '&#10003;' : '&#9675;'}</span>
+                        <span class="text-sm ${i.checked ? '' : ''}" style="color: var(--deft-txt);">${escapeHtml(i.name)}</span>
+                        <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${i.quantity || ''} ${i.unit || ''}</span>
+                    </div>`).join('')}
+                </div>`;
+            } else {
+                itemsDiv.innerHTML = '<div class="p-3 text-center text-xs" style="color: var(--deft-txt-3);">No items found</div>';
+            }
+        }
+    } else {
+        // Collapse
+        itemsDiv.style.display = 'none';
+        chevron.style.transform = '';
+    }
+}
+
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    try {
+        const d = new Date(dateStr + (dateStr.includes('T') ? '' : 'T00:00:00'));
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch(e) { return dateStr; }
+}
+
+// Close autocomplete dropdowns on outside click
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('#pantryFoodSearch') && !e.target.closest('#foodSearchResults')) {
+        document.getElementById('foodSearchResults').classList.remove('open');
+    }
+    if (!e.target.closest('#preparedRecipeSearch') && !e.target.closest('#recipeSearchResults')) {
+        document.getElementById('recipeSearchResults').classList.remove('open');
+    }
+    if (!e.target.closest('#addShoppingItemInput') && !e.target.closest('#shoppingAutocomplete')) {
+        document.getElementById('shoppingAutocomplete').classList.remove('open');
+    }
+});
+
+// Keyboard: close modals on Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-backdrop.active').forEach(m => {
+            m.classList.remove('active');
+        });
+        const dd = document.getElementById('profileDropdown');
+        if (!dd.classList.contains('hidden')) {
+            dd.classList.add('hidden');
+            document.getElementById('profileBtn').setAttribute('aria-expanded', 'false');
+        }
+    }
+});
+</script>
+
+</body>
+</html>

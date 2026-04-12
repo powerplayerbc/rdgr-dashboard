@@ -49,6 +49,7 @@ const NAV_GROUPS = [
     { label: 'BRAIN', href: '/brain', items: [
         { label: 'BRAIN', href: '/brain' },
         { label: 'DEFT', href: '/deft' },
+        { label: 'Pantry', href: '/pantry' },
     ]},
     { label: 'Trading', href: '/trading-desk', items: [
         { label: 'Trading Desk', href: '/trading-desk' },
@@ -86,6 +87,7 @@ const PAGE_URL_MAP = {
     'media.html': '/media',
     'brain.html': '/brain',
     'deft.html': '/deft',
+    'pantry.html': '/pantry',
     'meetings.html': '/meetings',
     'our-workflows.html': '/our-workflows',
     'org-chart.html': '/org-chart',
@@ -373,22 +375,32 @@ const skip = ['builder-test.html', 'page-builder.html', '_update_nav.js', '_test
 const dir = __dirname;
 const files = fs.readdirSync(dir).filter(f => f.endsWith('.html') && !skip.includes(f));
 
-// Also include subdirectory HTML files
-const financePath = path.join(dir, 'finance', 'index.html');
-if (fs.existsSync(financePath)) {
-    files.push('finance/index.html');
-}
-const brandVoicePath = path.join(dir, 'brand-voice', 'index.html');
-if (fs.existsSync(brandVoicePath)) {
-    files.push('brand-voice/index.html');
-}
+// Auto-discover all subdirectory index.html files
+fs.readdirSync(dir, { withFileTypes: true })
+    .filter(d => d.isDirectory() && !['node_modules', '.git', 'docs'].includes(d.name))
+    .forEach(d => {
+        const subIndex = path.join(d.name, 'index.html');
+        if (fs.existsSync(path.join(dir, subIndex))) {
+            files.push(subIndex);
+        }
+    });
 
 let updated = 0;
 
 files.forEach(file => {
     const filePath = path.join(dir, file);
     let content = fs.readFileSync(filePath, 'utf8');
-    const activeUrl = PAGE_URL_MAP[file] || '/';
+    // Derive URL from file path: 'pantry.html' -> '/pantry', 'pantry/index.html' -> '/pantry'
+    let activeUrl = PAGE_URL_MAP[file];
+    if (!activeUrl) {
+        if (file.endsWith('/index.html')) {
+            activeUrl = '/' + file.replace('/index.html', '');
+        } else if (file.endsWith('.html')) {
+            activeUrl = '/' + file.replace('.html', '');
+        } else {
+            activeUrl = '/';
+        }
+    }
 
     // 1. Inject dropdown CSS if not already present
     if (!content.includes('.nav-group-btn {')) {

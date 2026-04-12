@@ -1302,6 +1302,7 @@
                             <div class="nav-dropdown">
                                 <a href="/brain">BRAIN</a>
                                 <a href="/deft" class="active">DEFT</a>
+                                <a href="/pantry">Pantry</a>
                             </div>
                         </div>
                         <div class="nav-group">
@@ -1401,6 +1402,7 @@
 <div class="mobile-nav-children open">
     <a href="/brain" class="mobile-nav-link">BRAIN</a>
     <a href="/deft" class="mobile-nav-link active">DEFT</a>
+    <a href="/pantry" class="mobile-nav-link">Pantry</a>
 </div>
 <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Trading <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
 <div class="mobile-nav-children">
@@ -1653,8 +1655,22 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             </div>
         </div>
 
+        <!-- Pantry Status -->
+        <div class="panel deft-reveal deft-reveal-5 mt-4" id="pantryStatusPanel" style="display:none;">
+            <div class="panel-header">
+                <div class="flex items-center gap-2">
+                    <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--deft-txt-2);">Pantry Status</span>
+                    <span id="expiringCount" class="font-mono text-xs px-1.5 py-0.5 rounded" style="background: var(--deft-warning-dim); color: var(--deft-warning);">0</span>
+                </div>
+                <a href="/pantry" class="btn btn-ghost text-xs">View Pantry</a>
+            </div>
+            <div class="panel-body" id="pantryStatusContent">
+                <div class="text-center text-xs py-2" style="color: var(--deft-txt-3);">Loading...</div>
+            </div>
+        </div>
+
         <!-- AI Meal Suggestions Panel -->
-        <div id="aiSuggestPanel" class="panel deft-reveal deft-reveal-5 mt-4" style="display:none;">
+        <div id="aiSuggestPanel" class="panel deft-reveal deft-reveal-6 mt-4" style="display:none;">
             <div class="panel-header">
                 <div class="flex items-center gap-2">
                     <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--deft-txt-2);">AI Meal Suggestions</span>
@@ -1957,8 +1973,24 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             </div>
         </div>
 
-        <!-- AI Nutrition Analyzer -->
+        <!-- Log from Prepared Meals (collapsible) -->
         <div class="panel deft-reveal deft-reveal-4 mt-4">
+            <div class="panel-header cursor-pointer" onclick="togglePreparedMealLog()">
+                <div class="flex items-center gap-2">
+                    <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--deft-txt-2);">Log from Prepared Meals</span>
+                    <span id="preparedMealLogCount" class="font-mono text-xs px-1.5 py-0.5 rounded" style="background: var(--deft-accent-dim); color: var(--deft-accent);">0</span>
+                </div>
+                <svg id="preparedLogChevron" width="14" height="14" viewBox="0 0 14 14" fill="none" style="color: var(--deft-txt-3); transition: transform 0.2s;"><path d="M4 5.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div id="preparedMealLogBody" class="panel-body" style="display:none;">
+                <div id="preparedMealLogList">
+                    <div class="text-center text-xs py-4" style="color: var(--deft-txt-3);">Loading prepared meals...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Nutrition Analyzer -->
+        <div class="panel deft-reveal deft-reveal-5 mt-4">
             <div class="panel-header">
                 <div class="flex items-center gap-2">
                     <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--deft-txt-2);">Analyze Any Food</span>
@@ -3379,7 +3411,34 @@ async function refreshToday() {
     todayExercises = (exResult && exResult.data) ? (exResult.data.exercises || exResult.data) : [];
     if (!Array.isArray(todayExercises)) todayExercises = [];
 
+    // Fetch expiring pantry items (non-blocking)
+    loadPantryStatus();
+
     renderToday();
+}
+
+async function loadPantryStatus() {
+    try {
+        const result = await deftApi('get_expiring_items', { days_ahead: 3 }, { silent: true });
+        const items = (result && result.data) ? (Array.isArray(result.data) ? result.data : result.data.items || []) : [];
+        const panel = document.getElementById('pantryStatusPanel');
+        if (items.length > 0) {
+            panel.style.display = '';
+            document.getElementById('expiringCount').textContent = items.length;
+            document.getElementById('pantryStatusContent').innerHTML = items.map(item => {
+                const days = item.days_until_expiry != null ? item.days_until_expiry : Math.ceil((new Date(item.expiry_date) - new Date()) / 86400000);
+                const color = days <= 0 ? 'var(--deft-danger)' : days <= 1 ? 'var(--deft-warning)' : 'var(--deft-txt-2)';
+                return `<div class="flex items-center justify-between py-1.5" style="border-bottom: 1px solid var(--deft-border);">
+                    <span class="text-sm" style="color: var(--deft-txt);">${item.name}</span>
+                    <span class="text-xs font-mono" style="color: ${color};">${days <= 0 ? 'Expired' : days + 'd left'} &middot; ${item.location || ''}</span>
+                </div>`;
+            }).join('');
+        } else {
+            panel.style.display = 'none';
+        }
+    } catch(e) {
+        // Non-critical, silently fail
+    }
 }
 
 function calcConsumedFromMeals(meals) {
@@ -5370,6 +5429,64 @@ function toggleQuickLog() {
     const isOpen = body.style.display !== 'none';
     body.style.display = isOpen ? 'none' : '';
     chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+// ── Prepared Meals Log ──
+let preparedMealsForLog = [];
+
+function togglePreparedMealLog() {
+    const body = document.getElementById('preparedMealLogBody');
+    const chev = document.getElementById('preparedLogChevron');
+    if (body.style.display === 'none') {
+        body.style.display = '';
+        chev.style.transform = 'rotate(180deg)';
+        loadPreparedMealsForLog();
+    } else {
+        body.style.display = 'none';
+        chev.style.transform = '';
+    }
+}
+
+async function loadPreparedMealsForLog() {
+    const data = await supabaseSelect('deft_prepared_meals',
+        `user_id=eq.${activeProfileId}&status=eq.available&servings_remaining=gt.0&select=*&order=name`
+    );
+    preparedMealsForLog = data || [];
+    document.getElementById('preparedMealLogCount').textContent = preparedMealsForLog.length;
+    if (preparedMealsForLog.length === 0) {
+        document.getElementById('preparedMealLogList').innerHTML =
+            `<div class="text-center py-4"><p class="text-xs" style="color: var(--deft-txt-3);">No prepared meals available</p><p class="text-xs mt-1"><a href="/pantry" style="color: var(--deft-accent);">Add prepared meals in Pantry</a></p></div>`;
+        return;
+    }
+    document.getElementById('preparedMealLogList').innerHTML = preparedMealsForLog.map(m => {
+        const n = m.nutrition_per_serving || {};
+        return `<div class="flex items-center justify-between p-3 rounded-lg mb-2" style="background: rgba(255,255,255,0.02); border: 1px solid var(--deft-border);">
+            <div>
+                <div class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${m.name}</div>
+                <div class="text-xs font-mono" style="color: var(--deft-txt-3);">${m.servings_remaining}/${m.total_servings} servings &middot; ${Math.round(n.calories || 0)} cal</div>
+            </div>
+            <button class="btn btn-primary text-xs" onclick="logPreparedMeal('${m.prepared_id}')">Log 1 Serving</button>
+        </div>`;
+    }).join('');
+}
+
+async function logPreparedMeal(preparedId) {
+    const meal = preparedMealsForLog.find(m => m.prepared_id === preparedId);
+    if (!meal) return;
+    const mealType = selectedMealType || 'lunch';
+    const result = await deftApi('consume_prepared', {
+        prepared_id: preparedId,
+        servings: 1,
+        meal_type: mealType,
+        meal_number: (todayMeals ? todayMeals.length : 0) + 1
+    });
+    if (result && result.success !== false) {
+        toast(meal.name + ' logged');
+        refreshToday();
+        loadPreparedMealsForLog();
+    } else {
+        toast('Failed to log meal', 'error');
+    }
 }
 
 // ── Food Database search ──
