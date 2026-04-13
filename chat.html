@@ -1571,6 +1571,12 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         }
     }
 
+    async function fetchThreadMemory(threadId) {
+        const memData = await supabaseSelect('command_thread_memory', `thread_id=eq.${threadId}`);
+        chatThreadMemory = (memData && memData.length) ? memData[0] : null;
+        return chatThreadMemory;
+    }
+
     async function summarizeCurrentThread() {
         if (!chatActiveThreadId) return;
         toast('Summarizing thread...', 'info');
@@ -1581,8 +1587,21 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 brand_id: 'carlton'
             });
             if (result?.success) {
-                toast('Thread summarized. Memory updated.', 'success');
-                await fetchThreadMemory(chatActiveThreadId);
+                toast('Thread summarized.', 'success');
+                const mem = await fetchThreadMemory(chatActiveThreadId);
+                // Show summary as a system blurb in the conversation
+                const summaryText = mem?.memory_summary || result.summary || 'Thread memory updated.';
+                const summaryMsg = {
+                    message_id: 'summary_' + Date.now(),
+                    thread_id: chatActiveThreadId,
+                    sender: 'system',
+                    sender_type: 'system',
+                    content: '\u{1F4CB} **Thread Summary**\n' + summaryText,
+                    content_type: 'system',
+                    created_at: new Date().toISOString(),
+                };
+                chatMessages.push(summaryMsg);
+                renderMessages();
             } else {
                 toast(result?.error || 'Summarize failed.', 'error');
             }

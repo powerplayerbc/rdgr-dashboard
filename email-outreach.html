@@ -3683,13 +3683,13 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
     function getDraftSubject(draft) {
         const content = draft.content || {};
-        return content.subject || draft.title || '(No subject)';
+        return content.subject || content.headline || draft.title || '(No subject)';
     }
 
     function getDraftBody(draft) {
         const content = draft.content || {};
         if (typeof content === 'string') return content;
-        return content.body || content.text || content.email_body || '';
+        return content.body || content.text || content.email_body || content.content || content.plain_text || '';
     }
 
     function getDraftScore(draft) {
