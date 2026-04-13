@@ -560,10 +560,20 @@
                     <h2 class="font-heading text-xl font-bold tracking-tight">Bug Reports</h2>
                     <p class="text-txt-3 text-xs mt-1">Track issues, paste fix results, and manage retests</p>
                 </div>
-                <button onclick="loadDashboard()" class="btn btn-ghost">
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 118.25 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M8 10l1.75-1.5L8 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    Refresh
-                </button>
+                <div class="flex gap-2 items-center">
+                    <button onclick="copyAllOpenBugs()" class="btn btn-primary" style="padding:0.35rem 0.75rem;font-size:0.7rem;" title="Copy all open bugs across every page">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="display:inline;vertical-align:-2px;margin-right:4px;"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2"/></svg>
+                        Copy All Open
+                    </button>
+                    <button onclick="openGlobalFixResults()" class="btn btn-primary" style="padding:0.35rem 0.75rem;font-size:0.7rem;" title="Paste fix results for bugs across all pages">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="display:inline;vertical-align:-2px;margin-right:4px;"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2" stroke="currentColor" stroke-width="2"/><rect x="8" y="2" width="8" height="4" rx="1" stroke="currentColor" stroke-width="2"/></svg>
+                        Paste Fix Results
+                    </button>
+                    <button onclick="loadDashboard()" class="btn btn-ghost">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 118.25 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M8 10l1.75-1.5L8 7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Refresh
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -609,6 +619,23 @@
             <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.75rem;">
                 <button onclick="closeModal('fixResultsModal')" class="btn btn-ghost">Cancel</button>
                 <button onclick="saveFixResults()" class="btn btn-primary">Save Fix Results</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Global Fix Results Modal ═══ -->
+    <div class="modal-backdrop" id="globalFixModal">
+        <div class="modal-content" style="max-width:750px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                <h3 class="font-heading font-bold text-sm">Paste Fix Results (All Pages)</h3>
+                <button onclick="closeModal('globalFixModal')" style="background:none;border:none;color:var(--deft-txt-3);cursor:pointer;font-size:1.2rem;">&times;</button>
+            </div>
+            <p class="text-xs text-txt-3 mb-3">Paste the full fix output below. Check which bugs were addressed, then save. All selected bugs will be marked fixed.</p>
+            <div id="globalFixCheckboxes" style="max-height:240px;overflow-y:auto;margin-bottom:0.75rem;padding-right:0.25rem;"></div>
+            <textarea class="fix-results-area" id="globalFixText" rows="10" placeholder="Paste fix results here..."></textarea>
+            <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.75rem;">
+                <button onclick="closeModal('globalFixModal')" class="btn btn-ghost">Cancel</button>
+                <button onclick="saveGlobalFixResults()" class="btn btn-primary">Save Fix Results</button>
             </div>
         </div>
     </div>
@@ -840,7 +867,123 @@
         }).catch(() => toast('Failed to copy', 'error'));
     }
 
-    // ═══ FIX RESULTS ═══
+    // ═══ COPY ALL OPEN BUGS (GLOBAL) ═══
+    function copyAllOpenBugs() {
+        let allOpen = [];
+        allGroups.forEach(group => {
+            const openBugs = group.bugs.filter(b => b.status === 'open' || b.status === 'in_progress');
+            if (openBugs.length) allOpen.push({ group, bugs: openBugs });
+        });
+        if (!allOpen.length) { toast('No open bugs to copy', 'error'); return; }
+
+        let text = '';
+        allOpen.forEach(({ group, bugs }) => {
+            const pagePath = group.page_url;
+            const pageFile = pagePath === '/' ? 'index.html' : pagePath.replace(/^\//, '').replace(/\/$/, '') + '/index.html';
+            text += '## Bugs on ' + pagePath + ' (' + bugs.length + ' open bug' + (bugs.length > 1 ? 's' : '') + ')\n\n';
+            bugs.forEach((bug, i) => {
+                text += (i + 1) + '. [' + bug.report_id + '] ' + bug.user_description + '\n';
+                text += '   Priority: ' + bug.priority + '\n';
+                if (bug.console_errors && bug.console_errors.length) {
+                    text += '   Console errors:\n';
+                    bug.console_errors.forEach(e => {
+                        const msg = typeof e === 'object' ? (e.m || e.message || JSON.stringify(e)) : e;
+                        text += '   - ' + msg + '\n';
+                    });
+                } else {
+                    text += '   Console errors: None captured\n';
+                }
+                if (bug.console_warnings && bug.console_warnings.length) {
+                    text += '   Console warnings:\n';
+                    bug.console_warnings.forEach(w => {
+                        const msg = typeof w === 'object' ? (w.m || w.message || JSON.stringify(w)) : w;
+                        text += '   - ' + msg + '\n';
+                    });
+                }
+                text += '   Reported: ' + new Date(bug.created_at).toLocaleDateString() + '\n\n';
+            });
+            text += '---\nPage URL: ' + pagePath + '\nDashboard file: ' + pageFile + '\n\n';
+        });
+
+        const totalCount = allOpen.reduce((s, o) => s + o.bugs.length, 0);
+        navigator.clipboard.writeText(text).then(() => {
+            toast('Copied ' + totalCount + ' bug(s) across ' + allOpen.length + ' page(s)', 'success');
+        }).catch(() => toast('Failed to copy', 'error'));
+    }
+
+    // ═══ GLOBAL FIX RESULTS ═══
+    function openGlobalFixResults() {
+        let allOpen = [];
+        allGroups.forEach(group => {
+            const openBugs = group.bugs.filter(b => b.status === 'open' || b.status === 'in_progress');
+            if (openBugs.length) allOpen.push({ group, bugs: openBugs });
+        });
+        if (!allOpen.length) { toast('No open bugs to fix', 'error'); return; }
+
+        let html = '';
+        allOpen.forEach(({ group, bugs }) => {
+            html += '<div style="margin-bottom:0.75rem;">';
+            html += '<div class="text-xs font-semibold mb-1" style="color:var(--deft-accent);font-family:monospace;">' + esc(group.page_url) + '</div>';
+            bugs.forEach(bug => {
+                html += '<label class="flex items-center gap-2 py-0.5 cursor-pointer" style="padding-left:0.5rem;">';
+                html += '<input type="checkbox" class="global-fix-cb" value="' + bug.id + '" checked style="accent-color:var(--deft-accent);">';
+                html += '<span class="text-xs"><span class="font-mono" style="color:var(--deft-accent-warm);">' + esc(bug.report_id) + '</span> ' + esc(bug.user_description.substring(0, 80)) + '</span>';
+                html += '</label>';
+            });
+            html += '</div>';
+        });
+        document.getElementById('globalFixCheckboxes').innerHTML = html;
+        document.getElementById('globalFixText').value = '';
+        openModal('globalFixModal');
+    }
+
+    async function saveGlobalFixResults() {
+        const text = document.getElementById('globalFixText').value.trim();
+        if (!text) { toast('Please paste the fix results', 'error'); return; }
+        const checkedIds = Array.from(document.querySelectorAll('.global-fix-cb:checked')).map(cb => parseInt(cb.value));
+        if (!checkedIds.length) { toast('Select at least one bug', 'error'); return; }
+
+        try {
+            const res = await fetch(SUPABASE_URL + '/rest/v1/user_bug_reports?id=in.(' + checkedIds.join(',') + ')', {
+                method: 'PATCH',
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+                body: JSON.stringify({ status: 'fixed', fix_results: text, fix_applied_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+            });
+            if (res.ok) {
+                toast(checkedIds.length + ' bug(s) marked as fixed', 'success');
+                closeModal('globalFixModal');
+
+                const lines = text.split('\n').filter(l => /^\s*[-*]\s+/.test(l) || /^\s*\d+\.\s+/.test(l));
+                if (lines.length > 0 && lines.length <= 20) {
+                    const retestItems = lines.slice(0, 10).map(l => ({
+                        text: l.replace(/^\s*[-*\d.]+\s*/, '').trim(),
+                        checked: false,
+                        created_at: new Date().toISOString()
+                    })).filter(i => i.text.length > 5);
+
+                    if (retestItems.length > 0) {
+                        for (const id of checkedIds) {
+                            await fetch(SUPABASE_URL + '/rest/v1/rpc/update_bug_retest_items', {
+                                method: 'POST',
+                                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ p_bug_id: id, p_retest_items: retestItems })
+                            });
+                        }
+                        toast(retestItems.length + ' retest items auto-generated', 'success');
+                    }
+                }
+
+                loadDashboard();
+            } else {
+                const err = await res.text();
+                toast('Failed to save: ' + err, 'error');
+            }
+        } catch (e) {
+            toast('Error: ' + e.message, 'error');
+        }
+    }
+
+    // ═══ FIX RESULTS (PER-PAGE) ═══
     function openFixResults(pageUrl, gi) {
         currentFixPageUrl = pageUrl;
         const group = allGroups[gi];
