@@ -317,7 +317,10 @@
             display: none; align-items: center; justify-content: center;
             padding: 0 3px;
         }
-        .bug-report-modal { z-index: 195 !important; }
+        .modal-backdrop { position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; }
+        .modal-backdrop.active { display:flex; }
+        .modal-content { background:var(--deft-surface-el,#1A1D28); border:1px solid var(--deft-border,#2A2E3D); border-radius:0.75rem; width:95%; max-width:640px; max-height:80vh; overflow-y:auto; padding:1.5rem; }
+        .bug-report-modal { z-index: 9001 !important; }
         .bug-report-modal .modal-content {
             max-width: 500px; width: 92vw;
         }

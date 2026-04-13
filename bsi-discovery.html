@@ -1386,14 +1386,24 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     // ═══════════════════════════════════════
     async function loadProgress() {
         const result = await apiGetProgress();
+        const offlineBanner = document.getElementById('bsiOfflineBanner');
         if (!result || !result.success) {
             console.warn('BSI discovery progress unavailable:', result?.error || 'no response');
             state.progressData = null;
             state.categoryMap = {};
             renderStats({ completed: 0, in_progress: 0, not_started: 12, total: 12 }, 0);
             renderCategoryCards();
+            if (!offlineBanner) {
+                const banner = document.createElement('div');
+                banner.id = 'bsiOfflineBanner';
+                banner.style.cssText = 'background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);border-radius:0.5rem;padding:0.75rem 1rem;margin:0.5rem auto 1rem;max-width:600px;text-align:center;font-size:0.8rem;color:#FF6B6B;';
+                banner.textContent = 'BSI Discovery service is currently offline. Progress data may be unavailable.';
+                const container = document.getElementById('progressView') || document.querySelector('.panel-body');
+                if (container) container.prepend(banner);
+            }
             return;
         }
+        if (offlineBanner) offlineBanner.remove();
         state.progressData = result;
         state.categoryMap = {};
         if (result.categories) {

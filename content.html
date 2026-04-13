@@ -1486,7 +1486,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
         try {
             const data = await sbSelect('social_content_queue',
-                `brand_id=eq.${BRAND_ID}&status=in.(approved,scheduled)&status=neq.pending&scheduled_for=gte.${startOfMonth}&scheduled_for=lte.${endOfMonth}T23:59:59&select=id,platform,content_type,status,scheduled_for,content&order=scheduled_for`
+                `brand_id=eq.${BRAND_ID}&status=in.(approved,scheduled)&scheduled_at=gte.${startOfMonth}&scheduled_at=lte.${endOfMonth}T23:59:59&select=id,platform,content_type,status,scheduled_at,content&order=scheduled_at`
             );
             calendarEvents = (data || []).filter(e => e.status !== 'pending' && e.status !== 'draft');
         } catch (e) {
@@ -1517,7 +1517,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         for (let d = 1; d <= daysInMonth; d++) {
             const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
             const isToday = dateStr === todayStr;
-            const dayEvents = calendarEvents.filter(e => e.scheduled_for && e.scheduled_for.startsWith(dateStr));
+            const dayEvents = calendarEvents.filter(e => e.scheduled_at && e.scheduled_at.startsWith(dateStr));
 
             const platformColors = {
                 linkedin: 'rgba(0,119,181,0.7)',

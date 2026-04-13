@@ -1098,7 +1098,56 @@
             </div>
             <div style="margin-bottom:0.75rem;">
                 <label class="bug-form-label">Page</label>
-                <div id="bugPageUrl" style="font-size:0.75rem;color:var(--deft-accent,#06D6A0);font-family:'JetBrains Mono',monospace;padding:0.3rem 0.5rem;background:rgba(0,0,0,0.2);border-radius:0.25rem;border:1px solid var(--deft-border,#2A2E3D);"></div>
+                <select id="bugPageUrl" style="width:100%;padding:0.35rem 0.5rem;border-radius:0.375rem;background:var(--deft-surface,#11131A);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-accent,#06D6A0);font-size:0.75rem;font-family:'JetBrains Mono',monospace;cursor:pointer;">
+                    <option value="/">/ (Dashboard)</option>
+                    <option value="/chat">/chat (Rodger)</option>
+                    <option value="/council">/council (Council)</option>
+                    <option value="/crm">/crm (CRM)</option>
+                    <option value="/email-outreach">/email-outreach (Email Outreach)</option>
+                    <option value="/social-dashboard">/social-dashboard (Social Dashboard)</option>
+                    <option value="/social-content">/social-content (Social Content)</option>
+                    <option value="/social-voice-settings">/social-voice-settings (Social Voice)</option>
+                    <option value="/offer-studio">/offer-studio (Offer Studio)</option>
+                    <option value="/finance">/finance (Finance)</option>
+                    <option value="/brand-discovery">/brand-discovery (Brand Discovery)</option>
+                    <option value="/brand-voice/">/brand-voice/ (Brand Voice)</option>
+                    <option value="/template-studio">/template-studio (Template Studio)</option>
+                    <option value="/brand-documents">/brand-documents (Brand Documents)</option>
+                    <option value="/bsi-discovery">/bsi-discovery (BSI Discovery)</option>
+                    <option value="/compliance">/compliance (Compliance)</option>
+                    <option value="/bsi-documents">/bsi-documents (BSI Documents)</option>
+                    <option value="/content">/content (Content)</option>
+                    <option value="/media">/media (Media)</option>
+                    <option value="/partnerships">/partnerships (Partnerships)</option>
+                    <option value="/brain">/brain (BRAIN)</option>
+                    <option value="/hub">/hub (Hub)</option>
+                    <option value="/knowledge-manager">/knowledge-manager (Knowledge)</option>
+                    <option value="/meetings">/meetings (Meetings)</option>
+                    <option value="/subscribers">/subscribers (Subscribers)</option>
+                    <option value="/profile">/profile (Profile)</option>
+                    <option value="/appearance">/appearance (Appearance)</option>
+                    <option value="/settings">/settings (Settings)</option>
+                    <option value="/our-workflows">/our-workflows (Workflows)</option>
+                    <option value="/org-chart">/org-chart (Org Chart)</option>
+                    <option value="/pantry">/pantry (Pantry)</option>
+                    <option value="/trading-desk">/trading-desk (Trading Desk)</option>
+                    <option value="/trading-bot">/trading-bot (Trading Bot)</option>
+                    <option value="/trading-monitor">/trading-monitor (Trading Monitor)</option>
+                    <option value="/trading-config">/trading-config (Trading Config)</option>
+                    <option value="/trading-research">/trading-research (Trading Research)</option>
+                    <option value="/trading-strategies">/trading-strategies (Trading Strategies)</option>
+                    <option value="/trading-discovery">/trading-discovery (Trading Discovery)</option>
+                    <option value="/trading-reports">/trading-reports (Trading Reports)</option>
+                    <option value="/trading-exchanges">/trading-exchanges (Trading Exchanges)</option>
+                    <option value="/trading-cross-pairs">/trading-cross-pairs (Cross Pairs)</option>
+                    <option value="/bug-reports/">/bug-reports/ (Bug Reports)</option>
+                    <option value="/deft">/deft (DEFT)</option>
+                    <option value="/deft-settings">/deft-settings (DEFT Settings)</option>
+                    <option value="/client-projects">/client-projects (Client Projects)</option>
+                    <option value="/email-voice-settings">/email-voice-settings (Email Voice)</option>
+                    <option value="/scraper-settings">/scraper-settings (Scraper Settings)</option>
+                    <option value="/council-advisors-settings">/council-advisors-settings (Council Settings)</option>
+                </select>
             </div>
             <div style="margin-bottom:0.75rem;">
                 <label class="bug-form-label">What's wrong? / What needs updating?</label>
@@ -1138,7 +1187,10 @@ function _ub(){var b=document.getElementById('bugBadge');if(b){b.textContent=_ce
 function _esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
 window._openBugReport=function(){
 var m=document.getElementById('bugReportModal');if(!m)return;
-document.getElementById('bugPageUrl').textContent=location.pathname;
+var sel=document.getElementById('bugPageUrl');
+var urlParams=new URLSearchParams(window.location.search);
+var defaultPage=urlParams.get('page')||location.pathname;
+if(sel.tagName==='SELECT'){sel.value=defaultPage;if(!sel.value)sel.selectedIndex=0;}else{sel.textContent=defaultPage;}
 var log=document.getElementById('bugConsoleLog'),items=[];
 _ce.forEach(function(e){items.push('<div class="bug-ce">[ERROR] '+_esc(e.m)+'</div>');});
 _cw.forEach(function(w){items.push('<div class="bug-cw">[WARN] '+_esc(w.m)+'</div>');});
@@ -1153,7 +1205,8 @@ var btn=document.getElementById('bugSubmitBtn');if(btn){btn.disabled=true;btn.te
 var SB='https://yrwrswyjawmgtxrgbnim.supabase.co';
 var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
 try{
-var r=await fetch(SB+'/rest/v1/user_bug_reports',{method:'POST',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({page_url:location.pathname,page_title:document.title,user_description:desc,console_errors:_ce,console_warnings:_cw,browser_info:{userAgent:navigator.userAgent,viewport:window.innerWidth+'x'+window.innerHeight,timestamp:new Date().toISOString()},priority:document.getElementById('bugPriority').value,status:'open'})});
+var pageEl=document.getElementById('bugPageUrl');var pageVal=pageEl.tagName==='SELECT'?pageEl.value:(pageEl.textContent||location.pathname);
+var r=await fetch(SB+'/rest/v1/user_bug_reports',{method:'POST',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({page_url:pageVal,page_title:document.title,user_description:desc,console_errors:_ce,console_warnings:_cw,browser_info:{userAgent:navigator.userAgent,viewport:window.innerWidth+'x'+window.innerHeight,timestamp:new Date().toISOString()},priority:document.getElementById('bugPriority').value,status:'open'})});
 if(r.ok){var d=await r.json();if(typeof toast==='function')toast('Bug report '+d[0].report_id+' submitted!','success');document.getElementById('bugDescription').value='';document.getElementById('bugReportModal').classList.remove('active');}
 else{var e=await r.text();if(typeof toast==='function')toast('Failed: '+e,'error');}
 }catch(ex){if(typeof toast==='function')toast('Error: '+ex.message,'error');}

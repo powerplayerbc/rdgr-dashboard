@@ -1072,14 +1072,14 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
             <!-- Voice Radar Chart (hidden until voice_calibration data exists) -->
             <div id="voiceRadarSection" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-4" style="display:none;">
-                <div class="panel">
+                <div class="panel" style="overflow:visible;">
                     <div class="panel-header">
                         <div class="flex items-center gap-2">
                             <span>🎙️</span>
                             <h2 class="font-heading font-semibold text-sm tracking-wide uppercase">Voice Calibration</h2>
                         </div>
                     </div>
-                    <div class="panel-body flex justify-center">
+                    <div class="panel-body flex justify-center" style="overflow:visible;padding:2rem 1.25rem;">
                         <div id="radarChartContainer"></div>
                     </div>
                 </div>
@@ -1542,9 +1542,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     }
 
     function renderRadarChart(dims) {
-        const size = 300;
+        const size = 400;
         const cx = size / 2, cy = size / 2;
-        const radius = 110;
+        const radius = 120;
         const levels = 4;
         const n = VOICE_DIMENSIONS.length;
 
@@ -1604,7 +1604,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         }
 
         document.getElementById('radarChartContainer').innerHTML = `
-            <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="max-width: 100%;">
+            <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="max-width:100%;overflow:visible;">
                 ${gridSvg}
                 ${axisSvg}
                 ${dataSvg}

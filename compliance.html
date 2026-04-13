@@ -1329,6 +1329,14 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         if (!result || !result.total_pending || result.total_pending === 0) {
             document.getElementById('pendingPanel').style.display = 'none';
             document.getElementById('pendingEmptyPanel').style.display = '';
+            if (!result && !document.getElementById('complianceOfflineBanner')) {
+                const banner = document.createElement('div');
+                banner.id = 'complianceOfflineBanner';
+                banner.style.cssText = 'background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.2);border-radius:0.5rem;padding:0.75rem 1rem;margin:0.5rem auto 1rem;max-width:600px;text-align:center;font-size:0.8rem;color:#FF6B6B;';
+                banner.textContent = 'BSI Discovery service is currently offline. Preference questions may be unavailable.';
+                const emptyPanel = document.getElementById('pendingEmptyPanel');
+                if (emptyPanel) emptyPanel.parentNode.insertBefore(banner, emptyPanel);
+            }
             return;
         }
 
