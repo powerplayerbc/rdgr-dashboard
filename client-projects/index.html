@@ -1604,8 +1604,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     }
 
     function onPreviewBuildChange() {
-        const buildId = document.getElementById('previewBuildSelect').value;
-        selectedPreviewBuildId = buildId || null;
+        const raw = document.getElementById('previewBuildSelect').value;
+        selectedPreviewBuildId = raw ? parseInt(raw, 10) : null;
         renderPreview();
     }
 
@@ -1669,8 +1669,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     // RENDER: CONFIG TAB
     // ═══════════════════════════════════════
     function onConfigBuildChange() {
-        const buildId = document.getElementById('configBuildSelect').value;
-        selectedConfigBuildId = buildId || null;
+        const raw = document.getElementById('configBuildSelect').value;
+        selectedConfigBuildId = raw ? parseInt(raw, 10) : null;
         renderConfig();
     }
 
