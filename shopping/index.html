@@ -7,7 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Pantry | Carlton AI</title>
+    <title>Shopping Lists | Carlton AI</title>
 
     <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
     <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
@@ -185,7 +185,6 @@
         .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -631,28 +630,6 @@
         .deft-reveal-6 { animation-delay: 0.3s; }
 
         /* ═══════════════════════════════════════
-           PANTRY-SPECIFIC: Location/Category Filter Pills
-           ═══════════════════════════════════════ */
-        .filter-pill {
-            padding: 0.3rem 0.75rem;
-            font-size: 0.7rem;
-            font-weight: 500;
-            border-radius: 0.375rem;
-            border: none;
-            cursor: pointer;
-            color: var(--deft-txt-3);
-            background: transparent;
-            transition: all 0.2s;
-            white-space: nowrap;
-            font-family: var(--deft-heading-font), system-ui;
-        }
-        .filter-pill:hover { color: var(--deft-txt); }
-        .filter-pill.active {
-            background: var(--deft-accent-dim);
-            color: var(--deft-accent);
-        }
-
-        /* ═══════════════════════════════════════
            SHOPPING LIST CHECKBOX
            ═══════════════════════════════════════ */
         .shopping-check {
@@ -711,29 +688,12 @@
         .autocomplete-item:hover { background: rgba(255,255,255,0.04); }
 
         /* ═══════════════════════════════════════
-           AI CARD FOR "WHAT CAN I MAKE"
-           ═══════════════════════════════════════ */
-        .ai-card {
-            background: linear-gradient(135deg, rgba(168,130,214,0.06), rgba(168,130,214,0.02));
-            border: 1px solid rgba(168,130,214,0.15);
-            border-radius: 0.75rem;
-            padding: 1rem 1.25rem;
-            transition: border-color 0.2s;
-        }
-        .ai-card:hover { border-color: rgba(168,130,214,0.3); }
-        @keyframes aiPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .ai-loading { animation: aiPulse 1.5s ease-in-out infinite; }
-
-        /* ═══════════════════════════════════════
            RESPONSIVE
            ═══════════════════════════════════════ */
         @media (max-width: 640px) {
             .filter-pill { font-size: 0.65rem; padding: 0.25rem 0.5rem; }
         }
-    
+
         /* ── Bug Report FAB ── */
         .bug-report-fab {
             position: fixed;
@@ -885,9 +845,8 @@
                             <div class="nav-dropdown">
                                 <a href="/brain">BRAIN</a>
                                 <a href="/deft">DEFT</a>
-                                <a href="/pantry" class="active">Pantry</a>
-                                <a href="/shopping">Shopping</a>
-                                <a href="/meal-plan">Meal Plan</a>
+                                <a href="/pantry">Pantry</a>
+                                <a href="/shopping" class="active">Shopping</a>
                             </div>
                         </div>
                         <div class="nav-group">
@@ -926,7 +885,6 @@
                         <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
                     </button>
                     <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 180px; z-index: 10000;" id="profileDropdown" role="menu">
-                        <!-- Profiles populated by JS -->
                     </div>
                 </div>
                 <!-- Settings link -->
@@ -986,9 +944,8 @@
 <div class="mobile-nav-children open">
     <a href="/brain" class="mobile-nav-link">BRAIN</a>
     <a href="/deft" class="mobile-nav-link">DEFT</a>
-    <a href="/pantry" class="mobile-nav-link active">Pantry</a>
-    <a href="/shopping" class="mobile-nav-link">Shopping</a>
-    <a href="/meal-plan" class="mobile-nav-link">Meal Plan</a>
+    <a href="/pantry" class="mobile-nav-link">Pantry</a>
+    <a href="/shopping" class="mobile-nav-link active">Shopping</a>
 </div>
 <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Trading <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
 <div class="mobile-nav-children">
@@ -1022,134 +979,59 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 </script>
         <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
 
-    <!-- ── PANTRY SUB-TAB BAR ── -->
+    <!-- ── SHOPPING SUB-TAB BAR ── -->
     <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pt-4 pb-4">
-        <div class="flex gap-1 p-0.5 rounded-lg overflow-x-auto" style="background: rgba(255,255,255,0.04);" role="tablist" aria-label="Pantry sections">
-            <button class="deft-tab active" id="tab-pantry" onclick="switchView('pantry')" role="tab" aria-selected="true" aria-controls="view-pantry">Pantry</button>
-            <button class="deft-tab" id="tab-prepared" onclick="switchView('prepared')" role="tab" aria-selected="false" aria-controls="view-prepared">Prepared Meals</button>
+        <div class="flex gap-1 p-0.5 rounded-lg overflow-x-auto" style="background: rgba(255,255,255,0.04);" role="tablist" aria-label="Shopping sections">
+            <button class="deft-tab active" id="tab-shopping" onclick="switchView('shopping')" role="tab" aria-selected="true" aria-controls="view-shopping">Shopping List</button>
+            <button class="deft-tab" id="tab-history" onclick="switchView('history')" role="tab" aria-selected="false" aria-controls="view-history">History</button>
         </div>
     </div>
 
     <!-- ═══════════════════════════════════════
-         VIEW: PANTRY
+         VIEW: SHOPPING LIST
          ═══════════════════════════════════════ -->
-    <div id="view-pantry" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" role="tabpanel" aria-labelledby="tab-pantry">
+    <div id="view-shopping" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" role="tabpanel" aria-labelledby="tab-shopping">
 
-        <!-- Header row -->
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 deft-reveal deft-reveal-1">
-            <div class="flex items-center gap-3">
-                <h2 class="font-heading font-bold text-lg" style="color: var(--deft-txt);">My Pantry</h2>
-                <span id="pantryCount" class="badge" style="background: var(--deft-accent-dim); color: var(--deft-accent);">0 items</span>
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-                <input type="text" id="pantrySearch" class="form-input" style="max-width: 200px; padding: 0.4rem 0.75rem; font-size: 0.8rem;" placeholder="Search pantry..." oninput="searchPantry(this.value)">
-                <button class="btn btn-primary text-xs" onclick="addPantryItem()">Add Item</button>
-                <button class="btn btn-ghost text-xs" onclick="openBarcodeScanner()">Scan Barcode</button>
-                <button class="btn btn-warm text-xs" onclick="whatCanIMake()">What Can I Make?</button>
-            </div>
-        </div>
-
-        <!-- Location filter pills -->
-        <div class="flex flex-wrap gap-1 mb-3 deft-reveal deft-reveal-2">
-            <button class="filter-pill active" onclick="filterPantryLocation('all', this)">All</button>
-            <button class="filter-pill" onclick="filterPantryLocation('fridge', this)">Fridge</button>
-            <button class="filter-pill" onclick="filterPantryLocation('pantry', this)">Pantry</button>
-            <button class="filter-pill" onclick="filterPantryLocation('freezer', this)">Freezer</button>
-        </div>
-
-        <!-- Category filter pills -->
-        <div class="flex flex-wrap gap-1 mb-4 deft-reveal deft-reveal-3">
-            <button class="filter-pill active" onclick="filterPantryCategory('all', this)">All</button>
-            <button class="filter-pill" onclick="filterPantryCategory('protein', this)">Protein</button>
-            <button class="filter-pill" onclick="filterPantryCategory('dairy', this)">Dairy</button>
-            <button class="filter-pill" onclick="filterPantryCategory('produce', this)">Produce</button>
-            <button class="filter-pill" onclick="filterPantryCategory('grains', this)">Grains</button>
-            <button class="filter-pill" onclick="filterPantryCategory('condiments', this)">Condiments</button>
-            <button class="filter-pill" onclick="filterPantryCategory('beverages', this)">Beverages</button>
-            <button class="filter-pill" onclick="filterPantryCategory('snacks', this)">Snacks</button>
-            <button class="filter-pill" onclick="filterPantryCategory('other', this)">Other</button>
-        </div>
-
-        <!-- What Can I Make Panel (hidden by default) -->
-        <div id="whatCanIMakePanel" class="mb-4" style="display: none;">
-            <div class="ai-card">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center gap-2">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 5h5l-4 3 1.5 5L8 11l-4.5 3L5 9 1 6h5l2-5z" fill="#A882D6"/></svg>
-                        <span class="font-heading font-bold text-sm" style="color: #A882D6;">AI Suggestions</span>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Left: Active shopping list -->
+            <div class="lg:col-span-2">
+                <!-- List header -->
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4 deft-reveal deft-reveal-1">
+                    <div class="flex items-center gap-3">
+                        <h2 class="font-heading font-bold text-lg" style="color: var(--deft-txt);">Shopping List</h2>
+                        <select id="shoppingListSelector" class="form-input" style="max-width: 200px; padding: 0.35rem 0.5rem; font-size: 0.75rem;" onchange="switchShoppingList(this.value)">
+                            <option value="">No lists</option>
+                        </select>
+                        <span id="sharedListBadge" style="display: none;" class="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full" title="Shared with household">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--deft-accent);"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                            <span style="color: var(--deft-accent);">Shared</span>
+                        </span>
                     </div>
-                    <button class="btn btn-ghost text-xs" onclick="document.getElementById('whatCanIMakePanel').style.display='none'">Close</button>
-                </div>
-                <div id="whatCanIMakeContent" class="text-sm" style="color: var(--deft-txt-2);">
-                    <p class="ai-loading">Analyzing your pantry...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pantry grid -->
-        <div id="pantryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 deft-reveal deft-reveal-4">
-            <div class="empty-state col-span-full">
-                <p>No items in your pantry yet</p>
-                <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Click "Add Item" to start tracking your food storage</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════
-         VIEW: PREPARED MEALS
-         ═══════════════════════════════════════ -->
-    <div id="view-prepared" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-prepared">
-
-        <!-- Header -->
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 deft-reveal deft-reveal-1">
-            <div class="flex items-center gap-3">
-                <h2 class="font-heading font-bold text-lg" style="color: var(--deft-txt);">Prepared Meals</h2>
-                <span id="preparedCount" class="badge" style="background: var(--deft-accent-warm-dim); color: var(--deft-accent-warm);">0</span>
-            </div>
-            <button class="btn btn-primary text-xs" onclick="addPreparedMeal()">Add Prepared Meal</button>
-        </div>
-
-        <!-- Prepared meals grid -->
-        <div id="preparedGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 deft-reveal deft-reveal-2">
-            <div class="empty-state col-span-full">
-                <p>No prepared meals tracked</p>
-                <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Add meals you've prepped to track servings and freshness</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════
-         MODALS
-         ═══════════════════════════════════════ -->
-
-    <!-- Add/Edit Pantry Item Modal -->
-    <div id="addPantryModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('addPantryModal')">
-        <div class="modal-content">
-            <div class="panel-header">
-                <span id="pantryModalTitle" class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Add Pantry Item</span>
-                <button class="btn btn-ghost text-xs" onclick="closeModal('addPantryModal')">Close</button>
-            </div>
-            <div class="panel-body">
-                <div class="space-y-4">
-                    <div class="form-group">
-                        <label class="form-label">Item Name</label>
-                        <input type="text" id="pantryItemName" class="form-input" placeholder="e.g. Chicken Breast">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button class="btn btn-ghost text-xs" onclick="createShoppingList()">New List</button>
+                        <button class="btn btn-warm text-xs" onclick="openTemplateSelector()">Load Template</button>
+                        <button class="btn btn-ghost text-xs" onclick="saveAsTemplate()">Save as Template</button>
+                        <button class="btn btn-primary text-xs" id="completeListBtn" onclick="completeShoppingList()" disabled>Complete List</button>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Search Food Database</label>
-                        <div class="relative">
-                            <input type="text" id="pantryFoodSearch" class="form-input" placeholder="Search foods..." oninput="searchFoodDatabase(this.value)">
-                            <div id="foodSearchResults" class="autocomplete-dropdown"></div>
+                </div>
+
+                <!-- Shopping items panel -->
+                <div class="panel deft-reveal deft-reveal-2">
+                    <div id="shoppingItems" class="divide-y" style="border-color: var(--deft-border);">
+                        <div class="empty-state">
+                            <p>No items on this list</p>
+                            <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Add items below or select a different list</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="form-group">
-                            <label class="form-label">Quantity</label>
-                            <input type="number" id="pantryItemQty" class="form-input" placeholder="e.g. 2" min="0" step="0.25">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Unit</label>
-                            <select id="pantryItemUnit" class="form-input">
+                    <!-- Add item row -->
+                    <div class="p-3 border-t" style="border-color: var(--deft-border);">
+                        <div class="flex gap-2 items-center">
+                            <div class="relative flex-1">
+                                <input type="text" id="addShoppingItemInput" class="form-input" style="padding: 0.4rem 0.75rem; font-size: 0.8rem;" placeholder="Add item..." oninput="searchShoppingHistory(this.value)" onkeydown="if(event.key==='Enter'){event.preventDefault();addShoppingItem();}">
+                                <div id="shoppingAutocomplete" class="autocomplete-dropdown"></div>
+                            </div>
+                            <input type="number" id="addShoppingItemQty" class="form-input" style="width: 60px; padding: 0.4rem 0.5rem; font-size: 0.8rem; text-align: center;" placeholder="Qty" value="1" min="0" step="0.5">
+                            <select id="addShoppingItemUnit" class="form-input" style="width: 80px; padding: 0.4rem 0.5rem; font-size: 0.75rem;">
                                 <option value="each">each</option>
                                 <option value="lbs">lbs</option>
                                 <option value="oz">oz</option>
@@ -1167,212 +1049,194 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                                 <option value="box">box</option>
                                 <option value="dozen">dozen</option>
                             </select>
+                            <input type="number" id="addShoppingItemPrice" class="form-input" style="width: 80px; padding: 0.4rem 0.5rem; font-size: 0.8rem;" step="0.01" min="0" placeholder="Price">
+                            <button class="btn btn-primary text-xs" onclick="addShoppingItem()">Add</button>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Category</label>
-                        <select id="pantryItemCategory" class="form-input">
-                            <option value="protein">Protein</option>
-                            <option value="dairy">Dairy</option>
-                            <option value="produce">Produce</option>
-                            <option value="grains">Grains</option>
-                            <option value="condiments">Condiments</option>
-                            <option value="beverages">Beverages</option>
-                            <option value="snacks">Snacks</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Location</label>
-                        <div class="flex gap-3 mt-1">
-                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
-                                <input type="radio" name="pantryLocation" value="fridge" checked style="accent-color: var(--deft-accent);"> Fridge
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
-                                <input type="radio" name="pantryLocation" value="pantry" style="accent-color: var(--deft-accent);"> Pantry
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
-                                <input type="radio" name="pantryLocation" value="freezer" style="accent-color: var(--deft-accent);"> Freezer
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Storage Type & Shelf Life</label>
-                        <div class="flex gap-2">
-                            <select id="pantryItemStorageType" class="form-input flex-1" onchange="onStorageTypeChange()">
-                                <option value="regular">Regular (fresh)</option>
-                                <option value="frozen">Frozen</option>
-                                <option value="meal_prep">Meal Prep</option>
-                                <option value="bulk">Bulk / Staple</option>
-                            </select>
-                            <div class="flex items-center gap-1" style="min-width: 120px;">
-                                <input type="number" id="pantryItemShelfDays" class="form-input" style="width: 70px;" min="1" max="365" value="7" onchange="onShelfDaysChange()">
-                                <span class="text-xs" style="color: var(--deft-txt-3);">days</span>
-                            </div>
-                        </div>
-                        <span class="text-xs mt-1 block" style="color: var(--deft-txt-3);">Adjust shelf life for this item - expiry auto-calculates below</span>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Expiry Date</label>
-                        <input type="date" id="pantryItemExpiry" class="form-input">
-                        <span class="text-xs mt-1 block" style="color: var(--deft-txt-3);">Auto-set from shelf days, or pick a specific date</span>
-                    </div>
+                </div>
+            </div>
 
-                    <!-- Nutrition Label Scanner -->
-                    <div class="form-group" style="border-top: 1px solid var(--deft-border); padding-top: 0.75rem; margin-top: 0.5rem;">
-                        <label class="form-label">Nutrition Info</label>
-                        <div id="nutritionPreview" style="display: none;" class="mb-2 p-2 rounded-lg" style="background: rgba(255,255,255,0.02);">
-                            <div class="grid grid-cols-4 gap-2 text-xs font-mono" style="color: var(--deft-txt-2);">
-                                <div><span style="color: var(--deft-txt-3);">Cal</span><br><span id="nutPreviewCal">-</span></div>
-                                <div><span style="color: var(--deft-txt-3);">Fat</span><br><span id="nutPreviewFat">-</span>g</div>
-                                <div><span style="color: var(--deft-txt-3);">Protein</span><br><span id="nutPreviewProtein">-</span>g</div>
-                                <div><span style="color: var(--deft-txt-3);">Net Carbs</span><br><span id="nutPreviewCarbs">-</span>g</div>
-                            </div>
-                            <button class="btn btn-ghost text-xs mt-2 w-full" onclick="editNutritionManually()">Edit Values</button>
-                        </div>
-                        <div id="nutritionManualFields" style="display: none;" class="grid grid-cols-2 gap-2 mb-2">
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Serving Size</label>
-                                <input type="text" id="nutServingSize" class="form-input text-xs" placeholder="e.g., 4 oz">
-                            </div>
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Calories</label>
-                                <input type="number" id="nutCalories" class="form-input text-xs" placeholder="0">
-                            </div>
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Total Fat (g)</label>
-                                <input type="number" id="nutFat" class="form-input text-xs" step="0.1" placeholder="0">
-                            </div>
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Protein (g)</label>
-                                <input type="number" id="nutProtein" class="form-input text-xs" step="0.1" placeholder="0">
-                            </div>
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Total Carbs (g)</label>
-                                <input type="number" id="nutTotalCarbs" class="form-input text-xs" step="0.1" placeholder="0">
-                            </div>
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Fiber (g)</label>
-                                <input type="number" id="nutFiber" class="form-input text-xs" step="0.1" placeholder="0">
-                            </div>
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Sugar (g)</label>
-                                <input type="number" id="nutSugar" class="form-input text-xs" step="0.1" placeholder="0">
-                            </div>
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Sodium (mg)</label>
-                                <input type="number" id="nutSodium" class="form-input text-xs" placeholder="0">
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="btn btn-warm text-xs flex-1" onclick="scanNutritionLabel()">
-                                <span id="scanBtnText">Scan Nutrition Label</span>
-                            </button>
-                            <button class="btn btn-ghost text-xs" onclick="toggleNutritionManual()">Enter Manually</button>
-                        </div>
-                        <input type="file" id="nutritionLabelFile" accept="image/*" capture="environment" style="display:none;" onchange="handleNutritionLabelUpload(event)">
-                        <div id="labelPreviewImg" style="display:none;" class="mt-2">
-                            <img id="labelImg" style="max-height: 120px; border-radius: 0.375rem; border: 1px solid var(--deft-border);">
-                        </div>
+            <!-- Right: Quick-add from history -->
+            <div class="deft-reveal deft-reveal-3">
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-2);">Frequently Bought</span>
                     </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Price Paid</label>
-                        <input type="number" id="pantryItemPrice" class="form-input" step="0.01" min="0" placeholder="e.g. 5.99">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Notes</label>
-                        <textarea id="pantryItemNotes" class="form-input" placeholder="Optional notes..." rows="2" style="min-height: 60px;"></textarea>
-                    </div>
-                    <div class="flex gap-2 justify-end pt-2">
-                        <button class="btn btn-ghost text-xs" onclick="closeModal('addPantryModal')">Cancel</button>
-                        <button class="btn btn-danger text-xs" id="removePantryBtn" onclick="removePantryItem(editingPantryItem, 'used_up')" style="display: none;">Remove</button>
-                        <button class="btn btn-primary text-xs" id="savePantryBtn" onclick="savePantryItem()">Save Item</button>
+                    <div id="frequentItemsList" class="max-h-96 overflow-y-auto">
+                        <div class="empty-state text-xs">Loading...</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Barcode Scanner Modal -->
-    <div id="barcodeScannerModal" class="modal-backdrop" onclick="if(event.target===this)closeBarcodeScanner()">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="panel-header">
-                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Scan Barcode</span>
-                <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Close</button>
+    <!-- ═══════════════════════════════════════
+         VIEW: HISTORY
+         ═══════════════════════════════════════ -->
+    <div id="view-history" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-history">
+
+        <!-- Cost Summary -->
+        <div class="mb-6 deft-reveal deft-reveal-1">
+            <h2 class="font-heading font-bold text-lg mb-4" style="color: var(--deft-txt);">Cost Summary (Last 30 Days)</h2>
+            <div id="costSummaryPanel" class="panel p-4">
+                <div class="empty-state text-xs">Loading cost data...</div>
             </div>
-            <div class="panel-body">
-                <div id="barcode-reader" style="width: 100%;"></div>
-                <div id="barcodeResult" style="display: none;" class="mt-3 p-3 rounded-lg">
+        </div>
+
+        <!-- Completed Lists -->
+        <div class="mb-6 deft-reveal deft-reveal-2">
+            <h2 class="font-heading font-bold text-lg mb-4" style="color: var(--deft-txt);">Completed Lists</h2>
+            <div id="completedLists" class="space-y-3">
+                <div class="empty-state">
+                    <p>No completed shopping lists yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Frequently Bought Table -->
+        <div class="deft-reveal deft-reveal-3">
+            <h2 class="font-heading font-bold text-lg mb-4" style="color: var(--deft-txt);">Frequently Bought</h2>
+            <div class="panel">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm" id="frequentTable">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--deft-border);">
+                                <th class="text-left px-4 py-3 font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-2);">Item</th>
+                                <th class="text-center px-4 py-3 font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-2);">Times Bought</th>
+                                <th class="text-center px-4 py-3 font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-2);">Last Bought</th>
+                                <th class="text-center px-4 py-3 font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-2);">Avg Price</th>
+                                <th class="text-center px-4 py-3 font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-2);">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="frequentTableBody">
+                            <tr><td colspan="5" class="empty-state">No purchase history yet</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Add/Edit Prepared Meal Modal -->
-    <div id="addPreparedModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('addPreparedModal')">
-        <div class="modal-content">
+    <!-- ═══════════════════════════════════════
+         MODALS
+         ═══════════════════════════════════════ -->
+
+    <!-- Create Shopping List Modal -->
+    <div id="createListModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('createListModal')">
+        <div class="modal-content" style="max-width: 420px;">
             <div class="panel-header">
-                <span id="preparedModalTitle" class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Add Prepared Meal</span>
-                <button class="btn btn-ghost text-xs" onclick="closeModal('addPreparedModal')">Close</button>
+                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">New Shopping List</span>
+                <button class="btn btn-ghost text-xs" onclick="closeModal('createListModal')">Close</button>
             </div>
             <div class="panel-body">
                 <div class="space-y-4">
                     <div class="form-group">
-                        <label class="form-label">Meal Name</label>
-                        <input type="text" id="preparedMealName" class="form-input" placeholder="e.g. Chicken Stir Fry">
+                        <label class="form-label">List Name</label>
+                        <input type="text" id="newListName" class="form-input" placeholder="e.g. Weekly Groceries">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Search Recipes</label>
-                        <div class="relative">
-                            <input type="text" id="preparedRecipeSearch" class="form-input" placeholder="Search recipes..." oninput="searchRecipes(this.value)">
-                            <div id="recipeSearchResults" class="autocomplete-dropdown"></div>
+                        <label class="form-label">Store (optional)</label>
+                        <input type="text" id="newListStore" class="form-input" placeholder="e.g. Costco, Walmart">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes (optional)</label>
+                        <textarea id="newListNotes" class="form-input" placeholder="Any notes..." rows="2" style="min-height: 60px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
+                            <input type="checkbox" id="newListShared" checked style="accent-color: var(--deft-accent);">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            Share with household
+                        </label>
+                        <span class="text-xs mt-1 block" style="color: var(--deft-txt-3);">Shared lists are visible to all household members</span>
+                    </div>
+                    <div class="flex gap-2 justify-end pt-2">
+                        <button class="btn btn-ghost text-xs" onclick="closeModal('createListModal')">Cancel</button>
+                        <button class="btn btn-primary text-xs" onclick="saveShoppingList()">Create List</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Shopping Item Modal (full edit) -->
+    <div id="editShoppingItemModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('editShoppingItemModal')">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="panel-header">
+                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Edit Item</span>
+                <button class="btn btn-ghost text-xs" onclick="closeModal('editShoppingItemModal')">Close</button>
+            </div>
+            <div class="panel-body">
+                <div class="space-y-3">
+                    <input type="hidden" id="editShoppingItemId">
+                    <div class="form-group">
+                        <label class="form-label">Item Name</label>
+                        <input type="text" id="editShoppingItemName" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Brand</label>
+                        <input type="text" id="editShoppingItemBrand" class="form-input" placeholder="e.g. Kerrygold, Costco Kirkland...">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="form-group">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" id="editShoppingItemQty" class="form-input" min="0" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Unit</label>
+                            <select id="editShoppingItemUnit" class="form-input">
+                                <option value="each">each</option><option value="lbs">lbs</option><option value="oz">oz</option><option value="kg">kg</option><option value="g">g</option><option value="cups">cups</option><option value="pack">pack</option><option value="bag">bag</option><option value="can">can</option><option value="bottle">bottle</option><option value="box">box</option><option value="dozen">dozen</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select id="editShoppingItemCategory" class="form-input">
+                                <option value="other">Other</option><option value="protein">Protein</option><option value="dairy">Dairy</option><option value="produce">Produce</option><option value="fat">Fat</option><option value="grains">Grains</option><option value="condiments">Condiments</option><option value="beverages">Beverages</option><option value="snacks">Snacks</option><option value="frozen">Frozen</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Goes to</label>
+                            <select id="editShoppingItemPantryLoc" class="form-input">
+                                <option value="fridge">Fridge</option><option value="pantry">Pantry</option><option value="freezer">Freezer</option>
+                            </select>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Total Servings</label>
-                        <input type="number" id="preparedServings" class="form-input" placeholder="e.g. 6" min="1" value="4">
-                    </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div class="form-group">
-                            <label class="form-label">Calories</label>
-                            <input type="number" id="preparedCalories" class="form-input" placeholder="per serving" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Fat (g)</label>
-                            <input type="number" id="preparedFat" class="form-input" placeholder="per serving" min="0" step="0.1">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Protein (g)</label>
-                            <input type="number" id="preparedProtein" class="form-input" placeholder="per serving" min="0" step="0.1">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Net Carbs (g)</label>
-                            <input type="number" id="preparedNetCarbs" class="form-input" placeholder="per serving" min="0" step="0.1">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Location</label>
-                        <div class="flex gap-3 mt-1">
-                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
-                                <input type="radio" name="preparedLocation" value="fridge" checked style="accent-color: var(--deft-accent);"> Fridge
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
-                                <input type="radio" name="preparedLocation" value="freezer" style="accent-color: var(--deft-accent);"> Freezer
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Expiry Date</label>
-                        <input type="date" id="preparedExpiry" class="form-input">
+                        <label class="form-label">Estimated Price</label>
+                        <input type="number" id="editShoppingItemPrice" class="form-input" step="0.01" min="0" placeholder="e.g. 5.99">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Notes</label>
-                        <textarea id="preparedNotes" class="form-input" placeholder="Optional notes..." rows="2" style="min-height: 60px;"></textarea>
+                        <textarea id="editShoppingItemNotes" class="form-input" placeholder="Add notes..." rows="2" style="min-height: 50px;"></textarea>
                     </div>
                     <div class="flex gap-2 justify-end pt-2">
-                        <button class="btn btn-ghost text-xs" onclick="closeModal('addPreparedModal')">Cancel</button>
-                        <button class="btn btn-primary text-xs" id="savePreparedBtn" onclick="savePreparedMeal()">Save Meal</button>
+                        <button class="btn btn-danger text-xs" onclick="deleteEditingShoppingItem()">Remove from List</button>
+                        <button class="btn btn-ghost text-xs" onclick="closeModal('editShoppingItemModal')">Cancel</button>
+                        <button class="btn btn-primary text-xs" onclick="saveShoppingItemEdits()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Selector Modal -->
+    <div id="templateSelectorModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('templateSelectorModal')">
+        <div class="modal-content" style="max-width: 520px;">
+            <div class="panel-header">
+                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Shopping Templates</span>
+                <button class="btn btn-ghost text-xs" onclick="closeModal('templateSelectorModal')">Close</button>
+            </div>
+            <div class="panel-body">
+                <div id="templateList" class="space-y-2 mb-4">
+                    <div class="empty-state text-xs">Loading templates...</div>
+                </div>
+                <div style="border-top: 1px solid var(--deft-border); padding-top: 0.75rem;">
+                    <p class="text-xs mb-2" style="color: var(--deft-txt-3);">Or create a new list from previously purchased items:</p>
+                    <div class="relative">
+                        <input type="text" id="templateSearchInput" class="form-input" placeholder="Search your purchase history..." oninput="searchPurchaseHistory(this.value)">
+                        <div id="purchaseHistoryResults" class="mt-2 max-h-48 overflow-y-auto"></div>
                     </div>
                 </div>
             </div>
@@ -1485,14 +1349,12 @@ const THEMES = {
 // ═══════════════════════════════════════
 let activeProfileId = null;
 let activeProfileName = 'Bradford';
-let currentView = 'pantry';
-let pantryItems = [];
-let pantryLocationFilter = 'all';
-let pantryCategoryFilter = 'all';
-let pantrySearchQuery = '';
-let preparedMeals = [];
-let editingPantryItem = null;
-let editingPreparedMeal = null;
+let currentView = 'shopping';
+let shoppingLists = [];
+let activeShoppingList = null;
+let shoppingItems = [];
+let shoppingHistory = [];
+let profilesMap = {}; // user_id -> display_name for "checked by" display
 
 // ═══════════════════════════════════════
 // THEME MANAGEMENT
@@ -1861,7 +1723,7 @@ function handleGate(e) {
         }
         document.getElementById('gate').classList.add('hidden');
         document.getElementById('pantryApp').style.opacity = '1';
-        initPantry();
+        initShopping();
         return false;
     }
     document.getElementById('gateError').classList.add('show');
@@ -1874,7 +1736,7 @@ function handleGate(e) {
 if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
     document.getElementById('gate').classList.add('hidden');
     document.getElementById('pantryApp').style.opacity = '1';
-    initPantry();
+    initShopping();
 }
 
 if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
@@ -1886,7 +1748,7 @@ if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
 // ═══════════════════════════════════════
 function switchView(view) {
     currentView = view;
-    const views = ['pantry', 'prepared'];
+    const views = ['shopping', 'history'];
     views.forEach(v => {
         const el = document.getElementById(`view-${v}`);
         if (el) el.style.display = v === view ? '' : 'none';
@@ -1909,14 +1771,14 @@ function switchView(view) {
     }
 
     // Lazy-load data for views
-    if (view === 'pantry') loadPantry();
-    if (view === 'prepared') loadPreparedMeals();
+    if (view === 'shopping') loadShoppingList();
+    if (view === 'history') loadShoppingHistory();
 }
 
 // ═══════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════
-async function initPantry() {
+async function initShopping() {
     const savedProfile = localStorage.getItem('rdgr-active-profile');
     if (savedProfile) {
         try {
@@ -1933,6 +1795,12 @@ async function initPantry() {
 
     await loadProfiles();
 
+    // Build profiles map for "checked by" display
+    const allProfiles = await supabaseSelect('deft_user_profiles', 'select=user_id,display_name,email&order=display_name');
+    if (allProfiles && allProfiles.length > 0) {
+        allProfiles.forEach(p => { profilesMap[p.user_id] = p.display_name || p.email || 'Someone'; });
+    }
+
     if (!activeProfileId) {
         const profiles = await supabaseSelect('deft_user_profiles', 'select=user_id,display_name,email&order=display_name&limit=1');
         if (profiles && profiles.length > 0) {
@@ -1942,451 +1810,430 @@ async function initPantry() {
     }
 
     if (activeProfileId) {
-        await loadPantry();
+        await loadShoppingList();
+        loadFrequentItems();
     }
 }
 
 // ═══════════════════════════════════════
-// PANTRY FUNCTIONS
+// SHOPPING LIST FUNCTIONS
 // ═══════════════════════════════════════
-async function loadPantry() {
+async function loadShoppingList() {
     if (!activeProfileId) return;
-    const items = await supabaseSelect('deft_pantry_items',
-        `user_id=eq.${activeProfileId}&select=*&order=expiry_date.asc.nullslast`);
-    pantryItems = items || [];
-    renderPantry();
-}
 
-function getExpiryStatus(expiryDate) {
-    if (!expiryDate) return { cls: 'fresh', label: 'No Expiry', bgColor: 'var(--deft-success-dim)', textColor: 'var(--deft-success)' };
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const exp = new Date(expiryDate + 'T00:00:00');
-    const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
+    // Fetch active (non-completed) shopping lists
+    const lists = await supabaseSelect('deft_shopping_lists',
+        `user_id=eq.${activeProfileId}&status=eq.active&select=*&order=created_at.desc`);
+    shoppingLists = (lists || []).map(l => ({ ...l, id: l.list_id || l.id }));
 
-    if (diffDays <= 0) {
-        return { cls: 'expired', label: 'Expired', bgColor: 'var(--deft-danger-dim)', textColor: 'var(--deft-danger)' };
-    } else if (diffDays <= 2) {
-        return { cls: 'expiring', label: 'Exp Soon', bgColor: 'var(--deft-warning-dim)', textColor: 'var(--deft-warning)' };
-    } else {
-        return { cls: 'fresh', label: 'Fresh', bgColor: 'var(--deft-success-dim)', textColor: 'var(--deft-success)' };
-    }
-}
-
-function renderPantry() {
-    const grid = document.getElementById('pantryGrid');
-    let filtered = pantryItems;
-
-    // Apply location filter
-    if (pantryLocationFilter !== 'all') {
-        filtered = filtered.filter(i => (i.location || '').toLowerCase() === pantryLocationFilter);
-    }
-    // Apply category filter
-    if (pantryCategoryFilter !== 'all') {
-        filtered = filtered.filter(i => (i.category || '').toLowerCase() === pantryCategoryFilter);
-    }
-    // Apply search
-    if (pantrySearchQuery) {
-        const q = pantrySearchQuery.toLowerCase();
-        filtered = filtered.filter(i => (i.name || '').toLowerCase().includes(q) || (i.notes || '').toLowerCase().includes(q));
-    }
-
-    // Update count badge
-    document.getElementById('pantryCount').textContent = `${filtered.length} item${filtered.length !== 1 ? 's' : ''}`;
-
-    if (filtered.length === 0) {
-        grid.innerHTML = `<div class="empty-state col-span-full">
-            <p>${pantrySearchQuery || pantryLocationFilter !== 'all' || pantryCategoryFilter !== 'all' ? 'No items match your filters' : 'No items in your pantry yet'}</p>
-            <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Click "Add Item" to start tracking your food storage</p>
-        </div>`;
+    // Populate list selector
+    const selector = document.getElementById('shoppingListSelector');
+    if (shoppingLists.length === 0) {
+        selector.innerHTML = '<option value="">No lists yet</option>';
+        activeShoppingList = null;
+        shoppingItems = [];
+        renderShoppingList();
+        loadFrequentItems();
         return;
     }
 
-    grid.innerHTML = filtered.map(item => {
-        const itemId = item.item_id || item.id;
-        const expiry = getExpiryStatus(item.expiry_date);
-        const qtyStr = item.quantity ? `${item.quantity} ${item.unit || ''}` : '';
-        const locStr = item.location ? item.location.charAt(0).toUpperCase() + item.location.slice(1) : '';
-        const subline = [qtyStr, locStr].filter(Boolean).join(' - ');
-        const storageLabels = { regular: '', frozen: 'Frozen', meal_prep: 'Meal Prep', bulk: 'Bulk' };
-        const storageBadge = item.storage_type && item.storage_type !== 'regular'
-            ? `<span class="text-xs px-1.5 py-0.5 rounded" style="background: rgba(100,149,237,0.15); color: #6495ED;">${storageLabels[item.storage_type] || item.storage_type}</span>`
-            : '';
+    selector.innerHTML = shoppingLists.map(l =>
+        `<option value="${l.id}" ${l.id === (activeShoppingList?.id || shoppingLists[0].id) ? 'selected' : ''}>${l.shared ? '\u{1F3E0} ' : ''}${escapeHtml(l.name || 'Untitled')}${l.store_name ? ' (' + escapeHtml(l.store_name) + ')' : ''}</option>`
+    ).join('');
 
-        const priceBadge = item.price_paid ? `<span class="text-xs px-1.5 py-0.5 rounded font-mono" style="background: rgba(240,168,48,0.1); color: var(--deft-accent-warm);">$${parseFloat(item.price_paid).toFixed(2)}</span>` : '';
+    // Set active list
+    if (!activeShoppingList || !shoppingLists.find(l => l.id === activeShoppingList.id)) {
+        activeShoppingList = shoppingLists[0];
+    }
+    selector.value = activeShoppingList.id;
 
-        return `<div class="panel p-3 cursor-pointer transition-all hover:border-opacity-60" onclick="editPantryItem('${itemId}')" style="border-color: var(--deft-border);" onmouseenter="this.style.borderColor='var(--deft-surface-hi)'" onmouseleave="this.style.borderColor='var(--deft-border)'">
-            <div class="flex items-start justify-between mb-2">
-                <div>
-                    <h3 class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${escapeHtml(item.name || 'Unnamed')}</h3>
-                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${escapeHtml(subline)}</span>
-                </div>
-                <span class="text-xs px-2 py-0.5 rounded-full font-mono" style="background: ${expiry.bgColor}; color: ${expiry.textColor};">${expiry.label}</span>
-            </div>
-            ${item.expiry_date ? `<div class="text-xs font-mono mb-2" style="color: var(--deft-txt-3);">Exp: ${formatDate(item.expiry_date)}</div>` : ''}
-            <div class="flex gap-2 mt-2 flex-wrap">
-                ${item.category ? `<span class="text-xs px-1.5 py-0.5 rounded" style="background: rgba(255,255,255,0.04); color: var(--deft-txt-3);">${escapeHtml(item.category)}</span>` : ''}
-                ${storageBadge}
-                ${priceBadge}
-            </div>
+    // Update shared badge
+    updateSharedBadge();
+
+    // Load items for active list
+    await loadShoppingItems();
+    loadFrequentItems();
+}
+
+async function loadShoppingItems() {
+    if (!activeShoppingList) { shoppingItems = []; renderShoppingList(); return; }
+    const items = await supabaseSelect('deft_shopping_items',
+        `list_id=eq.${activeShoppingList.id}&select=*&order=checked.asc,category.asc,name.asc`);
+    shoppingItems = (items || []).map(i => ({ ...i, id: i.item_id || i.id }));
+    renderShoppingList();
+}
+
+function renderShoppingList() {
+    const container = document.getElementById('shoppingItems');
+    const completeBtn = document.getElementById('completeListBtn');
+
+    if (!activeShoppingList || shoppingItems.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+            <p>${activeShoppingList ? 'No items on this list' : 'Create a shopping list to get started'}</p>
+            <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Add items below or select a different list</p>
         </div>`;
-    }).join('');
-}
-
-function filterPantryLocation(loc, el) {
-    pantryLocationFilter = loc;
-    // Update active pills
-    if (el) {
-        el.closest('.flex').querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-        el.classList.add('active');
+        completeBtn.disabled = true;
+        return;
     }
-    renderPantry();
-}
 
-function filterPantryCategory(cat, el) {
-    pantryCategoryFilter = cat;
-    if (el) {
-        el.closest('.flex').querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-        el.classList.add('active');
-    }
-    renderPantry();
-}
+    completeBtn.disabled = false;
 
-function searchPantry(query) {
-    pantrySearchQuery = query;
-    renderPantry();
-}
+    const unchecked = shoppingItems.filter(i => !i.checked);
+    const checked = shoppingItems.filter(i => i.checked);
 
-// Shelf life defaults (user-adjustable per item)
-const SHELF_DEFAULTS = { regular: 7, frozen: 90, meal_prep: 4, bulk: 30 };
-let scannedNutrition = null;
+    let html = '';
 
-function onStorageTypeChange() {
-    const st = document.getElementById('pantryItemStorageType').value;
-    const shelfInput = document.getElementById('pantryItemShelfDays');
-    shelfInput.value = SHELF_DEFAULTS[st] || 7;
-    onShelfDaysChange();
-}
-
-function onShelfDaysChange() {
-    const days = parseInt(document.getElementById('pantryItemShelfDays').value) || 7;
-    const expiry = new Date();
-    expiry.setDate(expiry.getDate() + days);
-    document.getElementById('pantryItemExpiry').value = expiry.toISOString().split('T')[0];
-}
-
-function resetNutritionFields() {
-    scannedNutrition = null;
-    document.getElementById('nutritionPreview').style.display = 'none';
-    document.getElementById('nutritionManualFields').style.display = 'none';
-    document.getElementById('labelPreviewImg').style.display = 'none';
-    document.getElementById('scanBtnText').textContent = 'Scan Nutrition Label';
-    ['nutServingSize','nutCalories','nutFat','nutProtein','nutTotalCarbs','nutFiber','nutSugar','nutSodium'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
+    // Unchecked items
+    unchecked.forEach(item => {
+        html += renderShoppingItem(item, false);
     });
+
+    // Checked items section
+    if (checked.length > 0) {
+        html += `<div class="px-4 py-2" style="background: rgba(255,255,255,0.02);">
+            <span class="text-xs font-heading font-bold uppercase tracking-wide" style="color: var(--deft-txt-3);">Checked (${checked.length})</span>
+        </div>`;
+        checked.forEach(item => {
+            html += renderShoppingItem(item, true);
+        });
+    }
+
+    container.innerHTML = html;
 }
 
-function populateNutritionFields(n) {
-    scannedNutrition = n;
-    document.getElementById('nutServingSize').value = n.serving_size || '';
-    document.getElementById('nutCalories').value = n.calories || '';
-    document.getElementById('nutFat').value = n.total_fat_g || '';
-    document.getElementById('nutProtein').value = n.protein_g || '';
-    document.getElementById('nutTotalCarbs').value = n.total_carbs_g || '';
-    document.getElementById('nutFiber').value = n.fiber_g || '';
-    document.getElementById('nutSugar').value = n.sugar_g || '';
-    document.getElementById('nutSodium').value = n.sodium_mg || '';
-    // Show preview
-    document.getElementById('nutPreviewCal').textContent = Math.round(n.calories || 0);
-    document.getElementById('nutPreviewFat').textContent = Math.round(n.total_fat_g || 0);
-    document.getElementById('nutPreviewProtein').textContent = Math.round(n.protein_g || 0);
-    document.getElementById('nutPreviewCarbs').textContent = Math.round((n.total_carbs_g || 0) - (n.fiber_g || 0));
-    document.getElementById('nutritionPreview').style.display = '';
-}
-
-function editNutritionManually() {
-    document.getElementById('nutritionManualFields').style.display = '';
-}
-
-function toggleNutritionManual() {
-    const fields = document.getElementById('nutritionManualFields');
-    fields.style.display = fields.style.display === 'none' ? '' : 'none';
-}
-
-function collectNutritionFromFields() {
-    const cal = parseFloat(document.getElementById('nutCalories').value);
-    if (!cal && cal !== 0) return null;
-    return {
-        serving_size: document.getElementById('nutServingSize').value || null,
-        calories: cal || 0,
-        total_fat_g: parseFloat(document.getElementById('nutFat').value) || 0,
-        protein_g: parseFloat(document.getElementById('nutProtein').value) || 0,
-        total_carbs_g: parseFloat(document.getElementById('nutTotalCarbs').value) || 0,
-        fiber_g: parseFloat(document.getElementById('nutFiber').value) || 0,
-        sugar_g: parseFloat(document.getElementById('nutSugar').value) || 0,
-        net_carbs_g: (parseFloat(document.getElementById('nutTotalCarbs').value) || 0) - (parseFloat(document.getElementById('nutFiber').value) || 0),
-        sodium_mg: parseFloat(document.getElementById('nutSodium').value) || 0
+function renderShoppingItem(item, isChecked) {
+    const categoryColors = {
+        protein: 'var(--deft-accent-warm)', dairy: '#38BDF8', produce: 'var(--deft-success)',
+        grains: '#F0A830', condiments: '#C084FC', beverages: '#4CC9F0',
+        snacks: '#FB7185', other: 'var(--deft-txt-3)'
     };
+    const catColor = categoryColors[(item.category || '').toLowerCase()] || categoryColors.other;
+
+    const brandStr = item.brand ? ` <span class="text-xs" style="color: var(--deft-txt-3);">(${escapeHtml(item.brand)})</span>` : '';
+    const priceStr = item.estimated_price ? `<span class="text-xs font-mono ml-2" style="color: var(--deft-accent-warm);">$${parseFloat(item.estimated_price).toFixed(2)}</span>` : '';
+    const actualPriceStr = (isChecked && item.actual_price) ? `<span class="text-xs font-mono ml-1" style="color: var(--deft-success);">paid $${parseFloat(item.actual_price).toFixed(2)}</span>` : '';
+
+    // Show who checked off the item if it was someone else
+    let checkedByStr = '';
+    if (isChecked && item.checked_by && item.checked_by !== activeProfileId) {
+        const checkerName = profilesMap[item.checked_by] || 'Someone';
+        checkedByStr = `<span class="text-xs ml-2 px-1.5 py-0.5 rounded" style="background: rgba(6,214,160,0.08); color: var(--deft-accent);">Checked by ${escapeHtml(checkerName)}</span>`;
+    }
+
+    return `<div class="shopping-item ${isChecked ? 'checked-item' : ''} flex items-center gap-3 px-4 py-3" style="border-bottom: 1px solid var(--deft-border);">
+        <div class="shopping-check ${isChecked ? 'checked' : ''}" onclick="toggleShoppingItem('${item.id}', ${!isChecked})" role="checkbox" aria-checked="${isChecked}" tabindex="0" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();toggleShoppingItem('${item.id}',${!isChecked});}"></div>
+        <div class="flex-1 min-w-0 cursor-pointer" onclick="editShoppingItemNotes('${item.id}')">
+            <span class="item-name text-sm font-medium" style="color: var(--deft-txt);">${escapeHtml(item.name || 'Item')}${brandStr}</span>
+            <span class="text-xs font-mono ml-2" style="color: var(--deft-txt-3);">${item.quantity || ''} ${item.unit || ''}</span>
+            ${priceStr}${actualPriceStr}${checkedByStr}
+            ${item.notes ? `<p class="text-xs mt-0.5" style="color: var(--deft-txt-3);">${escapeHtml(item.notes)}</p>` : ''}
+        </div>
+        ${item.category ? `<span class="text-xs px-1.5 py-0.5 rounded font-mono hidden sm:inline" style="background: ${catColor}15; color: ${catColor};">${escapeHtml(item.category)}</span>` : ''}
+        <button class="p-1 rounded transition-colors" style="color: var(--deft-txt-3);" onclick="editShoppingItemNotes('${item.id}')" title="Edit item" onmouseenter="this.style.color='var(--deft-txt)'" onmouseleave="this.style.color='var(--deft-txt-3)'">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10 2l2 2-7 7H3v-2l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+    </div>`;
 }
 
-function scanNutritionLabel() {
-    document.getElementById('nutritionLabelFile').click();
-}
+async function toggleShoppingItem(id, checked) {
+    const item = shoppingItems.find(i => i.id === id);
 
-async function handleNutritionLabelUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Show image preview
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        const base64 = e.target.result;
-        document.getElementById('labelImg').src = base64;
-        document.getElementById('labelPreviewImg').style.display = '';
-        document.getElementById('scanBtnText').textContent = 'Analyzing...';
-
-        // Send to AI for analysis
-        try {
-            const result = await deftApi('analyze_nutrition_label', { image_base64: base64 });
-            if (result && result.success !== false && result.data) {
-                const data = result.data;
-                populateNutritionFields(data);
-                document.getElementById('nutritionManualFields').style.display = '';
-                // Auto-fill name if blank
-                if (data.food_name && !document.getElementById('pantryItemName').value) {
-                    document.getElementById('pantryItemName').value = data.food_name;
-                }
-                // Auto-fill brand in notes if available
-                if (data.brand) {
-                    const notes = document.getElementById('pantryItemNotes');
-                    if (!notes.value) notes.value = 'Brand: ' + data.brand;
-                }
-                toast('Nutrition label scanned', 'success');
-            } else {
-                toast('Could not read label - enter manually', 'error');
-                document.getElementById('nutritionManualFields').style.display = '';
+    // When checking off, prompt for actual price if item has an estimated price or if user wants to log it
+    if (checked && item) {
+        const existingPrice = item.estimated_price ? `$${parseFloat(item.estimated_price).toFixed(2)}` : '';
+        const priceInput = prompt(`Actual price paid${existingPrice ? ' (estimated: ' + existingPrice + ')' : ''}:`, existingPrice ? parseFloat(item.estimated_price).toFixed(2) : '');
+        if (priceInput !== null && priceInput.trim() !== '') {
+            const actualPrice = parseFloat(priceInput.replace(/^\$/, ''));
+            if (!isNaN(actualPrice) && actualPrice >= 0) {
+                item.actual_price = actualPrice;
+                await supabaseWrite('deft_shopping_items', 'PATCH', { actual_price: actualPrice }, `item_id=eq.${item.item_id || id}`);
             }
-        } catch (err) {
-            toast('Scan failed - enter manually', 'error');
-            document.getElementById('nutritionManualFields').style.display = '';
         }
-        document.getElementById('scanBtnText').textContent = 'Scan Nutrition Label';
-    };
-    reader.readAsDataURL(file);
+    }
+
+    const operation = checked ? 'check_off_item' : 'uncheck_item';
+    const result = await deftApi(operation, { item_id: id }, { silent: true });
+    if (result) {
+        // Optimistic update
+        if (item) item.checked = checked;
+        renderShoppingList();
+    } else {
+        // Fallback: direct Supabase write
+        await supabaseWrite('deft_shopping_items', 'PATCH', { checked }, `id=eq.${id}`);
+        if (item) item.checked = checked;
+        renderShoppingList();
+    }
 }
 
-function addPantryItem() {
-    editingPantryItem = null;
-    document.getElementById('pantryModalTitle').textContent = 'Add Pantry Item';
-    document.getElementById('pantryItemName').value = '';
-    document.getElementById('pantryFoodSearch').value = '';
-    document.getElementById('pantryItemQty').value = '';
-    document.getElementById('pantryItemUnit').value = 'each';
-    document.getElementById('pantryItemCategory').value = 'other';
-    document.querySelectorAll('input[name="pantryLocation"]').forEach(r => r.checked = r.value === 'fridge');
-    document.getElementById('pantryItemStorageType').value = 'regular';
-    document.getElementById('pantryItemShelfDays').value = SHELF_DEFAULTS.regular;
-    document.getElementById('pantryItemExpiry').value = '';
-    document.getElementById('pantryItemPrice').value = '';
-    document.getElementById('pantryItemNotes').value = '';
-    resetNutritionFields();
-    document.getElementById('removePantryBtn').style.display = 'none';
-    document.getElementById('savePantryBtn').textContent = 'Save Item';
-    // Auto-set storage type when location changes
-    document.querySelectorAll('input[name="pantryLocation"]').forEach(r => {
-        r.onchange = () => {
-            const st = document.getElementById('pantryItemStorageType');
-            if (r.value === 'freezer' && st.value !== 'frozen') { st.value = 'frozen'; onStorageTypeChange(); }
-            else if (r.value !== 'freezer' && st.value === 'frozen') { st.value = 'regular'; onStorageTypeChange(); }
-        };
-    });
-    openModal('addPantryModal');
+async function removeShoppingItem(id) {
+    const itemId = shoppingItems.find(i => i.id === id)?.item_id || id;
+    await supabaseWrite('deft_shopping_items', 'DELETE', null, `item_id=eq.${itemId}`);
+    shoppingItems = shoppingItems.filter(i => i.id !== id);
+    renderShoppingList();
+    toast('Item removed', 'success');
 }
 
-function editPantryItem(id) {
-    const item = pantryItems.find(i => (i.item_id || i.id) === id);
+function editShoppingItemNotes(id) {
+    const item = shoppingItems.find(i => i.id === id);
     if (!item) return;
-    editingPantryItem = id;
-    document.getElementById('pantryModalTitle').textContent = 'Edit Pantry Item';
-    document.getElementById('pantryItemName').value = item.name || '';
-    document.getElementById('pantryFoodSearch').value = '';
-    document.getElementById('pantryItemQty').value = item.quantity || '';
-    document.getElementById('pantryItemUnit').value = item.unit || 'each';
-    document.getElementById('pantryItemCategory').value = item.category || 'other';
-    document.querySelectorAll('input[name="pantryLocation"]').forEach(r => r.checked = r.value === (item.location || 'fridge'));
-    document.getElementById('pantryItemStorageType').value = item.storage_type || 'regular';
-    document.getElementById('pantryItemShelfDays').value = item.default_shelf_days || SHELF_DEFAULTS[item.storage_type || 'regular'] || 7;
-    document.getElementById('pantryItemExpiry').value = item.expiry_date || '';
-    document.getElementById('pantryItemPrice').value = item.price_paid || '';
-    document.getElementById('pantryItemNotes').value = item.notes || '';
-    resetNutritionFields();
-    if (item.nutrition_per_unit) {
-        populateNutritionFields(item.nutrition_per_unit);
-        document.getElementById('nutritionManualFields').style.display = '';
+    document.getElementById('editShoppingItemId').value = item.item_id || id;
+    document.getElementById('editShoppingItemName').value = item.name || '';
+    document.getElementById('editShoppingItemBrand').value = item.brand || '';
+    document.getElementById('editShoppingItemQty').value = item.quantity || 1;
+    document.getElementById('editShoppingItemUnit').value = item.unit || 'each';
+    document.getElementById('editShoppingItemCategory').value = item.category || 'other';
+    document.getElementById('editShoppingItemPantryLoc').value = item.pantry_location || 'fridge';
+    document.getElementById('editShoppingItemPrice').value = item.estimated_price || '';
+    document.getElementById('editShoppingItemNotes').value = item.notes || '';
+    openModal('editShoppingItemModal');
+}
+
+async function saveShoppingItemEdits() {
+    const itemId = document.getElementById('editShoppingItemId').value;
+    const priceVal = parseFloat(document.getElementById('editShoppingItemPrice').value);
+    const updates = {
+        name: document.getElementById('editShoppingItemName').value.trim(),
+        brand: document.getElementById('editShoppingItemBrand').value.trim() || null,
+        quantity: parseFloat(document.getElementById('editShoppingItemQty').value) || 1,
+        unit: document.getElementById('editShoppingItemUnit').value,
+        category: document.getElementById('editShoppingItemCategory').value,
+        pantry_location: document.getElementById('editShoppingItemPantryLoc').value,
+        estimated_price: isNaN(priceVal) ? null : priceVal,
+        notes: document.getElementById('editShoppingItemNotes').value.trim() || null
+    };
+    await supabaseWrite('deft_shopping_items', 'PATCH', updates, `item_id=eq.${itemId}`);
+    const item = shoppingItems.find(i => (i.item_id || i.id) === itemId);
+    if (item) Object.assign(item, updates);
+    renderShoppingList();
+    closeModal('editShoppingItemModal');
+    toast('Item updated', 'success');
+}
+
+async function deleteEditingShoppingItem() {
+    const itemId = document.getElementById('editShoppingItemId').value;
+    if (!confirm('Remove this item from the list?')) return;
+    await supabaseWrite('deft_shopping_items', 'DELETE', null, `item_id=eq.${itemId}`);
+    shoppingItems = shoppingItems.filter(i => (i.item_id || i.id) !== itemId);
+    renderShoppingList();
+    closeModal('editShoppingItemModal');
+    toast('Item removed', 'success');
+}
+
+// ── Shopping Templates ──
+async function openTemplateSelector() {
+    const templates = await supabaseSelect('deft_shopping_templates',
+        `user_id=eq.${activeProfileId}&select=*&order=is_default.desc,name`);
+    const list = document.getElementById('templateList');
+    if (!templates || templates.length === 0) {
+        list.innerHTML = '<div class="empty-state text-xs">No templates yet. Save your current list as a template to get started.</div>';
+    } else {
+        list.innerHTML = templates.map(t => {
+            const items = t.items || [];
+            return `<div class="flex items-center justify-between p-3 rounded-lg" style="background: rgba(255,255,255,0.02); border: 1px solid var(--deft-border);">
+                <div>
+                    <div class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${escapeHtml(t.name)}${t.is_default ? ' <span class="text-xs px-1.5 py-0.5 rounded" style="background: var(--deft-accent-dim); color: var(--deft-accent);">Default</span>' : ''}</div>
+                    <div class="text-xs font-mono" style="color: var(--deft-txt-3);">${items.length} items</div>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-primary text-xs" onclick="loadTemplate('${t.template_id}')">Load</button>
+                    <button class="btn btn-danger text-xs" onclick="deleteTemplate('${t.template_id}')">Delete</button>
+                </div>
+            </div>`;
+        }).join('');
     }
-    document.getElementById('removePantryBtn').style.display = '';
-    document.getElementById('savePantryBtn').textContent = 'Update Item';
-    // Set location change handler
-    document.querySelectorAll('input[name="pantryLocation"]').forEach(r => {
-        r.onchange = () => {
-            const st = document.getElementById('pantryItemStorageType');
-            if (r.value === 'freezer' && st.value !== 'frozen') { st.value = 'frozen'; onStorageTypeChange(); }
-            else if (r.value !== 'freezer' && st.value === 'frozen') { st.value = 'regular'; onStorageTypeChange(); }
-        };
+    document.getElementById('purchaseHistoryResults').innerHTML = '';
+    document.getElementById('templateSearchInput').value = '';
+    openModal('templateSelectorModal');
+}
+
+async function loadTemplate(templateId) {
+    if (!activeShoppingList) {
+        toast('Create a shopping list first', 'error');
+        return;
+    }
+    const templates = await supabaseSelect('deft_shopping_templates',
+        `template_id=eq.${templateId}&select=items`);
+    if (!templates || !templates[0]) return;
+    const items = templates[0].items || [];
+    if (!items.length) { toast('Template is empty', 'error'); return; }
+
+    const result = await deftApi('add_shopping_items', {
+        list_id: activeShoppingList.id,
+        items: items.map(i => ({ name: i.name, quantity: i.quantity, unit: i.unit, category: i.category, brand: i.brand, pantry_location: i.pantry_location }))
     });
-    openModal('addPantryModal');
+    if (result) {
+        toast(`Loaded ${items.length} items from template`, 'success');
+        closeModal('templateSelectorModal');
+        await loadShoppingItems();
+    }
 }
 
-async function savePantryItem() {
-    const name = document.getElementById('pantryItemName').value.trim();
-    if (!name) { toast('Item name is required', 'error'); return; }
-
-    const quantity = parseFloat(document.getElementById('pantryItemQty').value) || null;
-    const unit = document.getElementById('pantryItemUnit').value;
-    const category = document.getElementById('pantryItemCategory').value;
-    const location = document.querySelector('input[name="pantryLocation"]:checked')?.value || 'fridge';
-    const storage_type = document.getElementById('pantryItemStorageType').value;
-    const default_shelf_days = parseInt(document.getElementById('pantryItemShelfDays').value) || null;
-    const expiry_date = document.getElementById('pantryItemExpiry').value || null;
-    const priceVal = parseFloat(document.getElementById('pantryItemPrice').value);
-    const price_paid = isNaN(priceVal) ? null : priceVal;
-    const notes = document.getElementById('pantryItemNotes').value.trim() || null;
-    const nutrition_per_unit = collectNutritionFromFields();
-
-    const data = { name, quantity, unit, category, location, storage_type, default_shelf_days, expiry_date, notes };
-    if (price_paid !== null) data.price_paid = price_paid;
-    if (nutrition_per_unit) data.nutrition_per_unit = nutrition_per_unit;
-
-    // Include barcode if set from scanner
-    const barcode = document.getElementById('addPantryModal').dataset.barcode || null;
-    if (barcode) {
-        data.barcode = barcode;
-        delete document.getElementById('addPantryModal').dataset.barcode;
+async function saveAsTemplate() {
+    if (!activeShoppingList || shoppingItems.length === 0) {
+        toast('No items to save as template', 'error');
+        return;
     }
+    const name = prompt('Template name (e.g., "Weekly Staples", "Costco Run"):');
+    if (!name) return;
+    const templateItems = shoppingItems.map(i => ({
+        name: i.name, quantity: i.quantity, unit: i.unit,
+        category: i.category, brand: i.brand, pantry_location: i.pantry_location
+    }));
+    await supabaseWrite('deft_shopping_templates', 'POST', {
+        user_id: activeProfileId, name, items: templateItems
+    });
+    toast(`Template "${name}" saved with ${templateItems.length} items`, 'success');
+}
 
-    // If nutrition was provided and item doesn't exist in food database, offer to create it
-    if (nutrition_per_unit && !editingPantryItem) {
-        createFoodDatabaseEntry(name, nutrition_per_unit);
-    }
+async function deleteTemplate(templateId) {
+    if (!confirm('Delete this template?')) return;
+    await supabaseWrite('deft_shopping_templates', 'DELETE', null, `template_id=eq.${templateId}`);
+    toast('Template deleted', 'success');
+    openTemplateSelector(); // Refresh the list
+}
 
-    let result;
-    if (editingPantryItem) {
-        result = await deftApi('update_pantry_item', { item_id: editingPantryItem, ...data });
-    } else {
-        result = await deftApi('add_pantry_item', data);
+async function searchPurchaseHistory(query) {
+    const results = document.getElementById('purchaseHistoryResults');
+    if (!query || query.length < 2) { results.innerHTML = ''; return; }
+    const items = await supabaseSelect('deft_shopping_history',
+        `user_id=eq.${activeProfileId}&name=ilike.*${encodeURIComponent(query)}*&select=*&order=purchase_count.desc&limit=15`);
+    if (!items || items.length === 0) {
+        results.innerHTML = '<div class="text-xs py-2" style="color: var(--deft-txt-3);">No matches found</div>';
+        return;
     }
+    results.innerHTML = items.map(i => `
+        <div class="flex items-center justify-between py-1.5 px-2 rounded cursor-pointer transition-colors hover:bg-white/5" onclick="addHistoryItemToCurrentList('${escapeHtml(i.name)}', ${i.typical_quantity || 1}, '${i.unit || 'each'}', '${i.category || 'other'}', '${i.pantry_location || 'fridge'}')">
+            <span class="text-sm" style="color: var(--deft-txt);">${escapeHtml(i.name)}${i.brand ? ' <span class=\"text-xs\" style=\"color: var(--deft-txt-3);\">(' + escapeHtml(i.brand) + ')</span>' : ''}</span>
+            <span class="text-xs font-mono" style="color: var(--deft-txt-3);">bought ${i.purchase_count}x</span>
+        </div>
+    `).join('');
+}
+
+async function addHistoryItemToCurrentList(name, qty, unit, category, pantryLoc) {
+    if (!activeShoppingList) { toast('Create a list first', 'error'); return; }
+    const result = await deftApi('add_shopping_items', {
+        list_id: activeShoppingList.id,
+        items: [{ name, quantity: qty, unit, category, pantry_location: pantryLoc }]
+    });
+    if (result) {
+        toast(`Added ${name}`, 'success');
+        await loadShoppingItems();
+    }
+}
+
+async function addShoppingItem() {
+    if (!activeShoppingList) { toast('Create a shopping list first', 'error'); return; }
+    const name = document.getElementById('addShoppingItemInput').value.trim();
+    if (!name) return;
+    const quantity = parseFloat(document.getElementById('addShoppingItemQty').value) || 1;
+    const unit = document.getElementById('addShoppingItemUnit').value;
+    const priceVal = parseFloat(document.getElementById('addShoppingItemPrice').value);
+    const itemData = { name, quantity, unit };
+    if (!isNaN(priceVal) && priceVal > 0) itemData.estimated_price = priceVal;
+
+    const result = await deftApi('add_shopping_items', {
+        list_id: activeShoppingList.id,
+        items: [itemData]
+    });
 
     if (result) {
-        toast(editingPantryItem ? 'Item updated' : 'Item added to pantry', 'success');
-        closeModal('addPantryModal');
-        editingPantryItem = null;
-        await loadPantry();
+        document.getElementById('addShoppingItemInput').value = '';
+        document.getElementById('addShoppingItemQty').value = '1';
+        document.getElementById('addShoppingItemUnit').value = 'each';
+        document.getElementById('addShoppingItemPrice').value = '';
+        document.getElementById('shoppingAutocomplete').classList.remove('open');
+        await loadShoppingItems();
+        toast('Item added', 'success');
     }
 }
 
-async function createFoodDatabaseEntry(name, nutrition) {
-    // Check if food already exists in database
-    try {
-        const existing = await supabaseSelect('deft_food_database',
-            `name=ilike.${encodeURIComponent(name)}&select=food_id,name&limit=1`);
-        if (existing && existing.length > 0) return; // Already exists
+function switchShoppingList(listId) {
+    activeShoppingList = shoppingLists.find(l => l.id === listId) || null;
+    updateSharedBadge();
+    loadShoppingItems();
+}
 
-        // Create new food database entry
-        const foodEntry = {
-            name: name,
-            brand: nutrition.brand || null,
-            serving_size: nutrition.serving_size || '1 serving',
-            nutrition_per_serving: {
-                calories: nutrition.calories || 0,
-                total_fat_g: nutrition.total_fat_g || 0,
-                saturated_fat_g: nutrition.saturated_fat_g || 0,
-                protein_g: nutrition.protein_g || 0,
-                total_carbs_g: nutrition.total_carbs_g || 0,
-                fiber_g: nutrition.fiber_g || 0,
-                sugar_g: nutrition.sugar_g || 0,
-                net_carbs_g: (nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0),
-                sodium_mg: nutrition.sodium_mg || 0,
-                cholesterol_mg: nutrition.cholesterol_mg || 0
-            },
-            category: 'other',
-            is_keto_friendly: ((nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0)) <= 10,
-            keto_tier: ((nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0)) <= 3 ? 'excellent'
-                : ((nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0)) <= 6 ? 'good'
-                : ((nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0)) <= 12 ? 'moderate' : 'avoid'
-        };
-        await supabaseWrite('deft_food_database', 'POST', foodEntry);
-    } catch (e) {
-        // Non-critical - don't block pantry item save
+function updateSharedBadge() {
+    const badge = document.getElementById('sharedListBadge');
+    if (badge) {
+        badge.style.display = (activeShoppingList && activeShoppingList.shared) ? '' : 'none';
     }
 }
 
-async function removePantryItem(id, reason) {
-    if (!id) return;
-    if (!confirm('Remove this item from your pantry?')) return;
-    const result = await deftApi('remove_pantry_item', { item_id: id, reason: reason || 'used_up' });
+function createShoppingList() {
+    document.getElementById('newListName').value = '';
+    document.getElementById('newListStore').value = '';
+    document.getElementById('newListNotes').value = '';
+    document.getElementById('newListShared').checked = true;
+    openModal('createListModal');
+}
+
+async function saveShoppingList() {
+    const name = document.getElementById('newListName').value.trim();
+    if (!name) { toast('List name is required', 'error'); return; }
+    const store_name = document.getElementById('newListStore').value.trim() || null;
+    const notes = document.getElementById('newListNotes').value.trim() || null;
+    const shared = document.getElementById('newListShared').checked;
+
+    const result = await deftApi('create_shopping_list', { name, store_name, notes, shared });
+
     if (result) {
-        toast('Item removed', 'success');
-        closeModal('addPantryModal');
-        editingPantryItem = null;
-        await loadPantry();
-    }
-}
-
-async function whatCanIMake() {
-    const panel = document.getElementById('whatCanIMakePanel');
-    const content = document.getElementById('whatCanIMakeContent');
-    panel.style.display = '';
-    content.innerHTML = '<p class="ai-loading">Analyzing your pantry items and suggesting recipes...</p>';
-
-    const result = await deftApi('what_can_i_make', {});
-    if (result && result.data) {
-        const suggestions = result.data.suggestions || result.data;
-        if (Array.isArray(suggestions) && suggestions.length > 0) {
-            content.innerHTML = suggestions.map(s => {
-                const matchPct = s.match_pct != null ? Math.round(s.match_pct * 100) : null;
-                const matchBadge = matchPct != null
-                    ? `<span class="badge ml-2" style="background: ${matchPct >= 80 ? 'var(--deft-success-dim)' : matchPct >= 60 ? 'var(--deft-warning-dim)' : 'var(--deft-danger-dim)'}; color: ${matchPct >= 80 ? 'var(--deft-success)' : matchPct >= 60 ? 'var(--deft-warning)' : 'var(--deft-danger)'}; font-size: 0.65rem;">${matchPct}% match</span>`
-                    : '';
-                const missingList = s.missing_ingredients && s.missing_ingredients.length > 0
-                    ? `<p class="text-xs mt-1" style="color: var(--deft-warning);">Missing: ${escapeHtml(s.missing_ingredients.map(i => typeof i === 'string' ? i : i.name).join(', '))}</p>`
-                    : '';
-                return `<div class="mb-3 p-3 rounded-lg" style="background: rgba(168,130,214,0.05); border: 1px solid rgba(168,130,214,0.1);">
-                    <div class="flex items-center">
-                        <h4 class="font-heading font-bold text-sm" style="color: #A882D6;">${escapeHtml(s.name || s.title || 'Suggestion')}</h4>
-                        ${matchBadge}
-                    </div>
-                    <p class="text-xs mb-1 mt-1" style="color: var(--deft-txt-2);">${escapeHtml(s.description || s.reason || '')}</p>
-                    ${s.ingredients ? `<p class="text-xs font-mono" style="color: var(--deft-txt-3);">Uses: ${escapeHtml(Array.isArray(s.ingredients) ? s.ingredients.join(', ') : s.ingredients)}</p>` : ''}
-                    ${missingList}
-                    ${s.estimated_nutrition ? `<p class="text-xs font-mono mt-1" style="color: var(--deft-txt-3);">${s.estimated_nutrition.calories || 0} cal | ${s.estimated_nutrition.fat_g || 0}g fat | ${s.estimated_nutrition.protein_g || 0}g protein | ${s.estimated_nutrition.net_carbs_g || 0}g net carbs</p>` : ''}
-                </div>`;
-            }).join('');
-        } else if (typeof suggestions === 'string') {
-            content.innerHTML = `<div class="text-sm" style="color: var(--deft-txt-2); white-space: pre-wrap;">${escapeHtml(suggestions)}</div>`;
-        } else {
-            content.innerHTML = '<p style="color: var(--deft-txt-3);">No suggestions available. Try adding more items to your pantry.</p>';
+        toast('Shopping list created', 'success');
+        closeModal('createListModal');
+        // Set the new list as active
+        if (result.data && (result.data.list_id || result.data.id)) {
+            activeShoppingList = { ...result.data, id: result.data.list_id || result.data.id };
         }
+        await loadShoppingList();
     } else {
-        content.innerHTML = '<p style="color: var(--deft-txt-3);">Could not generate suggestions right now. Please try again later.</p>';
+        // Fallback: create directly in Supabase
+        const directResult = await supabaseWrite('deft_shopping_lists', 'POST', {
+            user_id: activeProfileId, name, store_name, notes, shared, status: 'active'
+        });
+        if (directResult && directResult[0]) {
+            toast('Shopping list created', 'success');
+            closeModal('createListModal');
+            activeShoppingList = directResult[0];
+            await loadShoppingList();
+        }
     }
 }
 
-// Food database autocomplete
-let foodSearchTimeout = null;
-async function searchFoodDatabase(query) {
-    clearTimeout(foodSearchTimeout);
-    const dropdown = document.getElementById('foodSearchResults');
+async function completeShoppingList() {
+    if (!activeShoppingList) return;
+    if (!confirm('Mark this shopping list as complete? Items will be added to your purchase history.')) return;
+
+    const result = await deftApi('complete_list', { list_id: activeShoppingList.id });
+    if (result) {
+        toast('Shopping list completed!', 'success');
+        activeShoppingList = null;
+        await loadShoppingList();
+    } else {
+        // Fallback: update status directly
+        await supabaseWrite('deft_shopping_lists', 'PATCH', {
+            status: 'completed', completed_at: new Date().toISOString()
+        }, `id=eq.${activeShoppingList.id}`);
+        toast('Shopping list completed!', 'success');
+        activeShoppingList = null;
+        await loadShoppingList();
+    }
+}
+
+// Shopping history autocomplete
+let shoppingHistoryTimeout = null;
+async function searchShoppingHistory(query) {
+    clearTimeout(shoppingHistoryTimeout);
+    const dropdown = document.getElementById('shoppingAutocomplete');
     if (!query || query.length < 2) { dropdown.classList.remove('open'); return; }
 
-    foodSearchTimeout = setTimeout(async () => {
-        const results = await supabaseSelect('deft_food_database',
-            `name=ilike.*${encodeURIComponent(query)}*&select=id,name,calories_per_serving,serving_size,serving_unit&limit=8`);
+    shoppingHistoryTimeout = setTimeout(async () => {
+        const results = await supabaseSelect('deft_shopping_history',
+            `user_id=eq.${activeProfileId}&item_name=ilike.*${encodeURIComponent(query)}*&select=item_name,purchase_count&order=purchase_count.desc&limit=8`);
         if (results && results.length > 0) {
-            dropdown.innerHTML = results.map(f => `
-                <div class="autocomplete-item" onclick="selectFoodItem('${escapeHtml(f.name)}')">
-                    <span>${escapeHtml(f.name)}</span>
-                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${f.calories_per_serving || '?'} cal / ${f.serving_size || ''} ${f.serving_unit || ''}</span>
+            dropdown.innerHTML = results.map(r => `
+                <div class="autocomplete-item" onclick="document.getElementById('addShoppingItemInput').value='${escapeHtml(r.item_name)}';document.getElementById('shoppingAutocomplete').classList.remove('open');">
+                    <span>${escapeHtml(r.item_name)}</span>
+                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">bought ${r.purchase_count}x</span>
                 </div>
             `).join('');
             dropdown.classList.add('open');
@@ -2396,290 +2243,209 @@ async function searchFoodDatabase(query) {
     }, 300);
 }
 
-function selectFoodItem(name) {
-    document.getElementById('pantryItemName').value = name;
-    document.getElementById('foodSearchResults').classList.remove('open');
-    document.getElementById('pantryFoodSearch').value = '';
-}
-
-// ═══════════════════════════════════════
-// PREPARED MEALS FUNCTIONS
-// ═══════════════════════════════════════
-async function loadPreparedMeals() {
+// Load frequent items for sidebar
+async function loadFrequentItems() {
     if (!activeProfileId) return;
-    const meals = await supabaseSelect('deft_prepared_meals',
-        `user_id=eq.${activeProfileId}&select=*&order=prepared_date.desc`);
-    preparedMeals = (meals || []).map(m => ({ ...m, id: m.prepared_id || m.id }));
-    renderPreparedMeals();
-}
+    const items = await supabaseSelect('deft_shopping_history',
+        `user_id=eq.${activeProfileId}&select=id,item_name,purchase_count&order=purchase_count.desc&limit=20`);
+    const container = document.getElementById('frequentItemsList');
 
-function renderPreparedMeals() {
-    const grid = document.getElementById('preparedGrid');
-    document.getElementById('preparedCount').textContent = preparedMeals.length;
-
-    if (preparedMeals.length === 0) {
-        grid.innerHTML = `<div class="empty-state col-span-full">
-            <p>No prepared meals tracked</p>
-            <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Add meals you've prepped to track servings and freshness</p>
-        </div>`;
+    if (!items || items.length === 0) {
+        container.innerHTML = '<div class="empty-state text-xs">No purchase history yet</div>';
         return;
     }
 
-    grid.innerHTML = preparedMeals.map(meal => {
-        const servingsUsed = meal.servings_consumed || 0;
-        const totalServings = meal.total_servings || 1;
-        const remaining = Math.max(totalServings - servingsUsed, 0);
-        const pct = Math.round((remaining / totalServings) * 100);
-        const nutrition = meal.nutrition_per_serving || {};
-        const locStr = meal.location ? meal.location.charAt(0).toUpperCase() + meal.location.slice(1) : '';
-        const dateStr = meal.prepared_date ? formatDate(meal.prepared_date) : '';
-        const subline = ['Prepared ' + dateStr, locStr].filter(Boolean).join(' - ');
-
-        return `<div class="panel p-4">
-            <div class="flex items-start justify-between mb-3">
-                <div>
-                    <h3 class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${escapeHtml(meal.name || 'Unnamed')}</h3>
-                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${escapeHtml(subline)}</span>
-                </div>
+    container.innerHTML = items.map(item => `
+        <div class="flex items-center justify-between px-3 py-2 cursor-pointer transition-colors" style="border-bottom: 1px solid var(--deft-border);" onclick="addHistoryItemToList('${escapeHtml(item.item_name)}')" onmouseenter="this.style.background='rgba(255,255,255,0.03)'" onmouseleave="this.style.background='transparent'">
+            <span class="text-xs" style="color: var(--deft-txt);">${escapeHtml(item.item_name)}</span>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${item.purchase_count}x</span>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="color: var(--deft-accent); opacity: 0.6;"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             </div>
-            <div class="mb-3">
-                <div class="flex justify-between text-xs mb-1" style="color: var(--deft-txt-2);">
-                    <span>Servings</span><span class="font-mono font-bold">${remaining} / ${totalServings}</span>
-                </div>
-                <div class="w-full h-2 rounded-full" style="background: var(--deft-border);">
-                    <div class="h-full rounded-full transition-all" style="width: ${pct}%; background: var(--deft-accent);"></div>
-                </div>
-            </div>
-            <div class="flex gap-3 text-xs font-mono mb-3" style="color: var(--deft-txt-2);">
-                <span>${nutrition.calories || '?'} cal</span>
-                <span>${nutrition.fat_g || '?'}g F</span>
-                <span>${nutrition.protein_g || '?'}g P</span>
-                <span>${nutrition.net_carbs_g || '?'}g C</span>
-            </div>
-            <div class="flex gap-2">
-                <button class="btn btn-primary text-xs flex-1" onclick="consumePrepared('${meal.id}')" ${remaining <= 0 ? 'disabled' : ''}>Eat 1 Serving</button>
-                <button class="btn btn-ghost text-xs" onclick="editPrepared('${meal.id}')">Edit</button>
-                <button class="btn btn-danger text-xs" onclick="discardPrepared('${meal.id}')">Discard</button>
-            </div>
-        </div>`;
-    }).join('');
+        </div>
+    `).join('');
 }
 
-function addPreparedMeal() {
-    editingPreparedMeal = null;
-    selectedRecipeId = null;
-    document.getElementById('preparedModalTitle').textContent = 'Add Prepared Meal';
-    document.getElementById('preparedMealName').value = '';
-    document.getElementById('preparedRecipeSearch').value = '';
-    document.getElementById('preparedServings').value = '4';
-    document.getElementById('preparedCalories').value = '';
-    document.getElementById('preparedFat').value = '';
-    document.getElementById('preparedProtein').value = '';
-    document.getElementById('preparedNetCarbs').value = '';
-    document.querySelectorAll('input[name="preparedLocation"]').forEach(r => r.checked = r.value === 'fridge');
-    // Default expiry to 5 days from now
-    const defaultExpiry = new Date();
-    defaultExpiry.setDate(defaultExpiry.getDate() + 5);
-    document.getElementById('preparedExpiry').value = defaultExpiry.toISOString().split('T')[0];
-    document.getElementById('preparedNotes').value = '';
-    document.getElementById('savePreparedBtn').textContent = 'Save Meal';
-    openModal('addPreparedModal');
-}
-
-function editPrepared(id) {
-    const meal = preparedMeals.find(m => m.id === id);
-    if (!meal) return;
-    editingPreparedMeal = id;
-    document.getElementById('preparedModalTitle').textContent = 'Edit Prepared Meal';
-    document.getElementById('preparedMealName').value = meal.name || '';
-    document.getElementById('preparedRecipeSearch').value = '';
-    document.getElementById('preparedServings').value = meal.total_servings || 4;
-    const n = meal.nutrition_per_serving || {};
-    document.getElementById('preparedCalories').value = n.calories || '';
-    document.getElementById('preparedFat').value = n.fat_g || '';
-    document.getElementById('preparedProtein').value = n.protein_g || '';
-    document.getElementById('preparedNetCarbs').value = n.net_carbs_g || '';
-    document.querySelectorAll('input[name="preparedLocation"]').forEach(r => r.checked = r.value === (meal.location || 'fridge'));
-    document.getElementById('preparedExpiry').value = meal.expiry_date || '';
-    document.getElementById('preparedNotes').value = meal.notes || '';
-    document.getElementById('savePreparedBtn').textContent = 'Update Meal';
-    openModal('addPreparedModal');
-}
-
-async function savePreparedMeal() {
-    const name = document.getElementById('preparedMealName').value.trim();
-    if (!name) { toast('Meal name is required', 'error'); return; }
-
-    const total_servings = parseInt(document.getElementById('preparedServings').value) || 4;
-    const location = document.querySelector('input[name="preparedLocation"]:checked')?.value || 'fridge';
-    const expiry_date = document.getElementById('preparedExpiry').value || null;
-    const notes = document.getElementById('preparedNotes').value.trim() || null;
-    const nutrition_per_serving = {
-        calories: parseFloat(document.getElementById('preparedCalories').value) || 0,
-        fat_g: parseFloat(document.getElementById('preparedFat').value) || 0,
-        protein_g: parseFloat(document.getElementById('preparedProtein').value) || 0,
-        net_carbs_g: parseFloat(document.getElementById('preparedNetCarbs').value) || 0,
-    };
-
-    const data = { name, total_servings, location, expiry_date, notes, nutrition_per_serving };
-    if (selectedRecipeId && !editingPreparedMeal) data.recipe_id = selectedRecipeId;
-
-    let result;
-    if (editingPreparedMeal) {
-        result = await deftApi('update_prepared_meal', { prepared_id: editingPreparedMeal, ...data });
-    } else {
-        result = await deftApi('add_prepared_meal', data);
-    }
-
-    if (result) {
-        toast(editingPreparedMeal ? 'Meal updated' : 'Prepared meal added', 'success');
-        closeModal('addPreparedModal');
-        editingPreparedMeal = null;
-        await loadPreparedMeals();
-    }
-}
-
-async function consumePrepared(id) {
-    const result = await deftApi('consume_prepared', { prepared_id: id, servings: 1 });
-    if (result) {
-        toast('Serving consumed! Logged to today\'s meals.', 'success');
-        await loadPreparedMeals();
-    }
-}
-
-async function discardPrepared(id) {
-    if (!confirm('Discard this prepared meal? This cannot be undone.')) return;
-    const result = await deftApi('discard_prepared', { prepared_id: id });
-    if (result) {
-        toast('Meal discarded', 'success');
-        await loadPreparedMeals();
-    }
-}
-
-// Recipe autocomplete
-let recipeSearchTimeout = null;
-let selectedRecipeId = null;
-
-async function searchRecipes(query) {
-    clearTimeout(recipeSearchTimeout);
-    const dropdown = document.getElementById('recipeSearchResults');
-    if (!query || query.length < 2) { dropdown.classList.remove('open'); return; }
-
-    recipeSearchTimeout = setTimeout(async () => {
-        const results = await supabaseSelect('deft_recipes',
-            `user_id=eq.${activeProfileId}&name=ilike.*${encodeURIComponent(query)}*&status=eq.active&select=recipe_id,name,servings,nutrition_per_serving&limit=8`);
-        if (results && results.length > 0) {
-            dropdown.innerHTML = results.map(r => {
-                const n = r.nutrition_per_serving || {};
-                const dataAttr = JSON.stringify({ recipe_id: r.recipe_id, name: r.name, servings: r.servings, nutrition: n }).replace(/"/g, '&quot;');
-                return `<div class="autocomplete-item" onclick="selectRecipeForPrepared(${dataAttr})">
-                    <div class="flex justify-between w-full">
-                        <span>${escapeHtml(r.name)}</span>
-                        <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${n.calories || '?'} cal &middot; ${r.servings || '?'} servings</span>
-                    </div>
-                </div>`;
-            }).join('');
-            dropdown.classList.add('open');
-        } else {
-            dropdown.innerHTML = '<div class="autocomplete-item" style="color: var(--deft-txt-3);">No recipes found</div>';
-            dropdown.classList.add('open');
-        }
-    }, 300);
-}
-
-function selectRecipeForPrepared(data) {
-    selectedRecipeId = data.recipe_id || null;
-    document.getElementById('preparedMealName').value = data.name || '';
-    document.getElementById('recipeSearchResults').classList.remove('open');
-    document.getElementById('preparedRecipeSearch').value = data.name || '';
-    if (data.servings) document.getElementById('preparedServings').value = data.servings;
-    const n = data.nutrition || {};
-    document.getElementById('preparedCalories').value = n.calories || '';
-    document.getElementById('preparedFat').value = n.fat_g || n.total_fat_g || '';
-    document.getElementById('preparedProtein').value = n.protein_g || '';
-    document.getElementById('preparedNetCarbs').value = n.net_carbs_g || '';
-    toast('Recipe loaded - nutrition auto-filled', 'success');
-}
-
-// ═══════════════════════════════════════
-// BARCODE SCANNER
-// ═══════════════════════════════════════
-let html5QrCode = null;
-
-function openBarcodeScanner() {
-    openModal('barcodeScannerModal');
-    document.getElementById('barcodeResult').style.display = 'none';
-
-    html5QrCode = new Html5Qrcode("barcode-reader");
-    html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 100 } },
-        async (decodedText) => {
-            // Stop scanning
-            await html5QrCode.stop();
-            html5QrCode = null;
-
-            // Show loading
-            const resultDiv = document.getElementById('barcodeResult');
-            resultDiv.style.display = '';
-            resultDiv.innerHTML = '<p class="ai-loading" style="color: var(--deft-txt-2);">Looking up product...</p>';
-
-            // Call DEFT-BRIDGE scan_barcode
-            const result = await deftApi('scan_barcode', { barcode: decodedText });
-
-            if (result && result.success !== false) {
-                const p = result.data || result;
-                const nutrition = p.nutrition_per_serving || {};
-                resultDiv.innerHTML = `
-                    <h4 class="font-heading font-bold text-sm mb-2" style="color: var(--deft-accent);">${escapeHtml(p.name || 'Unknown Product')}</h4>
-                    ${p.brand ? `<p class="text-xs mb-1" style="color: var(--deft-txt-2);">Brand: ${escapeHtml(p.brand)}</p>` : ''}
-                    <p class="text-xs mb-2 font-mono" style="color: var(--deft-txt-3);">
-                        ${nutrition.calories || 0} cal | ${nutrition.total_fat_g || 0}g fat | ${nutrition.protein_g || 0}g protein | ${nutrition.net_carbs_g || 0}g net carbs
-                    </p>
-                    <div class="flex gap-2 mt-3">
-                        <button class="btn btn-primary text-xs" onclick="addScannedItem('${escapeHtml(p.name || '')}', '${escapeHtml(decodedText)}')">Add to Pantry</button>
-                        <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Cancel</button>
-                    </div>
-                `;
-            } else {
-                resultDiv.innerHTML = `
-                    <p class="text-xs" style="color: var(--deft-warning);">Product not found for barcode: ${escapeHtml(decodedText)}</p>
-                    <div class="flex gap-2 mt-2">
-                        <button class="btn btn-ghost text-xs" onclick="restartBarcodeScanner()">Try Again</button>
-                        <button class="btn btn-primary text-xs" onclick="addScannedItem('', '${escapeHtml(decodedText)}')">Add Manually</button>
-                    </div>
-                `;
-            }
-        },
-        (errorMessage) => { /* ignore scan errors */ }
-    ).catch(err => {
-        document.getElementById('barcodeResult').style.display = '';
-        document.getElementById('barcodeResult').innerHTML = `<p class="text-xs" style="color: var(--deft-danger);">Camera access denied or not available.</p>`;
+async function addHistoryItemToList(itemName) {
+    if (!activeShoppingList) { toast('Create a shopping list first', 'error'); return; }
+    const result = await supabaseWrite('deft_shopping_items', 'POST', {
+        list_id: activeShoppingList.id,
+        name: itemName,
+        quantity: 1,
+        unit: 'each',
+        checked: false
     });
-}
-
-function closeBarcodeScanner() {
-    if (html5QrCode) {
-        html5QrCode.stop().catch(() => {});
-        html5QrCode = null;
+    if (result) {
+        await loadShoppingItems();
+        toast(`Added "${itemName}"`, 'success');
     }
-    closeModal('barcodeScannerModal');
 }
 
-function restartBarcodeScanner() {
-    closeBarcodeScanner();
-    setTimeout(() => openBarcodeScanner(), 300);
+// ═══════════════════════════════════════
+// SHOPPING HISTORY FUNCTIONS
+// ═══════════════════════════════════════
+async function loadShoppingHistory() {
+    if (!activeProfileId) return;
+
+    // Load completed lists
+    const lists = await supabaseSelect('deft_shopping_lists',
+        `user_id=eq.${activeProfileId}&status=eq.completed&select=*&order=completed_at.desc&limit=20`);
+
+    // Load frequent items
+    const freqItems = await supabaseSelect('deft_shopping_history',
+        `user_id=eq.${activeProfileId}&select=*&order=purchase_count.desc&limit=50`);
+
+    renderShoppingHistory(
+        (lists || []).map(l => ({ ...l, id: l.list_id || l.id })),
+        (freqItems || []).map(f => ({ ...f, id: f.history_id || f.id }))
+    );
+
+    // Load cost summary
+    loadCostSummary();
 }
 
-function addScannedItem(name, barcode) {
-    closeBarcodeScanner();
-    // Open the add pantry item modal pre-filled with the scanned item name
-    addPantryItem();
-    setTimeout(() => {
-        if (name) document.getElementById('pantryItemName').value = name;
-        // Store barcode for when form is submitted
-        document.getElementById('addPantryModal').dataset.barcode = barcode;
-    }, 100);
+async function loadCostSummary() {
+    const panel = document.getElementById('costSummaryPanel');
+    try {
+        const costData = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_cost_summary`, {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ p_user_id: activeProfileId, p_days: 30 })
+        }).then(r => r.json());
+
+        if (!costData || (costData.code && costData.message)) {
+            panel.innerHTML = '<div class="empty-state text-xs" style="color: var(--deft-txt-3);">Cost tracking data will appear here once you start logging prices on shopping items.</div>';
+            return;
+        }
+
+        const total = costData.total_spent || 0;
+        const byCategory = costData.by_category || [];
+        const byStore = costData.by_store || [];
+        const topItems = costData.top_items || [];
+
+        let html = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div class="p-3 rounded-lg" style="background: rgba(255,255,255,0.02); border: 1px solid var(--deft-border);">
+                <div class="text-xs font-heading uppercase tracking-wide mb-1" style="color: var(--deft-txt-3);">Total Spent</div>
+                <div class="text-lg font-bold font-mono" style="color: var(--deft-accent);">$${parseFloat(total).toFixed(2)}</div>
+            </div>`;
+
+        // By category breakdown (top 3)
+        if (byCategory.length > 0) {
+            html += `<div class="p-3 rounded-lg" style="background: rgba(255,255,255,0.02); border: 1px solid var(--deft-border);">
+                <div class="text-xs font-heading uppercase tracking-wide mb-1" style="color: var(--deft-txt-3);">By Category</div>
+                ${byCategory.slice(0, 3).map(c => `<div class="flex justify-between text-xs py-0.5">
+                    <span style="color: var(--deft-txt-2);">${escapeHtml(c.category || 'Other')}</span>
+                    <span class="font-mono" style="color: var(--deft-txt);">$${parseFloat(c.total || 0).toFixed(2)}</span>
+                </div>`).join('')}
+            </div>`;
+        }
+
+        // By store breakdown (top 3)
+        if (byStore.length > 0) {
+            html += `<div class="p-3 rounded-lg" style="background: rgba(255,255,255,0.02); border: 1px solid var(--deft-border);">
+                <div class="text-xs font-heading uppercase tracking-wide mb-1" style="color: var(--deft-txt-3);">By Store</div>
+                ${byStore.slice(0, 3).map(s => `<div class="flex justify-between text-xs py-0.5">
+                    <span style="color: var(--deft-txt-2);">${escapeHtml(s.store || 'Unknown')}</span>
+                    <span class="font-mono" style="color: var(--deft-txt);">$${parseFloat(s.total || 0).toFixed(2)}</span>
+                </div>`).join('')}
+            </div>`;
+        }
+
+        // Top items by frequency with avg price
+        if (topItems.length > 0) {
+            html += `<div class="p-3 rounded-lg" style="background: rgba(255,255,255,0.02); border: 1px solid var(--deft-border);">
+                <div class="text-xs font-heading uppercase tracking-wide mb-1" style="color: var(--deft-txt-3);">Top Items</div>
+                ${topItems.slice(0, 3).map(i => `<div class="flex justify-between text-xs py-0.5">
+                    <span style="color: var(--deft-txt-2);">${escapeHtml(i.name || 'Item')}</span>
+                    <span class="font-mono" style="color: var(--deft-txt);">${i.count || 0}x @ $${parseFloat(i.avg_price || 0).toFixed(2)}</span>
+                </div>`).join('')}
+            </div>`;
+        }
+
+        html += '</div>';
+        panel.innerHTML = html;
+    } catch (err) {
+        panel.innerHTML = '<div class="empty-state text-xs" style="color: var(--deft-txt-3);">Cost tracking data will appear here once you start logging prices on shopping items.</div>';
+    }
+}
+
+function renderShoppingHistory(lists, freqItems) {
+    // Render completed lists
+    const listContainer = document.getElementById('completedLists');
+    if (lists.length === 0) {
+        listContainer.innerHTML = '<div class="empty-state"><p>No completed shopping lists yet</p></div>';
+    } else {
+        listContainer.innerHTML = lists.map(list => {
+            const dateStr = list.completed_at ? formatDate(list.completed_at.split('T')[0]) : 'Unknown date';
+            const itemCount = list.item_count || '?';
+            return `<div class="panel">
+                <div class="panel-header cursor-pointer" onclick="toggleHistoryList('${list.id}', this)">
+                    <div>
+                        <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${escapeHtml(list.name || 'Untitled')}</span>
+                        <span class="text-xs font-mono ml-2" style="color: var(--deft-txt-3);">${dateStr}${list.store_name ? ' - ' + escapeHtml(list.store_name) : ''}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge" style="background: var(--deft-accent-dim); color: var(--deft-accent);">${itemCount} items</span>
+                        <svg class="history-chevron transition-transform" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    </div>
+                </div>
+                <div class="history-items" id="history-items-${list.id}" style="display: none;"></div>
+            </div>`;
+        }).join('');
+    }
+
+    // Render frequent items table
+    const tableBody = document.getElementById('frequentTableBody');
+    if (freqItems.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="empty-state">No purchase history yet</td></tr>';
+    } else {
+        tableBody.innerHTML = freqItems.map(item => {
+            const lastBought = item.last_purchased ? formatDate(item.last_purchased.split('T')[0]) : 'N/A';
+            const avgPrice = item.avg_price ? '$' + item.avg_price.toFixed(2) : 'N/A';
+            return `<tr style="border-bottom: 1px solid var(--deft-border);">
+                <td class="px-4 py-3 text-sm" style="color: var(--deft-txt);">${escapeHtml(item.item_name || 'Item')}</td>
+                <td class="px-4 py-3 text-center text-sm font-mono" style="color: var(--deft-accent);">${item.purchase_count || 0}</td>
+                <td class="px-4 py-3 text-center text-xs font-mono" style="color: var(--deft-txt-3);">${lastBought}</td>
+                <td class="px-4 py-3 text-center text-xs font-mono" style="color: var(--deft-txt-2);">${avgPrice}</td>
+                <td class="px-4 py-3 text-center">
+                    <button class="btn btn-ghost text-xs" onclick="addHistoryItemToList('${escapeHtml(item.item_name)}')">+ Add to List</button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+}
+
+async function toggleHistoryList(listId, headerEl) {
+    const itemsDiv = document.getElementById(`history-items-${listId}`);
+    const chevron = headerEl.querySelector('.history-chevron');
+
+    if (itemsDiv.style.display === 'none') {
+        // Expand - load items
+        itemsDiv.style.display = '';
+        chevron.style.transform = 'rotate(180deg)';
+
+        if (!itemsDiv.innerHTML || itemsDiv.innerHTML === '') {
+            itemsDiv.innerHTML = '<div class="p-3 text-center text-xs" style="color: var(--deft-txt-3);">Loading...</div>';
+            const items = await supabaseSelect('deft_shopping_items',
+                `list_id=eq.${listId}&select=name,quantity,unit,checked&order=name.asc`);
+
+            if (items && items.length > 0) {
+                itemsDiv.innerHTML = `<div class="px-4 py-2 space-y-1" style="border-top: 1px solid var(--deft-border);">
+                    ${items.map(i => `<div class="flex items-center gap-2 py-1">
+                        <span class="text-xs" style="color: ${i.checked ? 'var(--deft-success)' : 'var(--deft-txt-3)'};">${i.checked ? '&#10003;' : '&#9675;'}</span>
+                        <span class="text-sm ${i.checked ? '' : ''}" style="color: var(--deft-txt);">${escapeHtml(i.name)}</span>
+                        <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${i.quantity || ''} ${i.unit || ''}</span>
+                    </div>`).join('')}
+                </div>`;
+            } else {
+                itemsDiv.innerHTML = '<div class="p-3 text-center text-xs" style="color: var(--deft-txt-3);">No items found</div>';
+            }
+        }
+    } else {
+        // Collapse
+        itemsDiv.style.display = 'none';
+        chevron.style.transform = '';
+    }
 }
 
 // ═══════════════════════════════════════
@@ -2702,11 +2468,8 @@ function formatDate(dateStr) {
 
 // Close autocomplete dropdowns on outside click
 document.addEventListener('click', (e) => {
-    if (!e.target.closest('#pantryFoodSearch') && !e.target.closest('#foodSearchResults')) {
-        document.getElementById('foodSearchResults').classList.remove('open');
-    }
-    if (!e.target.closest('#preparedRecipeSearch') && !e.target.closest('#recipeSearchResults')) {
-        document.getElementById('recipeSearchResults').classList.remove('open');
+    if (!e.target.closest('#addShoppingItemInput') && !e.target.closest('#shoppingAutocomplete')) {
+        document.getElementById('shoppingAutocomplete').classList.remove('open');
     }
 });
 

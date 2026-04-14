@@ -7,7 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Pantry | Carlton AI</title>
+    <title>Meal Plan | Carlton AI</title>
 
     <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
     <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
@@ -26,7 +26,8 @@
         html.rdgr-authed #deftApp,
         html.rdgr-authed #brainApp,
         html.rdgr-authed #settingsApp,
-        html.rdgr-authed #pantryApp { opacity: 1 !important; }
+        html.rdgr-authed #pantryApp,
+        html.rdgr-authed #mealPlanApp { opacity: 1 !important; }
 
         /* ── Nav Dropdown System ── */
         .nav-group { position: relative; }
@@ -185,7 +186,6 @@
         .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -318,7 +318,6 @@
         /* ═══════════════════════════════════════
            PULSE DOT
            ═══════════════════════════════════════ */
-        /* ── Nav bar uses FIXED RDGR colors (never themed) ── */
         @keyframes pulse-live {
             0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(6,214,160,0.5); }
             50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(6,214,160,0); }
@@ -340,32 +339,6 @@
         }
         .task-tab:hover { color: #E8ECF1; }
         .task-tab.active { background: rgba(6,214,160,0.12); color: #06D6A0; }
-
-        /* ═══════════════════════════════════════
-           DEFT SUB-TABS
-           ═══════════════════════════════════════ */
-        .deft-tab {
-            flex: 1;
-            padding: 0.5rem 1rem;
-            font-family: var(--deft-heading-font), system-ui, sans-serif;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-align: center;
-            border-radius: 0.375rem;
-            border: none;
-            cursor: pointer;
-            color: var(--deft-txt-2);
-            background: transparent;
-            transition: background 0.2s ease, color 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            white-space: nowrap;
-        }
-        .deft-tab:hover { color: var(--deft-txt); }
-        .deft-tab.active {
-            background: var(--deft-accent-dim);
-            color: var(--deft-accent);
-        }
 
         /* ═══════════════════════════════════════
            PANELS
@@ -596,11 +569,11 @@
         /* ═══════════════════════════════════════
            BACKGROUND IMAGE SUPPORT
            ═══════════════════════════════════════ */
-        #pantryApp {
+        #mealPlanApp {
             position: relative;
             min-height: 100vh;
         }
-        #pantryApp::before {
+        #mealPlanApp::before {
             content: '';
             position: fixed;
             inset: 0;
@@ -631,109 +604,265 @@
         .deft-reveal-6 { animation-delay: 0.3s; }
 
         /* ═══════════════════════════════════════
-           PANTRY-SPECIFIC: Location/Category Filter Pills
+           MEAL PLAN GRID
            ═══════════════════════════════════════ */
-        .filter-pill {
-            padding: 0.3rem 0.75rem;
-            font-size: 0.7rem;
-            font-weight: 500;
-            border-radius: 0.375rem;
-            border: none;
-            cursor: pointer;
-            color: var(--deft-txt-3);
-            background: transparent;
-            transition: all 0.2s;
-            white-space: nowrap;
-            font-family: var(--deft-heading-font), system-ui;
+        .mp-grid {
+            display: grid;
+            grid-template-columns: 90px repeat(7, 1fr);
+            gap: 1px;
+            background: var(--deft-border);
+            border: 1px solid var(--deft-border);
+            border-radius: var(--deft-radius);
+            overflow: hidden;
         }
-        .filter-pill:hover { color: var(--deft-txt); }
-        .filter-pill.active {
-            background: var(--deft-accent-dim);
+        .mp-grid-header {
+            background: var(--deft-surface-el);
+            padding: 0.625rem 0.5rem;
+            text-align: center;
+            font-family: var(--deft-heading-font), system-ui;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--deft-txt-2);
+        }
+        .mp-grid-header.today {
+            color: var(--deft-accent);
+            background: rgba(168,214,91,0.06);
+        }
+        .mp-grid-header .mp-day-num {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--deft-txt);
+            margin-top: 0.125rem;
+            letter-spacing: 0;
+        }
+        .mp-grid-header.today .mp-day-num {
             color: var(--deft-accent);
         }
-
-        /* ═══════════════════════════════════════
-           SHOPPING LIST CHECKBOX
-           ═══════════════════════════════════════ */
-        .shopping-check {
-            width: 18px; height: 18px;
-            border: 2px solid var(--deft-border);
-            border-radius: 4px;
+        .mp-row-label {
+            background: var(--deft-surface-el);
+            padding: 0.75rem 0.625rem;
+            font-family: var(--deft-heading-font), system-ui;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--deft-txt-3);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            writing-mode: horizontal-tb;
+        }
+        .mp-cell {
+            background: var(--deft-surface);
+            padding: 0.375rem;
+            min-height: 72px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            transition: background 0.15s;
+        }
+        .mp-cell:hover {
+            background: var(--deft-surface-el);
+        }
+        .mp-cell-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+        .mp-add-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px dashed var(--deft-border);
             background: transparent;
+            color: var(--deft-txt-3);
             cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.2s;
-            flex-shrink: 0;
+            font-size: 1rem;
+            line-height: 1;
         }
-        .shopping-check:hover { border-color: var(--deft-accent); }
-        .shopping-check.checked {
-            background: var(--deft-accent);
+        .mp-add-btn:hover {
             border-color: var(--deft-accent);
+            color: var(--deft-accent);
+            background: var(--deft-accent-dim);
         }
-        .shopping-check.checked::after {
-            content: '';
-            width: 6px; height: 10px;
-            border: solid var(--deft-base); border-width: 0 2px 2px 0;
-            transform: rotate(45deg) translate(-1px, -1px);
-        }
-        .shopping-item.checked-item {
-            opacity: 0.45;
-        }
-        .shopping-item.checked-item .item-name {
-            text-decoration: line-through;
-        }
-
-        /* ═══════════════════════════════════════
-           AUTOCOMPLETE DROPDOWN
-           ═══════════════════════════════════════ */
-        .autocomplete-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0; right: 0;
-            z-index: 80;
+        .mp-recipe-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.3rem 0.5rem;
             background: var(--deft-surface-el);
             border: 1px solid var(--deft-border);
-            border-radius: 0.5rem;
-            max-height: 200px;
-            overflow-y: auto;
-            display: none;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-        }
-        .autocomplete-dropdown.open { display: block; }
-        .autocomplete-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.8rem;
+            border-radius: 0.375rem;
+            font-size: 0.65rem;
             color: var(--deft-txt);
+            transition: border-color 0.15s;
+            line-height: 1.3;
+        }
+        .mp-recipe-chip:hover {
+            border-color: var(--deft-accent);
+        }
+        .mp-recipe-chip .mp-chip-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+        }
+        .mp-recipe-chip .mp-chip-servings {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.55rem;
+            color: var(--deft-accent);
+            background: var(--deft-accent-dim);
+            padding: 0.1rem 0.3rem;
+            border-radius: 0.2rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .mp-recipe-chip .mp-chip-remove {
+            flex-shrink: 0;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--deft-txt-3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            line-height: 1;
+            transition: all 0.15s;
+            padding: 0;
+        }
+        .mp-recipe-chip .mp-chip-remove:hover {
+            background: var(--deft-danger-dim);
+            color: var(--deft-danger);
+        }
+
+        /* ═══════════════════════════════════════
+           RECIPE PICKER
+           ═══════════════════════════════════════ */
+        .recipe-pick-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.625rem 0.75rem;
+            border-radius: 0.375rem;
             cursor: pointer;
             transition: background 0.12s;
+            border: 1px solid transparent;
         }
-        .autocomplete-item:hover { background: rgba(255,255,255,0.04); }
+        .recipe-pick-item:hover {
+            background: rgba(255,255,255,0.03);
+            border-color: var(--deft-border);
+        }
+        .recipe-pick-item.selected {
+            background: var(--deft-accent-dim);
+            border-color: rgba(168,214,91,0.3);
+        }
+        .keto-badge {
+            background: rgba(168,214,91,0.15);
+            color: var(--deft-accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.55rem;
+            font-weight: 600;
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
 
         /* ═══════════════════════════════════════
-           AI CARD FOR "WHAT CAN I MAKE"
+           WEEK NAV
            ═══════════════════════════════════════ */
-        .ai-card {
-            background: linear-gradient(135deg, rgba(168,130,214,0.06), rgba(168,130,214,0.02));
-            border: 1px solid rgba(168,130,214,0.15);
-            border-radius: 0.75rem;
-            padding: 1rem 1.25rem;
-            transition: border-color 0.2s;
+        .week-nav-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 0.375rem;
+            border: 1px solid var(--deft-border);
+            background: transparent;
+            color: var(--deft-txt-2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
         }
-        .ai-card:hover { border-color: rgba(168,130,214,0.3); }
-        @keyframes aiPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .week-nav-btn:hover {
+            background: rgba(255,255,255,0.04);
+            color: var(--deft-txt);
+            border-color: var(--deft-accent);
         }
-        .ai-loading { animation: aiPulse 1.5s ease-in-out infinite; }
 
         /* ═══════════════════════════════════════
-           RESPONSIVE
+           SUMMARY SIDEBAR
            ═══════════════════════════════════════ */
-        @media (max-width: 640px) {
-            .filter-pill { font-size: 0.65rem; padding: 0.25rem 0.5rem; }
+        .summary-stat {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
         }
-    
+        .summary-stat:last-child { border-bottom: none; }
+        .summary-stat-label {
+            font-size: 0.7rem;
+            color: var(--deft-txt-3);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-family: var(--deft-heading-font), system-ui;
+            font-weight: 600;
+        }
+        .summary-stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--deft-txt);
+        }
+
+        /* ═══════════════════════════════════════
+           RESPONSIVE — MOBILE GRID
+           ═══════════════════════════════════════ */
+        @media (max-width: 768px) {
+            .mp-grid {
+                grid-template-columns: 70px repeat(7, minmax(100px, 1fr));
+                overflow-x: auto;
+            }
+            .mp-grid-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin: 0 -1rem;
+                padding: 0 1rem;
+            }
+            .mp-grid {
+                min-width: 820px;
+            }
+            .recipe-picker-modal .modal-content {
+                max-width: 100%;
+                width: 100%;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+                margin: 0;
+            }
+            .mp-layout {
+                flex-direction: column !important;
+            }
+            .mp-sidebar {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
+
         /* ── Bug Report FAB ── */
         .bug-report-fab {
             position: fixed;
@@ -820,7 +949,7 @@
 <!-- ═══════════════════════════════════════
      MAIN APPLICATION
      ═══════════════════════════════════════ -->
-<div id="pantryApp" style="opacity: 0;">
+<div id="mealPlanApp" style="opacity: 0;">
 
     <!-- ── TOP NAV BAR ── -->
     <nav class="sticky top-0 z-50 border-b" style="border-color: #2A2E3D; background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
@@ -881,13 +1010,13 @@
                         </div>
                         <a href="/partnerships" class="nav-group-btn">Partnerships</a>
                         <div class="nav-group">
-                            <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <a href="/brain" class="nav-group-btn active">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
                                 <a href="/brain">BRAIN</a>
                                 <a href="/deft">DEFT</a>
-                                <a href="/pantry" class="active">Pantry</a>
+                                <a href="/pantry">Pantry</a>
                                 <a href="/shopping">Shopping</a>
-                                <a href="/meal-plan">Meal Plan</a>
+                                <a href="/meal-plan" class="active">Meal Plan</a>
                             </div>
                         </div>
                         <div class="nav-group">
@@ -986,9 +1115,9 @@
 <div class="mobile-nav-children open">
     <a href="/brain" class="mobile-nav-link">BRAIN</a>
     <a href="/deft" class="mobile-nav-link">DEFT</a>
-    <a href="/pantry" class="mobile-nav-link active">Pantry</a>
+    <a href="/pantry" class="mobile-nav-link">Pantry</a>
     <a href="/shopping" class="mobile-nav-link">Shopping</a>
-    <a href="/meal-plan" class="mobile-nav-link">Meal Plan</a>
+    <a href="/meal-plan" class="mobile-nav-link active">Meal Plan</a>
 </div>
 <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Trading <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
 <div class="mobile-nav-children">
@@ -1022,99 +1151,83 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 </script>
         <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
 
-    <!-- ── PANTRY SUB-TAB BAR ── -->
-    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pt-4 pb-4">
-        <div class="flex gap-1 p-0.5 rounded-lg overflow-x-auto" style="background: rgba(255,255,255,0.04);" role="tablist" aria-label="Pantry sections">
-            <button class="deft-tab active" id="tab-pantry" onclick="switchView('pantry')" role="tab" aria-selected="true" aria-controls="view-pantry">Pantry</button>
-            <button class="deft-tab" id="tab-prepared" onclick="switchView('prepared')" role="tab" aria-selected="false" aria-controls="view-prepared">Prepared Meals</button>
-        </div>
-    </div>
-
     <!-- ═══════════════════════════════════════
-         VIEW: PANTRY
+         MEAL PLAN CONTENT
          ═══════════════════════════════════════ -->
-    <div id="view-pantry" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" role="tabpanel" aria-labelledby="tab-pantry">
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pt-4 pb-8">
 
-        <!-- Header row -->
+        <!-- Plan Header Row -->
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4 deft-reveal deft-reveal-1">
             <div class="flex items-center gap-3">
-                <h2 class="font-heading font-bold text-lg" style="color: var(--deft-txt);">My Pantry</h2>
-                <span id="pantryCount" class="badge" style="background: var(--deft-accent-dim); color: var(--deft-accent);">0 items</span>
+                <h2 class="font-heading font-bold text-lg" style="color: var(--deft-txt);">Meal Plan</h2>
+                <span id="planNameBadge" class="badge" style="background: var(--deft-accent-warm-dim); color: var(--deft-accent-warm); display: none;"></span>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-                <input type="text" id="pantrySearch" class="form-input" style="max-width: 200px; padding: 0.4rem 0.75rem; font-size: 0.8rem;" placeholder="Search pantry..." oninput="searchPantry(this.value)">
-                <button class="btn btn-primary text-xs" onclick="addPantryItem()">Add Item</button>
-                <button class="btn btn-ghost text-xs" onclick="openBarcodeScanner()">Scan Barcode</button>
-                <button class="btn btn-warm text-xs" onclick="whatCanIMake()">What Can I Make?</button>
+                <button class="btn btn-ghost text-xs" onclick="createNewPlan()">New Plan</button>
+                <button class="btn btn-primary text-xs" onclick="generateShoppingList()" id="genShopBtn">Generate Shopping List</button>
             </div>
         </div>
 
-        <!-- Location filter pills -->
-        <div class="flex flex-wrap gap-1 mb-3 deft-reveal deft-reveal-2">
-            <button class="filter-pill active" onclick="filterPantryLocation('all', this)">All</button>
-            <button class="filter-pill" onclick="filterPantryLocation('fridge', this)">Fridge</button>
-            <button class="filter-pill" onclick="filterPantryLocation('pantry', this)">Pantry</button>
-            <button class="filter-pill" onclick="filterPantryLocation('freezer', this)">Freezer</button>
+        <!-- Week Navigation -->
+        <div class="flex items-center justify-between gap-3 mb-4 deft-reveal deft-reveal-2">
+            <button class="week-nav-btn" onclick="navigateWeek(-1)" aria-label="Previous week">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8.5 3.5L5 7l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="flex items-center gap-2">
+                <span id="weekRange" class="font-heading font-semibold text-sm" style="color: var(--deft-txt);"></span>
+                <button class="text-xs px-2 py-0.5 rounded" style="background: var(--deft-accent-dim); color: var(--deft-accent); border: none; cursor: pointer; font-family: var(--deft-heading-font); font-weight: 600;" onclick="goToThisWeek()">Today</button>
+            </div>
+            <button class="week-nav-btn" onclick="navigateWeek(1)" aria-label="Next week">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.5 3.5L9 7l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
         </div>
 
-        <!-- Category filter pills -->
-        <div class="flex flex-wrap gap-1 mb-4 deft-reveal deft-reveal-3">
-            <button class="filter-pill active" onclick="filterPantryCategory('all', this)">All</button>
-            <button class="filter-pill" onclick="filterPantryCategory('protein', this)">Protein</button>
-            <button class="filter-pill" onclick="filterPantryCategory('dairy', this)">Dairy</button>
-            <button class="filter-pill" onclick="filterPantryCategory('produce', this)">Produce</button>
-            <button class="filter-pill" onclick="filterPantryCategory('grains', this)">Grains</button>
-            <button class="filter-pill" onclick="filterPantryCategory('condiments', this)">Condiments</button>
-            <button class="filter-pill" onclick="filterPantryCategory('beverages', this)">Beverages</button>
-            <button class="filter-pill" onclick="filterPantryCategory('snacks', this)">Snacks</button>
-            <button class="filter-pill" onclick="filterPantryCategory('other', this)">Other</button>
-        </div>
+        <!-- Main Layout: Grid + Sidebar -->
+        <div class="flex gap-4 mp-layout deft-reveal deft-reveal-3">
 
-        <!-- What Can I Make Panel (hidden by default) -->
-        <div id="whatCanIMakePanel" class="mb-4" style="display: none;">
-            <div class="ai-card">
-                <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center gap-2">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 5h5l-4 3 1.5 5L8 11l-4.5 3L5 9 1 6h5l2-5z" fill="#A882D6"/></svg>
-                        <span class="font-heading font-bold text-sm" style="color: #A882D6;">AI Suggestions</span>
+            <!-- Weekly Calendar Grid -->
+            <div class="flex-1 min-w-0">
+                <div class="mp-grid-wrapper">
+                    <div id="mealGrid" class="mp-grid" role="grid" aria-label="Weekly meal plan grid">
+                        <!-- Populated by JS -->
                     </div>
-                    <button class="btn btn-ghost text-xs" onclick="document.getElementById('whatCanIMakePanel').style.display='none'">Close</button>
-                </div>
-                <div id="whatCanIMakeContent" class="text-sm" style="color: var(--deft-txt-2);">
-                    <p class="ai-loading">Analyzing your pantry...</p>
                 </div>
             </div>
-        </div>
 
-        <!-- Pantry grid -->
-        <div id="pantryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 deft-reveal deft-reveal-4">
-            <div class="empty-state col-span-full">
-                <p>No items in your pantry yet</p>
-                <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Click "Add Item" to start tracking your food storage</p>
+            <!-- Plan Summary Sidebar -->
+            <div class="mp-sidebar hidden lg:block" style="width: 240px; flex-shrink: 0;">
+                <div class="panel">
+                    <div class="panel-header">
+                        <span class="font-heading font-bold text-xs" style="color: var(--deft-txt);">Week Summary</span>
+                    </div>
+                    <div class="panel-body" style="padding: 0.75rem 1rem;">
+                        <div class="summary-stat">
+                            <span class="summary-stat-label">Meals</span>
+                            <span class="summary-stat-value" id="summaryMeals">0</span>
+                        </div>
+                        <div class="summary-stat">
+                            <span class="summary-stat-label">Calories</span>
+                            <span class="summary-stat-value" id="summaryCalories">--</span>
+                        </div>
+                        <div class="summary-stat">
+                            <span class="summary-stat-label">Fat</span>
+                            <span class="summary-stat-value" id="summaryFat">--</span>
+                        </div>
+                        <div class="summary-stat">
+                            <span class="summary-stat-label">Protein</span>
+                            <span class="summary-stat-value" id="summaryProtein">--</span>
+                        </div>
+                        <div class="summary-stat">
+                            <span class="summary-stat-label">Net Carbs</span>
+                            <span class="summary-stat-value" id="summaryCarbs">--</span>
+                        </div>
+                        <div style="padding-top: 0.75rem;">
+                            <button class="btn btn-warm text-xs w-full" onclick="generateShoppingList()">Generate Shopping List</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- ═══════════════════════════════════════
-         VIEW: PREPARED MEALS
-         ═══════════════════════════════════════ -->
-    <div id="view-prepared" class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-8" style="display: none;" role="tabpanel" aria-labelledby="tab-prepared">
-
-        <!-- Header -->
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 deft-reveal deft-reveal-1">
-            <div class="flex items-center gap-3">
-                <h2 class="font-heading font-bold text-lg" style="color: var(--deft-txt);">Prepared Meals</h2>
-                <span id="preparedCount" class="badge" style="background: var(--deft-accent-warm-dim); color: var(--deft-accent-warm);">0</span>
-            </div>
-            <button class="btn btn-primary text-xs" onclick="addPreparedMeal()">Add Prepared Meal</button>
-        </div>
-
-        <!-- Prepared meals grid -->
-        <div id="preparedGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 deft-reveal deft-reveal-2">
-            <div class="empty-state col-span-full">
-                <p>No prepared meals tracked</p>
-                <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Add meals you've prepped to track servings and freshness</p>
-            </div>
         </div>
     </div>
 
@@ -1122,258 +1235,84 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
          MODALS
          ═══════════════════════════════════════ -->
 
-    <!-- Add/Edit Pantry Item Modal -->
-    <div id="addPantryModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('addPantryModal')">
-        <div class="modal-content">
+    <!-- Recipe Picker Modal -->
+    <div id="recipePickerModal" class="modal-backdrop recipe-picker-modal" onclick="if(event.target===this)closeModal('recipePickerModal')">
+        <div class="modal-content" style="max-width: 520px;">
             <div class="panel-header">
-                <span id="pantryModalTitle" class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Add Pantry Item</span>
-                <button class="btn btn-ghost text-xs" onclick="closeModal('addPantryModal')">Close</button>
+                <div>
+                    <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Add Recipe</span>
+                    <span id="pickerSlotLabel" class="text-xs ml-2" style="color: var(--deft-txt-3);"></span>
+                </div>
+                <button class="btn btn-ghost text-xs" onclick="closeModal('recipePickerModal')">Close</button>
+            </div>
+            <div class="panel-body">
+                <div class="mb-3">
+                    <input type="text" id="recipeSearchInput" class="form-input" placeholder="Search recipes..." oninput="searchRecipesDebounced(this.value)" style="font-size: 0.8rem;">
+                </div>
+                <div id="recipeSearchResults" style="max-height: 320px; overflow-y: auto; margin: 0 -0.25rem;">
+                    <div class="empty-state" style="padding: 1.5rem 1rem;">
+                        <p style="color: var(--deft-txt-3); font-size: 0.8rem;">Search for a recipe to add</p>
+                    </div>
+                </div>
+                <div id="recipePickerFooter" style="display: none; border-top: 1px solid var(--deft-border); padding-top: 0.75rem; margin-top: 0.75rem;">
+                    <div class="flex items-center gap-3">
+                        <div class="form-group" style="flex: 0 0 90px;">
+                            <label class="form-label">Servings</label>
+                            <input type="number" id="pickerServings" class="form-input" value="1" min="0.5" step="0.5" style="font-size: 0.8rem; padding: 0.4rem 0.5rem; text-align: center;">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-medium truncate" style="color: var(--deft-txt);" id="pickerSelectedName"></p>
+                            <p class="text-xs" style="color: var(--deft-txt-3);" id="pickerSelectedNutrition"></p>
+                        </div>
+                        <button class="btn btn-primary text-xs" onclick="confirmAddRecipe()" style="white-space: nowrap;">Add to Plan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Plan Modal -->
+    <div id="newPlanModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('newPlanModal')">
+        <div class="modal-content" style="max-width: 420px;">
+            <div class="panel-header">
+                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">New Meal Plan</span>
+                <button class="btn btn-ghost text-xs" onclick="closeModal('newPlanModal')">Close</button>
             </div>
             <div class="panel-body">
                 <div class="space-y-4">
                     <div class="form-group">
-                        <label class="form-label">Item Name</label>
-                        <input type="text" id="pantryItemName" class="form-input" placeholder="e.g. Chicken Breast">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Search Food Database</label>
-                        <div class="relative">
-                            <input type="text" id="pantryFoodSearch" class="form-input" placeholder="Search foods..." oninput="searchFoodDatabase(this.value)">
-                            <div id="foodSearchResults" class="autocomplete-dropdown"></div>
-                        </div>
+                        <label class="form-label">Plan Name</label>
+                        <input type="text" id="newPlanName" class="form-input" placeholder="e.g. Week of Apr 14">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div class="form-group">
-                            <label class="form-label">Quantity</label>
-                            <input type="number" id="pantryItemQty" class="form-input" placeholder="e.g. 2" min="0" step="0.25">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" id="newPlanStart" class="form-input" style="font-size: 0.8rem;">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Unit</label>
-                            <select id="pantryItemUnit" class="form-input">
-                                <option value="each">each</option>
-                                <option value="lbs">lbs</option>
-                                <option value="oz">oz</option>
-                                <option value="kg">kg</option>
-                                <option value="g">g</option>
-                                <option value="cups">cups</option>
-                                <option value="tbsp">tbsp</option>
-                                <option value="tsp">tsp</option>
-                                <option value="ml">ml</option>
-                                <option value="L">L</option>
-                                <option value="pack">pack</option>
-                                <option value="bag">bag</option>
-                                <option value="can">can</option>
-                                <option value="bottle">bottle</option>
-                                <option value="box">box</option>
-                                <option value="dozen">dozen</option>
-                            </select>
+                            <label class="form-label">End Date</label>
+                            <input type="date" id="newPlanEnd" class="form-input" style="font-size: 0.8rem;">
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Category</label>
-                        <select id="pantryItemCategory" class="form-input">
-                            <option value="protein">Protein</option>
-                            <option value="dairy">Dairy</option>
-                            <option value="produce">Produce</option>
-                            <option value="grains">Grains</option>
-                            <option value="condiments">Condiments</option>
-                            <option value="beverages">Beverages</option>
-                            <option value="snacks">Snacks</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Location</label>
-                        <div class="flex gap-3 mt-1">
-                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
-                                <input type="radio" name="pantryLocation" value="fridge" checked style="accent-color: var(--deft-accent);"> Fridge
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
-                                <input type="radio" name="pantryLocation" value="pantry" style="accent-color: var(--deft-accent);"> Pantry
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
-                                <input type="radio" name="pantryLocation" value="freezer" style="accent-color: var(--deft-accent);"> Freezer
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Storage Type & Shelf Life</label>
-                        <div class="flex gap-2">
-                            <select id="pantryItemStorageType" class="form-input flex-1" onchange="onStorageTypeChange()">
-                                <option value="regular">Regular (fresh)</option>
-                                <option value="frozen">Frozen</option>
-                                <option value="meal_prep">Meal Prep</option>
-                                <option value="bulk">Bulk / Staple</option>
-                            </select>
-                            <div class="flex items-center gap-1" style="min-width: 120px;">
-                                <input type="number" id="pantryItemShelfDays" class="form-input" style="width: 70px;" min="1" max="365" value="7" onchange="onShelfDaysChange()">
-                                <span class="text-xs" style="color: var(--deft-txt-3);">days</span>
-                            </div>
-                        </div>
-                        <span class="text-xs mt-1 block" style="color: var(--deft-txt-3);">Adjust shelf life for this item - expiry auto-calculates below</span>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Expiry Date</label>
-                        <input type="date" id="pantryItemExpiry" class="form-input">
-                        <span class="text-xs mt-1 block" style="color: var(--deft-txt-3);">Auto-set from shelf days, or pick a specific date</span>
-                    </div>
-
-                    <!-- Nutrition Label Scanner -->
-                    <div class="form-group" style="border-top: 1px solid var(--deft-border); padding-top: 0.75rem; margin-top: 0.5rem;">
-                        <label class="form-label">Nutrition Info</label>
-                        <div id="nutritionPreview" style="display: none;" class="mb-2 p-2 rounded-lg" style="background: rgba(255,255,255,0.02);">
-                            <div class="grid grid-cols-4 gap-2 text-xs font-mono" style="color: var(--deft-txt-2);">
-                                <div><span style="color: var(--deft-txt-3);">Cal</span><br><span id="nutPreviewCal">-</span></div>
-                                <div><span style="color: var(--deft-txt-3);">Fat</span><br><span id="nutPreviewFat">-</span>g</div>
-                                <div><span style="color: var(--deft-txt-3);">Protein</span><br><span id="nutPreviewProtein">-</span>g</div>
-                                <div><span style="color: var(--deft-txt-3);">Net Carbs</span><br><span id="nutPreviewCarbs">-</span>g</div>
-                            </div>
-                            <button class="btn btn-ghost text-xs mt-2 w-full" onclick="editNutritionManually()">Edit Values</button>
-                        </div>
-                        <div id="nutritionManualFields" style="display: none;" class="grid grid-cols-2 gap-2 mb-2">
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Serving Size</label>
-                                <input type="text" id="nutServingSize" class="form-input text-xs" placeholder="e.g., 4 oz">
-                            </div>
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Calories</label>
-                                <input type="number" id="nutCalories" class="form-input text-xs" placeholder="0">
-                            </div>
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Total Fat (g)</label>
-                                <input type="number" id="nutFat" class="form-input text-xs" step="0.1" placeholder="0">
-                            </div>
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Protein (g)</label>
-                                <input type="number" id="nutProtein" class="form-input text-xs" step="0.1" placeholder="0">
-                            </div>
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Total Carbs (g)</label>
-                                <input type="number" id="nutTotalCarbs" class="form-input text-xs" step="0.1" placeholder="0">
-                            </div>
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Fiber (g)</label>
-                                <input type="number" id="nutFiber" class="form-input text-xs" step="0.1" placeholder="0">
-                            </div>
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Sugar (g)</label>
-                                <input type="number" id="nutSugar" class="form-input text-xs" step="0.1" placeholder="0">
-                            </div>
-                            <div>
-                                <label class="text-xs" style="color: var(--deft-txt-3);">Sodium (mg)</label>
-                                <input type="number" id="nutSodium" class="form-input text-xs" placeholder="0">
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <button class="btn btn-warm text-xs flex-1" onclick="scanNutritionLabel()">
-                                <span id="scanBtnText">Scan Nutrition Label</span>
-                            </button>
-                            <button class="btn btn-ghost text-xs" onclick="toggleNutritionManual()">Enter Manually</button>
-                        </div>
-                        <input type="file" id="nutritionLabelFile" accept="image/*" capture="environment" style="display:none;" onchange="handleNutritionLabelUpload(event)">
-                        <div id="labelPreviewImg" style="display:none;" class="mt-2">
-                            <img id="labelImg" style="max-height: 120px; border-radius: 0.375rem; border: 1px solid var(--deft-border);">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Price Paid</label>
-                        <input type="number" id="pantryItemPrice" class="form-input" step="0.01" min="0" placeholder="e.g. 5.99">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Notes</label>
-                        <textarea id="pantryItemNotes" class="form-input" placeholder="Optional notes..." rows="2" style="min-height: 60px;"></textarea>
                     </div>
                     <div class="flex gap-2 justify-end pt-2">
-                        <button class="btn btn-ghost text-xs" onclick="closeModal('addPantryModal')">Cancel</button>
-                        <button class="btn btn-danger text-xs" id="removePantryBtn" onclick="removePantryItem(editingPantryItem, 'used_up')" style="display: none;">Remove</button>
-                        <button class="btn btn-primary text-xs" id="savePantryBtn" onclick="savePantryItem()">Save Item</button>
+                        <button class="btn btn-ghost text-xs" onclick="closeModal('newPlanModal')">Cancel</button>
+                        <button class="btn btn-primary text-xs" id="createPlanBtn" onclick="confirmCreatePlan()">Create Plan</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Barcode Scanner Modal -->
-    <div id="barcodeScannerModal" class="modal-backdrop" onclick="if(event.target===this)closeBarcodeScanner()">
-        <div class="modal-content" style="max-width: 500px;">
+    <!-- Shopping List Result Modal -->
+    <div id="shoppingListModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('shoppingListModal')">
+        <div class="modal-content" style="max-width: 520px;">
             <div class="panel-header">
-                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Scan Barcode</span>
-                <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Close</button>
+                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Shopping List</span>
+                <button class="btn btn-ghost text-xs" onclick="closeModal('shoppingListModal')">Close</button>
             </div>
-            <div class="panel-body">
-                <div id="barcode-reader" style="width: 100%;"></div>
-                <div id="barcodeResult" style="display: none;" class="mt-3 p-3 rounded-lg">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add/Edit Prepared Meal Modal -->
-    <div id="addPreparedModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('addPreparedModal')">
-        <div class="modal-content">
-            <div class="panel-header">
-                <span id="preparedModalTitle" class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Add Prepared Meal</span>
-                <button class="btn btn-ghost text-xs" onclick="closeModal('addPreparedModal')">Close</button>
-            </div>
-            <div class="panel-body">
-                <div class="space-y-4">
-                    <div class="form-group">
-                        <label class="form-label">Meal Name</label>
-                        <input type="text" id="preparedMealName" class="form-input" placeholder="e.g. Chicken Stir Fry">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Search Recipes</label>
-                        <div class="relative">
-                            <input type="text" id="preparedRecipeSearch" class="form-input" placeholder="Search recipes..." oninput="searchRecipes(this.value)">
-                            <div id="recipeSearchResults" class="autocomplete-dropdown"></div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Total Servings</label>
-                        <input type="number" id="preparedServings" class="form-input" placeholder="e.g. 6" min="1" value="4">
-                    </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div class="form-group">
-                            <label class="form-label">Calories</label>
-                            <input type="number" id="preparedCalories" class="form-input" placeholder="per serving" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Fat (g)</label>
-                            <input type="number" id="preparedFat" class="form-input" placeholder="per serving" min="0" step="0.1">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Protein (g)</label>
-                            <input type="number" id="preparedProtein" class="form-input" placeholder="per serving" min="0" step="0.1">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Net Carbs (g)</label>
-                            <input type="number" id="preparedNetCarbs" class="form-input" placeholder="per serving" min="0" step="0.1">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Location</label>
-                        <div class="flex gap-3 mt-1">
-                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
-                                <input type="radio" name="preparedLocation" value="fridge" checked style="accent-color: var(--deft-accent);"> Fridge
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
-                                <input type="radio" name="preparedLocation" value="freezer" style="accent-color: var(--deft-accent);"> Freezer
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Expiry Date</label>
-                        <input type="date" id="preparedExpiry" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Notes</label>
-                        <textarea id="preparedNotes" class="form-input" placeholder="Optional notes..." rows="2" style="min-height: 60px;"></textarea>
-                    </div>
-                    <div class="flex gap-2 justify-end pt-2">
-                        <button class="btn btn-ghost text-xs" onclick="closeModal('addPreparedModal')">Cancel</button>
-                        <button class="btn btn-primary text-xs" id="savePreparedBtn" onclick="savePreparedMeal()">Save Meal</button>
-                    </div>
+            <div class="panel-body" id="shoppingListContent">
+                <div class="empty-state">
+                    <p>Generating shopping list...</p>
                 </div>
             </div>
         </div>
@@ -1485,14 +1424,14 @@ const THEMES = {
 // ═══════════════════════════════════════
 let activeProfileId = null;
 let activeProfileName = 'Bradford';
-let currentView = 'pantry';
-let pantryItems = [];
-let pantryLocationFilter = 'all';
-let pantryCategoryFilter = 'all';
-let pantrySearchQuery = '';
-let preparedMeals = [];
-let editingPantryItem = null;
-let editingPreparedMeal = null;
+let currentWeekStart = null; // Date object — always Monday
+let activePlan = null; // { plan_id, plan_name, start_date, end_date }
+let planEntries = []; // array of entries for the current plan
+let allRecipes = []; // cached recipes for picker
+let pickerSelectedRecipe = null;
+let pickerTargetDate = null;
+let pickerTargetMealType = null;
+let searchTimer = null;
 
 // ═══════════════════════════════════════
 // THEME MANAGEMENT
@@ -1744,7 +1683,7 @@ async function deftApi(operation, data = {}, { silent = false } = {}) {
         return result;
     } catch (err) {
         console.warn(`deftApi(${operation}) error:`, err.message);
-        if (!silent) toast('Connection error — check if the backend is running', 'error');
+        if (!silent) toast('Connection error -- check if the backend is running', 'error');
         return null;
     }
 }
@@ -1860,8 +1799,8 @@ function handleGate(e) {
             activeProfileId = gateSelectedProfile.id;
         }
         document.getElementById('gate').classList.add('hidden');
-        document.getElementById('pantryApp').style.opacity = '1';
-        initPantry();
+        document.getElementById('mealPlanApp').style.opacity = '1';
+        initMealPlan();
         return false;
     }
     document.getElementById('gateError').classList.add('show');
@@ -1873,8 +1812,8 @@ function handleGate(e) {
 
 if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated === true) {
     document.getElementById('gate').classList.add('hidden');
-    document.getElementById('pantryApp').style.opacity = '1';
-    initPantry();
+    document.getElementById('mealPlanApp').style.opacity = '1';
+    initMealPlan();
 }
 
 if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
@@ -1882,41 +1821,565 @@ if (!JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
 }
 
 // ═══════════════════════════════════════
-// VIEW SWITCHING
+// DATE UTILITIES
 // ═══════════════════════════════════════
-function switchView(view) {
-    currentView = view;
-    const views = ['pantry', 'prepared'];
-    views.forEach(v => {
-        const el = document.getElementById(`view-${v}`);
-        if (el) el.style.display = v === view ? '' : 'none';
-        const tab = document.getElementById(`tab-${v}`);
-        if (tab) {
-            tab.classList.toggle('active', v === view);
-            tab.setAttribute('aria-selected', v === view ? 'true' : 'false');
+const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'];
+const MEAL_LABELS = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack' };
+
+function getMonday(d) {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    date.setDate(diff);
+    date.setHours(0, 0, 0, 0);
+    return date;
+}
+
+function formatDate(d) {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function getWeekDates(monday) {
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(monday);
+        d.setDate(d.getDate() + i);
+        dates.push(d);
+    }
+    return dates;
+}
+
+function isToday(d) {
+    const now = new Date();
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+}
+
+// ═══════════════════════════════════════
+// WEEK NAVIGATION
+// ═══════════════════════════════════════
+function navigateWeek(direction) {
+    currentWeekStart.setDate(currentWeekStart.getDate() + (direction * 7));
+    renderGrid();
+    loadPlanForWeek();
+}
+
+function goToThisWeek() {
+    currentWeekStart = getMonday(new Date());
+    renderGrid();
+    loadPlanForWeek();
+}
+
+function updateWeekRange() {
+    const dates = getWeekDates(currentWeekStart);
+    const start = dates[0];
+    const end = dates[6];
+    const sameMonth = start.getMonth() === end.getMonth();
+    let rangeText;
+    if (sameMonth) {
+        rangeText = `${MONTH_NAMES[start.getMonth()]} ${start.getDate()} - ${end.getDate()}, ${start.getFullYear()}`;
+    } else {
+        rangeText = `${MONTH_NAMES[start.getMonth()]} ${start.getDate()} - ${MONTH_NAMES[end.getMonth()]} ${end.getDate()}, ${end.getFullYear()}`;
+    }
+    document.getElementById('weekRange').textContent = rangeText;
+}
+
+// ═══════════════════════════════════════
+// GRID RENDERING
+// ═══════════════════════════════════════
+function renderGrid() {
+    updateWeekRange();
+    const dates = getWeekDates(currentWeekStart);
+    const grid = document.getElementById('mealGrid');
+
+    // Build header row: corner cell + 7 day headers
+    let html = '<div class="mp-grid-header" style="border-right: 1px solid var(--deft-border);"></div>';
+    dates.forEach((d, i) => {
+        const todayClass = isToday(d) ? ' today' : '';
+        html += `<div class="mp-grid-header${todayClass}">
+            ${DAY_NAMES[i]}
+            <span class="mp-day-num">${d.getDate()}</span>
+        </div>`;
+    });
+
+    // Build meal rows
+    MEAL_TYPES.forEach(mealType => {
+        html += `<div class="mp-row-label">${MEAL_LABELS[mealType]}</div>`;
+        dates.forEach(d => {
+            const dateStr = formatDate(d);
+            const cellId = `cell-${dateStr}-${mealType}`;
+            const entries = getEntriesForSlot(dateStr, mealType);
+            html += `<div class="mp-cell" id="${cellId}" data-date="${dateStr}" data-meal="${mealType}">`;
+            if (entries.length > 0) {
+                entries.forEach(entry => {
+                    html += renderRecipeChip(entry);
+                });
+                // Still show add button below existing entries
+                html += `<div style="display:flex;justify-content:center;padding-top:0.125rem;">
+                    <button class="mp-add-btn" onclick="openRecipePicker('${dateStr}','${mealType}')" aria-label="Add recipe to ${MEAL_LABELS[mealType]} on ${dateStr}" title="Add recipe">+</button>
+                </div>`;
+            } else {
+                html += `<div class="mp-cell-empty">
+                    <button class="mp-add-btn" onclick="openRecipePicker('${dateStr}','${mealType}')" aria-label="Add recipe to ${MEAL_LABELS[mealType]} on ${dateStr}" title="Add recipe">+</button>
+                </div>`;
+            }
+            html += '</div>';
+        });
+    });
+
+    grid.innerHTML = html;
+    updateSummary();
+}
+
+function renderRecipeChip(entry) {
+    const name = entry.recipe_name || entry.name || 'Recipe';
+    const servings = entry.servings || 1;
+    const entryId = entry.entry_id || entry.id;
+    return `<div class="mp-recipe-chip" title="${escapeHtml(name)} (${servings} serving${servings !== 1 ? 's' : ''})">
+        <span class="mp-chip-name">${escapeHtml(name)}</span>
+        <span class="mp-chip-servings">${servings}x</span>
+        <button class="mp-chip-remove" onclick="removeEntry('${entryId}')" aria-label="Remove ${escapeHtml(name)}" title="Remove">&times;</button>
+    </div>`;
+}
+
+function escapeHtml(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
+}
+
+function getEntriesForSlot(dateStr, mealType) {
+    return planEntries.filter(e => e.planned_date === dateStr && e.meal_type === mealType);
+}
+
+// ═══════════════════════════════════════
+// SUMMARY
+// ═══════════════════════════════════════
+function updateSummary() {
+    const totalMeals = planEntries.length;
+    document.getElementById('summaryMeals').textContent = totalMeals;
+
+    let totalCal = 0, totalFat = 0, totalProtein = 0, totalCarbs = 0;
+    let hasNutrition = false;
+
+    planEntries.forEach(entry => {
+        const n = entry.nutrition_per_serving || entry.nutrition || null;
+        const s = entry.servings || 1;
+        if (n) {
+            hasNutrition = true;
+            totalCal += (n.calories || 0) * s;
+            totalFat += (n.fat_g || n.fat || 0) * s;
+            totalProtein += (n.protein_g || n.protein || 0) * s;
+            totalCarbs += (n.net_carbs_g || n.net_carbs || n.carbs || 0) * s;
         }
     });
 
-    // Re-trigger reveal animations
-    const activeView = document.getElementById(`view-${view}`);
-    if (activeView) {
-        const revealEls = activeView.querySelectorAll('.deft-reveal');
-        revealEls.forEach(el => {
-            el.style.animation = 'none';
-            el.offsetHeight;
-            el.style.animation = '';
-        });
+    if (hasNutrition) {
+        document.getElementById('summaryCalories').textContent = Math.round(totalCal).toLocaleString();
+        document.getElementById('summaryFat').textContent = Math.round(totalFat) + 'g';
+        document.getElementById('summaryProtein').textContent = Math.round(totalProtein) + 'g';
+        document.getElementById('summaryCarbs').textContent = Math.round(totalCarbs) + 'g';
+    } else {
+        document.getElementById('summaryCalories').textContent = '--';
+        document.getElementById('summaryFat').textContent = '--';
+        document.getElementById('summaryProtein').textContent = '--';
+        document.getElementById('summaryCarbs').textContent = '--';
+    }
+}
+
+// ═══════════════════════════════════════
+// RECIPE PICKER
+// ═══════════════════════════════════════
+function openRecipePicker(dateStr, mealType) {
+    pickerTargetDate = dateStr;
+    pickerTargetMealType = mealType;
+    pickerSelectedRecipe = null;
+
+    // Format the slot label
+    const d = new Date(dateStr + 'T00:00:00');
+    const dayName = DAY_NAMES[(d.getDay() + 6) % 7]; // Convert Sun=0 to Mon=0 based
+    document.getElementById('pickerSlotLabel').textContent = `${dayName} ${MONTH_NAMES[d.getMonth()]} ${d.getDate()} - ${MEAL_LABELS[mealType]}`;
+
+    // Reset picker state
+    document.getElementById('recipeSearchInput').value = '';
+    document.getElementById('recipePickerFooter').style.display = 'none';
+    document.getElementById('recipeSearchResults').innerHTML = '<div class="empty-state" style="padding: 1.5rem 1rem;"><p style="color: var(--deft-txt-3); font-size: 0.8rem;">Search for a recipe to add</p></div>';
+
+    openModal('recipePickerModal');
+
+    // Auto-load recipes if we haven't yet
+    if (allRecipes.length === 0) {
+        searchRecipes('');
+    } else {
+        renderRecipeList(allRecipes);
     }
 
-    // Lazy-load data for views
-    if (view === 'pantry') loadPantry();
-    if (view === 'prepared') loadPreparedMeals();
+    // Focus search input
+    setTimeout(() => document.getElementById('recipeSearchInput').focus(), 200);
+}
+
+function searchRecipesDebounced(query) {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => searchRecipes(query), 300);
+}
+
+async function searchRecipes(query) {
+    const resultsEl = document.getElementById('recipeSearchResults');
+    resultsEl.innerHTML = '<div class="empty-state" style="padding: 1rem;"><div class="skeleton" style="height: 40px; margin-bottom: 0.5rem;"></div><div class="skeleton" style="height: 40px; margin-bottom: 0.5rem;"></div><div class="skeleton" style="height: 40px;"></div></div>';
+
+    const result = await deftApi('search_recipes', { query: query || '' }, { silent: true });
+
+    if (result && result.recipes) {
+        allRecipes = result.recipes;
+        renderRecipeList(result.recipes);
+    } else if (result && Array.isArray(result)) {
+        allRecipes = result;
+        renderRecipeList(result);
+    } else if (result && result.data && Array.isArray(result.data)) {
+        allRecipes = result.data;
+        renderRecipeList(result.data);
+    } else {
+        // Fallback: try Supabase direct
+        const recipes = await supabaseSelect('deft_recipes',
+            `user_id=eq.${activeProfileId}&status=eq.active&select=recipe_id,name,servings,nutrition_per_serving,tags&order=name&limit=50`
+        );
+        if (recipes && recipes.length > 0) {
+            allRecipes = recipes.map(r => ({
+                recipe_id: r.recipe_id,
+                name: r.name,
+                servings: r.servings,
+                nutrition_per_serving: r.nutrition_per_serving,
+                tags: r.tags,
+            }));
+            if (query) {
+                const q = query.toLowerCase();
+                renderRecipeList(allRecipes.filter(r => r.name.toLowerCase().includes(q)));
+            } else {
+                renderRecipeList(allRecipes);
+            }
+        } else {
+            resultsEl.innerHTML = '<div class="empty-state" style="padding: 1.5rem 1rem;"><p style="color: var(--deft-txt-3); font-size: 0.8rem;">No recipes found</p><p style="color: var(--deft-txt-3); font-size: 0.7rem; margin-top: 0.25rem;">Add recipes in DEFT first</p></div>';
+        }
+    }
+}
+
+function renderRecipeList(recipes) {
+    const resultsEl = document.getElementById('recipeSearchResults');
+
+    if (!recipes || recipes.length === 0) {
+        resultsEl.innerHTML = '<div class="empty-state" style="padding: 1.5rem 1rem;"><p style="color: var(--deft-txt-3); font-size: 0.8rem;">No recipes found</p></div>';
+        return;
+    }
+
+    resultsEl.innerHTML = recipes.map(r => {
+        const n = r.nutrition_per_serving || {};
+        const cal = n.calories ? Math.round(n.calories) : null;
+        const isKeto = (r.tags && r.tags.includes('keto')) || (n.net_carbs_g !== undefined && n.net_carbs_g <= 10);
+        const nutritionStr = cal ? `${cal} cal` : '';
+        const recipeId = r.recipe_id || r.id;
+
+        return `<div class="recipe-pick-item" data-id="${recipeId}" onclick="selectPickerRecipe(this, '${recipeId}', '${escapeHtml(r.name).replace(/'/g, "\\'")}')">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium truncate" style="color: var(--deft-txt);">${escapeHtml(r.name)}</span>
+                    ${isKeto ? '<span class="keto-badge">Keto</span>' : ''}
+                </div>
+                ${nutritionStr ? `<div class="text-xs mt-0.5" style="color: var(--deft-txt-3);">${nutritionStr}${n.fat_g ? ' | F:' + Math.round(n.fat_g) + 'g' : ''}${n.protein_g ? ' | P:' + Math.round(n.protein_g) + 'g' : ''}${n.net_carbs_g !== undefined ? ' | C:' + Math.round(n.net_carbs_g) + 'g' : ''}</div>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function selectPickerRecipe(el, recipeId, recipeName) {
+    // Deselect previous
+    document.querySelectorAll('.recipe-pick-item.selected').forEach(item => item.classList.remove('selected'));
+    el.classList.add('selected');
+
+    const recipe = allRecipes.find(r => (r.recipe_id || r.id) === recipeId);
+    pickerSelectedRecipe = recipe || { recipe_id: recipeId, name: recipeName };
+
+    // Show footer
+    const footer = document.getElementById('recipePickerFooter');
+    footer.style.display = 'block';
+    document.getElementById('pickerSelectedName').textContent = recipeName;
+    document.getElementById('pickerServings').value = 1;
+
+    const n = recipe?.nutrition_per_serving;
+    if (n && n.calories) {
+        document.getElementById('pickerSelectedNutrition').textContent =
+            `${Math.round(n.calories)} cal | F:${Math.round(n.fat_g || 0)}g | P:${Math.round(n.protein_g || 0)}g | C:${Math.round(n.net_carbs_g || 0)}g`;
+    } else {
+        document.getElementById('pickerSelectedNutrition').textContent = 'Nutrition data not available';
+    }
+}
+
+async function confirmAddRecipe() {
+    if (!pickerSelectedRecipe || !activePlan) {
+        if (!activePlan) {
+            // Auto-create a plan for the current week
+            const result = await createPlanForWeek();
+            if (!result) return;
+        }
+        if (!pickerSelectedRecipe) {
+            toast('Please select a recipe', 'error');
+            return;
+        }
+    }
+
+    const servings = parseFloat(document.getElementById('pickerServings').value) || 1;
+    const recipeId = pickerSelectedRecipe.recipe_id || pickerSelectedRecipe.id;
+
+    const result = await deftApi('add_plan_entry', {
+        plan_id: activePlan.plan_id,
+        recipe_id: recipeId,
+        planned_date: pickerTargetDate,
+        meal_type: pickerTargetMealType,
+        servings: servings
+    });
+
+    if (result) {
+        // Add to local state
+        const newEntry = {
+            entry_id: result.entry_id || result.id || crypto.randomUUID(),
+            plan_id: activePlan.plan_id,
+            recipe_id: recipeId,
+            recipe_name: pickerSelectedRecipe.name,
+            planned_date: pickerTargetDate,
+            meal_type: pickerTargetMealType,
+            servings: servings,
+            nutrition_per_serving: pickerSelectedRecipe.nutrition_per_serving || null,
+        };
+        planEntries.push(newEntry);
+        renderGrid();
+        closeModal('recipePickerModal');
+        toast(`Added "${pickerSelectedRecipe.name}" to plan`, 'success');
+    }
+}
+
+// ═══════════════════════════════════════
+// PLAN MANAGEMENT
+// ═══════════════════════════════════════
+function createNewPlan() {
+    // Pre-fill with current week dates
+    const dates = getWeekDates(currentWeekStart);
+    document.getElementById('newPlanName').value = `Week of ${MONTH_NAMES[dates[0].getMonth()]} ${dates[0].getDate()}`;
+    document.getElementById('newPlanStart').value = formatDate(dates[0]);
+    document.getElementById('newPlanEnd').value = formatDate(dates[6]);
+    openModal('newPlanModal');
+}
+
+async function confirmCreatePlan() {
+    const name = document.getElementById('newPlanName').value.trim();
+    const startDate = document.getElementById('newPlanStart').value;
+    const endDate = document.getElementById('newPlanEnd').value;
+
+    if (!name || !startDate || !endDate) {
+        toast('Please fill in all fields', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('createPlanBtn');
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+
+    const result = await deftApi('create_meal_plan', {
+        plan_name: name,
+        start_date: startDate,
+        end_date: endDate,
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Create Plan';
+
+    if (result) {
+        activePlan = {
+            plan_id: result.plan_id || result.id,
+            plan_name: name,
+            start_date: startDate,
+            end_date: endDate,
+        };
+        planEntries = [];
+        updatePlanBadge();
+        renderGrid();
+        closeModal('newPlanModal');
+        toast('Meal plan created!', 'success');
+    }
+}
+
+async function createPlanForWeek() {
+    const dates = getWeekDates(currentWeekStart);
+    const name = `Week of ${MONTH_NAMES[dates[0].getMonth()]} ${dates[0].getDate()}`;
+    const startDate = formatDate(dates[0]);
+    const endDate = formatDate(dates[6]);
+
+    const result = await deftApi('create_meal_plan', {
+        plan_name: name,
+        start_date: startDate,
+        end_date: endDate,
+    });
+
+    if (result) {
+        activePlan = {
+            plan_id: result.plan_id || result.id,
+            plan_name: name,
+            start_date: startDate,
+            end_date: endDate,
+        };
+        planEntries = [];
+        updatePlanBadge();
+        toast('Auto-created plan: ' + name, 'success');
+        return true;
+    }
+    return false;
+}
+
+function updatePlanBadge() {
+    const badge = document.getElementById('planNameBadge');
+    if (activePlan && activePlan.plan_name) {
+        badge.textContent = activePlan.plan_name;
+        badge.style.display = '';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+async function loadPlanForWeek() {
+    if (!activeProfileId) return;
+
+    const dates = getWeekDates(currentWeekStart);
+    const startDate = formatDate(dates[0]);
+    const endDate = formatDate(dates[6]);
+
+    // Try to get plans that overlap with this week
+    const result = await deftApi('get_meal_plans', { status: 'active' }, { silent: true });
+
+    let plan = null;
+    if (result && result.plans && Array.isArray(result.plans)) {
+        plan = result.plans.find(p => p.start_date <= endDate && p.end_date >= startDate);
+    } else if (result && Array.isArray(result)) {
+        plan = result.find(p => p.start_date <= endDate && p.end_date >= startDate);
+    } else if (result && result.data && Array.isArray(result.data)) {
+        plan = result.data.find(p => p.start_date <= endDate && p.end_date >= startDate);
+    }
+
+    if (plan) {
+        activePlan = {
+            plan_id: plan.plan_id || plan.id,
+            plan_name: plan.plan_name || plan.name,
+            start_date: plan.start_date,
+            end_date: plan.end_date,
+        };
+        updatePlanBadge();
+
+        // Load entries for this plan
+        if (plan.entries && Array.isArray(plan.entries)) {
+            planEntries = plan.entries;
+        } else {
+            // Try to get entries separately
+            const entriesResult = await deftApi('get_plan_entries', { plan_id: activePlan.plan_id }, { silent: true });
+            if (entriesResult && entriesResult.entries) {
+                planEntries = entriesResult.entries;
+            } else if (entriesResult && Array.isArray(entriesResult)) {
+                planEntries = entriesResult;
+            } else if (entriesResult && entriesResult.data) {
+                planEntries = entriesResult.data;
+            } else {
+                planEntries = [];
+            }
+        }
+    } else {
+        activePlan = null;
+        planEntries = [];
+        updatePlanBadge();
+    }
+
+    renderGrid();
+}
+
+async function removeEntry(entryId) {
+    const result = await deftApi('remove_plan_entry', { entry_id: entryId });
+
+    if (result || result === null) {
+        // Remove from local state (also remove on null — may be a 204 response)
+        planEntries = planEntries.filter(e => (e.entry_id || e.id) !== entryId);
+        renderGrid();
+        toast('Removed from plan', 'success');
+    }
+}
+
+// ═══════════════════════════════════════
+// SHOPPING LIST
+// ═══════════════════════════════════════
+async function generateShoppingList() {
+    if (!activePlan) {
+        toast('No meal plan for this week. Create one first.', 'error');
+        return;
+    }
+
+    if (planEntries.length === 0) {
+        toast('Add some recipes to your plan first.', 'error');
+        return;
+    }
+
+    openModal('shoppingListModal');
+    document.getElementById('shoppingListContent').innerHTML = '<div class="empty-state"><div class="skeleton" style="height: 24px; margin-bottom: 0.5rem;"></div><div class="skeleton" style="height: 24px; margin-bottom: 0.5rem;"></div><div class="skeleton" style="height: 24px; margin-bottom: 0.5rem;"></div><div class="skeleton" style="height: 24px;"></div></div>';
+
+    const result = await deftApi('generate_plan_shopping_list', { plan_id: activePlan.plan_id });
+
+    if (result) {
+        let items = [];
+        if (result.items) items = result.items;
+        else if (result.shopping_list) items = result.shopping_list;
+        else if (result.data) items = result.data;
+        else if (Array.isArray(result)) items = result;
+
+        if (items.length === 0) {
+            document.getElementById('shoppingListContent').innerHTML = '<div class="empty-state"><p>No items needed! Your pantry has everything.</p></div>';
+            return;
+        }
+
+        // Group by category if available
+        const grouped = {};
+        items.forEach(item => {
+            const cat = item.category || item.aisle || 'Other';
+            if (!grouped[cat]) grouped[cat] = [];
+            grouped[cat].push(item);
+        });
+
+        let html = '';
+        Object.keys(grouped).sort().forEach(cat => {
+            html += `<div style="margin-bottom: 0.75rem;">
+                <h4 class="font-heading font-bold text-xs mb-1" style="color: var(--deft-accent-warm); text-transform: uppercase; letter-spacing: 0.05em;">${escapeHtml(cat)}</h4>`;
+            grouped[cat].forEach(item => {
+                const name = item.name || item.ingredient;
+                const qty = item.quantity ? `${item.quantity}${item.unit ? ' ' + item.unit : ''}` : '';
+                html += `<div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                    <span class="text-sm" style="color: var(--deft-txt); flex: 1;">${escapeHtml(name)}</span>
+                    ${qty ? `<span class="font-mono text-xs" style="color: var(--deft-txt-3);">${escapeHtml(qty)}</span>` : ''}
+                </div>`;
+            });
+            html += '</div>';
+        });
+
+        // Add button to go to shopping page
+        html += `<div style="padding-top: 0.75rem; border-top: 1px solid var(--deft-border);">
+            <a href="/shopping" class="btn btn-primary text-xs w-full" style="display: block; text-align: center; text-decoration: none;">Open Shopping List</a>
+        </div>`;
+
+        document.getElementById('shoppingListContent').innerHTML = html;
+    } else {
+        document.getElementById('shoppingListContent').innerHTML = '<div class="empty-state"><p style="color: var(--deft-danger);">Failed to generate shopping list. The backend may not support this operation yet.</p></div>';
+    }
 }
 
 // ═══════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════
-async function initPantry() {
+async function initMealPlan() {
     const savedProfile = localStorage.getItem('rdgr-active-profile');
     if (savedProfile) {
         try {
@@ -1941,783 +2404,40 @@ async function initPantry() {
         }
     }
 
+    // Initialize to current week
+    currentWeekStart = getMonday(new Date());
+    renderGrid();
+
     if (activeProfileId) {
-        await loadPantry();
+        await loadPlanForWeek();
     }
 }
 
 // ═══════════════════════════════════════
-// PANTRY FUNCTIONS
+// KEYBOARD SHORTCUTS
 // ═══════════════════════════════════════
-async function loadPantry() {
-    if (!activeProfileId) return;
-    const items = await supabaseSelect('deft_pantry_items',
-        `user_id=eq.${activeProfileId}&select=*&order=expiry_date.asc.nullslast`);
-    pantryItems = items || [];
-    renderPantry();
-}
-
-function getExpiryStatus(expiryDate) {
-    if (!expiryDate) return { cls: 'fresh', label: 'No Expiry', bgColor: 'var(--deft-success-dim)', textColor: 'var(--deft-success)' };
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const exp = new Date(expiryDate + 'T00:00:00');
-    const diffDays = Math.ceil((exp - now) / (1000 * 60 * 60 * 24));
-
-    if (diffDays <= 0) {
-        return { cls: 'expired', label: 'Expired', bgColor: 'var(--deft-danger-dim)', textColor: 'var(--deft-danger)' };
-    } else if (diffDays <= 2) {
-        return { cls: 'expiring', label: 'Exp Soon', bgColor: 'var(--deft-warning-dim)', textColor: 'var(--deft-warning)' };
-    } else {
-        return { cls: 'fresh', label: 'Fresh', bgColor: 'var(--deft-success-dim)', textColor: 'var(--deft-success)' };
-    }
-}
-
-function renderPantry() {
-    const grid = document.getElementById('pantryGrid');
-    let filtered = pantryItems;
-
-    // Apply location filter
-    if (pantryLocationFilter !== 'all') {
-        filtered = filtered.filter(i => (i.location || '').toLowerCase() === pantryLocationFilter);
-    }
-    // Apply category filter
-    if (pantryCategoryFilter !== 'all') {
-        filtered = filtered.filter(i => (i.category || '').toLowerCase() === pantryCategoryFilter);
-    }
-    // Apply search
-    if (pantrySearchQuery) {
-        const q = pantrySearchQuery.toLowerCase();
-        filtered = filtered.filter(i => (i.name || '').toLowerCase().includes(q) || (i.notes || '').toLowerCase().includes(q));
-    }
-
-    // Update count badge
-    document.getElementById('pantryCount').textContent = `${filtered.length} item${filtered.length !== 1 ? 's' : ''}`;
-
-    if (filtered.length === 0) {
-        grid.innerHTML = `<div class="empty-state col-span-full">
-            <p>${pantrySearchQuery || pantryLocationFilter !== 'all' || pantryCategoryFilter !== 'all' ? 'No items match your filters' : 'No items in your pantry yet'}</p>
-            <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Click "Add Item" to start tracking your food storage</p>
-        </div>`;
-        return;
-    }
-
-    grid.innerHTML = filtered.map(item => {
-        const itemId = item.item_id || item.id;
-        const expiry = getExpiryStatus(item.expiry_date);
-        const qtyStr = item.quantity ? `${item.quantity} ${item.unit || ''}` : '';
-        const locStr = item.location ? item.location.charAt(0).toUpperCase() + item.location.slice(1) : '';
-        const subline = [qtyStr, locStr].filter(Boolean).join(' - ');
-        const storageLabels = { regular: '', frozen: 'Frozen', meal_prep: 'Meal Prep', bulk: 'Bulk' };
-        const storageBadge = item.storage_type && item.storage_type !== 'regular'
-            ? `<span class="text-xs px-1.5 py-0.5 rounded" style="background: rgba(100,149,237,0.15); color: #6495ED;">${storageLabels[item.storage_type] || item.storage_type}</span>`
-            : '';
-
-        const priceBadge = item.price_paid ? `<span class="text-xs px-1.5 py-0.5 rounded font-mono" style="background: rgba(240,168,48,0.1); color: var(--deft-accent-warm);">$${parseFloat(item.price_paid).toFixed(2)}</span>` : '';
-
-        return `<div class="panel p-3 cursor-pointer transition-all hover:border-opacity-60" onclick="editPantryItem('${itemId}')" style="border-color: var(--deft-border);" onmouseenter="this.style.borderColor='var(--deft-surface-hi)'" onmouseleave="this.style.borderColor='var(--deft-border)'">
-            <div class="flex items-start justify-between mb-2">
-                <div>
-                    <h3 class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${escapeHtml(item.name || 'Unnamed')}</h3>
-                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${escapeHtml(subline)}</span>
-                </div>
-                <span class="text-xs px-2 py-0.5 rounded-full font-mono" style="background: ${expiry.bgColor}; color: ${expiry.textColor};">${expiry.label}</span>
-            </div>
-            ${item.expiry_date ? `<div class="text-xs font-mono mb-2" style="color: var(--deft-txt-3);">Exp: ${formatDate(item.expiry_date)}</div>` : ''}
-            <div class="flex gap-2 mt-2 flex-wrap">
-                ${item.category ? `<span class="text-xs px-1.5 py-0.5 rounded" style="background: rgba(255,255,255,0.04); color: var(--deft-txt-3);">${escapeHtml(item.category)}</span>` : ''}
-                ${storageBadge}
-                ${priceBadge}
-            </div>
-        </div>`;
-    }).join('');
-}
-
-function filterPantryLocation(loc, el) {
-    pantryLocationFilter = loc;
-    // Update active pills
-    if (el) {
-        el.closest('.flex').querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-        el.classList.add('active');
-    }
-    renderPantry();
-}
-
-function filterPantryCategory(cat, el) {
-    pantryCategoryFilter = cat;
-    if (el) {
-        el.closest('.flex').querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-        el.classList.add('active');
-    }
-    renderPantry();
-}
-
-function searchPantry(query) {
-    pantrySearchQuery = query;
-    renderPantry();
-}
-
-// Shelf life defaults (user-adjustable per item)
-const SHELF_DEFAULTS = { regular: 7, frozen: 90, meal_prep: 4, bulk: 30 };
-let scannedNutrition = null;
-
-function onStorageTypeChange() {
-    const st = document.getElementById('pantryItemStorageType').value;
-    const shelfInput = document.getElementById('pantryItemShelfDays');
-    shelfInput.value = SHELF_DEFAULTS[st] || 7;
-    onShelfDaysChange();
-}
-
-function onShelfDaysChange() {
-    const days = parseInt(document.getElementById('pantryItemShelfDays').value) || 7;
-    const expiry = new Date();
-    expiry.setDate(expiry.getDate() + days);
-    document.getElementById('pantryItemExpiry').value = expiry.toISOString().split('T')[0];
-}
-
-function resetNutritionFields() {
-    scannedNutrition = null;
-    document.getElementById('nutritionPreview').style.display = 'none';
-    document.getElementById('nutritionManualFields').style.display = 'none';
-    document.getElementById('labelPreviewImg').style.display = 'none';
-    document.getElementById('scanBtnText').textContent = 'Scan Nutrition Label';
-    ['nutServingSize','nutCalories','nutFat','nutProtein','nutTotalCarbs','nutFiber','nutSugar','nutSodium'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-    });
-}
-
-function populateNutritionFields(n) {
-    scannedNutrition = n;
-    document.getElementById('nutServingSize').value = n.serving_size || '';
-    document.getElementById('nutCalories').value = n.calories || '';
-    document.getElementById('nutFat').value = n.total_fat_g || '';
-    document.getElementById('nutProtein').value = n.protein_g || '';
-    document.getElementById('nutTotalCarbs').value = n.total_carbs_g || '';
-    document.getElementById('nutFiber').value = n.fiber_g || '';
-    document.getElementById('nutSugar').value = n.sugar_g || '';
-    document.getElementById('nutSodium').value = n.sodium_mg || '';
-    // Show preview
-    document.getElementById('nutPreviewCal').textContent = Math.round(n.calories || 0);
-    document.getElementById('nutPreviewFat').textContent = Math.round(n.total_fat_g || 0);
-    document.getElementById('nutPreviewProtein').textContent = Math.round(n.protein_g || 0);
-    document.getElementById('nutPreviewCarbs').textContent = Math.round((n.total_carbs_g || 0) - (n.fiber_g || 0));
-    document.getElementById('nutritionPreview').style.display = '';
-}
-
-function editNutritionManually() {
-    document.getElementById('nutritionManualFields').style.display = '';
-}
-
-function toggleNutritionManual() {
-    const fields = document.getElementById('nutritionManualFields');
-    fields.style.display = fields.style.display === 'none' ? '' : 'none';
-}
-
-function collectNutritionFromFields() {
-    const cal = parseFloat(document.getElementById('nutCalories').value);
-    if (!cal && cal !== 0) return null;
-    return {
-        serving_size: document.getElementById('nutServingSize').value || null,
-        calories: cal || 0,
-        total_fat_g: parseFloat(document.getElementById('nutFat').value) || 0,
-        protein_g: parseFloat(document.getElementById('nutProtein').value) || 0,
-        total_carbs_g: parseFloat(document.getElementById('nutTotalCarbs').value) || 0,
-        fiber_g: parseFloat(document.getElementById('nutFiber').value) || 0,
-        sugar_g: parseFloat(document.getElementById('nutSugar').value) || 0,
-        net_carbs_g: (parseFloat(document.getElementById('nutTotalCarbs').value) || 0) - (parseFloat(document.getElementById('nutFiber').value) || 0),
-        sodium_mg: parseFloat(document.getElementById('nutSodium').value) || 0
-    };
-}
-
-function scanNutritionLabel() {
-    document.getElementById('nutritionLabelFile').click();
-}
-
-async function handleNutritionLabelUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Show image preview
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-        const base64 = e.target.result;
-        document.getElementById('labelImg').src = base64;
-        document.getElementById('labelPreviewImg').style.display = '';
-        document.getElementById('scanBtnText').textContent = 'Analyzing...';
-
-        // Send to AI for analysis
-        try {
-            const result = await deftApi('analyze_nutrition_label', { image_base64: base64 });
-            if (result && result.success !== false && result.data) {
-                const data = result.data;
-                populateNutritionFields(data);
-                document.getElementById('nutritionManualFields').style.display = '';
-                // Auto-fill name if blank
-                if (data.food_name && !document.getElementById('pantryItemName').value) {
-                    document.getElementById('pantryItemName').value = data.food_name;
-                }
-                // Auto-fill brand in notes if available
-                if (data.brand) {
-                    const notes = document.getElementById('pantryItemNotes');
-                    if (!notes.value) notes.value = 'Brand: ' + data.brand;
-                }
-                toast('Nutrition label scanned', 'success');
-            } else {
-                toast('Could not read label - enter manually', 'error');
-                document.getElementById('nutritionManualFields').style.display = '';
+document.addEventListener('keydown', function(e) {
+    // Escape closes modals
+    if (e.key === 'Escape') {
+        const modals = ['recipePickerModal', 'newPlanModal', 'shoppingListModal', 'createProfileModal', 'bugReportModal'];
+        modals.forEach(id => {
+            const modal = document.getElementById(id);
+            if (modal && modal.classList.contains('active')) {
+                closeModal(id);
             }
-        } catch (err) {
-            toast('Scan failed - enter manually', 'error');
-            document.getElementById('nutritionManualFields').style.display = '';
-        }
-        document.getElementById('scanBtnText').textContent = 'Scan Nutrition Label';
-    };
-    reader.readAsDataURL(file);
-}
-
-function addPantryItem() {
-    editingPantryItem = null;
-    document.getElementById('pantryModalTitle').textContent = 'Add Pantry Item';
-    document.getElementById('pantryItemName').value = '';
-    document.getElementById('pantryFoodSearch').value = '';
-    document.getElementById('pantryItemQty').value = '';
-    document.getElementById('pantryItemUnit').value = 'each';
-    document.getElementById('pantryItemCategory').value = 'other';
-    document.querySelectorAll('input[name="pantryLocation"]').forEach(r => r.checked = r.value === 'fridge');
-    document.getElementById('pantryItemStorageType').value = 'regular';
-    document.getElementById('pantryItemShelfDays').value = SHELF_DEFAULTS.regular;
-    document.getElementById('pantryItemExpiry').value = '';
-    document.getElementById('pantryItemPrice').value = '';
-    document.getElementById('pantryItemNotes').value = '';
-    resetNutritionFields();
-    document.getElementById('removePantryBtn').style.display = 'none';
-    document.getElementById('savePantryBtn').textContent = 'Save Item';
-    // Auto-set storage type when location changes
-    document.querySelectorAll('input[name="pantryLocation"]').forEach(r => {
-        r.onchange = () => {
-            const st = document.getElementById('pantryItemStorageType');
-            if (r.value === 'freezer' && st.value !== 'frozen') { st.value = 'frozen'; onStorageTypeChange(); }
-            else if (r.value !== 'freezer' && st.value === 'frozen') { st.value = 'regular'; onStorageTypeChange(); }
-        };
-    });
-    openModal('addPantryModal');
-}
-
-function editPantryItem(id) {
-    const item = pantryItems.find(i => (i.item_id || i.id) === id);
-    if (!item) return;
-    editingPantryItem = id;
-    document.getElementById('pantryModalTitle').textContent = 'Edit Pantry Item';
-    document.getElementById('pantryItemName').value = item.name || '';
-    document.getElementById('pantryFoodSearch').value = '';
-    document.getElementById('pantryItemQty').value = item.quantity || '';
-    document.getElementById('pantryItemUnit').value = item.unit || 'each';
-    document.getElementById('pantryItemCategory').value = item.category || 'other';
-    document.querySelectorAll('input[name="pantryLocation"]').forEach(r => r.checked = r.value === (item.location || 'fridge'));
-    document.getElementById('pantryItemStorageType').value = item.storage_type || 'regular';
-    document.getElementById('pantryItemShelfDays').value = item.default_shelf_days || SHELF_DEFAULTS[item.storage_type || 'regular'] || 7;
-    document.getElementById('pantryItemExpiry').value = item.expiry_date || '';
-    document.getElementById('pantryItemPrice').value = item.price_paid || '';
-    document.getElementById('pantryItemNotes').value = item.notes || '';
-    resetNutritionFields();
-    if (item.nutrition_per_unit) {
-        populateNutritionFields(item.nutrition_per_unit);
-        document.getElementById('nutritionManualFields').style.display = '';
+        });
     }
-    document.getElementById('removePantryBtn').style.display = '';
-    document.getElementById('savePantryBtn').textContent = 'Update Item';
-    // Set location change handler
-    document.querySelectorAll('input[name="pantryLocation"]').forEach(r => {
-        r.onchange = () => {
-            const st = document.getElementById('pantryItemStorageType');
-            if (r.value === 'freezer' && st.value !== 'frozen') { st.value = 'frozen'; onStorageTypeChange(); }
-            else if (r.value !== 'freezer' && st.value === 'frozen') { st.value = 'regular'; onStorageTypeChange(); }
-        };
-    });
-    openModal('addPantryModal');
-}
-
-async function savePantryItem() {
-    const name = document.getElementById('pantryItemName').value.trim();
-    if (!name) { toast('Item name is required', 'error'); return; }
-
-    const quantity = parseFloat(document.getElementById('pantryItemQty').value) || null;
-    const unit = document.getElementById('pantryItemUnit').value;
-    const category = document.getElementById('pantryItemCategory').value;
-    const location = document.querySelector('input[name="pantryLocation"]:checked')?.value || 'fridge';
-    const storage_type = document.getElementById('pantryItemStorageType').value;
-    const default_shelf_days = parseInt(document.getElementById('pantryItemShelfDays').value) || null;
-    const expiry_date = document.getElementById('pantryItemExpiry').value || null;
-    const priceVal = parseFloat(document.getElementById('pantryItemPrice').value);
-    const price_paid = isNaN(priceVal) ? null : priceVal;
-    const notes = document.getElementById('pantryItemNotes').value.trim() || null;
-    const nutrition_per_unit = collectNutritionFromFields();
-
-    const data = { name, quantity, unit, category, location, storage_type, default_shelf_days, expiry_date, notes };
-    if (price_paid !== null) data.price_paid = price_paid;
-    if (nutrition_per_unit) data.nutrition_per_unit = nutrition_per_unit;
-
-    // Include barcode if set from scanner
-    const barcode = document.getElementById('addPantryModal').dataset.barcode || null;
-    if (barcode) {
-        data.barcode = barcode;
-        delete document.getElementById('addPantryModal').dataset.barcode;
-    }
-
-    // If nutrition was provided and item doesn't exist in food database, offer to create it
-    if (nutrition_per_unit && !editingPantryItem) {
-        createFoodDatabaseEntry(name, nutrition_per_unit);
-    }
-
-    let result;
-    if (editingPantryItem) {
-        result = await deftApi('update_pantry_item', { item_id: editingPantryItem, ...data });
-    } else {
-        result = await deftApi('add_pantry_item', data);
-    }
-
-    if (result) {
-        toast(editingPantryItem ? 'Item updated' : 'Item added to pantry', 'success');
-        closeModal('addPantryModal');
-        editingPantryItem = null;
-        await loadPantry();
-    }
-}
-
-async function createFoodDatabaseEntry(name, nutrition) {
-    // Check if food already exists in database
-    try {
-        const existing = await supabaseSelect('deft_food_database',
-            `name=ilike.${encodeURIComponent(name)}&select=food_id,name&limit=1`);
-        if (existing && existing.length > 0) return; // Already exists
-
-        // Create new food database entry
-        const foodEntry = {
-            name: name,
-            brand: nutrition.brand || null,
-            serving_size: nutrition.serving_size || '1 serving',
-            nutrition_per_serving: {
-                calories: nutrition.calories || 0,
-                total_fat_g: nutrition.total_fat_g || 0,
-                saturated_fat_g: nutrition.saturated_fat_g || 0,
-                protein_g: nutrition.protein_g || 0,
-                total_carbs_g: nutrition.total_carbs_g || 0,
-                fiber_g: nutrition.fiber_g || 0,
-                sugar_g: nutrition.sugar_g || 0,
-                net_carbs_g: (nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0),
-                sodium_mg: nutrition.sodium_mg || 0,
-                cholesterol_mg: nutrition.cholesterol_mg || 0
-            },
-            category: 'other',
-            is_keto_friendly: ((nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0)) <= 10,
-            keto_tier: ((nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0)) <= 3 ? 'excellent'
-                : ((nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0)) <= 6 ? 'good'
-                : ((nutrition.total_carbs_g || 0) - (nutrition.fiber_g || 0)) <= 12 ? 'moderate' : 'avoid'
-        };
-        await supabaseWrite('deft_food_database', 'POST', foodEntry);
-    } catch (e) {
-        // Non-critical - don't block pantry item save
-    }
-}
-
-async function removePantryItem(id, reason) {
-    if (!id) return;
-    if (!confirm('Remove this item from your pantry?')) return;
-    const result = await deftApi('remove_pantry_item', { item_id: id, reason: reason || 'used_up' });
-    if (result) {
-        toast('Item removed', 'success');
-        closeModal('addPantryModal');
-        editingPantryItem = null;
-        await loadPantry();
-    }
-}
-
-async function whatCanIMake() {
-    const panel = document.getElementById('whatCanIMakePanel');
-    const content = document.getElementById('whatCanIMakeContent');
-    panel.style.display = '';
-    content.innerHTML = '<p class="ai-loading">Analyzing your pantry items and suggesting recipes...</p>';
-
-    const result = await deftApi('what_can_i_make', {});
-    if (result && result.data) {
-        const suggestions = result.data.suggestions || result.data;
-        if (Array.isArray(suggestions) && suggestions.length > 0) {
-            content.innerHTML = suggestions.map(s => {
-                const matchPct = s.match_pct != null ? Math.round(s.match_pct * 100) : null;
-                const matchBadge = matchPct != null
-                    ? `<span class="badge ml-2" style="background: ${matchPct >= 80 ? 'var(--deft-success-dim)' : matchPct >= 60 ? 'var(--deft-warning-dim)' : 'var(--deft-danger-dim)'}; color: ${matchPct >= 80 ? 'var(--deft-success)' : matchPct >= 60 ? 'var(--deft-warning)' : 'var(--deft-danger)'}; font-size: 0.65rem;">${matchPct}% match</span>`
-                    : '';
-                const missingList = s.missing_ingredients && s.missing_ingredients.length > 0
-                    ? `<p class="text-xs mt-1" style="color: var(--deft-warning);">Missing: ${escapeHtml(s.missing_ingredients.map(i => typeof i === 'string' ? i : i.name).join(', '))}</p>`
-                    : '';
-                return `<div class="mb-3 p-3 rounded-lg" style="background: rgba(168,130,214,0.05); border: 1px solid rgba(168,130,214,0.1);">
-                    <div class="flex items-center">
-                        <h4 class="font-heading font-bold text-sm" style="color: #A882D6;">${escapeHtml(s.name || s.title || 'Suggestion')}</h4>
-                        ${matchBadge}
-                    </div>
-                    <p class="text-xs mb-1 mt-1" style="color: var(--deft-txt-2);">${escapeHtml(s.description || s.reason || '')}</p>
-                    ${s.ingredients ? `<p class="text-xs font-mono" style="color: var(--deft-txt-3);">Uses: ${escapeHtml(Array.isArray(s.ingredients) ? s.ingredients.join(', ') : s.ingredients)}</p>` : ''}
-                    ${missingList}
-                    ${s.estimated_nutrition ? `<p class="text-xs font-mono mt-1" style="color: var(--deft-txt-3);">${s.estimated_nutrition.calories || 0} cal | ${s.estimated_nutrition.fat_g || 0}g fat | ${s.estimated_nutrition.protein_g || 0}g protein | ${s.estimated_nutrition.net_carbs_g || 0}g net carbs</p>` : ''}
-                </div>`;
-            }).join('');
-        } else if (typeof suggestions === 'string') {
-            content.innerHTML = `<div class="text-sm" style="color: var(--deft-txt-2); white-space: pre-wrap;">${escapeHtml(suggestions)}</div>`;
-        } else {
-            content.innerHTML = '<p style="color: var(--deft-txt-3);">No suggestions available. Try adding more items to your pantry.</p>';
-        }
-    } else {
-        content.innerHTML = '<p style="color: var(--deft-txt-3);">Could not generate suggestions right now. Please try again later.</p>';
-    }
-}
-
-// Food database autocomplete
-let foodSearchTimeout = null;
-async function searchFoodDatabase(query) {
-    clearTimeout(foodSearchTimeout);
-    const dropdown = document.getElementById('foodSearchResults');
-    if (!query || query.length < 2) { dropdown.classList.remove('open'); return; }
-
-    foodSearchTimeout = setTimeout(async () => {
-        const results = await supabaseSelect('deft_food_database',
-            `name=ilike.*${encodeURIComponent(query)}*&select=id,name,calories_per_serving,serving_size,serving_unit&limit=8`);
-        if (results && results.length > 0) {
-            dropdown.innerHTML = results.map(f => `
-                <div class="autocomplete-item" onclick="selectFoodItem('${escapeHtml(f.name)}')">
-                    <span>${escapeHtml(f.name)}</span>
-                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${f.calories_per_serving || '?'} cal / ${f.serving_size || ''} ${f.serving_unit || ''}</span>
-                </div>
-            `).join('');
-            dropdown.classList.add('open');
-        } else {
-            dropdown.classList.remove('open');
-        }
-    }, 300);
-}
-
-function selectFoodItem(name) {
-    document.getElementById('pantryItemName').value = name;
-    document.getElementById('foodSearchResults').classList.remove('open');
-    document.getElementById('pantryFoodSearch').value = '';
-}
-
-// ═══════════════════════════════════════
-// PREPARED MEALS FUNCTIONS
-// ═══════════════════════════════════════
-async function loadPreparedMeals() {
-    if (!activeProfileId) return;
-    const meals = await supabaseSelect('deft_prepared_meals',
-        `user_id=eq.${activeProfileId}&select=*&order=prepared_date.desc`);
-    preparedMeals = (meals || []).map(m => ({ ...m, id: m.prepared_id || m.id }));
-    renderPreparedMeals();
-}
-
-function renderPreparedMeals() {
-    const grid = document.getElementById('preparedGrid');
-    document.getElementById('preparedCount').textContent = preparedMeals.length;
-
-    if (preparedMeals.length === 0) {
-        grid.innerHTML = `<div class="empty-state col-span-full">
-            <p>No prepared meals tracked</p>
-            <p class="text-sm mt-1" style="color: var(--deft-txt-3);">Add meals you've prepped to track servings and freshness</p>
-        </div>`;
-        return;
-    }
-
-    grid.innerHTML = preparedMeals.map(meal => {
-        const servingsUsed = meal.servings_consumed || 0;
-        const totalServings = meal.total_servings || 1;
-        const remaining = Math.max(totalServings - servingsUsed, 0);
-        const pct = Math.round((remaining / totalServings) * 100);
-        const nutrition = meal.nutrition_per_serving || {};
-        const locStr = meal.location ? meal.location.charAt(0).toUpperCase() + meal.location.slice(1) : '';
-        const dateStr = meal.prepared_date ? formatDate(meal.prepared_date) : '';
-        const subline = ['Prepared ' + dateStr, locStr].filter(Boolean).join(' - ');
-
-        return `<div class="panel p-4">
-            <div class="flex items-start justify-between mb-3">
-                <div>
-                    <h3 class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${escapeHtml(meal.name || 'Unnamed')}</h3>
-                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${escapeHtml(subline)}</span>
-                </div>
-            </div>
-            <div class="mb-3">
-                <div class="flex justify-between text-xs mb-1" style="color: var(--deft-txt-2);">
-                    <span>Servings</span><span class="font-mono font-bold">${remaining} / ${totalServings}</span>
-                </div>
-                <div class="w-full h-2 rounded-full" style="background: var(--deft-border);">
-                    <div class="h-full rounded-full transition-all" style="width: ${pct}%; background: var(--deft-accent);"></div>
-                </div>
-            </div>
-            <div class="flex gap-3 text-xs font-mono mb-3" style="color: var(--deft-txt-2);">
-                <span>${nutrition.calories || '?'} cal</span>
-                <span>${nutrition.fat_g || '?'}g F</span>
-                <span>${nutrition.protein_g || '?'}g P</span>
-                <span>${nutrition.net_carbs_g || '?'}g C</span>
-            </div>
-            <div class="flex gap-2">
-                <button class="btn btn-primary text-xs flex-1" onclick="consumePrepared('${meal.id}')" ${remaining <= 0 ? 'disabled' : ''}>Eat 1 Serving</button>
-                <button class="btn btn-ghost text-xs" onclick="editPrepared('${meal.id}')">Edit</button>
-                <button class="btn btn-danger text-xs" onclick="discardPrepared('${meal.id}')">Discard</button>
-            </div>
-        </div>`;
-    }).join('');
-}
-
-function addPreparedMeal() {
-    editingPreparedMeal = null;
-    selectedRecipeId = null;
-    document.getElementById('preparedModalTitle').textContent = 'Add Prepared Meal';
-    document.getElementById('preparedMealName').value = '';
-    document.getElementById('preparedRecipeSearch').value = '';
-    document.getElementById('preparedServings').value = '4';
-    document.getElementById('preparedCalories').value = '';
-    document.getElementById('preparedFat').value = '';
-    document.getElementById('preparedProtein').value = '';
-    document.getElementById('preparedNetCarbs').value = '';
-    document.querySelectorAll('input[name="preparedLocation"]').forEach(r => r.checked = r.value === 'fridge');
-    // Default expiry to 5 days from now
-    const defaultExpiry = new Date();
-    defaultExpiry.setDate(defaultExpiry.getDate() + 5);
-    document.getElementById('preparedExpiry').value = defaultExpiry.toISOString().split('T')[0];
-    document.getElementById('preparedNotes').value = '';
-    document.getElementById('savePreparedBtn').textContent = 'Save Meal';
-    openModal('addPreparedModal');
-}
-
-function editPrepared(id) {
-    const meal = preparedMeals.find(m => m.id === id);
-    if (!meal) return;
-    editingPreparedMeal = id;
-    document.getElementById('preparedModalTitle').textContent = 'Edit Prepared Meal';
-    document.getElementById('preparedMealName').value = meal.name || '';
-    document.getElementById('preparedRecipeSearch').value = '';
-    document.getElementById('preparedServings').value = meal.total_servings || 4;
-    const n = meal.nutrition_per_serving || {};
-    document.getElementById('preparedCalories').value = n.calories || '';
-    document.getElementById('preparedFat').value = n.fat_g || '';
-    document.getElementById('preparedProtein').value = n.protein_g || '';
-    document.getElementById('preparedNetCarbs').value = n.net_carbs_g || '';
-    document.querySelectorAll('input[name="preparedLocation"]').forEach(r => r.checked = r.value === (meal.location || 'fridge'));
-    document.getElementById('preparedExpiry').value = meal.expiry_date || '';
-    document.getElementById('preparedNotes').value = meal.notes || '';
-    document.getElementById('savePreparedBtn').textContent = 'Update Meal';
-    openModal('addPreparedModal');
-}
-
-async function savePreparedMeal() {
-    const name = document.getElementById('preparedMealName').value.trim();
-    if (!name) { toast('Meal name is required', 'error'); return; }
-
-    const total_servings = parseInt(document.getElementById('preparedServings').value) || 4;
-    const location = document.querySelector('input[name="preparedLocation"]:checked')?.value || 'fridge';
-    const expiry_date = document.getElementById('preparedExpiry').value || null;
-    const notes = document.getElementById('preparedNotes').value.trim() || null;
-    const nutrition_per_serving = {
-        calories: parseFloat(document.getElementById('preparedCalories').value) || 0,
-        fat_g: parseFloat(document.getElementById('preparedFat').value) || 0,
-        protein_g: parseFloat(document.getElementById('preparedProtein').value) || 0,
-        net_carbs_g: parseFloat(document.getElementById('preparedNetCarbs').value) || 0,
-    };
-
-    const data = { name, total_servings, location, expiry_date, notes, nutrition_per_serving };
-    if (selectedRecipeId && !editingPreparedMeal) data.recipe_id = selectedRecipeId;
-
-    let result;
-    if (editingPreparedMeal) {
-        result = await deftApi('update_prepared_meal', { prepared_id: editingPreparedMeal, ...data });
-    } else {
-        result = await deftApi('add_prepared_meal', data);
-    }
-
-    if (result) {
-        toast(editingPreparedMeal ? 'Meal updated' : 'Prepared meal added', 'success');
-        closeModal('addPreparedModal');
-        editingPreparedMeal = null;
-        await loadPreparedMeals();
-    }
-}
-
-async function consumePrepared(id) {
-    const result = await deftApi('consume_prepared', { prepared_id: id, servings: 1 });
-    if (result) {
-        toast('Serving consumed! Logged to today\'s meals.', 'success');
-        await loadPreparedMeals();
-    }
-}
-
-async function discardPrepared(id) {
-    if (!confirm('Discard this prepared meal? This cannot be undone.')) return;
-    const result = await deftApi('discard_prepared', { prepared_id: id });
-    if (result) {
-        toast('Meal discarded', 'success');
-        await loadPreparedMeals();
-    }
-}
-
-// Recipe autocomplete
-let recipeSearchTimeout = null;
-let selectedRecipeId = null;
-
-async function searchRecipes(query) {
-    clearTimeout(recipeSearchTimeout);
-    const dropdown = document.getElementById('recipeSearchResults');
-    if (!query || query.length < 2) { dropdown.classList.remove('open'); return; }
-
-    recipeSearchTimeout = setTimeout(async () => {
-        const results = await supabaseSelect('deft_recipes',
-            `user_id=eq.${activeProfileId}&name=ilike.*${encodeURIComponent(query)}*&status=eq.active&select=recipe_id,name,servings,nutrition_per_serving&limit=8`);
-        if (results && results.length > 0) {
-            dropdown.innerHTML = results.map(r => {
-                const n = r.nutrition_per_serving || {};
-                const dataAttr = JSON.stringify({ recipe_id: r.recipe_id, name: r.name, servings: r.servings, nutrition: n }).replace(/"/g, '&quot;');
-                return `<div class="autocomplete-item" onclick="selectRecipeForPrepared(${dataAttr})">
-                    <div class="flex justify-between w-full">
-                        <span>${escapeHtml(r.name)}</span>
-                        <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${n.calories || '?'} cal &middot; ${r.servings || '?'} servings</span>
-                    </div>
-                </div>`;
-            }).join('');
-            dropdown.classList.add('open');
-        } else {
-            dropdown.innerHTML = '<div class="autocomplete-item" style="color: var(--deft-txt-3);">No recipes found</div>';
-            dropdown.classList.add('open');
-        }
-    }, 300);
-}
-
-function selectRecipeForPrepared(data) {
-    selectedRecipeId = data.recipe_id || null;
-    document.getElementById('preparedMealName').value = data.name || '';
-    document.getElementById('recipeSearchResults').classList.remove('open');
-    document.getElementById('preparedRecipeSearch').value = data.name || '';
-    if (data.servings) document.getElementById('preparedServings').value = data.servings;
-    const n = data.nutrition || {};
-    document.getElementById('preparedCalories').value = n.calories || '';
-    document.getElementById('preparedFat').value = n.fat_g || n.total_fat_g || '';
-    document.getElementById('preparedProtein').value = n.protein_g || '';
-    document.getElementById('preparedNetCarbs').value = n.net_carbs_g || '';
-    toast('Recipe loaded - nutrition auto-filled', 'success');
-}
-
-// ═══════════════════════════════════════
-// BARCODE SCANNER
-// ═══════════════════════════════════════
-let html5QrCode = null;
-
-function openBarcodeScanner() {
-    openModal('barcodeScannerModal');
-    document.getElementById('barcodeResult').style.display = 'none';
-
-    html5QrCode = new Html5Qrcode("barcode-reader");
-    html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 100 } },
-        async (decodedText) => {
-            // Stop scanning
-            await html5QrCode.stop();
-            html5QrCode = null;
-
-            // Show loading
-            const resultDiv = document.getElementById('barcodeResult');
-            resultDiv.style.display = '';
-            resultDiv.innerHTML = '<p class="ai-loading" style="color: var(--deft-txt-2);">Looking up product...</p>';
-
-            // Call DEFT-BRIDGE scan_barcode
-            const result = await deftApi('scan_barcode', { barcode: decodedText });
-
-            if (result && result.success !== false) {
-                const p = result.data || result;
-                const nutrition = p.nutrition_per_serving || {};
-                resultDiv.innerHTML = `
-                    <h4 class="font-heading font-bold text-sm mb-2" style="color: var(--deft-accent);">${escapeHtml(p.name || 'Unknown Product')}</h4>
-                    ${p.brand ? `<p class="text-xs mb-1" style="color: var(--deft-txt-2);">Brand: ${escapeHtml(p.brand)}</p>` : ''}
-                    <p class="text-xs mb-2 font-mono" style="color: var(--deft-txt-3);">
-                        ${nutrition.calories || 0} cal | ${nutrition.total_fat_g || 0}g fat | ${nutrition.protein_g || 0}g protein | ${nutrition.net_carbs_g || 0}g net carbs
-                    </p>
-                    <div class="flex gap-2 mt-3">
-                        <button class="btn btn-primary text-xs" onclick="addScannedItem('${escapeHtml(p.name || '')}', '${escapeHtml(decodedText)}')">Add to Pantry</button>
-                        <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Cancel</button>
-                    </div>
-                `;
-            } else {
-                resultDiv.innerHTML = `
-                    <p class="text-xs" style="color: var(--deft-warning);">Product not found for barcode: ${escapeHtml(decodedText)}</p>
-                    <div class="flex gap-2 mt-2">
-                        <button class="btn btn-ghost text-xs" onclick="restartBarcodeScanner()">Try Again</button>
-                        <button class="btn btn-primary text-xs" onclick="addScannedItem('', '${escapeHtml(decodedText)}')">Add Manually</button>
-                    </div>
-                `;
-            }
-        },
-        (errorMessage) => { /* ignore scan errors */ }
-    ).catch(err => {
-        document.getElementById('barcodeResult').style.display = '';
-        document.getElementById('barcodeResult').innerHTML = `<p class="text-xs" style="color: var(--deft-danger);">Camera access denied or not available.</p>`;
-    });
-}
-
-function closeBarcodeScanner() {
-    if (html5QrCode) {
-        html5QrCode.stop().catch(() => {});
-        html5QrCode = null;
-    }
-    closeModal('barcodeScannerModal');
-}
-
-function restartBarcodeScanner() {
-    closeBarcodeScanner();
-    setTimeout(() => openBarcodeScanner(), 300);
-}
-
-function addScannedItem(name, barcode) {
-    closeBarcodeScanner();
-    // Open the add pantry item modal pre-filled with the scanned item name
-    addPantryItem();
-    setTimeout(() => {
-        if (name) document.getElementById('pantryItemName').value = name;
-        // Store barcode for when form is submitted
-        document.getElementById('addPantryModal').dataset.barcode = barcode;
-    }, 100);
-}
-
-// ═══════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════
-function escapeHtml(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-}
-
-function formatDate(dateStr) {
-    if (!dateStr) return '';
-    try {
-        const d = new Date(dateStr + (dateStr.includes('T') ? '' : 'T00:00:00'));
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    } catch(e) { return dateStr; }
-}
-
-// Close autocomplete dropdowns on outside click
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('#pantryFoodSearch') && !e.target.closest('#foodSearchResults')) {
-        document.getElementById('foodSearchResults').classList.remove('open');
-    }
-    if (!e.target.closest('#preparedRecipeSearch') && !e.target.closest('#recipeSearchResults')) {
-        document.getElementById('recipeSearchResults').classList.remove('open');
-    }
+    // Left/Right arrow keys for week navigation (when no input is focused)
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    if (e.key === 'ArrowLeft') navigateWeek(-1);
+    if (e.key === 'ArrowRight') navigateWeek(1);
 });
 
-// Keyboard: close modals on Escape
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        document.querySelectorAll('.modal-backdrop.active').forEach(m => {
-            m.classList.remove('active');
-        });
-        const dd = document.getElementById('profileDropdown');
-        if (!dd.classList.contains('hidden')) {
+// Close profile dropdown on outside click
+document.addEventListener('click', function(e) {
+    const dd = document.getElementById('profileDropdown');
+    if (dd && !dd.classList.contains('hidden')) {
+        if (!document.getElementById('profileSwitcher').contains(e.target)) {
             dd.classList.add('hidden');
             document.getElementById('profileBtn').setAttribute('aria-expanded', 'false');
         }
