@@ -183,6 +183,7 @@
         }
         .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
     </style>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1334,6 +1335,7 @@
                             <div class="nav-dropdown">
                                 <a href="/brand-discovery">Discovery</a>
                                 <a href="/brand-voice">Voice</a>
+                                <a href="/brand-voice/calibration">Calibration</a>
                                 <a href="/template-studio">Templates</a>
                                 <a href="/brand-documents">Docs</a>
                             </div>
@@ -1830,6 +1832,12 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         <input type="text" id="foodBrowserSearch" class="form-input pl-9" placeholder="Search foods (e.g. chicken, avocado, butter...)" oninput="searchFoodBrowser(this.value)">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--deft-txt-3);"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                     </div>
+                    <button class="btn btn-ghost text-xs flex-shrink-0" onclick="openBarcodeScanner()" title="Scan barcode to look up food">
+                        <span class="flex items-center gap-1.5">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="11" y1="8" x2="11" y2="16"/><line x1="15" y1="8" x2="15" y2="16"/><line x1="19" y1="8" x2="19" y2="16"/></svg>
+                            Scan Barcode
+                        </span>
+                    </button>
                     <div class="flex gap-1 overflow-x-auto">
                         <button class="recipe-filter active" data-cat="all" onclick="filterFoodCategory('all')">All</button>
                         <button class="recipe-filter" data-cat="protein" onclick="filterFoodCategory('protein')">Protein</button>
@@ -2718,7 +2726,19 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             </div>
 
             <!-- Actions -->
-            <div class="p-5 flex gap-2">
+            <div class="p-5 flex flex-wrap gap-2">
+                <button class="btn btn-primary text-xs" onclick="editRecipe()">
+                    <span class="flex items-center gap-1.5">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2L4 10H2v-2L8.5 1.5z" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Edit Recipe
+                    </span>
+                </button>
+                <button class="btn btn-ghost text-xs" onclick="duplicateRecipe()">
+                    <span class="flex items-center gap-1.5">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="3.5" y="3.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1"/><path d="M8.5 3.5V2a1 1 0 00-1-1H2a1 1 0 00-1 1v5.5a1 1 0 001 1h1.5" stroke="currentColor" stroke-width="1"/></svg>
+                        Duplicate
+                    </span>
+                </button>
                 <button class="btn btn-danger text-xs" onclick="archiveRecipe()">
                     <span class="flex items-center gap-1.5">
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3h9M4.5 3V2a1 1 0 011-1h1a1 1 0 011 1v1M9.5 3v7a1 1 0 01-1 1h-5a1 1 0 01-1-1V3" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -2735,7 +2755,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     <div id="addRecipeModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('addRecipeModal')">
         <div class="modal-content" style="max-width: 640px;">
             <div class="p-5 border-b flex items-center justify-between" style="border-color: var(--deft-border);">
-                <h2 class="font-heading font-bold text-base">New Recipe</h2>
+                <h2 id="recipeModalTitle" class="font-heading font-bold text-base">New Recipe</h2>
                 <button onclick="closeModal('addRecipeModal')" class="p-1 rounded transition-colors" style="color: var(--deft-txt-3);" aria-label="Close">
                     <svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </button>
@@ -2779,6 +2799,20 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             <div class="p-5 border-t flex justify-end gap-2" style="border-color: var(--deft-border);">
                 <button class="btn btn-ghost text-xs" onclick="closeModal('addRecipeModal')">Cancel</button>
                 <button id="saveRecipeBtn" class="btn btn-primary text-xs" onclick="saveNewRecipe()">Save Recipe</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ BARCODE SCANNER MODAL ═══ -->
+    <div class="modal-backdrop" id="barcodeScannerModal" onclick="if(event.target===this)closeBarcodeScanner()">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="panel-header">
+                <span class="font-heading font-bold text-sm" style="color:var(--deft-txt);">Scan Barcode</span>
+                <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Close</button>
+            </div>
+            <div class="panel-body">
+                <div id="barcode-reader" style="width:100%;"></div>
+                <div id="barcodeResult" style="display:none;" class="mt-3 p-3 rounded-lg"></div>
             </div>
         </div>
     </div>
@@ -4362,12 +4396,88 @@ async function archiveRecipe() {
 
 // ── Add Recipe Modal ──
 let newRecipeIngredients = [];
+let editingRecipeId = null;
 
 function openAddRecipeModal() {
+    editingRecipeId = null;
+    document.getElementById('recipeModalTitle').textContent = 'New Recipe';
+    document.getElementById('saveRecipeBtn').textContent = 'Save Recipe';
     document.getElementById('newRecipeName').value = '';
     document.getElementById('newRecipeServings').value = '1';
     document.getElementById('newRecipeTags').value = '';
     newRecipeIngredients = [{ name: '', quantity: '', unit: 'g', nutrition: {} }];
+    renderIngredientRows();
+    openModal('addRecipeModal');
+}
+
+async function editRecipe() {
+    const recipeId = document.getElementById('recipeDetailPanel').dataset.recipeId;
+    if (!recipeId) return;
+
+    const results = await supabaseSelect('deft_recipes', `recipe_id=eq.${recipeId}&select=*`);
+    const ingResults = await supabaseSelect('deft_ingredients', `recipe_id=eq.${recipeId}&select=*&order=sort_order`);
+    if (!results || results.length === 0) { toast('Recipe not found', 'error'); return; }
+
+    const recipe = results[0];
+    const ingredients = ingResults || [];
+
+    closeRecipeDetail();
+
+    editingRecipeId = recipeId;
+    document.getElementById('recipeModalTitle').textContent = 'Edit Recipe';
+    document.getElementById('saveRecipeBtn').textContent = 'Update Recipe';
+    document.getElementById('newRecipeName').value = recipe.name || '';
+    document.getElementById('newRecipeServings').value = recipe.servings || 1;
+    document.getElementById('newRecipeTags').value = (recipe.tags || []).join(', ');
+
+    newRecipeIngredients = ingredients.length > 0
+        ? ingredients.map(i => ({
+            name: i.name || '',
+            quantity: i.quantity || '',
+            unit: i.unit || 'g',
+            nutrition: i.nutrition_per_unit || i.nutrition || {},
+            food_id: i.food_id || null,
+            baseServing: i.base_serving || null,
+            _approxConversion: i.approx_conversion || false,
+        }))
+        : [{ name: '', quantity: '', unit: 'g', nutrition: {} }];
+
+    renderIngredientRows();
+    openModal('addRecipeModal');
+}
+
+async function duplicateRecipe() {
+    const recipeId = document.getElementById('recipeDetailPanel').dataset.recipeId;
+    if (!recipeId) return;
+
+    const results = await supabaseSelect('deft_recipes', `recipe_id=eq.${recipeId}&select=*`);
+    const ingResults = await supabaseSelect('deft_ingredients', `recipe_id=eq.${recipeId}&select=*&order=sort_order`);
+    if (!results || results.length === 0) { toast('Recipe not found', 'error'); return; }
+
+    const recipe = results[0];
+    const ingredients = ingResults || [];
+
+    closeRecipeDetail();
+
+    editingRecipeId = null;
+    document.getElementById('recipeModalTitle').textContent = 'Duplicate Recipe';
+    document.getElementById('saveRecipeBtn').textContent = 'Save Recipe';
+    document.getElementById('newRecipeName').value = (recipe.name || '') + ' (copy)';
+    document.getElementById('newRecipeServings').value = recipe.servings || 1;
+    document.getElementById('newRecipeTags').value = (recipe.tags || []).join(', ');
+
+    newRecipeIngredients = ingredients.length > 0
+        ? ingredients.map(i => ({
+            name: i.name || '',
+            quantity: i.quantity || '',
+            unit: i.unit || 'g',
+            nutrition: i.nutrition_per_unit || i.nutrition || {},
+            food_id: i.food_id || null,
+            baseServing: i.base_serving || null,
+            _approxConversion: i.approx_conversion || false,
+        }))
+        : [{ name: '', quantity: '', unit: 'g', nutrition: {} }];
+
     renderIngredientRows();
     openModal('addRecipeModal');
 }
@@ -4452,16 +4562,23 @@ async function saveNewRecipe() {
     if (ingredients.length === 0) { toast('Add at least one ingredient', 'error'); return; }
 
     const btn = document.getElementById('saveRecipeBtn');
+    const isEditing = !!editingRecipeId;
     btn.disabled = true;
-    btn.textContent = 'Saving...';
+    btn.textContent = isEditing ? 'Updating...' : 'Saving...';
 
-    const result = await deftApi('add_recipe', { name, servings, tags, ingredients });
+    let result;
+    if (isEditing) {
+        result = await deftApi('update_recipe', { recipe_id: editingRecipeId, name, servings, tags, ingredients });
+    } else {
+        result = await deftApi('add_recipe', { name, servings, tags, ingredients });
+    }
 
     btn.disabled = false;
-    btn.textContent = 'Save Recipe';
+    btn.textContent = isEditing ? 'Update Recipe' : 'Save Recipe';
 
     if (result) {
-        toast(`${name} saved!`, 'success');
+        toast(isEditing ? `${name} updated!` : `${name} saved!`, 'success');
+        editingRecipeId = null;
         closeModal('addRecipeModal');
         loadRecipes();
     }
@@ -5988,6 +6105,67 @@ async function loadWeeklyReport() {
     }
 
     content.innerHTML = `<div class="ai-card">${html}</div>`;
+}
+
+// ═══════════════════════════════════════
+// BARCODE SCANNER
+// ═══════════════════════════════════════
+let html5QrCode = null;
+
+function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function openBarcodeScanner() {
+    openModal('barcodeScannerModal');
+    document.getElementById('barcodeResult').style.display = 'none';
+
+    html5QrCode = new Html5Qrcode("barcode-reader");
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 100 } },
+        async (decodedText) => {
+            await html5QrCode.stop();
+            html5QrCode = null;
+
+            const resultDiv = document.getElementById('barcodeResult');
+            resultDiv.style.display = '';
+            resultDiv.innerHTML = '<p class="ai-loading" style="color: var(--deft-txt-2);">Looking up product...</p>';
+
+            const result = await deftApi('scan_barcode', { barcode: decodedText });
+
+            if (result && result.success !== false) {
+                const food = result.data || result.food || result;
+                const n = food.nutrition_per_serving || {};
+                resultDiv.innerHTML = `
+                    <h4 class="font-heading font-bold text-sm mb-2" style="color:var(--deft-accent);">${escapeHtml(food.name || 'Unknown')}</h4>
+                    ${food.brand ? `<p class="text-xs mb-1" style="color:var(--deft-txt-2);">Brand: ${escapeHtml(food.brand)}</p>` : ''}
+                    <p class="text-xs mb-2 font-mono" style="color:var(--deft-txt-3);">${n.calories||0} cal | ${n.total_fat_g||0}g fat | ${n.protein_g||0}g protein | ${n.net_carbs_g||0}g carbs</p>
+                    <div class="flex gap-2 mt-3">
+                        <button class="btn btn-primary text-xs" onclick="closeBarcodeScanner(); document.getElementById('foodBrowserSearch').value='${escapeHtml(food.name || '')}'; searchFoodBrowser('${escapeHtml(food.name || '')}');">Find in Foods</button>
+                        <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Cancel</button>
+                    </div>`;
+            } else {
+                resultDiv.innerHTML = `
+                    <p class="text-xs" style="color:var(--deft-warning);">Product not found for barcode: ${escapeHtml(decodedText)}</p>
+                    <div class="flex gap-2 mt-2">
+                        <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner();setTimeout(openBarcodeScanner,300);">Try Again</button>
+                    </div>`;
+            }
+        },
+        () => {}
+    ).catch(() => {
+        document.getElementById('barcodeResult').style.display = '';
+        document.getElementById('barcodeResult').innerHTML = '<p class="text-xs" style="color:var(--deft-danger);">Camera access denied or not available.</p>';
+    });
+}
+
+function closeBarcodeScanner() {
+    if (html5QrCode) { html5QrCode.stop().catch(()=>{}); html5QrCode = null; }
+    closeModal('barcodeScannerModal');
 }
 
 function openModal(id) {

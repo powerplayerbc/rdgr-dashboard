@@ -860,6 +860,7 @@
                             <div class="nav-dropdown">
                                 <a href="/brand-discovery">Discovery</a>
                                 <a href="/brand-voice">Voice</a>
+                                <a href="/brand-voice/calibration">Calibration</a>
                                 <a href="/template-studio">Templates</a>
                                 <a href="/brand-documents">Docs</a>
                             </div>
@@ -1353,7 +1354,20 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     </div>
                     <div class="form-group">
                         <label class="form-label">Location</label>
-                        <div class="flex gap-3 mt-1">
+                        <label class="flex items-center gap-2 cursor-pointer text-sm mb-2 mt-1" style="color: var(--deft-txt-2);">
+                            <input type="checkbox" id="preparedSplitStorage" onchange="toggleSplitStorage()" style="accent-color: var(--deft-accent);"> Split between fridge & freezer
+                        </label>
+                        <div id="splitStorageInputs" style="display:none;" class="mb-2 flex gap-3">
+                            <div>
+                                <label class="text-xs" style="color:var(--deft-txt-3);">Fridge servings</label>
+                                <input type="number" id="preparedFridgeQty" class="form-input" min="0" style="width:100px;">
+                            </div>
+                            <div>
+                                <label class="text-xs" style="color:var(--deft-txt-3);">Freezer servings</label>
+                                <input type="number" id="preparedFreezerQty" class="form-input" min="0" style="width:100px;">
+                            </div>
+                        </div>
+                        <div id="locationRadios" class="flex gap-3">
                             <label class="flex items-center gap-2 cursor-pointer text-sm" style="color: var(--deft-txt-2);">
                                 <input type="radio" name="preparedLocation" value="fridge" checked style="accent-color: var(--deft-accent);"> Fridge
                             </label>
@@ -2465,6 +2479,24 @@ function renderPreparedMeals() {
     }).join('');
 }
 
+function toggleSplitStorage() {
+    const split = document.getElementById('preparedSplitStorage').checked;
+    document.getElementById('splitStorageInputs').style.display = split ? '' : 'none';
+    document.getElementById('locationRadios').style.display = split ? 'none' : '';
+    if (split) {
+        const total = parseInt(document.getElementById('preparedServings').value) || 1;
+        const half = Math.ceil(total / 2);
+        document.getElementById('preparedFridgeQty').value = half;
+        document.getElementById('preparedFreezerQty').value = total - half;
+    }
+}
+
+function resetSplitStorage() {
+    document.getElementById('preparedSplitStorage').checked = false;
+    document.getElementById('splitStorageInputs').style.display = 'none';
+    document.getElementById('locationRadios').style.display = '';
+}
+
 function addPreparedMeal() {
     editingPreparedMeal = null;
     selectedRecipeId = null;
@@ -2477,6 +2509,7 @@ function addPreparedMeal() {
     document.getElementById('preparedProtein').value = '';
     document.getElementById('preparedNetCarbs').value = '';
     document.querySelectorAll('input[name="preparedLocation"]').forEach(r => r.checked = r.value === 'fridge');
+    resetSplitStorage();
     // Default expiry to 5 days from now
     const defaultExpiry = new Date();
     defaultExpiry.setDate(defaultExpiry.getDate() + 5);
@@ -2500,6 +2533,7 @@ function editPrepared(id) {
     document.getElementById('preparedProtein').value = n.protein_g || '';
     document.getElementById('preparedNetCarbs').value = n.net_carbs_g || '';
     document.querySelectorAll('input[name="preparedLocation"]').forEach(r => r.checked = r.value === (meal.location || 'fridge'));
+    resetSplitStorage();
     document.getElementById('preparedExpiry').value = meal.expiry_date || '';
     document.getElementById('preparedNotes').value = meal.notes || '';
     document.getElementById('savePreparedBtn').textContent = 'Update Meal';
@@ -2521,21 +2555,75 @@ async function savePreparedMeal() {
         net_carbs_g: parseFloat(document.getElementById('preparedNetCarbs').value) || 0,
     };
 
-    const data = { name, total_servings, location, expiry_date, notes, nutrition_per_serving };
-    if (selectedRecipeId && !editingPreparedMeal) data.recipe_id = selectedRecipeId;
+    const isSplit = document.getElementById('preparedSplitStorage').checked;
 
-    let result;
-    if (editingPreparedMeal) {
-        result = await deftApi('update_prepared_meal', { prepared_id: editingPreparedMeal, ...data });
+    const btn = document.getElementById('savePreparedBtn');
+    btn.disabled = true;
+    btn.textContent = editingPreparedMeal ? 'Updating...' : 'Saving...';
+
+    if (isSplit && !editingPreparedMeal) {
+        // Create TWO entries: one fridge, one freezer
+        const fridgeQty = parseInt(document.getElementById('preparedFridgeQty').value) || 0;
+        const freezerQty = parseInt(document.getElementById('preparedFreezerQty').value) || 0;
+
+        if (fridgeQty + freezerQty === 0) {
+            toast('Set at least 1 serving for fridge or freezer', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Save Meal';
+            return;
+        }
+
+        let fridgeOk = true, freezerOk = true;
+
+        if (fridgeQty > 0) {
+            const fridgeData = { name, total_servings: fridgeQty, location: 'fridge', expiry_date, notes, nutrition_per_serving };
+            if (selectedRecipeId) fridgeData.recipe_id = selectedRecipeId;
+            const r = await deftApi('add_prepared_meal', fridgeData);
+            if (!r) fridgeOk = false;
+        }
+
+        if (freezerQty > 0) {
+            const freezerData = { name, total_servings: freezerQty, location: 'freezer', expiry_date, notes, nutrition_per_serving };
+            if (selectedRecipeId) freezerData.recipe_id = selectedRecipeId;
+            const r = await deftApi('add_prepared_meal', freezerData);
+            if (!r) freezerOk = false;
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Save Meal';
+
+        if (fridgeOk && freezerOk) {
+            const parts = [];
+            if (fridgeQty > 0) parts.push(`${fridgeQty} in fridge`);
+            if (freezerQty > 0) parts.push(`${freezerQty} in freezer`);
+            toast(`Prepared meal added: ${parts.join(', ')}`, 'success');
+            closeModal('addPreparedModal');
+            editingPreparedMeal = null;
+            await loadPreparedMeals();
+        } else {
+            toast('Some entries failed to save', 'error');
+        }
     } else {
-        result = await deftApi('add_prepared_meal', data);
-    }
+        // Normal single-entry save (or edit mode)
+        const data = { name, total_servings, location, expiry_date, notes, nutrition_per_serving };
+        if (selectedRecipeId && !editingPreparedMeal) data.recipe_id = selectedRecipeId;
 
-    if (result) {
-        toast(editingPreparedMeal ? 'Meal updated' : 'Prepared meal added', 'success');
-        closeModal('addPreparedModal');
-        editingPreparedMeal = null;
-        await loadPreparedMeals();
+        let result;
+        if (editingPreparedMeal) {
+            result = await deftApi('update_prepared_meal', { prepared_id: editingPreparedMeal, ...data });
+        } else {
+            result = await deftApi('add_prepared_meal', data);
+        }
+
+        btn.disabled = false;
+        btn.textContent = editingPreparedMeal ? 'Update Meal' : 'Save Meal';
+
+        if (result) {
+            toast(editingPreparedMeal ? 'Meal updated' : 'Prepared meal added', 'success');
+            closeModal('addPreparedModal');
+            editingPreparedMeal = null;
+            await loadPreparedMeals();
+        }
     }
 }
 

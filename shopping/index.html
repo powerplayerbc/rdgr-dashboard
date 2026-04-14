@@ -820,6 +820,7 @@
                             <div class="nav-dropdown">
                                 <a href="/brand-discovery">Discovery</a>
                                 <a href="/brand-voice">Voice</a>
+                                <a href="/brand-voice/calibration">Calibration</a>
                                 <a href="/template-studio">Templates</a>
                                 <a href="/brand-documents">Docs</a>
                             </div>
@@ -847,6 +848,7 @@
                                 <a href="/deft">DEFT</a>
                                 <a href="/pantry">Pantry</a>
                                 <a href="/shopping" class="active">Shopping</a>
+                                <a href="/meal-plan">Meal Plan</a>
                             </div>
                         </div>
                         <div class="nav-group">
@@ -946,6 +948,7 @@
     <a href="/deft" class="mobile-nav-link">DEFT</a>
     <a href="/pantry" class="mobile-nav-link">Pantry</a>
     <a href="/shopping" class="mobile-nav-link active">Shopping</a>
+    <a href="/meal-plan" class="mobile-nav-link">Meal Plan</a>
 </div>
 <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Trading <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
 <div class="mobile-nav-children">
@@ -2228,11 +2231,11 @@ async function searchShoppingHistory(query) {
 
     shoppingHistoryTimeout = setTimeout(async () => {
         const results = await supabaseSelect('deft_shopping_history',
-            `user_id=eq.${activeProfileId}&item_name=ilike.*${encodeURIComponent(query)}*&select=item_name,purchase_count&order=purchase_count.desc&limit=8`);
+            `user_id=eq.${activeProfileId}&name=ilike.*${encodeURIComponent(query)}*&select=name,purchase_count&order=purchase_count.desc&limit=8`);
         if (results && results.length > 0) {
             dropdown.innerHTML = results.map(r => `
-                <div class="autocomplete-item" onclick="document.getElementById('addShoppingItemInput').value='${escapeHtml(r.item_name)}';document.getElementById('shoppingAutocomplete').classList.remove('open');">
-                    <span>${escapeHtml(r.item_name)}</span>
+                <div class="autocomplete-item" onclick="document.getElementById('addShoppingItemInput').value='${escapeHtml(r.name)}';document.getElementById('shoppingAutocomplete').classList.remove('open');">
+                    <span>${escapeHtml(r.name)}</span>
                     <span class="text-xs font-mono" style="color: var(--deft-txt-3);">bought ${r.purchase_count}x</span>
                 </div>
             `).join('');
@@ -2247,7 +2250,7 @@ async function searchShoppingHistory(query) {
 async function loadFrequentItems() {
     if (!activeProfileId) return;
     const items = await supabaseSelect('deft_shopping_history',
-        `user_id=eq.${activeProfileId}&select=id,item_name,purchase_count&order=purchase_count.desc&limit=20`);
+        `user_id=eq.${activeProfileId}&select=history_id,name,purchase_count&order=purchase_count.desc&limit=20`);
     const container = document.getElementById('frequentItemsList');
 
     if (!items || items.length === 0) {
@@ -2256,8 +2259,8 @@ async function loadFrequentItems() {
     }
 
     container.innerHTML = items.map(item => `
-        <div class="flex items-center justify-between px-3 py-2 cursor-pointer transition-colors" style="border-bottom: 1px solid var(--deft-border);" onclick="addHistoryItemToList('${escapeHtml(item.item_name)}')" onmouseenter="this.style.background='rgba(255,255,255,0.03)'" onmouseleave="this.style.background='transparent'">
-            <span class="text-xs" style="color: var(--deft-txt);">${escapeHtml(item.item_name)}</span>
+        <div class="flex items-center justify-between px-3 py-2 cursor-pointer transition-colors" style="border-bottom: 1px solid var(--deft-border);" onclick="addHistoryItemToList('${escapeHtml(item.name)}')" onmouseenter="this.style.background='rgba(255,255,255,0.03)'" onmouseleave="this.style.background='transparent'">
+            <span class="text-xs" style="color: var(--deft-txt);">${escapeHtml(item.name)}</span>
             <div class="flex items-center gap-2">
                 <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${item.purchase_count}x</span>
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="color: var(--deft-accent); opacity: 0.6;"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -2403,12 +2406,12 @@ function renderShoppingHistory(lists, freqItems) {
             const lastBought = item.last_purchased ? formatDate(item.last_purchased.split('T')[0]) : 'N/A';
             const avgPrice = item.avg_price ? '$' + item.avg_price.toFixed(2) : 'N/A';
             return `<tr style="border-bottom: 1px solid var(--deft-border);">
-                <td class="px-4 py-3 text-sm" style="color: var(--deft-txt);">${escapeHtml(item.item_name || 'Item')}</td>
+                <td class="px-4 py-3 text-sm" style="color: var(--deft-txt);">${escapeHtml(item.name || 'Item')}</td>
                 <td class="px-4 py-3 text-center text-sm font-mono" style="color: var(--deft-accent);">${item.purchase_count || 0}</td>
                 <td class="px-4 py-3 text-center text-xs font-mono" style="color: var(--deft-txt-3);">${lastBought}</td>
                 <td class="px-4 py-3 text-center text-xs font-mono" style="color: var(--deft-txt-2);">${avgPrice}</td>
                 <td class="px-4 py-3 text-center">
-                    <button class="btn btn-ghost text-xs" onclick="addHistoryItemToList('${escapeHtml(item.item_name)}')">+ Add to List</button>
+                    <button class="btn btn-ghost text-xs" onclick="addHistoryItemToList('${escapeHtml(item.name)}')">+ Add to List</button>
                 </td>
             </tr>`;
         }).join('');

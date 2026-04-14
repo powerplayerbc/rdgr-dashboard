@@ -989,6 +989,7 @@
                             <div class="nav-dropdown">
                                 <a href="/brand-discovery">Discovery</a>
                                 <a href="/brand-voice">Voice</a>
+                                <a href="/brand-voice/calibration">Calibration</a>
                                 <a href="/template-studio">Templates</a>
                                 <a href="/brand-documents">Docs</a>
                             </div>
@@ -1829,19 +1830,24 @@ const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'];
 const MEAL_LABELS = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack' };
 
 function getMonday(d) {
-    const date = new Date(d);
+    const pacificStr = (d || new Date()).toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+    const date = new Date(pacificStr + 'T12:00:00');
     const day = date.getDay();
     const diff = date.getDate() - day + (day === 0 ? -6 : 1);
     date.setDate(diff);
-    date.setHours(0, 0, 0, 0);
+    date.setHours(12, 0, 0, 0);
     return date;
 }
 
 function formatDate(d) {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return d.toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+}
+
+function formatDateDisplay(d) {
+    return d.toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric',
+        timeZone: 'America/Los_Angeles'
+    });
 }
 
 function getWeekDates(monday) {
@@ -1855,8 +1861,9 @@ function getWeekDates(monday) {
 }
 
 function isToday(d) {
-    const now = new Date();
-    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+    const nowPacific = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+    const dStr = d.toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+    return nowPacific === dStr;
 }
 
 // ═══════════════════════════════════════
@@ -1878,12 +1885,18 @@ function updateWeekRange() {
     const dates = getWeekDates(currentWeekStart);
     const start = dates[0];
     const end = dates[6];
-    const sameMonth = start.getMonth() === end.getMonth();
+    const startFormatted = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/Los_Angeles' });
+    const endFormatted = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/Los_Angeles' });
+    const endYear = end.toLocaleDateString('en-US', { year: 'numeric', timeZone: 'America/Los_Angeles' });
+    const startMonth = start.toLocaleDateString('en-US', { month: 'short', timeZone: 'America/Los_Angeles' });
+    const endMonth = end.toLocaleDateString('en-US', { month: 'short', timeZone: 'America/Los_Angeles' });
     let rangeText;
-    if (sameMonth) {
-        rangeText = `${MONTH_NAMES[start.getMonth()]} ${start.getDate()} - ${end.getDate()}, ${start.getFullYear()}`;
+    if (startMonth === endMonth) {
+        const startDay = start.toLocaleDateString('en-US', { day: 'numeric', timeZone: 'America/Los_Angeles' });
+        const endDay = end.toLocaleDateString('en-US', { day: 'numeric', timeZone: 'America/Los_Angeles' });
+        rangeText = `${startMonth} ${startDay} - ${endDay}, ${endYear}`;
     } else {
-        rangeText = `${MONTH_NAMES[start.getMonth()]} ${start.getDate()} - ${MONTH_NAMES[end.getMonth()]} ${end.getDate()}, ${end.getFullYear()}`;
+        rangeText = `${startFormatted} - ${endFormatted}, ${endYear}`;
     }
     document.getElementById('weekRange').textContent = rangeText;
 }
@@ -1929,6 +1942,37 @@ function renderGrid() {
             }
             html += '</div>';
         });
+    });
+
+    // Build per-date nutrition totals row
+    html += `<div class="mp-row-label" style="font-size:0.6rem;color:var(--deft-txt-3);">Totals</div>`;
+    dates.forEach(d => {
+        const dateStr = formatDate(d);
+        const dayEntries = planEntries.filter(e => e.planned_date === dateStr);
+        let cal = 0, fat = 0, protein = 0, carbs = 0, hasNut = false;
+        dayEntries.forEach(entry => {
+            const n = entry.nutrition_per_serving || entry.nutrition || null;
+            const s = entry.servings || 1;
+            if (n) {
+                hasNut = true;
+                cal += (n.calories || 0) * s;
+                fat += (n.fat_g || n.fat || 0) * s;
+                protein += (n.protein_g || n.protein || 0) * s;
+                carbs += (n.net_carbs_g || n.net_carbs || n.carbs || 0) * s;
+            }
+        });
+        if (hasNut) {
+            html += `<div class="mp-cell" style="min-height:auto;padding:0.375rem 0.25rem;justify-content:center;align-items:center;">
+                <div class="mp-date-nutrition" style="font-family:'JetBrains Mono',monospace;font-size:0.55rem;color:var(--deft-txt-3);text-align:center;line-height:1.6;">
+                    <span>${Math.round(cal)} cal</span><br>
+                    <span>${Math.round(fat)}g F</span> &middot; <span>${Math.round(protein)}g P</span> &middot; <span>${Math.round(carbs)}g C</span>
+                </div>
+            </div>`;
+        } else {
+            html += `<div class="mp-cell" style="min-height:auto;padding:0.375rem 0.25rem;justify-content:center;align-items:center;">
+                <span style="font-size:0.55rem;color:var(--deft-txt-3);">--</span>
+            </div>`;
+        }
     });
 
     grid.innerHTML = html;
@@ -2043,9 +2087,9 @@ async function searchRecipes(query) {
         allRecipes = result.data;
         renderRecipeList(result.data);
     } else {
-        // Fallback: try Supabase direct
+        // Fallback: try Supabase direct (all users' recipes)
         const recipes = await supabaseSelect('deft_recipes',
-            `user_id=eq.${activeProfileId}&status=eq.active&select=recipe_id,name,servings,nutrition_per_serving,tags&order=name&limit=50`
+            `status=eq.active&select=recipe_id,name,servings,nutrition_per_serving,tags,user_id&order=name&limit=50`
         );
         if (recipes && recipes.length > 0) {
             allRecipes = recipes.map(r => ({
@@ -2054,6 +2098,7 @@ async function searchRecipes(query) {
                 servings: r.servings,
                 nutrition_per_serving: r.nutrition_per_serving,
                 tags: r.tags,
+                user_id: r.user_id,
             }));
             if (query) {
                 const q = query.toLowerCase();
@@ -2067,6 +2112,18 @@ async function searchRecipes(query) {
     }
 }
 
+function getProfileNameCache() {
+    try {
+        const cached = JSON.parse(localStorage.getItem('rdgr-profiles-cache') || '{}');
+        if (cached.profiles && Array.isArray(cached.profiles)) {
+            const map = {};
+            cached.profiles.forEach(p => { map[p.user_id] = p.display_name || p.email || '?'; });
+            return map;
+        }
+    } catch(e) {}
+    return {};
+}
+
 function renderRecipeList(recipes) {
     const resultsEl = document.getElementById('recipeSearchResults');
 
@@ -2075,18 +2132,23 @@ function renderRecipeList(recipes) {
         return;
     }
 
+    const profileNames = getProfileNameCache();
+
     resultsEl.innerHTML = recipes.map(r => {
         const n = r.nutrition_per_serving || {};
         const cal = n.calories ? Math.round(n.calories) : null;
         const isKeto = (r.tags && r.tags.includes('keto')) || (n.net_carbs_g !== undefined && n.net_carbs_g <= 10);
         const nutritionStr = cal ? `${cal} cal` : '';
         const recipeId = r.recipe_id || r.id;
+        const isOtherUser = r.user_id && r.user_id !== activeProfileId;
+        const ownerName = isOtherUser ? (profileNames[r.user_id] || 'Other') : '';
 
         return `<div class="recipe-pick-item" data-id="${recipeId}" onclick="selectPickerRecipe(this, '${recipeId}', '${escapeHtml(r.name).replace(/'/g, "\\'")}')">
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
                     <span class="text-sm font-medium truncate" style="color: var(--deft-txt);">${escapeHtml(r.name)}</span>
                     ${isKeto ? '<span class="keto-badge">Keto</span>' : ''}
+                    ${isOtherUser ? `<span style="font-size:0.55rem;color:var(--deft-txt-3);font-family:'JetBrains Mono',monospace;background:rgba(255,255,255,0.04);padding:0.1rem 0.35rem;border-radius:0.2rem;white-space:nowrap;flex-shrink:0;">${escapeHtml(ownerName)}</span>` : ''}
                 </div>
                 ${nutritionStr ? `<div class="text-xs mt-0.5" style="color: var(--deft-txt-3);">${nutritionStr}${n.fat_g ? ' | F:' + Math.round(n.fat_g) + 'g' : ''}${n.protein_g ? ' | P:' + Math.round(n.protein_g) + 'g' : ''}${n.net_carbs_g !== undefined ? ' | C:' + Math.round(n.net_carbs_g) + 'g' : ''}</div>` : ''}
             </div>
