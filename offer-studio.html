@@ -999,6 +999,7 @@
                                 <a href="/social-dashboard">Social</a>
                                 <a href="/social-content">Social Content</a>
                                 <a href="/offer-studio" class="active">Offers</a>
+                                <a href="/client-projects">Client Projects</a>
                             </div>
                         </div>
                         <div class="nav-group">
@@ -3577,7 +3578,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     };
 
     async function fetchFulfillment() {
-        const data = await supabaseRPC('website_build_dashboard', { p_brand_id: 'carlton' });
+        const data = await supabaseRPC('website_build_dashboard', {});
         fulfillmentData = data?.builds || [];
         renderFulfillment();
     }

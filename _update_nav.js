@@ -26,6 +26,7 @@ const NAV_GROUPS = [
         { label: 'Social', href: '/social-dashboard' },
         { label: 'Social Content', href: '/social-content' },
         { label: 'Offers', href: '/offer-studio' },
+        { label: 'Client Projects', href: '/client-projects' },
     ]},
     { label: 'Finance', href: '/finance', items: [
         { label: 'Dashboard', href: '/finance' },
@@ -81,6 +82,7 @@ const PAGE_URL_MAP = {
     'email-outreach.html': '/email-outreach',
     'social-dashboard.html': '/social-dashboard',
     'offer-studio.html': '/offer-studio',
+    'client-projects.html': '/client-projects',
     'brand-discovery.html': '/brand-discovery',
     'template-studio.html': '/template-studio',
     'brand-documents.html': '/brand-documents',
