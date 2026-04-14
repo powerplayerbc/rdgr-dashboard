@@ -755,6 +755,11 @@
     <!-- Main Content -->
     <div id="mainContent" style="opacity: 0;">
 
+        <!-- DEBUG BANNER - remove after fixing -->
+        <div id="debugBanner" style="background:#1E3A8A;color:#fff;padding:8px 16px;font-family:monospace;font-size:12px;position:fixed;bottom:0;left:0;right:0;z-index:99999;">
+            v2026-04-13c | Loading...
+        </div>
+
         <!-- Top Nav -->
         <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
             <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
@@ -1332,11 +1337,14 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
     async function fetchPages() {
         try {
-            allPages = await supabaseSelect('website_pages', 'select=id,build_id,page_type,slug,status,content_json,html_content&order=created_at.desc');
-            if (!Array.isArray(allPages)) allPages = [];
-            console.log('[client-projects] Fetched pages:', allPages.length, 'pages, build_ids:', [...new Set(allPages.map(p => p.build_id + '(' + typeof p.build_id + ')'))]);
+            const url = SUPABASE_URL + '/rest/v1/website_pages?select=id,build_id,page_type,slug,status,content_json,html_content&order=created_at.desc';
+            const res = await fetch(url, { headers: sbHeaders });
+            const data = await res.json();
+            allPages = Array.isArray(data) ? data : [];
+            // Visible debug: show page count in stats bar
+            const dbg = document.getElementById('stat-total');
+            if (dbg) dbg.title = allPages.length + ' pages loaded';
         } catch (e) {
-            console.error('Failed to fetch pages:', e);
             allPages = [];
         }
     }
@@ -2038,8 +2046,13 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             populateBuildSelectors();
             renderPreview();
             renderConfig();
+
+            // Update debug banner
+            var dbg = document.getElementById('debugBanner');
+            if (dbg) dbg.textContent = 'v2026-04-13c | builds: ' + allBuilds.length + ' | pages: ' + allPages.length + ' | page build_ids: ' + allPages.map(function(p){return p.build_id;}).join(',');
         } catch (e) {
-            console.error('Refresh failed:', e);
+            var dbg2 = document.getElementById('debugBanner');
+            if (dbg2) dbg2.textContent = 'v2026-04-13c | ERROR: ' + String(e);
         }
 
         if (el) el.textContent = new Date().toLocaleTimeString();
