@@ -2151,6 +2151,10 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         document.querySelectorAll('#outreachFilterRow .filter-pill').forEach(function(pill) {
             pill.classList.toggle('active-filter', pill.getAttribute('data-filter') === filter);
         });
+        var draftsSection = document.getElementById('draftsSection');
+        if (draftsSection) {
+            draftsSection.style.display = (filter === 'all' || filter === 'draft') ? '' : 'none';
+        }
         renderOutreach();
     }
 

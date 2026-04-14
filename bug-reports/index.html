@@ -798,6 +798,15 @@
                 html += '</div>';
                 html += '</div>';
 
+                // Show fix results inline if present
+                if (bug.status === 'fixed' && bug.fix_results) {
+                    html += '<div style="margin-top:0.5rem;padding:0.4rem 0.6rem;background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.15);border-radius:0.25rem;">';
+                    html += '<div class="text-xs font-semibold mb-1" style="text-transform:uppercase;letter-spacing:0.03em;color:var(--deft-accent);">Fix Results</div>';
+                    html += '<pre class="text-xs text-txt-2" style="white-space:pre-wrap;word-break:break-word;margin:0;max-height:120px;overflow-y:auto;">' + esc(bug.fix_results) + '</pre>';
+                    if (bug.fix_applied_at) html += '<div class="text-xs text-txt-3 mt-1">Applied ' + timeAgo(bug.fix_applied_at) + '</div>';
+                    html += '</div>';
+                }
+
                 // Show retest items inline if present
                 if (bug.retest_items && bug.retest_items.length) {
                     html += '<div style="margin-top:0.5rem;padding-top:0.5rem;border-top:1px solid rgba(42,46,61,0.3);">';
@@ -862,8 +871,19 @@
         });
         text += '---\nPage URL: ' + pageUrl + '\nDashboard file: ' + pageFile + '\n';
 
-        navigator.clipboard.writeText(text).then(() => {
+        navigator.clipboard.writeText(text).then(async () => {
             toast('Copied ' + openBugs.length + ' bug(s) to clipboard', 'success');
+            const bugIds = openBugs.filter(b => b.status === 'open').map(b => b.id);
+            if (bugIds.length) {
+                try {
+                    await fetch(SUPABASE_URL + '/rest/v1/user_bug_reports?id=in.(' + bugIds.join(',') + ')&status=eq.open', {
+                        method: 'PATCH',
+                        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'in_progress', updated_at: new Date().toISOString() })
+                    });
+                    loadDashboard();
+                } catch (e) { console.error('Failed to mark bugs as in_progress:', e); }
+            }
         }).catch(() => toast('Failed to copy', 'error'));
     }
 
@@ -906,8 +926,19 @@
         });
 
         const totalCount = allOpen.reduce((s, o) => s + o.bugs.length, 0);
-        navigator.clipboard.writeText(text).then(() => {
+        navigator.clipboard.writeText(text).then(async () => {
             toast('Copied ' + totalCount + ' bug(s) across ' + allOpen.length + ' page(s)', 'success');
+            const bugIds = allOpen.flatMap(o => o.bugs.filter(b => b.status === 'open').map(b => b.id));
+            if (bugIds.length) {
+                try {
+                    await fetch(SUPABASE_URL + '/rest/v1/user_bug_reports?id=in.(' + bugIds.join(',') + ')&status=eq.open', {
+                        method: 'PATCH',
+                        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: 'in_progress', updated_at: new Date().toISOString() })
+                    });
+                    loadDashboard();
+                } catch (e) { console.error('Failed to mark bugs as in_progress:', e); }
+            }
         }).catch(() => toast('Failed to copy', 'error'));
     }
 
@@ -926,7 +957,7 @@
             html += '<div class="text-xs font-semibold mb-1" style="color:var(--deft-accent);font-family:monospace;">' + esc(group.page_url) + '</div>';
             bugs.forEach(bug => {
                 html += '<label class="flex items-center gap-2 py-0.5 cursor-pointer" style="padding-left:0.5rem;">';
-                html += '<input type="checkbox" class="global-fix-cb" value="' + bug.id + '" checked style="accent-color:var(--deft-accent);">';
+                html += '<input type="checkbox" class="global-fix-cb" value="' + bug.id + '" style="accent-color:var(--deft-accent);">';
                 html += '<span class="text-xs"><span class="font-mono" style="color:var(--deft-accent-warm);">' + esc(bug.report_id) + '</span> ' + esc(bug.user_description.substring(0, 80)) + '</span>';
                 html += '</label>';
             });
@@ -990,7 +1021,7 @@
         const openBugs = group.bugs.filter(b => b.status === 'open' || b.status === 'in_progress');
         let html = '<div class="text-xs text-txt-3 mb-2 font-semibold" style="text-transform:uppercase;">Select bugs that were fixed:</div>';
         openBugs.forEach(bug => {
-            html += '<label class="flex items-center gap-2 py-1 cursor-pointer"><input type="checkbox" class="fix-bug-cb" value="' + bug.id + '" checked style="accent-color:var(--deft-accent);"><span class="text-xs"><span class="font-mono" style="color:var(--deft-accent-warm);">' + esc(bug.report_id) + '</span> ' + esc(bug.user_description.substring(0, 60)) + '</span></label>';
+            html += '<label class="flex items-center gap-2 py-1 cursor-pointer"><input type="checkbox" class="fix-bug-cb" value="' + bug.id + '" style="accent-color:var(--deft-accent);"><span class="text-xs"><span class="font-mono" style="color:var(--deft-accent-warm);">' + esc(bug.report_id) + '</span> ' + esc(bug.user_description.substring(0, 60)) + '</span></label>';
         });
         document.getElementById('fixBugCheckboxes').innerHTML = html;
         document.getElementById('fixResultsText').value = '';

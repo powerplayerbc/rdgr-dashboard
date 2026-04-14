@@ -1486,11 +1486,11 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
         try {
             const data = await sbSelect('social_content_queue',
-                `brand_id=eq.${BRAND_ID}&status=in.(approved,scheduled)&scheduled_at=gte.${startOfMonth}&scheduled_at=lte.${endOfMonth}T23:59:59&select=id,platform,content_type,status,scheduled_at,content&order=scheduled_at`
+                `brand_id=eq.${BRAND_ID}&status=in.(approved,scheduled)&scheduled_at=gte.${startOfMonth}&scheduled_at=lte.${endOfMonth}T23:59:59&select=id,platform,post_type,status,scheduled_at,content_text&order=scheduled_at`
             );
             calendarEvents = (data || []).filter(e => e.status !== 'pending' && e.status !== 'draft');
         } catch (e) {
-            console.error('Calendar load error:', e);
+            console.error('Calendar load error:', e.message || e);
             calendarEvents = [];
         }
 
@@ -1535,7 +1535,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 const platform = (e.platform || 'other').toLowerCase();
                 const bg = platformColors[platform] || 'rgba(138,149,169,0.5)';
                 const label = platform.charAt(0).toUpperCase() + platform.slice(1);
-                const preview = (e.content || '').substring(0, 30);
+                const preview = (e.content_text || '').substring(0, 30);
                 return `<div class="cal-event" style="background:${bg};color:#fff;" title="${esc(preview)}">${label}</div>`;
             }).join('');
 

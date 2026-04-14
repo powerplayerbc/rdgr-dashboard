@@ -3849,10 +3849,14 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         <div class="w-2 h-2 rounded-full flex-shrink-0" style="background:${dotColor}" title="${esc(dotTitle)}"></div>
                         <div class="min-w-0">
                             <div class="flex items-center gap-1.5 flex-wrap">
-                                <span class="text-xs font-medium text-txt truncate">${esc(wf.name)}</span>
+                                ${wf.id
+                                    ? `<a href="https://n8n.carltonaiservices.com/workflow/${esc(wf.id)}" target="_blank" rel="noopener" class="text-xs font-medium text-txt truncate hover:text-accent hover:underline" title="Open ${esc(wf.name)} in n8n">${esc(wf.name)}</a>`
+                                    : `<span class="text-xs font-medium text-txt truncate">${esc(wf.name)}</span>`
+                                }
                                 ${regBadge}
+                                ${wf.id ? `<button onclick="event.stopPropagation();navigator.clipboard.writeText('https://n8n.carltonaiservices.com/workflow/${esc(wf.id)}').then(()=>{if(typeof toast==='function')toast('URL copied','success');})" class="text-txt-3 hover:text-accent" style="background:none;border:none;cursor:pointer;padding:0;line-height:1;flex-shrink:0;" title="Copy workflow URL"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>` : ''}
                             </div>
-                            ${wf.id ? `<a href="https://n8n.carltonaiservices.com/workflow/${esc(wf.id)}" target="_blank" rel="noopener" class="text-[0.6rem] font-mono text-accent hover:underline" title="Open in n8n">${esc(wf.id)} &#8599;</a>` : ''}
+                            ${wf.id ? `<span class="text-[0.6rem] font-mono text-txt-3">${esc(wf.id)}</span>` : ''}
                         </div>
                     </div>
                     ${isFailed ? `<span class="text-[0.6rem] text-alert truncate max-w-[120px]" title="${esc(failError)}">${esc(failError)}</span>` : ''}

@@ -1310,7 +1310,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 await new Promise(r => setTimeout(r, 2000));
                 return fetchJSON(url, body, { retries: retries + 1, backoff });
             }
-            console.error('Fetch error:', url, err);
+            console.warn('Fetch error:', url, err);
             return null;
         }
     }
@@ -1324,9 +1324,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                 }
             });
-            if (!res.ok) { console.error('Supabase error:', res.status, await res.text()); return null; }
+            if (!res.ok) { console.warn('Supabase error:', res.status, await res.text()); return null; }
             return await res.json();
-        } catch (err) { console.error('Supabase fetch error:', table, err); return null; }
+        } catch (err) { console.warn('Supabase fetch error:', table, err); return null; }
     }
 
     // ═══════════════════════════════════════
