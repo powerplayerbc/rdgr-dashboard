@@ -3852,7 +3852,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                                 <span class="text-xs font-medium text-txt truncate">${esc(wf.name)}</span>
                                 ${regBadge}
                             </div>
-                            ${wf.id ? `<span class="text-[0.6rem] font-mono text-txt-3">${esc(wf.id)}</span>` : ''}
+                            ${wf.id ? `<a href="https://n8n.carltonaiservices.com/workflow/${esc(wf.id)}" target="_blank" rel="noopener" class="text-[0.6rem] font-mono text-accent hover:underline" title="Open in n8n">${esc(wf.id)} &#8599;</a>` : ''}
                         </div>
                     </div>
                     ${isFailed ? `<span class="text-[0.6rem] text-alert truncate max-w-[120px]" title="${esc(failError)}">${esc(failError)}</span>` : ''}
@@ -4007,7 +4007,7 @@ var SB='https://yrwrswyjawmgtxrgbnim.supabase.co';
 var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
 try{
 var r=await fetch(SB+'/rest/v1/user_bug_reports',{method:'POST',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({page_url:location.pathname,page_title:document.title,user_description:desc,console_errors:_ce,console_warnings:_cw,browser_info:{userAgent:navigator.userAgent,viewport:window.innerWidth+'x'+window.innerHeight,timestamp:new Date().toISOString()},priority:document.getElementById('bugPriority').value,status:'open'})});
-if(r.ok){var d=await r.json();if(typeof toast==='function')toast('Bug report '+d[0].report_id+' submitted!','success');document.getElementById('bugDescription').value='';document.getElementById('bugReportModal').classList.remove('active');}
+if(r.ok){var d=await r.json();if(typeof toast==='function')toast('Bug report '+d[0].report_id+' submitted!','success');document.getElementById('bugDescription').value='';document.getElementById('bugReportModal').classList.remove('active');_ce.length=0;_cw.length=0;_ub();}
 else{var e=await r.text();if(typeof toast==='function')toast('Failed: '+e,'error');}
 }catch(ex){if(typeof toast==='function')toast('Error: '+ex.message,'error');}
 finally{if(btn){btn.disabled=false;btn.textContent='Submit Bug Report';}}

@@ -836,9 +836,9 @@
                             </div>
                         </div>
                         <div class="nav-group">
-                            <a href="/finance" class="nav-group-btn">Finance <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <a href="/finance" class="nav-group-btn active">Finance <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
-                                <a href="/finance">Dashboard</a>
+                                <a href="/finance" class="active">Dashboard</a>
                             </div>
                         </div>
                         <div class="nav-group">
@@ -1196,7 +1196,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         <div id="sectionActions" class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4" style="display:none;">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- Record Expense -->
-                <div class="action-card" onclick="openModal('recordExpenseModal')">
+                <div class="action-card" onclick="openRecordExpenseModal()">
                     <div class="flex items-center gap-3 mb-2">
                         <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--deft-warning-dim); color: var(--deft-warning);">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M10 4v12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -2026,7 +2026,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         const [arAging, apAging, invoices] = await Promise.all([
             rpc('bkai_aging_report', { p_brand_id: BRAND_ID, p_report_type: 'ar' }),
             rpc('bkai_aging_report', { p_brand_id: BRAND_ID, p_report_type: 'ap' }),
-            sbSelect('bkai_invoices', 'brand_id=eq.carlton&order=created_at.desc&limit=100')
+            sbSelect('bkai_ap_invoices', 'brand_id=eq.carlton&order=created_at.desc&limit=100')
         ]);
 
         invoiceList = Array.isArray(invoices) ? invoices : [];
@@ -2338,11 +2338,11 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             }));
         } else {
             if (invoiceList.length === 0) {
-                invoiceList = await sbSelect('bkai_invoices', 'brand_id=eq.carlton&order=created_at.desc&limit=50');
+                invoiceList = await sbSelect('bkai_ap_invoices', 'brand_id=eq.carlton&order=created_at.desc&limit=50');
             }
             matchCandidates = invoiceList.map(inv => ({
                 id: inv.id, type: 'invoice',
-                description: inv.customer_name || inv.description || '--',
+                description: inv.vendor_name || inv.customer_name || inv.notes || '--',
                 date: inv.due_date || inv.created_at?.slice(0, 10),
                 amount: parseFloat(inv.amount) || 0,
                 detail: inv.status || ''
@@ -2541,7 +2541,20 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     // ACTION HANDLERS
     // =======================================
 
-    // Record Expense
+    // Record Expense — ensure categories are loaded before opening modal
+    async function openRecordExpenseModal() {
+        const reCatSelect = document.getElementById('reCategory');
+        if (reCatSelect && reCatSelect.options.length <= 1) {
+            if (expenseCategories.length === 0) {
+                expenseCategories = await sbSelect('bkai_chart_of_accounts', 'brand_id=eq.carlton&account_type=eq.expense&select=account_code,account_name&order=account_name');
+                expenseCategories = Array.isArray(expenseCategories) ? expenseCategories : [];
+            }
+            reCatSelect.innerHTML = '<option value="">Select category...</option>' +
+                expenseCategories.map(c => `<option value="${c.account_code}">${esc(c.account_name)} (${c.account_code})</option>`).join('');
+        }
+        openModal('recordExpenseModal');
+    }
+
     async function submitRecordExpense() {
         const btn = document.getElementById('reSubmitBtn');
         const date = document.getElementById('reDate').value;
@@ -2757,6 +2770,53 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     }
 
     // Generate Report
+    function formatReportResult(res) {
+        if (typeof res === 'string') return '<pre class="text-xs text-txt-2 whitespace-pre-wrap" style="max-height:400px;overflow-y:auto;">' + esc(res) + '</pre>';
+        // Build a summary card from the response
+        let html = '<div style="max-height:400px;overflow-y:auto;">';
+        const title = res.report_title || res.report_type || res.type || '';
+        const period = res.period || res.date_range || (res.year ? 'Year ' + res.year + (res.quarter ? ' Q' + res.quarter : '') : '');
+        if (title || period) html += '<div class="flex justify-between items-center mb-3"><span class="text-sm font-heading font-semibold text-txt">' + esc(title) + '</span><span class="text-xs text-txt-3">' + esc(period) + '</span></div>';
+        // Key metrics
+        const metricKeys = ['total_revenue','total_expenses','net_income','net_profit','gross_profit','total_income','total_deductions','tax_owed','estimated_tax','total','cash_in','cash_out','net_cash_flow'];
+        const foundMetrics = metricKeys.filter(k => res[k] !== undefined && res[k] !== null);
+        if (foundMetrics.length) {
+            html += '<div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">';
+            foundMetrics.forEach(k => {
+                const label = k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                const val = typeof res[k] === 'number' ? fmtMoney(res[k]) : esc(String(res[k]));
+                const isNeg = typeof res[k] === 'number' && res[k] < 0;
+                html += '<div class="p-3 rounded-lg" style="background:var(--deft-surface-el);border:1px solid var(--deft-border);"><div class="text-[0.65rem] text-txt-3 uppercase mb-1">' + esc(label) + '</div><div class="text-base font-heading font-bold' + (isNeg ? ' text-alert' : ' text-txt') + '">' + val + '</div></div>';
+            });
+            html += '</div>';
+        }
+        // Line items table
+        const items = res.line_items || res.items || res.categories || res.entries || res.rows;
+        if (Array.isArray(items) && items.length) {
+            const cols = Object.keys(items[0]);
+            html += '<table class="data-table text-xs"><thead><tr>' + cols.map(c => '<th>' + esc(c.replace(/_/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase())) + '</th>').join('') + '</tr></thead><tbody>';
+            items.forEach(row => {
+                html += '<tr>' + cols.map(c => {
+                    const v = row[c];
+                    return '<td>' + (typeof v === 'number' ? fmtMoney(v) : esc(String(v ?? ''))) + '</td>';
+                }).join('') + '</tr>';
+            });
+            html += '</tbody></table>';
+        }
+        // Fallback: show remaining keys not yet rendered
+        const shownKeys = new Set([...metricKeys, 'report_title','report_type','type','period','date_range','year','quarter','line_items','items','categories','entries','rows','success','error','message']);
+        const remaining = Object.keys(res).filter(k => !shownKeys.has(k) && res[k] !== undefined && res[k] !== null && typeof res[k] !== 'object');
+        if (remaining.length) {
+            html += '<div class="mt-3 pt-3" style="border-top:1px solid var(--deft-border);">';
+            remaining.forEach(k => {
+                html += '<div class="flex justify-between py-1"><span class="text-xs text-txt-3">' + esc(k.replace(/_/g, ' ')) + '</span><span class="text-xs font-medium text-txt">' + esc(String(res[k])) + '</span></div>';
+            });
+            html += '</div>';
+        }
+        html += '</div>';
+        return html;
+    }
+
     async function submitGenerateReport() {
         const btn = document.getElementById('grSubmitBtn');
         const reportType = document.getElementById('grReportType').value;
@@ -2778,7 +2838,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             if (res && !res.error) {
                 toast('Report generated', 'success');
                 resultDiv.style.display = '';
-                resultDiv.innerHTML = '<div class="text-xs text-txt-3 uppercase font-mono mb-2">Report Result</div><pre class="text-xs text-txt-2 whitespace-pre-wrap overflow-x-auto" style="max-height:300px;overflow-y:auto;">' + esc(typeof res === 'string' ? res : JSON.stringify(res, null, 2)) + '</pre>';
+                resultDiv.innerHTML = '<div class="text-xs text-txt-3 uppercase font-mono mb-2">Report Result</div>' + formatReportResult(res);
             } else {
                 toast('Report generation failed: ' + (res?.error || res?.message || 'Unknown error'), 'error');
             }
@@ -3055,7 +3115,7 @@ var SB='https://yrwrswyjawmgtxrgbnim.supabase.co';
 var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
 try{
 var r=await fetch(SB+'/rest/v1/user_bug_reports',{method:'POST',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({page_url:location.pathname,page_title:document.title,user_description:desc,console_errors:_ce,console_warnings:_cw,browser_info:{userAgent:navigator.userAgent,viewport:window.innerWidth+'x'+window.innerHeight,timestamp:new Date().toISOString()},priority:document.getElementById('bugPriority').value,status:'open'})});
-if(r.ok){var d=await r.json();if(typeof toast==='function')toast('Bug report '+d[0].report_id+' submitted!','success');document.getElementById('bugDescription').value='';document.getElementById('bugReportModal').classList.remove('active');}
+if(r.ok){var d=await r.json();if(typeof toast==='function')toast('Bug report '+d[0].report_id+' submitted!','success');document.getElementById('bugDescription').value='';document.getElementById('bugReportModal').classList.remove('active');_ce.length=0;_cw.length=0;_ub();}
 else{var e=await r.text();if(typeof toast==='function')toast('Failed: '+e,'error');}
 }catch(ex){if(typeof toast==='function')toast('Error: '+ex.message,'error');}
 finally{if(btn){btn.disabled=false;btn.textContent='Submit Bug Report';}}

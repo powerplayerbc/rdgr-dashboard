@@ -2526,10 +2526,15 @@ async function triggerContentGeneration() {
 }
 
 async function triggerWeeklyStrategy() {
+    const btns = document.querySelectorAll('[onclick*="triggerWeeklyStrategy"]');
+    btns.forEach(b => { b.disabled = true; b._orig = b.textContent; b.textContent = 'Generating...'; });
+    showToast('Generating weekly strategy... This may take up to 60 seconds.', 'info');
     try {
-        await webhookPost('content-strategist-v2', { brand_id: BRAND_ID, force: true });
-        showToast('Weekly strategy triggered', 'success');
-    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+        const result = await webhookPost('content-strategist-v2', { brand_id: BRAND_ID, force: true });
+        showToast('Weekly strategy generated successfully!', 'success');
+        await loadPillars();
+    } catch (err) { showToast('Strategy generation failed: ' + err.message, 'error'); }
+    finally { btns.forEach(b => { b.disabled = false; b.textContent = b._orig || 'Weekly Strategy'; }); }
 }
 
 function openAddPillarModal() { openModal('addPillarModal'); }
@@ -2725,16 +2730,22 @@ function setQueuePillarFilter(name) {
 
 // Queue actions
 async function approvePost(id) {
+    // Find and disable the approve button
+    const card = document.querySelector(`[data-queue-id="${id}"]`) || document.querySelector(`[onclick*="approvePost(${id})"]`);
+    const btn = card?.closest ? card : null;
+    if (btn) { btn.disabled = true; btn.textContent = 'Approving...'; }
+    showToast('Approving post... This may take up to 60 seconds for content enrichment.', 'info');
     try {
         await webhookPost('content-approve-v2', { action: 'approve', queue_ids: [id] });
         showToast('Post approved', 'success');
-        await loadQueue();
         // Submit to brand voice learning loop (non-blocking)
         const post = queuePosts.find(p => p.id === id);
         const platform = post?.platform || 'general';
         const channelMap = { linkedin: 'social_linkedin', twitter: 'social_twitter', instagram: 'social_instagram', facebook: 'social_facebook' };
         sbRpc('submit_content_feedback', { p_brand_id: 'carlton', p_content_type: 'social_post', p_content_id: String(id), p_channel: channelMap[platform] || 'general', p_verdict: 'approved', p_feedback_categories: ['approved_as_is'], p_feedback_detail: '' }).catch(e => console.warn('Feedback:', e));
-    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+    } catch (err) { showToast('Approve failed: ' + err.message, 'error'); }
+    // Reload queue regardless of success/error
+    try { await loadQueue(); } catch(e) { console.warn('Queue reload:', e); }
 }
 
 function openRejectModal(id) {
@@ -2748,17 +2759,22 @@ function openRejectModal(id) {
 async function submitReject() {
     if (!rejectTargetId) return;
     const reason = document.getElementById('rejectReason').value.trim();
+    const btn = document.querySelector('#rejectModal .btn-danger, #rejectModal [onclick*="submitReject"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Rejecting...'; }
     try {
         await webhookPost('content-approve-v2', { action: 'reject', queue_ids: [rejectTargetId], rejection_reason: reason });
         showToast('Post rejected', 'success');
-        closeModal('rejectModal');
-        await loadQueue();
         // Submit to brand voice learning loop (non-blocking)
         const post = queuePosts.find(p => p.id === rejectTargetId);
         const platform = post?.platform || 'general';
         const channelMap = { linkedin: 'social_linkedin', twitter: 'social_twitter', instagram: 'social_instagram', facebook: 'social_facebook' };
         sbRpc('submit_content_feedback', { p_brand_id: 'carlton', p_content_type: 'social_post', p_content_id: String(rejectTargetId), p_channel: channelMap[platform] || 'general', p_verdict: 'rejected', p_feedback_categories: ['wrong_tone'], p_feedback_detail: reason || '' }).catch(e => console.warn('Feedback:', e));
-    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+    } catch (err) { showToast('Reject failed: ' + err.message, 'error'); }
+    finally {
+        closeModal('rejectModal');
+        if (btn) { btn.disabled = false; btn.textContent = 'Reject'; }
+        try { await loadQueue(); } catch(e) { console.warn('Queue reload:', e); }
+    }
 }
 
 async function submitRequestEdits() {
@@ -2795,6 +2811,8 @@ async function submitSchedule() {
     const dt = document.getElementById('scheduleDateTime').value;
     if (!dt) { showToast('Please select a date and time', 'error'); return; }
     const isoDate = new Date(dt).toISOString();
+    const btn = document.querySelector('#scheduleModal .btn-primary');
+    if (btn) { btn.disabled = true; btn.textContent = 'Scheduling...'; }
     try {
         // Check if this is a reschedule or approve+schedule
         const post = queuePosts.find(p => p.id === scheduleTargetId);
@@ -2805,9 +2823,12 @@ async function submitSchedule() {
             await webhookPost('content-approve-v2', { action: 'approve', queue_ids: [scheduleTargetId], scheduled_at: isoDate });
             showToast('Post approved & scheduled', 'success');
         }
-        closeModal('scheduleModal');
         await loadQueue();
     } catch (err) { showToast('Failed: ' + err.message, 'error'); }
+    finally {
+        closeModal('scheduleModal');
+        if (btn) { btn.disabled = false; btn.textContent = 'Approve & Schedule'; }
+    }
 }
 
 function openBumpModal() { openModal('bumpModal'); }
@@ -3758,7 +3779,7 @@ var SB='https://yrwrswyjawmgtxrgbnim.supabase.co';
 var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
 try{
 var r=await fetch(SB+'/rest/v1/user_bug_reports',{method:'POST',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({page_url:location.pathname,page_title:document.title,user_description:desc,console_errors:_ce,console_warnings:_cw,browser_info:{userAgent:navigator.userAgent,viewport:window.innerWidth+'x'+window.innerHeight,timestamp:new Date().toISOString()},priority:document.getElementById('bugPriority').value,status:'open'})});
-if(r.ok){var d=await r.json();if(typeof toast==='function')toast('Bug report '+d[0].report_id+' submitted!','success');document.getElementById('bugDescription').value='';document.getElementById('bugReportModal').classList.remove('active');}
+if(r.ok){var d=await r.json();if(typeof toast==='function')toast('Bug report '+d[0].report_id+' submitted!','success');document.getElementById('bugDescription').value='';document.getElementById('bugReportModal').classList.remove('active');_ce.length=0;_cw.length=0;_ub();}
 else{var e=await r.text();if(typeof toast==='function')toast('Failed: '+e,'error');}
 }catch(ex){if(typeof toast==='function')toast('Error: '+ex.message,'error');}
 finally{if(btn){btn.disabled=false;btn.textContent='Submit Bug Report';}}

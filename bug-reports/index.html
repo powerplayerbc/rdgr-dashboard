@@ -1350,7 +1350,7 @@ var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl
 try{
 var pageEl=document.getElementById('bugPageUrl');var pageVal=pageEl.tagName==='SELECT'?pageEl.value:(pageEl.textContent||location.pathname);
 var r=await fetch(SB+'/rest/v1/user_bug_reports',{method:'POST',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({page_url:pageVal,page_title:document.title,user_description:desc,console_errors:_ce,console_warnings:_cw,browser_info:{userAgent:navigator.userAgent,viewport:window.innerWidth+'x'+window.innerHeight,timestamp:new Date().toISOString()},priority:document.getElementById('bugPriority').value,status:'open'})});
-if(r.ok){var d=await r.json();if(typeof toast==='function')toast('Bug report '+d[0].report_id+' submitted!','success');document.getElementById('bugDescription').value='';document.getElementById('bugReportModal').classList.remove('active');}
+if(r.ok){var d=await r.json();if(typeof toast==='function')toast('Bug report '+d[0].report_id+' submitted!','success');document.getElementById('bugDescription').value='';document.getElementById('bugReportModal').classList.remove('active');_ce.length=0;_cw.length=0;_ub();}
 else{var e=await r.text();if(typeof toast==='function')toast('Failed: '+e,'error');}
 }catch(ex){if(typeof toast==='function')toast('Error: '+ex.message,'error');}
 finally{if(btn){btn.disabled=false;btn.textContent='Submit Bug Report';}}
