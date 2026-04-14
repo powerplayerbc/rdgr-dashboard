@@ -1084,12 +1084,13 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 </div>
 
                 <!-- Page Type Tabs -->
-                <div class="flex gap-1 p-0.5 rounded-lg mb-4" style="background: rgba(255,255,255,0.04);" id="pageTypeTabs">
+                <div class="flex gap-1 p-0.5 rounded-lg mb-4 flex-wrap" style="background: rgba(255,255,255,0.04);" id="pageTypeTabs">
                     <button class="task-tab active" data-pagetype="homepage" onclick="switchPageType('homepage')">Homepage</button>
-                    <button class="task-tab" data-pagetype="lead_magnet" onclick="switchPageType('lead_magnet')">Lead Magnet</button>
-                    <button class="task-tab" data-pagetype="lm_thank_you" onclick="switchPageType('lm_thank_you')">LM Thank You</button>
-                    <button class="task-tab" data-pagetype="sales" onclick="switchPageType('sales')">Sales</button>
-                    <button class="task-tab" data-pagetype="sales_thank_you" onclick="switchPageType('sales_thank_you')">Sales Thank You</button>
+                    <button class="task-tab" data-pagetype="lead_magnet_landing" onclick="switchPageType('lead_magnet_landing')">Lead Magnet</button>
+                    <button class="task-tab" data-pagetype="lead_magnet_thankyou" onclick="switchPageType('lead_magnet_thankyou')">LM Thank You</button>
+                    <button class="task-tab" data-pagetype="sales_page" onclick="switchPageType('sales_page')">Sales</button>
+                    <button class="task-tab" data-pagetype="purchase_page" onclick="switchPageType('purchase_page')">Purchase</button>
+                    <button class="task-tab" data-pagetype="receipt" onclick="switchPageType('receipt')">Receipt</button>
                 </div>
 
                 <!-- Preview Area -->
@@ -1278,13 +1279,14 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         'generating_pages', 'operator_review', 'client_review', 'deploying', 'live'
     ];
 
-    const PAGE_TYPES = ['homepage', 'lead_magnet', 'lm_thank_you', 'sales', 'sales_thank_you'];
+    const PAGE_TYPES = ['homepage', 'lead_magnet_landing', 'lead_magnet_thankyou', 'sales_page', 'purchase_page', 'receipt'];
     const PAGE_TYPE_LABELS = {
         homepage: 'Homepage',
-        lead_magnet: 'Lead Magnet',
-        lm_thank_you: 'LM Thank You',
-        sales: 'Sales Page',
-        sales_thank_you: 'Sales Thank You'
+        lead_magnet_landing: 'Lead Magnet',
+        lead_magnet_thankyou: 'LM Thank You',
+        sales_page: 'Sales Page',
+        purchase_page: 'Purchase Page',
+        receipt: 'Receipt'
     };
 
     // ═══════════════════════════════════════
@@ -1480,24 +1482,27 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
         container.innerHTML = logs.map(log => {
             const eventColors = {
-                build_created: '#06D6A0',
-                status_changed: '#4CC9F0',
+                status_change: '#4CC9F0',
                 page_generated: '#38BDF8',
                 page_approved: '#22C55E',
                 page_revision: '#FB923C',
+                build_created: '#06D6A0',
                 deployed: '#22C55E',
                 error: '#FF6B6B'
             };
-            const dotColor = eventColors[log.event_type] || '#8A95A9';
+            const action = log.action || log.event_type || '';
+            const dotColor = eventColors[action] || '#8A95A9';
             const timeAgo = getTimeAgo(log.created_at);
-            const message = log.message || log.event_type || 'Event';
+            const details = log.details || {};
+            const message = log.message || details.reason || details.new_status || action.replace(/_/g, ' ') || 'Event';
+            const buildLabel = log.build_id ? String(log.build_id) : '';
 
             return `
                 <div class="activity-item">
                     <div class="activity-dot" style="background:${dotColor};"></div>
                     <div class="flex-1 min-w-0">
                         <div class="text-sm" style="color: var(--deft-txt, #E8ECF1);">${escapeHtml(message)}</div>
-                        ${log.build_id ? `<div class="text-xs text-txt-3 mt-0.5">Build: ${log.build_id.slice(0,8)}...</div>` : ''}
+                        ${buildLabel ? `<div class="text-xs text-txt-3 mt-0.5">${log.actor ? escapeHtml(log.actor) + ' · ' : ''}Build #${buildLabel}</div>` : ''}
                     </div>
                     <div class="text-xs text-txt-3 whitespace-nowrap">${timeAgo}</div>
                 </div>
@@ -1634,8 +1639,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     }
 
     function onPreviewBuildChange() {
-        const buildId = document.getElementById('previewBuildSelect').value;
-        selectedPreviewBuildId = buildId || null;
+        const raw = document.getElementById('previewBuildSelect').value;
+        selectedPreviewBuildId = raw ? parseInt(raw, 10) : null;
         renderPreview();
     }
 
@@ -1699,8 +1704,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     // RENDER: CONFIG TAB
     // ═══════════════════════════════════════
     function onConfigBuildChange() {
-        const buildId = document.getElementById('configBuildSelect').value;
-        selectedConfigBuildId = buildId || null;
+        const raw = document.getElementById('configBuildSelect').value;
+        selectedConfigBuildId = raw ? parseInt(raw, 10) : null;
         renderConfig();
     }
 
