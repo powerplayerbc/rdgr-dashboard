@@ -986,6 +986,43 @@
         }).catch(() => toast('Failed to copy', 'error'));
     }
 
+    // ═══ SMART FIX TEXT PARSER ═══
+    // When pasted text contains ## [UBR-XXXX] headers, split by bug ID
+    // so each bug only gets its own section instead of the entire text.
+    function parseFixTextByBugId(fullText, checkedCbs) {
+        // Check if text contains any ## [UBR-XXXX] headers
+        const headerPattern = /^##\s*\[?(UBR-\d+)\]?/gm;
+        const headers = [...fullText.matchAll(headerPattern)];
+        if (headers.length === 0) {
+            // No headers found - return full text for all bugs (legacy behavior)
+            return null;
+        }
+
+        // Build a map of report_id -> section text
+        const sections = {};
+        for (let i = 0; i < headers.length; i++) {
+            const reportId = headers[i][1]; // e.g. "UBR-0047"
+            const startIdx = headers[i].index;
+            const endIdx = (i + 1 < headers.length) ? headers[i + 1].index : fullText.length;
+            sections[reportId] = fullText.substring(startIdx, endIdx).trim();
+        }
+
+        // Map each checked checkbox to its specific section
+        const perBugText = {};
+        checkedCbs.forEach(cb => {
+            const bugId = parseInt(cb.value);
+            const reportId = cb.dataset.reportId; // e.g. "UBR-0047"
+            if (reportId && sections[reportId]) {
+                perBugText[bugId] = sections[reportId];
+            } else {
+                // Bug not mentioned by header - give it the full text as fallback
+                perBugText[bugId] = fullText;
+            }
+        });
+
+        return perBugText;
+    }
+
     // ═══ GLOBAL FIX RESULTS ═══
     function openGlobalFixResults() {
         let allOpen = [];
@@ -1001,7 +1038,7 @@
             html += '<div class="text-xs font-semibold mb-1" style="color:var(--deft-accent);font-family:monospace;">' + esc(group.page_url) + '</div>';
             bugs.forEach(bug => {
                 html += '<label class="flex items-center gap-2 py-0.5 cursor-pointer" style="padding-left:0.5rem;">';
-                html += '<input type="checkbox" class="global-fix-cb" value="' + bug.id + '" style="accent-color:var(--deft-accent);">';
+                html += '<input type="checkbox" class="global-fix-cb" value="' + bug.id + '" data-report-id="' + esc(bug.report_id) + '" style="accent-color:var(--deft-accent);">';
                 html += '<span class="text-xs"><span class="font-mono" style="color:var(--deft-accent-warm);">' + esc(bug.report_id) + '</span> ' + esc(bug.user_description.substring(0, 80)) + '</span>';
                 html += '</label>';
             });
@@ -1015,18 +1052,52 @@
     async function saveGlobalFixResults() {
         const text = document.getElementById('globalFixText').value.trim();
         if (!text) { toast('Please paste the fix results', 'error'); return; }
-        const checkedIds = Array.from(document.querySelectorAll('.global-fix-cb:checked')).map(cb => parseInt(cb.value));
+        const checkedCbs = Array.from(document.querySelectorAll('.global-fix-cb:checked'));
+        const checkedIds = checkedCbs.map(cb => parseInt(cb.value));
         if (!checkedIds.length) { toast('Select at least one bug', 'error'); return; }
 
+        // Smart parse: split text by ## [UBR-XXXX] headers if present
+        const perBugText = parseFixTextByBugId(text, checkedCbs);
+
         try {
-            const res = await fetch(SUPABASE_URL + '/rest/v1/user_bug_reports?id=in.(' + checkedIds.join(',') + ')', {
-                method: 'PATCH',
-                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-                body: JSON.stringify({ status: 'fixed', fix_results: text, fix_applied_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-            });
-            if (res.ok) {
-                toast(checkedIds.length + ' bug(s) marked as fixed', 'success');
-                closeModal('globalFixModal');
+            let savedCount = 0;
+            if (perBugText) {
+                // Per-bug sections found - save each bug with only its matching section
+                for (const id of checkedIds) {
+                    const bugText = perBugText[id] || text;
+                    const res = await fetch(SUPABASE_URL + '/rest/v1/user_bug_reports?id=eq.' + id, {
+                        method: 'PATCH',
+                        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+                        body: JSON.stringify({ status: 'fixed', fix_results: bugText, fix_applied_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+                    });
+                    if (res.ok) savedCount++;
+
+                    // Generate retest items from this bug's section
+                    const lines = bugText.split('\n').filter(l => /^\s*[-*]\s+/.test(l) || /^\s*\d+\.\s+/.test(l));
+                    if (lines.length > 0 && lines.length <= 20) {
+                        const retestItems = lines.slice(0, 10).map(l => ({
+                            text: l.replace(/^\s*[-*\d.]+\s*/, '').trim(),
+                            checked: false,
+                            created_at: new Date().toISOString()
+                        })).filter(i => i.text.length > 5);
+                        if (retestItems.length > 0) {
+                            await fetch(SUPABASE_URL + '/rest/v1/rpc/update_bug_retest_items', {
+                                method: 'POST',
+                                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ p_bug_id: id, p_retest_items: retestItems })
+                            });
+                        }
+                    }
+                }
+                toast(savedCount + ' bug(s) marked as fixed (per-bug sections matched)', 'success');
+            } else {
+                // No headers - legacy behavior: same text to all bugs
+                const res = await fetch(SUPABASE_URL + '/rest/v1/user_bug_reports?id=in.(' + checkedIds.join(',') + ')', {
+                    method: 'PATCH',
+                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+                    body: JSON.stringify({ status: 'fixed', fix_results: text, fix_applied_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+                });
+                if (res.ok) savedCount = checkedIds.length;
 
                 const lines = text.split('\n').filter(l => /^\s*[-*]\s+/.test(l) || /^\s*\d+\.\s+/.test(l));
                 if (lines.length > 0 && lines.length <= 20) {
@@ -1035,7 +1106,6 @@
                         checked: false,
                         created_at: new Date().toISOString()
                     })).filter(i => i.text.length > 5);
-
                     if (retestItems.length > 0) {
                         for (const id of checkedIds) {
                             await fetch(SUPABASE_URL + '/rest/v1/rpc/update_bug_retest_items', {
@@ -1044,15 +1114,13 @@
                                 body: JSON.stringify({ p_bug_id: id, p_retest_items: retestItems })
                             });
                         }
-                        toast(retestItems.length + ' retest items auto-generated', 'success');
                     }
                 }
-
-                loadDashboard();
-            } else {
-                const err = await res.text();
-                toast('Failed to save: ' + err, 'error');
+                toast(savedCount + ' bug(s) marked as fixed', 'success');
             }
+
+            closeModal('globalFixModal');
+            loadDashboard();
         } catch (e) {
             toast('Error: ' + e.message, 'error');
         }
@@ -1065,7 +1133,7 @@
         const openBugs = group.bugs.filter(b => b.status === 'open' || b.status === 'in_progress');
         let html = '<div class="text-xs text-txt-3 mb-2 font-semibold" style="text-transform:uppercase;">Select bugs that were fixed:</div>';
         openBugs.forEach(bug => {
-            html += '<label class="flex items-center gap-2 py-1 cursor-pointer"><input type="checkbox" class="fix-bug-cb" value="' + bug.id + '" style="accent-color:var(--deft-accent);"><span class="text-xs"><span class="font-mono" style="color:var(--deft-accent-warm);">' + esc(bug.report_id) + '</span> ' + esc(bug.user_description.substring(0, 60)) + '</span></label>';
+            html += '<label class="flex items-center gap-2 py-1 cursor-pointer"><input type="checkbox" class="fix-bug-cb" value="' + bug.id + '" data-report-id="' + esc(bug.report_id) + '" style="accent-color:var(--deft-accent);"><span class="text-xs"><span class="font-mono" style="color:var(--deft-accent-warm);">' + esc(bug.report_id) + '</span> ' + esc(bug.user_description.substring(0, 60)) + '</span></label>';
         });
         document.getElementById('fixBugCheckboxes').innerHTML = html;
         document.getElementById('fixResultsText').value = '';
@@ -1075,21 +1143,50 @@
     async function saveFixResults() {
         const text = document.getElementById('fixResultsText').value.trim();
         if (!text) { toast('Please paste the fix results', 'error'); return; }
-        const checkedIds = Array.from(document.querySelectorAll('.fix-bug-cb:checked')).map(cb => parseInt(cb.value));
+        const checkedCbs = Array.from(document.querySelectorAll('.fix-bug-cb:checked'));
+        const checkedIds = checkedCbs.map(cb => parseInt(cb.value));
         if (!checkedIds.length) { toast('Select at least one bug', 'error'); return; }
 
-        try {
-            // Update each bug with fix results
-            const res = await fetch(SUPABASE_URL + '/rest/v1/user_bug_reports?id=in.(' + checkedIds.join(',') + ')', {
-                method: 'PATCH',
-                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-                body: JSON.stringify({ status: 'fixed', fix_results: text, fix_applied_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-            });
-            if (res.ok) {
-                toast(checkedIds.length + ' bug(s) marked as fixed', 'success');
-                closeModal('fixResultsModal');
+        // Smart parse: split text by ## [UBR-XXXX] headers if present
+        const perBugText = parseFixTextByBugId(text, checkedCbs);
 
-                // Auto-generate retest items from fix text
+        try {
+            let savedCount = 0;
+            if (perBugText) {
+                for (const id of checkedIds) {
+                    const bugText = perBugText[id] || text;
+                    const res = await fetch(SUPABASE_URL + '/rest/v1/user_bug_reports?id=eq.' + id, {
+                        method: 'PATCH',
+                        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+                        body: JSON.stringify({ status: 'fixed', fix_results: bugText, fix_applied_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+                    });
+                    if (res.ok) savedCount++;
+
+                    const lines = bugText.split('\n').filter(l => /^\s*[-*]\s+/.test(l) || /^\s*\d+\.\s+/.test(l));
+                    if (lines.length > 0 && lines.length <= 20) {
+                        const retestItems = lines.slice(0, 10).map(l => ({
+                            text: l.replace(/^\s*[-*\d.]+\s*/, '').trim(),
+                            checked: false,
+                            created_at: new Date().toISOString()
+                        })).filter(i => i.text.length > 5);
+                        if (retestItems.length > 0) {
+                            await fetch(SUPABASE_URL + '/rest/v1/rpc/update_bug_retest_items', {
+                                method: 'POST',
+                                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ p_bug_id: id, p_retest_items: retestItems })
+                            });
+                        }
+                    }
+                }
+                toast(savedCount + ' bug(s) marked as fixed (per-bug sections matched)', 'success');
+            } else {
+                const res = await fetch(SUPABASE_URL + '/rest/v1/user_bug_reports?id=in.(' + checkedIds.join(',') + ')', {
+                    method: 'PATCH',
+                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+                    body: JSON.stringify({ status: 'fixed', fix_results: text, fix_applied_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+                });
+                if (res.ok) savedCount = checkedIds.length;
+
                 const lines = text.split('\n').filter(l => /^\s*[-*]\s+/.test(l) || /^\s*\d+\.\s+/.test(l));
                 if (lines.length > 0 && lines.length <= 20) {
                     const retestItems = lines.slice(0, 10).map(l => ({
@@ -1097,9 +1194,7 @@
                         checked: false,
                         created_at: new Date().toISOString()
                     })).filter(i => i.text.length > 5);
-
                     if (retestItems.length > 0) {
-                        // Update each fixed bug with retest items
                         for (const id of checkedIds) {
                             await fetch(SUPABASE_URL + '/rest/v1/rpc/update_bug_retest_items', {
                                 method: 'POST',
@@ -1107,15 +1202,13 @@
                                 body: JSON.stringify({ p_bug_id: id, p_retest_items: retestItems })
                             });
                         }
-                        toast(retestItems.length + ' retest items auto-generated', 'success');
                     }
                 }
-
-                loadDashboard();
-            } else {
-                const err = await res.text();
-                toast('Failed to save: ' + err, 'error');
+                toast(savedCount + ' bug(s) marked as fixed', 'success');
             }
+
+            closeModal('fixResultsModal');
+            loadDashboard();
         } catch (e) {
             toast('Error: ' + e.message, 'error');
         }
