@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v2026-04-13b: 6 page types, parseInt fix, debug logging -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1331,8 +1332,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
     async function fetchPages() {
         try {
-            allPages = await supabaseSelect('website_pages', 'select=*&order=created_at.desc');
+            allPages = await supabaseSelect('website_pages', 'select=id,build_id,page_type,slug,status,content_json,html_content&order=created_at.desc');
             if (!Array.isArray(allPages)) allPages = [];
+            console.log('[client-projects] Fetched pages:', allPages.length, 'pages, build_ids:', [...new Set(allPages.map(p => p.build_id + '(' + typeof p.build_id + ')'))]);
         } catch (e) {
             console.error('Failed to fetch pages:', e);
             allPages = [];
@@ -1606,6 +1608,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     function onPreviewBuildChange() {
         const raw = document.getElementById('previewBuildSelect').value;
         selectedPreviewBuildId = raw ? parseInt(raw, 10) : null;
+        console.log('[client-projects] Preview build selected:', selectedPreviewBuildId, '(type:', typeof selectedPreviewBuildId, '), pages for this build:', allPages.filter(p => p.build_id === selectedPreviewBuildId).length);
         renderPreview();
     }
 
