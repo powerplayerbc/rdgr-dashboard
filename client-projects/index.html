@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- v2026-04-13b: 6 page types, parseInt fix, debug logging -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -61,6 +60,43 @@
             var _fs = _tc.fontScale || 1;
             _r.style.setProperty('--deft-font-scale', _fs);
         } catch(e) {}
+
+        // Async theme sync: fetch from Supabase if localStorage is empty
+        if (!_tc || !_tc.preset) {
+            window.addEventListener('DOMContentLoaded', function() {
+                var pid = _p.id || 'default';
+                if (pid === 'default') return;
+                fetch('https://yrwrswyjawmgtxrgbnim.supabase.co/rest/v1/deft_user_profiles?user_id=eq.' + pid + '&select=preferences', {
+                    headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8' }
+                }).then(function(r){return r.json()}).then(function(d) {
+                    if (d && d[0] && d[0].preferences && d[0].preferences.theme) {
+                        var tc = d[0].preferences.theme;
+                        localStorage.setItem('deft-theme-' + pid, JSON.stringify(tc));
+                        // Apply the theme without reload
+                        var presets = { forest:{accent:'#A8D65B',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans'},rdgr:{accent:'#06D6A0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans'} };
+                        var t = (tc.preset==='custom'&&tc.custom)?tc.custom:(presets[tc.preset]||null);
+                        if (t) {
+                            var r = document.documentElement;
+                            r.style.setProperty('--deft-accent',t.accent);
+                            r.style.setProperty('--deft-accent-dim',t.accent+'26');
+                            r.style.setProperty('--deft-base',t.base);
+                            r.style.setProperty('--deft-surface',t.surface);
+                            r.style.setProperty('--deft-surface-el',t.surfaceEl||t.surface);
+                            r.style.setProperty('--deft-surface-hi',t.surfaceHi||t.surfaceEl||t.surface);
+                            r.style.setProperty('--deft-border',t.border);
+                            r.style.setProperty('--deft-txt',t.txt);
+                            r.style.setProperty('--deft-txt-2',t.txt2);
+                            r.style.setProperty('--deft-txt-3',t.txt3);
+                            r.style.setProperty('--deft-heading-font',t.headingFont||'Chakra Petch');
+                            r.style.setProperty('--deft-body-font',t.bodyFont||'IBM Plex Sans');
+                            if(tc.fontScale) r.style.setProperty('--deft-font-scale',tc.fontScale);
+                            document.body.style.background=t.base;
+                            document.body.style.color=t.txt;
+                        }
+                    }
+                }).catch(function(){});
+            });
+        }
     </script>
     <style>
         html.rdgr-authed .gate-overlay { display: none !important; }
@@ -755,11 +791,6 @@
     <!-- Main Content -->
     <div id="mainContent" style="opacity: 0;">
 
-        <!-- DEBUG BANNER - remove after fixing -->
-        <div id="debugBanner" style="background:#1E3A8A;color:#fff;padding:8px 16px;font-family:monospace;font-size:12px;position:fixed;bottom:0;left:0;right:0;z-index:99999;">
-            v2026-04-13c | Loading...
-        </div>
-
         <!-- Top Nav -->
         <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
             <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
@@ -860,7 +891,7 @@
                             <span class="hidden sm:inline" id="profileName">Bradford</span>
                             <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
                         </button>
-                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown">
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 100;" id="profileDropdown">
                         </div>
                     </div>
                     <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2 relative" title="Settings" id="settingsLink">
@@ -905,8 +936,6 @@
 <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Brand <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
 <div class="mobile-nav-children">
     <a href="/brand-discovery" class="mobile-nav-link">Discovery</a>
-    <a href="/brand-voice/" class="mobile-nav-link">Voice</a>
-    <a href="/brand-voice/calibration/" class="mobile-nav-link">Calibration</a>
     <a href="/template-studio" class="mobile-nav-link">Templates</a>
     <a href="/brand-documents" class="mobile-nav-link">Docs</a>
 </div>
@@ -1337,14 +1366,10 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
     async function fetchPages() {
         try {
-            const url = SUPABASE_URL + '/rest/v1/website_pages?select=id,build_id,page_type,slug,status,content_json,html_content&order=created_at.desc';
-            const res = await fetch(url, { headers: sbHeaders });
-            const data = await res.json();
-            allPages = Array.isArray(data) ? data : [];
-            // Visible debug: show page count in stats bar
-            const dbg = document.getElementById('stat-total');
-            if (dbg) dbg.title = allPages.length + ' pages loaded';
+            allPages = await supabaseSelect('website_pages', 'select=*&order=created_at.desc');
+            if (!Array.isArray(allPages)) allPages = [];
         } catch (e) {
+            console.error('Failed to fetch pages:', e);
             allPages = [];
         }
     }
@@ -1616,7 +1641,6 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     function onPreviewBuildChange() {
         const raw = document.getElementById('previewBuildSelect').value;
         selectedPreviewBuildId = raw ? parseInt(raw, 10) : null;
-        console.log('[client-projects] Preview build selected:', selectedPreviewBuildId, '(type:', typeof selectedPreviewBuildId, '), pages for this build:', allPages.filter(p => p.build_id === selectedPreviewBuildId).length);
         renderPreview();
     }
 
@@ -2046,13 +2070,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             populateBuildSelectors();
             renderPreview();
             renderConfig();
-
-            // Update debug banner
-            var dbg = document.getElementById('debugBanner');
-            if (dbg) dbg.textContent = 'v2026-04-13c | builds: ' + allBuilds.length + ' | pages: ' + allPages.length + ' | page build_ids: ' + allPages.map(function(p){return p.build_id;}).join(',');
         } catch (e) {
-            var dbg2 = document.getElementById('debugBanner');
-            if (dbg2) dbg2.textContent = 'v2026-04-13c | ERROR: ' + String(e);
+            console.error('Refresh failed:', e);
         }
 
         if (el) el.textContent = new Date().toLocaleTimeString();
