@@ -4,7 +4,7 @@
 
 // Global state variables
 let activeProfileId = null;
-let activeProfileName = '';
+let activeProfileName = 'Bradford';
 let currentView = 'today';
 let dailyLog = null;
 let todayMeals = [];
@@ -131,12 +131,10 @@ function selectProfile(userId, name) {
     location.reload();
 }
 
-function positionProfileDropdown() {
-    const dd = document.getElementById('profileDropdown');
-    const btn = document.getElementById('profileBtn');
-    const rect = btn.getBoundingClientRect();
-    dd.style.top = (rect.bottom + 4) + 'px';
-    dd.style.right = (window.innerWidth - rect.right) + 'px';
+// Migrate old localStorage key
+if (!localStorage.getItem('rdgr-active-profile') && localStorage.getItem('deft-active-profile')) {
+    localStorage.setItem('rdgr-active-profile', localStorage.getItem('deft-active-profile'));
+    localStorage.removeItem('deft-active-profile');
 }
 
 function toggleProfileDropdown() {
@@ -145,7 +143,6 @@ function toggleProfileDropdown() {
     dd.classList.toggle('hidden');
     btn.setAttribute('aria-expanded', !dd.classList.contains('hidden'));
     if (!dd.classList.contains('hidden')) {
-        positionProfileDropdown();
         setTimeout(() => {
             document.addEventListener('click', closeProfileDropdown, { once: true });
         }, 0);
@@ -157,11 +154,6 @@ function closeProfileDropdown(e) {
     if (!document.getElementById('profileSwitcher').contains(e.target)) {
         dd.classList.add('hidden');
         document.getElementById('profileBtn').setAttribute('aria-expanded', 'false');
-    } else {
-        // Click was inside the switcher -- re-register so outside clicks still close it
-        setTimeout(() => {
-            document.addEventListener('click', closeProfileDropdown, { once: true });
-        }, 0);
     }
 }
 
@@ -175,17 +167,11 @@ async function initDeft() {
     if (savedProfile) {
         try {
             const p = JSON.parse(savedProfile);
-            if (p && p.id) {
-                activeProfileId = p.id;
-                activeProfileName = p.name || 'Unknown';
-                document.getElementById('profileName').textContent = activeProfileName;
-                document.getElementById('profileAvatar').textContent = activeProfileName[0].toUpperCase();
-            } else {
-                localStorage.removeItem('rdgr-active-profile');
-            }
-        } catch(e) {
-            localStorage.removeItem('rdgr-active-profile');
-        }
+            activeProfileId = p.id;
+            activeProfileName = p.name;
+            document.getElementById('profileName').textContent = p.name;
+            document.getElementById('profileAvatar').textContent = p.name[0].toUpperCase();
+        } catch(e) {}
     }
 
     // Apply theme
@@ -195,20 +181,19 @@ async function initDeft() {
     // Load profiles for switcher
     await loadProfiles();
 
-    // If no profile selected, prompt the user to choose one
+    // Auto-select first profile if none saved
     if (!activeProfileId) {
-        toast('Please select a profile to continue', 'warning');
-        const dd = document.getElementById('profileDropdown');
-        if (dd && dd.children.length > 1) {
-            dd.classList.remove('hidden');
-            positionProfileDropdown();
-            document.getElementById('profileBtn').setAttribute('aria-expanded', 'true');
+        const profiles = await supabaseSelect('deft_user_profiles', 'select=user_id,display_name,email&order=display_name&limit=1');
+        if (profiles && profiles.length > 0) {
+            const p = profiles[0];
+            selectProfile(p.user_id, p.display_name || p.email);
         }
-        return;
     }
 
     // Load today's data
-    await refreshToday();
+    if (activeProfileId) {
+        await refreshToday();
+    }
 }
 
 // ═══════════════════════════════════════
