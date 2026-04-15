@@ -826,7 +826,6 @@ textarea.form-input { resize: vertical; min-height: 80px; }
    BACKGROUND IMAGE SUPPORT
    ═══════════════════════════════════════ */
 #deftApp {
-    position: relative;
     min-height: 100vh;
 }
 #deftApp::before {
