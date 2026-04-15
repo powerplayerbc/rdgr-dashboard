@@ -2064,9 +2064,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     // ═══════════════════════════════════════
     function initClientProjects() {
         refreshAll();
-        // Auto-refresh every 30 seconds
+        // Auto-refresh every 5 minutes (manual refresh button available for faster updates)
         if (refreshInterval) clearInterval(refreshInterval);
-        refreshInterval = setInterval(refreshAll, 30000);
+        refreshInterval = setInterval(refreshAll, 300000);
     }
 
     async function refreshAll() {
@@ -2101,15 +2101,30 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     // ═══════════════════════════════════════
     // REALTIME SUBSCRIPTIONS
     // ═══════════════════════════════════════
+    // Lightweight data refresh that updates stats/build cards but does NOT reload the preview iframe
+    async function softRefresh() {
+        try {
+            await Promise.all([fetchBuilds(), fetchPages(), fetchActivity(), fetchDashboard()]);
+            renderStatsFromBuilds();
+            renderPipeline();
+            renderBuilds();
+            populateBuildSelectors();
+            renderConfig();
+            // Intentionally skip renderPreview() -- user is reviewing content
+            const el = document.getElementById('lastRefresh');
+            if (el) el.textContent = new Date().toLocaleTimeString() + ' (data)';
+        } catch (e) { console.warn('Soft refresh failed:', e); }
+    }
+
     (function setupRealtime() {
         const buildCh = supabaseClient
             .channel('client-projects-builds')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'website_builds' }, () => refreshAll())
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'website_builds' }, () => softRefresh())
             .subscribe();
 
         const pageCh = supabaseClient
             .channel('client-projects-pages')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'website_pages' }, () => refreshAll())
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'website_pages' }, () => softRefresh())
             .subscribe();
 
         const logCh = supabaseClient
