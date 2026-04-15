@@ -1089,13 +1089,25 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 </div>
 
                 <!-- Page Type Tabs -->
-                <div class="flex gap-1 p-0.5 rounded-lg mb-4 flex-wrap" style="background: rgba(255,255,255,0.04);" id="pageTypeTabs">
-                    <button class="task-tab active" data-pagetype="homepage" onclick="switchPageType('homepage')">Homepage</button>
-                    <button class="task-tab" data-pagetype="lead_magnet_landing" onclick="switchPageType('lead_magnet_landing')">Lead Magnet</button>
-                    <button class="task-tab" data-pagetype="lead_magnet_thankyou" onclick="switchPageType('lead_magnet_thankyou')">LM Thank You</button>
-                    <button class="task-tab" data-pagetype="sales_page" onclick="switchPageType('sales_page')">Sales</button>
-                    <button class="task-tab" data-pagetype="purchase_page" onclick="switchPageType('purchase_page')">Purchase</button>
-                    <button class="task-tab" data-pagetype="receipt" onclick="switchPageType('receipt')">Receipt</button>
+                <div id="pageTypeTabs">
+                    <div class="flex gap-1 p-0.5 rounded-lg mb-2 flex-wrap" style="background: rgba(255,255,255,0.04);">
+                        <span style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.1em;color:#525E73;padding:0.4rem 0.5rem;white-space:nowrap;">Core</span>
+                        <button class="task-tab active" data-pagetype="homepage" onclick="switchPageType('homepage')">Homepage</button>
+                        <button class="task-tab" data-pagetype="lead_magnet_landing" onclick="switchPageType('lead_magnet_landing')">Lead Magnet</button>
+                        <button class="task-tab" data-pagetype="lead_magnet_thankyou" onclick="switchPageType('lead_magnet_thankyou')">LM Thank You</button>
+                    </div>
+                    <div class="flex gap-1 p-0.5 rounded-lg mb-2 flex-wrap" style="background: rgba(255,255,255,0.04);">
+                        <span style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.1em;color:#525E73;padding:0.4rem 0.5rem;white-space:nowrap;">High $</span>
+                        <button class="task-tab" data-pagetype="sales_page" onclick="switchPageType('sales_page')">Sales</button>
+                        <button class="task-tab" data-pagetype="purchase_page" onclick="switchPageType('purchase_page')">Purchase</button>
+                        <button class="task-tab" data-pagetype="receipt" onclick="switchPageType('receipt')">Receipt</button>
+                    </div>
+                    <div class="flex gap-1 p-0.5 rounded-lg mb-4 flex-wrap" style="background: rgba(255,255,255,0.04);">
+                        <span style="font-size:0.6rem;text-transform:uppercase;letter-spacing:0.1em;color:#525E73;padding:0.4rem 0.5rem;white-space:nowrap;">Low $</span>
+                        <button class="task-tab" data-pagetype="sales_page_low" onclick="switchPageType('sales_page_low')">Sales</button>
+                        <button class="task-tab" data-pagetype="purchase_page_low" onclick="switchPageType('purchase_page_low')">Purchase</button>
+                        <button class="task-tab" data-pagetype="receipt_low" onclick="switchPageType('receipt_low')">Receipt</button>
+                    </div>
                 </div>
 
                 <!-- Preview Area -->
@@ -1284,14 +1296,17 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         'generating_pages', 'operator_review', 'client_review', 'deploying', 'live'
     ];
 
-    const PAGE_TYPES = ['homepage', 'lead_magnet_landing', 'lead_magnet_thankyou', 'sales_page', 'purchase_page', 'receipt'];
+    const PAGE_TYPES = ['homepage', 'lead_magnet_landing', 'lead_magnet_thankyou', 'sales_page', 'purchase_page', 'receipt', 'sales_page_low', 'purchase_page_low', 'receipt_low'];
     const PAGE_TYPE_LABELS = {
         homepage: 'Homepage',
         lead_magnet_landing: 'Lead Magnet',
         lead_magnet_thankyou: 'LM Thank You',
-        sales_page: 'Sales Page',
-        purchase_page: 'Purchase Page',
-        receipt: 'Receipt'
+        sales_page: 'Sales (High)',
+        purchase_page: 'Purchase (High)',
+        receipt: 'Receipt (High)',
+        sales_page_low: 'Sales (Low)',
+        purchase_page_low: 'Purchase (Low)',
+        receipt_low: 'Receipt (Low)'
     };
 
     // ═══════════════════════════════════════
