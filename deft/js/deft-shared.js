@@ -4,7 +4,7 @@
 
 // Global state variables
 let activeProfileId = null;
-let activeProfileName = 'Bradford';
+let activeProfileName = '';
 let currentView = 'today';
 let dailyLog = null;
 let todayMeals = [];
@@ -14,7 +14,17 @@ let todayExercises = [];
 // PROFILE SWITCHER
 // ═══════════════════════════════════════
 async function loadProfiles() {
-    const profiles = await supabaseSelect('deft_user_profiles', 'select=user_id,display_name,email&order=display_name');
+    let profiles = await supabaseSelect('deft_user_profiles', 'select=user_id,display_name,email&order=display_name');
+
+    // Fallback to cached profiles if Supabase fails
+    if (!profiles) {
+        try {
+            const cached = JSON.parse(localStorage.getItem('rdgr-profiles-cache') || '{}');
+            if (cached.profiles && Array.isArray(cached.profiles)) {
+                profiles = cached.profiles;
+            }
+        } catch(e) {}
+    }
 
     const dropdown = document.getElementById('profileDropdown');
     dropdown.innerHTML = '';
@@ -41,6 +51,12 @@ async function loadProfiles() {
             btn.onclick = () => selectProfile(p.user_id, p.display_name || p.email);
             dropdown.appendChild(btn);
         });
+    } else {
+        const errDiv = document.createElement('div');
+        errDiv.className = 'px-3 py-2 text-xs';
+        errDiv.style.color = '#E85D5D';
+        errDiv.textContent = 'Could not load profiles. Check your connection.';
+        dropdown.appendChild(errDiv);
     }
 
     // Divider + "New Profile" button
@@ -133,6 +149,11 @@ function closeProfileDropdown(e) {
     if (!document.getElementById('profileSwitcher').contains(e.target)) {
         dd.classList.add('hidden');
         document.getElementById('profileBtn').setAttribute('aria-expanded', 'false');
+    } else {
+        // Click was inside the switcher -- re-register so outside clicks still close it
+        setTimeout(() => {
+            document.addEventListener('click', closeProfileDropdown, { once: true });
+        }, 0);
     }
 }
 
@@ -146,11 +167,17 @@ async function initDeft() {
     if (savedProfile) {
         try {
             const p = JSON.parse(savedProfile);
-            activeProfileId = p.id;
-            activeProfileName = p.name;
-            document.getElementById('profileName').textContent = p.name;
-            document.getElementById('profileAvatar').textContent = p.name[0].toUpperCase();
-        } catch(e) {}
+            if (p && p.id) {
+                activeProfileId = p.id;
+                activeProfileName = p.name || 'Unknown';
+                document.getElementById('profileName').textContent = activeProfileName;
+                document.getElementById('profileAvatar').textContent = activeProfileName[0].toUpperCase();
+            } else {
+                localStorage.removeItem('rdgr-active-profile');
+            }
+        } catch(e) {
+            localStorage.removeItem('rdgr-active-profile');
+        }
     }
 
     // Apply theme
@@ -160,19 +187,19 @@ async function initDeft() {
     // Load profiles for switcher
     await loadProfiles();
 
-    // Auto-select first profile if none saved
+    // If no profile selected, prompt the user to choose one
     if (!activeProfileId) {
-        const profiles = await supabaseSelect('deft_user_profiles', 'select=user_id,display_name,email&order=display_name&limit=1');
-        if (profiles && profiles.length > 0) {
-            const p = profiles[0];
-            selectProfile(p.user_id, p.display_name || p.email);
+        toast('Please select a profile to continue', 'warning');
+        const dd = document.getElementById('profileDropdown');
+        if (dd && dd.children.length > 1) {
+            dd.classList.remove('hidden');
+            document.getElementById('profileBtn').setAttribute('aria-expanded', 'true');
         }
+        return;
     }
 
     // Load today's data
-    if (activeProfileId) {
-        await refreshToday();
-    }
+    await refreshToday();
 }
 
 // ═══════════════════════════════════════

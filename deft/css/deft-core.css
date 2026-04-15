@@ -820,6 +820,8 @@ textarea.form-input { resize: vertical; min-height: 80px; }
    ═══════════════════════════════════════ */
 #profileDropdown {
     box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
+    max-height: 70vh;
+    overflow-y: auto;
 }
 
 /* ═══════════════════════════════════════
