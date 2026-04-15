@@ -131,13 +131,21 @@ function selectProfile(userId, name) {
     location.reload();
 }
 
+function positionProfileDropdown() {
+    const dd = document.getElementById('profileDropdown');
+    const btn = document.getElementById('profileBtn');
+    const rect = btn.getBoundingClientRect();
+    dd.style.top = (rect.bottom + 4) + 'px';
+    dd.style.right = (window.innerWidth - rect.right) + 'px';
+}
+
 function toggleProfileDropdown() {
     const dd = document.getElementById('profileDropdown');
     const btn = document.getElementById('profileBtn');
     dd.classList.toggle('hidden');
     btn.setAttribute('aria-expanded', !dd.classList.contains('hidden'));
-    // Close on outside click
     if (!dd.classList.contains('hidden')) {
+        positionProfileDropdown();
         setTimeout(() => {
             document.addEventListener('click', closeProfileDropdown, { once: true });
         }, 0);
@@ -193,6 +201,7 @@ async function initDeft() {
         const dd = document.getElementById('profileDropdown');
         if (dd && dd.children.length > 1) {
             dd.classList.remove('hidden');
+            positionProfileDropdown();
             document.getElementById('profileBtn').setAttribute('aria-expanded', 'true');
         }
         return;

@@ -375,8 +375,10 @@
                             <a href="/brain" class="nav-group-btn">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
                             <div class="nav-dropdown">
                                 <a href="/brain">BRAIN</a>
-                                <a href="/deft">DEFT</a>
+                                <a href="/deft" class="active">DEFT</a>
                                 <a href="/pantry">Pantry</a>
+                                <a href="/shopping">Shopping</a>
+                                <a href="/meal-plan">Meal Plan</a>
                                 <a href="/school">School</a>
                             </div>
                         </div>
@@ -415,7 +417,7 @@
                         <span class="text-xs font-medium hidden sm:block" id="profileName">Profile</span>
                         <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
                     </button>
-                    <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 180px; z-index: 10000;" id="profileDropdown" role="menu">
+                    <div class="py-1 rounded-lg border hidden" style="position: fixed; background: #1A1D28; border-color: #2A2E3D; min-width: 180px; z-index: 99999;" id="profileDropdown" role="menu">
                         <!-- Profiles populated by JS -->
                     </div>
                 </div>
@@ -481,6 +483,7 @@
     <a href="/pantry" class="mobile-nav-link">Pantry</a>
     <a href="/shopping" class="mobile-nav-link">Shopping</a>
     <a href="/meal-plan" class="mobile-nav-link">Meal Plan</a>
+    <a href="/school" class="mobile-nav-link">School</a>
 </div>
 <button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Trading <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
 <div class="mobile-nav-children">
