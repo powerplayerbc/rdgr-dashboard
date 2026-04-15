@@ -20,7 +20,7 @@ const NAV_GROUPS = [
         { label: 'Rodger', href: '/chat' },
         { label: 'Council', href: '/council' },
     ]},
-    { label: 'Outreach', href: '/crm', items: [
+    { label: 'Outreach', href: '/crm', role: 'admin', items: [
         { label: 'CRM', href: '/crm' },
         { label: 'Email', href: '/email-outreach' },
         { label: 'Social', href: '/social-dashboard' },
@@ -28,7 +28,7 @@ const NAV_GROUPS = [
         { label: 'Offers', href: '/offer-studio' },
         { label: 'Client Projects', href: '/client-projects' },
     ]},
-    { label: 'Finance', href: '/finance', items: [
+    { label: 'Finance', href: '/finance', role: 'admin', items: [
         { label: 'Dashboard', href: '/finance' },
     ]},
     { label: 'Brand', href: '/brand-discovery', items: [
@@ -37,7 +37,7 @@ const NAV_GROUPS = [
         { label: 'Templates', href: '/template-studio' },
         { label: 'Docs', href: '/brand-documents' },
     ]},
-    { label: 'Policy', href: '/bsi-discovery', items: [
+    { label: 'Policy', href: '/bsi-discovery', role: 'admin', items: [
         { label: 'Discovery', href: '/bsi-discovery' },
         { label: 'Compliance', href: '/compliance' },
         { label: 'Documents', href: '/bsi-documents' },
@@ -51,8 +51,9 @@ const NAV_GROUPS = [
         { label: 'BRAIN', href: '/brain' },
         { label: 'DEFT', href: '/deft' },
         { label: 'Pantry', href: '/pantry' },
+        { label: 'School', href: '/school' },
     ]},
-    { label: 'Trading', href: '/trading-desk', items: [
+    { label: 'Trading', href: '/trading-desk', role: 'admin', items: [
         { label: 'Trading Desk', href: '/trading-desk' },
         { label: 'Bot Dashboard', href: '/trading-bot' },
         { label: 'Strategies', href: '/trading-strategies' },
@@ -65,7 +66,7 @@ const NAV_GROUPS = [
         { label: 'Reports', href: '/trading-reports' },
     ]},
     { label: 'Meetings', href: '/meetings' },
-    { label: 'System', href: '/our-workflows', items: [
+    { label: 'System', href: '/our-workflows', role: 'admin', items: [
         { label: 'Workflows', href: '/our-workflows' },
         { label: 'Org Map', href: '/org-chart' },
         { label: 'HUB', href: '/hub' },
@@ -91,6 +92,8 @@ const PAGE_URL_MAP = {
     'brain.html': '/brain',
     'deft.html': '/deft',
     'pantry.html': '/pantry',
+    'school.html': '/school',
+    'school/index.html': '/school',
     'meetings.html': '/meetings',
     'our-workflows.html': '/our-workflows',
     'org-chart.html': '/org-chart',
@@ -452,19 +455,21 @@ function buildMobileNavHTML(activeUrl) {
     NAV_GROUPS.forEach((group, gi) => {
         const isGroupActive = gi === activeGroupIdx;
 
+        const mRoleAttr = group.role ? ` data-nav-role="${group.role}"` : '';
+
         if (!group.items) {
             // Standalone link
-            items += `<a href="${group.href}" class="mobile-nav-link${isGroupActive ? ' active' : ''}">${group.label}</a>\n`;
+            items += `<a href="${group.href}" class="mobile-nav-link${isGroupActive ? ' active' : ''}"${mRoleAttr}>${group.label}</a>\n`;
         } else {
             // Group with children - accordion
             const shouldExpand = isGroupActive;
-            items += `<button class="mobile-nav-group-btn${isGroupActive ? ' active' : ''}${shouldExpand ? ' expanded' : ''}" onclick="toggleMobileAccordion(this)">${group.label} ${chevronSvg}</button>\n`;
+            items += `<div${mRoleAttr}><button class="mobile-nav-group-btn${isGroupActive ? ' active' : ''}${shouldExpand ? ' expanded' : ''}" onclick="toggleMobileAccordion(this)">${group.label} ${chevronSvg}</button>\n`;
             items += `<div class="mobile-nav-children${shouldExpand ? ' open' : ''}">\n`;
             group.items.forEach(item => {
                 const isItemActive = item.href === activeUrl;
                 items += `    <a href="${item.href}" class="mobile-nav-link${isItemActive ? ' active' : ''}">${item.label}</a>\n`;
             });
-            items += `</div>\n`;
+            items += `</div></div>\n`;
         }
     });
 
@@ -492,9 +497,11 @@ function buildNavHTML(activeUrl) {
     const tabs = NAV_GROUPS.map((group, gi) => {
         const isGroupActive = gi === activeGroupIdx;
 
+        const roleAttr = group.role ? ` data-nav-role="${group.role}"` : '';
+
         if (!group.items) {
             // Standalone tab (no dropdown)
-            return `<a href="${group.href}" class="nav-group-btn${isGroupActive ? ' active' : ''}">${group.label}</a>`;
+            return `<a href="${group.href}" class="nav-group-btn${isGroupActive ? ' active' : ''}"${roleAttr}>${group.label}</a>`;
         }
 
         // Group with dropdown
@@ -504,7 +511,7 @@ function buildNavHTML(activeUrl) {
             return `<a href="${item.href}"${isItemActive ? ' class="active"' : ''}>${item.label}</a>`;
         }).join('\n                                ');
 
-        return `<div class="nav-group">
+        return `<div class="nav-group"${roleAttr}>
                             <a href="${group.href}" class="nav-group-btn${isGroupActive ? ' active' : ''}">${group.label} ${chevron}</a>
                             <div class="nav-dropdown">
                                 ${dropdownItems}
@@ -614,7 +621,17 @@ files.forEach(file => {
         }
     }
 
-    // 3. Inject click prevention script if not already present
+    // 3. Inject role-based nav filtering script if not already present
+    const roleFilterScript = `<script>try{var _rp=JSON.parse(localStorage.getItem('rdgr-active-profile')||'{}');if(_rp.role==='student'){document.querySelectorAll('[data-nav-role=\"admin\"]').forEach(function(el){el.style.display='none';});}}catch(e){}</script>`;
+    if (!content.includes('data-nav-role')) {
+        const navCloseForRole = content.indexOf('</nav>');
+        if (navCloseForRole > -1) {
+            const insertAtRole = navCloseForRole + '</nav>'.length;
+            content = content.substring(0, insertAtRole) + '\n        ' + roleFilterScript + content.substring(insertAtRole);
+        }
+    }
+
+    // 3b. Inject click prevention script if not already present
     const clickPreventScript = `<script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>`;
     if (!content.includes("closest('.nav-group-btn.active")) {
         // Insert right after </nav>

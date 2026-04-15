@@ -19,7 +19,7 @@ function getCachedProfiles(callback) {
     } catch(e) {}
     var _SB_URL = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://yrwrswyjawmgtxrgbnim.supabase.co';
     var _SB_KEY = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
-    fetch(`${_SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
+    fetch(`${_SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email,role&order=display_name`, {
         headers: { 'apikey': _SB_KEY, 'Authorization': `Bearer ${_SB_KEY}` }
     }).then(r => r.json()).then(profiles => {
         if (profiles && Array.isArray(profiles) && profiles.length > 0) {
@@ -41,7 +41,8 @@ function loadGateProfiles() {
                     const initial = name[0].toUpperCase();
                     const colors = { 'Bradford': '#06D6A0', 'Dianna': '#A855F7', 'Brianna': '#4CC9F0' };
                     const color = colors[name] || '#8A95A9';
-                    return `<button type="button" onclick="selectGateProfile('${p.user_id}','${name.replace(/'/g, '&#39;')}',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="if(!this.classList.contains('selected'))this.style.background='rgba(255,255,255,0.02)'">
+                    const role = p.role || 'admin';
+                    return `<button type="button" onclick="selectGateProfile('${p.user_id}','${name.replace(/'/g, '&#39;')}',this,'${role}')" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="if(!this.classList.contains('selected'))this.style.background='rgba(255,255,255,0.02)'">
                         <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:${color}20;color:${color};border:2px solid transparent;">${initial}</div>
                         <span class="text-xs" style="color:#8A95A9;">${name}</span>
                     </button>`;
@@ -57,8 +58,8 @@ function loadGateProfiles() {
     });
 }
 
-function selectGateProfile(userId, name, el) {
-    gateSelectedProfile = { id: userId, name: name };
+function selectGateProfile(userId, name, el, role) {
+    gateSelectedProfile = { id: userId, name: name, role: role || 'admin' };
     document.querySelectorAll('.gate-profile-btn').forEach(btn => {
         btn.classList.remove('selected');
         btn.style.background = 'rgba(255,255,255,0.02)';
