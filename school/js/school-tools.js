@@ -396,7 +396,7 @@ function openTool_protractor() {
             <span style="font-size:0.75rem;color:var(--deft-txt-3);">Angle:</span>
             <span id="protractor-angle" style="font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--deft-accent);font-weight:600;">0&deg;</span>
         </div>
-        <svg id="protractor-svg" viewBox="0 0 300 170" style="width:100%;border-radius:8px;background:var(--deft-surface);border:1px solid var(--deft-border);cursor:pointer;">
+        <svg id="protractor-svg" viewBox="0 0 300 170" style="width:100%;border-radius:8px;background:transparent;cursor:pointer;">
             <!-- Outer arc -->
             <path d="M 15,150 A 135,135 0 0,1 285,150" fill="none" stroke="var(--deft-border)" stroke-width="1"/>
             <!-- Inner arc -->
@@ -411,6 +411,13 @@ function openTool_protractor() {
         </svg>
     `;
     const panel = createToolPanel('protractor', 'Protractor', 340, 250, html);
+    // Make protractor panel transparent so it can overlay content
+    panel.style.background = 'transparent';
+    panel.style.border = 'none';
+    panel.style.boxShadow = 'none';
+    panel.querySelector('.tool-panel-header').style.background = 'rgba(17,19,26,0.8)';
+    panel.querySelector('.tool-panel-header').style.borderRadius = '12px 12px 0 0';
+    panel.querySelector('.tool-panel-body').style.background = 'transparent';
     setTimeout(() => {
         const svg = document.getElementById('protractor-svg');
         if (!svg) return;

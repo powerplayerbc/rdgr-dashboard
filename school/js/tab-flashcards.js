@@ -398,7 +398,7 @@ function fcBuildSpellingMastery() {
 
     wordItems.forEach((item, i) => {
         const cls = item.proficient ? 'fc-chip-done' : (item.attempts > 0 ? 'fc-chip-wip' : 'fc-chip-new');
-        html += `<button class="fc-word-chip ${cls}" onclick="fcJumpToSpWord(${i})" title="${escapeHtml(item.word)}">${escapeHtml(item.word)}</button>`;
+        html += `<button class="fc-word-chip ${cls}" onclick="fcJumpToSpWord(${i})" title="Word ${i + 1}">${i + 1}</button>`;
     });
 
     html += `</div></div>`;

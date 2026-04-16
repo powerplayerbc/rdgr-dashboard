@@ -100,105 +100,66 @@ function applyRoleVisibility() {
 }
 
 // ═══════════════════════════════════════
-// INIT
+// INIT (kept for backward compatibility -- each page now uses initPage())
 // ═══════════════════════════════════════
 async function initSchool() {
-    // Load saved profile
-    const savedProfile = localStorage.getItem('rdgr-active-profile');
-    if (savedProfile) {
-        try {
-            const p = JSON.parse(savedProfile);
-            activeProfileId = p.id;
-            activeProfileName = p.name;
-            userRole = p.role || 'admin';
-            const nameEl = document.getElementById('profileName');
-            const avatarEl = document.getElementById('profileAvatar');
-            if (nameEl) nameEl.textContent = p.name;
-            if (avatarEl) avatarEl.textContent = p.name[0].toUpperCase();
-        } catch(e) {}
-    }
+    // initPage() is defined per-page in the HTML and calls the right refresh function
+    if (typeof initPage === 'function') initPage();
+}
 
-    // If role not cached, fetch from Supabase
-    if (activeProfileId && !userRole) {
-        const profiles = await supabaseSelect('deft_user_profiles', `user_id=eq.${activeProfileId}&select=role`);
-        if (profiles && profiles[0]) {
-            userRole = profiles[0].role || 'admin';
-            // Update localStorage with role
-            const saved = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
-            saved.role = userRole;
-            localStorage.setItem('rdgr-active-profile', JSON.stringify(saved));
+// Load current lesson from sessionStorage (for questions page)
+function loadCurrentLesson() {
+    try {
+        var saved = sessionStorage.getItem('school-current-lesson');
+        if (saved) {
+            var data = JSON.parse(saved);
+            currentAssignmentId = data.assignmentId;
+            currentLessonId = data.lessonId;
+            currentLessonTitle = data.title;
+            return true;
         }
-    }
-
-    // Apply role-based UI
-    applyRoleVisibility();
-
-    // Load profiles for switcher
-    await loadProfiles();
-
-    // Check URL hash for deep link (e.g., #typing)
-    const hash = window.location.hash.replace('#', '');
-    if (hash && ['lessons', 'questions', 'grades', 'calendar', 'history', 'vocabulary', 'flashcards', 'typing', 'teacher'].includes(hash)) {
-        switchView(hash);
-    } else {
-        // Default view: lessons for student, calendar for teacher
-        switchView(isStudent() ? 'lessons' : 'lessons');
-    }
+    } catch(e) {}
+    return false;
 }
 
 // ═══════════════════════════════════════
-// VIEW SWITCHING
+// VIEW SWITCHING (each tab is now its own page)
 // ═══════════════════════════════════════
 function switchView(view) {
-    // Block student from teacher view
+    // Each tab is a separate page -- navigate to it
+    var routes = {
+        lessons: '/school',
+        today: '/school',
+        questions: '/school/questions',
+        grades: '/school/grades',
+        calendar: '/school/calendar',
+        history: '/school/history',
+        vocabulary: '/school/vocabulary',
+        flashcards: '/school/flashcards',
+        typing: '/school/typing',
+        teacher: '/school/teacher',
+    };
     if (view === 'teacher' && isStudent()) {
         toast('Access restricted', 'error');
         return;
     }
-
-    currentView = view;
-    const views = ['lessons', 'questions', 'grades', 'calendar', 'history', 'vocabulary', 'flashcards', 'typing', 'teacher'];
-    views.forEach(v => {
-        const el = document.getElementById(`view-${v}`);
-        if (el) el.style.display = v === view ? '' : 'none';
-        const tab = document.getElementById(`tab-${v}`);
-        if (tab) {
-            tab.classList.toggle('active', v === view);
-            tab.setAttribute('aria-selected', v === view ? 'true' : 'false');
-        }
-    });
-
-    // Update hash for deep linking
-    window.location.hash = view;
-
-    // Lazy-load data for views
-    var _viewFn = {
-        lessons: typeof refreshLessons !== 'undefined' ? refreshLessons : null,
-        questions: typeof refreshQuestions !== 'undefined' && currentAssignmentId ? refreshQuestions : null,
-        grades: typeof refreshGrades !== 'undefined' ? refreshGrades : null,
-        calendar: typeof refreshCalendar !== 'undefined' ? refreshCalendar : null,
-        history: typeof refreshHistory !== 'undefined' ? refreshHistory : null,
-        vocabulary: typeof refreshVocabulary !== 'undefined' ? refreshVocabulary : null,
-        flashcards: typeof refreshFlashcards !== 'undefined' ? refreshFlashcards : null,
-        typing: typeof initTyping !== 'undefined' ? initTyping : null,
-        teacher: typeof refreshTeacher !== 'undefined' ? refreshTeacher : null,
-    };
-    if (_viewFn[view]) {
-        try { _viewFn[view](); } catch(e) { console.error('View load error (' + view + '):', e); }
-    } else if (view !== 'questions') {
-        // Log which script failed to load so we can debug
-        console.error('View function for "' + view + '" is not defined. The script file may have failed to load. Check the Network tab for errors on school/js/tab-' + view + '.js');
-        var container = document.getElementById(view === 'typing' ? 'typing-container' : view + '-container');
-        if (container) container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--deft-txt-3);"><p>This section failed to load. Try refreshing the page (Ctrl+Shift+R).</p><p style="font-size:0.75rem;margin-top:0.5rem;">If this persists, report it using the bug button.</p></div>';
+    if (routes[view] && window.location.pathname !== routes[view]) {
+        window.location.href = routes[view];
     }
 }
 
-// Navigate to a lesson's questions
+// Navigate to a lesson's questions (separate page now)
 function openLesson(assignmentId, lessonId, title) {
     currentAssignmentId = assignmentId;
     currentLessonId = lessonId;
     currentLessonTitle = title;
-    switchView('questions');
+    // Store in sessionStorage so the questions page can pick it up
+    sessionStorage.setItem('school-current-lesson', JSON.stringify({
+        assignmentId: assignmentId,
+        lessonId: lessonId,
+        title: title
+    }));
+    window.location.href = '/school/questions';
 }
 
 // ═══════════════════════════════════════
