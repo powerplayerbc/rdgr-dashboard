@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>JS Load Test</title></head>
+<body>
+<h3>JS Load Test</h3>
+<pre id="log"></pre>
+<script>
+function log(msg) {
+    document.getElementById('log').textContent += msg + '\n';
+    console.log(msg);
+}
+window.onerror = function(msg, src, line, col, err) {
+    log('ERROR: ' + msg + ' at ' + src + ':' + line);
+    return true; // prevent default
+};
+// Mock globals
+window.activeProfileId = 'test';
+window.userRole = 'admin';
+window.supabaseSelect = async function() { return []; };
+window.supabaseWrite = async function() { return null; };
+window.supabaseUpsert = async function() { return null; };
+window.schoolApi = async function() { return {success:true}; };
+window.toast = function() {};
+window.openModal = function() {};
+window.closeModal = function() {};
+window.escapeHtml = function(s) { return s || ''; };
+window.formatDate = function(s) { return s || ''; };
+window.todayStr = function() { return '2026-04-16'; };
+window.isTeacher = function() { return true; };
+window.isStudent = function() { return false; };
+window.switchView = function() {};
+window.openLesson = function() {};
+window.getSubjectStyle = function() { return {bg:'#000',text:'#fff',label:'Test'}; };
+window.getSubjectIcon = function() { return ''; };
+window.buildSkeletons = function() { return ''; };
+window.emptyState = function() { return ''; };
+window.refreshGrades = async function() {};
+window.getLetterGrade = function() { return {min:90,grade:'A',color:'green'}; };
+window.GRADE_THRESHOLDS = [{min:90,grade:'A'}];
+window.SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+window.SUPABASE_ANON_KEY = 'test';
+log('Mocks ready. Loading scripts...');
+</script>
+
+<script src="js/school-config.js" onerror="log('FAILED: school-config.js')" onload="log('OK: school-config.js')"></script>
+<script src="js/tab-vocabulary.js" onerror="log('FAILED: tab-vocabulary.js')" onload="log('OK: tab-vocabulary.js, refreshVocabulary=' + typeof refreshVocabulary)"></script>
+<script src="js/tab-flashcards.js" onerror="log('FAILED: tab-flashcards.js')" onload="log('OK: tab-flashcards.js, refreshFlashcards=' + typeof refreshFlashcards)"></script>
+<script src="js/tab-typing.js" onerror="log('FAILED: tab-typing.js')" onload="log('OK: tab-typing.js, initTyping=' + typeof initTyping)"></script>
+<script src="js/tab-teacher.js" onerror="log('FAILED: tab-teacher.js')" onload="log('OK: tab-teacher.js, refreshTeacher=' + typeof refreshTeacher)"></script>
+
+<script>
+log('--- Final check ---');
+log('refreshVocabulary: ' + typeof refreshVocabulary);
+log('refreshFlashcards: ' + typeof refreshFlashcards);
+log('initTyping: ' + typeof initTyping);
+log('refreshTeacher: ' + typeof refreshTeacher);
+</script>
+</body></html>
