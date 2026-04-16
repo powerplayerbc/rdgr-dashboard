@@ -63,6 +63,14 @@ async function refreshHistory() {
         ]);
 
         historyCurrentFact = (todayFacts && todayFacts.length > 0) ? todayFacts[0] : null;
+        // Parse any double-encoded JSONB fields
+        if (historyCurrentFact) {
+            ['key_figures', 'topic_tags', 'references_facts'].forEach(function(field) {
+                if (typeof historyCurrentFact[field] === 'string') {
+                    try { historyCurrentFact[field] = JSON.parse(historyCurrentFact[field]); } catch(e) { historyCurrentFact[field] = []; }
+                }
+            });
+        }
         historyWeekFacts = weekFacts || [];
         const progressCount = allPastFacts ? allPastFacts.length : 0;
 

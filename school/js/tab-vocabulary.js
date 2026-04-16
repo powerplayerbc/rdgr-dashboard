@@ -87,6 +87,11 @@ async function vocabLoadWeekData(weekNum) {
 
     vocabState.weekData = (weekRows && weekRows.length > 0) ? weekRows[0] : null;
 
+    // Ensure words is parsed if it came back as a string (double-encoded JSONB)
+    if (vocabState.weekData && typeof vocabState.weekData.words === 'string') {
+        try { vocabState.weekData.words = JSON.parse(vocabState.weekData.words); } catch(e) { vocabState.weekData.words = []; }
+    }
+
     // Filter quiz attempts for this week
     if (quizRows && vocabState.weekData) {
         vocabState.quizAttempts = quizRows.filter(

@@ -147,7 +147,8 @@ async function fcLoadSpellingData() {
             : Promise.resolve(null)
     ]);
 
-    fcState.spWords = (weekRows && weekRows[0] && weekRows[0].words) ? weekRows[0].words : [];
+    var rawWords = (weekRows && weekRows[0] && weekRows[0].words) ? weekRows[0].words : [];
+    fcState.spWords = typeof rawWords === 'string' ? (function() { try { return JSON.parse(rawWords); } catch(e) { return []; } })() : rawWords;
 
     // Index progress by card_key
     fcState.spProgress = {};
