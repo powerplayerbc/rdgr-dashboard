@@ -865,7 +865,7 @@ async function loadTeacherLessons() {
 
     const lessons = await supabaseSelect(
         'school_lessons',
-        'select=id,title,subject,description,question_count,source_type,created_at&order=created_at.desc'
+        'select=lesson_id,title,subject,description,source_type,created_at&order=created_at.desc'
     );
 
     teacherLessons = lessons || [];
@@ -914,7 +914,7 @@ function buildLibraryCard(lesson) {
                     transition:background 0.12s;cursor:pointer;"
              onmouseenter="this.style.background='var(--deft-surface-el)'"
              onmouseleave="this.style.background='transparent'"
-             onclick="toggleLibraryExpand(this, '${escapeHtml(lesson.id)}')"
+             onclick="toggleLibraryExpand(this, '${escapeHtml(lesson.lesson_id)}')"
              role="button" tabindex="0"
              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
 
@@ -949,14 +949,14 @@ function buildLibraryCard(lesson) {
             </div>
 
             <!-- Assign button -->
-            <button class="btn btn-ghost" onclick="event.stopPropagation();openAssignModal('${escapeHtml(lesson.id)}','${escapeHtml((lesson.title || '').replace(/'/g, "\\'"))}')"
+            <button class="btn btn-ghost" onclick="event.stopPropagation();openAssignModal('${escapeHtml(lesson.lesson_id)}','${escapeHtml((lesson.title || '').replace(/'/g, "\\'"))}')"
                     style="padding:5px 12px;font-size:11px;flex-shrink:0;">
                 Assign
             </button>
         </div>
 
         <!-- Expandable detail (hidden by default) -->
-        <div class="library-detail" data-lesson-id="${escapeHtml(lesson.id)}"
+        <div class="library-detail" data-lesson-id="${escapeHtml(lesson.lesson_id)}"
              style="display:none;padding:0 12px 12px 58px;background:var(--deft-surface-el);
                     border-bottom:1px solid var(--deft-border);">
             <div style="padding:10px 0;font-size:12px;color:var(--deft-txt-3);">Loading questions...</div>
@@ -992,7 +992,7 @@ async function toggleLibraryExpand(cardEl, lessonId) {
     // Fetch questions for this lesson
     const questions = await supabaseSelect(
         'school_questions',
-        `lesson_id=eq.${lessonId}&select=id,question_number,question_text,question_type,correct_answer,points&order=question_number`
+        `lesson_id=eq.${lessonId}&select=question_id,question_number,question_text,question_type,correct_answer,points&order=question_number`
     );
 
     if (!questions || questions.length === 0) {
@@ -1123,7 +1123,7 @@ async function loadPendingReviews() {
 
     const answers = await supabaseSelect(
         'school_answers',
-        'check_status=eq.checked&order=checked_at.desc&limit=20&select=id,question_id,student_id,answer_text,score,ai_score,ai_feedback,check_status,school_questions(question_text,correct_answer,points)'
+        'check_status=eq.checked&order=checked_at.desc&limit=20&select=answer_id,question_id,student_id,answer_text,ai_score,ai_feedback,check_status,school_questions(question_text,correct_answer,points)'
     );
 
     pendingReviews = answers || [];
@@ -1156,7 +1156,7 @@ function buildReviewCard(answer) {
     const gradeInfo = aiScorePct != null ? getLetterGrade(aiScorePct) : null;
 
     return `
-        <div style="padding:14px;border-bottom:1px solid var(--deft-border);" data-answer-id="${escapeHtml(answer.id)}">
+        <div style="padding:14px;border-bottom:1px solid var(--deft-border);" data-answer-id="${escapeHtml(answer.answer_id)}">
             <!-- Question -->
             <div style="margin-bottom:8px;">
                 <span style="font-size:11px;font-weight:600;color:var(--deft-txt-3);text-transform:uppercase;
@@ -1209,15 +1209,15 @@ function buildReviewCard(answer) {
                 <label style="font-size:11px;color:var(--deft-txt-2);font-weight:600;white-space:nowrap;">Override Score:</label>
                 <input type="number" class="form-input" min="0" max="${maxPoints}" step="0.5"
                        value="${aiScore}"
-                       id="override-${escapeHtml(answer.id)}"
+                       id="override-${escapeHtml(answer.answer_id)}"
                        style="width:70px;font-size:12px;padding:5px 8px;text-align:center;"
                        aria-label="Override score for this answer">
                 <span style="font-size:11px;color:var(--deft-txt-3);">/ ${maxPoints}</span>
-                <button class="btn btn-primary" onclick="confirmReview('${escapeHtml(answer.id)}')"
+                <button class="btn btn-primary" onclick="confirmReview('${escapeHtml(answer.answer_id)}')"
                         style="padding:5px 12px;font-size:11px;margin-left:auto;">
                     Confirm
                 </button>
-                <button class="btn btn-ghost" onclick="confirmReview('${escapeHtml(answer.id)}', true)"
+                <button class="btn btn-ghost" onclick="confirmReview('${escapeHtml(answer.answer_id)}', true)"
                         style="padding:5px 12px;font-size:11px;">
                     Accept AI
                 </button>
@@ -1232,7 +1232,7 @@ async function confirmReview(answerId, acceptAI) {
 
     if (acceptAI) {
         // Use existing AI score
-        const answer = pendingReviews.find(a => a.id === answerId);
+        const answer = pendingReviews.find(a => a.answer_id === answerId);
         score = answer?.ai_score;
     } else {
         score = parseFloat(overrideInput?.value);
@@ -1262,7 +1262,7 @@ async function confirmReview(answerId, acceptAI) {
             setTimeout(() => card.remove(), 300);
         }
         // Update count
-        pendingReviews = pendingReviews.filter(a => a.id !== answerId);
+        pendingReviews = pendingReviews.filter(a => a.answer_id !== answerId);
         const countEl = document.getElementById('reviewCount');
         if (countEl) {
             countEl.textContent = pendingReviews.length > 0 ? `${pendingReviews.length} to review` : '';
@@ -1293,7 +1293,7 @@ async function loadExcuseManager() {
 
     const assignments = await supabaseSelect(
         'school_assignments',
-        `assigned_date=gte.${mondayStr}&assigned_date=lte.${sundayStr}&status=neq.excused&select=id,lesson_id,student_id,status,assigned_date,school_lessons(title,subject)&order=assigned_date.desc`
+        `assigned_date=gte.${mondayStr}&assigned_date=lte.${sundayStr}&status=neq.excused&select=assignment_id,lesson_id,student_id,status,assigned_date,school_lessons(title,subject)&order=assigned_date.desc`
     );
 
     if (!assignments || assignments.length === 0) {

@@ -54,7 +54,7 @@ async function loadCalendarAssignments() {
     const endOfMonth = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
 
     let query = `assigned_date=gte.${startOfMonth}&assigned_date=lte.${endOfMonth}`;
-    query += '&select=id,lesson_id,student_id,assigned_date,status,school_lessons(id,title,subject)';
+    query += '&select=assignment_id,lesson_id,student_id,assigned_date,status,school_lessons(lesson_id,title,subject)';
     query += '&order=assigned_date';
 
     // Students only see their own assignments
@@ -68,7 +68,7 @@ async function loadCalendarAssignments() {
 
 async function loadAllLessons() {
     if (calLessonsCache) return calLessonsCache;
-    const data = await supabaseSelect('school_lessons', 'select=id,title,subject&order=subject,title');
+    const data = await supabaseSelect('school_lessons', 'select=lesson_id,title,subject&order=subject,title');
     calLessonsCache = data || [];
     return calLessonsCache;
 }
@@ -214,7 +214,7 @@ function renderCalendarList() {
         if (isTeacher()) {
             actionsHtml = `
                 <div class="cal-list-actions">
-                    <button class="cal-list-action" onclick="event.stopPropagation();deleteCalAssignment('${a.id}')" title="Delete assignment" aria-label="Delete assignment">
+                    <button class="cal-list-action" onclick="event.stopPropagation();deleteCalAssignment('${a.assignment_id}')" title="Delete assignment" aria-label="Delete assignment">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                             <path d="M2 4h10M5 4V3a1 1 0 011-1h2a1 1 0 011 1v1M9 6.5v4M5 6.5v4M3.5 4l.5 8a1 1 0 001 1h4a1 1 0 001-1l.5-8" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -223,7 +223,7 @@ function renderCalendarList() {
         }
 
         html += `
-            <div class="cal-list-item" onclick="handleCalListClick('${a.id}', '${lesson.id || ''}', '${escapeHtml(lesson.title || '')}')" tabindex="0" onkeydown="if(event.key==='Enter')this.click()">
+            <div class="cal-list-item" onclick="handleCalListClick('${a.assignment_id}', '${lesson.lesson_id || ''}', '${escapeHtml(lesson.title || '')}')" tabindex="0" onkeydown="if(event.key==='Enter')this.click()">
                 <div class="cal-list-date">${formatDate(a.assigned_date)}</div>
                 <div class="cal-list-title">${escapeHtml(lesson.title || 'Untitled')}</div>
                 <span class="cal-list-badge" style="background:${style.bg};color:${style.text};">${style.label}</span>
@@ -260,7 +260,7 @@ function handleCalDayClick(dateStr) {
             if (dayAssignments.length === 1) {
                 const a = dayAssignments[0];
                 const lesson = a.school_lessons || {};
-                openLesson(a.id, lesson.id, lesson.title || 'Untitled');
+                openLesson(a.id, lesson.lesson_id, lesson.title || 'Untitled');
             } else {
                 // Multiple: go to lessons view (it will show all)
                 switchView('lessons');
@@ -296,7 +296,7 @@ async function openAssignModal(dateStr) {
         select.innerHTML = '<option value="">-- Select a lesson --</option>';
         lessons.forEach(l => {
             const style = getSubjectStyle(l.subject || 'other');
-            select.innerHTML += `<option value="${l.id}">${escapeHtml(l.title)} (${style.label})</option>`;
+            select.innerHTML += `<option value="${l.lesson_id}">${escapeHtml(l.title)} (${style.label})</option>`;
         });
     }
 

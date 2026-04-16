@@ -37,7 +37,7 @@ async function refreshGrades() {
             `user_id=eq.${viewUserId}&select=*`
         ),
         supabaseSelect('school_lessons',
-            'select=id,title,subject,lesson_date'
+            'select=lesson_id,title,subject'
         )
     ]);
 
@@ -56,7 +56,7 @@ async function refreshGrades() {
     gradesData.lessons = {};
     if (lessons && lessons.length) {
         for (const l of lessons) {
-            gradesData.lessons[l.id] = l;
+            gradesData.lessons[l.lesson_id] = l;
         }
     }
 
@@ -77,7 +77,7 @@ function calcGradeStats() {
     let assignmentCount = 0;
 
     for (const a of gradesData.assignments) {
-        const aGrades = gradesData.grades[a.id];
+        const aGrades = gradesData.grades[a.assignment_id];
         if (!aGrades || !aGrades.length) continue;
 
         assignmentCount++;
@@ -261,10 +261,10 @@ function renderAssignmentAccordion(assignment) {
     const title = lesson.title || 'Untitled Lesson';
     const subject = lesson.subject || 'other';
     const subjectStyle = getSubjectStyle(subject);
-    const aStats = calcAssignmentStats(assignment.id);
+    const aStats = calcAssignmentStats(assignment.assignment_id);
     const letterGrade = getLetterGrade(aStats.pct);
     const dateStr = formatDate(assignment.assigned_date || assignment.created_at);
-    const isExpanded = gradesData.expandedId === assignment.id;
+    const isExpanded = gradesData.expandedId === assignment.assignment_id;
 
     return `
         <div class="grades-accordion-card" style="
@@ -276,9 +276,9 @@ function renderAssignmentAccordion(assignment) {
         ">
             <!-- Accordion header -->
             <button
-                onclick="toggleGradeAccordion('${assignment.id}')"
+                onclick="toggleGradeAccordion('${assignment.assignment_id}')"
                 aria-expanded="${isExpanded}"
-                aria-controls="grade-detail-${assignment.id}"
+                aria-controls="grade-detail-${assignment.assignment_id}"
                 style="
                     width: 100%; border: none; background: transparent; cursor: pointer;
                     padding: 14px 18px; display: flex; align-items: center; gap: 12px;
@@ -328,11 +328,11 @@ function renderAssignmentAccordion(assignment) {
             </button>
 
             <!-- Accordion detail panel -->
-            <div id="grade-detail-${assignment.id}"
+            <div id="grade-detail-${assignment.assignment_id}"
                  role="region"
                  aria-label="Grade detail for ${escapeHtml(title)}"
                  style="display: ${isExpanded ? 'block' : 'none'};">
-                ${isExpanded ? renderAssignmentDetail(assignment.id) : ''}
+                ${isExpanded ? renderAssignmentDetail(assignment.assignment_id) : ''}
             </div>
         </div>
     `;
@@ -542,7 +542,7 @@ function renderQuestionRow(row, assignmentId) {
 
     const teacherActions = isTeacher() ? `
         <span style="display: flex; gap: 4px; justify-content: flex-end;">
-            <button onclick="openOverrideInline('${assignmentId}', '${g.id}', ${score || 0}, ${possible})"
+            <button onclick="openOverrideInline('${assignmentId}', '${g.answer_id}', ${score || 0}, ${possible})"
                     title="Override score"
                     style="background: transparent; border: 1px solid var(--deft-border); color: var(--deft-txt-2);
                            border-radius: 6px; padding: 3px 8px; font-size: 11px; cursor: pointer;
@@ -551,7 +551,7 @@ function renderQuestionRow(row, assignmentId) {
                     onmouseleave="this.style.borderColor='var(--deft-border)';this.style.color='var(--deft-txt-2)'">
                 Edit
             </button>
-            <button onclick="toggleStrike('${assignmentId}', '${g.id}', ${!isStruck})"
+            <button onclick="toggleStrike('${assignmentId}', '${g.answer_id}', ${!isStruck})"
                     title="${isStruck ? 'Unstrike' : 'Strike'} question"
                     style="background: transparent; border: 1px solid ${isStruck ? 'var(--deft-warning)' : 'var(--deft-border)'};
                            color: ${isStruck ? 'var(--deft-warning)' : 'var(--deft-txt-3)'};
@@ -565,7 +565,7 @@ function renderQuestionRow(row, assignmentId) {
     ` : '';
 
     return `
-        <div id="grade-row-${g.id}" style="
+        <div id="grade-row-${g.answer_id}" style="
             display: grid;
             grid-template-columns: 36px 1.5fr 1fr 1fr 70px 60px ${isTeacher() ? '120px' : ''};
             gap: 4px; padding: 8px 18px; align-items: center;
@@ -610,7 +610,7 @@ function renderQuestionRow(row, assignmentId) {
         </div>
 
         <!-- Inline override input (hidden by default) -->
-        <div id="override-inline-${g.id}" style="display: none;"></div>
+        <div id="override-inline-${g.answer_id}" style="display: none;"></div>
     `;
 }
 
@@ -754,7 +754,7 @@ async function submitOverride(assignmentId, gradeId, maxPoints) {
         // Update local cache
         const aGrades = gradesData.grades[assignmentId];
         if (aGrades) {
-            const g = aGrades.find(gr => gr.id === gradeId);
+            const g = aGrades.find(gr => gr.answer_id === gradeId);
             if (g) {
                 g.override_score = newScore;
                 g.override_reason = reason;
@@ -786,7 +786,7 @@ async function toggleStrike(assignmentId, gradeId, shouldStrike) {
         // Update local cache
         const aGrades = gradesData.grades[assignmentId];
         if (aGrades) {
-            const g = aGrades.find(gr => gr.id === gradeId);
+            const g = aGrades.find(gr => gr.answer_id === gradeId);
             if (g) g.struck = shouldStrike;
         }
         // Re-render
@@ -812,7 +812,7 @@ async function excuseAssignment(assignmentId) {
     if (result) {
         toast('Assignment excused', 'success');
         // Remove from local data and re-render
-        gradesData.assignments = gradesData.assignments.filter(a => a.id !== assignmentId);
+        gradesData.assignments = gradesData.assignments.filter(a => a.assignment_id !== assignmentId);
         delete gradesData.grades[assignmentId];
         gradesData.expandedId = null;
         renderGrades();

@@ -60,7 +60,7 @@ async function refreshLessons() {
 // ═══════════════════════════════════════
 
 async function fetchTodayAssignments(today) {
-    let query = `assigned_date=eq.${today}&status=neq.excused&select=id,lesson_id,student_id,status,score,assigned_date,completed_at&order=created_at`;
+    let query = `assigned_date=eq.${today}&status=neq.excused&select=assignment_id,lesson_id,student_id,status,assigned_date,completed_at&order=created_at`;
 
     if (isStudent()) {
         query += `&student_id=eq.${activeProfileId}`;
@@ -75,12 +75,12 @@ async function fetchLessonsMap(lessonIds) {
     const idsParam = lessonIds.map(id => `"${id}"`).join(',');
     const lessons = await supabaseSelect(
         'school_lessons',
-        `id=in.(${idsParam})&select=id,title,subject,description,question_count`
+        `lesson_id=in.(${idsParam})&select=lesson_id,title,subject,description`
     );
 
     const map = {};
     if (lessons) {
-        lessons.forEach(l => { map[l.id] = l; });
+        lessons.forEach(l => { map[l.lesson_id] = l; });
     }
     return map;
 }
