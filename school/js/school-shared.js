@@ -138,7 +138,7 @@ async function initSchool() {
 
     // Check URL hash for deep link (e.g., #typing)
     const hash = window.location.hash.replace('#', '');
-    if (hash && ['lessons', 'questions', 'grades', 'calendar', 'history', 'vocabulary', 'typing', 'teacher'].includes(hash)) {
+    if (hash && ['lessons', 'questions', 'grades', 'calendar', 'history', 'vocabulary', 'flashcards', 'typing', 'teacher'].includes(hash)) {
         switchView(hash);
     } else {
         // Default view: lessons for student, calendar for teacher
@@ -157,7 +157,7 @@ function switchView(view) {
     }
 
     currentView = view;
-    const views = ['lessons', 'questions', 'grades', 'calendar', 'history', 'vocabulary', 'typing', 'teacher'];
+    const views = ['lessons', 'questions', 'grades', 'calendar', 'history', 'vocabulary', 'flashcards', 'typing', 'teacher'];
     views.forEach(v => {
         const el = document.getElementById(`view-${v}`);
         if (el) el.style.display = v === view ? '' : 'none';
@@ -178,6 +178,7 @@ function switchView(view) {
     if (view === 'calendar') refreshCalendar();
     if (view === 'history') refreshHistory();
     if (view === 'vocabulary') refreshVocabulary();
+    if (view === 'flashcards') refreshFlashcards();
     if (view === 'typing') initTyping();
     if (view === 'teacher') refreshTeacher();
 }
