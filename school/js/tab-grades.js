@@ -31,10 +31,10 @@ async function refreshGrades() {
     // Fetch all data in parallel
     const [assignments, grades, lessons] = await Promise.all([
         supabaseSelect('school_assignments',
-            `user_id=eq.${viewUserId}&status=neq.excused&order=assigned_date.desc&select=*`
+            `student_id=eq.${viewUserId}&status=neq.excused&order=assigned_date.desc&select=*`
         ),
         supabaseSelect('school_grades',
-            `user_id=eq.${viewUserId}&select=*`
+            `student_id=eq.${viewUserId}&select=*`
         ),
         supabaseSelect('school_lessons',
             'select=lesson_id,title,subject'
