@@ -23,31 +23,71 @@ async function refreshLessons() {
     listEl.innerHTML = buildSkeletons(3);
 
     try {
-        const assignments = await fetchTodayAssignments(today);
+        // Fetch today's AND upcoming assignments (not excused), ordered by date
+        const allAssignments = await fetchCurrentAndUpcoming(today);
 
-        if (!assignments || assignments.length === 0) {
+        if (!allAssignments || allAssignments.length === 0) {
             listEl.innerHTML = emptyState(
                 isTeacher()
-                    ? 'No lessons assigned for today. Use the button above to assign one.'
-                    : 'No lessons for today \u2014 enjoy a free day!',
+                    ? 'No lessons assigned. Use the button above to assign one.'
+                    : 'No lessons assigned \u2014 enjoy a free day!',
                 'empty'
             );
             updateLessonsCount(headerEl, 0, 0);
             return;
         }
 
+        // Split into today vs upcoming
+        const todayAssignments = allAssignments.filter(a => a.assigned_date === today);
+        const upcomingAssignments = allAssignments.filter(a => a.assigned_date > today);
+
         // Collect unique lesson IDs and fetch lesson details
-        const lessonIds = [...new Set(assignments.map(a => a.lesson_id).filter(Boolean))];
+        const lessonIds = [...new Set(allAssignments.map(a => a.lesson_id).filter(Boolean))];
         const lessonsMap = await fetchLessonsMap(lessonIds);
 
-        // Build and insert cards
-        const completedCount = assignments.filter(a => a.status === 'completed').length;
-        updateLessonsCount(headerEl, completedCount, assignments.length);
+        // Build today section
+        const completedCount = todayAssignments.filter(a => a.status === 'completed').length;
+        updateLessonsCount(headerEl, completedCount, todayAssignments.length);
 
-        listEl.innerHTML = assignments.map(a => {
-            const lesson = lessonsMap[a.lesson_id] || {};
-            return buildLessonCard(a, lesson);
-        }).join('');
+        var html = '';
+
+        if (todayAssignments.length > 0) {
+            html += todayAssignments.map(a => {
+                const lesson = lessonsMap[a.lesson_id] || {};
+                return buildLessonCard(a, lesson);
+            }).join('');
+        } else {
+            html += '<div style="text-align:center;padding:1.5rem;color:var(--deft-txt-3);font-size:0.875rem;">No lessons for today \u2014 all caught up!</div>';
+        }
+
+        // Build upcoming section
+        if (upcomingAssignments.length > 0) {
+            html += '<div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--deft-border);">';
+            html += '<h3 style="margin:0 0 0.75rem;font-size:0.8125rem;font-weight:600;color:var(--deft-txt-2);font-family:var(--deft-heading-font),sans-serif;text-transform:uppercase;letter-spacing:0.05em;">';
+            html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="inline mr-1" style="vertical-align:-2px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
+            html += 'Get Ahead \u2014 Upcoming Lessons</h3>';
+
+            // Group by date
+            var dateGroups = {};
+            upcomingAssignments.forEach(function(a) {
+                if (!dateGroups[a.assigned_date]) dateGroups[a.assigned_date] = [];
+                dateGroups[a.assigned_date].push(a);
+            });
+
+            Object.keys(dateGroups).sort().forEach(function(date) {
+                var dayLabel = formatDate(date);
+                var isWeekend = (function() { var d = new Date(date + 'T00:00:00'); return d.getDay() === 0 || d.getDay() === 6; })();
+                html += '<div style="margin-bottom:0.5rem;font-size:0.75rem;font-weight:600;color:var(--deft-txt-3);">' + escapeHtml(dayLabel) + '</div>';
+                dateGroups[date].forEach(function(a) {
+                    var lesson = lessonsMap[a.lesson_id] || {};
+                    html += buildLessonCard(a, lesson);
+                });
+            });
+
+            html += '</div>';
+        }
+
+        listEl.innerHTML = html;
 
     } catch (err) {
         console.error('refreshLessons error:', err);
@@ -59,8 +99,15 @@ async function refreshLessons() {
 // DATA FETCHING
 // ═══════════════════════════════════════
 
-async function fetchTodayAssignments(today) {
-    let query = `assigned_date=eq.${today}&status=neq.excused&select=assignment_id,lesson_id,student_id,status,assigned_date,completed_at&order=created_at`;
+async function fetchCurrentAndUpcoming(today) {
+    // Fetch today + next 14 days of assignments (allows working ahead by 2 weeks)
+    var futureDate = (function() {
+        var d = new Date(today + 'T00:00:00');
+        d.setDate(d.getDate() + 14);
+        return d.toISOString().split('T')[0];
+    })();
+
+    let query = `assigned_date=gte.${today}&assigned_date=lte.${futureDate}&status=neq.excused&select=assignment_id,lesson_id,student_id,status,assigned_date,completed_at&order=assigned_date,created_at`;
 
     if (isStudent()) {
         query += `&student_id=eq.${activeProfileId}`;
@@ -114,7 +161,7 @@ function buildLessonsHeader(today) {
             <div>
                 <h2 style="margin:0;font-size:18px;font-weight:700;
                            color:var(--deft-txt);font-family:var(--deft-heading-font),sans-serif;">
-                    Today's Lessons
+                    Lessons
                 </h2>
                 <p style="margin:4px 0 0;font-size:13px;color:var(--deft-txt-3);
                           font-family:var(--deft-body-font),sans-serif;">
