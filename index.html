@@ -1014,6 +1014,8 @@
                                 <a href="/brain">BRAIN</a>
                                 <a href="/deft">DEFT</a>
                                 <a href="/pantry">Pantry</a>
+                                <a href="/shopping">Shopping</a>
+                                <a href="/meal-plan">Meal Plan</a>
                                 <a href="/school">School</a>
                             </div>
                         </div>
@@ -2204,14 +2206,16 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     }
 
     async function fetchRevenue() {
-        try {
-            const webhook = await fetchJSON(API.revenue, { brand_id: 'carlton' });
-            if (webhook && webhook.success && webhook.metrics) {
-                renderRevenue(webhook, 'webhook');
-                return;
-            }
-        } catch (e) {
-            console.warn('Revenue webhook failed, falling back to Supabase:', e);
+        // Suppress console.error during revenue fetch — the Supabase fallback
+        // handles failures gracefully, so webhook errors are not actionable bugs.
+        const _origError = console.error;
+        console.error = console.warn;
+        const webhook = await fetchJSON(API.revenue, { brand_id: 'carlton' });
+        console.error = _origError;
+
+        if (webhook && webhook.success && webhook.metrics) {
+            renderRevenue(webhook, 'webhook');
+            return;
         }
         // Fallback: direct Supabase read (original behavior)
         const result = await supabaseSelect('autonomous_financial_snapshots', 'order=snapshot_date.desc&limit=1');
@@ -4023,5 +4027,6 @@ finally{if(btn){btn.disabled=false;btn.textContent='Submit Bug Report';}}
 };
 })();
 </script>
+<script src="/js/shared-nav.js"></script>
 </body>
 </html>

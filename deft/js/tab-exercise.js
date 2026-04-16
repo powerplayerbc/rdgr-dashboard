@@ -15,6 +15,25 @@ let exTypeSearchTimeout;
 let calOverrideActive = false;
 let modalIntensity = 'moderate';
 
+// Speed-based MET values for walking/running (Compendium of Physical Activities)
+const SPEED_MET_TABLE = [
+    { maxMph: 2.5, met: 2.8 },   // Walking slow
+    { maxMph: 3.2, met: 3.5 },   // Walking moderate
+    { maxMph: 4.0, met: 4.3 },   // Walking brisk
+    { maxMph: 5.5, met: 8.3 },   // Jogging
+    { maxMph: 6.5, met: 9.8 },   // Running easy
+    { maxMph: 7.5, met: 11.0 },  // Running moderate
+    { maxMph: 9.0, met: 11.8 },  // Running fast
+    { maxMph: Infinity, met: 14.5 } // Running very fast
+];
+
+function getMetFromSpeed(mph) {
+    for (const entry of SPEED_MET_TABLE) {
+        if (mph <= entry.maxMph) return entry.met;
+    }
+    return 14.5;
+}
+
 // ═══════════════════════════════════════
 // EXISTING: EXERCISE LOG FUNCTIONS
 // ═══════════════════════════════════════
@@ -105,6 +124,12 @@ async function logExercise() {
     const details = {};
     const dist = parseFloat(document.getElementById('exDistance').value);
     if (dist) details.distance_miles = dist;
+    const speed = parseFloat(document.getElementById('exSpeed').value);
+    if (speed && speed > 0) {
+        details.avg_speed_mph = speed;
+    } else if (dist && duration > 0) {
+        details.avg_speed_mph = Math.round((dist / (duration / 60)) * 10) / 10;
+    }
     const sets = parseInt(document.getElementById('exSets').value);
     if (sets) details.sets = sets;
     const reps = parseInt(document.getElementById('exReps').value);
@@ -129,7 +154,13 @@ async function logExercise() {
             sports:     { low: 4.0, moderate: 6.0, high: 8.0,  max: 10.0 },
             other:      { low: 3.0, moderate: 5.0, high: 7.0,  max: 9.0  }
         };
-        const met = (MET[type] || MET.other)[selectedIntensity || 'moderate'];
+        let met;
+        const speedMph = details.avg_speed_mph;
+        if (type === 'cardio' && speedMph && speedMph > 0) {
+            met = getMetFromSpeed(speedMph);
+        } else {
+            met = (MET[type] || MET.other)[selectedIntensity || 'moderate'];
+        }
         const profWeightEl = document.getElementById('profWeight');
         const weightLbs = (profWeightEl && parseFloat(profWeightEl.value)) || (dailyLog?.weight_lbs) || 170;
         const weightKg = weightLbs * 0.453592;
@@ -156,6 +187,7 @@ async function logExercise() {
         document.getElementById('exDuration').value = '';
         document.getElementById('exCalories').value = '';
         document.getElementById('exDistance').value = '';
+        document.getElementById('exSpeed').value = '';
         document.getElementById('exSets').value = '';
         document.getElementById('exReps').value = '';
         document.getElementById('exWeight').value = '';
@@ -528,3 +560,35 @@ function clearExerciseTypeSelection() {
     // Re-render to remove selected state
     renderExerciseTypes();
 }
+
+// Auto-calculate speed from distance and duration
+(function setupSpeedAutoCalc() {
+    function init() {
+        const distEl = document.getElementById('exDistance');
+        const durEl = document.getElementById('exDuration');
+        const speedEl = document.getElementById('exSpeed');
+        if (!distEl || !durEl || !speedEl) return;
+
+        function autoCalcSpeed() {
+            if (speedEl.value && !speedEl.dataset.auto) return;
+            const dist = parseFloat(distEl.value);
+            const dur = parseFloat(durEl.value);
+            if (dist > 0 && dur > 0) {
+                speedEl.value = (dist / (dur / 60)).toFixed(1);
+                speedEl.dataset.auto = '1';
+            }
+        }
+
+        distEl.addEventListener('input', autoCalcSpeed);
+        durEl.addEventListener('input', autoCalcSpeed);
+        speedEl.addEventListener('input', function () {
+            delete speedEl.dataset.auto;
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();

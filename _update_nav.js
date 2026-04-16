@@ -51,6 +51,8 @@ const NAV_GROUPS = [
         { label: 'BRAIN', href: '/brain' },
         { label: 'DEFT', href: '/deft' },
         { label: 'Pantry', href: '/pantry' },
+        { label: 'Shopping', href: '/shopping' },
+        { label: 'Meal Plan', href: '/meal-plan' },
         { label: 'School', href: '/school' },
     ]},
     { label: 'Trading', href: '/trading-desk', role: 'admin', items: [
@@ -94,6 +96,8 @@ const PAGE_URL_MAP = {
     'pantry.html': '/pantry',
     'school.html': '/school',
     'school/index.html': '/school',
+    'shopping/index.html': '/shopping',
+    'meal-plan/index.html': '/meal-plan',
     'meetings.html': '/meetings',
     'our-workflows.html': '/our-workflows',
     'org-chart.html': '/org-chart',
@@ -713,7 +717,15 @@ files.forEach(file => {
         }
     }
 
-    // 9. Inject bug report CSS if not already present
+    // 9. Inject shared-nav.js runtime loader before </body> if not present
+    if (!content.includes('shared-nav.js')) {
+        const bodyCloseIdx = content.indexOf('</body>');
+        if (bodyCloseIdx > -1) {
+            content = content.substring(0, bodyCloseIdx) + '<script src="/js/shared-nav.js"></script>\n' + content.substring(bodyCloseIdx);
+        }
+    }
+
+    // 10. Inject bug report CSS if not already present
     if (!content.includes('.bug-report-fab {')) {
         const styleCloseIdx = content.lastIndexOf('</style>');
         if (styleCloseIdx > -1) {

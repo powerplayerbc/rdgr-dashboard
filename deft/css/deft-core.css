@@ -1099,7 +1099,7 @@ textarea.form-input { resize: vertical; min-height: 80px; }
     transition: max-height 0.3s ease;
 }
 .details-content.open {
-    max-height: 300px;
+    max-height: 350px;
 }
 /* ═══════════════════════════════════════
    ANALYTICS — Range Pills
