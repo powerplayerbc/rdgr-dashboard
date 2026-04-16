@@ -8,7 +8,7 @@
 const VOCAB_SEMESTER_START = '2026-05-04';
 const VOCAB_SEMESTER_END   = '2026-07-11';
 const VOCAB_TOTAL_WEEKS    = 10;
-const VOCAB_SEMESTER_ID    = 'summer-2026';
+const VOCAB_SEMESTER_ID    = '2026-summer';
 
 let vocabState = {
     currentWeekNumber: 1,
