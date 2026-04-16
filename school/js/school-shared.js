@@ -172,15 +172,25 @@ function switchView(view) {
     window.location.hash = view;
 
     // Lazy-load data for views
-    if (view === 'lessons') refreshLessons();
-    if (view === 'questions' && currentAssignmentId) refreshQuestions();
-    if (view === 'grades') refreshGrades();
-    if (view === 'calendar') refreshCalendar();
-    if (view === 'history') refreshHistory();
-    if (view === 'vocabulary') refreshVocabulary();
-    if (view === 'flashcards') refreshFlashcards();
-    if (view === 'typing') initTyping();
-    if (view === 'teacher') refreshTeacher();
+    var _viewFn = {
+        lessons: typeof refreshLessons !== 'undefined' ? refreshLessons : null,
+        questions: typeof refreshQuestions !== 'undefined' && currentAssignmentId ? refreshQuestions : null,
+        grades: typeof refreshGrades !== 'undefined' ? refreshGrades : null,
+        calendar: typeof refreshCalendar !== 'undefined' ? refreshCalendar : null,
+        history: typeof refreshHistory !== 'undefined' ? refreshHistory : null,
+        vocabulary: typeof refreshVocabulary !== 'undefined' ? refreshVocabulary : null,
+        flashcards: typeof refreshFlashcards !== 'undefined' ? refreshFlashcards : null,
+        typing: typeof initTyping !== 'undefined' ? initTyping : null,
+        teacher: typeof refreshTeacher !== 'undefined' ? refreshTeacher : null,
+    };
+    if (_viewFn[view]) {
+        try { _viewFn[view](); } catch(e) { console.error('View load error (' + view + '):', e); }
+    } else if (view !== 'questions') {
+        // Log which script failed to load so we can debug
+        console.error('View function for "' + view + '" is not defined. The script file may have failed to load. Check the Network tab for errors on school/js/tab-' + view + '.js');
+        var container = document.getElementById(view === 'typing' ? 'typing-container' : view + '-container');
+        if (container) container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--deft-txt-3);"><p>This section failed to load. Try refreshing the page (Ctrl+Shift+R).</p><p style="font-size:0.75rem;margin-top:0.5rem;">If this persists, report it using the bug button.</p></div>';
+    }
 }
 
 // Navigate to a lesson's questions
