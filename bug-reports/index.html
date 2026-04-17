@@ -627,7 +627,7 @@
             </div>
             <p class="text-xs text-txt-3 mb-3">Paste what Claude Code fixed below. Select which bugs were addressed, then save.</p>
             <div class="mb-3" id="fixBugCheckboxes"></div>
-            <textarea class="fix-results-area" id="fixResultsText" rows="8" placeholder="Paste Claude Code's output here..."></textarea>
+            <textarea class="fix-results-area" id="fixResultsText" rows="8" placeholder="Paste Claude Code's output here... Include a '### Retest Steps' section with user-actionable verification steps."></textarea>
             <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.75rem;">
                 <button onclick="closeModal('fixResultsModal')" class="btn btn-ghost">Cancel</button>
                 <button onclick="saveFixResults()" class="btn btn-primary">Save Fix Results</button>
@@ -644,7 +644,7 @@
             </div>
             <p class="text-xs text-txt-3 mb-3">Paste the full fix output below. Check which bugs were addressed, then save. All selected bugs will be marked fixed.</p>
             <div id="globalFixCheckboxes" style="max-height:240px;overflow-y:auto;margin-bottom:0.75rem;padding-right:0.25rem;"></div>
-            <textarea class="fix-results-area" id="globalFixText" rows="10" placeholder="Paste fix results here..."></textarea>
+            <textarea class="fix-results-area" id="globalFixText" rows="10" placeholder="Paste fix results here... Include a '### Retest Steps' section with user-actionable verification steps."></textarea>
             <div style="display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.75rem;">
                 <button onclick="closeModal('globalFixModal')" class="btn btn-ghost">Cancel</button>
                 <button onclick="saveGlobalFixResults()" class="btn btn-primary">Save Fix Results</button>
@@ -1023,6 +1023,40 @@
         return perBugText;
     }
 
+    // ═══ RETEST ITEM EXTRACTION ═══
+    // Extracts user-actionable verification steps from fix text.
+    // Primary: looks for a dedicated ### Retest Steps section.
+    // Fallback: extracts all bullets but filters out developer-note patterns.
+    function extractRetestItems(text) {
+        const retestHeaderMatch = text.match(/^###\s*Retest\s*Steps?\s*$/im);
+        let lines;
+        let fromDedicatedSection = false;
+
+        if (retestHeaderMatch) {
+            fromDedicatedSection = true;
+            const startIdx = retestHeaderMatch.index + retestHeaderMatch[0].length;
+            const rest = text.substring(startIdx);
+            const nextHeaderMatch = rest.match(/^##/m);
+            const sectionText = nextHeaderMatch ? rest.substring(0, nextHeaderMatch.index) : rest;
+            lines = sectionText.split('\n').filter(l => /^\s*[-*]\s+/.test(l) || /^\s*\d+\.\s+/.test(l));
+        } else {
+            lines = text.split('\n').filter(l => /^\s*[-*]\s+/.test(l) || /^\s*\d+\.\s+/.test(l));
+            const devPattern = /^\s*[-*\d.]+\s*(Root cause|Fix(ed)?|Verified|Changed|Updated|Modified|Refactored|Added|Removed|Deleted|Patched|Reverted|Cause|Issue|Problem|Reason|Because|Created|Implemented|Built|Deployed|Tested|Confirmed|Resolved)[\s:;]/i;
+            const filePattern = /\.(js|ts|html|css|py|sql|json|md|mjs|jsx|tsx|vue|svelte)\b/;
+            lines = lines.filter(l => !devPattern.test(l) && !filePattern.test(l));
+        }
+
+        if (lines.length === 0 || lines.length > 20) return { items: [], fromDedicatedSection };
+
+        const items = lines.slice(0, 10).map(l => ({
+            text: l.replace(/^\s*[-*\d.]+\s*/, '').trim(),
+            checked: false,
+            created_at: new Date().toISOString()
+        })).filter(i => i.text.length > 5);
+
+        return { items, fromDedicatedSection };
+    }
+
     // ═══ GLOBAL FIX RESULTS ═══
     function openGlobalFixResults() {
         let allOpen = [];
@@ -1061,6 +1095,7 @@
 
         try {
             let savedCount = 0;
+            let _retestFallbackUsed = false;
             if (perBugText) {
                 // Per-bug sections found - save each bug with only its matching section
                 for (const id of checkedIds) {
@@ -1073,21 +1108,15 @@
                     if (res.ok) savedCount++;
 
                     // Generate retest items from this bug's section
-                    const lines = bugText.split('\n').filter(l => /^\s*[-*]\s+/.test(l) || /^\s*\d+\.\s+/.test(l));
-                    if (lines.length > 0 && lines.length <= 20) {
-                        const retestItems = lines.slice(0, 10).map(l => ({
-                            text: l.replace(/^\s*[-*\d.]+\s*/, '').trim(),
-                            checked: false,
-                            created_at: new Date().toISOString()
-                        })).filter(i => i.text.length > 5);
-                        if (retestItems.length > 0) {
-                            await fetch(SUPABASE_URL + '/rest/v1/rpc/update_bug_retest_items', {
-                                method: 'POST',
-                                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ p_bug_id: id, p_retest_items: retestItems })
-                            });
-                        }
+                    const extracted = extractRetestItems(bugText);
+                    if (extracted.items.length > 0) {
+                        await fetch(SUPABASE_URL + '/rest/v1/rpc/update_bug_retest_items', {
+                            method: 'POST',
+                            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ p_bug_id: id, p_retest_items: extracted.items })
+                        });
                     }
+                    if (!extracted.fromDedicatedSection && extracted.items.length > 0) _retestFallbackUsed = true;
                 }
                 toast(savedCount + ' bug(s) marked as fixed (per-bug sections matched)', 'success');
             } else {
@@ -1099,26 +1128,21 @@
                 });
                 if (res.ok) savedCount = checkedIds.length;
 
-                const lines = text.split('\n').filter(l => /^\s*[-*]\s+/.test(l) || /^\s*\d+\.\s+/.test(l));
-                if (lines.length > 0 && lines.length <= 20) {
-                    const retestItems = lines.slice(0, 10).map(l => ({
-                        text: l.replace(/^\s*[-*\d.]+\s*/, '').trim(),
-                        checked: false,
-                        created_at: new Date().toISOString()
-                    })).filter(i => i.text.length > 5);
-                    if (retestItems.length > 0) {
-                        for (const id of checkedIds) {
-                            await fetch(SUPABASE_URL + '/rest/v1/rpc/update_bug_retest_items', {
-                                method: 'POST',
-                                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ p_bug_id: id, p_retest_items: retestItems })
-                            });
-                        }
+                const extracted = extractRetestItems(text);
+                if (extracted.items.length > 0) {
+                    for (const id of checkedIds) {
+                        await fetch(SUPABASE_URL + '/rest/v1/rpc/update_bug_retest_items', {
+                            method: 'POST',
+                            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ p_bug_id: id, p_retest_items: extracted.items })
+                        });
                     }
                 }
+                if (!extracted.fromDedicatedSection && extracted.items.length > 0) _retestFallbackUsed = true;
                 toast(savedCount + ' bug(s) marked as fixed', 'success');
             }
 
+            if (_retestFallbackUsed) toast('Tip: Include a "### Retest Steps" section in fix reports for better retest items.', 'warning');
             closeModal('globalFixModal');
             loadDashboard();
         } catch (e) {
@@ -1152,6 +1176,7 @@
 
         try {
             let savedCount = 0;
+            let _retestFallbackUsed = false;
             if (perBugText) {
                 for (const id of checkedIds) {
                     const bugText = perBugText[id] || text;
@@ -1162,21 +1187,15 @@
                     });
                     if (res.ok) savedCount++;
 
-                    const lines = bugText.split('\n').filter(l => /^\s*[-*]\s+/.test(l) || /^\s*\d+\.\s+/.test(l));
-                    if (lines.length > 0 && lines.length <= 20) {
-                        const retestItems = lines.slice(0, 10).map(l => ({
-                            text: l.replace(/^\s*[-*\d.]+\s*/, '').trim(),
-                            checked: false,
-                            created_at: new Date().toISOString()
-                        })).filter(i => i.text.length > 5);
-                        if (retestItems.length > 0) {
-                            await fetch(SUPABASE_URL + '/rest/v1/rpc/update_bug_retest_items', {
-                                method: 'POST',
-                                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ p_bug_id: id, p_retest_items: retestItems })
-                            });
-                        }
+                    const extracted = extractRetestItems(bugText);
+                    if (extracted.items.length > 0) {
+                        await fetch(SUPABASE_URL + '/rest/v1/rpc/update_bug_retest_items', {
+                            method: 'POST',
+                            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ p_bug_id: id, p_retest_items: extracted.items })
+                        });
                     }
+                    if (!extracted.fromDedicatedSection && extracted.items.length > 0) _retestFallbackUsed = true;
                 }
                 toast(savedCount + ' bug(s) marked as fixed (per-bug sections matched)', 'success');
             } else {
@@ -1187,26 +1206,21 @@
                 });
                 if (res.ok) savedCount = checkedIds.length;
 
-                const lines = text.split('\n').filter(l => /^\s*[-*]\s+/.test(l) || /^\s*\d+\.\s+/.test(l));
-                if (lines.length > 0 && lines.length <= 20) {
-                    const retestItems = lines.slice(0, 10).map(l => ({
-                        text: l.replace(/^\s*[-*\d.]+\s*/, '').trim(),
-                        checked: false,
-                        created_at: new Date().toISOString()
-                    })).filter(i => i.text.length > 5);
-                    if (retestItems.length > 0) {
-                        for (const id of checkedIds) {
-                            await fetch(SUPABASE_URL + '/rest/v1/rpc/update_bug_retest_items', {
-                                method: 'POST',
-                                headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ p_bug_id: id, p_retest_items: retestItems })
-                            });
-                        }
+                const extracted = extractRetestItems(text);
+                if (extracted.items.length > 0) {
+                    for (const id of checkedIds) {
+                        await fetch(SUPABASE_URL + '/rest/v1/rpc/update_bug_retest_items', {
+                            method: 'POST',
+                            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ p_bug_id: id, p_retest_items: extracted.items })
+                        });
                     }
                 }
+                if (!extracted.fromDedicatedSection && extracted.items.length > 0) _retestFallbackUsed = true;
                 toast(savedCount + ' bug(s) marked as fixed', 'success');
             }
 
+            if (_retestFallbackUsed) toast('Tip: Include a "### Retest Steps" section in fix reports for better retest items.', 'warning');
             closeModal('fixResultsModal');
             loadDashboard();
         } catch (e) {
