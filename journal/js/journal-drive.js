@@ -20,63 +20,56 @@ function openFileUpload() {
         const file = input.files[0];
         if (!file) return;
 
-        if (file.size > 25 * 1024 * 1024) {
-            toast('File must be under 25 MB', 'error');
+        if (file.size > 50 * 1024 * 1024) {
+            toast('File must be under 50 MB', 'error');
             return;
         }
 
         // Show upload progress
         const progressEl = showUploadProgress(file.name);
 
-        const reader = new FileReader();
-        reader.onload = async function () {
-            const base64 = reader.result.split(',')[1];
+        try {
+            // Compress images (max 1920px, 80% JPEG quality)
+            const compressed = await compressImage(file, 1920, 0.8);
 
-            try {
-                const result = await journalDriveApi('upload_attachment', {
-                    entry_date: currentDate,
-                    file_name: file.name,
-                    mime_type: file.type,
-                    file_data_base64: base64
-                });
+            const result = await journalDriveApi('upload_attachment', {
+                entry_date: currentDate,
+                file_name: compressed.fileName,
+                mime_type: compressed.mimeType,
+                file_data_base64: compressed.base64
+            });
 
-                removeUploadProgress(progressEl);
-
-                if (result && result.success) {
-                    // Insert attachment record into journal_attachments
-                    if (currentEntry && currentEntry.entry_id) {
-                        await supabaseWrite('journal_attachments', 'POST', {
-                            entry_id: currentEntry.entry_id,
-                            user_id: activeProfileId,
-                            file_name: file.name,
-                            mime_type: file.type,
-                            drive_file_id: result.fileId || '',
-                            drive_url: result.driveUrl || '',
-                            thumbnail_url: result.thumbnailUrl || '',
-                            file_size_bytes: file.size || 0
-                        });
-                    }
-                    toast('File uploaded');
-                    if (typeof loadAttachments === 'function') {
-                        loadAttachments();
-                    } else {
-                        refreshAttachmentList();
-                    }
-                } else {
-                    const errMsg = (result && result.error) ? result.error : 'Upload failed';
-                    toast(errMsg, 'error');
-                }
-            } catch (err) {
-                removeUploadProgress(progressEl);
-                console.error('File upload error:', err);
-                toast('Upload failed', 'error');
-            }
-        };
-        reader.onerror = function () {
             removeUploadProgress(progressEl);
-            toast('Could not read file', 'error');
-        };
-        reader.readAsDataURL(file);
+
+            if (result && result.success) {
+                // Insert attachment record into journal_attachments
+                if (currentEntry && currentEntry.entry_id) {
+                    await supabaseWrite('journal_attachments', 'POST', {
+                        entry_id: currentEntry.entry_id,
+                        user_id: activeProfileId,
+                        file_name: compressed.fileName,
+                        mime_type: compressed.mimeType,
+                        drive_file_id: result.fileId || '',
+                        drive_url: result.driveUrl || '',
+                        thumbnail_url: result.thumbnailUrl || '',
+                        file_size_bytes: compressed.base64.length
+                    });
+                }
+                toast('File uploaded');
+                if (typeof loadAttachments === 'function') {
+                    loadAttachments();
+                } else {
+                    refreshAttachmentList();
+                }
+            } else {
+                const errMsg = (result && result.error) ? result.error : 'Upload failed';
+                toast(errMsg, 'error');
+            }
+        } catch (err) {
+            removeUploadProgress(progressEl);
+            console.error('File upload error:', err);
+            toast('Upload failed', 'error');
+        }
     };
 
     document.body.appendChild(input);

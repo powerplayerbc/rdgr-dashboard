@@ -503,25 +503,24 @@ function uploadCustomSticker() {
         const file = input.files[0];
         if (!file) return;
 
-        if (file.size > 2 * 1024 * 1024) {
-            toast('Sticker must be under 2 MB', 'error');
+        if (file.size > 20 * 1024 * 1024) {
+            toast('Image must be under 20 MB', 'error');
             return;
         }
 
-        const reader = new FileReader();
-        reader.onload = async function () {
-            const base64 = reader.result.split(',')[1];
+        try {
+            toast('Compressing & uploading...');
 
-            toast('Uploading sticker...');
+            // Compress sticker (max 512px, keep PNG for small/transparent images)
+            const compressed = await compressImage(file, 512, 0.85);
 
             const result = await journalDriveApi('upload_custom_sticker', {
-                file_name: file.name,
-                mime_type: file.type,
-                file_data_base64: base64
+                file_name: compressed.fileName,
+                mime_type: compressed.mimeType,
+                file_data_base64: compressed.base64
             });
 
             if (result && result.success) {
-                // Insert into sticker library (columns: user_id, name, drive_file_id, image_url, category)
                 await supabaseWrite('journal_sticker_library', 'POST', {
                     user_id: activeProfileId,
                     name: file.name.replace(/\.[^.]+$/, ''),
@@ -535,8 +534,10 @@ function uploadCustomSticker() {
             } else {
                 toast('Upload failed', 'error');
             }
-        };
-        reader.readAsDataURL(file);
+        } catch (err) {
+            console.error('Sticker upload error:', err);
+            toast('Upload failed', 'error');
+        }
     };
 
     document.body.appendChild(input);

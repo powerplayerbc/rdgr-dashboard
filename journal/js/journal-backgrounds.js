@@ -189,21 +189,21 @@ function uploadCustomBackground() {
         const file = input.files[0];
         if (!file) return;
 
-        if (file.size > 5 * 1024 * 1024) {
-            toast('Background image must be under 5 MB', 'error');
+        if (file.size > 50 * 1024 * 1024) {
+            toast('Image must be under 50 MB', 'error');
             return;
         }
 
-        const reader = new FileReader();
-        reader.onload = async function () {
-            const base64 = reader.result.split(',')[1];
+        try {
+            toast('Compressing & uploading...');
 
-            toast('Uploading background...');
+            // Compress image (max 1920px, 75% quality for backgrounds)
+            const compressed = await compressImage(file, 1920, 0.75);
 
             const result = await journalDriveApi('upload_background_image', {
-                file_name: file.name,
-                mime_type: file.type,
-                file_data_base64: base64
+                file_name: compressed.fileName,
+                mime_type: compressed.mimeType,
+                file_data_base64: compressed.base64
             });
 
             if (result && result.success) {
@@ -212,9 +212,9 @@ function uploadCustomBackground() {
                     user_id: activeProfileId,
                     name: bgName,
                     type: 'image',
-                    image_url: result.url || result.file_url,
-                    is_active: true,
-                    sort_order: 999
+                    value: result.thumbnailUrl || result.driveUrl || '',
+                    category: 'custom',
+                    is_active: true
                 });
 
                 toast('Background uploaded');
@@ -225,8 +225,10 @@ function uploadCustomBackground() {
             } else {
                 toast('Upload failed', 'error');
             }
-        };
-        reader.readAsDataURL(file);
+        } catch (err) {
+            console.error('Background upload error:', err);
+            toast('Upload failed', 'error');
+        }
     };
 
     document.body.appendChild(input);

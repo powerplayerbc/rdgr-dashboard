@@ -101,6 +101,81 @@ const STICKER_LIBRARY = [
 ];
 
 // =============================================
+// IMAGE COMPRESSION UTILITY
+// =============================================
+// Compresses an image file using Canvas API before upload.
+// Returns { base64, mimeType, fileName } with the compressed image.
+// maxDim: max width/height in pixels. quality: JPEG quality 0-1.
+function compressImage(file, maxDim, quality) {
+    maxDim = maxDim || 1920;
+    quality = quality || 0.8;
+    return new Promise(function(resolve, reject) {
+        // Non-image files pass through unchanged
+        if (!file.type || !file.type.startsWith('image/')) {
+            var reader = new FileReader();
+            reader.onload = function() {
+                resolve({ base64: reader.result.split(',')[1], mimeType: file.type, fileName: file.name });
+            };
+            reader.onerror = function() { reject(new Error('Failed to read file')); };
+            reader.readAsDataURL(file);
+            return;
+        }
+
+        var img = new Image();
+        var url = URL.createObjectURL(file);
+        img.onload = function() {
+            URL.revokeObjectURL(url);
+
+            var w = img.naturalWidth;
+            var h = img.naturalHeight;
+
+            // Only resize if larger than maxDim
+            if (w > maxDim || h > maxDim) {
+                if (w > h) {
+                    h = Math.round(h * (maxDim / w));
+                    w = maxDim;
+                } else {
+                    w = Math.round(w * (maxDim / h));
+                    h = maxDim;
+                }
+            }
+
+            var canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+
+            // Export as JPEG for compression (PNG stays PNG if small enough)
+            var outputType = 'image/jpeg';
+            var ext = '.jpg';
+            // Keep PNG for stickers/transparency
+            if (file.type === 'image/png' && file.size < 500 * 1024) {
+                outputType = 'image/png';
+                ext = '.png';
+            }
+
+            var dataUrl = canvas.toDataURL(outputType, quality);
+            var base64 = dataUrl.split(',')[1];
+            var newName = file.name.replace(/\.[^.]+$/, ext);
+
+            resolve({ base64: base64, mimeType: outputType, fileName: newName });
+        };
+        img.onerror = function() {
+            URL.revokeObjectURL(url);
+            // Fallback: read raw if image can't be decoded
+            var reader = new FileReader();
+            reader.onload = function() {
+                resolve({ base64: reader.result.split(',')[1], mimeType: file.type, fileName: file.name });
+            };
+            reader.onerror = function() { reject(new Error('Failed to read file')); };
+            reader.readAsDataURL(file);
+        };
+        img.src = url;
+    });
+}
+
+// =============================================
 // THEME ENGINE (shared with DEFT)
 // =============================================
 const THEMES = {
