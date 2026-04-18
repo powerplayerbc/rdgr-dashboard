@@ -606,8 +606,11 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         <button onclick="openBackgroundPicker('daily')" class="btn-icon" title="Background">
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 9.5l3-3 2 2 3-3 3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </button>
-                        <button onclick="openStickerPicker()" class="btn-icon" title="Stickers">
+                        <button onclick="openStickerPicker()" class="btn-icon" title="Add sticker">
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 8.5s.75 1 2 1 2-1 2-1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <button onclick="toggleStickerMode()" id="dailyStickerModeToggle" class="btn-icon" title="Toggle sticker mode (drag/resize/rotate)">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.5 2v3.5H2M8.5 2v3.5H12M5.5 12V8.5H2M8.5 12V8.5H12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </button>
                     </div>
                 </div>
@@ -858,8 +861,14 @@ function toggleAutoSaveSetting(enabled) {
 }
 
 /* ── Panel Transparency Settings ── */
+function applyPanelOpacity(val) {
+    var v = parseFloat(val);
+    document.documentElement.style.setProperty('--journal-panel-opacity', v);
+    document.documentElement.style.setProperty('--journal-panel-bg', 'rgba(26,29,40,' + v + ')');
+    document.documentElement.style.setProperty('--journal-panel-bg-hover', 'rgba(26,29,40,' + Math.min(v + 0.1, 1) + ')');
+}
 function updatePanelOpacity(val) {
-    document.documentElement.style.setProperty('--journal-panel-opacity', val);
+    applyPanelOpacity(val);
     var pct = Math.round(val * 100);
     var label = document.getElementById('panelOpacityValue');
     if (label) label.textContent = pct + '%';
@@ -888,7 +897,7 @@ function loadJournalDisplaySettings() {
     try {
         var settings = JSON.parse(localStorage.getItem('journal-settings') || '{}');
         if (settings.panelOpacity !== undefined) {
-            document.documentElement.style.setProperty('--journal-panel-opacity', settings.panelOpacity);
+            applyPanelOpacity(settings.panelOpacity);
             var slider = document.getElementById('panelOpacitySlider');
             if (slider) slider.value = settings.panelOpacity;
             var label = document.getElementById('panelOpacityValue');

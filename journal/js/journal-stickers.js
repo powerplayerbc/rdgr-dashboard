@@ -484,13 +484,17 @@ function toggleStickerMode() {
         deselectAllStickers();
     }
 
-    // Update toggle button visuals
-    const toggleBtn = document.getElementById('stickerModeToggle');
-    if (toggleBtn) {
-        toggleBtn.classList.toggle('sticker-mode-active', stickerMode);
-        toggleBtn.setAttribute('aria-pressed', stickerMode ? 'true' : 'false');
-        toggleBtn.title = stickerMode ? 'Sticker mode ON (click to lock stickers)' : 'Sticker mode OFF (click to edit stickers)';
-    }
+    // Update toggle button visuals on both calendar and daily buttons
+    ['stickerModeToggle', 'dailyStickerModeToggle'].forEach(function(id) {
+        var btn = document.getElementById(id);
+        if (btn) {
+            btn.style.background = stickerMode ? 'rgba(6,214,160,0.2)' : '';
+            btn.style.borderColor = stickerMode ? 'rgba(6,214,160,0.5)' : '';
+            btn.style.color = stickerMode ? '#06D6A0' : '';
+        }
+    });
+
+    toast(stickerMode ? 'Sticker mode ON -- drag, resize & rotate stickers' : 'Sticker mode OFF -- normal editing', 'info');
 }
 
 // =============================================

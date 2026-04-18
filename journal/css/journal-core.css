@@ -187,7 +187,7 @@
     margin-bottom: 1rem;
     flex-wrap: wrap;
     padding: 0.625rem 0.75rem;
-    background: rgba(17, 19, 26, 0.7);
+    background: var(--journal-panel-bg, rgba(26,29,40,0.75));
     backdrop-filter: blur(var(--journal-panel-blur));
     border-radius: 0.5rem;
 }
@@ -217,22 +217,24 @@
     pointer-events: none;
 }
 
-/* ── Journal Transparency (configurable via --journal-panel-opacity) ── */
+/* ── Journal Transparency (configurable via settings sliders) ── */
 :root {
     --journal-panel-opacity: 0.75;
     --journal-panel-blur: 8px;
+    --journal-panel-bg: rgba(26, 29, 40, 0.75);
+    --journal-panel-bg-hover: rgba(26, 29, 40, 0.85);
 }
 
 /* ── Quill Editor Overrides ── */
 .ql-toolbar.ql-snow {
     border-color: var(--deft-border, #2A2E3D) !important;
-    background: rgba(17, 19, 26, var(--journal-panel-opacity)) !important;
+    background: var(--journal-panel-bg, rgba(26,29,40,0.75)) !important;
     backdrop-filter: blur(var(--journal-panel-blur));
     border-radius: 0.5rem 0.5rem 0 0;
 }
 .ql-container.ql-snow {
     border-color: var(--deft-border, #2A2E3D) !important;
-    background: rgba(17, 19, 26, var(--journal-panel-opacity)) !important;
+    background: var(--journal-panel-bg, rgba(26,29,40,0.75)) !important;
     backdrop-filter: blur(var(--journal-panel-blur));
     border-radius: 0 0 0.5rem 0.5rem;
     min-height: 300px;
@@ -288,7 +290,7 @@
 .journal-section {
     margin-top: 1.5rem;
     padding: 1rem;
-    background: rgba(17, 19, 26, var(--journal-panel-opacity));
+    background: var(--journal-panel-bg, rgba(26,29,40,0.75));
     backdrop-filter: blur(var(--journal-panel-blur));
     border: 1px solid rgba(42, 46, 61, 0.6);
     border-radius: 0.625rem;
@@ -385,6 +387,26 @@
     outline: none;
 }
 .next-step-input:focus { border-color: var(--deft-accent, #06D6A0); }
+
+/* ── Background Picker Delete Button ── */
+.bg-picker-card { position: relative; }
+.bg-picker-card-inner {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0.25rem; cursor: pointer; border: none;
+    background: transparent; padding: 0; width: 100%;
+}
+.bg-picker-delete {
+    position: absolute; top: -4px; right: -4px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(255,107,107,0.9); color: #fff;
+    border: none; cursor: pointer;
+    font-size: 0.7rem; font-weight: 700; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.15s;
+    z-index: 2;
+}
+.bg-picker-card:hover .bg-picker-delete { opacity: 1; }
+.bg-picker-delete:hover { background: #FF6B6B; transform: scale(1.15); }
 
 /* ── Save Status Indicator ── */
 .save-status {

@@ -44,12 +44,18 @@ async function openBackgroundPicker(target) {
 
     backgroundsList.forEach(bg => {
         const previewStyle = getBackgroundPreviewStyle(bg);
-        const isCustom = bg.user_id ? ' (Custom)' : '';
+        const isCustom = bg.user_id ? true : false;
+        const deleteBtn = isCustom
+            ? `<button class="bg-picker-delete" onclick="event.stopPropagation();deleteBackground('${bg.background_id}')" title="Delete" aria-label="Delete ${bg.name}">&times;</button>`
+            : '';
         gridHtml += `
-            <button class="bg-picker-card" onclick="selectBackground('${bg.background_id}', '${target}')" title="${bg.name}${isCustom}" aria-label="${bg.name}">
-                <div class="bg-picker-preview" style="${previewStyle}"></div>
-                <span class="bg-picker-label">${bg.name}</span>
-            </button>
+            <div class="bg-picker-card" style="position:relative;">
+                <button class="bg-picker-card-inner" onclick="selectBackground('${bg.background_id}', '${target}')" title="${bg.name}" aria-label="${bg.name}">
+                    <div class="bg-picker-preview" style="${previewStyle}"></div>
+                    <span class="bg-picker-label">${bg.name}</span>
+                </button>
+                ${deleteBtn}
+            </div>
         `;
     });
 
@@ -176,6 +182,22 @@ function applyMonthBackground() {
         container.style.backgroundRepeat = 'no-repeat';
     } else if (bg.type === 'solid' && bg.value) {
         container.style.background = bg.value;
+    }
+}
+
+// =============================================
+// DELETE CUSTOM BACKGROUND
+// =============================================
+async function deleteBackground(backgroundId) {
+    if (!confirm('Delete this background? This cannot be undone.')) return;
+
+    const result = await supabaseWrite('journal_backgrounds', 'DELETE', null, 'background_id=eq.' + backgroundId);
+    if (result !== null) {
+        toast('Background deleted');
+        await loadBackgrounds();
+        openBackgroundPicker(backgroundPickerTarget);
+    } else {
+        toast('Failed to delete background', 'error');
     }
 }
 
