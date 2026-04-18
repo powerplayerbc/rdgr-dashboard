@@ -33,6 +33,11 @@ async function loadDailyView() {
         currentEntry = null;
         isDirty = false;
         updateSaveIndicator('saved');
+        // Clear title and mood for empty day
+        const titleInput = document.getElementById('entryTitle');
+        if (titleInput) titleInput.value = '';
+        if (typeof updateMoodSelection === 'function') updateMoodSelection('');
+        if (typeof updateWordCount === 'function') updateWordCount();
     }
 
     // Start autosave

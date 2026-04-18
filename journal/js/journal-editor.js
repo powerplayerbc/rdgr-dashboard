@@ -82,9 +82,16 @@ function destroyQuillEditor() {
         quillEditor = null;
     }
 
-    // Clear container
+    // Remove all Quill toolbar(s) that were inserted as siblings
     const container = document.getElementById('editorContainer');
-    if (container) container.innerHTML = '';
+    if (container) {
+        const parent = container.parentNode;
+        if (parent) {
+            parent.querySelectorAll('.ql-toolbar').forEach(function(tb) { tb.remove(); });
+        }
+        container.innerHTML = '';
+        container.className = '';
+    }
 }
 
 // =============================================
