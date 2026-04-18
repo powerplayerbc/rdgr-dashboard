@@ -26,40 +26,68 @@ function openBulkUploadModal(type) {
     var title = document.getElementById('bulkUploadTitle');
     if (title) title.textContent = type === 'sticker' ? 'Upload Stickers' : 'Upload Backgrounds';
 
-    renderBulkStep1();
+    renderBulkUploadScreen();
     openModal('bulkUploadModal');
 }
 
 // =============================================
-// STEP 1 — METADATA (Bundle Name + Tags)
+// RENDER — Single screen with drop zone + optional organize section
 // =============================================
-function renderBulkStep1() {
+function renderBulkUploadScreen() {
     var content = document.getElementById('bulkUploadContent');
     if (!content) return;
 
     content.innerHTML = `
         <div class="bulk-step">
-            <label class="bulk-label">Bundle Name <span class="bulk-optional">(optional)</span></label>
-            <input type="text" id="bulkBundleName" class="bulk-input" placeholder="e.g., Fairy Collection" value="${_escBulk(_bulkUploadBundle)}">
-
-            <label class="bulk-label" style="margin-top:12px;">Tags</label>
-            <div class="bulk-tag-bar" id="bulkTagBar">
-                <div id="bulkTagChips" class="bulk-tag-chips"></div>
-                <input type="text" id="bulkTagInput" class="bulk-tag-input" placeholder="Type a tag, press Enter"
-                    onkeydown="if(event.key==='Enter'){event.preventDefault();addBulkTag();}">
+            <div class="bulk-drop-zone" id="bulkDropZone"
+                 onclick="document.getElementById('bulkFileInput').click();"
+                 ondragenter="_bulkDragEnter(event)"
+                 ondragleave="_bulkDragLeave(event)"
+                 ondragover="event.preventDefault();"
+                 ondrop="_bulkDrop(event)">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="opacity:0.4;margin-bottom:6px;"><path d="M16 4v18M10 10l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 22v4a2 2 0 002 2h20a2 2 0 002-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <span>Drop images here or click to browse</span>
+                <span class="bulk-hint" style="margin-top:4px;">Max ${BULK_CONFIG[_bulkUploadType].sizeLimitMB} MB per file</span>
             </div>
-            <p class="bulk-hint">Tags help you find these later. All files in this batch share the same tags.</p>
+            <input type="file" id="bulkFileInput" multiple accept="image/*" style="display:none;" onchange="handleBulkFiles(this.files); this.value='';">
+
+            <div id="bulkPreviewGrid" class="bulk-preview-grid"></div>
+
+            <details class="bulk-organize" id="bulkOrganize">
+                <summary class="bulk-organize-toggle">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4h8M2 6h5M2 8h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    Organize <span class="bulk-optional">&mdash; bundle name &amp; tags</span>
+                </summary>
+                <div class="bulk-organize-body">
+                    <label class="bulk-label">Bundle Name <span class="bulk-optional">(optional)</span></label>
+                    <input type="text" id="bulkBundleName" class="bulk-input" placeholder="e.g., Fairy Collection" value="${_escBulk(_bulkUploadBundle)}">
+
+                    <label class="bulk-label" style="margin-top:10px;">Tags <span class="bulk-optional">(optional)</span></label>
+                    <div class="bulk-tag-bar" id="bulkTagBar">
+                        <div id="bulkTagChips" class="bulk-tag-chips"></div>
+                        <input type="text" id="bulkTagInput" class="bulk-tag-input" placeholder="Type a tag, press Enter"
+                            onkeydown="if(event.key==='Enter'){event.preventDefault();addBulkTag();}">
+                    </div>
+                    <p class="bulk-hint">All files in this batch share the same tags.</p>
+                </div>
+            </details>
+
+            <div id="bulkProgressWrap" class="bulk-progress-wrap" style="display:none;">
+                <div class="bulk-progress-bar"><div class="bulk-progress-fill" id="bulkProgressFill"></div></div>
+                <span id="bulkProgressText" class="bulk-hint">Uploading...</span>
+            </div>
 
             <div class="bulk-actions">
-                <button class="bulk-btn bulk-btn-primary" onclick="showBulkStep2()">
-                    Next &mdash; Select Files
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.5 3.5L9 7l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span id="bulkFileCount" class="bulk-hint">${_bulkUploadFiles.length} file${_bulkUploadFiles.length !== 1 ? 's' : ''} selected</span>
+                <button class="bulk-btn bulk-btn-primary" id="bulkUploadBtn" onclick="startBulkUpload()" ${_bulkUploadFiles.length === 0 ? 'disabled' : ''}>
+                    Upload${_bulkUploadFiles.length > 0 ? ' ' + _bulkUploadFiles.length + ' File' + (_bulkUploadFiles.length !== 1 ? 's' : '') : ''}
                 </button>
             </div>
         </div>
     `;
 
     renderBulkTagChips();
+    renderBulkPreviewGrid();
 }
 
 // =============================================
@@ -93,55 +121,6 @@ function renderBulkTagChips() {
             '<button type="button" class="bulk-tag-remove" onclick="removeBulkTag(\'' + _escBulk(tag) + '\')" aria-label="Remove tag">&times;</button>' +
         '</span>';
     }).join('');
-}
-
-// =============================================
-// STEP 2 — FILE SELECTION
-// =============================================
-function showBulkStep2() {
-    var nameInput = document.getElementById('bulkBundleName');
-    _bulkUploadBundle = nameInput ? nameInput.value.trim() : '';
-
-    var content = document.getElementById('bulkUploadContent');
-    if (!content) return;
-
-    var tagSummary = '';
-    if (_bulkUploadBundle) tagSummary += '<span class="bulk-tag-chip bulk-bundle-chip">' + _escBulk(_bulkUploadBundle) + '</span>';
-    _bulkUploadTags.forEach(function(t) { tagSummary += '<span class="bulk-tag-chip">' + _escBulk(t) + '</span>'; });
-
-    content.innerHTML = `
-        <div class="bulk-step">
-            ${tagSummary ? '<div class="bulk-meta-summary">' + tagSummary + '<button class="bulk-back-link" onclick="renderBulkStep1()">Edit</button></div>' : '<div class="bulk-meta-summary"><span class="bulk-hint" style="margin:0;">No bundle or tags set</span><button class="bulk-back-link" onclick="renderBulkStep1()">Edit</button></div>'}
-
-            <div class="bulk-drop-zone" id="bulkDropZone"
-                 onclick="document.getElementById('bulkFileInput').click();"
-                 ondragenter="_bulkDragEnter(event)"
-                 ondragleave="_bulkDragLeave(event)"
-                 ondragover="event.preventDefault();"
-                 ondrop="_bulkDrop(event)">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="opacity:0.4;margin-bottom:6px;"><path d="M16 4v18M10 10l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 22v4a2 2 0 002 2h20a2 2 0 002-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                <span>Drop images here or click to browse</span>
-                <span class="bulk-hint" style="margin-top:4px;">Max ${BULK_CONFIG[_bulkUploadType].sizeLimitMB} MB per file</span>
-            </div>
-            <input type="file" id="bulkFileInput" multiple accept="image/*" style="display:none;" onchange="handleBulkFiles(this.files); this.value='';">
-
-            <div id="bulkPreviewGrid" class="bulk-preview-grid"></div>
-
-            <div id="bulkProgressWrap" class="bulk-progress-wrap" style="display:none;">
-                <div class="bulk-progress-bar"><div class="bulk-progress-fill" id="bulkProgressFill"></div></div>
-                <span id="bulkProgressText" class="bulk-hint">Uploading...</span>
-            </div>
-
-            <div class="bulk-actions">
-                <span id="bulkFileCount" class="bulk-hint">${_bulkUploadFiles.length} file${_bulkUploadFiles.length !== 1 ? 's' : ''} selected</span>
-                <button class="bulk-btn bulk-btn-primary" id="bulkUploadBtn" onclick="startBulkUpload()" ${_bulkUploadFiles.length === 0 ? 'disabled' : ''}>
-                    Upload${_bulkUploadFiles.length > 0 ? ' ' + _bulkUploadFiles.length + ' File' + (_bulkUploadFiles.length !== 1 ? 's' : '') : ''}
-                </button>
-            </div>
-        </div>
-    `;
-
-    renderBulkPreviewGrid();
 }
 
 // =============================================
@@ -246,6 +225,10 @@ function renderBulkPreviewGrid() {
 // UPLOAD
 // =============================================
 async function startBulkUpload() {
+    // Capture bundle name from input (same screen now)
+    var nameInput = document.getElementById('bulkBundleName');
+    _bulkUploadBundle = nameInput ? nameInput.value.trim() : '';
+
     var pending = _bulkUploadFiles.filter(function(f) { return f.status === 'pending'; });
     if (pending.length === 0) { toast('No files to upload', 'error'); return; }
 
@@ -440,18 +423,25 @@ function _escBulk(s) {
         }
         .bulk-tag-remove:hover { opacity: 1; }
 
-        /* ── Meta Summary (Step 2 header) ── */
-        .bulk-meta-summary {
-            display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-            margin-bottom: 12px; padding: 8px 10px; border-radius: 6px;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--deft-border, #2A2E3D);
+        /* ── Organize Section (collapsible) ── */
+        .bulk-organize {
+            margin-bottom: 12px; border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 8px; overflow: hidden;
         }
-        .bulk-back-link {
-            margin-left: auto; font-size: 0.7rem; color: var(--deft-accent, #06D6A0);
-            background: none; border: none; cursor: pointer; text-decoration: underline;
-            padding: 0;
+        .bulk-organize-toggle {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 12px; cursor: pointer; font-size: 0.75rem;
+            font-weight: 500; color: var(--deft-txt-2, #8A95A9);
+            background: rgba(255,255,255,0.02); list-style: none;
+            transition: color 0.15s;
         }
+        .bulk-organize-toggle::-webkit-details-marker { display: none; }
+        .bulk-organize-toggle::marker { content: ''; }
+        .bulk-organize-toggle:hover { color: var(--deft-txt, #E8ECF1); }
+        .bulk-organize[open] .bulk-organize-toggle {
+            border-bottom: 1px solid var(--deft-border, #2A2E3D);
+        }
+        .bulk-organize-body { padding: 10px 12px; }
 
         /* ── Drop Zone ── */
         .bulk-drop-zone {
