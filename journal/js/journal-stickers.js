@@ -2,7 +2,7 @@
 // Journal Stickers — Konva.js Sticker System
 // =============================================
 
-let stickerMode = true;
+let stickerMode = false;
 let activeStickerScope = 'daily';
 let stickerTransformers = [];
 
@@ -28,13 +28,14 @@ function initStickerCanvas(containerId, scope) {
     const layer = new Konva.Layer();
     stage.add(layer);
 
-    // Position canvas overlay and allow pointer events
+    // Position canvas overlay -- pointer-events off by default.
+    // User toggles "sticker mode" to interact with stickers.
     stage.container().style.position = 'absolute';
     stage.container().style.top = '0';
     stage.container().style.left = '0';
     stage.container().style.width = '100%';
     stage.container().style.height = '100%';
-    stage.container().style.pointerEvents = 'auto';
+    stage.container().style.pointerEvents = 'none';
     stage.container().style.zIndex = '10';
 
     if (scope === 'daily') {

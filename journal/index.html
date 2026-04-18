@@ -532,8 +532,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     <!-- ═══════════════════════════════════════
          VIEW: CALENDAR
          ═══════════════════════════════════════ -->
-    <div id="view-calendar" class="max-w-[1000px] mx-auto px-4 py-6" role="tabpanel" aria-labelledby="tab-calendar">
-        <div id="calendarWrapper" class="relative rounded-xl p-4" style="border: 1px solid var(--deft-border, #2A2E3D); background-size: cover; background-position: center; background-repeat: no-repeat; overflow: hidden;">
+    <div id="view-calendar" class="px-4 py-4" role="tabpanel" aria-labelledby="tab-calendar">
+        <div id="calendarWrapper" class="relative rounded-xl p-4" style="border: 1px solid var(--deft-border, #2A2E3D); background-size: cover; background-position: center; background-repeat: no-repeat; overflow: hidden; min-height: calc(100vh - 130px);">
             <!-- Sticker canvas for monthly stickers -->
             <div id="calendarStickerCanvas" class="sticker-canvas-wrapper"></div>
 
@@ -571,7 +571,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     <!-- ═══════════════════════════════════════
          VIEW: DAILY
          ═══════════════════════════════════════ -->
-    <div id="view-daily" style="display:none;" class="max-w-[1000px] mx-auto px-4 py-4" role="tabpanel" aria-labelledby="tab-daily">
+    <div id="view-daily" style="display:none;" class="px-4 py-4" role="tabpanel" aria-labelledby="tab-daily">
         <div class="daily-wrapper">
             <!-- Background layer -->
             <div id="dailyBackground" class="daily-background"></div>
