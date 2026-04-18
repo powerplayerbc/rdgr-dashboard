@@ -378,13 +378,17 @@ async function promoteNextStep(stepId) {
 
     const stepTitle = steps[0].title;
 
-    // Create a BRAIN task
+    // Create a BRAIN task (scheduled_date is required)
+    const scheduledDate = currentDate || getToday();
     const taskBody = {
         user_id: activeProfileId,
         title: stepTitle,
         status: 'pending',
-        source: 'journal',
-        created_at: new Date().toISOString()
+        scheduled_date: scheduledDate,
+        original_date: scheduledDate,
+        estimated_minutes: 30,
+        heat_level: 0,
+        points_earned: 0
     };
 
     const taskResult = await supabaseWrite('brain_tasks', 'POST', taskBody);
