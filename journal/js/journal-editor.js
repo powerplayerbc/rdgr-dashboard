@@ -563,7 +563,8 @@ async function restoreVersion(versionId) {
         /* ── Word Count ── */
         #wordCount {
             font-size: 0.7rem;
-            color: var(--deft-txt-3, #525E73);
+            color: var(--jday-section-color, var(--deft-txt-2, #8A95A9));
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
             font-variant-numeric: tabular-nums;
         }
 
