@@ -2,7 +2,7 @@
 // Journal Stickers — Konva.js Sticker System
 // =============================================
 
-let stickerMode = false;
+let stickerMode = true;
 let activeStickerScope = 'daily';
 let stickerTransformers = [];
 
@@ -28,11 +28,13 @@ function initStickerCanvas(containerId, scope) {
     const layer = new Konva.Layer();
     stage.add(layer);
 
-    // Make canvas transparent (no background fill)
+    // Position canvas overlay and allow pointer events
     stage.container().style.position = 'absolute';
     stage.container().style.top = '0';
     stage.container().style.left = '0';
-    stage.container().style.pointerEvents = stickerMode ? 'auto' : 'none';
+    stage.container().style.width = '100%';
+    stage.container().style.height = '100%';
+    stage.container().style.pointerEvents = 'auto';
     stage.container().style.zIndex = '10';
 
     if (scope === 'daily') {
@@ -521,11 +523,15 @@ function uploadCustomSticker() {
             });
 
             if (result && result.success) {
+                // Use full-res content URL for sticker images
+                const stickerUrl = result.fileId
+                    ? 'https://lh3.googleusercontent.com/d/' + result.fileId + '=w512'
+                    : (result.driveUrl || '');
                 await supabaseWrite('journal_sticker_library', 'POST', {
                     user_id: activeProfileId,
                     name: file.name.replace(/\.[^.]+$/, ''),
                     drive_file_id: result.fileId || '',
-                    image_url: result.thumbnailUrl || result.driveUrl || '',
+                    image_url: stickerUrl,
                     category: 'custom'
                 });
 

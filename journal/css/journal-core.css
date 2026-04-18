@@ -215,7 +215,7 @@
     z-index: 5;
     pointer-events: none;
 }
-.sticker-canvas-wrapper.sticker-mode-on {
+.sticker-canvas-wrapper canvas {
     pointer-events: auto;
 }
 

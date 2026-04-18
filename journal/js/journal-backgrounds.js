@@ -210,12 +210,16 @@ function uploadCustomBackground() {
             });
 
             if (result && result.success) {
+                // Use full-res content URL, not thumbnail
+                const imageUrl = result.fileId
+                    ? 'https://lh3.googleusercontent.com/d/' + result.fileId + '=w1600'
+                    : (result.driveUrl || '');
                 const bgName = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
                 await supabaseWrite('journal_backgrounds', 'POST', {
                     user_id: activeProfileId,
                     name: bgName,
                     type: 'image',
-                    value: result.thumbnailUrl || result.driveUrl || '',
+                    value: imageUrl,
                     category: 'custom',
                     is_active: true
                 });

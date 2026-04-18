@@ -158,6 +158,7 @@ async function initJournal() {
 
     // Load initial view data
     if (activeProfileId) {
+        if (typeof loadBackgrounds === 'function') loadBackgrounds();
         if (typeof loadCalendar === 'function') loadCalendar();
     }
 }

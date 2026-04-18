@@ -29,6 +29,11 @@ async function loadDailyView() {
     if (entries && entries.length > 0) {
         currentEntry = entries[0];
         loadEntryIntoEditor(currentEntry);
+        // Apply saved background
+        if (currentEntry.background_id && typeof applyDailyBackground === 'function') {
+            if (!backgroundsList || backgroundsList.length === 0) await loadBackgrounds();
+            applyDailyBackground(currentEntry.background_id);
+        }
     } else {
         currentEntry = null;
         isDirty = false;

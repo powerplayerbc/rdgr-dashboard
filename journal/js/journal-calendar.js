@@ -239,16 +239,16 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--deft-txt-3, #525E73);
-            background: rgba(17, 19, 26, 0.6);
-            backdrop-filter: blur(4px);
+            background: color-mix(in srgb, var(--deft-surface-el, #1A1D28) calc(var(--journal-panel-opacity, 0.75) * 100%), transparent);
+            backdrop-filter: blur(var(--journal-panel-blur, 8px));
         }
 
         /* Day cells */
         .jcal-cell {
             min-height: 72px;
             padding: 0.375rem;
-            background: rgba(17, 19, 26, 0.55);
-            backdrop-filter: blur(4px);
+            background: color-mix(in srgb, var(--deft-surface-el, #1A1D28) calc(var(--journal-panel-opacity, 0.75) * 100%), transparent);
+            backdrop-filter: blur(var(--journal-panel-blur, 8px));
             border: 2px solid transparent;
             cursor: pointer;
             position: relative;
@@ -264,7 +264,7 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
             width: 100%;
         }
         .jcal-cell:hover {
-            background: rgba(17, 19, 26, 0.7);
+            background: color-mix(in srgb, var(--deft-surface-el, #1A1D28) calc((var(--journal-panel-opacity, 0.75) + 0.1) * 100%), transparent);
         }
         .jcal-cell:focus-visible {
             border-color: var(--deft-accent, #06D6A0);
@@ -280,7 +280,7 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
             opacity: 0.2;
         }
         .jcal-cell--outside:hover {
-            background: rgba(17, 19, 26, 0.55);
+            background: color-mix(in srgb, var(--deft-surface-el, #1A1D28) calc(var(--journal-panel-opacity, 0.75) * 100%), transparent);
         }
 
         /* Today highlight */
