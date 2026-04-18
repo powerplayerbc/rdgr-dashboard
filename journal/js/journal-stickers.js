@@ -495,6 +495,22 @@ function toggleStickerMode() {
     });
 
     toast(stickerMode ? 'Sticker mode ON -- drag, resize & rotate stickers' : 'Sticker mode OFF -- normal editing', 'info');
+
+    // Show/hide floating exit button
+    var exitBtn = document.getElementById('stickerModeExitBtn');
+    if (stickerMode) {
+        if (!exitBtn) {
+            exitBtn = document.createElement('button');
+            exitBtn.id = 'stickerModeExitBtn';
+            exitBtn.onclick = toggleStickerMode;
+            exitBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Exit Sticker Mode';
+            exitBtn.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);z-index:10001;display:flex;align-items:center;gap:0.5rem;padding:0.625rem 1.25rem;border-radius:999px;border:1px solid rgba(6,214,160,0.5);background:rgba(8,9,13,0.92);backdrop-filter:blur(12px);color:#06D6A0;font-size:0.8rem;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.5);';
+            document.body.appendChild(exitBtn);
+        }
+        exitBtn.style.display = 'flex';
+    } else {
+        if (exitBtn) exitBtn.style.display = 'none';
+    }
 }
 
 // =============================================

@@ -224,8 +224,8 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 1px;
-            background: var(--deft-border, #2A2E3D);
-            border: 1px solid var(--deft-border, #2A2E3D);
+            background: rgba(42, 46, 61, 0.3);
+            border: 1px solid rgba(42, 46, 61, 0.3);
             border-radius: 0.5rem;
             overflow: hidden;
         }
