@@ -50,6 +50,7 @@ const NAV_GROUPS = [
     { label: 'BRAIN', href: '/brain', items: [
         { label: 'BRAIN', href: '/brain' },
         { label: 'DEFT', href: '/deft' },
+        { label: 'Journal', href: '/journal' },
         { label: 'Pantry', href: '/pantry' },
         { label: 'Shopping', href: '/shopping' },
         { label: 'Meal Plan', href: '/meal-plan' },
@@ -97,6 +98,7 @@ const PAGE_URL_MAP = {
     'school.html': '/school',
     'school/index.html': '/school',
     'shopping/index.html': '/shopping',
+    'journal/index.html': '/journal',
     'meal-plan/index.html': '/meal-plan',
     'meetings.html': '/meetings',
     'our-workflows.html': '/our-workflows',
@@ -547,10 +549,11 @@ files.forEach(file => {
     const filePath = path.join(dir, file);
     let content = fs.readFileSync(filePath, 'utf8');
     // Derive URL from file path: 'pantry.html' -> '/pantry', 'pantry/index.html' -> '/pantry'
-    let activeUrl = PAGE_URL_MAP[file];
+    const fileNorm = file.replace(/\\/g, '/');
+    let activeUrl = PAGE_URL_MAP[file] || PAGE_URL_MAP[fileNorm];
     if (!activeUrl) {
-        if (file.endsWith('/index.html')) {
-            activeUrl = '/' + file.replace('/index.html', '');
+        if (fileNorm.endsWith('/index.html')) {
+            activeUrl = '/' + fileNorm.replace('/index.html', '');
         } else if (file.endsWith('.html')) {
             activeUrl = '/' + file.replace('.html', '');
         } else {

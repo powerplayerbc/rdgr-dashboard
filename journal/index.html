@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Journal | Carlton AI</title>
+
+    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://yrwrswyjawmgtxrgbnim.supabase.co">
+    <script>
+        // Instant auth check — prevents gate flash on authenticated page loads
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #journalApp { opacity: 1 !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
+
+        /* ── Nav Dropdown System ── */
+        .nav-group { position: relative; }
+        .nav-group-btn {
+            display: flex; align-items: center; gap: 0.25rem;
+            padding: 0.3rem 0.75rem;
+            font-size: 0.7rem; font-weight: 500;
+            color: #8A95A9;
+            border-radius: 0.375rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+            border: none; background: transparent;
+        }
+        .nav-group-btn:hover { color: #E8ECF1; }
+        .nav-group-btn.active {
+            background: rgba(6,214,160,0.12);
+            color: #06D6A0;
+        }
+        .nav-group-btn .chevron {
+            transition: transform 0.2s;
+            opacity: 0.5;
+        }
+        .nav-group:hover .nav-group-btn .chevron { transform: rotate(180deg); opacity: 0.8; }
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 150px;
+            padding: 0.375rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: opacity 0.15s, visibility 0.15s, transform 0.15s;
+            z-index: 70;
+        }
+        .nav-group:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .nav-dropdown a {
+            display: block;
+            padding: 0.4rem 0.625rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+            white-space: nowrap;
+        }
+        .nav-dropdown a:hover {
+            background: rgba(255,255,255,0.06);
+            color: var(--deft-txt, #E8ECF1);
+        }
+        .nav-dropdown a.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        /* Theme overrides for nav */
+        .nav-group-btn.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important;
+            color: var(--deft-accent, #06D6A0) !important;
+        }
+        /* ── Mobile Nav System ── */
+        .mobile-menu-btn {
+            display: none;
+            align-items: center; justify-content: center;
+            width: 32px; height: 32px;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            border-radius: 0.375rem;
+            background: transparent;
+            color: var(--deft-txt-2, #8A95A9);
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+            flex-shrink: 0;
+        }
+        .mobile-menu-btn:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        @media (max-width: 639px) { .mobile-menu-btn { display: flex; } }
+        #mobileNavOverlay {
+            position: fixed; inset: 0; z-index: 200;
+            display: none; opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        #mobileNavOverlay.open { display: flex; opacity: 1; }
+        .mobile-nav-backdrop {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.5);
+        }
+        .mobile-nav-sidebar {
+            position: relative; z-index: 1;
+            width: 280px; max-width: 85vw; height: 100vh;
+            background: var(--deft-base, #11131A);
+            border-right: 1px solid var(--deft-border, #2A2E3D);
+            overflow-y: auto;
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            padding: 0.75rem 0;
+        }
+        #mobileNavOverlay.open .mobile-nav-sidebar { transform: translateX(0); }
+        .mobile-nav-close {
+            display: flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px;
+            border: none; background: transparent;
+            color: var(--deft-txt-3, #525E73);
+            cursor: pointer; font-size: 1.1rem;
+            border-radius: 0.25rem;
+            transition: background 0.12s, color 0.12s;
+        }
+        .mobile-nav-close:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link {
+            display: block;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.75rem; font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            text-decoration: none;
+            transition: background 0.12s, color 0.12s;
+        }
+        .mobile-nav-link:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link.active {
+            background: var(--deft-accent-dim, rgba(6,214,160,0.12));
+            color: var(--deft-accent, #06D6A0);
+        }
+        .mobile-nav-group-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 0.5rem 1.25rem;
+            font-size: 0.75rem; font-weight: 500;
+            color: var(--deft-txt-2, #8A95A9);
+            background: transparent; border: none;
+            cursor: pointer;
+            transition: background 0.12s, color 0.12s;
+            text-align: left;
+        }
+        .mobile-nav-group-btn:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-group-btn.active { color: var(--deft-accent, #06D6A0); }
+        .mobile-nav-group-btn .mn-chevron {
+            transition: transform 0.2s; opacity: 0.5;
+        }
+        .mobile-nav-group-btn.expanded .mn-chevron { transform: rotate(180deg); opacity: 0.8; }
+        .mobile-nav-children {
+            display: none;
+            padding-left: 1rem;
+        }
+        .mobile-nav-children.open { display: block; }
+        .mobile-nav-divider {
+            height: 1px;
+            background: var(--deft-border, #2A2E3D);
+            margin: 0.375rem 1rem;
+        }
+
+        /* ── Bug Report FAB ── */
+        .bug-report-fab {
+            position: fixed;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            z-index: 190;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--deft-border, #2A2E3D);
+            background: var(--deft-surface-el, #1A1D28);
+            color: var(--deft-txt-3, #525E73);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            padding: 0; line-height: 1;
+        }
+        .bug-report-fab:hover {
+            background: rgba(255,107,107,0.12);
+            color: #FF6B6B;
+            border-color: rgba(255,107,107,0.3);
+            box-shadow: 0 4px 16px rgba(255,107,107,0.15);
+        }
+        .bug-report-fab .bug-badge {
+            position: absolute; top: -4px; right: -4px;
+            min-width: 16px; height: 16px; border-radius: 8px;
+            background: #FF6B6B; color: #fff;
+            font-size: 0.55rem; font-weight: 700;
+            display: none; align-items: center; justify-content: center;
+            padding: 0 3px;
+        }
+        .bug-report-modal { z-index: 195 !important; }
+        .bug-report-modal .modal-content {
+            max-width: 500px; width: 92vw;
+        }
+        .bug-form-label {
+            display: block; font-size: 0.65rem; font-weight: 600;
+            color: var(--deft-txt-2, #8A95A9);
+            margin-bottom: 0.25rem;
+            text-transform: uppercase; letter-spacing: 0.03em;
+        }
+        .bug-console-log {
+            max-height: 100px; overflow-y: auto;
+            padding: 0.4rem; border-radius: 0.375rem;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--deft-border, #2A2E3D);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem; line-height: 1.4;
+        }
+        .bug-ce { color: #FF6B6B; }
+        .bug-cw { color: #FFD93D; }
+        .bug-cn { color: var(--deft-txt-3, #525E73); font-style: italic; }
+    </style>
+    <link rel="stylesheet" href="css/journal-core.css">
+
+    <!-- Quill.js Rich Text Editor -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+
+    <!-- Konva.js Canvas (for stickers) -->
+    <script src="https://cdn.jsdelivr.net/npm/konva@9/konva.min.js"></script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link id="deft-fonts" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deft-base': 'var(--deft-base)',
+                        surface: 'var(--deft-surface)',
+                        'surface-el': 'var(--deft-surface-el)',
+                        'surface-hi': 'var(--deft-surface-hi)',
+                        border: 'var(--deft-border)',
+                        accent: 'var(--deft-accent)',
+                        'accent-dim': 'var(--deft-accent-dim)',
+                        'accent-warm': 'var(--deft-accent-warm)',
+                        success: 'var(--deft-success)',
+                        warning: 'var(--deft-warning)',
+                        danger: 'var(--deft-danger)',
+                        txt: 'var(--deft-txt)',
+                        'txt-2': 'var(--deft-txt-2)',
+                        'txt-3': 'var(--deft-txt-3)',
+                    },
+                    fontFamily: {
+                        heading: ['var(--deft-heading-font)', 'system-ui', 'sans-serif'],
+                        body: ['var(--deft-body-font)', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     PASSWORD GATE
+     ═══════════════════════════════════════ -->
+<div id="gate" class="gate-overlay">
+    <div class="max-w-sm w-full px-6">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center gap-2 mb-4">
+                <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+            </div>
+            <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+            <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+        </div>
+        <div id="gateProfiles" class="flex justify-center gap-3 mb-6">
+            <div class="text-center text-xs text-txt-3">Loading profiles...</div>
+        </div>
+        <form id="gateForm" onsubmit="return handleGate(event)">
+            <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+            <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+            <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+        </form>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MAIN APPLICATION
+     ═══════════════════════════════════════ -->
+<div id="journalApp" style="opacity: 0;">
+
+    <!-- ── TOP NAV BAR ── -->
+    <nav class="sticky top-0 z-50 border-b" style="border-color: #2A2E3D; background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="pulse-dot"></div>
+                <h1 style="font-family: 'Chakra Petch', system-ui, sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.025em; color: #E8ECF1;">RDGR <span style="color: #525E73; font-weight: 400;">Command Center</span></h1>
+                <button class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Open menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <a href="/" class="nav-group-btn">Dashboard</a>
+                        <div class="nav-group">
+                            <a href="/chat" class="nav-group-btn">Rodger <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/chat">Rodger</a>
+                                <a href="/council">Council</a>
+                            </div>
+                        </div>
+                        <div class="nav-group" data-nav-role="admin">
+                            <a href="/crm" class="nav-group-btn">Outreach <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/crm">CRM</a>
+                                <a href="/email-outreach">Email</a>
+                                <a href="/social-dashboard">Social</a>
+                                <a href="/social-content">Social Content</a>
+                                <a href="/offer-studio">Offers</a>
+                                <a href="/client-projects">Client Projects</a>
+                            </div>
+                        </div>
+                        <div class="nav-group" data-nav-role="admin">
+                            <a href="/finance" class="nav-group-btn">Finance <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/finance">Dashboard</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/brand-discovery" class="nav-group-btn">Brand <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brand-discovery">Discovery</a>
+                                <a href="/brand-voice">Voice</a>
+                                <a href="/template-studio">Templates</a>
+                                <a href="/brand-documents">Docs</a>
+                            </div>
+                        </div>
+                        <div class="nav-group" data-nav-role="admin">
+                            <a href="/bsi-discovery" class="nav-group-btn">Policy <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/bsi-discovery">Discovery</a>
+                                <a href="/compliance">Compliance</a>
+                                <a href="/bsi-documents">Documents</a>
+                            </div>
+                        </div>
+                        <div class="nav-group">
+                            <a href="/content" class="nav-group-btn">Content <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/content">Publishing</a>
+                                <a href="/media">Media</a>
+                            </div>
+                        </div>
+                        <a href="/partnerships" class="nav-group-btn">Partnerships</a>
+                        <div class="nav-group">
+                            <a href="/brain" class="nav-group-btn active">BRAIN <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/brain">BRAIN</a>
+                                <a href="/deft">DEFT</a>
+                                <a href="/journal" class="active">Journal</a>
+                                <a href="/pantry">Pantry</a>
+                                <a href="/shopping">Shopping</a>
+                                <a href="/meal-plan">Meal Plan</a>
+                                <a href="/school">School</a>
+                            </div>
+                        </div>
+                        <div class="nav-group" data-nav-role="admin">
+                            <a href="/trading-desk" class="nav-group-btn">Trading <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/trading-desk">Trading Desk</a>
+                                <a href="/trading-bot">Bot Dashboard</a>
+                                <a href="/trading-strategies">Strategies</a>
+                                <a href="/trading-monitor">Monitor</a>
+                                <a href="/trading-research">Research</a>
+                                <a href="/trading-discovery">Discovery</a>
+                                <a href="/trading-cross-pairs">Cross-Pairs</a>
+                                <a href="/trading-exchanges">Exchanges</a>
+                                <a href="/trading-config">Config</a>
+                                <a href="/trading-reports">Reports</a>
+                            </div>
+                        </div>
+                        <a href="/meetings" class="nav-group-btn">Meetings</a>
+                        <div class="nav-group" data-nav-role="admin">
+                            <a href="/our-workflows" class="nav-group-btn">System <svg class="chevron" width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></a>
+                            <div class="nav-dropdown">
+                                <a href="/our-workflows">Workflows</a>
+                                <a href="/org-chart">Org Map</a>
+                                <a href="/hub">HUB</a>
+                                <a href="/bug-reports">Bug Reports</a>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- PROFILE SWITCHER -->
+                <div class="relative" id="profileSwitcher">
+                    <button onclick="toggleProfileDropdown()" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-colors" style="background: rgba(255,255,255,0.04);" id="profileBtn" aria-label="Switch profile" aria-expanded="false" aria-haspopup="true">
+                        <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                        <span class="text-xs font-medium hidden sm:block" id="profileName">Bradford</span>
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    </button>
+                    <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 180px; z-index: 10000;" id="profileDropdown" role="menu">
+                        <!-- Profiles populated by JS -->
+                    </div>
+                </div>
+                <!-- Settings link -->
+                <a href="/settings" class="hover:opacity-80 transition-opacity p-2" title="Settings" style="color: #525E73;" aria-label="Settings">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 10a2 2 0 100-4 2 2 0 000 4z" stroke="currentColor" stroke-width="1.2"/><path d="M13.5 8a5.5 5.5 0 01-.08.92l1.47 1.15a.35.35 0 01.08.45l-1.4 2.42a.35.35 0 01-.43.15l-1.73-.7a5.4 5.4 0 01-1.59.92l-.26 1.84a.35.35 0 01-.35.3H7.29a.35.35 0 01-.35-.3l-.26-1.84a5.4 5.4 0 01-1.59-.92l-1.73.7a.35.35 0 01-.43-.15l-1.4-2.42a.35.35 0 01.08-.45l1.47-1.15A5.6 5.6 0 012.5 8c0-.31.03-.62.08-.92L1.11 5.93a.35.35 0 01-.08-.45l1.4-2.42a.35.35 0 01.43-.15l1.73.7a5.4 5.4 0 011.59-.92l.26-1.84A.35.35 0 016.79.55h1.42c.17 0 .32.13.35.3l.26 1.84c.58.2 1.12.52 1.59.92l1.73-.7a.35.35 0 01.43.15l1.4 2.42a.35.35 0 01-.08.45l-1.47 1.15c.05.3.08.61.08.92z" stroke="currentColor" stroke-width="1.2"/></svg>
+                </a>
+            </div>
+        </div>
+        <!-- Mobile nav (visible only on small screens) -->
+
+        <!-- Mobile Nav Overlay -->
+        <div id="mobileNavOverlay">
+            <div class="mobile-nav-backdrop"></div>
+            <div class="mobile-nav-sidebar">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 1rem 0.75rem;">
+                    <span style="font-size:0.8rem;font-weight:700;color:var(--deft-txt,#E8ECF1);">Menu</span>
+                    <button class="mobile-nav-close" onclick="toggleMobileNav()">&times;</button>
+                </div>
+                <div class="mobile-nav-divider"></div>
+                <a href="/" class="mobile-nav-link">Dashboard</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Rodger <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/chat" class="mobile-nav-link">Rodger</a>
+    <a href="/council" class="mobile-nav-link">Council</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Outreach <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/crm" class="mobile-nav-link">CRM</a>
+    <a href="/email-outreach" class="mobile-nav-link">Email</a>
+    <a href="/social-dashboard" class="mobile-nav-link">Social</a>
+    <a href="/social-content" class="mobile-nav-link">Social Content</a>
+    <a href="/offer-studio" class="mobile-nav-link">Offers</a>
+    <a href="/client-projects" class="mobile-nav-link">Client Projects</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Finance <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/finance" class="mobile-nav-link">Dashboard</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Brand <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/brand-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/brand-voice" class="mobile-nav-link">Voice</a>
+    <a href="/template-studio" class="mobile-nav-link">Templates</a>
+    <a href="/brand-documents" class="mobile-nav-link">Docs</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Policy <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/bsi-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/compliance" class="mobile-nav-link">Compliance</a>
+    <a href="/bsi-documents" class="mobile-nav-link">Documents</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Content <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/content" class="mobile-nav-link">Publishing</a>
+    <a href="/media" class="mobile-nav-link">Media</a>
+</div>
+<a href="/partnerships" class="mobile-nav-link">Partnerships</a>
+<button class="mobile-nav-group-btn active expanded" onclick="toggleMobileAccordion(this)">BRAIN <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children open">
+    <a href="/brain" class="mobile-nav-link">BRAIN</a>
+    <a href="/deft" class="mobile-nav-link">DEFT</a>
+    <a href="/pantry" class="mobile-nav-link">Pantry</a>
+    <a href="/shopping" class="mobile-nav-link">Shopping</a>
+    <a href="/meal-plan" class="mobile-nav-link">Meal Plan</a>
+    <a href="/school" class="mobile-nav-link">School</a>
+    <a href="/journal" class="mobile-nav-link active">Journal</a>
+</div>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">Trading <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/trading-desk" class="mobile-nav-link">Trading Desk</a>
+    <a href="/trading-bot" class="mobile-nav-link">Bot Dashboard</a>
+    <a href="/trading-strategies" class="mobile-nav-link">Strategies</a>
+    <a href="/trading-monitor" class="mobile-nav-link">Monitor</a>
+    <a href="/trading-research" class="mobile-nav-link">Research</a>
+    <a href="/trading-discovery" class="mobile-nav-link">Discovery</a>
+    <a href="/trading-cross-pairs" class="mobile-nav-link">Cross-Pairs</a>
+    <a href="/trading-exchanges" class="mobile-nav-link">Exchanges</a>
+    <a href="/trading-config" class="mobile-nav-link">Config</a>
+    <a href="/trading-reports" class="mobile-nav-link">Reports</a>
+</div>
+<a href="/meetings" class="mobile-nav-link">Meetings</a>
+<button class="mobile-nav-group-btn" onclick="toggleMobileAccordion(this)">System <svg class="mn-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+<div class="mobile-nav-children">
+    <a href="/our-workflows" class="mobile-nav-link">Workflows</a>
+    <a href="/org-chart" class="mobile-nav-link">Org Map</a>
+    <a href="/hub" class="mobile-nav-link">HUB</a>
+    <a href="/bug-reports" class="mobile-nav-link">Bug Reports</a>
+</div>
+
+            </div>
+        </div>
+        </nav>
+        <script>
+function toggleMobileNav(){var o=document.getElementById('mobileNavOverlay');if(o.classList.contains('open')){o.style.opacity='0';o.querySelector('.mobile-nav-sidebar').style.transform='translateX(-100%)';setTimeout(function(){o.classList.remove('open');o.style.display='none';},250);}else{o.style.display='flex';requestAnimationFrame(function(){o.classList.add('open');o.style.opacity='1';o.querySelector('.mobile-nav-sidebar').style.transform='translateX(0)';});}}
+function toggleMobileAccordion(btn){btn.classList.toggle('expanded');var ch=btn.nextElementSibling;ch.classList.toggle('open');}
+document.getElementById('mobileNavOverlay')?.querySelector('.mobile-nav-backdrop')?.addEventListener('click',function(){toggleMobileNav();});
+document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function(a){a.addEventListener('click',function(){toggleMobileNav();});});
+</script>
+        <script>document.querySelector('nav').addEventListener('click',function(e){var l=e.target.closest('.nav-group-btn.active,.nav-dropdown a.active');if(l)e.preventDefault();});</script>
+
+    <!-- ── JOURNAL SUB-TAB BAR ── -->
+    <div class="max-w-[1000px] mx-auto px-4 pt-4 pb-4">
+        <div class="flex gap-1 p-0.5 rounded-lg overflow-x-auto" style="background: rgba(255,255,255,0.04);" role="tablist" aria-label="Journal sections">
+            <button class="journal-tab active" id="tab-calendar" onclick="switchView('calendar')" role="tab" aria-selected="true" aria-controls="view-calendar">Calendar</button>
+            <button class="journal-tab" id="tab-daily" onclick="switchView('daily')" role="tab" aria-selected="false" aria-controls="view-daily">Daily</button>
+            <button class="journal-tab" id="tab-search" onclick="switchView('search')" role="tab" aria-selected="false" aria-controls="view-search">Search</button>
+            <button class="journal-tab" id="tab-settings" onclick="switchView('settings')" role="tab" aria-selected="false" aria-controls="view-settings">Settings</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: CALENDAR
+         ═══════════════════════════════════════ -->
+    <div id="view-calendar" class="max-w-[1000px] mx-auto px-4 py-6" role="tabpanel" aria-labelledby="tab-calendar">
+        <div id="calendarWrapper" class="relative rounded-xl p-4" style="background: var(--deft-surface, #11131A); border: 1px solid var(--deft-border, #2A2E3D);">
+            <!-- Sticker canvas for monthly stickers -->
+            <div id="calendarStickerCanvas" class="sticker-canvas-wrapper"></div>
+
+            <div class="flex items-center justify-between mb-4">
+                <button onclick="navigateMonth(-1)" class="btn-icon" title="Previous month">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8.5 3.5L5 7l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="flex items-center gap-3">
+                    <h2 id="calendarMonthLabel" class="font-heading font-bold text-lg" style="color: var(--deft-txt);">April 2026</h2>
+                    <button onclick="calendarGoToday()" class="btn btn-xs btn-ghost">Today</button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openBackgroundPicker('monthly')" class="btn-icon" title="Month background">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 9.5l3-3 2 2 3-3 3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <button onclick="openStickerPicker()" class="btn-icon" title="Add sticker">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 8.5s.75 1 2 1 2-1 2-1M5.5 5.5h.01M8.5 5.5h.01" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    </button>
+                    <button onclick="toggleStickerMode()" id="stickerModeToggle" class="btn-icon" title="Toggle sticker mode">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </button>
+                    <button onclick="navigateMonth(1)" class="btn-icon" title="Next month">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.5 3.5L9 7l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div id="calendarGrid">
+                <!-- Calendar grid rendered by journal-calendar.js -->
+                <div class="empty-state"><div class="empty-state-icon">&#128197;</div>Loading calendar...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: DAILY
+         ═══════════════════════════════════════ -->
+    <div id="view-daily" style="display:none;" class="max-w-[1000px] mx-auto px-4 py-4" role="tabpanel" aria-labelledby="tab-daily">
+        <div class="daily-wrapper">
+            <!-- Background layer -->
+            <div id="dailyBackground" class="daily-background"></div>
+
+            <!-- Sticker canvas -->
+            <div id="dailyStickerCanvas" class="sticker-canvas-wrapper"></div>
+
+            <!-- Content -->
+            <div class="daily-content">
+                <!-- Header: date nav + actions -->
+                <div class="daily-header">
+                    <div class="daily-date-nav">
+                        <button onclick="navigateDay(-1)" class="btn-icon" title="Previous day">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M8.5 3.5L5 7l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <span id="dailyDateLabel" class="daily-date-label">April 17, 2026</span>
+                        <button onclick="navigateDay(1)" class="btn-icon" title="Next day">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.5 3.5L9 7l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <button onclick="goToToday()" class="btn btn-xs btn-ghost" id="todayBadge">Today</button>
+                    </div>
+                    <div class="daily-actions">
+                        <div id="moodBar" class="mood-bar">
+                            <!-- Mood buttons rendered by JS -->
+                        </div>
+                        <button onclick="toggleFavorite()" id="favBtn" class="fav-btn" title="Toggle favorite">&#9734;</button>
+                        <span id="saveStatus" class="save-status save-status-saved">Saved</span>
+                        <button onclick="saveEntry('manual')" class="btn btn-sm btn-primary" id="saveBtn">Save</button>
+                        <button onclick="openModal('versionHistoryModal')" class="btn-icon" title="Version history">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 3.5v3.5l2.5 1.5M12.5 7a5.5 5.5 0 11-11 0 5.5 5.5 0 0111 0z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <button onclick="openBackgroundPicker('daily')" class="btn-icon" title="Background">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 9.5l3-3 2 2 3-3 3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
+                        <button onclick="openStickerPicker()" class="btn-icon" title="Stickers">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M5 8.5s.75 1 2 1 2-1 2-1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Title input -->
+                <input type="text" id="entryTitle" class="journal-title-input" placeholder="Entry title (optional)">
+
+                <!-- Quill Editor Container -->
+                <div id="editorContainer"></div>
+
+                <!-- Word count -->
+                <div class="flex items-center justify-between mt-2">
+                    <span id="wordCount" class="word-count">0 words</span>
+                </div>
+
+                <!-- BRAIN Activities Section -->
+                <div class="journal-section" id="brainActivitiesSection">
+                    <div class="journal-section-title">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11z" stroke="currentColor" stroke-width="1.2"/><path d="M5 7h4M7 5v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        Today's BRAIN Activities
+                    </div>
+                    <div id="brainActivitiesList">
+                        <div class="empty-state"><div class="empty-state-icon">&#128218;</div>No activities logged for this day</div>
+                    </div>
+                </div>
+
+                <!-- Next Steps Section -->
+                <div class="journal-section" id="nextStepsSection">
+                    <div class="journal-section-title">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3.5 7h7M7 3.5v7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        Next Steps
+                    </div>
+                    <div id="nextStepsList"></div>
+                    <div class="next-step-add">
+                        <input type="text" id="nextStepInput" class="next-step-input" placeholder="Add a next step..." onkeydown="if(event.key==='Enter'){addNextStep()}">
+                        <button onclick="addNextStep()" class="btn btn-sm btn-ghost">Add</button>
+                    </div>
+                </div>
+
+                <!-- Attachments Section -->
+                <div class="journal-section" id="attachmentsSection">
+                    <div class="journal-section-title">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7.5 1.5l-4 4a2.83 2.83 0 004 4l5-5a1.41 1.41 0 00-2-2l-5 5a.71.71 0 001 1l4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Attachments
+                    </div>
+                    <div id="attachmentsList">
+                        <div class="empty-state text-xs" style="padding: 0.75rem;">No attachments</div>
+                    </div>
+                    <button onclick="openFileUpload()" class="btn btn-sm btn-ghost mt-2">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        Upload File
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: SEARCH
+         ═══════════════════════════════════════ -->
+    <div id="view-search" style="display:none;" class="max-w-[800px] mx-auto px-4 py-6" role="tabpanel" aria-labelledby="tab-search">
+        <div class="relative mb-4">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 14 14" fill="none" style="color: var(--deft-txt-3);"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M9.5 9.5L12.5 12.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search journal entries..." oninput="searchEntries(this.value)">
+        </div>
+        <div id="searchResults">
+            <div class="empty-state"><div class="empty-state-icon">&#128270;</div>Type to search your journal entries</div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         VIEW: SETTINGS
+         ═══════════════════════════════════════ -->
+    <div id="view-settings" style="display:none;" class="max-w-[800px] mx-auto px-4 py-6" role="tabpanel" aria-labelledby="tab-settings">
+        <h2 class="font-heading font-bold text-lg mb-4" style="color:var(--deft-txt);">Journal Settings</h2>
+
+        <div class="settings-section">
+            <div class="settings-label">Auto-Save</div>
+            <div class="flex items-center gap-3">
+                <label class="flex items-center gap-2 text-sm" style="color:var(--deft-txt-2);">
+                    <input type="checkbox" id="autoSaveEnabled" checked onchange="toggleAutoSaveSetting(this.checked)" style="accent-color: var(--deft-accent);">
+                    Auto-save enabled (every 30 seconds)
+                </label>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-label">Background Library</div>
+            <div id="settingsBackgroundGrid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-2">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-label">Custom Stickers</div>
+            <div id="settingsStickerGrid" class="grid grid-cols-6 sm:grid-cols-8 gap-2 mt-2">
+                <!-- Populated by JS -->
+            </div>
+            <button onclick="uploadCustomSticker()" class="btn btn-sm btn-ghost mt-2">Upload Custom Sticker</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         MODALS
+         ═══════════════════════════════════════ -->
+
+    <!-- Version History Modal -->
+    <div id="versionHistoryModal" class="modal-backdrop">
+        <div class="modal-content" style="max-width:700px;">
+            <div class="modal-header">
+                <span class="modal-title">Version History</span>
+                <button onclick="closeModal('versionHistoryModal')" class="btn-icon">&times;</button>
+            </div>
+            <div id="versionHistoryList">
+                <div class="empty-state">Loading versions...</div>
+            </div>
+            <div id="versionPreviewContent" style="display:none;" class="mt-4 p-3 rounded-lg" style="background:rgba(0,0,0,0.2);border:1px solid var(--deft-border);">
+            </div>
+        </div>
+    </div>
+
+    <!-- Sticker Picker Modal -->
+    <div id="stickerPickerModal" class="modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Add Sticker</span>
+                <button onclick="closeModal('stickerPickerModal')" class="btn-icon">&times;</button>
+            </div>
+            <div id="stickerPickerContent">
+                <!-- Populated by journal-stickers.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Background Picker Modal -->
+    <div id="backgroundPickerModal" class="modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">Choose Background</span>
+                <button onclick="closeModal('backgroundPickerModal')" class="btn-icon">&times;</button>
+            </div>
+            <div id="backgroundPickerContent">
+                <!-- Populated by journal-backgrounds.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toasts" aria-live="polite"></div>
+
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT (External Files)
+     ═══════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/journal-config.js"></script>
+<script src="js/journal-api.js"></script>
+<script src="js/journal-shared.js"></script>
+<script src="js/journal-calendar.js"></script>
+<script src="js/journal-editor.js"></script>
+<script src="js/journal-daily.js"></script>
+<script src="js/journal-stickers.js"></script>
+<script src="js/journal-backgrounds.js"></script>
+<script src="js/journal-drive.js"></script>
+<script src="js/journal-auth.js"></script>
+
+<!-- Inline: Search + Settings functions -->
+<script>
+/* ── Search View ── */
+var searchTimeout = null;
+function searchEntries(query) {
+    clearTimeout(searchTimeout);
+    if (!query || query.length < 2) {
+        document.getElementById('searchResults').innerHTML = '<div class="empty-state"><div class="empty-state-icon">\uD83D\uDD0D</div>Type to search your journal entries</div>';
+        return;
+    }
+    searchTimeout = setTimeout(async function() {
+        try {
+            var results = await supabaseSelect('journal_entries',
+                'user_id=eq.' + activeProfileId + '&content_text=ilike.*' + encodeURIComponent(query) + '*&select=entry_id,entry_date,title,content_text,mood,word_count,is_favorite&order=entry_date.desc&limit=20');
+            var container = document.getElementById('searchResults');
+            if (!results || results.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">\uD83D\uDD0D</div>No entries found</div>';
+                return;
+            }
+            container.innerHTML = results.map(function(r) {
+                var preview = (r.content_text || '').substring(0, 150).trim();
+                var mood = r.mood ? (MOOD_OPTIONS.find(function(m) { return m.slug === r.mood; }) || {}).emoji || '' : '';
+                return '<div class="search-result-card" onclick="openDailyView(\'' + r.entry_date + '\')">' +
+                    '<div class="flex items-center justify-between mb-1">' +
+                        '<span class="font-heading font-bold text-sm" style="color:var(--deft-txt);">' + mood + ' ' + (r.title || formatDate(r.entry_date)) + '</span>' +
+                        '<span class="text-xs font-mono" style="color:var(--deft-txt-3);">' + r.entry_date + '</span>' +
+                    '</div>' +
+                    '<p class="text-xs" style="color:var(--deft-txt-2);line-height:1.5;">' + preview + (preview.length >= 150 ? '...' : '') + '</p>' +
+                    '<div class="flex items-center gap-2 mt-1">' +
+                        '<span class="word-count">' + (r.word_count || 0) + ' words</span>' +
+                        (r.is_favorite ? '<span style="color:#FFD93D;">\u2B50</span>' : '') +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        } catch (err) {
+            console.error('Search error:', err);
+            document.getElementById('searchResults').innerHTML = '<div class="empty-state"><div class="empty-state-icon">\u26A0\uFE0F</div>Search failed. Please try again.</div>';
+        }
+    }, 300);
+}
+
+/* ── Settings View ── */
+function toggleAutoSaveSetting(enabled) {
+    if (typeof window.autoSaveInterval !== 'undefined' && window.autoSaveInterval) {
+        clearInterval(window.autoSaveInterval);
+        window.autoSaveInterval = null;
+    }
+    if (enabled && typeof startAutoSave === 'function') {
+        startAutoSave();
+    }
+    try {
+        var settings = JSON.parse(localStorage.getItem('journal-settings') || '{}');
+        settings.autoSave = enabled;
+        localStorage.setItem('journal-settings', JSON.stringify(settings));
+    } catch(e) {}
+    if (typeof toast === 'function') {
+        toast('Auto-save ' + (enabled ? 'enabled' : 'disabled'), 'success');
+    }
+}
+</script>
+
+    <!-- Bug Report FAB -->
+    <button class="bug-report-fab" id="bugReportBtn" onclick="_openBugReport()" title="Report a bug">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2l1.88 1.88"/><path d="M14.12 3.88L16 2"/><path d="M9 7.13v-1a3.003 3.003 0 116 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 014-4h4a4 4 0 014 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>
+        <span class="bug-badge" id="bugBadge">0</span>
+    </button>
+
+    <!-- Bug Report Modal -->
+    <div class="modal-backdrop bug-report-modal" id="bugReportModal">
+        <div class="modal-content" style="padding:1.25rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                <h3 style="font-size:0.95rem;font-weight:700;color:var(--deft-txt,#E8ECF1);margin:0;font-family:var(--deft-heading-font,'Chakra Petch'),sans-serif;">Report Bug / Request Update</h3>
+                <button onclick="document.getElementById('bugReportModal').classList.remove('active')" style="background:none;border:none;color:var(--deft-txt-3,#525E73);cursor:pointer;font-size:1.2rem;padding:0.25rem;">&times;</button>
+            </div>
+            <div style="margin-bottom:0.75rem;">
+                <label class="bug-form-label">Page</label>
+                <div id="bugPageUrl" style="font-size:0.75rem;color:var(--deft-accent,#06D6A0);font-family:'JetBrains Mono',monospace;padding:0.3rem 0.5rem;background:rgba(0,0,0,0.2);border-radius:0.25rem;border:1px solid var(--deft-border,#2A2E3D);"></div>
+            </div>
+            <div style="margin-bottom:0.75rem;">
+                <label class="bug-form-label">What's wrong? / What needs updating?</label>
+                <textarea id="bugDescription" rows="4" placeholder="Describe the issue or update needed..." style="width:100%;resize:vertical;padding:0.5rem;border-radius:0.375rem;background:var(--deft-surface,#11131A);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);font-size:0.8rem;font-family:var(--deft-body-font,'IBM Plex Sans'),sans-serif;"></textarea>
+            </div>
+            <div style="margin-bottom:0.75rem;">
+                <label class="bug-form-label">Console Errors / Warnings</label>
+                <div class="bug-console-log" id="bugConsoleLog"><span class="bug-cn">No console errors captured</span></div>
+            </div>
+            <div style="display:flex;gap:0.75rem;align-items:flex-end;margin-bottom:1rem;">
+                <div style="flex:1;">
+                    <label class="bug-form-label">Priority</label>
+                    <select id="bugPriority" style="width:100%;padding:0.35rem 0.5rem;border-radius:0.375rem;background:var(--deft-surface,#11131A);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);font-size:0.75rem;">
+                        <option value="low">Low</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+                <button onclick="document.getElementById('bugReportModal').classList.remove('active')" style="padding:0.4rem 1rem;border-radius:0.375rem;border:1px solid var(--deft-border,#2A2E3D);background:transparent;color:var(--deft-txt-2,#8A95A9);font-size:0.75rem;cursor:pointer;">Cancel</button>
+                <button onclick="_submitBugReport()" id="bugSubmitBtn" style="padding:0.4rem 1rem;border-radius:0.375rem;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:0.75rem;font-weight:600;cursor:pointer;">Submit Bug Report</button>
+            </div>
+        </div>
+    </div>
+<script>
+(function(){
+var _ce=[],_cw=[];
+var _oe=console.error,_ow=console.warn;
+function _s(a){return Array.from(a).map(function(x){try{return typeof x==='object'?JSON.stringify(x):String(x)}catch(e){return String(x)}}).join(' ');}
+console.error=function(){_ce.push({m:_s(arguments),t:new Date().toISOString()});if(_ce.length>50)_ce.shift();_ub();_oe.apply(console,arguments);};
+console.warn=function(){_cw.push({m:_s(arguments),t:new Date().toISOString()});if(_cw.length>50)_cw.shift();_ow.apply(console,arguments);};
+window.addEventListener('error',function(e){_ce.push({m:e.message+(e.filename?' at '+e.filename+':'+e.lineno:''),t:new Date().toISOString()});_ub();});
+window.addEventListener('unhandledrejection',function(e){_ce.push({m:'Unhandled Promise: '+(e.reason&&e.reason.message||e.reason||'Unknown'),t:new Date().toISOString()});_ub();});
+function _ub(){var b=document.getElementById('bugBadge');if(b){b.textContent=_ce.length;b.style.display=_ce.length>0?'flex':'none';}}
+function _esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+window._openBugReport=function(){
+var m=document.getElementById('bugReportModal');if(!m)return;
+document.getElementById('bugPageUrl').textContent=location.pathname;
+var log=document.getElementById('bugConsoleLog'),items=[];
+_ce.forEach(function(e){items.push('<div class="bug-ce">[ERROR] '+_esc(e.m)+'</div>');});
+_cw.forEach(function(w){items.push('<div class="bug-cw">[WARN] '+_esc(w.m)+'</div>');});
+log.innerHTML=items.length?items.join(''):'<span class="bug-cn">No console errors captured</span>';
+m.classList.add('active');
+var ta=document.getElementById('bugDescription');if(ta)ta.focus();
+};
+window._submitBugReport=async function(){
+var desc=document.getElementById('bugDescription').value.trim();
+if(!desc){if(typeof toast==='function')toast('Please describe the issue','error');return;}
+var btn=document.getElementById('bugSubmitBtn');if(btn){btn.disabled=true;btn.textContent='Submitting...';}
+var SB='https://yrwrswyjawmgtxrgbnim.supabase.co';
+var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+try{
+var r=await fetch(SB+'/rest/v1/user_bug_reports',{method:'POST',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({page_url:location.pathname,page_title:document.title,user_description:desc,console_errors:_ce,console_warnings:_cw,browser_info:{userAgent:navigator.userAgent,viewport:window.innerWidth+'x'+window.innerHeight,timestamp:new Date().toISOString()},priority:document.getElementById('bugPriority').value,status:'open'})});
+if(r.ok){var d=await r.json();if(typeof toast==='function')toast('Bug report '+d[0].report_id+' submitted!','success');document.getElementById('bugDescription').value='';document.getElementById('bugReportModal').classList.remove('active');_ce.length=0;_cw.length=0;_ub();}
+else{var e=await r.text();if(typeof toast==='function')toast('Failed: '+e,'error');}
+}catch(ex){if(typeof toast==='function')toast('Error: '+ex.message,'error');}
+finally{if(btn){btn.disabled=false;btn.textContent='Submit Bug Report';}}
+};
+})();
+</script>
+
+</div><!-- end journalApp -->
+
+<script src="/js/shared-nav.js"></script>
+</body>
+</html>
