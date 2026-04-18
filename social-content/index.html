@@ -1316,10 +1316,11 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
         <!-- ═══ 4 SUB-TABS ═══ -->
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pt-4">
-            <div class="flex gap-1 p-0.5 rounded-lg" style="background: rgba(255,255,255,0.04); max-width: 780px;">
+            <div class="flex gap-1 p-0.5 rounded-lg" style="background: rgba(255,255,255,0.04); max-width: 920px;">
                 <button class="top-tab" id="tabBtnPillars" onclick="switchTab('pillars')">Pillars</button>
                 <button class="top-tab active" id="tabBtnQueue" onclick="switchTab('queue')">Content Queue</button>
                 <button class="top-tab" id="tabBtnCalendar" onclick="switchTab('calendar')">Calendar</button>
+                <button class="top-tab" id="tabBtnVideoScripts" onclick="switchTab('videoScripts')">Video Scripts</button>
                 <button class="top-tab" id="tabBtnStrategy" onclick="switchTab('strategy')">Strategy</button>
                 <button class="top-tab" id="tabBtnConfig" onclick="switchTab('config')">Config</button>
             </div>
@@ -1452,6 +1453,143 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
                 <!-- Calendar Grid -->
                 <div id="calendarGrid" class="panel overflow-hidden"></div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- TAB: VIDEO SCRIPTS                      -->
+        <!-- ═══════════════════════════════════════ -->
+        <div id="tabVideoScripts" class="tab-content" style="display:none;">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
+
+                <!-- Section A: Script Generator -->
+                <div class="panel mb-4">
+                    <div class="panel-header px-4 py-3" style="border-bottom: 1px solid var(--deft-border, #2A2E3D);">
+                        <h3 class="font-heading font-bold text-sm tracking-wide uppercase" style="color: var(--deft-txt, #E8ECF1);">Script Generator</h3>
+                    </div>
+                    <div class="panel-body px-4 py-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: var(--deft-txt-2, #8A95A9);">Script Type</label>
+                                <select id="vsScriptType" class="form-input">
+                                    <option value="product_reveal">Product Reveal</option>
+                                    <option value="story_hook">Story Hook</option>
+                                    <option value="problem_solution">Problem-Solution</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: var(--deft-txt-2, #8A95A9);">Platform</label>
+                                <select id="vsPlatform" class="form-input">
+                                    <option value="tiktok">TikTok</option>
+                                    <option value="instagram_reels">Instagram Reels</option>
+                                    <option value="youtube_shorts">YouTube Shorts</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: var(--deft-txt-2, #8A95A9);">Product / Service Name</label>
+                                <input type="text" id="vsProduct" class="form-input" placeholder="e.g. Carlton AI Content Engine">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: var(--deft-txt-2, #8A95A9);">Key Benefit to Feature</label>
+                                <input type="text" id="vsKeyBenefit" class="form-input" placeholder="e.g. Saves 10 hours per week on content creation">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: var(--deft-txt-2, #8A95A9);">Additional Context</label>
+                            <textarea id="vsContext" class="form-input" rows="3" placeholder="Any extra details, tone preferences, or specific points to cover..."></textarea>
+                        </div>
+                        <button id="vsGenBtn" class="btn btn-primary text-xs py-2 px-5" onclick="generateVideoScript()">Generate Script</button>
+                    </div>
+                </div>
+
+                <!-- Section B: Generated Script Display -->
+                <div id="scriptResult" class="panel mb-4" style="display:none;">
+                    <div class="panel-header px-4 py-3" style="border-bottom: 1px solid var(--deft-border, #2A2E3D);">
+                        <h3 class="font-heading font-bold text-sm tracking-wide uppercase" style="color: var(--deft-txt, #E8ECF1);">Generated Script</h3>
+                    </div>
+                    <div class="panel-body px-4 py-4">
+                        <!-- 30-Second Timeline Bar -->
+                        <div class="mb-5">
+                            <div class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--deft-txt-2, #8A95A9);">30-Second Timeline</div>
+                            <div class="flex rounded-md overflow-hidden" style="height: 28px;">
+                                <div style="flex: 5; background: var(--deft-accent, #06D6A0); opacity: 0.85;" title="Hook (0-5s)"></div>
+                                <div style="flex: 15; background: var(--deft-accent-warm, #4CC9F0); opacity: 0.85;" title="Story (5-20s)"></div>
+                                <div style="flex: 5; background: var(--deft-success, #6BCB77); opacity: 0.85;" title="Reveal (20-25s)"></div>
+                                <div style="flex: 5; background: var(--deft-warning, #FFD93D); opacity: 0.85;" title="CTA (25-30s)"></div>
+                            </div>
+                            <div class="flex text-center mt-1">
+                                <div style="flex: 5;" class="text-[0.6rem] font-mono uppercase tracking-wider" title="0-5s"><span style="color: var(--deft-accent, #06D6A0);">Hook</span><br><span style="color: var(--deft-txt-3, #525E73);">0-5s</span></div>
+                                <div style="flex: 15;" class="text-[0.6rem] font-mono uppercase tracking-wider" title="5-20s"><span style="color: var(--deft-accent-warm, #4CC9F0);">Story</span><br><span style="color: var(--deft-txt-3, #525E73);">5-20s</span></div>
+                                <div style="flex: 5;" class="text-[0.6rem] font-mono uppercase tracking-wider" title="20-25s"><span style="color: var(--deft-success, #6BCB77);">Reveal</span><br><span style="color: var(--deft-txt-3, #525E73);">20-25s</span></div>
+                                <div style="flex: 5;" class="text-[0.6rem] font-mono uppercase tracking-wider" title="25-30s"><span style="color: var(--deft-warning, #FFD93D);">CTA</span><br><span style="color: var(--deft-txt-3, #525E73);">25-30s</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Script Sections -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                            <div class="rounded-lg p-3" style="background: rgba(6,214,160,0.06); border: 1px solid rgba(6,214,160,0.15);">
+                                <div class="text-[0.65rem] font-mono font-bold uppercase tracking-wider mb-1" style="color: var(--deft-accent, #06D6A0);">Hook (0-5s)</div>
+                                <div id="vsHookText" class="text-sm" style="color: var(--deft-txt, #E8ECF1);">--</div>
+                            </div>
+                            <div class="rounded-lg p-3" style="background: rgba(76,201,240,0.06); border: 1px solid rgba(76,201,240,0.15);">
+                                <div class="text-[0.65rem] font-mono font-bold uppercase tracking-wider mb-1" style="color: var(--deft-accent-warm, #4CC9F0);">Story (5-20s)</div>
+                                <div id="vsStoryText" class="text-sm" style="color: var(--deft-txt, #E8ECF1);">--</div>
+                            </div>
+                            <div class="rounded-lg p-3" style="background: rgba(107,203,119,0.06); border: 1px solid rgba(107,203,119,0.15);">
+                                <div class="text-[0.65rem] font-mono font-bold uppercase tracking-wider mb-1" style="color: var(--deft-success, #6BCB77);">Reveal (20-25s)</div>
+                                <div id="vsRevealText" class="text-sm" style="color: var(--deft-txt, #E8ECF1);">--</div>
+                            </div>
+                            <div class="rounded-lg p-3" style="background: rgba(255,217,61,0.06); border: 1px solid rgba(255,217,61,0.15);">
+                                <div class="text-[0.65rem] font-mono font-bold uppercase tracking-wider mb-1" style="color: var(--deft-warning, #FFD93D);">CTA (25-30s)</div>
+                                <div id="vsCtaText" class="text-sm" style="color: var(--deft-txt, #E8ECF1);">--</div>
+                            </div>
+                        </div>
+
+                        <!-- Full Script -->
+                        <div class="mb-4">
+                            <label class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: var(--deft-txt-2, #8A95A9);">Full Script</label>
+                            <textarea id="vsFullScript" class="form-input" rows="6" readonly style="cursor: default;"></textarea>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-2">
+                            <button class="btn btn-primary text-xs py-1.5 px-4" onclick="copyVideoScript()">Copy Script</button>
+                            <button class="btn btn-ghost text-xs py-1.5 px-4" onclick="document.getElementById('scriptResult').style.display='none';">Generate Another</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section C: Script Library -->
+                <div class="panel">
+                    <div class="panel-header px-4 py-3 flex items-center justify-between" style="border-bottom: 1px solid var(--deft-border, #2A2E3D);">
+                        <h3 class="font-heading font-bold text-sm tracking-wide uppercase" style="color: var(--deft-txt, #E8ECF1);">Script Library</h3>
+                        <button class="btn btn-ghost text-xs py-1 px-3" onclick="loadVideoScripts()">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="inline mr-1"><path d="M1.5 6a4.5 4.5 0 018.22-2.5M10.5 6a4.5 4.5 0 01-8.22 2.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><path d="M10.5 1.5v2h-2M1.5 10.5v-2h2" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            Refresh
+                        </button>
+                    </div>
+                    <div class="panel-body">
+                        <div class="overflow-x-auto">
+                            <table class="w-full" style="border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid var(--deft-border, #2A2E3D);">
+                                        <th class="text-left text-[0.65rem] font-mono uppercase tracking-wider px-4 py-2.5" style="color: var(--deft-txt-3, #525E73);">Date</th>
+                                        <th class="text-left text-[0.65rem] font-mono uppercase tracking-wider px-4 py-2.5" style="color: var(--deft-txt-3, #525E73);">Type</th>
+                                        <th class="text-left text-[0.65rem] font-mono uppercase tracking-wider px-4 py-2.5" style="color: var(--deft-txt-3, #525E73);">Platform</th>
+                                        <th class="text-left text-[0.65rem] font-mono uppercase tracking-wider px-4 py-2.5" style="color: var(--deft-txt-3, #525E73);">Product</th>
+                                        <th class="text-left text-[0.65rem] font-mono uppercase tracking-wider px-4 py-2.5" style="color: var(--deft-txt-3, #525E73);">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vsLibraryBody">
+                                    <tr><td colspan="5" class="text-center py-6" style="color: var(--deft-txt-3, #525E73);">No scripts yet. Generate your first one above.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -2139,6 +2277,7 @@ function refreshAll() {
         if (currentTab === 'queue') loadQueue();
         else if (currentTab === 'calendar') loadCalendar();
         else if (currentTab === 'pillars') renderPillars();
+        else if (currentTab === 'videoScripts') loadVideoScripts();
         else if (currentTab === 'strategy') loadEditorial();
         else if (currentTab === 'config') loadCalendarConfig();
     });
@@ -2148,12 +2287,14 @@ function refreshAll() {
 function switchTab(tab) {
     currentTab = tab;
     sessionStorage.setItem('social-content-tab', tab);
-    ['pillars','queue','calendar','strategy','config'].forEach(t => {
-        document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`).style.display = t === tab ? '' : 'none';
-        document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.toggle('active', t === tab);
+    ['pillars','queue','calendar','videoScripts','strategy','config'].forEach(t => {
+        const idSuffix = t.charAt(0).toUpperCase() + t.slice(1);
+        document.getElementById(`tab${idSuffix}`).style.display = t === tab ? '' : 'none';
+        document.getElementById(`tabBtn${idSuffix}`).classList.toggle('active', t === tab);
     });
     // Lazy-load tab data
     if (tab === 'calendar' && calendarPosts.length === 0) loadCalendar();
+    if (tab === 'videoScripts') loadVideoScripts();
     if (tab === 'strategy' && editorialPlans.length === 0) loadEditorial();
     if (tab === 'config' && !configLoaded) loadCalendarConfig();
 }
@@ -3705,6 +3846,119 @@ function toggleProfileDD() {
 function selectProfileGlobal(userId, name) {
     localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name }));
     location.reload();
+}
+
+// ═══════════════════════════════════════
+// VIDEO SCRIPTS TAB
+// ═══════════════════════════════════════
+let videoScriptsLoaded = false;
+
+async function generateVideoScript() {
+    const scriptType = document.getElementById('vsScriptType').value;
+    const platform = document.getElementById('vsPlatform').value;
+    const product = document.getElementById('vsProduct').value;
+    const keyBenefit = document.getElementById('vsKeyBenefit').value;
+    const context = document.getElementById('vsContext').value;
+
+    if (!product || !keyBenefit) {
+        showToast('Please enter a product/service and key benefit.', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('vsGenBtn');
+    btn.disabled = true;
+    btn.textContent = 'Generating...';
+
+    try {
+        const resp = await fetch('https://n8n.carltonaiservices.com/webhook/content-video-script', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ brand_id: BRAND_ID, script_type: scriptType, platform, product, key_benefit: keyBenefit, context })
+        });
+        const data = await resp.json();
+        if (data && data.success !== false) {
+            document.getElementById('vsHookText').textContent = data.hook || '--';
+            document.getElementById('vsStoryText').textContent = data.story || '--';
+            document.getElementById('vsRevealText').textContent = data.reveal || '--';
+            document.getElementById('vsCtaText').textContent = data.cta || '--';
+            document.getElementById('vsFullScript').value = data.full_script || '';
+            document.getElementById('scriptResult').style.display = '';
+            loadVideoScripts();
+            showToast('Script generated successfully!', 'success');
+        } else {
+            showToast('Script generation failed. Try again.', 'error');
+        }
+    } catch(e) {
+        console.error(e);
+        showToast('Failed to reach script generator.', 'error');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Generate Script';
+}
+
+function copyVideoScript() {
+    const text = document.getElementById('vsFullScript').value;
+    if (!text) { showToast('No script to copy.', 'error'); return; }
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('Script copied to clipboard!', 'success');
+    }).catch(() => {
+        showToast('Failed to copy script.', 'error');
+    });
+}
+
+async function loadVideoScripts() {
+    try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/video_scripts?brand_id=eq.${BRAND_ID}&order=created_at.desc&limit=20&select=id,created_at,script_type,platform,product,status,full_script`, {
+            headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
+        });
+        const scripts = await resp.json();
+        const tbody = document.getElementById('vsLibraryBody');
+        if (!scripts || !Array.isArray(scripts) || scripts.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6" style="color: var(--deft-txt-3, #525E73);">No scripts yet. Generate your first one above.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = scripts.map(s => {
+            const date = new Date(s.created_at).toLocaleDateString();
+            const type = (s.script_type || '').replace(/_/g, ' ');
+            const platformLabel = (s.platform || '--').replace(/_/g, ' ');
+            const statusMap = {
+                draft: { bg: 'rgba(138,149,169,0.1)', color: 'var(--deft-txt-3, #8A95A9)' },
+                approved: { bg: 'rgba(6,214,160,0.15)', color: 'var(--deft-success, #6BCB77)' },
+                filmed: { bg: 'rgba(76,201,240,0.15)', color: 'var(--deft-accent-warm, #4CC9F0)' },
+                posted: { bg: 'rgba(16,185,129,0.15)', color: 'var(--deft-accent, #06D6A0)' }
+            };
+            const st = statusMap[s.status] || statusMap.draft;
+            const safeScript = esc(s.full_script || '');
+            return `<tr style="cursor:pointer; border-bottom: 1px solid var(--deft-border, #2A2E3D);" onmouseenter="this.style.background='rgba(255,255,255,0.02)'" onmouseleave="this.style.background=''" onclick="showLibraryScript(this)" data-script="${safeScript}">
+                <td class="text-xs px-4 py-2.5" style="color: var(--deft-txt-2, #8A95A9);">${date}</td>
+                <td class="text-xs px-4 py-2.5 capitalize" style="color: var(--deft-txt, #E8ECF1);">${esc(type)}</td>
+                <td class="text-xs px-4 py-2.5 capitalize" style="color: var(--deft-txt, #E8ECF1);">${esc(platformLabel)}</td>
+                <td class="text-xs px-4 py-2.5" style="color: var(--deft-txt, #E8ECF1);">${esc(s.product || '--')}</td>
+                <td class="px-4 py-2.5"><span class="badge" style="background:${st.bg};color:${st.color};">${s.status || 'draft'}</span></td>
+            </tr>`;
+        }).join('');
+        videoScriptsLoaded = true;
+    } catch(e) {
+        console.error('Failed to load scripts:', e);
+        showToast('Failed to load script library.', 'error');
+    }
+}
+
+function showLibraryScript(row) {
+    const script = row.getAttribute('data-script');
+    if (script) {
+        // Decode HTML entities back to text
+        const tmp = document.createElement('textarea');
+        tmp.innerHTML = script;
+        document.getElementById('vsFullScript').value = tmp.value;
+        document.getElementById('vsHookText').textContent = '--';
+        document.getElementById('vsStoryText').textContent = '--';
+        document.getElementById('vsRevealText').textContent = '--';
+        document.getElementById('vsCtaText').textContent = '--';
+        document.getElementById('scriptResult').style.display = '';
+        window.scrollTo({ top: document.getElementById('scriptResult').offsetTop - 80, behavior: 'smooth' });
+    }
 }
 
 function signOut() {

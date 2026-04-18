@@ -798,6 +798,70 @@
                     </div>
                 </div>
 
+                <!-- Quick Start: Voice Training Wizard -->
+                <div class="panel mb-6" id="voiceWizardPanel">
+                    <div class="panel-header collapsible-toggle" onclick="this.parentElement.classList.toggle('collapsed')" style="cursor:pointer;">
+                        <div class="flex items-center gap-2">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L10 5.5 15 6.5 11.5 10 12.5 15 8 12.5 3.5 15 4.5 10 1 6.5 6 5.5Z" stroke="var(--deft-accent-warm, #4CC9F0)" stroke-width="1.2" fill="none"/></svg>
+                            <span class="font-heading font-semibold text-sm" style="color: var(--deft-accent-warm, #4CC9F0);">Quick Start: Learn from Your Writing</span>
+                            <span class="badge" style="background:rgba(76,201,240,0.15);color:#4CC9F0;">new</span>
+                        </div>
+                        <svg class="chevron-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    </div>
+                    <div class="panel-body">
+                        <p class="text-xs text-txt-3 mb-4">Paste 3 examples of your writing and the AI will analyze your voice -- tone, patterns, vocabulary. Results can seed the calibration dimensions below.</p>
+                        <div class="space-y-3 mb-4">
+                            <div>
+                                <label class="text-xs font-semibold text-txt-2 mb-1 block">Example 1</label>
+                                <textarea id="wizardEx1" class="form-input w-full text-sm" rows="3" placeholder="Paste a writing sample (email, social post, blog excerpt, proposal...)"></textarea>
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-txt-2 mb-1 block">Example 2</label>
+                                <textarea id="wizardEx2" class="form-input w-full text-sm" rows="3" placeholder="Paste a second writing sample -- different format if possible"></textarea>
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-txt-2 mb-1 block">Example 3</label>
+                                <textarea id="wizardEx3" class="form-input w-full text-sm" rows="3" placeholder="Paste a third writing sample"></textarea>
+                            </div>
+                        </div>
+                        <button onclick="runVoiceWizard()" id="wizardBtn" class="btn text-sm py-2 px-4 flex items-center gap-2" style="background:var(--deft-accent-warm,#4CC9F0);color:var(--deft-base,#08090D);border:none;border-radius:0.5rem;font-weight:600;cursor:pointer;">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            Analyze My Voice
+                        </button>
+                        <!-- Results area (hidden until analysis completes) -->
+                        <div id="wizardResults" style="display:none;" class="mt-5 pt-5" >
+                            <div style="border-top:1px solid var(--deft-border,#2A2E3D);"></div>
+                            <h4 class="font-heading font-semibold text-sm mt-4 mb-3" style="color:var(--deft-accent-warm,#4CC9F0);">Voice Analysis Results</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                                <div class="p-3 rounded-lg" style="background:var(--deft-surface-el);border:1px solid var(--deft-border);">
+                                    <div class="text-xs text-txt-3 mb-1">Your Tone (3 words)</div>
+                                    <div class="text-sm font-semibold" id="wizardTone">--</div>
+                                </div>
+                                <div class="p-3 rounded-lg" style="background:var(--deft-surface-el);border:1px solid var(--deft-border);">
+                                    <div class="text-xs text-txt-3 mb-1">What You Do Differently</div>
+                                    <div class="text-sm" id="wizardPatterns">--</div>
+                                </div>
+                                <div class="p-3 rounded-lg" style="background:var(--deft-surface-el);border:1px solid var(--deft-border);">
+                                    <div class="text-xs text-txt-3 mb-1">Words You Never Use</div>
+                                    <div class="text-sm" id="wizardAvoids">--</div>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-lg mb-4" style="background:var(--deft-surface-el);border:1px solid var(--deft-border);">
+                                <div class="text-xs text-txt-3 mb-1">Sample Paragraph in Your Voice</div>
+                                <div class="text-sm italic" id="wizardSample">--</div>
+                            </div>
+                            <div class="p-3 rounded-lg mb-4" style="background:var(--deft-surface-el);border:1px solid var(--deft-border);">
+                                <div class="text-xs text-txt-3 mb-1">Suggested Dimension Seeds</div>
+                                <div class="text-sm" id="wizardDimensions">--</div>
+                            </div>
+                            <button onclick="applyWizardToCalibration()" class="btn btn-ghost text-xs py-2 px-3 flex items-center gap-1.5">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                Apply to Calibration Dimensions
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Core Tone -->
                 <div class="mb-6">
                     <div class="flex items-center gap-2 mb-3">
@@ -2229,6 +2293,83 @@ function logout() {
     localStorage.removeItem('rdgr-session');
     localStorage.removeItem('rdgr-active-profile');
     location.reload();
+}
+
+// ══════════════════════════════════════════════════
+// VOICE TRAINING WIZARD
+// ══════════════════════════════════════════════════
+let wizardData = null;
+
+async function runVoiceWizard() {
+    const ex1 = $('wizardEx1').value.trim();
+    const ex2 = $('wizardEx2').value.trim();
+    const ex3 = $('wizardEx3').value.trim();
+
+    if (!ex1 || !ex2 || !ex3) {
+        alert('Please paste all 3 writing examples before analyzing.');
+        return;
+    }
+
+    const btn = $('wizardBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="animate-spin" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="2" stroke-dasharray="30" stroke-linecap="round"/></svg> Analyzing...';
+
+    try {
+        const resp = await fetch('https://n8n.carltonaiservices.com/webhook/voice-training-quick', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ brand_id: 'carlton', examples: [ex1, ex2, ex3] })
+        });
+        const data = await resp.json();
+
+        if (data && data.tone) {
+            wizardData = data;
+            $('wizardTone').textContent = data.tone || '--';
+            $('wizardPatterns').textContent = data.patterns || '--';
+            $('wizardAvoids').textContent = data.avoids || '--';
+            $('wizardSample').textContent = data.sample_paragraph || '--';
+
+            // Render dimension suggestions
+            if (data.dimensions && typeof data.dimensions === 'object') {
+                const dimHtml = Object.entries(data.dimensions).map(([dim, val]) => {
+                    const label = dim.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    const score = typeof val === 'number' ? val : (val.score || 5);
+                    const note = typeof val === 'object' && val.note ? val.note : '';
+                    return `<div class="flex items-center gap-2 text-xs mb-1">
+                        <span class="font-semibold" style="min-width:120px;">${label}:</span>
+                        <div class="flex-1 h-2 rounded-full" style="background:var(--deft-border);">
+                            <div class="h-2 rounded-full" style="background:var(--deft-accent-warm,#4CC9F0);width:${score * 10}%;"></div>
+                        </div>
+                        <span class="text-txt-3" style="min-width:30px;">${score}/10</span>
+                        ${note ? `<span class="text-txt-3 italic">${note}</span>` : ''}
+                    </div>`;
+                }).join('');
+                $('wizardDimensions').innerHTML = dimHtml;
+            } else {
+                $('wizardDimensions').textContent = 'No dimension mappings available';
+            }
+
+            $('wizardResults').style.display = '';
+        } else {
+            alert('Analysis failed. Please try again.');
+        }
+    } catch(e) {
+        console.error('Voice wizard error:', e);
+        alert('Failed to reach the analysis service. Please try again.');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Analyze My Voice';
+}
+
+function applyWizardToCalibration() {
+    if (!wizardData || !wizardData.dimensions) {
+        alert('No wizard data to apply.');
+        return;
+    }
+    // Store wizard results for the calibration workflow to use
+    localStorage.setItem('rdgr-voice-wizard-seed', JSON.stringify(wizardData));
+    alert('Voice analysis saved. The calibration questions will now be informed by your detected voice patterns.');
 }
 
 // ══════════════════════════════════════════════════

@@ -656,7 +656,88 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 <div id="meetingDetailContent"><!-- Filled by JS --></div>
             </div>
 
-            <!-- Section 3: Pre-Meeting Prep -->
+            <!-- Section 3: Generate Proposal -->
+            <div class="panel mt-6" id="proposalSection" style="display:none;">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 2h7l3 3v9a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 2v3h3M5 8h6M5 11h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="font-heading font-semibold text-sm">Generate Proposal</span>
+                    </div>
+                    <button class="btn btn-ghost text-xs py-1 px-2" onclick="toggleProposalPanel()" title="Close">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+                <div class="panel-body">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5 text-txt-2">Meeting Notes</label>
+                            <textarea id="proposalNotes" rows="5" class="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);" placeholder="Paste meeting notes or key discussion points..."></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-txt-2">Client Name</label>
+                                <input type="text" id="proposalClient" class="form-input text-sm" placeholder="Client name">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-txt-2">Price / Scope</label>
+                                <input type="text" id="proposalPrice" class="form-input text-sm" placeholder="e.g. $5,000 / Full website build">
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="generateProposal()" id="proposalGenBtn">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                            Generate Proposal
+                        </button>
+                    </div>
+
+                    <!-- Proposal Results -->
+                    <div id="proposalResults" style="display:none;" class="mt-5 space-y-4">
+                        <div class="p-3 rounded-lg" style="background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.15);">
+                            <h4 class="font-heading font-semibold text-sm mb-2" style="color:var(--deft-accent,#06D6A0);">Executive Summary</h4>
+                            <p class="text-sm text-txt-2" id="propExecSummary" style="line-height:1.7;"></p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="p-3 rounded-lg" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);">
+                                <h4 class="font-heading font-semibold text-xs mb-1.5 uppercase tracking-wide text-txt-3">Problem</h4>
+                                <p class="text-sm text-txt-2" id="propProblem" style="line-height:1.6;"></p>
+                            </div>
+                            <div class="p-3 rounded-lg" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);">
+                                <h4 class="font-heading font-semibold text-xs mb-1.5 uppercase tracking-wide text-txt-3">Solution</h4>
+                                <p class="text-sm text-txt-2" id="propSolution" style="line-height:1.6;"></p>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-lg" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);">
+                            <h4 class="font-heading font-semibold text-xs mb-1.5 uppercase tracking-wide text-txt-3">Scope</h4>
+                            <ul class="space-y-1" id="propScope"></ul>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="p-3 rounded-lg" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);">
+                                <h4 class="font-heading font-semibold text-xs mb-1.5 uppercase tracking-wide text-txt-3">Timeline</h4>
+                                <p class="text-sm text-txt-2" id="propTimeline" style="line-height:1.6;"></p>
+                            </div>
+                            <div class="p-3 rounded-lg" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);">
+                                <h4 class="font-heading font-semibold text-xs mb-1.5 uppercase tracking-wide text-txt-3">Investment</h4>
+                                <p class="text-sm text-txt-2" id="propInvestment" style="line-height:1.6;"></p>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-lg" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);">
+                            <h4 class="font-heading font-semibold text-xs mb-1.5 uppercase tracking-wide text-txt-3">Next Steps</h4>
+                            <ul class="space-y-1" id="propNextSteps"></ul>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-xs font-medium text-txt-2">Full Proposal</label>
+                                <button class="btn btn-ghost text-xs py-1 px-2" onclick="copyProposal()">
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="4" width="6.5" height="6.5" rx="1" stroke="currentColor" stroke-width="1"/><path d="M2.5 8V2.5A.5.5 0 013 2h5.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                                    Copy to Clipboard
+                                </button>
+                            </div>
+                            <textarea id="proposalFullText" rows="8" readonly class="w-full px-3 py-2 rounded-lg text-xs outline-none resize-y" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt-2,#8A95A9);font-family:'JetBrains Mono',monospace;line-height:1.6;"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Pre-Meeting Prep -->
             <div class="panel mt-6" id="prepSection">
                 <div class="panel-header">
                     <div class="flex items-center gap-2">
@@ -1001,7 +1082,18 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 </div>`;
             }
 
+            // Generate Proposal button (always visible in detail view)
+            html += `<div class="mt-4">
+                <button class="btn btn-primary" onclick="openProposalFromMeeting()">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 1.5h5.5l2.5 2.5v6.5a.75.75 0 01-.75.75h-7A.75.75 0 011.5 10.5V2.25A.75.75 0 012.25 1.5z" stroke="currentColor" stroke-width="1"/><path d="M4 7h4M4 9h3" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                    Generate Proposal
+                </button>
+            </div>`;
+
             document.getElementById('meetingDetailContent').innerHTML = html;
+
+            // Pre-fill proposal fields from meeting data
+            window._currentMeetingData = meeting;
 
         } catch (e) {
             console.error('View meeting error:', e);
@@ -1192,6 +1284,97 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     function signOut(){localStorage.removeItem('rdgr-session');localStorage.removeItem('rdgr-active-profile');location.reload();}
     function toggleProfileDD(){const dd=document.getElementById('profileDropdown');dd.classList.toggle('hidden');if(!dd.classList.contains('hidden')){setTimeout(()=>document.addEventListener('click',function c(e){if(!document.getElementById('profileSwitcher').contains(e.target))dd.classList.add('hidden');document.removeEventListener('click',c);}),0);}}
     function selectProfileGlobal(userId,name){localStorage.setItem('rdgr-active-profile',JSON.stringify({id:userId,name:name}));location.reload();}
+
+    // ═══════════════════════════════════════
+    // GENERATE PROPOSAL
+    // ═══════════════════════════════════════
+    function openProposalFromMeeting() {
+        const section = document.getElementById('proposalSection');
+        section.style.display = '';
+        // Pre-fill from current meeting data if available
+        if (window._currentMeetingData) {
+            const m = window._currentMeetingData;
+            const notes = m.summary || m.ai_summary || m.transcript_text || m.transcript || '';
+            const client = getMeetingClient(m) || '';
+            document.getElementById('proposalNotes').value = notes;
+            document.getElementById('proposalClient').value = client;
+        }
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function toggleProposalPanel() {
+        const section = document.getElementById('proposalSection');
+        section.style.display = section.style.display === 'none' ? '' : 'none';
+    }
+
+    async function generateProposal() {
+        const notes = document.getElementById('proposalNotes').value.trim();
+        const client_name = document.getElementById('proposalClient').value.trim();
+        const price = document.getElementById('proposalPrice').value.trim();
+
+        if (!notes) { toast('Please enter meeting notes', 'error'); return; }
+        if (!client_name) { toast('Please enter a client name', 'error'); return; }
+
+        const btn = document.getElementById('proposalGenBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner" style="width:12px;height:12px;"></div> Generating...';
+
+        try {
+            const res = await fetch('https://n8n.carltonaiservices.com/webhook/mtg-proposal-gen', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notes, client_name, price })
+            });
+            const data = await res.json();
+
+            // Populate results
+            document.getElementById('propExecSummary').textContent = data.executive_summary || '';
+            document.getElementById('propProblem').textContent = data.problem || '';
+            document.getElementById('propSolution').textContent = data.solution || '';
+            document.getElementById('propTimeline').textContent = data.timeline || '';
+            document.getElementById('propInvestment').textContent = data.investment || '';
+
+            // Scope bullet list
+            const scopeEl = document.getElementById('propScope');
+            const scopeItems = Array.isArray(data.scope) ? data.scope : [];
+            scopeEl.innerHTML = scopeItems.map(item =>
+                `<li class="flex items-start gap-2 text-sm text-txt-2"><span class="text-accent mt-0.5 flex-shrink-0">\u2022</span><span>${esc(String(item))}</span></li>`
+            ).join('') || '<li class="text-sm text-txt-3">No scope items</li>';
+
+            // Next steps bullet list
+            const stepsEl = document.getElementById('propNextSteps');
+            const stepsItems = Array.isArray(data.next_steps) ? data.next_steps : [];
+            stepsEl.innerHTML = stepsItems.map(item =>
+                `<li class="flex items-start gap-2 text-sm text-txt-2"><span class="text-accent mt-0.5 flex-shrink-0">\u2022</span><span>${esc(String(item))}</span></li>`
+            ).join('') || '<li class="text-sm text-txt-3">No next steps</li>';
+
+            // Full proposal text
+            let fullText = `PROPOSAL FOR ${(client_name || '').toUpperCase()}\n`;
+            fullText += `${'='.repeat(40)}\n\n`;
+            fullText += `EXECUTIVE SUMMARY\n${data.executive_summary || ''}\n\n`;
+            fullText += `PROBLEM\n${data.problem || ''}\n\n`;
+            fullText += `SOLUTION\n${data.solution || ''}\n\n`;
+            fullText += `SCOPE\n${scopeItems.map(s => '  - ' + s).join('\n')}\n\n`;
+            fullText += `TIMELINE\n${data.timeline || ''}\n\n`;
+            fullText += `INVESTMENT\n${data.investment || ''}\n\n`;
+            fullText += `NEXT STEPS\n${stepsItems.map(s => '  - ' + s).join('\n')}\n`;
+            document.getElementById('proposalFullText').value = fullText;
+
+            document.getElementById('proposalResults').style.display = '';
+            toast('Proposal generated', 'success');
+        } catch (e) {
+            console.error('Proposal generation error:', e);
+            toast('Failed to generate proposal: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Generate Proposal';
+        }
+    }
+
+    function copyProposal() {
+        const text = document.getElementById('proposalFullText').value;
+        navigator.clipboard.writeText(text).then(() => toast('Proposal copied to clipboard', 'success')).catch(() => toast('Failed to copy', 'error'));
+    }
 
     </script>
 

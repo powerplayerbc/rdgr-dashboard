@@ -559,6 +559,7 @@
         .toast-error { background: rgba(255,107,107,0.15); border: 1px solid rgba(255,107,107,0.3); color: #FF6B6B; }
         .toast-info { background: rgba(76,201,240,0.15); border: 1px solid rgba(76,201,240,0.3); color: #4CC9F0; }
         @keyframes toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Stat chip */
         .stat-chip {
@@ -1012,6 +1013,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 <button class="task-tab" data-tab="builds" onclick="switchTab('builds')">Active Builds</button>
                 <button class="task-tab" data-tab="preview" onclick="switchTab('preview')">Page Preview</button>
                 <button class="task-tab" data-tab="config" onclick="switchTab('config')">Deploy &amp; Config</button>
+                <button class="task-tab" data-tab="reports" onclick="switchTab('reports')">Generate Report</button>
             </div>
 
             <!-- ════════════════════════════════════════ -->
@@ -1216,6 +1218,89 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 </div>
 
                 <div id="configEmpty" class="empty-state">Select a build above to view configuration</div>
+            </div>
+
+            <!-- ════════════════════════════════════════ -->
+            <!-- TAB 5: GENERATE REPORT                  -->
+            <!-- ════════════════════════════════════════ -->
+            <div id="tab-reports" class="tab-content" style="display:none;">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="flex items-center gap-2">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 2h4v5H2zM10 2h4v3h-4zM10 8h4v6h-4zM2 10h4v4H2z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            <span class="font-heading text-sm font-semibold">Generate Client Report</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="space-y-3" style="max-width:640px;">
+                            <div>
+                                <label class="text-xs text-txt-3 uppercase tracking-wide font-medium mb-1 block">Project Notes</label>
+                                <textarea id="reportNotes" rows="5" class="form-input text-sm" placeholder="Paste project notes, updates, deliverables completed..."></textarea>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-xs text-txt-3 uppercase tracking-wide font-medium mb-1 block">Client Name</label>
+                                    <input type="text" id="reportClient" class="form-input text-sm" placeholder="Client name">
+                                </div>
+                                <div>
+                                    <label class="text-xs text-txt-3 uppercase tracking-wide font-medium mb-1 block">Reporting Period</label>
+                                    <select id="reportPeriod" class="form-input text-sm">
+                                        <option value="this_week">This Week</option>
+                                        <option value="this_month">This Month</option>
+                                        <option value="last_month">Last Month</option>
+                                        <option value="custom">Custom</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="generateClientReport()" id="reportGenBtn">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                Generate Report
+                            </button>
+                        </div>
+
+                        <!-- Report Results -->
+                        <div id="reportResults" style="display:none;" class="mt-6 space-y-4">
+                            <div class="p-3 rounded-lg" style="background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.15);">
+                                <h4 class="font-heading font-semibold text-sm mb-2" style="color:var(--deft-accent,#06D6A0);">Executive Summary</h4>
+                                <p class="text-sm text-txt-2" id="rptExecSummary" style="line-height:1.7;"></p>
+                            </div>
+                            <div class="p-3 rounded-lg" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);">
+                                <h4 class="font-heading font-semibold text-xs mb-2 uppercase tracking-wide text-txt-3">What We Did</h4>
+                                <ul class="space-y-1" id="rptWhatWeDid"></ul>
+                            </div>
+                            <div class="p-3 rounded-lg" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);">
+                                <h4 class="font-heading font-semibold text-xs mb-2 uppercase tracking-wide text-txt-3">Results</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm" id="rptResultsTable">
+                                        <thead>
+                                            <tr style="border-bottom:1px solid var(--deft-border,#2A2E3D);">
+                                                <th class="text-left py-2 pr-4 text-xs text-txt-3 font-medium uppercase">Metric</th>
+                                                <th class="text-left py-2 pr-4 text-xs text-txt-3 font-medium uppercase">Before</th>
+                                                <th class="text-left py-2 pr-4 text-xs text-txt-3 font-medium uppercase">After</th>
+                                                <th class="text-left py-2 text-xs text-txt-3 font-medium uppercase">Change</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="rptResultsBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-lg" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);">
+                                <h4 class="font-heading font-semibold text-xs mb-2 uppercase tracking-wide text-txt-3">What's Next</h4>
+                                <ul class="space-y-1" id="rptWhatsNext"></ul>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="text-xs font-medium text-txt-2">Full Report</label>
+                                    <button class="btn btn-ghost text-xs py-1 px-2" onclick="copyReport()">
+                                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="4" width="6.5" height="6.5" rx="1" stroke="currentColor" stroke-width="1"/><path d="M2.5 8V2.5A.5.5 0 013 2h5.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                                        Copy to Clipboard
+                                    </button>
+                                </div>
+                                <textarea id="reportFullText" rows="8" readonly class="form-input text-xs resize-y" style="font-family:'JetBrains Mono',monospace;line-height:1.6;color:var(--deft-txt-2,#8A95A9);"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div><!-- /max-w container -->
@@ -2165,6 +2250,87 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     function selectProfileGlobal(userId, name) {
         localStorage.setItem('rdgr-active-profile', JSON.stringify({ id: userId, name: name }));
         location.reload();
+    }
+
+    // ═══════════════════════════════════════
+    // GENERATE CLIENT REPORT
+    // ═══════════════════════════════════════
+    function escHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+    async function generateClientReport() {
+        const notes = document.getElementById('reportNotes').value.trim();
+        const client_name = document.getElementById('reportClient').value.trim();
+        const period = document.getElementById('reportPeriod').value;
+
+        if (!notes) { toast('Please enter project notes', 'error'); return; }
+        if (!client_name) { toast('Please enter a client name', 'error'); return; }
+
+        const btn = document.getElementById('reportGenBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<div style="width:12px;height:12px;border:2px solid rgba(6,214,160,0.3);border-top-color:var(--deft-accent,#06D6A0);border-radius:50%;animation:spin 0.6s linear infinite;"></div> Generating...';
+
+        try {
+            const res = await fetch('https://n8n.carltonaiservices.com/webhook/cp-report-gen', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notes, client_name, period })
+            });
+            const data = await res.json();
+
+            document.getElementById('rptExecSummary').textContent = data.executive_summary || '';
+
+            // What we did
+            const whatEl = document.getElementById('rptWhatWeDid');
+            const whatItems = Array.isArray(data.what_we_did) ? data.what_we_did : [];
+            whatEl.innerHTML = whatItems.map(item =>
+                `<li class="flex items-start gap-2 text-sm text-txt-2"><span class="text-accent mt-0.5 flex-shrink-0">\u2022</span><span>${escHtml(String(item))}</span></li>`
+            ).join('') || '<li class="text-sm text-txt-3">No items</li>';
+
+            // Results table
+            const tbody = document.getElementById('rptResultsBody');
+            const tableData = Array.isArray(data.results_table) ? data.results_table : [];
+            tbody.innerHTML = tableData.map(row =>
+                `<tr style="border-bottom:1px solid var(--deft-border,#2A2E3D);">
+                    <td class="py-2 pr-4 text-txt-2">${escHtml(row.metric || '')}</td>
+                    <td class="py-2 pr-4 text-txt-3">${escHtml(row.before || '')}</td>
+                    <td class="py-2 pr-4 text-txt-2">${escHtml(row.after || '')}</td>
+                    <td class="py-2 font-medium" style="color:var(--deft-accent,#06D6A0);">${escHtml(row.change || '')}</td>
+                </tr>`
+            ).join('') || '<tr><td colspan="4" class="py-2 text-sm text-txt-3">No results data</td></tr>';
+
+            // What's next
+            const nextEl = document.getElementById('rptWhatsNext');
+            const nextItems = Array.isArray(data.whats_next) ? data.whats_next : [];
+            nextEl.innerHTML = nextItems.map(item =>
+                `<li class="flex items-start gap-2 text-sm text-txt-2"><span class="text-accent mt-0.5 flex-shrink-0">\u2022</span><span>${escHtml(String(item))}</span></li>`
+            ).join('') || '<li class="text-sm text-txt-3">No items</li>';
+
+            // Full report text
+            const periodLabel = { this_week: 'This Week', this_month: 'This Month', last_month: 'Last Month', custom: 'Custom' }[period] || period;
+            let fullText = `CLIENT REPORT: ${client_name.toUpperCase()}\n`;
+            fullText += `Period: ${periodLabel}\n`;
+            fullText += `${'='.repeat(40)}\n\n`;
+            fullText += `EXECUTIVE SUMMARY\n${data.executive_summary || ''}\n\n`;
+            fullText += `WHAT WE DID\n${whatItems.map(s => '  - ' + s).join('\n')}\n\n`;
+            fullText += `RESULTS\n`;
+            tableData.forEach(r => { fullText += `  ${r.metric || ''}: ${r.before || ''} -> ${r.after || ''} (${r.change || ''})\n`; });
+            fullText += `\nWHAT'S NEXT\n${nextItems.map(s => '  - ' + s).join('\n')}\n`;
+            document.getElementById('reportFullText').value = fullText;
+
+            document.getElementById('reportResults').style.display = '';
+            toast('Report generated', 'success');
+        } catch (e) {
+            console.error('Report generation error:', e);
+            toast('Failed to generate report: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Generate Report';
+        }
+    }
+
+    function copyReport() {
+        const text = document.getElementById('reportFullText').value;
+        navigator.clipboard.writeText(text).then(() => toast('Report copied to clipboard', 'success')).catch(() => toast('Failed to copy', 'error'));
     }
 
     </script>

@@ -1010,6 +1010,12 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         <div class="stat-label">Active Rules</div>
                     </div>
                 </div>
+                <div class="stat-chip flex-1 min-w-[130px]" style="cursor:pointer;" onclick="document.getElementById('filterCategory').value='ai_slop';applyRuleFilters();" title="Click to filter AI Slop rules">
+                    <div>
+                        <div class="stat-value" style="color: #A855F7;" id="statSlopHits">--</div>
+                        <div class="stat-label">Slop Hits (7d)</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Section 2: Needs Your Input -->
@@ -1054,6 +1060,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     <div class="filter-bar">
                         <select class="filter-select" id="filterCategory" onchange="applyRuleFilters()">
                             <option value="">All Categories</option>
+                            <option value="ai_slop">AI Slop Filter</option>
                             <option value="service_scope">Service Scope</option>
                             <option value="non_negotiables">Non-Negotiables</option>
                             <option value="contract_terms">Contract Terms</option>
@@ -1098,6 +1105,43 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                                 <tr><td colspan="5" class="text-center text-txt-3 py-8"><div class="skeleton h-6 w-48 mx-auto rounded"></div></td></tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3b: AI Slop Filter Summary -->
+            <div class="panel mb-6" id="slopFilterPanel">
+                <div class="panel-header collapsible-toggle" onclick="this.parentElement.classList.toggle('collapsed')">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 3h12M4 6h8M6 9h4M7 12h2" stroke="#A855F7" stroke-width="1.3" stroke-linecap="round"/></svg>
+                        <span class="font-heading font-semibold text-sm" style="color:#A855F7;">AI Slop Filter</span>
+                        <span class="badge" style="background:rgba(168,85,247,0.15);color:#A855F7;" id="slopRuleCount">--</span>
+                    </div>
+                    <svg class="chevron-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                </div>
+                <div class="panel-body">
+                    <p class="text-xs text-txt-3 mb-4">Content quality gate powered by Slagathore. All AI-generated content is checked against these rules before publication.</p>
+                    <div class="flex flex-wrap gap-3 mb-4">
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:var(--deft-surface-el);border:1px solid var(--deft-border);">
+                            <span class="text-sm font-bold" style="color:#A855F7;" id="slopVerbCount">--</span>
+                            <span class="text-xs text-txt-2">Banned Verbs</span>
+                        </div>
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:var(--deft-surface-el);border:1px solid var(--deft-border);">
+                            <span class="text-sm font-bold" style="color:#A855F7;" id="slopFillerCount">--</span>
+                            <span class="text-xs text-txt-2">Filler Phrases</span>
+                        </div>
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:var(--deft-surface-el);border:1px solid var(--deft-border);">
+                            <span class="text-sm font-bold" style="color:#A855F7;" id="slopStarterCount">--</span>
+                            <span class="text-xs text-txt-2">Paragraph Starters</span>
+                        </div>
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:var(--deft-surface-el);border:1px solid var(--deft-border);">
+                            <span class="text-sm font-bold" style="color:#A855F7;" id="slopAtmoCount">--</span>
+                            <span class="text-xs text-txt-2">Atmospheric Words</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 px-3 py-2 rounded-lg" style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15);">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1a6 6 0 100 12A6 6 0 007 1z" stroke="#A855F7" stroke-width="1" fill="none"/><path d="M7 4v3M7 9v.5" stroke="#A855F7" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <span class="text-xs" style="color:#A855F7;">The human test: Would an actual human say this out loud in a meeting? If no, rewrite it.</span>
                     </div>
                 </div>
             </div>
@@ -1275,7 +1319,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         const [totalChecks, activeRulesCount, allChecks] = await Promise.all([
             supabaseCount('compliance_checks', 'brand_id=eq.carlton'),
             supabaseCount('bsi_policy_rules', 'brand_id=eq.carlton&is_active=eq.true'),
-            supabaseSelect('compliance_checks', 'brand_id=eq.carlton&select=verdict,created_at'),
+            supabaseSelect('compliance_checks', 'brand_id=eq.carlton&select=verdict,created_at,violations'),
         ]);
 
         document.getElementById('statTotalChecks').textContent = totalChecks || 0;
@@ -1291,9 +1335,18 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             weekAgo.setDate(weekAgo.getDate() - 7);
             const violations = allChecks.filter(c => c.verdict !== 'compliant' && new Date(c.created_at) >= weekAgo).length;
             document.getElementById('statViolations').textContent = violations;
+
+            // Slop hits in last 7 days — count checks that have ai_slop violations
+            const slopHits = allChecks.filter(c => {
+                if (new Date(c.created_at) < weekAgo) return false;
+                const v = c.violations || [];
+                return v.some(vi => (vi.rule_text || '').toLowerCase().includes('slop') || (vi.category === 'ai_slop'));
+            }).length;
+            document.getElementById('statSlopHits').textContent = slopHits;
         } else {
             document.getElementById('statPassRate').textContent = '--';
             document.getElementById('statViolations').textContent = '0';
+            document.getElementById('statSlopHits').textContent = '0';
         }
     }
 
@@ -1572,7 +1625,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     // SECTION 3: ACTIVE RULES
     // ═══════════════════════════════════════
     async function loadRules() {
-        const rules = await supabaseSelect('bsi_policy_rules', 'brand_id=eq.carlton&is_active=eq.true&order=severity&select=id,rule_text,category,rule_type,severity,enforcement');
+        const rules = await supabaseSelect('bsi_policy_rules', 'brand_id=eq.carlton&is_active=eq.true&order=severity&select=id,rule_text,category,rule_type,severity,enforcement,metadata');
         if (!rules) {
             document.getElementById('rulesTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-txt-3 py-6">Failed to load rules</td></tr>';
             return;
@@ -1581,6 +1634,14 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         allRules = rules;
         document.getElementById('rulesCount').textContent = `(${rules.length})`;
         renderRulesTable(rules);
+
+        // Populate AI Slop Filter panel counts
+        const slopRules = rules.filter(r => r.category === 'ai_slop');
+        document.getElementById('slopRuleCount').textContent = slopRules.length + ' rules';
+        document.getElementById('slopVerbCount').textContent = slopRules.filter(r => r.metadata && r.metadata.sub_category === 'banned_verb').length;
+        document.getElementById('slopFillerCount').textContent = slopRules.filter(r => r.metadata && r.metadata.sub_category === 'banned_filler').length;
+        document.getElementById('slopStarterCount').textContent = slopRules.filter(r => r.metadata && r.metadata.sub_category === 'banned_starter').length;
+        document.getElementById('slopAtmoCount').textContent = slopRules.filter(r => r.metadata && r.metadata.sub_category === 'banned_atmospheric').length;
     }
 
     function applyRuleFilters() {
@@ -1647,9 +1708,18 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
             const enforcement = (rule.enforcement || '--').replace(/_/g, ' ');
 
+            // Category badge — purple for ai_slop
+            let categoryBadge = '';
+            if (rule.category === 'ai_slop') {
+                const subCat = (rule.metadata && rule.metadata.sub_category) ? rule.metadata.sub_category.replace(/_/g, ' ').replace(/^banned /, '') : 'slop';
+                categoryBadge = `<span class="badge" style="background:rgba(168,85,247,0.15);color:#A855F7;">ai slop</span> <span class="text-xs text-txt-3">${esc(subCat)}</span>`;
+            } else {
+                categoryBadge = `<span class="text-xs">${esc(categoryLabel)}</span>`;
+            }
+
             return `<tr>
                 <td style="color: var(--deft-txt);" title="${esc(rule.rule_text)}">${esc(ruleText)}</td>
-                <td><span class="text-xs">${esc(categoryLabel)}</span></td>
+                <td>${categoryBadge}</td>
                 <td>${typeBadge}</td>
                 <td>${severityBadge}</td>
                 <td><span class="text-xs">${esc(enforcement)}</span></td>

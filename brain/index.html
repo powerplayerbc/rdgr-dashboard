@@ -650,6 +650,7 @@
             from { opacity: 0; transform: translateX(40px); }
             to { opacity: 1; transform: translateX(0); }
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes toastOut {
             from { opacity: 1; transform: translateX(0); }
             to { opacity: 0; transform: translateX(40px); }
@@ -1911,9 +1912,62 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             <div class="panel brain-reveal brain-reveal-5">
                 <div class="panel-header">
                     <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Weekly Report</span>
+                    <button class="btn btn-primary btn-sm text-xs" onclick="toggleWeeklyReset()" id="weeklyResetToggle">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Run Weekly Reset
+                    </button>
                 </div>
                 <div class="panel-body" id="weeklyReportContent">
                     <div class="text-xs" style="color: var(--brain-txt-3);">Loading report...</div>
+                </div>
+
+                <!-- Weekly Reset Input (hidden by default) -->
+                <div id="weeklyResetInput" style="display:none;border-top:1px solid var(--deft-border,#2A2E3D);">
+                    <div class="panel-body">
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5" style="color:var(--brain-txt-2);">Paste this week's notes</label>
+                                <textarea id="weeklyResetNotes" rows="8" class="form-input text-sm" placeholder="What happened this week? Key wins, blockers, thoughts, decisions..."></textarea>
+                            </div>
+                            <button class="btn btn-primary" onclick="runWeeklyReset()" id="weeklyResetBtn">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                                Run Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weekly Reset Results (hidden by default) -->
+                <div id="weeklyResetResults" style="display:none;border-top:1px solid var(--deft-border,#2A2E3D);">
+                    <div class="panel-body">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <!-- What Moved Forward -->
+                            <div class="p-3 rounded-lg" style="background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.2);">
+                                <h4 class="font-heading font-bold text-xs uppercase tracking-wide mb-2" style="color:var(--deft-success,#06D6A0);">What Moved Forward</h4>
+                                <ul class="space-y-1" id="wrMovedForward"></ul>
+                            </div>
+                            <!-- What Stalled -->
+                            <div class="p-3 rounded-lg" style="background:rgba(255,107,107,0.06);border:1px solid rgba(255,107,107,0.2);">
+                                <h4 class="font-heading font-bold text-xs uppercase tracking-wide mb-2" style="color:var(--deft-danger,#FF6B6B);">What Stalled</h4>
+                                <div class="space-y-2" id="wrStalled"></div>
+                            </div>
+                            <!-- Overcomplicating -->
+                            <div class="p-3 rounded-lg" style="background:rgba(255,165,0,0.06);border:1px solid rgba(255,165,0,0.2);">
+                                <h4 class="font-heading font-bold text-xs uppercase tracking-wide mb-2" style="color:#FFA500;">Overcomplicating</h4>
+                                <p class="text-sm" style="color:var(--brain-txt-2);line-height:1.6;" id="wrOvercomplicating"></p>
+                            </div>
+                            <!-- Drop This -->
+                            <div class="p-3 rounded-lg" style="background:rgba(255,107,107,0.06);border:1px solid rgba(255,107,107,0.2);">
+                                <h4 class="font-heading font-bold text-xs uppercase tracking-wide mb-2" style="color:var(--deft-danger,#FF6B6B);">Drop This</h4>
+                                <p class="text-sm" style="color:var(--brain-txt-2);line-height:1.6;" id="wrDrop"></p>
+                            </div>
+                        </div>
+                        <!-- Double Down (full-width) -->
+                        <div class="mt-3 p-3 rounded-lg" style="background:rgba(6,214,160,0.06);border:1px solid rgba(6,214,160,0.2);">
+                            <h4 class="font-heading font-bold text-xs uppercase tracking-wide mb-2" style="color:var(--deft-success,#06D6A0);">Double Down On</h4>
+                            <p class="text-sm" style="color:var(--brain-txt-2);line-height:1.6;" id="wrDoubleDown"></p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -6337,6 +6391,79 @@ if (_origLoadDashboard) {
         loadActivitySuggestions();
         loadDailyInsight();
     };
+}
+
+// ═══════════════════════════════════════
+// WEEKLY RESET
+// ═══════════════════════════════════════
+function toggleWeeklyReset() {
+    const input = document.getElementById('weeklyResetInput');
+    input.style.display = input.style.display === 'none' ? '' : 'none';
+    if (input.style.display !== 'none') {
+        document.getElementById('weeklyResetNotes').focus();
+    }
+}
+
+function _wrEsc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+async function runWeeklyReset() {
+    const notes = document.getElementById('weeklyResetNotes').value.trim();
+    if (!notes) { toast('Please paste your weekly notes', 'error'); return; }
+
+    const btn = document.getElementById('weeklyResetBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div style="width:12px;height:12px;border:2px solid rgba(6,214,160,0.3);border-top-color:var(--deft-accent,#06D6A0);border-radius:50%;animation:spin 0.6s linear infinite;"></div> Running Reset...';
+
+    try {
+        const res = await fetch('https://n8n.carltonaiservices.com/webhook/brain-weekly-reset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notes, week_of: new Date().toISOString().split('T')[0] })
+        });
+        const data = await res.json();
+
+        // What Moved Forward
+        const mfEl = document.getElementById('wrMovedForward');
+        const mfItems = Array.isArray(data.moved_forward) ? data.moved_forward : [];
+        mfEl.innerHTML = mfItems.map(item =>
+            `<li class="flex items-start gap-2 text-sm" style="color:var(--brain-txt-2);"><span style="color:var(--deft-success,#06D6A0);" class="mt-0.5 flex-shrink-0">\u2022</span><span>${_wrEsc(String(item))}</span></li>`
+        ).join('') || '<li class="text-sm" style="color:var(--brain-txt-3);">No items</li>';
+
+        // What Stalled
+        const sEl = document.getElementById('wrStalled');
+        const sItems = Array.isArray(data.stalled) ? data.stalled : [];
+        sEl.innerHTML = sItems.map(item => {
+            const itemText = typeof item === 'object' ? (item.item || '') : String(item);
+            const why = typeof item === 'object' ? (item.why || '') : '';
+            return `<div class="text-sm" style="color:var(--brain-txt-2);"><span class="font-medium">${_wrEsc(itemText)}</span>${why ? `<span class="text-xs block mt-0.5" style="color:var(--brain-txt-3);">${_wrEsc(why)}</span>` : ''}</div>`;
+        }).join('') || '<div class="text-sm" style="color:var(--brain-txt-3);">No items</div>';
+
+        // Overcomplicating
+        document.getElementById('wrOvercomplicating').textContent = data.overcomplicating || 'Nothing flagged.';
+
+        // Drop This
+        const dropData = data.drop || {};
+        const dropItem = typeof dropData === 'object' ? (dropData.item || dropData.what || String(dropData)) : String(dropData);
+        const dropWhy = typeof dropData === 'object' ? (dropData.explanation || dropData.why || '') : '';
+        document.getElementById('wrDrop').innerHTML = `<span class="font-medium">${_wrEsc(dropItem)}</span>${dropWhy ? `<span class="text-xs block mt-1" style="color:var(--brain-txt-3);">${_wrEsc(dropWhy)}</span>` : ''}`;
+
+        // Double Down On
+        const ddData = data.double_down || {};
+        const ddItem = typeof ddData === 'object' ? (ddData.item || ddData.what || String(ddData)) : String(ddData);
+        const ddWhy = typeof ddData === 'object' ? (ddData.explanation || ddData.why || '') : '';
+        document.getElementById('wrDoubleDown').innerHTML = `<span class="font-medium">${_wrEsc(ddItem)}</span>${ddWhy ? `<span class="text-xs block mt-1" style="color:var(--brain-txt-3);">${_wrEsc(ddWhy)}</span>` : ''}`;
+
+        // Show results, hide input
+        document.getElementById('weeklyResetResults').style.display = '';
+        document.getElementById('weeklyResetInput').style.display = 'none';
+        toast('Weekly reset complete', 'success');
+    } catch (e) {
+        console.error('Weekly reset error:', e);
+        toast('Failed to run weekly reset: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Run Reset';
+    }
 }
 
 </script>

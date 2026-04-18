@@ -313,6 +313,7 @@
         .toast-error { background:rgba(255,107,107,0.15); border:1px solid rgba(255,107,107,0.3); color:#FF6B6B; }
         .toast-info { background:rgba(76,201,240,0.15); border:1px solid rgba(76,201,240,0.3); color:#4CC9F0; }
         @keyframes toast-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes spin { to { transform:rotate(360deg); } }
 
         /* ── Knowledge Manager Specific ── */
         .km-group {
@@ -721,6 +722,10 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     <span class="font-heading font-semibold" style="color: #818CF8;">Knowledge Manager</span>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
+                    <button class="btn btn-primary text-xs" onclick="toggleSkillBuilder()" id="skillBuilderToggle">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        Build New Skill
+                    </button>
                     <span class="text-xs text-txt-3 mr-1">Filter:</span>
                     <button class="km-filter-chip active" onclick="setRoleFilter('all')">All</button>
                     <button class="km-filter-chip" onclick="setRoleFilter('frontend')">Frontend</button>
@@ -729,6 +734,85 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     <select id="projectFilter" class="form-input text-xs py-1 px-2" style="width:auto;min-width:120px;background:rgba(255,255,255,0.03);" onchange="setProjectFilter(this.value)">
                         <option value="all">All Projects</option>
                     </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Skill Builder Panel (hidden by default) ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-4" id="skillBuilderPanel" style="display:none;">
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 3h4l-3 3 1 4-4-2-4 2 1-4-3-3h4z" stroke="#818CF8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span class="font-heading font-semibold text-sm" style="color:#818CF8;">Build New Skill</span>
+                    </div>
+                    <button class="btn btn-ghost text-xs py-1 px-2" onclick="toggleSkillBuilder()" title="Close">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+                <div class="panel-body">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-txt-2">Skill Name</label>
+                                <input type="text" id="sbSkillName" class="form-input text-sm" placeholder="e.g. email-copy-writer">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-txt-2">What goes in (inputs)</label>
+                                <textarea id="sbInputs" rows="3" class="form-input text-sm" placeholder="Describe the inputs this skill receives..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-txt-2">What comes out (outputs)</label>
+                                <textarea id="sbOutputs" rows="3" class="form-input text-sm" placeholder="Describe the outputs this skill produces..."></textarea>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-txt-2">What I always want (rules)</label>
+                                <textarea id="sbAlwaysWant" rows="3" class="form-input text-sm" placeholder="Rules and behaviors to always include..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-txt-2">What I never want (rules)</label>
+                                <textarea id="sbNeverWant" rows="3" class="form-input text-sm" placeholder="Things to always avoid..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium mb-1.5 text-txt-2">Perfect output example</label>
+                                <textarea id="sbExample" rows="3" class="form-input text-sm" placeholder="Paste an example of ideal output..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button class="btn btn-primary" onclick="generateSkill()" id="sbGenBtn">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 1l2 3h-4l2-3z" stroke="currentColor" stroke-width="1"/><path d="M6 5v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            Generate Skill
+                        </button>
+                    </div>
+
+                    <!-- Skill Builder Results -->
+                    <div id="sbResults" style="display:none;" class="mt-5 space-y-4">
+                        <div class="p-3 rounded-lg" style="background:rgba(129,140,248,0.06);border:1px solid rgba(129,140,248,0.2);">
+                            <h4 class="font-heading font-semibold text-xs mb-1 uppercase tracking-wide" style="color:#818CF8;">Trigger Summary</h4>
+                            <p class="text-sm text-txt-2" id="sbTriggerSummary" style="line-height:1.6;"></p>
+                        </div>
+                        <div class="p-3 rounded-lg" style="background:rgba(129,140,248,0.06);border:1px solid rgba(129,140,248,0.2);">
+                            <h4 class="font-heading font-semibold text-xs mb-1 uppercase tracking-wide" style="color:#818CF8;">Preview</h4>
+                            <p class="text-sm text-txt-2" id="sbPreview" style="line-height:1.6;"></p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium mb-1.5 text-txt-2">Generated Skill Body</label>
+                            <pre id="sbSkillBody" class="w-full px-3 py-3 rounded-lg text-xs overflow-x-auto" style="background:var(--deft-surface-hi,#242836);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt-2,#8A95A9);font-family:'JetBrains Mono',monospace;line-height:1.6;white-space:pre-wrap;max-height:400px;overflow-y:auto;"></pre>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="btn btn-primary" onclick="saveSkillToKB()" id="sbSaveBtn">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 1h6.586L10 2.414V10a1 1 0 01-1 1H2a1 1 0 01-1-1V2a1 1 0 011-1z" stroke="currentColor" stroke-width="1"/><path d="M4 1v3h4V1M3 7h6M3 9h4" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/></svg>
+                                Save to Knowledge Base
+                            </button>
+                            <button class="btn btn-ghost text-xs" onclick="navigator.clipboard.writeText(document.getElementById('sbSkillBody').textContent).then(()=>toast('Copied!','success'))">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="4" y="4" width="6.5" height="6.5" rx="1" stroke="currentColor" stroke-width="1"/><path d="M2.5 8V2.5A.5.5 0 013 2h5.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                                Copy
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1762,6 +1846,85 @@ document.getElementById('chatInput').addEventListener('keydown', function(e) {
         sendSuggestion();
     }
 });
+
+// ═══════════════════════════════════════════
+// SKILL BUILDER
+// ═══════════════════════════════════════════
+let _sbLastPayload = null;
+
+function toggleSkillBuilder() {
+    const panel = document.getElementById('skillBuilderPanel');
+    panel.style.display = panel.style.display === 'none' ? '' : 'none';
+    if (panel.style.display !== 'none') {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+async function generateSkill() {
+    const skill_name = document.getElementById('sbSkillName').value.trim();
+    const inputs = document.getElementById('sbInputs').value.trim();
+    const outputs = document.getElementById('sbOutputs').value.trim();
+    const always_want = document.getElementById('sbAlwaysWant').value.trim();
+    const never_want = document.getElementById('sbNeverWant').value.trim();
+    const example = document.getElementById('sbExample').value.trim();
+
+    if (!skill_name) { toast('Please enter a skill name', 'error'); return; }
+    if (!inputs && !outputs) { toast('Please describe at least inputs or outputs', 'error'); return; }
+
+    const btn = document.getElementById('sbGenBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div style="width:12px;height:12px;border:2px solid rgba(129,140,248,0.3);border-top-color:#818CF8;border-radius:50%;animation:spin 0.6s linear infinite;"></div> Generating...';
+
+    _sbLastPayload = { skill_name, inputs, outputs, always_want, never_want, example, save: false };
+
+    try {
+        const res = await fetch('https://n8n.carltonaiservices.com/webhook/km-skill-builder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(_sbLastPayload)
+        });
+        const data = await res.json();
+
+        document.getElementById('sbTriggerSummary').textContent = data.trigger_summary || '';
+        document.getElementById('sbPreview').textContent = data.preview || '';
+        document.getElementById('sbSkillBody').textContent = data.skill_body || JSON.stringify(data, null, 2);
+
+        document.getElementById('sbResults').style.display = '';
+        toast('Skill generated', 'success');
+    } catch (e) {
+        console.error('Skill generation error:', e);
+        toast('Failed to generate skill: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8 1l2 3h-4l2-3z" stroke="currentColor" stroke-width="1"/><path d="M6 5v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Generate Skill';
+    }
+}
+
+async function saveSkillToKB() {
+    if (!_sbLastPayload) { toast('Generate a skill first', 'error'); return; }
+
+    const btn = document.getElementById('sbSaveBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div style="width:12px;height:12px;border:2px solid rgba(129,140,248,0.3);border-top-color:#818CF8;border-radius:50%;animation:spin 0.6s linear infinite;"></div> Saving...';
+
+    try {
+        const res = await fetch('https://n8n.carltonaiservices.com/webhook/km-skill-builder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ..._sbLastPayload, save: true })
+        });
+        const data = await res.json();
+        toast('Skill saved to Knowledge Base!', 'success');
+        // Reload the knowledge data to show the new skill
+        if (typeof loadAllData === 'function') loadAllData();
+    } catch (e) {
+        console.error('Save skill error:', e);
+        toast('Failed to save skill: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 1h6.586L10 2.414V10a1 1 0 01-1 1H2a1 1 0 01-1-1V2a1 1 0 011-1z" stroke="currentColor" stroke-width="1"/><path d="M4 1v3h4V1M3 7h6M3 9h4" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/></svg> Save to Knowledge Base';
+    }
+}
 
 </script>
 
