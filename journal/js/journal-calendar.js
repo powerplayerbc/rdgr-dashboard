@@ -76,6 +76,7 @@ async function loadCalendar() {
     if (typeof applyMonthBackground === 'function') {
         applyMonthBackground();
     }
+    applyMonthColors();
 }
 
 // =============================================
@@ -97,6 +98,85 @@ function navigateMonth(delta) {
 function calendarGoToday() {
     currentMonth = getToday().substring(0, 7);
     loadCalendar();
+}
+
+// =============================================
+// MONTH COLOR CUSTOMIZATION
+// =============================================
+function getMonthColorsKey() {
+    return 'journal-month-colors-' + (activeProfileId || 'default') + '-' + currentMonth;
+}
+
+function getMonthColors() {
+    try {
+        var saved = localStorage.getItem(getMonthColorsKey());
+        return saved ? JSON.parse(saved) : null;
+    } catch(e) { return null; }
+}
+
+function applyMonthColors() {
+    var colors = getMonthColors();
+    var wrapper = document.getElementById('calendarWrapper');
+    if (!wrapper) return;
+
+    if (colors) {
+        wrapper.style.setProperty('--jcal-title-color', colors.title || '');
+        wrapper.style.setProperty('--jcal-day-color', colors.day || '');
+        wrapper.style.setProperty('--jcal-accent-color', colors.accent || '');
+        wrapper.style.setProperty('--jcal-preview-color', colors.preview || '');
+    } else {
+        wrapper.style.removeProperty('--jcal-title-color');
+        wrapper.style.removeProperty('--jcal-day-color');
+        wrapper.style.removeProperty('--jcal-accent-color');
+        wrapper.style.removeProperty('--jcal-preview-color');
+    }
+}
+
+function openMonthCustomizer() {
+    var colors = getMonthColors() || {};
+    var parts = currentMonth.split('-');
+    var monthName = JCAL_MONTH_NAMES[parseInt(parts[1]) - 1] + ' ' + parts[0];
+
+    document.getElementById('monthCustomizerTitle').textContent = 'Customize ' + monthName;
+    document.getElementById('monthTitleColor').value = colors.title || '#E8ECF1';
+    document.getElementById('monthDayColor').value = colors.day || '#E8ECF1';
+    document.getElementById('monthAccentColor').value = colors.accent || '#06D6A0';
+    document.getElementById('monthPreviewColor').value = colors.preview || '#8A95A9';
+
+    openModal('monthCustomizerModal');
+}
+
+function previewMonthColor() {
+    var wrapper = document.getElementById('calendarWrapper');
+    if (!wrapper) return;
+    wrapper.style.setProperty('--jcal-title-color', document.getElementById('monthTitleColor').value);
+    wrapper.style.setProperty('--jcal-day-color', document.getElementById('monthDayColor').value);
+    wrapper.style.setProperty('--jcal-accent-color', document.getElementById('monthAccentColor').value);
+    wrapper.style.setProperty('--jcal-preview-color', document.getElementById('monthPreviewColor').value);
+}
+
+function saveMonthColors() {
+    var colors = {
+        title: document.getElementById('monthTitleColor').value,
+        day: document.getElementById('monthDayColor').value,
+        accent: document.getElementById('monthAccentColor').value,
+        preview: document.getElementById('monthPreviewColor').value
+    };
+    localStorage.setItem(getMonthColorsKey(), JSON.stringify(colors));
+    applyMonthColors();
+    closeModal('monthCustomizerModal');
+    toast('Month colors saved');
+}
+
+function resetMonthColors() {
+    localStorage.removeItem(getMonthColorsKey());
+    applyMonthColors();
+    document.getElementById('monthTitleColor').value = '#E8ECF1';
+    document.getElementById('monthDayColor').value = '#E8ECF1';
+    document.getElementById('monthAccentColor').value = '#06D6A0';
+    document.getElementById('monthPreviewColor').value = '#8A95A9';
+    previewMonthColor();
+    toast('Month colors reset to defaults');
 }
 
 // =============================================
@@ -246,9 +326,10 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
             overflow: hidden;
         }
 
-        /* Month label */
+        /* Month label (color customizable per month) */
         #calendarMonthLabel {
-            text-shadow: 0 1px 4px rgba(0,0,0,0.7), 0 0 1px rgba(0,0,0,0.9);
+            color: var(--jcal-title-color, var(--deft-txt, #E8ECF1)) !important;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.7), 0 0 2px rgba(0,0,0,0.9);
         }
 
         /* Day-of-week headers */
@@ -259,7 +340,7 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color: var(--deft-txt, #E8ECF1);
+            color: var(--jcal-day-color, var(--deft-txt, #E8ECF1));
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
             background: var(--journal-panel-bg, rgba(26,29,40,0.75));
             backdrop-filter: blur(var(--journal-panel-blur, 8px));
@@ -269,7 +350,7 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
         .jcal-preview {
             font-size: 0.55rem;
             line-height: 1.3;
-            color: var(--deft-txt-2, #8A95A9);
+            color: var(--jcal-preview-color, var(--deft-txt-2, #8A95A9));
             margin-top: 0.2rem;
             overflow: hidden;
             display: -webkit-box;
@@ -320,10 +401,10 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
 
         /* Today highlight */
         .jcal-cell--today {
-            border-color: var(--deft-accent, #06D6A0);
+            border-color: var(--jcal-accent-color, var(--deft-accent, #06D6A0));
         }
         .jcal-cell--today .jcal-cell__num {
-            background: var(--deft-accent, #06D6A0);
+            background: var(--jcal-accent-color, var(--deft-accent, #06D6A0));
             color: #0D0F13;
             border-radius: 50%;
             width: 22px;
@@ -338,7 +419,7 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
         .jcal-cell__num {
             font-size: 0.7rem;
             font-weight: 500;
-            color: var(--deft-txt-2, #8A95A9);
+            color: var(--jcal-day-color, var(--deft-txt-2, #8A95A9));
             line-height: 1;
         }
 
@@ -369,7 +450,7 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: var(--deft-accent, #06D6A0);
+            background: var(--jcal-accent-color, var(--deft-accent, #06D6A0));
             opacity: 0.5;
             display: inline-block;
         }
