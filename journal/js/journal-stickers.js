@@ -203,24 +203,18 @@ function selectSticker(node, scope) {
 function showStickerDeleteBtn(node, stage) {
     hideStickerDeleteBtn();
 
+    // Add delete button to the bottom sticker bar
+    var bar = document.getElementById('stickerModeBar');
+    if (!bar) return;
+
     var btn = document.createElement('button');
     btn.id = 'stickerDeleteFloating';
-    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M4.5 3V2.5a1 1 0 011-1h1a1 1 0 011 1V3M5 5.5v3M7 5.5v3M3 3l.5 6.5a1 1 0 001 .5h3a1 1 0 001-.5L9 3" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg> Delete';
-    btn.style.cssText = 'position:fixed;z-index:10002;display:flex;align-items:center;gap:0.375rem;padding:0.4rem 0.75rem;border-radius:0.375rem;border:1px solid rgba(255,107,107,0.5);background:rgba(8,9,13,0.92);backdrop-filter:blur(12px);color:#FF6B6B;font-size:0.7rem;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.5);';
-
-    // Position near the node
-    var rect = stage.container().getBoundingClientRect();
-    var nodeRect = node.getClientRect();
-    var left = rect.left + nodeRect.x + nodeRect.width / 2 - 40;
-    var top = rect.top + nodeRect.y - 36;
-    if (top < 10) top = rect.top + nodeRect.y + nodeRect.height + 8;
-    btn.style.left = Math.max(10, left) + 'px';
-    btn.style.top = Math.max(10, top) + 'px';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M4.5 3V2.5a1 1 0 011-1h1a1 1 0 011 1V3M5 5.5v3M7 5.5v3M3 3l.5 6.5a1 1 0 001 .5h3a1 1 0 001-.5L9 3" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg> Delete Sticker';
+    btn.style.cssText = 'display:flex;align-items:center;gap:0.375rem;padding:0.5rem 1rem;border-radius:999px;border:1px solid rgba(255,107,107,0.5);background:transparent;color:#FF6B6B;font-size:0.8rem;font-weight:600;cursor:pointer;';
 
     btn.onclick = function() {
         var stickerId = node.getAttr('_stickerId');
         if (!stickerId) {
-            // No DB record, just remove from canvas
             node.destroy();
             deselectAllStickers();
             var layer = stage.findOne('Layer');
@@ -228,12 +222,12 @@ function showStickerDeleteBtn(node, stage) {
             toast('Sticker removed');
             return;
         }
-        if (confirm('Delete this sticker?')) {
+        if (confirm('Delete this sticker from the page?')) {
             deleteSticker(stickerId, node);
         }
     };
 
-    document.body.appendChild(btn);
+    bar.appendChild(btn);
 }
 
 function hideStickerDeleteBtn() {
@@ -339,11 +333,41 @@ async function loadCustomStickersForPicker() {
         return;
     }
 
-    grid.innerHTML = stickers.map(s => `
-        <button class="sticker-picker-item sticker-picker-custom" onclick="addSticker('${s.slug}', 'custom', '${s.image_url}')" title="${s.name || s.slug}" aria-label="${s.name || s.slug}">
-            <img src="${s.image_url}" alt="${s.name || s.slug}" loading="lazy" />
-        </button>
-    `).join('');
+    grid.innerHTML = stickers.map(s => {
+        var slug = s.id || s.name || 'custom';
+        var name = s.name || 'Custom sticker';
+        return `<div class="sticker-picker-custom-card" style="position:relative;">
+            <button class="sticker-picker-item sticker-picker-custom" onclick="addSticker('${slug}', 'custom', '${s.image_url}')" title="${name}" aria-label="${name}">
+                <img src="${s.image_url}" alt="${name}" loading="lazy" />
+            </button>
+            <button class="sticker-picker-custom-delete" onclick="event.stopPropagation();deleteCustomSticker('${s.id}')" title="Delete sticker" aria-label="Delete ${name}">&times;</button>
+        </div>`;
+    }).join('');
+}
+
+async function deleteCustomSticker(libraryId) {
+    // Check if this sticker is being used on any pages
+    var library = await supabaseSelect('journal_sticker_library', 'id=eq.' + libraryId + '&select=image_url,name');
+    if (!library || !library.length) { toast('Sticker not found', 'error'); return; }
+
+    var imageUrl = library[0].image_url;
+    var name = library[0].name || 'this sticker';
+
+    // Count how many placed stickers reference this image
+    var usages = await supabaseSelect('journal_stickers', 'image_url=eq.' + encodeURIComponent(imageUrl) + '&select=sticker_id');
+    var usageCount = (usages && usages.length) ? usages.length : 0;
+
+    var msg = 'Delete "' + name + '" from your sticker library?';
+    if (usageCount > 0) {
+        msg += '\n\nWARNING: This sticker is currently placed on ' + usageCount + ' page' + (usageCount > 1 ? 's' : '') + '. Those placed stickers will remain but the image may stop loading.';
+    }
+
+    if (!confirm(msg)) return;
+
+    // Delete from library
+    await supabaseWrite('journal_sticker_library', 'DELETE', null, 'id=eq.' + libraryId);
+    toast('Custom sticker deleted');
+    loadCustomStickersForPicker();
 }
 
 // =============================================
@@ -545,20 +569,28 @@ function toggleStickerMode() {
 
     toast(stickerMode ? 'Sticker mode ON -- drag, resize & rotate stickers' : 'Sticker mode OFF -- normal editing', 'info');
 
-    // Show/hide floating exit button
-    var exitBtn = document.getElementById('stickerModeExitBtn');
+    // Show/hide floating sticker toolbar bar
+    var bar = document.getElementById('stickerModeBar');
     if (stickerMode) {
-        if (!exitBtn) {
-            exitBtn = document.createElement('button');
+        if (!bar) {
+            bar = document.createElement('div');
+            bar.id = 'stickerModeBar';
+            bar.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);z-index:10001;display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0.75rem;border-radius:999px;background:rgba(8,9,13,0.92);backdrop-filter:blur(12px);box-shadow:0 4px 20px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);';
+
+            var exitBtn = document.createElement('button');
             exitBtn.id = 'stickerModeExitBtn';
             exitBtn.onclick = toggleStickerMode;
             exitBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Exit Sticker Mode';
-            exitBtn.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);z-index:10001;display:flex;align-items:center;gap:0.5rem;padding:0.625rem 1.25rem;border-radius:999px;border:1px solid rgba(6,214,160,0.5);background:rgba(8,9,13,0.92);backdrop-filter:blur(12px);color:#06D6A0;font-size:0.8rem;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.5);';
-            document.body.appendChild(exitBtn);
+            exitBtn.style.cssText = 'display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:999px;border:1px solid rgba(6,214,160,0.5);background:transparent;color:#06D6A0;font-size:0.8rem;font-weight:600;cursor:pointer;';
+            bar.appendChild(exitBtn);
+
+            document.body.appendChild(bar);
         }
-        exitBtn.style.display = 'flex';
+        bar.style.display = 'flex';
+        // Remove delete button when entering mode fresh (no sticker selected yet)
+        hideStickerDeleteBtn();
     } else {
-        if (exitBtn) exitBtn.style.display = 'none';
+        if (bar) bar.style.display = 'none';
     }
 }
 

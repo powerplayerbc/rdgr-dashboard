@@ -392,6 +392,21 @@
 }
 .next-step-input:focus { border-color: var(--deft-accent, #06D6A0); }
 
+/* ── Custom Sticker Picker Delete Button ── */
+.sticker-picker-custom-card { position: relative; display: inline-block; }
+.sticker-picker-custom-delete {
+    position: absolute; top: -4px; right: -4px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: rgba(255,107,107,0.9); color: #fff;
+    border: none; cursor: pointer;
+    font-size: 0.7rem; font-weight: 700; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.15s;
+    z-index: 2;
+}
+.sticker-picker-custom-card:hover .sticker-picker-custom-delete { opacity: 1; }
+.sticker-picker-custom-delete:hover { background: #FF6B6B; transform: scale(1.15); }
+
 /* ── Background Picker Delete Button ── */
 .bg-picker-card { position: relative; }
 .bg-picker-card-inner {
