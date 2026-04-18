@@ -232,9 +232,9 @@ function uploadCustomBackground() {
             });
 
             if (result && result.success) {
-                // Use full-res content URL, not thumbnail
+                // Use Drive thumbnail URL (works without auth in browsers)
                 const imageUrl = result.fileId
-                    ? 'https://lh3.googleusercontent.com/d/' + result.fileId + '=w1600'
+                    ? 'https://drive.google.com/thumbnail?id=' + result.fileId + '&sz=w1600'
                     : (result.driveUrl || '');
                 const bgName = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
                 await supabaseWrite('journal_backgrounds', 'POST', {

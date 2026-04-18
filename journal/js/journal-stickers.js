@@ -126,7 +126,7 @@ function loadCustomStickerImage(stickerData, x, y) {
         if (!imageUrl) { resolve(null); return; }
 
         const img = new Image();
-        img.crossOrigin = 'anonymous';
+        // No crossOrigin — Google Drive URLs need cookies/redirects
         img.onload = function () {
             const node = new Konva.Image({
                 image: img,
@@ -335,7 +335,7 @@ function addSticker(slug, type, imageUrl) {
         saveStickerToDb(node, slug, 'emoji', null, scope);
     } else if (type === 'custom' && imageUrl) {
         const img = new Image();
-        img.crossOrigin = 'anonymous';
+        // No crossOrigin — Google Drive URLs need cookies/redirects
         img.onload = function () {
             const node = new Konva.Image({
                 image: img,
@@ -544,9 +544,9 @@ function uploadCustomSticker() {
             });
 
             if (result && result.success) {
-                // Use full-res content URL for sticker images
+                // Use Drive thumbnail URL (works without auth in browsers)
                 const stickerUrl = result.fileId
-                    ? 'https://lh3.googleusercontent.com/d/' + result.fileId + '=w512'
+                    ? 'https://drive.google.com/thumbnail?id=' + result.fileId + '&sz=w512'
                     : (result.driveUrl || '');
                 await supabaseWrite('journal_sticker_library', 'POST', {
                     user_id: activeProfileId,
