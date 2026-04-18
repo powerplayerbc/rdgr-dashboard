@@ -533,7 +533,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
          VIEW: CALENDAR
          ═══════════════════════════════════════ -->
     <div id="view-calendar" class="max-w-[1000px] mx-auto px-4 py-6" role="tabpanel" aria-labelledby="tab-calendar">
-        <div id="calendarWrapper" class="relative rounded-xl p-4" style="background: var(--deft-surface, #11131A); border: 1px solid var(--deft-border, #2A2E3D);">
+        <div id="calendarWrapper" class="relative rounded-xl p-4" style="border: 1px solid var(--deft-border, #2A2E3D); background-size: cover; background-position: center; background-repeat: no-repeat; overflow: hidden;">
             <!-- Sticker canvas for monthly stickers -->
             <div id="calendarStickerCanvas" class="sticker-canvas-wrapper"></div>
 
@@ -695,6 +695,29 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         </div>
 
         <div class="settings-section">
+            <div class="settings-label">Panel Transparency</div>
+            <p class="text-xs mb-2" style="color:var(--deft-txt-3);">Controls how see-through panels are over background images</p>
+            <div class="flex items-center gap-3">
+                <span class="text-xs" style="color:var(--deft-txt-3);">Transparent</span>
+                <input type="range" id="panelOpacitySlider" min="0.2" max="1" step="0.05" value="0.75"
+                    oninput="updatePanelOpacity(this.value)" style="flex:1; accent-color: var(--deft-accent);">
+                <span class="text-xs" style="color:var(--deft-txt-3);">Opaque</span>
+                <span id="panelOpacityValue" class="text-xs font-mono" style="color:var(--deft-txt-2); min-width:2.5rem; text-align:right;">75%</span>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <div class="settings-label">Blur Amount</div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs" style="color:var(--deft-txt-3);">None</span>
+                <input type="range" id="panelBlurSlider" min="0" max="20" step="1" value="8"
+                    oninput="updatePanelBlur(this.value)" style="flex:1; accent-color: var(--deft-accent);">
+                <span class="text-xs" style="color:var(--deft-txt-3);">Heavy</span>
+                <span id="panelBlurValue" class="text-xs font-mono" style="color:var(--deft-txt-2); min-width:2.5rem; text-align:right;">8px</span>
+            </div>
+        </div>
+
+        <div class="settings-section">
             <div class="settings-label">Background Library</div>
             <div id="settingsBackgroundGrid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mt-2">
                 <!-- Populated by JS -->
@@ -832,6 +855,60 @@ function toggleAutoSaveSetting(enabled) {
     if (typeof toast === 'function') {
         toast('Auto-save ' + (enabled ? 'enabled' : 'disabled'), 'success');
     }
+}
+
+/* ── Panel Transparency Settings ── */
+function updatePanelOpacity(val) {
+    document.documentElement.style.setProperty('--journal-panel-opacity', val);
+    var pct = Math.round(val * 100);
+    var label = document.getElementById('panelOpacityValue');
+    if (label) label.textContent = pct + '%';
+    saveJournalDisplaySettings();
+}
+
+function updatePanelBlur(val) {
+    document.documentElement.style.setProperty('--journal-panel-blur', val + 'px');
+    var label = document.getElementById('panelBlurValue');
+    if (label) label.textContent = val + 'px';
+    saveJournalDisplaySettings();
+}
+
+function saveJournalDisplaySettings() {
+    try {
+        var settings = JSON.parse(localStorage.getItem('journal-settings') || '{}');
+        var opacity = document.getElementById('panelOpacitySlider');
+        var blur = document.getElementById('panelBlurSlider');
+        if (opacity) settings.panelOpacity = parseFloat(opacity.value);
+        if (blur) settings.panelBlur = parseInt(blur.value);
+        localStorage.setItem('journal-settings', JSON.stringify(settings));
+    } catch(e) {}
+}
+
+function loadJournalDisplaySettings() {
+    try {
+        var settings = JSON.parse(localStorage.getItem('journal-settings') || '{}');
+        if (settings.panelOpacity !== undefined) {
+            document.documentElement.style.setProperty('--journal-panel-opacity', settings.panelOpacity);
+            var slider = document.getElementById('panelOpacitySlider');
+            if (slider) slider.value = settings.panelOpacity;
+            var label = document.getElementById('panelOpacityValue');
+            if (label) label.textContent = Math.round(settings.panelOpacity * 100) + '%';
+        }
+        if (settings.panelBlur !== undefined) {
+            document.documentElement.style.setProperty('--journal-panel-blur', settings.panelBlur + 'px');
+            var slider = document.getElementById('panelBlurSlider');
+            if (slider) slider.value = settings.panelBlur;
+            var label = document.getElementById('panelBlurValue');
+            if (label) label.textContent = settings.panelBlur + 'px';
+        }
+    } catch(e) {}
+}
+
+// Load settings on page ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadJournalDisplaySettings);
+} else {
+    loadJournalDisplaySettings();
 }
 </script>
 

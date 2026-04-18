@@ -201,7 +201,7 @@ function uploadCustomBackground() {
             toast('Compressing & uploading...');
 
             // Compress image (max 1920px, 75% quality for backgrounds)
-            const compressed = await compressImage(file, 1920, 0.75);
+            const compressed = await compressImage(file, 3840, 0.92);
 
             const result = await journalDriveApi('upload_background_image', {
                 file_name: compressed.fileName,

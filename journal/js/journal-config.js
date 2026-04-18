@@ -107,11 +107,22 @@ const STICKER_LIBRARY = [
 // Returns { base64, mimeType, fileName } with the compressed image.
 // maxDim: max width/height in pixels. quality: JPEG quality 0-1.
 function compressImage(file, maxDim, quality) {
-    maxDim = maxDim || 1920;
-    quality = quality || 0.8;
+    maxDim = maxDim || 3840;
+    quality = quality || 0.92;
     return new Promise(function(resolve, reject) {
         // Non-image files pass through unchanged
         if (!file.type || !file.type.startsWith('image/')) {
+            var reader = new FileReader();
+            reader.onload = function() {
+                resolve({ base64: reader.result.split(',')[1], mimeType: file.type, fileName: file.name });
+            };
+            reader.onerror = function() { reject(new Error('Failed to read file')); };
+            reader.readAsDataURL(file);
+            return;
+        }
+
+        // Small files (under 4MB) pass through without compression
+        if (file.size < 4 * 1024 * 1024) {
             var reader = new FileReader();
             reader.onload = function() {
                 resolve({ base64: reader.result.split(',')[1], mimeType: file.type, fileName: file.name });
@@ -146,13 +157,13 @@ function compressImage(file, maxDim, quality) {
             var ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, w, h);
 
-            // Export as JPEG for compression (PNG stays PNG if small enough)
-            var outputType = 'image/jpeg';
-            var ext = '.jpg';
-            // Keep PNG for stickers/transparency
-            if (file.type === 'image/png' && file.size < 500 * 1024) {
-                outputType = 'image/png';
-                ext = '.png';
+            // Keep original format when possible, only convert to JPEG for large files
+            var outputType = file.type || 'image/jpeg';
+            var ext = file.name.match(/\.[^.]+$/)?.[0] || '.jpg';
+            // For very large images, use JPEG for better compression
+            if (file.size > 10 * 1024 * 1024 && file.type !== 'image/png') {
+                outputType = 'image/jpeg';
+                ext = '.jpg';
             }
 
             var dataUrl = canvas.toDataURL(outputType, quality);

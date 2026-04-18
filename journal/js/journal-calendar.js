@@ -239,14 +239,16 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--deft-txt-3, #525E73);
-            background: var(--deft-surface-el, #1A1D28);
+            background: rgba(17, 19, 26, 0.6);
+            backdrop-filter: blur(4px);
         }
 
         /* Day cells */
         .jcal-cell {
             min-height: 72px;
             padding: 0.375rem;
-            background: var(--deft-surface-el, #1A1D28);
+            background: rgba(17, 19, 26, 0.55);
+            backdrop-filter: blur(4px);
             border: 2px solid transparent;
             cursor: pointer;
             position: relative;
@@ -262,7 +264,7 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
             width: 100%;
         }
         .jcal-cell:hover {
-            background: rgba(255,255,255,0.03);
+            background: rgba(17, 19, 26, 0.7);
         }
         .jcal-cell:focus-visible {
             border-color: var(--deft-accent, #06D6A0);
@@ -278,7 +280,7 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
             opacity: 0.2;
         }
         .jcal-cell--outside:hover {
-            background: var(--deft-surface-el, #1A1D28);
+            background: rgba(17, 19, 26, 0.55);
         }
 
         /* Today highlight */

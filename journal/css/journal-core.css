@@ -63,14 +63,15 @@
     width: 32px; height: 32px;
     padding: 0;
     border-radius: 0.375rem;
-    background: transparent;
-    border: 1px solid var(--deft-border, #2A2E3D);
+    background: rgba(17, 19, 26, 0.5);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(42, 46, 61, 0.6);
     color: var(--deft-txt-2, #8A95A9);
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: background 0.15s, color 0.15s;
 }
-.btn-icon:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+.btn-icon:hover { background: rgba(17, 19, 26, 0.8); color: var(--deft-txt, #E8ECF1); }
 
 /* ── Journal Tabs ── */
 .journal-tabs {
@@ -184,6 +185,10 @@
     gap: 0.75rem;
     margin-bottom: 1rem;
     flex-wrap: wrap;
+    padding: 0.625rem 0.75rem;
+    background: rgba(17, 19, 26, 0.7);
+    backdrop-filter: blur(var(--journal-panel-blur));
+    border-radius: 0.5rem;
 }
 .daily-date-nav {
     display: flex;
@@ -214,15 +219,23 @@
     pointer-events: auto;
 }
 
+/* ── Journal Transparency (configurable via --journal-panel-opacity) ── */
+:root {
+    --journal-panel-opacity: 0.75;
+    --journal-panel-blur: 8px;
+}
+
 /* ── Quill Editor Overrides ── */
 .ql-toolbar.ql-snow {
     border-color: var(--deft-border, #2A2E3D) !important;
-    background: var(--deft-surface, #11131A) !important;
+    background: rgba(17, 19, 26, var(--journal-panel-opacity)) !important;
+    backdrop-filter: blur(var(--journal-panel-blur));
     border-radius: 0.5rem 0.5rem 0 0;
 }
 .ql-container.ql-snow {
     border-color: var(--deft-border, #2A2E3D) !important;
-    background: var(--deft-surface, #11131A) !important;
+    background: rgba(17, 19, 26, var(--journal-panel-opacity)) !important;
+    backdrop-filter: blur(var(--journal-panel-blur));
     border-radius: 0 0 0.5rem 0.5rem;
     min-height: 300px;
     font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif;
@@ -277,8 +290,9 @@
 .journal-section {
     margin-top: 1.5rem;
     padding: 1rem;
-    background: var(--deft-surface, #11131A);
-    border: 1px solid var(--deft-border, #2A2E3D);
+    background: rgba(17, 19, 26, var(--journal-panel-opacity));
+    backdrop-filter: blur(var(--journal-panel-blur));
+    border: 1px solid rgba(42, 46, 61, 0.6);
     border-radius: 0.625rem;
 }
 .journal-section-title {
