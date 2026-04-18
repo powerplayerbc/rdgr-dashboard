@@ -61,18 +61,97 @@ async function openBackgroundPicker(target) {
 
     const modalBody = document.getElementById('backgroundPickerContent');
     if (!modalBody) return;
+    // Load current position settings
+    var posSettings = getBgPositionSettings(target);
+
     modalBody.innerHTML = `
         <div class="bg-picker-header">
             <span class="bg-picker-header-label">Background for ${targetLabel}</span>
         </div>
         <div class="bg-picker-grid">${gridHtml}</div>
-        <button class="bg-upload-btn" onclick="uploadCustomBackground()">
+        <div style="margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--deft-border, #2A2E3D);">
+            <div class="settings-label" style="margin-bottom:0.5rem;">Image Position</div>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:start;">
+                <div>
+                    <label class="text-xs" style="color:var(--deft-txt-3);display:block;margin-bottom:0.25rem;">Fit</label>
+                    <select id="bgFitSelect" onchange="previewBgPosition('${target}')" style="padding:0.3rem 0.5rem;font-size:0.7rem;border-radius:0.375rem;border:1px solid var(--deft-border);background:var(--deft-surface-el, #1A1D28);color:var(--deft-txt);">
+                        <option value="cover" ${posSettings.fit === 'cover' ? 'selected' : ''}>Cover (fill, may crop)</option>
+                        <option value="contain" ${posSettings.fit === 'contain' ? 'selected' : ''}>Contain (fit whole image)</option>
+                        <option value="auto" ${posSettings.fit === 'auto' ? 'selected' : ''}>Original size</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs" style="color:var(--deft-txt-3);display:block;margin-bottom:0.25rem;">Vertical</label>
+                    <select id="bgPosYSelect" onchange="previewBgPosition('${target}')" style="padding:0.3rem 0.5rem;font-size:0.7rem;border-radius:0.375rem;border:1px solid var(--deft-border);background:var(--deft-surface-el, #1A1D28);color:var(--deft-txt);">
+                        <option value="top" ${posSettings.posY === 'top' ? 'selected' : ''}>Top</option>
+                        <option value="center" ${posSettings.posY === 'center' ? 'selected' : ''}>Center</option>
+                        <option value="bottom" ${posSettings.posY === 'bottom' ? 'selected' : ''}>Bottom</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs" style="color:var(--deft-txt-3);display:block;margin-bottom:0.25rem;">Horizontal</label>
+                    <select id="bgPosXSelect" onchange="previewBgPosition('${target}')" style="padding:0.3rem 0.5rem;font-size:0.7rem;border-radius:0.375rem;border:1px solid var(--deft-border);background:var(--deft-surface-el, #1A1D28);color:var(--deft-txt);">
+                        <option value="left" ${posSettings.posX === 'left' ? 'selected' : ''}>Left</option>
+                        <option value="center" ${posSettings.posX === 'center' ? 'selected' : ''}>Center</option>
+                        <option value="right" ${posSettings.posX === 'right' ? 'selected' : ''}>Right</option>
+                    </select>
+                </div>
+                <button onclick="saveBgPosition('${target}')" class="btn btn-sm btn-primary" style="align-self:end;">Save Position</button>
+            </div>
+        </div>
+        <button class="bg-upload-btn" onclick="uploadCustomBackground()" style="margin-top:0.75rem;">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             Upload Custom Background
         </button>
     `;
 
     openModal('backgroundPickerModal');
+}
+
+// =============================================
+// BACKGROUND POSITION SETTINGS
+// =============================================
+function getBgPositionKey(target) {
+    return 'journal-bg-pos-' + (activeProfileId || 'default') + '-' + (target === 'daily' ? currentDate : currentMonth);
+}
+
+function getBgPositionSettings(target) {
+    try {
+        var saved = localStorage.getItem(getBgPositionKey(target));
+        return saved ? JSON.parse(saved) : { fit: 'cover', posY: 'center', posX: 'center' };
+    } catch(e) { return { fit: 'cover', posY: 'center', posX: 'center' }; }
+}
+
+function previewBgPosition(target) {
+    var fit = document.getElementById('bgFitSelect').value;
+    var posY = document.getElementById('bgPosYSelect').value;
+    var posX = document.getElementById('bgPosXSelect').value;
+    applyBgPositionToContainer(target, fit, posX, posY);
+}
+
+function saveBgPosition(target) {
+    var settings = {
+        fit: document.getElementById('bgFitSelect').value,
+        posY: document.getElementById('bgPosYSelect').value,
+        posX: document.getElementById('bgPosXSelect').value
+    };
+    localStorage.setItem(getBgPositionKey(target), JSON.stringify(settings));
+    applyBgPositionToContainer(target, settings.fit, settings.posX, settings.posY);
+    toast('Background position saved');
+}
+
+function applyBgPositionToContainer(target, fit, posX, posY) {
+    var container;
+    if (target === 'daily') {
+        container = document.getElementById('dailyBackground');
+    } else {
+        container = document.getElementById('calendarWrapper') || document.getElementById('view-calendar');
+    }
+    if (!container) return;
+
+    container.style.backgroundSize = fit;
+    container.style.backgroundPosition = posX + ' ' + posY;
+    container.style.backgroundRepeat = 'no-repeat';
 }
 
 function getBackgroundPreviewStyle(bg) {
@@ -138,8 +217,10 @@ function applyDailyBackground(backgroundId) {
     } else if (bg.type === 'image' && bg.value) {
         container.style.background = '';
         container.style.backgroundImage = `url('${bg.value}')`;
-        container.style.backgroundSize = 'cover';
-        container.style.backgroundPosition = 'center';
+        // Apply saved position settings
+        var pos = getBgPositionSettings('daily');
+        container.style.backgroundSize = pos.fit;
+        container.style.backgroundPosition = pos.posX + ' ' + pos.posY;
         container.style.backgroundRepeat = 'no-repeat';
     } else if (bg.type === 'solid' && bg.value) {
         container.style.background = bg.value;
@@ -177,8 +258,9 @@ function applyMonthBackground() {
         container.style.background = bg.value;
     } else if (bg.type === 'image' && bg.value) {
         container.style.backgroundImage = `url('${bg.value}')`;
-        container.style.backgroundSize = 'cover';
-        container.style.backgroundPosition = 'center';
+        var pos = getBgPositionSettings('monthly');
+        container.style.backgroundSize = pos.fit;
+        container.style.backgroundPosition = pos.posX + ' ' + pos.posY;
         container.style.backgroundRepeat = 'no-repeat';
     } else if (bg.type === 'solid' && bg.value) {
         container.style.background = bg.value;
