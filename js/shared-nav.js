@@ -45,6 +45,7 @@
         { label: 'BRAIN', href: '/brain', items: [
             { label: 'BRAIN', href: '/brain' },
             { label: 'DEFT', href: '/deft' },
+            { label: 'Journal', href: '/journal' },
             { label: 'Pantry', href: '/pantry' },
             { label: 'Shopping', href: '/shopping' },
             { label: 'Meal Plan', href: '/meal-plan' },
