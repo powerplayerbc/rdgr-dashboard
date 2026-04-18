@@ -168,6 +168,7 @@ async function initJournal() {
 // =============================================
 function switchView(view) {
     currentView = view;
+    activeStickerScope = (view === 'calendar') ? 'monthly' : 'daily';
     const views = ['calendar', 'daily', 'search', 'settings'];
     views.forEach(v => {
         const el = document.getElementById(`view-${v}`);

@@ -3,7 +3,7 @@
 // =============================================
 
 let stickerMode = false;
-let activeStickerScope = 'daily';
+let activeStickerScope = 'monthly'; // Default to monthly since calendar is the initial view
 let stickerTransformers = [];
 
 // =============================================
@@ -373,10 +373,24 @@ async function deleteCustomSticker(libraryId) {
 // =============================================
 // ADD STICKER
 // =============================================
-function addSticker(slug, type, imageUrl) {
+async function addSticker(slug, type, imageUrl) {
     const scope = activeStickerScope;
     const stage = scope === 'daily' ? konvaStage : calendarKonvaStage;
     if (!stage) { toast('Sticker canvas not ready', 'error'); return; }
+
+    // For daily scope, ensure entry exists (auto-create if needed)
+    if (scope === 'daily' && (!currentEntry || !currentEntry.entry_id)) {
+        if (typeof saveEntry === 'function') {
+            const saved = await saveEntry('manual');
+            if (!saved || !saved.entry_id) {
+                toast('Save your entry first before adding stickers', 'error');
+                return;
+            }
+        } else {
+            toast('Save your entry first before adding stickers', 'error');
+            return;
+        }
+    }
 
     const layer = stage.findOne('Layer');
     if (!layer) return;
