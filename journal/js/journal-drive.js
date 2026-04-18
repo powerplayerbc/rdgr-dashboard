@@ -43,6 +43,19 @@ function openFileUpload() {
                 removeUploadProgress(progressEl);
 
                 if (result && result.success) {
+                    // Insert attachment record into journal_attachments
+                    if (currentEntry && currentEntry.entry_id) {
+                        await supabaseWrite('journal_attachments', 'POST', {
+                            entry_id: currentEntry.entry_id,
+                            user_id: activeProfileId,
+                            file_name: file.name,
+                            mime_type: file.type,
+                            drive_file_id: result.fileId || '',
+                            drive_url: result.driveUrl || '',
+                            thumbnail_url: result.thumbnailUrl || '',
+                            file_size_bytes: file.size || 0
+                        });
+                    }
                     toast('File uploaded');
                     if (typeof loadAttachments === 'function') {
                         loadAttachments();

@@ -65,6 +65,17 @@ async function loadCalendar() {
     });
 
     container.innerHTML = html;
+
+    // Initialize sticker canvas for monthly view
+    if (typeof initStickerCanvas === 'function') {
+        initStickerCanvas('calendarStickerCanvas', 'monthly');
+    }
+    if (typeof loadStickers === 'function') {
+        loadStickers('monthly');
+    }
+    if (typeof applyMonthBackground === 'function') {
+        applyMonthBackground();
+    }
 }
 
 // =============================================

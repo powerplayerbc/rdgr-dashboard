@@ -182,7 +182,7 @@ function applyMonthBackground() {
 function uploadCustomBackground() {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/jpeg,image/png,image/webp';
+    input.accept = 'image/*';
     input.style.display = 'none';
 
     input.onchange = async function () {

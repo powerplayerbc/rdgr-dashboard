@@ -134,7 +134,7 @@
 /* ── Toast System ── */
 .toast-container {
     position: fixed;
-    top: 1rem;
+    bottom: 1rem;
     right: 1rem;
     z-index: 10000;
     display: flex;

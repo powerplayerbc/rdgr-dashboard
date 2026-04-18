@@ -496,7 +496,7 @@ function toggleStickerMode() {
 function uploadCustomSticker() {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = 'image/png,image/webp,image/gif';
+    input.accept = 'image/*';
     input.style.display = 'none';
 
     input.onchange = async function () {
@@ -521,18 +521,17 @@ function uploadCustomSticker() {
             });
 
             if (result && result.success) {
-                // Insert into sticker library
-                const slug = file.name.replace(/\.[^.]+$/, '').replace(/[^a-z0-9]/gi, '-').toLowerCase();
+                // Insert into sticker library (columns: user_id, name, drive_file_id, image_url, category)
                 await supabaseWrite('journal_sticker_library', 'POST', {
                     user_id: activeProfileId,
-                    slug: slug,
                     name: file.name.replace(/\.[^.]+$/, ''),
-                    image_url: result.url || result.file_url,
-                    mime_type: file.type
+                    drive_file_id: result.fileId || '',
+                    image_url: result.thumbnailUrl || result.driveUrl || '',
+                    category: 'custom'
                 });
 
                 toast('Custom sticker uploaded');
-                loadCustomStickersForPicker();
+                openStickerPicker();
             } else {
                 toast('Upload failed', 'error');
             }
