@@ -30,7 +30,7 @@ function openFileUpload() {
 
         try {
             // Compress images (max 1920px, 80% JPEG quality)
-            const compressed = await compressImage(file, 3840, 0.92);
+            const compressed = await compressImage(file);
 
             const result = await journalDriveApi('upload_attachment', {
                 entry_date: currentDate,
