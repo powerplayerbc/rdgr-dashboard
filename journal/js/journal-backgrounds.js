@@ -9,7 +9,7 @@ let backgroundPickerTarget = 'daily';
 // LOAD BACKGROUNDS
 // =============================================
 async function loadBackgrounds() {
-    const query = `select=*&or=(user_id.is.null,user_id.eq.${activeProfileId})&is_active=eq.true&order=sort_order,name`;
+    const query = `select=*&or=(user_id.is.null,user_id.eq.${activeProfileId})&is_active=eq.true&order=name`;
     const result = await supabaseSelect('journal_backgrounds', query);
     backgroundsList = result || [];
     return backgroundsList;
