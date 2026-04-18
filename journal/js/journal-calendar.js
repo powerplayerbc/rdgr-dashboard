@@ -33,7 +33,7 @@ async function loadCalendar() {
 
     const entries = await supabaseSelect(
         'journal_entries',
-        `user_id=eq.${activeProfileId}&entry_date=gte.${firstDate}&entry_date=lte.${lastDate}&select=entry_date,mood,is_favorite,word_count`
+        `user_id=eq.${activeProfileId}&entry_date=gte.${firstDate}&entry_date=lte.${lastDate}&select=entry_date,mood,is_favorite,word_count,title,content_text`
     );
 
     // Build lookup by date
@@ -151,6 +151,21 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
         if (entryData.is_favorite) ariaLabel += ', favorited';
     }
 
+    // Text preview (title + snippet of content)
+    let previewHtml = '';
+    if (entryData) {
+        const title = entryData.title || '';
+        const text = (entryData.content_text || '').replace(/\n/g, ' ').trim();
+        let preview = '';
+        if (title) preview = title;
+        else if (text) preview = text;
+        if (preview) {
+            // Truncate to ~60 chars for the cell
+            if (preview.length > 60) preview = preview.substring(0, 57) + '...';
+            previewHtml = `<div class="jcal-preview">${preview.replace(/</g,'&lt;')}</div>`;
+        }
+    }
+
     return `<button type="button"
         class="${cellClasses}"
         role="gridcell"
@@ -160,6 +175,7 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
     >
         <span class="jcal-cell__num">${dayNum}</span>
         ${indicatorsHtml ? `<div class="jcal-indicators">${indicatorsHtml}</div>` : ''}
+        ${previewHtml}
         ${dotHtml ? `<div class="jcal-dot-row">${dotHtml}</div>` : ''}
     </button>`;
 }
@@ -230,22 +246,41 @@ function renderCalendarDay(dateStr, dayNum, inMonth, entryData, isToday) {
             overflow: hidden;
         }
 
+        /* Month label */
+        #calendarMonthLabel {
+            text-shadow: 0 1px 4px rgba(0,0,0,0.7), 0 0 1px rgba(0,0,0,0.9);
+        }
+
         /* Day-of-week headers */
         .jcal-dow {
-            padding: 0.5rem 0.25rem;
+            padding: 0.625rem 0.25rem;
             text-align: center;
-            font-size: 0.65rem;
-            font-weight: 600;
+            font-size: 0.8rem;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--deft-txt-3, #525E73);
+            letter-spacing: 0.08em;
+            color: var(--deft-txt, #E8ECF1);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
             background: var(--journal-panel-bg, rgba(26,29,40,0.75));
             backdrop-filter: blur(var(--journal-panel-blur, 8px));
         }
 
+        /* Text preview in cells */
+        .jcal-preview {
+            font-size: 0.55rem;
+            line-height: 1.3;
+            color: var(--deft-txt-2, #8A95A9);
+            margin-top: 0.2rem;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            word-break: break-word;
+        }
+
         /* Day cells */
         .jcal-cell {
-            min-height: 72px;
+            min-height: 90px;
             padding: 0.375rem;
             background: var(--journal-panel-bg, rgba(26,29,40,0.75));
             backdrop-filter: blur(var(--journal-panel-blur, 8px));
