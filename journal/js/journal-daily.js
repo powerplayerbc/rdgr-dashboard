@@ -16,6 +16,9 @@ async function loadDailyView() {
     // Update date display
     renderDailyHeader();
 
+    // Apply per-day color customization
+    applyDayColors(currentDate);
+
     // Destroy old editor, create fresh one
     destroyQuillEditor();
     initQuillEditor();
@@ -551,6 +554,102 @@ function formatFileSize(bytes) {
     var sizes = ['B', 'KB', 'MB', 'GB'];
     var i = Math.floor(Math.log(bytes) / Math.log(1024));
     return parseFloat((bytes / Math.pow(1024, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+// =============================================
+// PER-DAY COLOR CUSTOMIZATION
+// =============================================
+function getDayColorsKey(dateStr) {
+    return 'journal-day-colors-' + (activeProfileId || 'default') + '-' + (dateStr || currentDate);
+}
+
+function getDayColorsDefaultKey() {
+    return 'journal-day-colors-default-' + (activeProfileId || 'default');
+}
+
+function getDayColors(dateStr) {
+    try {
+        // Check for day-specific colors first, then fall back to defaults
+        var specific = localStorage.getItem(getDayColorsKey(dateStr));
+        if (specific) return JSON.parse(specific);
+        var defaults = localStorage.getItem(getDayColorsDefaultKey());
+        if (defaults) return JSON.parse(defaults);
+        return null;
+    } catch(e) { return null; }
+}
+
+function applyDayColors(dateStr) {
+    var colors = getDayColors(dateStr);
+    var wrapper = document.querySelector('.daily-wrapper') || document.getElementById('view-daily');
+    if (!wrapper) return;
+
+    if (colors) {
+        wrapper.style.setProperty('--jday-heading-color', colors.heading || '');
+        wrapper.style.setProperty('--jday-body-color', colors.body || '');
+        wrapper.style.setProperty('--jday-section-color', colors.section || '');
+        wrapper.style.setProperty('--jday-accent-color', colors.accent || '');
+    } else {
+        wrapper.style.removeProperty('--jday-heading-color');
+        wrapper.style.removeProperty('--jday-body-color');
+        wrapper.style.removeProperty('--jday-section-color');
+        wrapper.style.removeProperty('--jday-accent-color');
+    }
+}
+
+function openDayCustomizer() {
+    var colors = getDayColors(currentDate) || {};
+    document.getElementById('dayCustomizerTitle').textContent = 'Customize ' + formatDate(currentDate);
+    document.getElementById('dayHeadingColor').value = colors.heading || '#E8ECF1';
+    document.getElementById('dayBodyColor').value = colors.body || '#E8ECF1';
+    document.getElementById('daySectionColor').value = colors.section || '#8A95A9';
+    document.getElementById('dayAccentColor').value = colors.accent || '#06D6A0';
+    document.getElementById('dayColorApplyAll').checked = false;
+    openModal('dayCustomizerModal');
+}
+
+function previewDayColor() {
+    var wrapper = document.querySelector('.daily-wrapper') || document.getElementById('view-daily');
+    if (!wrapper) return;
+    wrapper.style.setProperty('--jday-heading-color', document.getElementById('dayHeadingColor').value);
+    wrapper.style.setProperty('--jday-body-color', document.getElementById('dayBodyColor').value);
+    wrapper.style.setProperty('--jday-section-color', document.getElementById('daySectionColor').value);
+    wrapper.style.setProperty('--jday-accent-color', document.getElementById('dayAccentColor').value);
+}
+
+function saveDayColors() {
+    var colors = {
+        heading: document.getElementById('dayHeadingColor').value,
+        body: document.getElementById('dayBodyColor').value,
+        section: document.getElementById('daySectionColor').value,
+        accent: document.getElementById('dayAccentColor').value
+    };
+
+    // Save for this specific day
+    localStorage.setItem(getDayColorsKey(currentDate), JSON.stringify(colors));
+
+    // If "apply to all" is checked, also save as defaults
+    if (document.getElementById('dayColorApplyAll').checked) {
+        localStorage.setItem(getDayColorsDefaultKey(), JSON.stringify(colors));
+        toast('Day colors saved as default for all days');
+    } else {
+        toast('Day colors saved for ' + formatDate(currentDate));
+    }
+
+    closeModal('dayCustomizerModal');
+}
+
+function resetDayColors() {
+    localStorage.removeItem(getDayColorsKey(currentDate));
+    if (document.getElementById('dayColorApplyAll').checked) {
+        localStorage.removeItem(getDayColorsDefaultKey());
+    }
+    applyDayColors(currentDate);
+    document.getElementById('dayHeadingColor').value = '#E8ECF1';
+    document.getElementById('dayBodyColor').value = '#E8ECF1';
+    document.getElementById('daySectionColor').value = '#8A95A9';
+    document.getElementById('dayAccentColor').value = '#06D6A0';
+    previewDayColor();
+    toast('Day colors reset');
 }
 
 // =============================================

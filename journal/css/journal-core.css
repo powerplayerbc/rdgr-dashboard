@@ -199,7 +199,8 @@
 .daily-date-label {
     font-size: 1rem;
     font-weight: 700;
-    color: var(--deft-txt, #E8ECF1);
+    color: var(--jday-heading-color, var(--deft-txt, #E8ECF1));
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
     min-width: 160px;
     text-align: center;
 }
@@ -241,7 +242,7 @@
     font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif;
 }
 .ql-editor {
-    color: var(--deft-txt, #E8ECF1) !important;
+    color: var(--jday-body-color, var(--deft-txt, #E8ECF1)) !important;
     font-size: 0.875rem;
     line-height: 1.7;
     min-height: 300px;
@@ -296,11 +297,12 @@
     border-radius: 0.625rem;
 }
 .journal-section-title {
-    font-size: 0.7rem;
-    font-weight: 700;
+    font-size: 0.75rem;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--deft-txt-3, #525E73);
+    letter-spacing: 0.06em;
+    color: var(--jday-section-color, var(--deft-txt-2, #8A95A9));
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
     margin-bottom: 0.75rem;
     display: flex;
     align-items: center;
@@ -327,7 +329,8 @@
 .brain-activity-info { flex: 1; min-width: 0; }
 .brain-activity-title {
     font-size: 0.75rem; font-weight: 600;
-    color: var(--deft-txt, #E8ECF1);
+    color: var(--jday-body-color, var(--deft-txt, #E8ECF1));
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .brain-activity-meta {
@@ -361,7 +364,8 @@
 .next-step-title {
     flex: 1;
     font-size: 0.75rem;
-    color: var(--deft-txt, #E8ECF1);
+    color: var(--jday-body-color, var(--deft-txt, #E8ECF1));
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 .next-step-title.completed {
     text-decoration: line-through;
@@ -540,7 +544,8 @@
     padding: 0.5rem 0;
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--deft-txt, #E8ECF1);
+    color: var(--jday-heading-color, var(--deft-txt, #E8ECF1));
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
     background: transparent;
     border: none;
     outline: none;
@@ -548,7 +553,7 @@
     font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif;
 }
 .journal-title-input::placeholder {
-    color: var(--deft-txt-3, #525E73);
+    color: var(--jday-section-color, var(--deft-txt-3, #525E73));
 }
 
 /* ── Word Count ── */
