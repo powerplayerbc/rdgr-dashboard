@@ -50,7 +50,9 @@ function openBackgroundPicker(target) {
         `;
     });
 
-    modal.querySelector('.modal-body').innerHTML = `
+    const modalBody = document.getElementById('backgroundPickerContent');
+    if (!modalBody) return;
+    modalBody.innerHTML = `
         <div class="bg-picker-header">
             <span class="bg-picker-header-label">Background for ${targetLabel}</span>
         </div>

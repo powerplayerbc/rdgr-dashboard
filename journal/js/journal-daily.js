@@ -116,7 +116,7 @@ async function loadBrainActivities() {
     // Fetch BRAIN activities for this day
     const activities = await supabaseSelect(
         'brain_activities',
-        `user_id=eq.${activeProfileId}&started_at=gte.${dayStart}&started_at=lte.${dayEnd}&select=activity_id,category,title,duration_min,points,started_at&order=started_at.asc`
+        `user_id=eq.${activeProfileId}&started_at=gte.${dayStart}&started_at=lte.${dayEnd}&select=activity_id,category_id,title,duration_minutes,points_earned,started_at&order=started_at.asc`
     );
 
     // Fetch journal-specific activity notes/hidden flags
@@ -151,7 +151,7 @@ async function loadBrainActivities() {
         const ja = jaMap[a.activity_id] || {};
         if (ja.is_hidden) return '';
 
-        const icon = catIcons[a.category] || '&#x2B50;';
+        const icon = catIcons[a.category_id] || '&#x2B50;';
         const time = new Date(a.started_at).toLocaleTimeString('en-US', {
             hour: 'numeric', minute: '2-digit', hour12: true
         });
@@ -164,7 +164,7 @@ async function loadBrainActivities() {
                 <span class="jday-act-icon">${icon}</span>
                 <div class="jday-act-info">
                     <span class="jday-act-title">${escapeHtmlSafe(a.title || 'Activity')}</span>
-                    <span class="jday-act-meta">${time} &middot; ${a.duration_min || 0}min &middot; ${a.points || 0}pts</span>
+                    <span class="jday-act-meta">${time} &middot; ${a.duration_minutes || 0}min &middot; ${a.points_earned || 0}pts</span>
                 </div>
                 <div class="jday-act-actions">
                     <button type="button" class="jday-act-btn" onclick="addActivityNote('${a.activity_id}')" title="Add note" aria-label="Add note">

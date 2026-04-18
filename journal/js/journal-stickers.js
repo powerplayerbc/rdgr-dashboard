@@ -238,7 +238,9 @@ function openStickerPicker() {
         Upload Custom Sticker
     </button>`;
 
-    modal.querySelector('.modal-body').innerHTML = `
+    const modalBody = document.getElementById('stickerPickerContent');
+    if (!modalBody) return;
+    modalBody.innerHTML = `
         <div class="sticker-picker-tabs" role="tablist">
             <button class="sticker-picker-tab active" onclick="switchStickerTab('emoji')" role="tab" aria-selected="true" id="tab-sticker-emoji">Emoji</button>
             <button class="sticker-picker-tab" onclick="switchStickerTab('custom')" role="tab" aria-selected="false" id="tab-sticker-custom">Custom</button>

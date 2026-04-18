@@ -99,3 +99,128 @@ const STICKER_LIBRARY = [
     { slug: 'gaming', category: 'activity', emoji: '\u{1F3AE}', label: 'Gaming' },
     { slug: 'workout', category: 'activity', emoji: '\u{1F3CB}\uFE0F', label: 'Workout' }
 ];
+
+// =============================================
+// THEME ENGINE (shared with DEFT)
+// =============================================
+const THEMES = {
+    forest: {
+        name: 'Forest',
+        accent: '#A8D65B', accentWarm: '#F0A830',
+        base: '#0F1008', surface: '#191C10', surfaceEl: '#232718', surfaceHi: '#2D3220',
+        border: '#3A3F2C', success: '#6BCB77', warning: '#F0A830', danger: '#E85D5D',
+        txt: '#EAE8E0', txt2: '#A09B8C', txt3: '#6B6758',
+        headingFont: 'Nunito', bodyFont: 'DM Sans',
+    },
+    sunrise: {
+        name: 'Sunrise',
+        accent: '#F0A830', accentWarm: '#E85D5D',
+        base: '#100D08', surface: '#1C1810', surfaceEl: '#272118', surfaceHi: '#322B20',
+        border: '#3F382C', success: '#6BCB77', warning: '#F0A830', danger: '#E85D5D',
+        txt: '#EAE8E0', txt2: '#A09B8C', txt3: '#6B6758',
+        headingFont: 'Nunito', bodyFont: 'DM Sans',
+    },
+    ocean: {
+        name: 'Ocean',
+        accent: '#38BDF8', accentWarm: '#06D6A0',
+        base: '#080D10', surface: '#10161C', surfaceEl: '#182027', surfaceHi: '#202A32',
+        border: '#2C363F', success: '#6BCB77', warning: '#F0A830', danger: '#E85D5D',
+        txt: '#E0E8EA', txt2: '#8C9BA0', txt3: '#586B6B',
+        headingFont: 'Nunito', bodyFont: 'DM Sans',
+    },
+    berry: {
+        name: 'Berry',
+        accent: '#C084FC', accentWarm: '#FB7185',
+        base: '#0D0810', surface: '#16101C', surfaceEl: '#201827', surfaceHi: '#2A2032',
+        border: '#3A2C3F', success: '#6BCB77', warning: '#F0A830', danger: '#E85D5D',
+        txt: '#E8E0EA', txt2: '#A08CA0', txt3: '#6B586B',
+        headingFont: 'Nunito', bodyFont: 'DM Sans',
+    },
+    rdgr: {
+        name: 'RDGR',
+        accent: '#06D6A0', accentWarm: '#4CC9F0',
+        base: '#08090D', surface: '#11131A', surfaceEl: '#1A1D28', surfaceHi: '#242836',
+        border: '#2A2E3D', success: '#06D6A0', warning: '#FFD93D', danger: '#FF6B6B',
+        txt: '#E8ECF1', txt2: '#8A95A9', txt3: '#525E73',
+        headingFont: 'Chakra Petch', bodyFont: 'IBM Plex Sans',
+    },
+    monochrome: {
+        name: 'Monochrome',
+        accent: '#E8E8E8', accentWarm: '#A0A0A0',
+        base: '#000000', surface: '#0A0A0A', surfaceEl: '#141414', surfaceHi: '#1E1E1E',
+        border: '#2A2A2A', success: '#6BCB77', warning: '#F0A830', danger: '#E85D5D',
+        txt: '#E8E8E8', txt2: '#A0A0A0', txt3: '#666666',
+        headingFont: 'Nunito', bodyFont: 'DM Sans',
+    },
+};
+
+function getThemeKey() {
+    return `deft-theme-${activeProfileId || 'default'}`;
+}
+
+function loadTheme() {
+    const saved = localStorage.getItem(getThemeKey());
+    if (saved) {
+        try { return JSON.parse(saved); } catch(e) {}
+    }
+    if (activeProfileId && activeProfileId !== 'default') {
+        fetch(SUPABASE_URL + '/rest/v1/deft_user_profiles?user_id=eq.' + activeProfileId + '&select=preferences', {
+            headers: { 'apikey': SUPABASE_ANON_KEY }
+        }).then(r => r.json()).then(d => {
+            if (d && d[0] && d[0].preferences && d[0].preferences.theme) {
+                localStorage.setItem(getThemeKey(), JSON.stringify(d[0].preferences.theme));
+                applyTheme(d[0].preferences.theme);
+            }
+        }).catch(() => {});
+    }
+    return { preset: 'rdgr' };
+}
+
+function applyTheme(config) {
+    const theme = config.preset === 'custom' ? config.custom : THEMES[config.preset] || THEMES.rdgr;
+    const app = document.documentElement;
+    app.style.setProperty('--deft-accent', theme.accent);
+    app.style.setProperty('--deft-accent-dim', hexToRGBA(theme.accent, 0.15));
+    app.style.setProperty('--deft-accent-warm', theme.accentWarm);
+    app.style.setProperty('--deft-accent-warm-dim', hexToRGBA(theme.accentWarm, 0.15));
+    app.style.setProperty('--deft-base', theme.base);
+    app.style.setProperty('--deft-surface', theme.surface);
+    app.style.setProperty('--deft-surface-el', theme.surfaceEl);
+    app.style.setProperty('--deft-surface-hi', theme.surfaceHi);
+    app.style.setProperty('--deft-border', theme.border);
+    const so = config.statusOverrides || {};
+    app.style.setProperty('--deft-success', so.success || theme.success);
+    app.style.setProperty('--deft-success-dim', hexToRGBA(so.success || theme.success, 0.15));
+    app.style.setProperty('--deft-warning', so.warning || theme.warning);
+    app.style.setProperty('--deft-warning-dim', hexToRGBA(so.warning || theme.warning, 0.15));
+    app.style.setProperty('--deft-danger', so.danger || theme.danger);
+    app.style.setProperty('--deft-danger-dim', hexToRGBA(so.danger || theme.danger, 0.15));
+    app.style.setProperty('--deft-txt', theme.txt);
+    app.style.setProperty('--deft-txt-2', theme.txt2);
+    app.style.setProperty('--deft-txt-3', theme.txt3);
+    app.style.setProperty('--deft-heading-font', theme.headingFont);
+    app.style.setProperty('--deft-body-font', theme.bodyFont);
+    document.body.style.background = theme.base;
+    document.body.style.color = theme.txt;
+    document.body.style.fontFamily = `${theme.bodyFont}, system-ui, sans-serif`;
+    loadFonts(theme.headingFont, theme.bodyFont);
+}
+
+function hexToRGBA(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function loadFonts(headingFont, bodyFont) {
+    const fonts = new Set([headingFont, bodyFont, 'JetBrains Mono']);
+    const families = Array.from(fonts).map(f => f.replace(/ /g, '+') + ':wght@400;500;600;700;800').join('&family=');
+    const existing = document.getElementById('deft-fonts');
+    if (existing) existing.remove();
+    const link = document.createElement('link');
+    link.id = 'deft-fonts';
+    link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${families}&display=swap`;
+    document.head.appendChild(link);
+}
