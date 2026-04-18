@@ -276,12 +276,17 @@ function openStickerPicker() {
         emojiHtml += `</div></div>`;
     }
 
-    const customHtml = `<div id="customStickersGrid" class="sticker-picker-grid">
+    const customHtml = `<div style="margin-bottom:8px;">
+        <input type="text" id="customStickerSearch" placeholder="Search by name, tag, or bundle..."
+            oninput="filterCustomStickers()"
+            style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--deft-border,#2A2E3D);background:var(--deft-surface,#11131A);color:var(--deft-txt,#E8ECF1);font-size:0.8rem;outline:none;" />
+    </div>
+    <div id="customStickersGrid" class="sticker-picker-grid">
         <div class="sticker-picker-loading">Loading custom stickers...</div>
     </div>
-    <button class="sticker-upload-btn" onclick="uploadCustomSticker()">
+    <button class="sticker-upload-btn" onclick="openBulkUploadModal('sticker')">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Upload Custom Sticker
+        Upload Stickers
     </button>`;
 
     const modalBody = document.getElementById('stickerPickerContent');
@@ -322,27 +327,84 @@ function switchStickerTab(tab) {
     }
 }
 
+let _customStickersCache = [];
+
 async function loadCustomStickersForPicker() {
     if (!activeProfileId) return;
-    const stickers = await supabaseSelect('journal_sticker_library', `select=*&user_id=eq.${activeProfileId}&order=created_at.desc`);
-    const grid = document.getElementById('customStickersGrid');
+    const stickers = await supabaseSelect('journal_sticker_library', `select=*&user_id=eq.${activeProfileId}&order=bundle.asc.nullslast,created_at.desc`);
+    _customStickersCache = stickers || [];
+    renderCustomStickers(_customStickersCache);
+}
+
+function filterCustomStickers() {
+    var input = document.getElementById('customStickerSearch');
+    var q = (input ? input.value : '').trim().toLowerCase();
+    if (!q) { renderCustomStickers(_customStickersCache); return; }
+    var filtered = _customStickersCache.filter(function(s) {
+        if ((s.name || '').toLowerCase().indexOf(q) !== -1) return true;
+        if (s.bundle && s.bundle.toLowerCase().indexOf(q) !== -1) return true;
+        if (s.tags && Array.isArray(s.tags)) {
+            for (var i = 0; i < s.tags.length; i++) {
+                if (s.tags[i].toLowerCase().indexOf(q) !== -1) return true;
+            }
+        }
+        return false;
+    });
+    renderCustomStickers(filtered);
+}
+
+function renderCustomStickers(stickers) {
+    var grid = document.getElementById('customStickersGrid');
     if (!grid) return;
 
     if (!stickers || !stickers.length) {
-        grid.innerHTML = '<div class="sticker-picker-empty">No custom stickers yet. Upload one below.</div>';
+        grid.innerHTML = '<div class="sticker-picker-empty">No custom stickers yet. Upload some below.</div>';
         return;
     }
 
-    grid.innerHTML = stickers.map(s => {
-        var slug = s.id || s.name || 'custom';
-        var name = s.name || 'Custom sticker';
-        return `<div class="sticker-picker-custom-card" style="position:relative;">
-            <button class="sticker-picker-item sticker-picker-custom" onclick="addSticker('${slug}', 'custom', '${s.image_url}')" title="${name}" aria-label="${name}">
-                <img src="${s.image_url}" alt="${name}" loading="lazy" />
-            </button>
-            <button class="sticker-picker-custom-delete" onclick="event.stopPropagation();deleteCustomSticker('${s.id}')" title="Delete sticker" aria-label="Delete ${name}">&times;</button>
-        </div>`;
-    }).join('');
+    // Group by bundle
+    var groups = {};
+    stickers.forEach(function(s) {
+        var key = s.bundle || '';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(s);
+    });
+
+    var html = '';
+    var keys = Object.keys(groups).sort(function(a, b) {
+        if (!a) return 1; if (!b) return -1;
+        return a.localeCompare(b);
+    });
+
+    keys.forEach(function(key) {
+        var items = groups[key];
+        var label = key || 'Ungrouped';
+        if (keys.length > 1 || key) {
+            html += '<div class="sticker-bundle-group">';
+            html += '<div class="sticker-bundle-header" onclick="this.parentElement.classList.toggle(\'collapsed\')">';
+            html += '<span>' + label + ' (' + items.length + ')</span>';
+            html += '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="sticker-bundle-chevron"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>';
+            html += '</div>';
+            html += '<div class="sticker-bundle-content sticker-picker-grid">';
+        }
+
+        items.forEach(function(s) {
+            var slug = s.id || s.name || 'custom';
+            var name = s.name || 'Custom sticker';
+            html += '<div class="sticker-picker-custom-card" style="position:relative;">';
+            html += '<button class="sticker-picker-item sticker-picker-custom" onclick="addSticker(\'' + slug + '\', \'custom\', \'' + s.image_url + '\')" title="' + name + '" aria-label="' + name + '">';
+            html += '<img src="' + s.image_url + '" alt="' + name + '" loading="lazy" />';
+            html += '</button>';
+            html += '<button class="sticker-picker-custom-delete" onclick="event.stopPropagation();deleteCustomSticker(\'' + s.id + '\')" title="Delete sticker" aria-label="Delete ' + name + '">&times;</button>';
+            html += '</div>';
+        });
+
+        if (keys.length > 1 || key) {
+            html += '</div></div>';
+        }
+    });
+
+    grid.innerHTML = html;
 }
 
 async function deleteCustomSticker(libraryId) {
@@ -803,6 +865,21 @@ function destroyStickerCanvas(scope) {
             color: #06D6A0;
             background: rgba(6,214,160,0.04);
         }
+
+        /* Bundle Groups */
+        .sticker-bundle-group { margin-bottom: 10px; }
+        .sticker-bundle-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 5px 4px; cursor: pointer; font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            color: var(--deft-txt-muted, #8A95A9);
+            border-bottom: 1px solid var(--deft-border, #2A2E3D);
+            margin-bottom: 6px; user-select: none;
+        }
+        .sticker-bundle-header:hover { color: var(--deft-txt, #E8ECF1); }
+        .sticker-bundle-chevron { transition: transform 0.2s; }
+        .sticker-bundle-group.collapsed .sticker-bundle-chevron { transform: rotate(-90deg); }
+        .sticker-bundle-group.collapsed .sticker-bundle-content { display: none; }
 
         /* Sticker Mode Toggle Button */
         #stickerModeToggle {

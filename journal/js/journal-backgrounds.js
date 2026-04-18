@@ -68,7 +68,12 @@ async function openBackgroundPicker(target) {
         <div class="bg-picker-header">
             <span class="bg-picker-header-label">Background for ${targetLabel}</span>
         </div>
-        <div class="bg-picker-grid">${gridHtml}</div>
+        <div style="margin-bottom:8px;">
+            <input type="text" id="customBgSearch" placeholder="Search by name, tag, or bundle..."
+                oninput="filterCustomBackgrounds('${target}')"
+                style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--deft-border,#2A2E3D);background:var(--deft-surface,#11131A);color:var(--deft-txt,#E8ECF1);font-size:0.8rem;outline:none;" />
+        </div>
+        <div class="bg-picker-grid" id="bgPickerGrid">${gridHtml}</div>
         <div style="margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--deft-border, #2A2E3D);">
             <div class="settings-label" style="margin-bottom:0.5rem;">Image Position</div>
             <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:start;">
@@ -99,9 +104,9 @@ async function openBackgroundPicker(target) {
                 <button onclick="saveBgPosition('${target}')" class="btn btn-sm btn-primary" style="align-self:end;">Save Position</button>
             </div>
         </div>
-        <button class="bg-upload-btn" onclick="uploadCustomBackground()" style="margin-top:0.75rem;">
+        <button class="bg-upload-btn" onclick="openBulkUploadModal('background')" style="margin-top:0.75rem;">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            Upload Custom Background
+            Upload Backgrounds
         </button>
     `;
 
@@ -345,6 +350,56 @@ function uploadCustomBackground() {
     document.body.appendChild(input);
     input.click();
     input.remove();
+}
+
+// =============================================
+// FILTER BACKGROUNDS
+// =============================================
+function filterCustomBackgrounds(target) {
+    var input = document.getElementById('customBgSearch');
+    var q = (input ? input.value : '').trim().toLowerCase();
+    var grid = document.getElementById('bgPickerGrid');
+    if (!grid) return;
+
+    var filtered = backgroundsList;
+    if (q) {
+        filtered = backgroundsList.filter(function(bg) {
+            // System backgrounds always show
+            if (!bg.user_id) return true;
+            if ((bg.name || '').toLowerCase().indexOf(q) !== -1) return true;
+            if (bg.bundle && bg.bundle.toLowerCase().indexOf(q) !== -1) return true;
+            if (bg.tags && Array.isArray(bg.tags)) {
+                for (var i = 0; i < bg.tags.length; i++) {
+                    if (bg.tags[i].toLowerCase().indexOf(q) !== -1) return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    var html = '';
+    // "None" option
+    html += '<button class="bg-picker-card" onclick="removeBackground(\'' + target + '\')" title="No background" aria-label="Remove background">';
+    html += '<div class="bg-picker-preview" style="background: var(--deft-bg, #0F1119); border: 1px dashed rgba(255,255,255,0.12);">';
+    html += '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="opacity:0.4;"><path d="M4 4l12 12M16 4L4 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+    html += '</div><span class="bg-picker-label">None</span></button>';
+
+    filtered.forEach(function(bg) {
+        var previewStyle = getBackgroundPreviewStyle(bg);
+        var isCustom = bg.user_id ? true : false;
+        var deleteBtn = isCustom
+            ? '<button class="bg-picker-delete" onclick="event.stopPropagation();deleteBackground(\'' + bg.background_id + '\')" title="Delete" aria-label="Delete ' + (bg.name || '') + '">&times;</button>'
+            : '';
+        html += '<div class="bg-picker-card" style="position:relative;">';
+        html += '<button class="bg-picker-card-inner" onclick="selectBackground(\'' + bg.background_id + '\', \'' + target + '\')" title="' + (bg.name || '') + '" aria-label="' + (bg.name || '') + '">';
+        html += '<div class="bg-picker-preview" style="' + previewStyle + '"></div>';
+        html += '<span class="bg-picker-label">' + (bg.name || '') + '</span>';
+        html += '</button>';
+        html += deleteBtn;
+        html += '</div>';
+    });
+
+    grid.innerHTML = html;
 }
 
 // =============================================

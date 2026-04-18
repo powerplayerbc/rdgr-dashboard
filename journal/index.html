@@ -889,6 +889,19 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         </div>
     </div>
 
+    <!-- Bulk Upload Modal -->
+    <div id="bulkUploadModal" class="modal-backdrop">
+        <div class="modal-content" style="max-width:640px;">
+            <div class="modal-header">
+                <span class="modal-title" id="bulkUploadTitle">Bulk Upload</span>
+                <button onclick="closeModal('bulkUploadModal')" class="btn-icon">&times;</button>
+            </div>
+            <div id="bulkUploadContent">
+                <!-- Populated by journal-bulk-upload.js -->
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div class="toast-container" id="toasts" aria-live="polite"></div>
 
@@ -905,6 +918,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 <script src="js/journal-daily.js"></script>
 <script src="js/journal-stickers.js"></script>
 <script src="js/journal-backgrounds.js"></script>
+<script src="js/journal-bulk-upload.js"></script>
 <script src="js/journal-drive.js"></script>
 <script src="js/journal-auth.js"></script>
 
