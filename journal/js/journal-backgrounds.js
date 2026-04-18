@@ -18,10 +18,13 @@ async function loadBackgrounds() {
 // =============================================
 // OPEN BACKGROUND PICKER
 // =============================================
-function openBackgroundPicker(target) {
+async function openBackgroundPicker(target) {
     backgroundPickerTarget = target;
     const modal = document.getElementById('backgroundPickerModal');
     if (!modal) return;
+
+    // Always load fresh backgrounds before rendering
+    await loadBackgrounds();
 
     const targetLabel = target === 'daily' ? 'Daily Entry' : 'Monthly Calendar';
 
@@ -43,7 +46,7 @@ function openBackgroundPicker(target) {
         const previewStyle = getBackgroundPreviewStyle(bg);
         const isCustom = bg.user_id ? ' (Custom)' : '';
         gridHtml += `
-            <button class="bg-picker-card" onclick="selectBackground('${bg.id}', '${target}')" title="${bg.name}${isCustom}" aria-label="${bg.name}">
+            <button class="bg-picker-card" onclick="selectBackground('${bg.background_id}', '${target}')" title="${bg.name}${isCustom}" aria-label="${bg.name}">
                 <div class="bg-picker-preview" style="${previewStyle}"></div>
                 <span class="bg-picker-label">${bg.name}</span>
             </button>
@@ -67,14 +70,14 @@ function openBackgroundPicker(target) {
 }
 
 function getBackgroundPreviewStyle(bg) {
-    if (bg.type === 'gradient' && bg.css_value) {
-        return `background: ${bg.css_value};`;
+    if (bg.type === 'gradient' && bg.value) {
+        return `background: ${bg.value};`;
     }
-    if (bg.type === 'image' && bg.image_url) {
-        return `background-image: url('${bg.image_url}'); background-size: cover; background-position: center;`;
+    if (bg.type === 'image' && bg.value) {
+        return `background-image: url('${bg.value}'); background-size: cover; background-position: center;`;
     }
-    if (bg.type === 'solid' && bg.css_value) {
-        return `background: ${bg.css_value};`;
+    if (bg.type === 'solid' && bg.value) {
+        return `background: ${bg.value};`;
     }
     return 'background: rgba(255,255,255,0.04);';
 }
@@ -115,7 +118,7 @@ function applyDailyBackground(backgroundId) {
         return;
     }
 
-    const bg = backgroundsList.find(b => String(b.id) === String(backgroundId));
+    const bg = backgroundsList.find(b => String(b.background_id) === String(backgroundId));
     if (!bg) {
         // Background not found in loaded list; clear
         container.style.background = '';
@@ -123,17 +126,17 @@ function applyDailyBackground(backgroundId) {
         return;
     }
 
-    if (bg.type === 'gradient' && bg.css_value) {
-        container.style.background = bg.css_value;
+    if (bg.type === 'gradient' && bg.value) {
+        container.style.background = bg.value;
         container.style.backgroundImage = '';
-    } else if (bg.type === 'image' && bg.image_url) {
+    } else if (bg.type === 'image' && bg.value) {
         container.style.background = '';
-        container.style.backgroundImage = `url('${bg.image_url}')`;
+        container.style.backgroundImage = `url('${bg.value}')`;
         container.style.backgroundSize = 'cover';
         container.style.backgroundPosition = 'center';
         container.style.backgroundRepeat = 'no-repeat';
-    } else if (bg.type === 'solid' && bg.css_value) {
-        container.style.background = bg.css_value;
+    } else if (bg.type === 'solid' && bg.value) {
+        container.style.background = bg.value;
         container.style.backgroundImage = '';
     } else {
         container.style.background = '';
@@ -157,22 +160,22 @@ function applyMonthBackground() {
         return;
     }
 
-    const bg = backgroundsList.find(b => String(b.id) === String(backgroundId));
+    const bg = backgroundsList.find(b => String(b.background_id) === String(backgroundId));
     if (!bg) {
         container.style.background = '';
         container.style.backgroundImage = '';
         return;
     }
 
-    if (bg.type === 'gradient' && bg.css_value) {
-        container.style.background = bg.css_value;
-    } else if (bg.type === 'image' && bg.image_url) {
-        container.style.backgroundImage = `url('${bg.image_url}')`;
+    if (bg.type === 'gradient' && bg.value) {
+        container.style.background = bg.value;
+    } else if (bg.type === 'image' && bg.value) {
+        container.style.backgroundImage = `url('${bg.value}')`;
         container.style.backgroundSize = 'cover';
         container.style.backgroundPosition = 'center';
         container.style.backgroundRepeat = 'no-repeat';
-    } else if (bg.type === 'solid' && bg.css_value) {
-        container.style.background = bg.css_value;
+    } else if (bg.type === 'solid' && bg.value) {
+        container.style.background = bg.value;
     }
 }
 
