@@ -937,14 +937,14 @@ function resetDayColors() {
             height: 22px;
             border-radius: 0.25rem;
             border: none;
-            background: transparent;
-            color: var(--deft-txt-3, #525E73);
+            background: rgba(255,255,255,0.06);
+            color: var(--jday-section-color, var(--deft-txt-2, #8A95A9));
             cursor: pointer;
             transition: background 0.12s, color 0.12s;
         }
         .jday-step-btn:hover {
-            background: rgba(255,255,255,0.06);
-            color: var(--deft-txt-2, #8A95A9);
+            background: rgba(255,255,255,0.12);
+            color: var(--jday-heading-color, var(--deft-txt, #E8ECF1));
         }
         .jday-step-btn--del:hover {
             background: rgba(255,107,107,0.12);
@@ -1074,7 +1074,8 @@ function resetDayColors() {
             padding: 1rem;
             text-align: center;
             font-size: 0.8rem;
-            color: var(--deft-txt-3, #525E73);
+            color: var(--jday-section-color, var(--deft-txt-2, #8A95A9));
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
         /* ── Responsive ── */

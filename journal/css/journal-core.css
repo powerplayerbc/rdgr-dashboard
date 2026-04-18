@@ -335,7 +335,8 @@
 }
 .brain-activity-meta {
     font-size: 0.65rem;
-    color: var(--deft-txt-3, #525E73);
+    color: var(--jday-section-color, var(--deft-txt-2, #8A95A9));
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     display: flex; gap: 0.5rem;
 }
 
@@ -348,7 +349,7 @@
 }
 .next-step-checkbox {
     width: 16px; height: 16px;
-    border: 1.5px solid var(--deft-border, #2A2E3D);
+    border: 1.5px solid var(--jday-section-color, var(--deft-border, #2A2E3D));
     border-radius: 0.25rem;
     background: transparent;
     cursor: pointer;
@@ -358,8 +359,8 @@
     padding: 0;
 }
 .next-step-checkbox.checked {
-    background: var(--deft-accent, #06D6A0);
-    border-color: var(--deft-accent, #06D6A0);
+    background: var(--jday-accent-color, var(--deft-accent, #06D6A0));
+    border-color: var(--jday-accent-color, var(--deft-accent, #06D6A0));
 }
 .next-step-title {
     flex: 1;
@@ -369,7 +370,7 @@
 }
 .next-step-title.completed {
     text-decoration: line-through;
-    color: var(--deft-txt-3, #525E73);
+    color: var(--jday-section-color, var(--deft-txt-3, #525E73));
 }
 .next-step-actions {
     display: flex;
@@ -384,13 +385,13 @@
     flex: 1;
     padding: 0.375rem 0.625rem;
     font-size: 0.7rem;
-    color: var(--deft-txt, #E8ECF1);
-    background: var(--deft-surface-el, #1A1D28);
-    border: 1px solid var(--deft-border, #2A2E3D);
+    color: var(--jday-body-color, var(--deft-txt, #E8ECF1));
+    background: rgba(17, 19, 26, 0.5);
+    border: 1px solid var(--jday-section-color, var(--deft-border, #2A2E3D));
     border-radius: 0.375rem;
     outline: none;
 }
-.next-step-input:focus { border-color: var(--deft-accent, #06D6A0); }
+.next-step-input:focus { border-color: var(--jday-accent-color, var(--deft-accent, #06D6A0)); }
 
 /* ── Custom Sticker Picker Delete Button ── */
 .sticker-picker-custom-card { position: relative; display: inline-block; }
@@ -544,7 +545,8 @@
 .empty-state {
     text-align: center;
     padding: 2rem 1rem;
-    color: var(--deft-txt-3, #525E73);
+    color: var(--jday-section-color, var(--deft-txt-2, #8A95A9));
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     font-size: 0.75rem;
 }
 .empty-state-icon {
@@ -574,7 +576,8 @@
 /* ── Word Count ── */
 .word-count {
     font-size: 0.6rem;
-    color: var(--deft-txt-3, #525E73);
+    color: var(--jday-section-color, var(--deft-txt-2, #8A95A9));
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     font-family: 'JetBrains Mono', monospace;
 }
 
