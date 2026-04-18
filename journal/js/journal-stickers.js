@@ -169,8 +169,11 @@ function attachStickerEvents(node, scope) {
     });
 }
 
+let _selectedStickerNode = null;
+
 function selectSticker(node, scope) {
     deselectAllStickers();
+    _selectedStickerNode = node;
 
     const stage = scope === 'daily' ? konvaStage : calendarKonvaStage;
     if (!stage) return;
@@ -192,9 +195,55 @@ function selectSticker(node, scope) {
     layer.add(tr);
     stickerTransformers.push(tr);
     layer.batchDraw();
+
+    // Show floating delete button
+    showStickerDeleteBtn(node, stage);
+}
+
+function showStickerDeleteBtn(node, stage) {
+    hideStickerDeleteBtn();
+
+    var btn = document.createElement('button');
+    btn.id = 'stickerDeleteFloating';
+    btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M4.5 3V2.5a1 1 0 011-1h1a1 1 0 011 1V3M5 5.5v3M7 5.5v3M3 3l.5 6.5a1 1 0 001 .5h3a1 1 0 001-.5L9 3" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg> Delete';
+    btn.style.cssText = 'position:fixed;z-index:10002;display:flex;align-items:center;gap:0.375rem;padding:0.4rem 0.75rem;border-radius:0.375rem;border:1px solid rgba(255,107,107,0.5);background:rgba(8,9,13,0.92);backdrop-filter:blur(12px);color:#FF6B6B;font-size:0.7rem;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.5);';
+
+    // Position near the node
+    var rect = stage.container().getBoundingClientRect();
+    var nodeRect = node.getClientRect();
+    var left = rect.left + nodeRect.x + nodeRect.width / 2 - 40;
+    var top = rect.top + nodeRect.y - 36;
+    if (top < 10) top = rect.top + nodeRect.y + nodeRect.height + 8;
+    btn.style.left = Math.max(10, left) + 'px';
+    btn.style.top = Math.max(10, top) + 'px';
+
+    btn.onclick = function() {
+        var stickerId = node.getAttr('_stickerId');
+        if (!stickerId) {
+            // No DB record, just remove from canvas
+            node.destroy();
+            deselectAllStickers();
+            var layer = stage.findOne('Layer');
+            if (layer) layer.batchDraw();
+            toast('Sticker removed');
+            return;
+        }
+        if (confirm('Delete this sticker?')) {
+            deleteSticker(stickerId, node);
+        }
+    };
+
+    document.body.appendChild(btn);
+}
+
+function hideStickerDeleteBtn() {
+    var existing = document.getElementById('stickerDeleteFloating');
+    if (existing) existing.remove();
 }
 
 function deselectAllStickers() {
+    _selectedStickerNode = null;
+    hideStickerDeleteBtn();
     stickerTransformers.forEach(tr => tr.destroy());
     stickerTransformers = [];
     if (konvaStage) {
