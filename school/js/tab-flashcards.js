@@ -398,7 +398,7 @@ function fcBuildSpellingMastery() {
 
     wordItems.forEach((item, i) => {
         const cls = item.proficient ? 'fc-chip-done' : (item.attempts > 0 ? 'fc-chip-wip' : 'fc-chip-new');
-        html += `<button class="fc-word-chip ${cls}" onclick="fcJumpToSpWord(${i})" title="Word ${i + 1}">${i + 1}</button>`;
+        html += `<button class="fc-word-chip ${cls} ${i === fcState.spIndex ? 'active' : ''}" onclick="fcJumpToSpWord(${i})" title="Word ${i + 1}">${i + 1}</button>`;
     });
 
     html += `</div></div>`;
@@ -446,7 +446,7 @@ function fcBuildSpellingCard() {
         <div class="fc-card-body">
             ${posBadge}
             <div class="fc-definition">${escapeHtml(w.definition || 'No definition available')}</div>
-            ${w.example_sentence ? `<div class="fc-example"><em>"${escapeHtml(w.example_sentence)}"</em></div>` : ''}
+            ${w.example_sentence ? `<div class="fc-example"><em>"${escapeHtml(w.example_sentence.replace(new RegExp(w.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '____'))}"</em></div>` : ''}
         </div>
         <button class="fc-speak-btn" onclick="fcSpeak('${escapeHtml(w.definition || '')}')" title="Read definition aloud" aria-label="Read aloud">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -1530,6 +1530,11 @@ function injectFlashcardStyles() {
 .fc-word-chip:hover {
     filter: brightness(1.15);
     transform: translateY(-1px);
+}
+.fc-word-chip.active {
+    border-color: var(--deft-accent);
+    background: var(--deft-accent-dim);
+    color: var(--deft-accent);
 }
 
 /* ── Flashcard 3D ── */

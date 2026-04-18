@@ -440,6 +440,10 @@ function addSticker(slug, type, imageUrl) {
 }
 
 async function saveStickerToDb(node, slug, type, imageUrl, scope) {
+    if (scope === 'daily' && (!currentEntry || !currentEntry.entry_id)) {
+        toast('Save your entry first before adding stickers', 'error');
+        return;
+    }
     const stage = scope === 'daily' ? konvaStage : calendarKonvaStage;
     if (!stage) return;
 

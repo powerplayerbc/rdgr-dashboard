@@ -139,7 +139,7 @@ async function fetchLessonsMap(lessonIds) {
 function buildLessonsHeader(today) {
     const dateLabel = formatDate(today);
     const assignBtn = isTeacher()
-        ? `<button onclick="openModal('assignLessonModal')"
+        ? `<button onclick="openLessonAssignModal()"
                 style="display:inline-flex;align-items:center;gap:6px;
                        padding:8px 16px;border-radius:8px;border:none;
                        background:var(--deft-accent);color:#0F1008;
@@ -420,6 +420,111 @@ function buildSkeletons(count) {
         `;
     }
     return html;
+}
+
+// ═══════════════════════════════════════
+// ASSIGN LESSON MODAL (Today tab)
+// ═══════════════════════════════════════
+
+async function openLessonAssignModal() {
+    let modal = document.getElementById('modal-assign-lesson-today');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modal-assign-lesson-today';
+        modal.className = 'modal-backdrop';
+        modal.onclick = function(e) { if (e.target === modal) closeModal('modal-assign-lesson-today'); };
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width:400px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                    <h3 style="margin:0;font-size:15px;font-weight:700;color:var(--deft-txt);font-family:var(--deft-heading-font),sans-serif;">Assign Lesson</h3>
+                    <button onclick="closeModal('modal-assign-lesson-today')" style="background:none;border:none;color:var(--deft-txt-3);cursor:pointer;padding:4px;" aria-label="Close">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+                <div>
+                    <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--deft-txt-2);margin-bottom:0.375rem;text-transform:uppercase;letter-spacing:0.04em;">Date</label>
+                    <input type="date" id="assign-today-date" style="width:100%;padding:0.5rem 0.625rem;font-size:0.8rem;color:var(--deft-txt);background:var(--deft-surface);border:1px solid var(--deft-border);border-radius:0.375rem;outline:none;" />
+
+                    <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--deft-txt-2);margin-bottom:0.375rem;margin-top:0.75rem;text-transform:uppercase;letter-spacing:0.04em;">Lesson</label>
+                    <select id="assign-today-lesson" style="width:100%;padding:0.5rem 0.625rem;font-size:0.8rem;color:var(--deft-txt);background:var(--deft-surface);border:1px solid var(--deft-border);border-radius:0.375rem;outline:none;">
+                        <option value="">Loading...</option>
+                    </select>
+
+                    <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--deft-txt-2);margin-bottom:0.375rem;margin-top:0.75rem;text-transform:uppercase;letter-spacing:0.04em;">Student</label>
+                    <select id="assign-today-student" style="width:100%;padding:0.5rem 0.625rem;font-size:0.8rem;color:var(--deft-txt);background:var(--deft-surface);border:1px solid var(--deft-border);border-radius:0.375rem;outline:none;">
+                    </select>
+                </div>
+                <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:1.25rem;">
+                    <button onclick="closeModal('modal-assign-lesson-today')" style="padding:0.5rem 1rem;font-size:0.75rem;font-weight:600;border-radius:0.375rem;background:transparent;color:var(--deft-txt-2);border:1px solid var(--deft-border);cursor:pointer;">Cancel</button>
+                    <button onclick="submitLessonAssignment()" style="padding:0.5rem 1rem;font-size:0.75rem;font-weight:600;border-radius:0.375rem;background:var(--deft-accent);color:#0D0F13;border:none;cursor:pointer;">Assign</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    // Pre-fill date
+    const dateInput = document.getElementById('assign-today-date');
+    if (dateInput) dateInput.value = todayStr();
+
+    // Load lessons
+    const lessonSelect = document.getElementById('assign-today-lesson');
+    if (lessonSelect) {
+        lessonSelect.innerHTML = '<option value="">Loading lessons...</option>';
+        const lessons = await supabaseSelect('school_lessons', 'select=lesson_id,title,subject&order=subject,title');
+        lessonSelect.innerHTML = '<option value="">-- Select a lesson --</option>';
+        (lessons || []).forEach(l => {
+            const style = getSubjectStyle(l.subject || 'other');
+            lessonSelect.innerHTML += `<option value="${l.lesson_id}">${escapeHtml(l.title)} (${style.label})</option>`;
+        });
+    }
+
+    // Load students
+    const studentSelect = document.getElementById('assign-today-student');
+    if (studentSelect) {
+        studentSelect.innerHTML = '';
+        const profiles = await supabaseSelect('deft_user_profiles', 'select=user_id,display_name,role&role=eq.student&order=display_name');
+        if (profiles && profiles.length) {
+            profiles.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.user_id;
+                opt.textContent = p.display_name || 'Student';
+                studentSelect.appendChild(opt);
+            });
+        } else {
+            const allProfiles = await supabaseSelect('deft_user_profiles', 'select=user_id,display_name&order=display_name');
+            (allProfiles || []).forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.user_id;
+                opt.textContent = p.display_name || 'User';
+                studentSelect.appendChild(opt);
+            });
+        }
+    }
+
+    openModal('modal-assign-lesson-today');
+}
+
+async function submitLessonAssignment() {
+    const lessonId = document.getElementById('assign-today-lesson')?.value;
+    const studentId = document.getElementById('assign-today-student')?.value;
+    const assignedDate = document.getElementById('assign-today-date')?.value;
+
+    if (!lessonId) { toast('Please select a lesson', 'error'); return; }
+    if (!studentId) { toast('Please select a student', 'error'); return; }
+    if (!assignedDate) { toast('Please select a date', 'error'); return; }
+
+    const result = await schoolApi('assign_lesson', {
+        lesson_id: lessonId,
+        student_id: studentId,
+        assigned_date: assignedDate
+    });
+
+    if (result) {
+        toast('Lesson assigned');
+        closeModal('modal-assign-lesson-today');
+        refreshLessons();
+    }
 }
 
 // Inject skeleton keyframes if not already present
