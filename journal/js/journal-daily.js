@@ -32,10 +32,14 @@ async function loadDailyView() {
     if (entries && entries.length > 0) {
         currentEntry = entries[0];
         loadEntryIntoEditor(currentEntry);
-        // Apply saved background
-        if (currentEntry.background_id && typeof applyDailyBackground === 'function') {
-            if (!backgroundsList || backgroundsList.length === 0) await loadBackgrounds();
-            applyDailyBackground(currentEntry.background_id);
+        // Apply saved background (or clear if none)
+        if (typeof applyDailyBackground === 'function') {
+            if (currentEntry.background_id) {
+                if (!backgroundsList || backgroundsList.length === 0) await loadBackgrounds();
+                applyDailyBackground(currentEntry.background_id);
+            } else {
+                applyDailyBackground(null);
+            }
         }
     } else {
         currentEntry = null;
@@ -46,6 +50,8 @@ async function loadDailyView() {
         if (titleInput) titleInput.value = '';
         if (typeof updateMoodSelection === 'function') updateMoodSelection('');
         if (typeof updateWordCount === 'function') updateWordCount();
+        // Clear background for empty day
+        if (typeof applyDailyBackground === 'function') applyDailyBackground(null);
     }
 
     // Start autosave
