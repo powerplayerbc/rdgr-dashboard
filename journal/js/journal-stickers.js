@@ -107,7 +107,7 @@ async function loadStickers(scope) {
         }
 
         if (node) {
-            node.setAttr('_stickerId', s.id);
+            node.setAttr('_stickerId', s.sticker_id);
             node.setAttr('_stickerScope', scope);
             node.setAttr('_stickerSlug', s.sticker_slug);
             node.setAttr('_stickerType', s.sticker_type);
@@ -397,7 +397,7 @@ async function saveStickerToDb(node, slug, type, imageUrl, scope) {
 
     const result = await supabaseWrite('journal_stickers', 'POST', body);
     if (result && result.length > 0) {
-        node.setAttr('_stickerId', result[0].id);
+        node.setAttr('_stickerId', result[0].sticker_id);
     }
 }
 
@@ -423,7 +423,7 @@ async function saveStickerPosition(stickerNode) {
         z_index: stickerNode.zIndex()
     };
 
-    await supabaseWrite('journal_stickers', 'PATCH', body, `id=eq.${stickerId}`);
+    await supabaseWrite('journal_stickers', 'PATCH', body, `sticker_id=eq.${stickerId}`);
 }
 
 // =============================================
@@ -432,7 +432,7 @@ async function saveStickerPosition(stickerNode) {
 async function deleteSticker(stickerId, node) {
     if (!stickerId) return;
 
-    const result = await supabaseWrite('journal_stickers', 'DELETE', null, `id=eq.${stickerId}`);
+    const result = await supabaseWrite('journal_stickers', 'DELETE', null, `sticker_id=eq.${stickerId}`);
     if (result !== null) {
         if (node) {
             node.destroy();
