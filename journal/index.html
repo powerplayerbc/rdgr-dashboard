@@ -561,6 +561,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     <button onclick="navigateMonth(1)" class="btn-icon" title="Next month">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.5 3.5L9 7l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
+                    <button onclick="printMonth()" class="btn-icon print-trigger-btn" title="Print this month + all entries">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2h6v3H4zM2.5 5h9a1 1 0 011 1v3.5a1 1 0 01-1 1H11v1.5H3V10.5h-.5a1 1 0 01-1-1V6a1 1 0 011-1zM4 8h6v4H4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+                    </button>
                 </div>
             </div>
 
@@ -617,6 +620,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         </button>
                         <button onclick="openDayCustomizer()" class="btn-icon" title="Customize day colors">
                             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="4.5" cy="4.5" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="9.5" cy="4.5" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="9.5" r="2" stroke="currentColor" stroke-width="1.2"/></svg>
+                        </button>
+                        <button onclick="printDaily()" class="btn-icon print-trigger-btn" title="Print this day">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 2h6v3H4zM2.5 5h9a1 1 0 011 1v3.5a1 1 0 01-1 1H11v1.5H3V10.5h-.5a1 1 0 01-1-1V6a1 1 0 011-1zM4 8h6v4H4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
                         </button>
                     </div>
                 </div>
@@ -921,6 +927,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 <script src="js/journal-bulk-upload.js"></script>
 <script src="js/journal-drive.js"></script>
 <script src="js/journal-auth.js"></script>
+<script src="js/journal-print.js"></script>
 
 <!-- Inline: Search + Settings functions -->
 <script>

@@ -861,6 +861,25 @@
         .habit-expand-chevron:hover { color: var(--brain-txt-2); }
         .habit-expand-chevron.open { transform: rotate(180deg); }
 
+        .habit-delete-btn {
+            background: transparent;
+            border: none;
+            color: var(--brain-txt-3);
+            padding: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.5;
+            transition: opacity 0.15s, color 0.15s, background 0.15s;
+        }
+        .habit-delete-btn:hover {
+            opacity: 1;
+            color: var(--brain-danger, #ef4444);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
         /* Task Row */
         .task-row {
             display: flex; align-items: center; gap: 0.75rem;
@@ -5201,6 +5220,9 @@ function renderHabitsDaily(date) {
                 <button class="habit-expand-chevron" onclick="event.stopPropagation(); toggleHabitExpand('${h.habit_id}')" title="Log details" id="chevron-${h.habit_id}">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </button>
+                <button class="habit-delete-btn" onclick="event.stopPropagation(); deleteHabit('${h.habit_id}')" title="Delete habit" aria-label="Delete ${h.name}">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 5h10M6 5V3.5a1 1 0 011-1h2a1 1 0 011 1V5M5 5l1 8a1 1 0 001 1h2a1 1 0 001-1l1-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
             </div>
             <div class="habit-expand" id="expand-${h.habit_id}">
                 <input type="number" class="form-input" placeholder="Minutes" min="1" max="480" style="max-width: 80px;" id="expandMin-${h.habit_id}" value="${comp?.actual_minutes || ''}">
@@ -5701,8 +5723,8 @@ async function submitEditHabit() {
     loadHabitsView();
 }
 
-async function deleteHabit() {
-    const id = document.getElementById('editHabitId').value;
+async function deleteHabit(habitId) {
+    const id = habitId || document.getElementById('editHabitId').value;
     if (!confirm('Delete this habit? This cannot be undone.')) return;
 
     if (webhookAvailable) {
@@ -5711,7 +5733,7 @@ async function deleteHabit() {
         await supabaseWrite('brain_habits', 'PATCH', { is_active: false }, `habit_id=eq.${id}`);
     }
 
-    closeModal('editHabitModal');
+    if (!habitId) closeModal('editHabitModal');
     toast('Habit deleted', 'info');
     loadHabitsView();
 }

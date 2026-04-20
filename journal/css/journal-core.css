@@ -593,3 +593,50 @@
     color: var(--deft-txt-3, #525E73);
     margin-bottom: 0.5rem;
 }
+
+/* ── Print ── */
+.print-only { display: none; }
+
+@media print {
+    @page {
+        size: letter portrait;
+        margin: 0.5in;
+    }
+
+    body > *:not(#printArea) { display: none !important; }
+    #printArea, .print-only { display: block !important; }
+
+    body {
+        background: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    #printArea {
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: 11pt;
+        line-height: 1.5;
+        color: black;
+        width: 100%;
+        max-width: none;
+    }
+    #printArea h1 { font-size: 20pt; margin: 0 0 8pt 0; }
+    #printArea h2 { font-size: 14pt; margin: 12pt 0 6pt 0; border-bottom: 1px solid #999; padding-bottom: 2pt; }
+    #printArea h3 { font-size: 12pt; margin: 10pt 0 4pt 0; color: #333; }
+    #printArea .print-page { page-break-after: always; }
+    #printArea .print-page:last-child { page-break-after: auto; }
+    #printArea img { max-width: 100%; height: auto; }
+    #printArea ul, #printArea ol { margin: 6pt 0 6pt 18pt; }
+    #printArea .print-meta { color: #555; font-size: 10pt; margin-bottom: 10pt; }
+    #printArea .print-mood { display: inline-block; padding: 2pt 6pt; border: 1px solid #999; border-radius: 3pt; font-size: 10pt; }
+
+    #printArea .print-calendar { width: 100%; border-collapse: collapse; margin-top: 8pt; }
+    #printArea .print-calendar th { border: 1px solid #999; padding: 3pt; font-size: 9pt; background: #eee; }
+    #printArea .print-calendar td { border: 1px solid #ccc; padding: 4pt; vertical-align: top; height: 64pt; font-size: 9pt; }
+    #printArea .print-calendar td.empty { background: #f9f9f9; }
+    #printArea .print-calendar .day-num { font-weight: bold; font-size: 10pt; }
+    #printArea .print-calendar .day-mood { font-size: 14pt; }
+
+    nav, .nav, .journal-nav, .journal-tabs, .toast-container, .modal, .modal-backdrop, .daily-actions .btn, .daily-actions .btn-icon { display: none !important; }
+}
