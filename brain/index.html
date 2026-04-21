@@ -5067,10 +5067,26 @@ async function loadHabitsView() {
     }
 }
 
+function _tsToLocalDate(ts) {
+    if (!ts) return null;
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return null;
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function isHabitVisibleOn(habit, dateStr) {
+    if (!habit || !dateStr) return false;
+    const createdLocal = _tsToLocalDate(habit.created_at);
+    if (createdLocal && createdLocal > dateStr) return false;
+    const deletedLocal = _tsToLocalDate(habit.deleted_at);
+    if (deletedLocal && dateStr > deletedLocal) return false;
+    return true;
+}
+
 async function loadHabitsDaily(date) {
-    // Load habits
+    // Load habits (all — including deleted; existence window filtered per-date in JS)
     const h = await supabaseSelect('brain_habits',
-        `user_id=eq.${activeProfileId}&is_active=eq.true&select=*&order=sort_order,created_at`
+        `user_id=eq.${activeProfileId}&select=*&order=sort_order,created_at`
     );
     habits = h || [];
 
@@ -5145,9 +5161,9 @@ async function loadHabitsWeekly() {
     const monStr = monday.toLocaleDateString('en-CA');
     const sunStr = sunday.toLocaleDateString('en-CA');
 
-    // Load habits
+    // Load habits (all — including deleted; existence window filtered per-date in JS)
     const h = await supabaseSelect('brain_habits',
-        `user_id=eq.${activeProfileId}&is_active=eq.true&select=*&order=sort_order,created_at`
+        `user_id=eq.${activeProfileId}&select=*&order=sort_order,created_at`
     );
     habits = h || [];
 
@@ -5179,10 +5195,11 @@ function renderHabitsDaily(date) {
         dotDates.push(dd.toLocaleDateString('en-CA'));
     }
 
-    // Filter habits for the current day (weekly habits only show on their designated day)
+    // Filter habits: existence window (created..deleted) + frequency (weekly/weekdays/weekends)
     const viewDate = new Date(date + 'T12:00:00');
     const viewDayOfWeek = viewDate.getDay(); // 0=Sun..6=Sat
     const visibleHabits = habits.filter(h => {
+        if (!isHabitVisibleOn(h, date)) return false;
         if (h.frequency === 'weekly' && h.weekly_day != null) {
             return h.weekly_day === viewDayOfWeek;
         }
@@ -5212,6 +5229,10 @@ function renderHabitsDaily(date) {
                 return `<div class="${cls}" title="${dd}"></div>`;
             }).join('');
 
+            const canDelete = (date === today) && !h.deleted_at;
+            const deleteBtn = canDelete ? `<button class="habit-delete-btn" onclick="event.stopPropagation(); deleteHabit('${h.habit_id}')" title="Delete habit (hides from tomorrow onward)" aria-label="Delete ${h.name}">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 5h10M6 5V3.5a1 1 0 011-1h2a1 1 0 011 1V5M5 5l1 8a1 1 0 001 1h2a1 1 0 001-1l1-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>` : '';
             return `
             <div class="habit-row ${isChecked ? 'completed' : ''}" id="habit-row-${h.habit_id}">
                 <button class="habit-checkbox ${isChecked ? 'checked' : ''}" onclick="event.stopPropagation(); toggleHabitCompletion('${h.habit_id}', '${date}')" aria-label="Toggle ${h.name}">
@@ -5224,9 +5245,7 @@ function renderHabitsDaily(date) {
                 <button class="habit-expand-chevron" onclick="event.stopPropagation(); toggleHabitExpand('${h.habit_id}')" title="Log details" id="chevron-${h.habit_id}">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </button>
-                <button class="habit-delete-btn" onclick="event.stopPropagation(); deleteHabit('${h.habit_id}')" title="Delete habit" aria-label="Delete ${h.name}">
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 5h10M6 5V3.5a1 1 0 011-1h2a1 1 0 011 1V5M5 5l1 8a1 1 0 001 1h2a1 1 0 001-1l1-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
+                ${deleteBtn}
             </div>
             <div class="habit-expand" id="expand-${h.habit_id}">
                 <input type="number" class="form-input" placeholder="Minutes" min="1" max="480" style="max-width: 80px;" id="expandMin-${h.habit_id}" value="${comp?.actual_minutes || ''}">
@@ -5282,8 +5301,9 @@ function renderHabitsDaily(date) {
 
 function renderDayProgress() {
     const date = habitViewDate;
-    const totalHabits = habits.length;
-    const doneHabits = habits.filter(h => !!habitCompletions[h.habit_id]?.[date]).length;
+    const activeOnDate = habits.filter(h => isHabitVisibleOn(h, date));
+    const totalHabits = activeOnDate.length;
+    const doneHabits = activeOnDate.filter(h => !!habitCompletions[h.habit_id]?.[date]).length;
     const totalTasks = tasks.length;
     const doneTasks = tasks.filter(t => t.status === 'completed').length;
     const total = totalHabits + totalTasks;
@@ -5299,8 +5319,9 @@ function renderDayProgress() {
 
 function renderDashboardHabitWidget() {
     const date = new Date().toLocaleDateString('en-CA');
-    const totalHabits = habits.length;
-    const doneHabits = habits.filter(h => !!habitCompletions[h.habit_id]?.[date]).length;
+    const activeOnDate = habits.filter(h => isHabitVisibleOn(h, date));
+    const totalHabits = activeOnDate.length;
+    const doneHabits = activeOnDate.filter(h => !!habitCompletions[h.habit_id]?.[date]).length;
     const totalTasks = tasks.length;
     const doneTasks = tasks.filter(t => t.status === 'completed').length;
     const total = totalHabits + totalTasks;
@@ -5340,20 +5361,23 @@ function renderHabitsWeekly(monday) {
         }
     });
 
-    // Build habit rows
+    // Build habit rows (only show habits that existed at least one day this week)
     const tbody = document.getElementById('weeklyHabitBody');
-    if (habits.length === 0) {
+    const weekHabits = habits.filter(h => dates.some(d => isHabitVisibleOn(h, d)));
+    if (weekHabits.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-xs" style="color: var(--brain-txt-3);">No habits configured</td></tr>';
     } else {
-        tbody.innerHTML = habits.map(h => {
+        tbody.innerHTML = weekHabits.map(h => {
             const icon = getCatIcon(h);
             const cells = dates.map((d, i) => {
                 const isFuture = d > today;
+                const existed = isHabitVisibleOn(h, d);
                 const done = !!habitCompletions[h.habit_id]?.[d];
                 const isToday = d === today;
                 let cls = 'wk-check';
                 let content = '\u00B7';
-                if (isFuture) { cls += ' future'; }
+                if (!existed) { cls += ' future'; content = '\u2014'; }
+                else if (isFuture) { cls += ' future'; }
                 else if (done) { cls += ' done'; content = '\u2713'; }
                 else { cls += ' missed'; content = '\u2717'; }
                 if (isToday) cls += ' today';
@@ -5363,13 +5387,14 @@ function renderHabitsWeekly(monday) {
         }).join('');
     }
 
-    // Completion percentages per day
+    // Completion percentages per day (denominator: habits that existed on that day)
     dates.forEach((d, i) => {
         const el = document.getElementById(`wkPct${i}`);
         if (!el) return;
         if (d > today) { el.textContent = '--'; return; }
-        const total = habits.length;
-        const done = habits.filter(h => !!habitCompletions[h.habit_id]?.[d]).length;
+        const activeOnD = habits.filter(h => isHabitVisibleOn(h, d));
+        const total = activeOnD.length;
+        const done = activeOnD.filter(h => !!habitCompletions[h.habit_id]?.[d]).length;
         const pct = total > 0 ? Math.round((done / total) * 100) : 0;
         el.textContent = `${pct}%`;
         el.style.color = pct >= 80 ? 'var(--brain-success)' : pct >= 50 ? 'var(--brain-accent)' : 'var(--brain-txt-3)';
@@ -5729,16 +5754,15 @@ async function submitEditHabit() {
 
 async function deleteHabit(habitId) {
     const id = habitId || document.getElementById('editHabitId').value;
-    if (!confirm('Delete this habit? This cannot be undone.')) return;
+    if (!confirm('Delete this habit? It will disappear from tomorrow onward. Past days keep their completion history.')) return;
 
-    if (webhookAvailable) {
-        await brainApi('delete_habit', { habit_id: id });
-    } else {
-        await supabaseWrite('brain_habits', 'PATCH', { is_active: false }, `habit_id=eq.${id}`);
-    }
+    await supabaseWrite('brain_habits', 'PATCH', {
+        is_active: false,
+        deleted_at: new Date().toISOString()
+    }, `habit_id=eq.${id}`);
 
     if (!habitId) closeModal('editHabitModal');
-    toast('Habit deleted', 'info');
+    toast('Habit archived — past history preserved', 'info');
     loadHabitsView();
 }
 
@@ -5936,7 +5960,7 @@ async function confirmCloseDay() {
 // ═══════════════════════════════════════
 async function loadHabitSettings() {
     const h = await supabaseSelect('brain_habits',
-        `user_id=eq.${activeProfileId}&is_active=eq.true&select=*&order=sort_order,created_at`
+        `user_id=eq.${activeProfileId}&deleted_at=is.null&select=*&order=sort_order,created_at`
     );
     habits = h || [];
     renderSettingsHabitList();
@@ -6398,7 +6422,7 @@ if (_origLoadDashboard) {
         // Load today's habits/tasks for the dashboard widget
         const today = new Date().toLocaleDateString('en-CA');
         const h = await supabaseSelect('brain_habits',
-            `user_id=eq.${activeProfileId}&is_active=eq.true&select=*&order=sort_order,created_at`
+            `user_id=eq.${activeProfileId}&deleted_at=is.null&select=*&order=sort_order,created_at`
         );
         habits = h || [];
         const hc = await supabaseSelect('brain_habit_completions',
