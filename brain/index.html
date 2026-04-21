@@ -5756,10 +5756,14 @@ async function deleteHabit(habitId) {
     const id = habitId || document.getElementById('editHabitId').value;
     if (!confirm('Delete this habit? It will disappear from tomorrow onward. Past days keep their completion history.')) return;
 
-    await supabaseWrite('brain_habits', 'PATCH', {
-        is_active: false,
-        deleted_at: new Date().toISOString()
-    }, `habit_id=eq.${id}`);
+    if (webhookAvailable) {
+        await brainApi('delete_habit', { habit_id: id });
+    } else {
+        await supabaseWrite('brain_habits', 'PATCH', {
+            is_active: false,
+            deleted_at: new Date().toISOString()
+        }, `habit_id=eq.${id}`);
+    }
 
     if (!habitId) closeModal('editHabitModal');
     toast('Habit archived — past history preserved', 'info');
