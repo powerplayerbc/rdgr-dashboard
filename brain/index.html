@@ -884,6 +884,57 @@
         .habit-delete-btn:active { transform: scale(0.95); }
         .habit-delete-btn svg { width: 14px; height: 14px; }
 
+        .habit-edit-btn {
+            background: rgba(100, 116, 139, 0.12);
+            border: 1px solid rgba(100, 116, 139, 0.35);
+            color: var(--brain-txt-2, #94a3b8);
+            width: 28px; height: 28px; padding: 0; border-radius: 6px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s, color 0.15s;
+        }
+        .habit-edit-btn:hover {
+            background: rgba(100, 116, 139, 0.25);
+            border-color: rgba(100, 116, 139, 0.6);
+            color: var(--brain-accent);
+            transform: scale(1.05);
+        }
+        .habit-edit-btn:active { transform: scale(0.95); }
+        .habit-edit-btn svg { width: 14px; height: 14px; }
+
+        .habit-drag-handle {
+            background: transparent;
+            border: none;
+            color: var(--brain-txt-3);
+            width: 18px; height: 28px; padding: 0;
+            cursor: grab; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: color 0.15s;
+        }
+        .habit-drag-handle:hover { color: var(--brain-txt-2); }
+        .habit-drag-handle:active { cursor: grabbing; }
+        .habit-row.dragging { opacity: 0.4; background: color-mix(in srgb, var(--brain-accent) 8%, var(--brain-surface)); }
+        .habit-row.drag-over { border-top: 2px solid var(--brain-accent); }
+
+        .habit-reorder-arrows {
+            display: flex; flex-direction: column; gap: 2px;
+            flex-shrink: 0;
+        }
+        .habit-reorder-arrows button {
+            background: transparent; border: 1px solid var(--brain-border);
+            color: var(--brain-txt-3);
+            width: 22px; height: 14px; padding: 0; border-radius: 4px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .habit-reorder-arrows button:hover {
+            color: var(--brain-accent); border-color: var(--brain-accent);
+        }
+        .habit-reorder-arrows button:disabled {
+            opacity: 0.3; cursor: not-allowed;
+        }
+        .habit-reorder-arrows svg { width: 10px; height: 10px; }
+
         /* Task Row */
         .task-row {
             display: flex; align-items: center; gap: 0.75rem;
@@ -5233,8 +5284,20 @@ function renderHabitsDaily(date) {
             const deleteBtn = canDelete ? `<button class="habit-delete-btn" onclick="event.stopPropagation(); deleteHabit('${h.habit_id}')" title="Delete habit (hides from tomorrow onward)" aria-label="Delete ${h.name}">
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 5h10M6 5V3.5a1 1 0 011-1h2a1 1 0 011 1V5M5 5l1 8a1 1 0 001 1h2a1 1 0 001-1l1-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>` : '';
+            const editBtn = !h.deleted_at ? `<button class="habit-edit-btn" onclick="event.stopPropagation(); openEditHabitModal('${h.habit_id}')" title="Edit habit" aria-label="Edit ${h.name}">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11.5 2.5a1.414 1.414 0 012 2L5 13l-3 1 1-3 8.5-8.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>` : '';
+            const dragHandle = !h.deleted_at ? `<button class="habit-drag-handle hidden sm:flex" aria-label="Drag to reorder" title="Drag to reorder" tabindex="-1" onmousedown="this.closest('.habit-row').setAttribute('draggable','true')" onmouseup="this.closest('.habit-row').removeAttribute('draggable')">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="4" r="1" fill="currentColor"/><circle cx="10" cy="4" r="1" fill="currentColor"/><circle cx="6" cy="8" r="1" fill="currentColor"/><circle cx="10" cy="8" r="1" fill="currentColor"/><circle cx="6" cy="12" r="1" fill="currentColor"/><circle cx="10" cy="12" r="1" fill="currentColor"/></svg>
+                </button>` : '';
+            const reorderArrows = !h.deleted_at ? `<div class="habit-reorder-arrows sm:hidden">
+                    <button onclick="event.stopPropagation(); moveHabit('${h.habit_id}', -1)" aria-label="Move up" title="Move up"><svg viewBox="0 0 10 10" fill="none"><path d="M2 6l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+                    <button onclick="event.stopPropagation(); moveHabit('${h.habit_id}', 1)" aria-label="Move down" title="Move down"><svg viewBox="0 0 10 10" fill="none"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+                </div>` : '';
             return `
-            <div class="habit-row ${isChecked ? 'completed' : ''}" id="habit-row-${h.habit_id}">
+            <div class="habit-row ${isChecked ? 'completed' : ''}" id="habit-row-${h.habit_id}" data-habit-id="${h.habit_id}">
+                ${dragHandle}
+                ${reorderArrows}
                 <button class="habit-checkbox ${isChecked ? 'checked' : ''}" onclick="event.stopPropagation(); toggleHabitCompletion('${h.habit_id}', '${date}')" aria-label="Toggle ${h.name}">
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
@@ -5245,6 +5308,7 @@ function renderHabitsDaily(date) {
                 <button class="habit-expand-chevron" onclick="event.stopPropagation(); toggleHabitExpand('${h.habit_id}')" title="Log details" id="chevron-${h.habit_id}">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </button>
+                ${editBtn}
                 ${deleteBtn}
             </div>
             <div class="habit-expand" id="expand-${h.habit_id}">
@@ -5253,6 +5317,7 @@ function renderHabitsDaily(date) {
                 <button class="btn btn-primary btn-sm" onclick="saveHabitExpand('${h.habit_id}', '${date}')">Save</button>
             </div>`;
         }).join('');
+        initHabitDragDrop();
     }
 
     // Render tasks
@@ -5750,6 +5815,94 @@ async function submitEditHabit() {
     closeModal('editHabitModal');
     toast(`Habit updated`, 'success');
     loadHabitsView();
+}
+
+// ─────────── UBR-0073: Habit reorder (drag on desktop, arrows on mobile) ───────────
+let habitDragState = { draggedEl: null };
+
+function initHabitDragDrop() {
+    const list = document.getElementById('habitsList');
+    if (!list || list.dataset.dndBound === '1') return;
+    list.dataset.dndBound = '1';
+
+    list.addEventListener('dragstart', (e) => {
+        const row = e.target.closest('.habit-row');
+        if (!row) return;
+        habitDragState.draggedEl = row;
+        row.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        try { e.dataTransfer.setData('text/plain', row.dataset.habitId || ''); } catch(_) {}
+    });
+
+    list.addEventListener('dragend', (e) => {
+        const row = e.target.closest('.habit-row');
+        if (row) {
+            row.classList.remove('dragging');
+            row.removeAttribute('draggable');
+        }
+        list.querySelectorAll('.habit-row.drag-over').forEach(r => r.classList.remove('drag-over'));
+        habitDragState.draggedEl = null;
+    });
+
+    list.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const dragged = habitDragState.draggedEl;
+        if (!dragged) return;
+        const target = e.target.closest('.habit-row');
+        if (!target || target === dragged) return;
+        const rect = target.getBoundingClientRect();
+        const before = (e.clientY - rect.top) < rect.height / 2;
+        list.querySelectorAll('.habit-row.drag-over').forEach(r => r.classList.remove('drag-over'));
+        target.classList.add('drag-over');
+        if (before) list.insertBefore(dragged, target);
+        else list.insertBefore(dragged, target.nextSibling);
+    });
+
+    list.addEventListener('drop', (e) => {
+        e.preventDefault();
+        list.querySelectorAll('.habit-row.drag-over').forEach(r => r.classList.remove('drag-over'));
+        saveHabitOrder();
+    });
+}
+
+async function saveHabitOrder() {
+    const list = document.getElementById('habitsList');
+    if (!list) return;
+    const rows = Array.from(list.querySelectorAll('.habit-row[data-habit-id]'));
+    const newOrder = rows.map((row, idx) => ({ habit_id: row.dataset.habitId, sort_order: idx }));
+
+    // Update local habits[] to match DOM order (so subsequent renders stay consistent)
+    const orderMap = Object.fromEntries(newOrder.map(o => [o.habit_id, o.sort_order]));
+    habits.forEach(h => {
+        if (orderMap[h.habit_id] !== undefined) h.sort_order = orderMap[h.habit_id];
+    });
+    habits.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+    // Persist via direct Supabase PATCH (simpler than extending the webhook)
+    try {
+        await Promise.all(newOrder.map(({ habit_id, sort_order }) =>
+            supabaseWrite('brain_habits', 'PATCH', { sort_order }, `habit_id=eq.${habit_id}`)
+        ));
+        toast('Order saved', 'success');
+    } catch(err) {
+        console.error('Reorder save failed:', err);
+        toast('Failed to save order: ' + err.message, 'error');
+    }
+}
+
+function moveHabit(habitId, delta) {
+    const visible = habits.filter(h => !h.deleted_at);
+    const idx = visible.findIndex(h => h.habit_id === habitId);
+    if (idx < 0) return;
+    const target = idx + delta;
+    if (target < 0 || target >= visible.length) return;
+    // Swap in the main habits array (preserves deleted/inactive entries)
+    const globalIdx = habits.findIndex(h => h.habit_id === visible[idx].habit_id);
+    const globalTarget = habits.findIndex(h => h.habit_id === visible[target].habit_id);
+    [habits[globalIdx], habits[globalTarget]] = [habits[globalTarget], habits[globalIdx]];
+    loadHabitsView();
+    // Give the DOM a tick to re-render, then persist
+    setTimeout(saveHabitOrder, 50);
 }
 
 async function deleteHabit(habitId) {

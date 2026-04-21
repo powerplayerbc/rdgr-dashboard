@@ -1506,26 +1506,32 @@ async function confirmReject() {
     const mode = document.querySelector('input[name="rejectMode"]:checked').value;
 
     try {
-        const newScore = Math.max(0, (a.performance_score || 0.5) - 0.2);
+        // UBR-0074: For fix_single / review_question, do NOT pre-retire the asset.
+        // The surgical-reextract workflow retires the old asset ONLY after the reviewer
+        // approves at least one replacement. Pre-retiring here orphans the asset if the
+        // reviewer rejects all candidates.
+        if (mode === 'reject_only') {
+            const newScore = Math.max(0, (a.performance_score || 0.5) - 0.2);
+            const patchRes = await fetch(
+                SUPABASE_URL + '/rest/v1/brand_content_assets?id=eq.' + a.id + '&brand_id=eq.' + BRAND_ID,
+                {
+                    method: 'PATCH',
+                    headers: { ...HEADERS, 'Prefer': 'return=minimal' },
+                    body: JSON.stringify({
+                        is_active: false,
+                        rejection_count: (a.rejection_count || 0) + 1,
+                        performance_score: newScore,
+                        retired_at: new Date().toISOString(),
+                        retired_reason: reason
+                    })
+                }
+            );
+            if (!patchRes.ok) throw new Error('PATCH failed: ' + patchRes.status);
+            toast('Asset rejected', 'success');
+        } else {
+            toast('Requesting rewrite...', 'info');
+        }
 
-        // Reject the asset via direct PATCH (more reliable than RPC for these fields)
-        const patchRes = await fetch(
-            SUPABASE_URL + '/rest/v1/brand_content_assets?id=eq.' + a.id + '&brand_id=eq.' + BRAND_ID,
-            {
-                method: 'PATCH',
-                headers: { ...HEADERS, 'Prefer': 'return=minimal' },
-                body: JSON.stringify({
-                    is_active: false,
-                    rejection_count: (a.rejection_count || 0) + 1,
-                    performance_score: newScore,
-                    retired_at: new Date().toISOString(),
-                    retired_reason: reason
-                })
-            }
-        );
-        if (!patchRes.ok) throw new Error('PATCH failed: ' + patchRes.status);
-
-        toast('Asset rejected', 'success');
         closeRejectModal();
 
         // Preserve filter state
@@ -1537,7 +1543,7 @@ async function confirmReject() {
         if (savedSearch) $('filterSearch').value = savedSearch;
         if (savedType || savedSearch) filterAssets();
 
-        // Trigger re-extraction if requested
+        // Trigger re-extraction if requested (workflow handles retire + insert atomically)
         if (mode === 'fix_single' || mode === 'review_question') {
             triggerReextract(a, reason, feedback, mode);
         }
@@ -1586,11 +1592,20 @@ async function triggerReextract(asset, reason, feedback, mode) {
             const savedSearch = $('filterSearch').value;
             if (savedType || savedSearch) filterAssets();
         } else {
-            $('reextractContent').innerHTML = `<div class="text-center py-4"><p class="text-txt-3">${esc(result.error || result.message || 'Re-extraction returned no results. The workflow may not be deployed yet.')}</p></div>`;
+            // UBR-0074: reviewer rejected all candidates. Original asset is still intact
+            // (we did NOT pre-retire on fix_single/review_question). Reassure the user.
+            const notes = result.review_notes ? '<p class="text-xs text-txt-3 mt-2"><strong>Reviewer notes:</strong> ' + esc(result.review_notes) + '</p>' : '';
+            $('reextractContent').innerHTML = `<div class="text-center py-4"><div class="text-warning text-lg mb-2">!</div><p class="font-medium">Rewrite produced no approved replacements.</p><p class="text-xs text-txt-3 mt-1">The AI reviewer rejected all candidates. <strong>Your original asset is still active</strong> — nothing was lost. Try rewriting again with different feedback, or reject the asset outright if you want to remove it.</p>${notes}</div>`;
+            // Reload assets so the user can visually confirm the original is still there
+            await loadAssets();
+            await loadStats();
+            const savedType = $('filterType').value;
+            const savedSearch = $('filterSearch').value;
+            if (savedType || savedSearch) filterAssets();
         }
     } catch(err) {
         console.error('Re-extract error:', err);
-        $('reextractContent').innerHTML = `<div class="text-center py-4"><p class="text-txt-3">Re-extraction failed: ${esc(err.message)}</p><p class="text-xs text-txt-3 mt-1">The surgical re-extraction workflow may not be deployed yet.</p></div>`;
+        $('reextractContent').innerHTML = `<div class="text-center py-4"><p class="text-txt-3">Re-extraction failed: ${esc(err.message)}</p><p class="text-xs text-txt-3 mt-1">Your original asset is still active — nothing was lost.</p></div>`;
     }
 }
 
