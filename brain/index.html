@@ -902,47 +902,57 @@
         .habit-edit-btn:active { transform: scale(0.95); }
         .habit-edit-btn svg { width: 14px; height: 14px; }
 
-        /* Settings habit list — reorder controls */
-        .setting-row-habit { cursor: pointer; transition: background 0.15s; }
-        .setting-row-habit:hover { background: color-mix(in srgb, var(--brain-accent) 4%, transparent); }
-        .setting-row-habit.dragging { opacity: 0.45; background: color-mix(in srgb, var(--brain-accent) 8%, var(--brain-surface)); }
-        .setting-row-habit.drag-over { box-shadow: inset 0 2px 0 0 var(--brain-accent); }
+        /* Settings habit list — reorder controls (v2.1 — prominent) */
+        .setting-row-habit { cursor: pointer; transition: background 0.15s; padding: 10px 16px !important; }
+        .setting-row-habit:hover { background: color-mix(in srgb, var(--brain-accent) 5%, transparent); }
+        .setting-row-habit.dragging { opacity: 0.5; background: color-mix(in srgb, var(--brain-accent) 10%, var(--brain-surface)); }
+        .setting-row-habit.drag-over { box-shadow: inset 0 3px 0 0 var(--brain-accent); }
 
         .habit-settings-drag-handle {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 24px; height: 28px; padding: 0;
-            color: var(--brain-txt-3);
+            display: inline-flex !important; align-items: center; justify-content: center;
+            width: 32px; height: 32px; padding: 0;
+            color: var(--brain-accent);
+            background: color-mix(in srgb, var(--brain-accent) 12%, transparent);
+            border: 1px solid color-mix(in srgb, var(--brain-accent) 30%, transparent);
             cursor: grab;
             flex-shrink: 0;
-            border-radius: 4px;
-            transition: color 0.15s, background 0.15s;
+            border-radius: 6px;
+            transition: color 0.15s, background 0.15s, transform 0.08s;
             user-select: none; -webkit-user-select: none;
         }
         .habit-settings-drag-handle:hover {
-            color: var(--brain-accent);
-            background: color-mix(in srgb, var(--brain-accent) 10%, transparent);
+            background: color-mix(in srgb, var(--brain-accent) 22%, transparent);
+            border-color: var(--brain-accent);
+            transform: scale(1.05);
         }
-        .habit-settings-drag-handle:active { cursor: grabbing; }
+        .habit-settings-drag-handle:active { cursor: grabbing; transform: scale(0.95); }
 
         .habit-settings-arrows {
-            display: flex; flex-direction: column; gap: 2px;
+            display: flex; flex-direction: column; gap: 3px;
             flex-shrink: 0;
         }
         .habit-settings-arrows button {
-            background: transparent; border: 1px solid var(--brain-border);
-            color: var(--brain-txt-2);
-            width: 26px; height: 16px; padding: 0; border-radius: 4px;
+            background: color-mix(in srgb, var(--brain-accent) 8%, transparent);
+            border: 1px solid color-mix(in srgb, var(--brain-accent) 30%, transparent);
+            color: var(--brain-accent);
+            width: 30px; height: 20px; padding: 0; border-radius: 5px;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: color 0.15s, border-color 0.15s, background 0.15s;
+            transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.08s;
         }
         .habit-settings-arrows button:hover:not(:disabled) {
-            color: var(--brain-accent); border-color: var(--brain-accent);
-            background: color-mix(in srgb, var(--brain-accent) 8%, transparent);
+            color: #fff;
+            background: var(--brain-accent);
+            border-color: var(--brain-accent);
+            transform: scale(1.08);
         }
+        .habit-settings-arrows button:active:not(:disabled) { transform: scale(0.95); }
         .habit-settings-arrows button:disabled {
-            opacity: 0.25; cursor: not-allowed;
+            opacity: 0.3; cursor: not-allowed;
+            background: transparent;
+            border-color: var(--brain-border);
+            color: var(--brain-txt-3);
         }
-        .habit-settings-arrows svg { width: 10px; height: 10px; }
+        .habit-settings-arrows svg { width: 14px; height: 14px; }
 
         /* Task Row */
         .task-row {
@@ -2139,7 +2149,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             <!-- Habits Management -->
             <div class="panel brain-reveal brain-reveal-3">
                 <div class="panel-header">
-                    <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Manage Habits</span>
+                    <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--brain-txt-2);">Manage Habits <span style="color: var(--brain-accent); font-size: 0.7em; margin-left: 6px;">[reorder v2.1]</span></span>
                     <button class="btn btn-primary btn-sm" onclick="openAddHabitModal()">+ Add</button>
                 </div>
                 <div class="panel-body p-0" id="settHabitList">
@@ -6126,7 +6136,12 @@ function renderSettingsHabitList() {
         container.innerHTML = '<div class="px-4 py-6 text-center text-xs" style="color: var(--brain-txt-3);">No habits yet</div>';
         return;
     }
-    container.innerHTML = `<div class="px-4 pt-3 pb-1 text-xs" style="color: var(--brain-txt-3);">Drag the handle or use the arrows to reorder. Click anywhere else on a row to edit it.</div>` +
+    const banner = `<div style="margin: 8px 12px 4px; padding: 10px 12px; border-radius: 8px; background: color-mix(in srgb, var(--brain-accent) 12%, transparent); border: 1px solid color-mix(in srgb, var(--brain-accent) 35%, transparent); color: var(--brain-txt); font-size: 12px; line-height: 1.45;">
+        <strong style="color: var(--brain-accent);">Reorder habits:</strong>
+        drag the <span style="display: inline-block; padding: 1px 5px; border-radius: 3px; background: color-mix(in srgb, var(--brain-accent) 25%, transparent); vertical-align: middle;">&#8286;&#8286;</span> grip on the left, or click the up/down arrows on the right.
+        Click anywhere else on a row to edit it. New order saves immediately.
+    </div>`;
+    container.innerHTML = banner +
     habits.map((h, idx) => {
         const icon = getCatIcon(h);
         const isFirst = idx === 0;
@@ -6135,7 +6150,7 @@ function renderSettingsHabitList() {
         <div class="setting-row setting-row-habit px-4" data-habit-id="${h.habit_id}" onclick="openEditHabitModal('${h.habit_id}')">
             <div class="flex items-center gap-2 flex-1 min-w-0">
                 <span class="habit-settings-drag-handle" draggable="true" onclick="event.stopPropagation();" aria-label="Drag to reorder ${h.name}" title="Drag to reorder">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="4" r="1.3" fill="currentColor"/><circle cx="10" cy="4" r="1.3" fill="currentColor"/><circle cx="6" cy="8" r="1.3" fill="currentColor"/><circle cx="10" cy="8" r="1.3" fill="currentColor"/><circle cx="6" cy="12" r="1.3" fill="currentColor"/><circle cx="10" cy="12" r="1.3" fill="currentColor"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="4" r="1.4" fill="currentColor"/><circle cx="10" cy="4" r="1.4" fill="currentColor"/><circle cx="6" cy="8" r="1.4" fill="currentColor"/><circle cx="10" cy="8" r="1.4" fill="currentColor"/><circle cx="6" cy="12" r="1.4" fill="currentColor"/><circle cx="10" cy="12" r="1.4" fill="currentColor"/></svg>
                 </span>
                 <span class="text-base flex-shrink-0">${icon}</span>
                 <span class="text-sm font-medium truncate" style="color: var(--brain-txt);">${h.name}</span>
@@ -6145,10 +6160,10 @@ function renderSettingsHabitList() {
             <div class="flex items-center gap-2 flex-shrink-0">
                 <div class="habit-settings-arrows">
                     <button type="button" draggable="false" onclick="event.stopPropagation(); moveHabit('${h.habit_id}', -1)" aria-label="Move up" title="Move up"${isFirst ? ' disabled' : ''}>
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 6l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 9l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
                     <button type="button" draggable="false" onclick="event.stopPropagation(); moveHabit('${h.habit_id}', 1)" aria-label="Move down" title="Move down"${isLast ? ' disabled' : ''}>
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
                 </div>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5.5 3.5L9 7l-3.5 3.5" stroke="var(--brain-txt-3)" stroke-width="1.5" stroke-linecap="round"/></svg>
