@@ -821,17 +821,7 @@
                     </div>
                     <div>
                         <label class="form-label">Suitable Channels</label>
-                        <div class="ch-group" id="newChannels">
-                            <label><input type="checkbox" value="cold_email"> Cold Email</label>
-                            <label><input type="checkbox" value="social_twitter"> Twitter</label>
-                            <label><input type="checkbox" value="social_linkedin"> LinkedIn</label>
-                            <label><input type="checkbox" value="social_instagram"> Instagram</label>
-                            <label><input type="checkbox" value="social_facebook"> Facebook</label>
-                            <label><input type="checkbox" value="blog"> Blog</label>
-                            <label><input type="checkbox" value="partnership"> Partnership</label>
-                            <label><input type="checkbox" value="sales"> Sales</label>
-                            <label><input type="checkbox" value="newsletter"> Newsletter</label>
-                        </div>
+                        <div class="ch-group" id="newChannels"></div>
                     </div>
                     <div class="flex justify-end">
                         <button type="submit" class="btn btn-primary px-6" id="addAssetBtn">Add Asset</button>
@@ -879,17 +869,7 @@
                 </div>
                 <div>
                     <label class="form-label">Suitable Channels</label>
-                    <div class="ch-group" id="editChannels">
-                        <label><input type="checkbox" value="cold_email"> Cold Email</label>
-                        <label><input type="checkbox" value="social_twitter"> Twitter</label>
-                        <label><input type="checkbox" value="social_linkedin"> LinkedIn</label>
-                        <label><input type="checkbox" value="social_instagram"> Instagram</label>
-                        <label><input type="checkbox" value="social_facebook"> Facebook</label>
-                        <label><input type="checkbox" value="blog"> Blog</label>
-                        <label><input type="checkbox" value="partnership"> Partnership</label>
-                        <label><input type="checkbox" value="sales"> Sales</label>
-                        <label><input type="checkbox" value="newsletter"> Newsletter</label>
-                    </div>
+                    <div class="ch-group" id="editChannels"></div>
                 </div>
                 <div class="flex justify-end gap-3">
                     <button type="button" onclick="closeEditModal()" class="btn btn-ghost">Cancel</button>
@@ -992,13 +972,37 @@ const ASSET_TYPES = [
     'identity_label','enemy','cause','us_vs_them','shared_experience'
 ];
 
-const CHANNELS = ['cold_email','social_twitter','social_linkedin','social_instagram','social_facebook','blog','partnership','sales','general'];
+// Canonical channel list — single source of truth. Must match the AI prompt's CHANNELS
+// list in build_asset_extraction_v2.py. Adding a channel here requires re-running asset
+// extraction so existing assets can be tagged with the new channel.
+const CHANNELS = [
+    'cold_email','email_sequence','newsletter',
+    'social_twitter','social_linkedin','social_instagram','social_facebook','social_tiktok',
+    'blog','podcast','video','webinar',
+    'sales_call','sales_deck','one_pager','proposal',
+    'website','landing_page',
+    'press','partnership',
+    'workshop','onboarding'
+];
 
 const CHANNEL_LABELS = {
-    cold_email: 'Cold Email', partnership: 'Partnership', social_twitter: 'Twitter',
-    social_linkedin: 'LinkedIn', social_instagram: 'Instagram', social_facebook: 'Facebook',
-    blog: 'Blog', sales: 'Sales', general: 'General'
+    cold_email: 'Cold Email', email_sequence: 'Email Sequence', newsletter: 'Newsletter',
+    social_twitter: 'Twitter', social_linkedin: 'LinkedIn', social_instagram: 'Instagram',
+    social_facebook: 'Facebook', social_tiktok: 'TikTok',
+    blog: 'Blog', podcast: 'Podcast', video: 'Video', webinar: 'Webinar',
+    sales_call: 'Sales Call', sales_deck: 'Sales Deck', one_pager: 'One-Pager', proposal: 'Proposal',
+    website: 'Website', landing_page: 'Landing Page',
+    press: 'Press', partnership: 'Partnership',
+    workshop: 'Workshop', onboarding: 'Onboarding'
 };
+
+function renderChannelCheckboxes(targetId) {
+    const host = document.getElementById(targetId);
+    if (!host) return;
+    host.innerHTML = CHANNELS.map(c =>
+        `<label><input type="checkbox" value="${c}"> ${esc(CHANNEL_LABELS[c] || c)}</label>`
+    ).join('');
+}
 
 let allAssets = [];
 let frPreviewData = null;
@@ -1360,7 +1364,8 @@ function openEditModal(idx) {
     $('editContext').value = a.context || '';
     $('editTags').value = (a.tags || []).join(', ');
 
-    // Set channel checkboxes
+    // Render channel checkboxes from canonical list, then set checked state
+    renderChannelCheckboxes('editChannels');
     const chs = a.suitable_channels || [];
     $('editChannels').querySelectorAll('input[type="checkbox"]').forEach(cb => {
         cb.checked = chs.includes(cb.value);
@@ -1855,6 +1860,7 @@ function refreshAll() {
 // ──────────────── INIT ────────────────
 document.addEventListener('DOMContentLoaded', () => {
     populateTypeDropdowns();
+    renderChannelCheckboxes('newChannels');
     initAuth();
 
     // If already authenticated

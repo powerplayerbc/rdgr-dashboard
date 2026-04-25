@@ -1780,12 +1780,12 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             <!-- Close Day Panel -->
             <div class="brain-reveal brain-reveal-4" id="closeDayPanel" style="display: none;">
                 <div class="panel" style="border-color: color-mix(in srgb, var(--brain-accent) 20%, var(--brain-border));">
-                    <div class="panel-body py-3 px-5 flex items-center justify-between">
+                    <div class="panel-body py-3 px-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div>
                             <p class="text-sm font-medium" style="color: var(--brain-txt);">Ready to close the day?</p>
                             <p class="text-xs" style="color: var(--brain-txt-3);" id="closeDaySubtext">Push 0 remaining items to tomorrow</p>
                         </div>
-                        <button class="btn btn-primary" onclick="openModal('closeDayModal')">Close Day</button>
+                        <button class="btn btn-primary w-full sm:w-auto" onclick="openModal('closeDayModal')">Close Day</button>
                     </div>
                 </div>
             </div>

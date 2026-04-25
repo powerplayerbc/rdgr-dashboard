@@ -850,12 +850,6 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         <input type="text" id="foodBrowserSearch" class="form-input pl-9" placeholder="Search foods (e.g. chicken, avocado, butter...)" oninput="searchFoodBrowser(this.value)">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--deft-txt-3);"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                     </div>
-                    <button class="btn btn-ghost text-xs flex-shrink-0" onclick="openBarcodeScanner()" title="Scan barcode to look up food">
-                        <span class="flex items-center gap-1.5">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="11" y1="8" x2="11" y2="16"/><line x1="15" y1="8" x2="15" y2="16"/><line x1="19" y1="8" x2="19" y2="16"/></svg>
-                            Scan Barcode
-                        </span>
-                    </button>
                     <div class="flex gap-1 overflow-x-auto">
                         <button class="recipe-filter active" data-cat="all" onclick="filterFoodCategory('all')">All</button>
                         <button class="recipe-filter" data-cat="protein" onclick="filterFoodCategory('protein')">Protein</button>
@@ -1964,9 +1958,17 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         <div class="modal-content" style="max-width: 560px;">
             <div class="panel-header">
                 <span class="font-heading font-bold text-sm uppercase tracking-wide" style="color: var(--deft-txt-2);">Add Food to Database</span>
-                <button onclick="closeModal('addFoodModal');resetFoodModal();" class="p-1 rounded hover:opacity-70 transition-opacity" style="color: var(--deft-txt-3);">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button class="btn btn-ghost text-xs" onclick="openBarcodeScanner('addFood')" title="Scan a barcode to auto-fill name, brand, and nutrition">
+                        <span class="flex items-center gap-1.5">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="11" y1="8" x2="11" y2="16"/><line x1="15" y1="8" x2="15" y2="16"/><line x1="19" y1="8" x2="19" y2="16"/></svg>
+                            Scan Barcode
+                        </span>
+                    </button>
+                    <button onclick="closeModal('addFoodModal');resetFoodModal();" class="p-1 rounded hover:opacity-70 transition-opacity" style="color: var(--deft-txt-3);">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
             </div>
             <div class="panel-body">
                 <div class="grid grid-cols-2 gap-3 mb-3">

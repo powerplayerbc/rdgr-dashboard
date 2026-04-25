@@ -261,7 +261,24 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
-function openBarcodeScanner() {
+function populateAddFoodFromScan(food) {
+    const n = food.nutrition_per_serving || {};
+    const set = (id, val) => { const el = document.getElementById(id); if (el && val != null && val !== '') el.value = val; };
+    set('newFoodName', food.name);
+    set('newFoodBrand', food.brand);
+    set('newFoodServing', food.serving_size);
+    set('newFoodCal', n.calories);
+    set('newFoodFat', n.total_fat_g);
+    set('newFoodProtein', n.protein_g);
+    set('newFoodTotalCarbs', n.total_carbs_g);
+    set('newFoodFiber', n.fiber_g);
+    set('newFoodNetCarbs', n.net_carbs_g);
+    set('newFoodSugar', n.sugar_g);
+    set('newFoodSodium', n.sodium_mg);
+    set('newFoodChol', n.cholesterol_mg);
+}
+
+function openBarcodeScanner(context) {
     openModal('barcodeScannerModal');
     document.getElementById('barcodeResult').style.display = 'none';
 
@@ -282,6 +299,14 @@ function openBarcodeScanner() {
             if (result && result.success !== false) {
                 const food = result.data || result.food || result;
                 const n = food.nutrition_per_serving || {};
+
+                if (context === 'addFood') {
+                    populateAddFoodFromScan(food);
+                    closeBarcodeScanner();
+                    toast(`Filled from barcode: ${food.name || decodedText}`, 'success');
+                    return;
+                }
+
                 resultDiv.innerHTML = `
                     <h4 class="font-heading font-bold text-sm mb-2" style="color:var(--deft-accent);">${escapeHtml(food.name || 'Unknown')}</h4>
                     ${food.brand ? `<p class="text-xs mb-1" style="color:var(--deft-txt-2);">Brand: ${escapeHtml(food.brand)}</p>` : ''}
@@ -294,7 +319,7 @@ function openBarcodeScanner() {
                 resultDiv.innerHTML = `
                     <p class="text-xs" style="color:var(--deft-warning);">Product not found for barcode: ${escapeHtml(decodedText)}</p>
                     <div class="flex gap-2 mt-2">
-                        <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner();setTimeout(openBarcodeScanner,300);">Try Again</button>
+                        <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner();setTimeout(()=>openBarcodeScanner('${context||''}'),300);">Try Again</button>
                     </div>`;
             }
         },
