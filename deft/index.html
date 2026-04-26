@@ -1947,6 +1947,15 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             </div>
             <div class="panel-body">
                 <div id="barcode-reader" style="width:100%;"></div>
+                <div class="flex items-center gap-2 mt-3">
+                    <input type="file" id="barcodePhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="scanBarcodePhoto(this)">
+                    <button class="btn btn-ghost text-xs flex-1" onclick="document.getElementById('barcodePhotoInput').click()">
+                        <span class="flex items-center gap-1.5 justify-center">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 19V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2z"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            Upload Photo Instead
+                        </span>
+                    </button>
+                </div>
                 <div id="barcodeResult" style="display:none;" class="mt-3 p-3 rounded-lg"></div>
             </div>
         </div>

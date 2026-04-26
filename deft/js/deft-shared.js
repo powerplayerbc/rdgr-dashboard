@@ -278,60 +278,110 @@ function populateAddFoodFromScan(food) {
     set('newFoodChol', n.cholesterol_mg);
 }
 
+let currentBarcodeContext = null;
+
+async function processBarcodeText(decodedText) {
+    const context = currentBarcodeContext;
+    const resultDiv = document.getElementById('barcodeResult');
+    resultDiv.style.display = '';
+    resultDiv.innerHTML = '<p class="ai-loading" style="color: var(--deft-txt-2);">Looking up product...</p>';
+
+    const result = await deftApi('scan_barcode', { barcode: decodedText });
+
+    if (result && result.success !== false) {
+        const food = result.data || result.food || result;
+        const n = food.nutrition_per_serving || {};
+
+        if (context === 'addFood') {
+            populateAddFoodFromScan(food);
+            closeBarcodeScanner();
+            toast(`Filled from barcode: ${food.name || decodedText}`, 'success');
+            return;
+        }
+
+        resultDiv.innerHTML = `
+            <h4 class="font-heading font-bold text-sm mb-2" style="color:var(--deft-accent);">${escapeHtml(food.name || 'Unknown')}</h4>
+            ${food.brand ? `<p class="text-xs mb-1" style="color:var(--deft-txt-2);">Brand: ${escapeHtml(food.brand)}</p>` : ''}
+            <p class="text-xs mb-2 font-mono" style="color:var(--deft-txt-3);">${n.calories||0} cal | ${n.total_fat_g||0}g fat | ${n.protein_g||0}g protein | ${n.net_carbs_g||0}g carbs</p>
+            <div class="flex gap-2 mt-3">
+                <button class="btn btn-primary text-xs" onclick="closeBarcodeScanner(); document.getElementById('foodBrowserSearch').value='${escapeHtml(food.name || '')}'; searchFoodBrowser('${escapeHtml(food.name || '')}');">Find in Foods</button>
+                <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Cancel</button>
+            </div>`;
+    } else {
+        resultDiv.innerHTML = `
+            <p class="text-xs" style="color:var(--deft-warning);">Product not found for barcode: ${escapeHtml(decodedText)}</p>
+            <div class="flex gap-2 mt-2">
+                <button class="btn btn-ghost text-xs" onclick="document.getElementById('barcodePhotoInput').click()">Try a photo</button>
+                <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner();setTimeout(()=>openBarcodeScanner('${context||''}'),300);">Retry camera</button>
+            </div>`;
+    }
+}
+
 function openBarcodeScanner(context) {
+    currentBarcodeContext = context || null;
     openModal('barcodeScannerModal');
     document.getElementById('barcodeResult').style.display = 'none';
+    document.getElementById('barcode-reader').style.display = '';
 
     html5QrCode = new Html5Qrcode("barcode-reader");
     html5QrCode.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 250, height: 100 } },
         async (decodedText) => {
-            await html5QrCode.stop();
+            try { await html5QrCode.stop(); } catch(e) {}
             html5QrCode = null;
-
-            const resultDiv = document.getElementById('barcodeResult');
-            resultDiv.style.display = '';
-            resultDiv.innerHTML = '<p class="ai-loading" style="color: var(--deft-txt-2);">Looking up product...</p>';
-
-            const result = await deftApi('scan_barcode', { barcode: decodedText });
-
-            if (result && result.success !== false) {
-                const food = result.data || result.food || result;
-                const n = food.nutrition_per_serving || {};
-
-                if (context === 'addFood') {
-                    populateAddFoodFromScan(food);
-                    closeBarcodeScanner();
-                    toast(`Filled from barcode: ${food.name || decodedText}`, 'success');
-                    return;
-                }
-
-                resultDiv.innerHTML = `
-                    <h4 class="font-heading font-bold text-sm mb-2" style="color:var(--deft-accent);">${escapeHtml(food.name || 'Unknown')}</h4>
-                    ${food.brand ? `<p class="text-xs mb-1" style="color:var(--deft-txt-2);">Brand: ${escapeHtml(food.brand)}</p>` : ''}
-                    <p class="text-xs mb-2 font-mono" style="color:var(--deft-txt-3);">${n.calories||0} cal | ${n.total_fat_g||0}g fat | ${n.protein_g||0}g protein | ${n.net_carbs_g||0}g carbs</p>
-                    <div class="flex gap-2 mt-3">
-                        <button class="btn btn-primary text-xs" onclick="closeBarcodeScanner(); document.getElementById('foodBrowserSearch').value='${escapeHtml(food.name || '')}'; searchFoodBrowser('${escapeHtml(food.name || '')}');">Find in Foods</button>
-                        <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Cancel</button>
-                    </div>`;
-            } else {
-                resultDiv.innerHTML = `
-                    <p class="text-xs" style="color:var(--deft-warning);">Product not found for barcode: ${escapeHtml(decodedText)}</p>
-                    <div class="flex gap-2 mt-2">
-                        <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner();setTimeout(()=>openBarcodeScanner('${context||''}'),300);">Try Again</button>
-                    </div>`;
-            }
+            await processBarcodeText(decodedText);
         },
         () => {}
     ).catch(() => {
-        document.getElementById('barcodeResult').style.display = '';
-        document.getElementById('barcodeResult').innerHTML = '<p class="text-xs" style="color:var(--deft-danger);">Camera access denied or not available.</p>';
+        // Camera unavailable -- hide the live viewer and prompt for a photo upload
+        const reader = document.getElementById('barcode-reader');
+        if (reader) reader.style.display = 'none';
+        const resultDiv = document.getElementById('barcodeResult');
+        resultDiv.style.display = '';
+        resultDiv.innerHTML = '<p class="text-xs" style="color:var(--deft-warning);">Camera not available. Use the Upload Photo button below to scan a barcode from an image.</p>';
     });
+}
+
+async function scanBarcodePhoto(input) {
+    const file = input && input.files && input.files[0];
+    if (!file) return;
+
+    // Stop any live camera scan in progress
+    if (html5QrCode) {
+        try { await html5QrCode.stop(); } catch(e) {}
+        html5QrCode = null;
+    }
+
+    const reader = document.getElementById('barcode-reader');
+    if (reader) reader.style.display = 'none';
+
+    const resultDiv = document.getElementById('barcodeResult');
+    resultDiv.style.display = '';
+    resultDiv.innerHTML = '<p class="ai-loading" style="color:var(--deft-txt-2);">Reading barcode from photo...</p>';
+
+    try {
+        const tempScanner = new Html5Qrcode("barcode-reader");
+        const decodedText = await tempScanner.scanFile(file, /* showImage */ false);
+        await processBarcodeText(decodedText);
+    } catch (err) {
+        resultDiv.innerHTML = `
+            <p class="text-xs" style="color:var(--deft-warning);">Could not read a barcode from this photo. Try a clearer image with the barcode in focus and no glare.</p>
+            <div class="flex gap-2 mt-2">
+                <button class="btn btn-ghost text-xs" onclick="document.getElementById('barcodePhotoInput').click()">Try another photo</button>
+                <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Cancel</button>
+            </div>`;
+    } finally {
+        // Clear input so the same file can be selected again later
+        input.value = '';
+    }
 }
 
 function closeBarcodeScanner() {
     if (html5QrCode) { html5QrCode.stop().catch(()=>{}); html5QrCode = null; }
+    currentBarcodeContext = null;
+    const photoInput = document.getElementById('barcodePhotoInput');
+    if (photoInput) photoInput.value = '';
     closeModal('barcodeScannerModal');
 }
 
