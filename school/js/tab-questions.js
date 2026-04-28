@@ -8,6 +8,7 @@ let _questionsData = [];
 let _answersMap = {};
 let _lessonDetail = null;
 let _hintCache = {};
+let _motivationStats = { explanations_used: 0, videos_searched: 0 }; // UBR-0084
 
 // ═══════════════════════════════════════
 // MAIN ENTRY POINT
@@ -20,17 +21,23 @@ async function refreshQuestions() {
 
     container.innerHTML = renderQuestionsLoading();
 
-    // Fetch lesson, questions, and answers in parallel
-    const [lessonRows, questions, answers] = await Promise.all([
+    // Fetch lesson, questions, answers, and motivation summary in parallel
+    const [lessonRows, questions, answers, motivation] = await Promise.all([
         supabaseSelect('school_lessons', `lesson_id=eq.${currentLessonId}&select=*`),
         supabaseSelect('school_questions', `lesson_id=eq.${currentLessonId}&select=*&order=question_number`),
-        supabaseSelect('school_answers', `assignment_id=eq.${currentAssignmentId}&select=*`)
+        supabaseSelect('school_answers', `assignment_id=eq.${currentAssignmentId}&select=*`),
+        supabaseRpc('get_motivation_summary', {
+            p_student_id: activeProfileId,
+            p_assignment_id: currentAssignmentId,
+            p_lesson_id: currentLessonId
+        })
     ]);
 
     _lessonDetail = (lessonRows && lessonRows.length > 0) ? lessonRows[0] : null;
     _questionsData = questions || [];
     _answersMap = {};
     _hintCache = {};
+    _motivationStats = (motivation && motivation[0]) || { explanations_used: 0, videos_searched: 0 };
 
     if (answers && answers.length > 0) {
         answers.forEach(a => { _answersMap[a.question_id] = a; });
@@ -53,6 +60,9 @@ function renderQuestionsView(container) {
 
     // Progress bar
     html += renderProgressBar(answeredCount, totalCount);
+
+    // Motivation stat row (UBR-0084) — explanations + videos used to learn
+    html += renderMotivationRow(_motivationStats);
 
     // Lesson content/description block
     if (_lessonDetail && _lessonDetail.lesson_content) {
@@ -171,6 +181,44 @@ function renderLessonContent(content) {
             <div style="font-size: 0.875rem; color: var(--deft-txt-2); line-height: 1.6; white-space: pre-line;">${escapeHtml(content)}</div>
         </div>
     `;
+}
+
+// ═══════════════════════════════════════
+// RENDER — Motivation Row (UBR-0084)
+// ═══════════════════════════════════════
+function renderMotivationRow(stats) {
+    const explanations = (stats && stats.explanations_used) || 0;
+    const videos = (stats && stats.videos_searched) || 0;
+    const total = explanations + videos;
+    const accentColor = total >= 5 ? 'var(--deft-success)' : (total >= 1 ? 'var(--deft-accent)' : 'var(--deft-txt-3)');
+    const tooltip = total === 0
+        ? 'Add explanations to your answers and look up videos to lift this score.'
+        : `${total} learn-more action${total === 1 ? '' : 's'} on this lesson.`;
+
+    const pill = (num, label) => `
+        <div style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.65rem; border-radius: 99px; background: var(--deft-surface-el); border: 1px solid var(--deft-border);">
+            <span style="font-size: 0.875rem; font-weight: 700; color: ${accentColor}; font-variant-numeric: tabular-nums;">${num}</span>
+            <span style="font-size: 0.7rem; color: var(--deft-txt-2); text-transform: uppercase; letter-spacing: 0.04em;">${label}</span>
+        </div>`;
+
+    return `
+        <div id="motivationRow" style="padding: 0.5rem 1.5rem 0.25rem 1.5rem;" title="${tooltip}">
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span style="font-size: 0.7rem; color: var(--deft-txt-3); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Motivation</span>
+                ${pill(explanations, 'Explanations')}
+                ${pill(videos, 'Videos')}
+            </div>
+        </div>
+    `;
+}
+
+function refreshMotivationRow() {
+    const el = document.getElementById('motivationRow');
+    if (!el) return;
+    const tmp = document.createElement('div');
+    tmp.innerHTML = renderMotivationRow(_motivationStats);
+    const replacement = tmp.firstElementChild;
+    if (replacement) el.replaceWith(replacement);
 }
 
 // ═══════════════════════════════════════
@@ -482,8 +530,13 @@ async function handleSubmitAnswer(qId) {
     const textarea = document.getElementById(`answer_text_${qId}`);
     let answerText = textarea ? textarea.value.trim() : '';
 
+    // Capture the raw textarea value BEFORE merging with MC selection — for MC
+    // questions this is the optional explanation. Used by motivation tracker (UBR-0084).
+    const rawExplanation = answerText;
+
     // Check for multiple choice selection
     const mcRadio = document.querySelector(`input[name="mc_${qId}"]:checked`);
+    const isMcSubmission = !!mcRadio;
     if (mcRadio) {
         // For MC questions, the selected option IS the answer; textarea is supplemental
         answerText = mcRadio.value + (answerText ? '\n\n' + answerText : '');
@@ -518,6 +571,26 @@ async function handleSubmitAnswer(qId) {
         // Update local answers map
         const answerData = result.data || result;
         _answersMap[qId] = answerData;
+
+        // Motivation tracker (UBR-0084): on MC questions, log when the student
+        // wrote a non-empty explanation. Only count once per (assignment, question)
+        // to keep the metric meaningful even if the user re-submits.
+        if (isMcSubmission && rawExplanation && rawExplanation.length > 0) {
+            const previouslyHadExplanation = !!(answerData
+                && answerData.answer_text
+                && /\n\n/.test(answerData.answer_text)
+                && _answersMap[qId] === answerData
+                && answerData._counted_explanation);
+            if (!previouslyHadExplanation) {
+                logMotivationEvent('explanation_added', {
+                    question_id: qId,
+                    explanation_length: rawExplanation.length
+                });
+                _motivationStats.explanations_used = (_motivationStats.explanations_used || 0) + 1;
+                if (answerData) answerData._counted_explanation = true;
+                refreshMotivationRow();
+            }
+        }
 
         // Re-render this card in place
         const card = document.getElementById(`card_${qId}`);
@@ -739,6 +812,11 @@ async function searchVideos() {
             <div style="width: 1.25rem; height: 1.25rem; border: 2px solid var(--deft-border); border-top-color: var(--deft-accent); border-radius: 50%; animation: qSpin 0.6s linear infinite;"></div>
             <span style="font-size: 0.8rem; color: var(--deft-txt-2);">Searching...</span>
         </div>`;
+
+    // Motivation tracker (UBR-0084): the student is asking for more learning material.
+    logMotivationEvent('video_search', { query });
+    _motivationStats.videos_searched = (_motivationStats.videos_searched || 0) + 1;
+    refreshMotivationRow();
 
     const result = await schoolApi('search_videos', { query }, { timeout: 15000 });
 

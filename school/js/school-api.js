@@ -51,6 +51,47 @@ async function supabaseUpsert(table, body, onConflict = '') {
     } catch (err) { console.error('Supabase upsert error:', err); return null; }
 }
 
+async function supabaseRpc(fn, body) {
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body || {})
+        });
+        if (!res.ok) { console.warn(`Supabase rpc ${fn} error:`, res.status); return null; }
+        const text = await res.text();
+        return text ? JSON.parse(text) : null;
+    } catch (err) { console.warn(`Supabase rpc ${fn} error:`, err); return null; }
+}
+
+// Fire-and-forget motivation event logger (UBR-0084).
+// Inserts a row into school_motivation_events. Errors are swallowed -- this
+// must never block the user-facing flow it's hooked into.
+function logMotivationEvent(eventType, payload = {}) {
+    if (!activeProfileId || !eventType) return;
+    const body = {
+        student_id: activeProfileId,
+        assignment_id: typeof currentAssignmentId !== 'undefined' ? currentAssignmentId : null,
+        lesson_id: typeof currentLessonId !== 'undefined' ? currentLessonId : null,
+        event_type: eventType,
+        payload: payload || {}
+    };
+    fetch(`${SUPABASE_URL}/rest/v1/school_motivation_events`, {
+        method: 'POST',
+        headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(body)
+    }).catch(() => { /* fire-and-forget */ });
+}
+
 // ═══════════════════════════════════════
 // SCHOOL-BRIDGE API
 // ═══════════════════════════════════════
