@@ -35,6 +35,7 @@ let fcState = {
     mulTimerStart: null,
     mulTimerId: null,
     mulElapsed: 0,
+    mulTimerStarted: false,    // user must press Start before each problem's timer runs
 
     // Session stats (multiplication)
     mulSessionAnswered: 0,
@@ -252,15 +253,12 @@ function fcRender() {
 }
 
 function fcPostRender() {
-    // Auto-focus input
+    // Auto-focus input only when ready (multiplication: only after Start; spelling: always)
     const input = document.getElementById('fc-input');
-    if (input && !fcState.spRevealed && !fcState.mulRevealed) {
+    const mulReady = fcState.mode === 'multiplication' && fcState.mulTimerStarted && !fcState.mulRevealed;
+    const spReady = fcState.mode === 'spelling' && !fcState.spRevealed;
+    if (input && (mulReady || spReady)) {
         setTimeout(() => input.focus(), 50);
-    }
-
-    // Start timer for multiplication
-    if (fcState.mode === 'multiplication' && fcState.mulCurrent && !fcState.mulRevealed) {
-        fcStartMulTimer();
     }
 }
 
@@ -293,6 +291,7 @@ function fcBuildModeSelector() {
 function fcSetMode(mode) {
     if (fcState.mode === mode) return;
     fcStopMulTimer();
+    fcState.mulTimerStarted = false;
     fcState.mode = mode;
     refreshFlashcards();
 }
@@ -796,6 +795,7 @@ function fcBuildMulCard() {
     // Problem display
     let cardContent = '';
     if (!revealed) {
+        const showTimer = fcState.mulTimerStarted;
         cardContent = `
         <div class="fc-mul-problem">
             <span class="fc-mul-a">${cur.a}</span>
@@ -804,7 +804,7 @@ function fcBuildMulCard() {
             <span class="fc-mul-eq">=</span>
             <span class="fc-mul-q">?</span>
         </div>
-        ${timerHtml}`;
+        ${showTimer ? timerHtml : ''}`;
     } else {
         if (correct) {
             const elapsed = fcState.mulElapsed;
@@ -854,18 +854,31 @@ function fcBuildMulCard() {
 
     let inputArea = '';
     if (!revealed) {
-        inputArea = `
-        <div class="fc-input-area">
-            <input id="fc-input" type="number" class="fc-text-input fc-num-input" placeholder="Answer"
-                   autocomplete="off" inputmode="numeric"
-                   onkeydown="if(event.key==='Enter')fcCheckMultiplication()" aria-label="Enter your answer">
-            <button class="fc-check-btn" onclick="fcCheckMultiplication()">
-                Check
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M2 7l4 4 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </button>
-        </div>`;
+        if (!fcState.mulTimerStarted) {
+            inputArea = `
+            <div class="fc-input-area fc-start-area">
+                <button class="fc-start-btn" onclick="fcStartMulTimerManual()" aria-label="Start the timer for this problem">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M4 3l9 5-9 5V3z" fill="currentColor"/>
+                    </svg>
+                    Start
+                </button>
+                <p class="fc-start-hint">Press Start when you're ready, then solve as fast as you can.</p>
+            </div>`;
+        } else {
+            inputArea = `
+            <div class="fc-input-area">
+                <input id="fc-input" type="number" class="fc-text-input fc-num-input" placeholder="Answer"
+                       autocomplete="off" inputmode="numeric"
+                       onkeydown="if(event.key==='Enter')fcCheckMultiplication()" aria-label="Enter your answer">
+                <button class="fc-check-btn" onclick="fcCheckMultiplication()">
+                    Check
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <path d="M2 7l4 4 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>`;
+        }
     } else {
         inputArea = `
         <div class="fc-input-area fc-input-row">
@@ -896,6 +909,12 @@ function fcBuildMulCard() {
 
 
 // ─── Multiplication Timer ───────────────────────────────────────────
+function fcStartMulTimerManual() {
+    fcState.mulTimerStarted = true;
+    fcStartMulTimer();
+    refreshFlashcards();
+}
+
 function fcStartMulTimer() {
     fcStopMulTimer();
     fcState.mulTimerStart = performance.now();
@@ -1080,6 +1099,7 @@ function fcRetryMultiplication() {
     fcState.mulRevealed = false;
     fcState.mulCorrect = null;
     fcState.mulInput = '';
+    fcState.mulTimerStarted = false;
     fcRender();
 }
 
@@ -1089,6 +1109,7 @@ function fcNextMultiplication() {
     fcState.mulRevealed = false;
     fcState.mulCorrect = null;
     fcState.mulInput = '';
+    fcState.mulTimerStarted = false;
     fcRender();
 }
 
@@ -1098,6 +1119,7 @@ function fcPracticeProblem(a, b) {
     fcState.mulRevealed = false;
     fcState.mulCorrect = null;
     fcState.mulInput = '';
+    fcState.mulTimerStarted = false;
     fcRender();
 
     // Scroll to card
@@ -1791,6 +1813,37 @@ function injectFlashcardStyles() {
 .fc-next-btn:hover {
     filter: brightness(1.1);
     transform: translateY(-1px);
+}
+.fc-start-area {
+    flex-direction: column !important;
+    gap: 10px !important;
+    align-items: center !important;
+}
+.fc-start-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 40px;
+    border-radius: 14px;
+    background: var(--deft-accent);
+    color: #000;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--deft-body-font), sans-serif;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.fc-start-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+.fc-start-hint {
+    font-size: 12px;
+    color: var(--deft-txt-3);
+    margin: 0;
+    text-align: center;
 }
 .fc-retry-btn {
     display: inline-flex;

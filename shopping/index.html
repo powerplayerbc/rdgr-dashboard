@@ -2157,13 +2157,15 @@ async function addHistoryItemToCurrentList(name, qty, unit, category, pantryLoc)
 
 async function addShoppingItem() {
     if (!activeShoppingList) { toast('Create a shopping list first', 'error'); return; }
-    const name = document.getElementById('addShoppingItemInput').value.trim();
+    const inputEl = document.getElementById('addShoppingItemInput');
+    const name = inputEl.value.trim();
     if (!name) return;
     const quantity = parseFloat(document.getElementById('addShoppingItemQty').value) || 1;
     const unit = document.getElementById('addShoppingItemUnit').value;
     const priceVal = parseFloat(document.getElementById('addShoppingItemPrice').value);
     const itemData = { name, quantity, unit };
     if (!isNaN(priceVal) && priceVal > 0) itemData.estimated_price = priceVal;
+    if (inputEl.dataset.foodId) itemData.food_id = inputEl.dataset.foodId;
 
     const result = await deftApi('add_shopping_items', {
         list_id: activeShoppingList.id,
@@ -2171,7 +2173,8 @@ async function addShoppingItem() {
     });
 
     if (result) {
-        document.getElementById('addShoppingItemInput').value = '';
+        inputEl.value = '';
+        delete inputEl.dataset.foodId;
         document.getElementById('addShoppingItemQty').value = '1';
         document.getElementById('addShoppingItemUnit').value = 'each';
         document.getElementById('addShoppingItemPrice').value = '';
@@ -2261,20 +2264,68 @@ async function searchShoppingHistory(query) {
     if (!query || query.length < 2) { dropdown.classList.remove('open'); return; }
 
     shoppingHistoryTimeout = setTimeout(async () => {
-        const results = await supabaseSelect('deft_shopping_history',
-            `user_id=eq.${activeProfileId}&name=ilike.*${encodeURIComponent(query)}*&select=name,purchase_count&order=purchase_count.desc&limit=8`);
-        if (results && results.length > 0) {
-            dropdown.innerHTML = results.map(r => `
-                <div class="autocomplete-item" onclick="document.getElementById('addShoppingItemInput').value='${escapeHtml(r.name)}';document.getElementById('shoppingAutocomplete').classList.remove('open');">
+        // Search both purchase history (user-specific) AND food database (canonical)
+        const [historyResults, foodResults] = await Promise.all([
+            supabaseSelect('deft_shopping_history',
+                `user_id=eq.${activeProfileId}&name=ilike.*${encodeURIComponent(query)}*&select=name,purchase_count,food_id,category,unit&order=purchase_count.desc&limit=5`),
+            supabaseSelect('deft_food_database',
+                `name=ilike.*${encodeURIComponent(query)}*&select=food_id,name,brand,serving_size,category&limit=5&order=name`)
+        ]);
+        window._shoppingFoodMatches = window._shoppingFoodMatches || {};
+
+        const blocks = [];
+        if (historyResults && historyResults.length > 0) {
+            blocks.push('<div class="autocomplete-section text-xs px-3 py-1" style="color: var(--deft-txt-3); background: rgba(255,255,255,0.02);">From your history</div>');
+            blocks.push(historyResults.map(r => {
+                const cacheKey = 'h_' + (r.food_id || r.name);
+                window._shoppingFoodMatches[cacheKey] = { name: r.name, food_id: r.food_id || null, category: r.category || null, unit: r.unit || null };
+                return `<div class="autocomplete-item" onclick="pickShoppingMatch('${cacheKey}')">
                     <span>${escapeHtml(r.name)}</span>
                     <span class="text-xs font-mono" style="color: var(--deft-txt-3);">bought ${r.purchase_count}x</span>
-                </div>
-            `).join('');
+                </div>`;
+            }).join(''));
+        }
+        if (foodResults && foodResults.length > 0) {
+            // Avoid duplicates if food already in history
+            const histNames = new Set((historyResults||[]).map(h => (h.name||'').toLowerCase()));
+            const novel = foodResults.filter(f => !histNames.has((f.name||'').toLowerCase()));
+            if (novel.length > 0) {
+                blocks.push('<div class="autocomplete-section text-xs px-3 py-1" style="color: var(--deft-txt-3); background: rgba(255,255,255,0.02);">From Foods database</div>');
+                blocks.push(novel.map(f => {
+                    const cacheKey = 'f_' + f.food_id;
+                    window._shoppingFoodMatches[cacheKey] = { name: f.name, food_id: f.food_id, category: f.category || null, unit: null, brand: f.brand };
+                    const subtitle = [f.brand, f.serving_size].filter(Boolean).join(' · ');
+                    return `<div class="autocomplete-item" onclick="pickShoppingMatch('${cacheKey}')">
+                        <span>${escapeHtml(f.name)}</span>
+                        <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${escapeHtml(subtitle)}</span>
+                    </div>`;
+                }).join(''));
+            }
+        }
+
+        if (blocks.length > 0) {
+            dropdown.innerHTML = blocks.join('');
             dropdown.classList.add('open');
         } else {
             dropdown.classList.remove('open');
         }
     }, 300);
+}
+
+function pickShoppingMatch(cacheKey) {
+    const m = (window._shoppingFoodMatches || {})[cacheKey];
+    if (!m) return;
+    document.getElementById('addShoppingItemInput').value = m.name;
+    document.getElementById('addShoppingItemInput').dataset.foodId = m.food_id || '';
+    if (m.category) {
+        const catEl = document.getElementById('addShoppingItemCategory');
+        if (catEl && [...catEl.options].some(o => o.value === m.category)) catEl.value = m.category;
+    }
+    if (m.unit) {
+        const unitEl = document.getElementById('addShoppingItemUnit');
+        if (unitEl && [...unitEl.options].some(o => o.value === m.unit)) unitEl.value = m.unit;
+    }
+    document.getElementById('shoppingAutocomplete').classList.remove('open');
 }
 
 // Load frequent items for sidebar

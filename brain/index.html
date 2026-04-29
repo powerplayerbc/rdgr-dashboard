@@ -2839,6 +2839,8 @@ let timerInterval = null;
 let categories = [];
 let dailySummary = null;
 let todayActivities = [];
+let todayHabitCompletions = [];
+let habitsCatalog = [];
 let realtimeChannels = [];
 let _dashboardLoading = false;
 let activityLogDate = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
@@ -3303,12 +3305,14 @@ async function loadDashboardData() {
     const todayRange = localDateToUTCRange(today);
 
     // Read directly from Supabase tables (reliable) — webhook used only for writes
-    const [profileRows, catRows, timerRows, scoreRows, activityRows] = await Promise.all([
+    const [profileRows, catRows, timerRows, scoreRows, activityRows, habitRows, habitCompletionRows] = await Promise.all([
         supabaseSelect('brain_user_profiles', `user_id=eq.${activeProfileId}&select=*`),
         supabaseSelect('brain_categories', `user_id=eq.${activeProfileId}&is_active=eq.true&order=sort_order&select=*`),
         supabaseSelect('brain_timers', `user_id=eq.${activeProfileId}&select=*`),
         supabaseSelect('brain_daily_scores', `user_id=eq.${activeProfileId}&score_date=eq.${today}&select=*`),
         supabaseSelect('brain_activities', `user_id=eq.${activeProfileId}&started_at=gte.${todayRange.start}&started_at=lt.${todayRange.end}&order=started_at.desc&select=*`),
+        supabaseSelect('brain_habits', `user_id=eq.${activeProfileId}&is_active=eq.true&deleted_at=is.null&select=habit_id,name,points_value,icon`),
+        supabaseSelect('brain_habit_completions', `user_id=eq.${activeProfileId}&completion_date=eq.${today}&order=completed_at.desc&select=*`),
     ]);
 
     // Non-blocking leaderboard fetch (don't hold up the page)
@@ -3328,9 +3332,17 @@ async function loadDashboardData() {
     if (activeTimer) startStopwatchDisplay();
     else stopStopwatchDisplay();
 
-    // Daily score
+    // Daily score (merge in habit completions — BRAIN-SCORING does not roll those into brain_daily_scores)
     dailySummary = (scoreRows && scoreRows[0]) || {};
     dailySummary.daily_goal = profile.daily_goal_points || 100;
+    todayHabitCompletions = habitCompletionRows || [];
+    habitsCatalog = habitRows || [];
+    const habitPoints = todayHabitCompletions.reduce((s, c) => s + (c.points_earned || 0), 0);
+    const habitMinutes = todayHabitCompletions.reduce((s, c) => s + (c.actual_minutes || 0), 0);
+    const habitCount = todayHabitCompletions.length;
+    dailySummary.total_points = (dailySummary.total_points || 0) + habitPoints;
+    dailySummary.total_minutes = (dailySummary.total_minutes || 0) + habitMinutes;
+    dailySummary.activities_count = (dailySummary.activities_count || 0) + habitCount;
 
     // Today's activities
     todayActivities = activityRows || [];
@@ -3525,37 +3537,68 @@ function renderCategoryDonut() {
     legend.innerHTML = legendHtml;
 }
 
+function _esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
+
 function renderTodayActivities() {
     const container = document.getElementById('todayActivityList');
     const count = document.getElementById('todayActivityCount');
-    count.textContent = `${todayActivities.length} activit${todayActivities.length === 1 ? 'y' : 'ies'}`;
 
-    // Auto-hide stale "no activities" insight banner when activities exist
-    if (todayActivities.length > 0) {
+    // Merge brain_activities + brain_habit_completions, sorted by time desc
+    const merged = [
+        ...todayActivities.map(a => ({
+            kind: 'activity',
+            sortKey: a.started_at || '',
+            time: a.started_at ? new Date(a.started_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '',
+            title: a.title || 'Untitled',
+            categoryId: a.category_id, categorySlug: a.category_slug,
+            duration: a.duration_min || 0,
+            points: a.points_earned || 0,
+        })),
+        ...todayHabitCompletions.map(c => {
+            const habit = habitsCatalog.find(h => h.habit_id === c.habit_id);
+            return {
+                kind: 'habit',
+                sortKey: c.completed_at || '',
+                time: c.completed_at ? new Date(c.completed_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '',
+                title: habit?.name || 'Habit',
+                duration: c.actual_minutes || 0,
+                points: c.points_earned || 0,
+            };
+        }),
+    ].sort((a, b) => (b.sortKey || '').localeCompare(a.sortKey || ''));
+
+    count.textContent = `${merged.length} activit${merged.length === 1 ? 'y' : 'ies'}`;
+
+    if (merged.length > 0) {
         const insightTxt = document.getElementById('dailyInsightText')?.textContent || '';
         if (insightTxt.includes('No activities logged')) {
             document.getElementById('dailyInsightBanner').style.display = 'none';
         }
     }
 
-    if (!todayActivities.length) {
+    if (!merged.length) {
         container.innerHTML = '<div class="px-4 py-8 text-center text-xs" style="color: var(--brain-txt-3);">No activities logged today</div>';
         return;
     }
 
-    container.innerHTML = todayActivities.map(a => {
-        const cat = categories.find(c => c.category_id === a.category_id || c.slug === a.category_slug);
-        const color = cat?.color || '#8A95A9';
-        const catName = cat?.name || a.category_slug || 'General';
-        const time = a.started_at ? new Date(a.started_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '';
+    container.innerHTML = merged.map(m => {
+        let color = '#8A95A9'; let catName = 'General';
+        if (m.kind === 'activity') {
+            const cat = categories.find(c => c.category_id === m.categoryId || c.slug === m.categorySlug);
+            color = cat?.color || color;
+            catName = cat?.name || m.categorySlug || 'General';
+        } else {
+            color = '#A882D6';
+            catName = 'Habit';
+        }
         return `<div class="flex items-center gap-3 px-4 py-2.5 border-b" style="border-color: var(--brain-border);">
             <div class="activity-dot" style="background: ${color};"></div>
             <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium line-clamp-1">${a.title || 'Untitled'}</p>
-                <p class="text-xs" style="color: var(--brain-txt-3);">${time} &middot; ${catName}</p>
+                <p class="text-sm font-medium line-clamp-1">${_esc(m.title)}</p>
+                <p class="text-xs" style="color: var(--brain-txt-3);">${m.time} &middot; ${catName}</p>
             </div>
-            <span class="badge badge-ghost">${a.duration_min || 0}m</span>
-            <span class="badge badge-accent">${a.points_earned || 0} pts</span>
+            <span class="badge badge-ghost">${m.duration}m</span>
+            <span class="badge badge-accent">${m.points} pts</span>
         </div>`;
     }).join('');
 }

@@ -280,10 +280,49 @@ function populateAddFoodFromScan(food) {
 
 let currentBarcodeContext = null;
 
+// GTIN/UPC/EAN mod-10 checksum validator. Accepts 8/12/13/14 digit codes only.
+function isValidGtin(text) {
+    if (!text) return false;
+    const digits = String(text).trim();
+    if (!/^\d+$/.test(digits)) return false;
+    if (![8, 12, 13, 14].includes(digits.length)) return false;
+    const padded = digits.padStart(14, '0');
+    let sum = 0;
+    for (let i = 0; i < 13; i++) {
+        const d = parseInt(padded[i], 10);
+        sum += (i % 2 === 0) ? d * 3 : d;
+    }
+    const check = (10 - (sum % 10)) % 10;
+    return check === parseInt(padded[13], 10);
+}
+
+// Restricted format list for Html5Qrcode — UPC/EAN only, no QR/Aztec/Code128/etc.
+function deftBarcodeFormats() {
+    if (typeof Html5QrcodeSupportedFormats === 'undefined') return undefined;
+    return [
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+    ];
+}
+
 async function processBarcodeText(decodedText) {
     const context = currentBarcodeContext;
     const resultDiv = document.getElementById('barcodeResult');
     resultDiv.style.display = '';
+
+    // Validate the decoded value as a real UPC/EAN before sending to backend
+    if (!isValidGtin(decodedText)) {
+        resultDiv.innerHTML = `
+            <p class="text-xs" style="color:var(--deft-warning);">Invalid barcode read (got "${escapeHtml(decodedText)}"). The scanner needs to see the full UPC/EAN — try moving the camera back, holding steady, or using a clearer photo.</p>
+            <div class="flex gap-2 mt-2">
+                <button class="btn btn-ghost text-xs" onclick="document.getElementById('barcodePhotoInput').click()">Try a photo</button>
+                <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner();setTimeout(()=>openBarcodeScanner('${context||''}'),300);">Retry camera</button>
+            </div>`;
+        return;
+    }
+
     resultDiv.innerHTML = '<p class="ai-loading" style="color: var(--deft-txt-2);">Looking up product...</p>';
 
     const result = await deftApi('scan_barcode', { barcode: decodedText });
@@ -323,10 +362,11 @@ function openBarcodeScanner(context) {
     document.getElementById('barcodeResult').style.display = 'none';
     document.getElementById('barcode-reader').style.display = '';
 
-    html5QrCode = new Html5Qrcode("barcode-reader");
+    const formatsToSupport = deftBarcodeFormats();
+    html5QrCode = new Html5Qrcode("barcode-reader", { formatsToSupport, verbose: false });
     html5QrCode.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 100 } },
+        { fps: 10, qrbox: { width: 280, height: 120 }, formatsToSupport },
         async (decodedText) => {
             try { await html5QrCode.stop(); } catch(e) {}
             html5QrCode = null;
@@ -361,7 +401,7 @@ async function scanBarcodePhoto(input) {
     resultDiv.innerHTML = '<p class="ai-loading" style="color:var(--deft-txt-2);">Reading barcode from photo...</p>';
 
     try {
-        const tempScanner = new Html5Qrcode("barcode-reader");
+        const tempScanner = new Html5Qrcode("barcode-reader", { formatsToSupport: deftBarcodeFormats(), verbose: false });
         const decodedText = await tempScanner.scanFile(file, /* showImage */ false);
         await processBarcodeText(decodedText);
     } catch (err) {

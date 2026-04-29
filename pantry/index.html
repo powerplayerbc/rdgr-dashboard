@@ -1133,6 +1133,19 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             </div>
             <div class="panel-body">
                 <div class="space-y-4">
+                    <div class="flex items-center gap-2 p-2 rounded-lg" style="background: rgba(168,130,214,0.06); border: 1px dashed rgba(168,130,214,0.25);">
+                        <button id="addPantryScanBtn" type="button" class="btn btn-primary text-xs" onclick="openBarcodeScanner()" style="display:inline-flex;align-items:center;gap:6px;">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                <rect x="1" y="2" width="1" height="10" fill="currentColor"/>
+                                <rect x="3" y="2" width="2" height="10" fill="currentColor"/>
+                                <rect x="6" y="2" width="1" height="10" fill="currentColor"/>
+                                <rect x="8" y="2" width="2" height="10" fill="currentColor"/>
+                                <rect x="11" y="2" width="2" height="10" fill="currentColor"/>
+                            </svg>
+                            Scan Barcode to Auto-Fill
+                        </button>
+                        <span class="text-xs flex-1" style="color: var(--deft-txt-3);">Camera or photo upload — supports UPC/EAN</span>
+                    </div>
                     <div class="form-group">
                         <label class="form-label">Item Name</label>
                         <input type="text" id="pantryItemName" class="form-input" placeholder="e.g. Chicken Breast">
@@ -1307,6 +1320,11 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 <div id="barcode-reader" style="width: 100%;"></div>
                 <div id="barcodeResult" style="display: none;" class="mt-3 p-3 rounded-lg">
                 </div>
+                <div class="flex justify-center mt-3">
+                    <input id="barcodePhotoInputPantry" type="file" accept="image/*" capture="environment" style="display:none;" onchange="pantryScanBarcodePhoto(this)">
+                    <button class="btn btn-ghost text-xs" onclick="document.getElementById('barcodePhotoInputPantry').click()">Upload Photo Instead</button>
+                </div>
+                <p class="text-xs mt-2 text-center" style="color: var(--deft-txt-3);">Supports UPC-A, UPC-E, EAN-13, EAN-8 (standard product barcodes)</p>
             </div>
         </div>
     </div>
@@ -2193,6 +2211,8 @@ async function handleNutritionLabelUpload(event) {
 
 function addPantryItem() {
     editingPantryItem = null;
+    delete document.getElementById('addPantryModal').dataset.foodId;
+    delete document.getElementById('addPantryModal').dataset.barcode;
     document.getElementById('pantryModalTitle').textContent = 'Add Pantry Item';
     document.getElementById('pantryItemName').value = '';
     document.getElementById('pantryFoodSearch').value = '';
@@ -2278,6 +2298,13 @@ async function savePantryItem() {
     if (barcode) {
         data.barcode = barcode;
         delete document.getElementById('addPantryModal').dataset.barcode;
+    }
+
+    // Include food_id FK if user picked an existing food from the database autocomplete
+    const linkedFoodId = document.getElementById('addPantryModal').dataset.foodId || null;
+    if (linkedFoodId) {
+        data.food_id = linkedFoodId;
+        delete document.getElementById('addPantryModal').dataset.foodId;
     }
 
     // If nutrition was provided and item doesn't exist in food database, offer to create it
@@ -2396,14 +2423,18 @@ async function searchFoodDatabase(query) {
 
     foodSearchTimeout = setTimeout(async () => {
         const results = await supabaseSelect('deft_food_database',
-            `name=ilike.*${encodeURIComponent(query)}*&select=id,name,calories_per_serving,serving_size,serving_unit&limit=8`);
+            `name=ilike.*${encodeURIComponent(query)}*&select=food_id,name,nutrition_per_serving,serving_size,category&limit=8`);
         if (results && results.length > 0) {
-            dropdown.innerHTML = results.map(f => `
-                <div class="autocomplete-item" onclick="selectFoodItem('${escapeHtml(f.name)}')">
+            window._foodSearchResults = {};
+            dropdown.innerHTML = results.map(f => {
+                window._foodSearchResults[f.food_id] = f;
+                const cals = (f.nutrition_per_serving && f.nutrition_per_serving.calories) ?? '?';
+                return `
+                <div class="autocomplete-item" onclick="selectFoodItem('${f.food_id}')">
                     <span>${escapeHtml(f.name)}</span>
-                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${f.calories_per_serving || '?'} cal / ${f.serving_size || ''} ${f.serving_unit || ''}</span>
+                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${cals} cal / ${escapeHtml(f.serving_size || '')}</span>
                 </div>
-            `).join('');
+            `;}).join('');
             dropdown.classList.add('open');
         } else {
             dropdown.classList.remove('open');
@@ -2411,10 +2442,22 @@ async function searchFoodDatabase(query) {
     }, 300);
 }
 
-function selectFoodItem(name) {
-    document.getElementById('pantryItemName').value = name;
+function selectFoodItem(food_id) {
+    const f = (window._foodSearchResults || {})[food_id];
+    if (!f) return;
+    document.getElementById('pantryItemName').value = f.name;
     document.getElementById('foodSearchResults').classList.remove('open');
     document.getElementById('pantryFoodSearch').value = '';
+    document.getElementById('addPantryModal').dataset.foodId = food_id;
+    if (f.category) {
+        const catEl = document.getElementById('pantryItemCategory');
+        if (catEl && [...catEl.options].some(o => o.value === f.category)) catEl.value = f.category;
+    }
+    if (f.nutrition_per_serving) {
+        populateNutritionFields(f.nutrition_per_serving);
+        document.getElementById('nutritionManualFields').style.display = '';
+    }
+    toast(`Linked to "${f.name}" in food database`, 'success');
 }
 
 // ═══════════════════════════════════════
@@ -2695,56 +2738,122 @@ function selectRecipeForPrepared(data) {
 // ═══════════════════════════════════════
 let html5QrCode = null;
 
+// GTIN/UPC/EAN mod-10 checksum — accepts 8/12/13/14 digit codes only.
+function isValidGtin(text) {
+    if (!text) return false;
+    const digits = String(text).trim();
+    if (!/^\d+$/.test(digits)) return false;
+    if (![8, 12, 13, 14].includes(digits.length)) return false;
+    const padded = digits.padStart(14, '0');
+    let sum = 0;
+    for (let i = 0; i < 13; i++) {
+        const d = parseInt(padded[i], 10);
+        sum += (i % 2 === 0) ? d * 3 : d;
+    }
+    const check = (10 - (sum % 10)) % 10;
+    return check === parseInt(padded[13], 10);
+}
+
+function pantryBarcodeFormats() {
+    if (typeof Html5QrcodeSupportedFormats === 'undefined') return undefined;
+    return [
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+    ];
+}
+
+async function handleScannedBarcode(decodedText) {
+    const resultDiv = document.getElementById('barcodeResult');
+    resultDiv.style.display = '';
+
+    if (!isValidGtin(decodedText)) {
+        resultDiv.innerHTML = `
+            <p class="text-xs" style="color: var(--deft-warning);">Invalid barcode read (got "${escapeHtml(decodedText)}"). Make sure the camera sees the full UPC/EAN — try moving back, holding steady, or using a clearer photo.</p>
+            <div class="flex gap-2 mt-2">
+                <button class="btn btn-ghost text-xs" onclick="document.getElementById('barcodePhotoInputPantry').click()">Try a photo</button>
+                <button class="btn btn-ghost text-xs" onclick="restartBarcodeScanner()">Retry camera</button>
+            </div>`;
+        return;
+    }
+
+    resultDiv.innerHTML = '<p class="ai-loading" style="color: var(--deft-txt-2);">Looking up product...</p>';
+    const result = await deftApi('scan_barcode', { barcode: decodedText });
+
+    if (result && result.success !== false) {
+        const p = result.data || result;
+        const nutrition = p.nutrition_per_serving || {};
+        resultDiv.innerHTML = `
+            <h4 class="font-heading font-bold text-sm mb-2" style="color: var(--deft-accent);">${escapeHtml(p.name || 'Unknown Product')}</h4>
+            ${p.brand ? `<p class="text-xs mb-1" style="color: var(--deft-txt-2);">Brand: ${escapeHtml(p.brand)}</p>` : ''}
+            <p class="text-xs mb-2 font-mono" style="color: var(--deft-txt-3);">
+                ${nutrition.calories || 0} cal | ${nutrition.total_fat_g || 0}g fat | ${nutrition.protein_g || 0}g protein | ${nutrition.net_carbs_g || 0}g net carbs
+            </p>
+            <p class="text-xs font-mono mt-1" style="color: var(--deft-txt-3);">UPC: ${escapeHtml(decodedText)}</p>
+            <div class="flex gap-2 mt-3">
+                <button class="btn btn-primary text-xs" onclick="addScannedItem('${escapeHtml(p.name || '')}', '${escapeHtml(decodedText)}')">Add to Pantry</button>
+                <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Cancel</button>
+            </div>
+        `;
+    } else {
+        resultDiv.innerHTML = `
+            <p class="text-xs" style="color: var(--deft-warning);">Product not found for UPC ${escapeHtml(decodedText)}. You can still add it manually with that UPC saved.</p>
+            <div class="flex gap-2 mt-2">
+                <button class="btn btn-ghost text-xs" onclick="restartBarcodeScanner()">Try Again</button>
+                <button class="btn btn-primary text-xs" onclick="addScannedItem('', '${escapeHtml(decodedText)}')">Add Manually</button>
+            </div>
+        `;
+    }
+}
+
 function openBarcodeScanner() {
     openModal('barcodeScannerModal');
     document.getElementById('barcodeResult').style.display = 'none';
+    const reader = document.getElementById('barcode-reader');
+    if (reader) reader.style.display = '';
 
-    html5QrCode = new Html5Qrcode("barcode-reader");
+    const formatsToSupport = pantryBarcodeFormats();
+    html5QrCode = new Html5Qrcode("barcode-reader", { formatsToSupport, verbose: false });
     html5QrCode.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 100 } },
+        { fps: 10, qrbox: { width: 280, height: 120 }, formatsToSupport },
         async (decodedText) => {
-            // Stop scanning
-            await html5QrCode.stop();
+            try { await html5QrCode.stop(); } catch(e) {}
             html5QrCode = null;
-
-            // Show loading
-            const resultDiv = document.getElementById('barcodeResult');
-            resultDiv.style.display = '';
-            resultDiv.innerHTML = '<p class="ai-loading" style="color: var(--deft-txt-2);">Looking up product...</p>';
-
-            // Call DEFT-BRIDGE scan_barcode
-            const result = await deftApi('scan_barcode', { barcode: decodedText });
-
-            if (result && result.success !== false) {
-                const p = result.data || result;
-                const nutrition = p.nutrition_per_serving || {};
-                resultDiv.innerHTML = `
-                    <h4 class="font-heading font-bold text-sm mb-2" style="color: var(--deft-accent);">${escapeHtml(p.name || 'Unknown Product')}</h4>
-                    ${p.brand ? `<p class="text-xs mb-1" style="color: var(--deft-txt-2);">Brand: ${escapeHtml(p.brand)}</p>` : ''}
-                    <p class="text-xs mb-2 font-mono" style="color: var(--deft-txt-3);">
-                        ${nutrition.calories || 0} cal | ${nutrition.total_fat_g || 0}g fat | ${nutrition.protein_g || 0}g protein | ${nutrition.net_carbs_g || 0}g net carbs
-                    </p>
-                    <div class="flex gap-2 mt-3">
-                        <button class="btn btn-primary text-xs" onclick="addScannedItem('${escapeHtml(p.name || '')}', '${escapeHtml(decodedText)}')">Add to Pantry</button>
-                        <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Cancel</button>
-                    </div>
-                `;
-            } else {
-                resultDiv.innerHTML = `
-                    <p class="text-xs" style="color: var(--deft-warning);">Product not found for barcode: ${escapeHtml(decodedText)}</p>
-                    <div class="flex gap-2 mt-2">
-                        <button class="btn btn-ghost text-xs" onclick="restartBarcodeScanner()">Try Again</button>
-                        <button class="btn btn-primary text-xs" onclick="addScannedItem('', '${escapeHtml(decodedText)}')">Add Manually</button>
-                    </div>
-                `;
-            }
+            await handleScannedBarcode(decodedText);
         },
-        (errorMessage) => { /* ignore scan errors */ }
+        () => { /* ignore per-frame errors */ }
     ).catch(err => {
+        if (reader) reader.style.display = 'none';
         document.getElementById('barcodeResult').style.display = '';
-        document.getElementById('barcodeResult').innerHTML = `<p class="text-xs" style="color: var(--deft-danger);">Camera access denied or not available.</p>`;
+        document.getElementById('barcodeResult').innerHTML = `<p class="text-xs" style="color: var(--deft-warning);">Camera not available. Use the Upload Photo button below to scan a barcode from an image.</p>`;
     });
+}
+
+async function pantryScanBarcodePhoto(input) {
+    const file = input && input.files && input.files[0];
+    if (!file) return;
+    if (html5QrCode) { try { await html5QrCode.stop(); } catch(e) {} html5QrCode = null; }
+    const reader = document.getElementById('barcode-reader');
+    if (reader) reader.style.display = 'none';
+    const resultDiv = document.getElementById('barcodeResult');
+    resultDiv.style.display = '';
+    resultDiv.innerHTML = '<p class="ai-loading" style="color:var(--deft-txt-2);">Reading barcode from photo...</p>';
+    try {
+        const tempScanner = new Html5Qrcode("barcode-reader", { formatsToSupport: pantryBarcodeFormats(), verbose: false });
+        const decodedText = await tempScanner.scanFile(file, false);
+        await handleScannedBarcode(decodedText);
+    } catch (err) {
+        resultDiv.innerHTML = `
+            <p class="text-xs" style="color:var(--deft-warning);">Could not read a UPC/EAN barcode from this photo. Try a clearer image with the barcode in focus and no glare.</p>
+            <div class="flex gap-2 mt-2">
+                <button class="btn btn-ghost text-xs" onclick="document.getElementById('barcodePhotoInputPantry').click()">Try another photo</button>
+                <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Cancel</button>
+            </div>`;
+    } finally {
+        input.value = '';
+    }
 }
 
 function closeBarcodeScanner() {
@@ -2760,15 +2869,32 @@ function restartBarcodeScanner() {
     setTimeout(() => openBarcodeScanner(), 300);
 }
 
-function addScannedItem(name, barcode) {
+async function addScannedItem(name, barcode) {
     closeBarcodeScanner();
-    // Open the add pantry item modal pre-filled with the scanned item name
-    addPantryItem();
-    setTimeout(() => {
-        if (name) document.getElementById('pantryItemName').value = name;
-        // Store barcode for when form is submitted
-        document.getElementById('addPantryModal').dataset.barcode = barcode;
-    }, 100);
+    const wasOpen = document.getElementById('addPantryModal').classList.contains('active');
+    if (!wasOpen) addPantryItem();
+    if (name) document.getElementById('pantryItemName').value = name;
+    document.getElementById('addPantryModal').dataset.barcode = barcode;
+
+    // Try to link to existing food_id by barcode (deft_food_database has barcode column)
+    try {
+        const matches = await supabaseSelect('deft_food_database',
+            `barcode=eq.${encodeURIComponent(barcode)}&select=food_id,name,nutrition_per_serving,serving_size,category&limit=1`);
+        if (matches && matches.length > 0) {
+            const f = matches[0];
+            document.getElementById('addPantryModal').dataset.foodId = f.food_id;
+            if (!name) document.getElementById('pantryItemName').value = f.name;
+            if (f.category) {
+                const catEl = document.getElementById('pantryItemCategory');
+                if (catEl && [...catEl.options].some(o => o.value === f.category)) catEl.value = f.category;
+            }
+            if (f.nutrition_per_serving) {
+                populateNutritionFields(f.nutrition_per_serving);
+                document.getElementById('nutritionManualFields').style.display = '';
+            }
+            toast(`Linked to "${f.name}" in food database`, 'success');
+        }
+    } catch (e) { /* non-fatal */ }
 }
 
 // ═══════════════════════════════════════
