@@ -231,7 +231,20 @@ async function logPreparedMeal(preparedId) {
 }
 
 // ── Food Database search ──
+// Cache picked food rows by food_id so the click handler can read them safely
+// without round-tripping the full data through HTML attributes (apostrophes
+// in names like "Frank's RedHot" or "Papa John's" otherwise break the inline
+// onclick string and trigger a SyntaxError that kills the whole page).
+window._foodDbCache = window._foodDbCache || {};
 let foodDbTimeout = null;
+
+function _escAttr(s) {
+    return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function _escText(s) {
+    return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 async function searchFoodDb(query) {
     if (!query || query.length < 2) {
         document.getElementById('foodDbResults').innerHTML = '<div class="text-center text-xs py-4" style="color: var(--deft-txt-3);">Type at least 2 characters to search</div>';
@@ -251,18 +264,15 @@ async function searchFoodDb(query) {
         }
 
         container.innerHTML = results.map(f => {
+            window._foodDbCache[f.food_id] = f;
             const n = f.nutrition_per_serving || {};
-            const nJson = JSON.stringify(n).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-            const eName = (f.name || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-            const eBrand = (f.brand || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-            const eServing = (f.serving_size || '').replace(/'/g, '&#39;').replace(/"/g, '&quot;');
             return `
-            <button type="button" class="meal-card" style="width:100%; text-align:left; cursor:pointer;" onclick="selectFoodForQuickLog('${f.food_id}', '${eName}', '${eBrand}', '${eServing}', this)" data-nutrition="${nJson}">
+            <button type="button" class="meal-card" style="width:100%; text-align:left; cursor:pointer;" data-food-id="${_escAttr(f.food_id)}">
                 <div class="flex items-center justify-between mb-1">
-                    <span class="font-medium text-sm">${f.name}</span>
-                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${f.serving_size || ''}</span>
+                    <span class="font-medium text-sm">${_escText(f.name)}</span>
+                    <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${_escText(f.serving_size || '')}</span>
                 </div>
-                ${f.brand ? `<div class="text-xs mb-1" style="color: var(--deft-txt-2);">${f.brand}</div>` : ''}
+                ${f.brand ? `<div class="text-xs mb-1" style="color: var(--deft-txt-2);">${_escText(f.brand)}</div>` : ''}
                 <div class="flex gap-3 text-xs font-mono" style="color: var(--deft-txt-2);">
                     <span>${Math.round(n.calories || 0)} cal</span>
                     <span>${(n.total_fat_g || 0).toFixed(1)}g F</span>
@@ -271,14 +281,23 @@ async function searchFoodDb(query) {
                 </div>
             </button>`;
         }).join('');
+        // Attach click handlers via addEventListener — no inline JS, no escaping pitfalls
+        container.querySelectorAll('button.meal-card[data-food-id]').forEach(btn => {
+            btn.addEventListener('click', () => selectFoodForQuickLog(btn.dataset.foodId));
+        });
     }, 250);
 }
 
 // ── Quick Log from Food Database ──
 let selectedQuickFood = null;
 
-function selectFoodForQuickLog(foodId, name, brand, servingSize, btn) {
-    const nutrition = JSON.parse(btn.dataset.nutrition || '{}');
+function selectFoodForQuickLog(foodId) {
+    const f = (window._foodDbCache || {})[foodId];
+    if (!f) return;
+    const name = f.name || '';
+    const brand = f.brand || '';
+    const servingSize = f.serving_size || '';
+    const nutrition = f.nutrition_per_serving || {};
     selectedQuickFood = { food_id: foodId, name, brand, serving_size: servingSize, nutrition };
 
     const container = document.getElementById('quickLogFoodForm');
@@ -286,13 +305,13 @@ function selectFoodForQuickLog(foodId, name, brand, servingSize, btn) {
     container.innerHTML = `
         <div class="p-3 rounded-lg mt-3" style="background: var(--deft-surface-el); border: 1px solid color-mix(in srgb, var(--deft-accent) 30%, transparent);">
             <div class="flex items-center justify-between mb-1">
-                <p class="font-medium text-sm">${name}</p>
+                <p class="font-medium text-sm">${_escText(name)}</p>
                 <button type="button" onclick="closeQuickLogForm()" class="p-1 rounded" style="color: var(--deft-txt-3);" title="Close">
                     <svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </button>
             </div>
-            ${brand ? `<p class="text-xs mb-1" style="color: var(--deft-txt-2);">${brand}</p>` : ''}
-            <p class="text-xs mb-3" style="color: var(--deft-txt-3);">Serving: ${servingSize || 'N/A'}</p>
+            ${brand ? `<p class="text-xs mb-1" style="color: var(--deft-txt-2);">${_escText(brand)}</p>` : ''}
+            <p class="text-xs mb-3" style="color: var(--deft-txt-3);">Serving: ${_escText(servingSize) || 'N/A'}</p>
             <div class="flex gap-2 items-end mb-3">
                 <div class="flex-1">
                     <label class="form-label">Servings</label>
