@@ -1343,11 +1343,12 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         <input type="text" id="preparedMealName" class="form-input" placeholder="e.g. Chicken Stir Fry">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Search Recipes</label>
+                        <label class="form-label">Search Recipes &amp; Foods</label>
                         <div class="relative">
-                            <input type="text" id="preparedRecipeSearch" class="form-input" placeholder="Search recipes..." oninput="searchRecipes(this.value)">
+                            <input type="text" id="preparedRecipeSearch" class="form-input" placeholder="Search recipes or foods (e.g. chicken stir fry, broccoli)..." oninput="searchRecipesAndFoods(this.value)">
                             <div id="recipeSearchResults" class="autocomplete-dropdown"></div>
                         </div>
+                        <p class="text-xs mt-1" style="color: var(--deft-txt-3);">Pick a recipe to auto-fill nutrition for the whole prep, or a food (e.g. side of broccoli) to capture a single ingredient.</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Total Servings</label>
@@ -2600,6 +2601,9 @@ async function savePreparedMeal() {
     };
 
     const isSplit = document.getElementById('preparedSplitStorage').checked;
+    // food_id picked from the food autocomplete (UBR-0105) — set when the user
+    // selected a food (e.g. side of broccoli) instead of a recipe.
+    const linkedFoodId = document.getElementById('addPreparedModal').dataset.foodId || null;
 
     const btn = document.getElementById('savePreparedBtn');
     btn.disabled = true;
@@ -2622,6 +2626,7 @@ async function savePreparedMeal() {
         if (fridgeQty > 0) {
             const fridgeData = { name, total_servings: fridgeQty, location: 'fridge', expiry_date, notes, nutrition_per_serving };
             if (selectedRecipeId) fridgeData.recipe_id = selectedRecipeId;
+            if (linkedFoodId) fridgeData.food_id = linkedFoodId;
             const r = await deftApi('add_prepared_meal', fridgeData);
             if (!r) fridgeOk = false;
         }
@@ -2629,6 +2634,7 @@ async function savePreparedMeal() {
         if (freezerQty > 0) {
             const freezerData = { name, total_servings: freezerQty, location: 'freezer', expiry_date, notes, nutrition_per_serving };
             if (selectedRecipeId) freezerData.recipe_id = selectedRecipeId;
+            if (linkedFoodId) freezerData.food_id = linkedFoodId;
             const r = await deftApi('add_prepared_meal', freezerData);
             if (!r) freezerOk = false;
         }
@@ -2651,6 +2657,7 @@ async function savePreparedMeal() {
         // Normal single-entry save (or edit mode)
         const data = { name, total_servings, location, expiry_date, notes, nutrition_per_serving };
         if (selectedRecipeId && !editingPreparedMeal) data.recipe_id = selectedRecipeId;
+        if (linkedFoodId && !editingPreparedMeal) data.food_id = linkedFoodId;
 
         let result;
         if (editingPreparedMeal) {
@@ -2692,33 +2699,93 @@ async function discardPrepared(id) {
 let recipeSearchTimeout = null;
 let selectedRecipeId = null;
 
-async function searchRecipes(query) {
+// Cache picks by composite key so apostrophes in names ("Frank's", "Papa John's")
+// don't break the inline onclick. (Same root cause as UBR-0100.)
+window._preparedPickCache = window._preparedPickCache || {};
+
+async function searchRecipesAndFoods(query) {
     clearTimeout(recipeSearchTimeout);
     const dropdown = document.getElementById('recipeSearchResults');
     if (!query || query.length < 2) { dropdown.classList.remove('open'); return; }
 
     recipeSearchTimeout = setTimeout(async () => {
-        const results = await supabaseSelect('deft_recipes',
-            `user_id=eq.${activeProfileId}&name=ilike.*${encodeURIComponent(query)}*&status=eq.active&select=recipe_id,name,servings,nutrition_per_serving&limit=8`);
-        if (results && results.length > 0) {
-            dropdown.innerHTML = results.map(r => {
+        const [recipes, foods] = await Promise.all([
+            supabaseSelect('deft_recipes',
+                `user_id=eq.${activeProfileId}&name=ilike.*${encodeURIComponent(query)}*&status=eq.active&select=recipe_id,name,servings,nutrition_per_serving&limit=6`),
+            supabaseSelect('deft_food_database',
+                `name=ilike.*${encodeURIComponent(query)}*&select=food_id,name,brand,serving_size,nutrition_per_serving&limit=6&order=name`)
+        ]);
+
+        const blocks = [];
+        if (recipes && recipes.length > 0) {
+            blocks.push('<div class="autocomplete-section text-xs px-3 py-1" style="color: var(--deft-txt-3); background: rgba(255,255,255,0.02);">Recipes</div>');
+            blocks.push(recipes.map(r => {
+                const key = 'r_' + r.recipe_id;
+                window._preparedPickCache[key] = { kind: 'recipe', recipe_id: r.recipe_id, name: r.name, servings: r.servings, nutrition: r.nutrition_per_serving || {} };
                 const n = r.nutrition_per_serving || {};
-                const dataAttr = JSON.stringify({ recipe_id: r.recipe_id, name: r.name, servings: r.servings, nutrition: n }).replace(/"/g, '&quot;');
-                return `<div class="autocomplete-item" onclick="selectRecipeForPrepared(${dataAttr})">
+                return `<div class="autocomplete-item" onclick="selectPreparedItem('${key}')">
                     <div class="flex justify-between w-full">
                         <span>${escapeHtml(r.name)}</span>
                         <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${n.calories || '?'} cal &middot; ${r.servings || '?'} servings</span>
                     </div>
                 </div>`;
-            }).join('');
+            }).join(''));
+        }
+        if (foods && foods.length > 0) {
+            blocks.push('<div class="autocomplete-section text-xs px-3 py-1" style="color: var(--deft-txt-3); background: rgba(255,255,255,0.02);">Foods</div>');
+            blocks.push(foods.map(f => {
+                const key = 'f_' + f.food_id;
+                window._preparedPickCache[key] = { kind: 'food', food_id: f.food_id, name: f.name, brand: f.brand, serving_size: f.serving_size, nutrition: f.nutrition_per_serving || {} };
+                const n = f.nutrition_per_serving || {};
+                const sub = [f.brand, f.serving_size].filter(Boolean).join(' · ');
+                return `<div class="autocomplete-item" onclick="selectPreparedItem('${key}')">
+                    <div class="flex justify-between w-full">
+                        <span>${escapeHtml(f.name)}</span>
+                        <span class="text-xs font-mono" style="color: var(--deft-txt-3);">${n.calories || '?'} cal &middot; ${escapeHtml(sub)}</span>
+                    </div>
+                </div>`;
+            }).join(''));
+        }
+
+        if (blocks.length > 0) {
+            dropdown.innerHTML = blocks.join('');
             dropdown.classList.add('open');
         } else {
-            dropdown.innerHTML = '<div class="autocomplete-item" style="color: var(--deft-txt-3);">No recipes found</div>';
+            dropdown.innerHTML = '<div class="autocomplete-item" style="color: var(--deft-txt-3);">No recipes or foods match</div>';
             dropdown.classList.add('open');
         }
     }, 300);
 }
 
+function selectPreparedItem(key) {
+    const data = (window._preparedPickCache || {})[key];
+    if (!data) return;
+    document.getElementById('recipeSearchResults').classList.remove('open');
+    document.getElementById('preparedRecipeSearch').value = data.name || '';
+    document.getElementById('preparedMealName').value = data.name || '';
+
+    const n = data.nutrition || {};
+    document.getElementById('preparedCalories').value = n.calories || '';
+    document.getElementById('preparedFat').value = n.fat_g || n.total_fat_g || '';
+    document.getElementById('preparedProtein').value = n.protein_g || '';
+    document.getElementById('preparedNetCarbs').value = n.net_carbs_g || '';
+
+    if (data.kind === 'recipe') {
+        selectedRecipeId = data.recipe_id || null;
+        document.getElementById('addPreparedModal').dataset.foodId = '';
+        if (data.servings) document.getElementById('preparedServings').value = data.servings;
+    } else {
+        // Food — no recipe FK; carry food_id on the modal dataset for the save handler.
+        selectedRecipeId = null;
+        document.getElementById('addPreparedModal').dataset.foodId = data.food_id || '';
+        // Single-food preps default to 1 serving (user can edit)
+        const servEl = document.getElementById('preparedServings');
+        if (!servEl.value || servEl.value === '4') servEl.value = 1;
+    }
+}
+
+// Backwards-compat shim — older inline onclicks (if any) still call these
+async function searchRecipes(q) { return searchRecipesAndFoods(q); }
 function selectRecipeForPrepared(data) {
     selectedRecipeId = data.recipe_id || null;
     document.getElementById('preparedMealName').value = data.name || '';

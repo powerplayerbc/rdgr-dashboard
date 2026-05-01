@@ -338,6 +338,25 @@ async function processBarcodeText(decodedText) {
             return;
         }
 
+        // Shopping list context — actually add the item to the active shopping list.
+        // (UBR-0102: previously this branch only displayed the product info but never
+        // inserted into deft_shopping_items, so the user saw a "found" notification but
+        // the item was never added.)
+        if (context === 'addShoppingItem' && typeof addShoppingItemFromBarcode === 'function') {
+            const ok = await addShoppingItemFromBarcode(food, decodedText);
+            if (ok) {
+                closeBarcodeScanner();
+                toast(`Added "${food.name || decodedText}" to shopping list`, 'success');
+                return;
+            }
+            resultDiv.innerHTML = `
+                <p class="text-xs" style="color:var(--deft-warning);">Could not add to shopping list. Make sure a list is selected and try again.</p>
+                <div class="flex gap-2 mt-2">
+                    <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Cancel</button>
+                </div>`;
+            return;
+        }
+
         resultDiv.innerHTML = `
             <h4 class="font-heading font-bold text-sm mb-2" style="color:var(--deft-accent);">${escapeHtml(food.name || 'Unknown')}</h4>
             ${food.brand ? `<p class="text-xs mb-1" style="color:var(--deft-txt-2);">Brand: ${escapeHtml(food.brand)}</p>` : ''}
@@ -356,30 +375,106 @@ async function processBarcodeText(decodedText) {
     }
 }
 
+// Manual barcode entry — for products where the scanner can't read the code
+// (round containers, faded UPCs, etc). Reads the input field, validates GTIN
+// checksum, and routes through the same processBarcodeText pipeline.
+async function submitManualBarcode() {
+    const input = document.getElementById('manualBarcodeInput');
+    if (!input) return;
+    const value = (input.value || '').trim();
+    if (!value) {
+        toast('Enter the barcode digits first', 'warning');
+        input.focus();
+        return;
+    }
+    if (!isValidGtin(value)) {
+        toast('Not a valid UPC/EAN — must be 8, 12, 13, or 14 digits with a valid checksum', 'warning');
+        input.focus();
+        return;
+    }
+    input.value = '';
+    // Stop the live camera so we don't get a parallel decode racing the manual entry
+    if (html5QrCode) { try { await html5QrCode.stop(); } catch(e) {} html5QrCode = null; }
+    await processBarcodeText(value);
+}
+
+// Inject (idempotently) a manual barcode entry row + scanning hint into the scanner
+// modal so every page that opens it gets the manual-entry fallback (UBR-0103) and
+// clear instructions about the auto-scanning live camera (UBR-0101).
+function ensureBarcodeManualEntryUi() {
+    const modalBody = document.querySelector('#barcodeScannerModal .panel-body');
+    if (!modalBody) return;
+    if (document.getElementById('manualBarcodeInput')) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'manualBarcodeWrap';
+    wrap.className = 'mt-3';
+    wrap.innerHTML = `
+        <p class="text-xs mb-2 text-center" style="color: var(--deft-txt-3);">Hold the camera 4-8 inches from the barcode — it scans automatically as soon as it can read it. No need to tap a capture button.</p>
+        <div class="flex gap-2 items-center">
+            <input id="manualBarcodeInput" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="14" placeholder="Or type UPC digits manually..." class="form-input flex-1" style="font-size: 0.85rem;" onkeydown="if(event.key==='Enter'){event.preventDefault();submitManualBarcode();}" aria-label="Manually enter barcode digits">
+            <button class="btn btn-primary text-xs" onclick="submitManualBarcode()">Look Up</button>
+        </div>`;
+    modalBody.appendChild(wrap);
+}
+
 function openBarcodeScanner(context) {
     currentBarcodeContext = context || null;
     openModal('barcodeScannerModal');
     document.getElementById('barcodeResult').style.display = 'none';
     document.getElementById('barcode-reader').style.display = '';
+    ensureBarcodeManualEntryUi();
 
     const formatsToSupport = deftBarcodeFormats();
+    // Camera config: enable continuous autofocus and a modest zoom so far-away
+    // or curved-container barcodes resolve clearly. `advanced` constraints are
+    // hints — browsers/devices that don't support them simply ignore the entry
+    // (no failure). aspectRatio hint helps mobile portrait orientation.
+    const videoConstraints = {
+        facingMode: { ideal: "environment" },
+        advanced: [
+            { focusMode: "continuous" },
+            { focusDistance: { ideal: 0.10 } },
+            { zoom: 1.5 }
+        ]
+    };
     html5QrCode = new Html5Qrcode("barcode-reader", { formatsToSupport, verbose: false });
     html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 280, height: 120 }, formatsToSupport },
+        videoConstraints,
+        {
+            fps: 10,
+            qrbox: { width: 280, height: 120 },
+            formatsToSupport,
+            aspectRatio: 1.0,
+            disableFlip: false,
+        },
         async (decodedText) => {
             try { await html5QrCode.stop(); } catch(e) {}
             html5QrCode = null;
             await processBarcodeText(decodedText);
         },
         () => {}
-    ).catch(() => {
-        // Camera unavailable -- hide the live viewer and prompt for a photo upload
+    ).catch((err) => {
+        // Some devices reject the advanced constraints — retry with simpler config
         const reader = document.getElementById('barcode-reader');
-        if (reader) reader.style.display = 'none';
-        const resultDiv = document.getElementById('barcodeResult');
-        resultDiv.style.display = '';
-        resultDiv.innerHTML = '<p class="text-xs" style="color:var(--deft-warning);">Camera not available. Use the Upload Photo button below to scan a barcode from an image.</p>';
+        const fallback = new Html5Qrcode("barcode-reader", { formatsToSupport, verbose: false });
+        html5QrCode = fallback;
+        fallback.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 280, height: 120 }, formatsToSupport },
+            async (decodedText) => {
+                try { await fallback.stop(); } catch(e) {}
+                html5QrCode = null;
+                await processBarcodeText(decodedText);
+            },
+            () => {}
+        ).catch(() => {
+            // Camera truly unavailable — hide viewer and surface the manual + photo paths
+            html5QrCode = null;
+            if (reader) reader.style.display = 'none';
+            const resultDiv = document.getElementById('barcodeResult');
+            resultDiv.style.display = '';
+            resultDiv.innerHTML = '<p class="text-xs" style="color:var(--deft-warning);">Camera not available. Use the Upload Photo button or type the barcode manually below.</p>';
+        });
     });
 }
 

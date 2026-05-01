@@ -1992,8 +1992,8 @@ async function toggleShoppingItem(id, checked) {
         if (item) item.checked = checked;
         renderShoppingList();
     } else {
-        // Fallback: direct Supabase write
-        await supabaseWrite('deft_shopping_items', 'PATCH', { checked }, `id=eq.${id}`);
+        // Fallback: direct Supabase write — table PK is item_id, not id
+        await supabaseWrite('deft_shopping_items', 'PATCH', { checked }, `item_id=eq.${id}`);
         if (item) item.checked = checked;
         renderShoppingList();
     }
@@ -2153,6 +2153,42 @@ async function addHistoryItemToCurrentList(name, qty, unit, category, pantryLoc)
         toast(`Added ${name}`, 'success');
         await loadShoppingItems();
     }
+}
+
+// Called from the shared barcode scanner (deft-shared.js processBarcodeText) when
+// the user scans/uploads/manually-enters a barcode while the scanner is open in
+// 'addShoppingItem' context. Inserts the scanned product into the active shopping
+// list with name, brand, barcode, and food_id (FK) populated.
+// Returns true on success so the scanner can show a success toast and close.
+async function addShoppingItemFromBarcode(food, barcode) {
+    if (!activeShoppingList) { toast('Create a shopping list first', 'error'); return false; }
+    if (!food) return false;
+    const item = {
+        name: food.name || `Product ${barcode}`,
+        quantity: 1,
+        unit: 'each',
+    };
+    if (food.brand) item.brand = food.brand;
+    if (food.food_id) item.food_id = food.food_id;
+    if (barcode) item.barcode = barcode;
+
+    let result = await deftApi('add_shopping_items', {
+        list_id: activeShoppingList.id,
+        items: [item]
+    }, { silent: true });
+
+    // Direct-write fallback if the bridge errors out
+    if (!result) {
+        const direct = await supabaseWrite('deft_shopping_items', 'POST', {
+            list_id: activeShoppingList.id,
+            user_id: activeProfileId,
+            ...item,
+            checked: false,
+        });
+        if (!direct) return false;
+    }
+    await loadShoppingItems();
+    return true;
 }
 
 async function addShoppingItem() {
@@ -2573,9 +2609,10 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ═══════════════════════════════════════
-// BARCODE SCANNER (UBR-0086)
-// Ports the html5-qrcode pattern from /deft/js/deft-shared.js
-// Backend: deftApi('scan_barcode', { barcode }) -> deft-bridge webhook
+// BARCODE SCANNER (UBR-0086, UBR-0101..UBR-0104)
+// Auto-decodes UPC/EAN via Html5Qrcode (live camera + photo upload + manual entry).
+// On successful scan in 'addShoppingItem' context, AUTO-ADDS the item to the
+// active shopping list — does NOT just populate the form (UBR-0102 fix).
 // ═══════════════════════════════════════
 let html5QrCode = null;
 let currentBarcodeContext = null;
@@ -2587,27 +2624,79 @@ function _bcEscapeHtml(str) {
     return div.innerHTML;
 }
 
-function populateShoppingItemFromScan(food) {
-    const nameInput = document.getElementById('addShoppingItemInput');
-    const qtyInput = document.getElementById('addShoppingItemQty');
-    const unitInput = document.getElementById('addShoppingItemUnit');
-    if (!nameInput) return;
-    const name = (food && food.name) ? String(food.name).trim() : '';
-    const brand = (food && food.brand) ? String(food.brand).trim() : '';
-    const display = brand && name ? `${brand} ${name}` : (name || brand);
-    if (display) nameInput.value = display;
-    if (qtyInput && (!qtyInput.value || qtyInput.value === '0')) qtyInput.value = 1;
-    if (unitInput && !unitInput.value) unitInput.value = 'each';
-    nameInput.focus();
-    if (typeof searchShoppingHistory === 'function' && display) {
-        try { searchShoppingHistory(display); } catch (e) { /* non-critical */ }
+// GTIN/UPC/EAN mod-10 checksum validator. Accepts 8/12/13/14 digit codes only.
+function _bcIsValidGtin(text) {
+    if (!text) return false;
+    const digits = String(text).trim();
+    if (!/^\d+$/.test(digits)) return false;
+    if (![8, 12, 13, 14].includes(digits.length)) return false;
+    const padded = digits.padStart(14, '0');
+    let sum = 0;
+    for (let i = 0; i < 13; i++) {
+        const d = parseInt(padded[i], 10);
+        sum += (i % 2 === 0) ? d * 3 : d;
     }
+    const check = (10 - (sum % 10)) % 10;
+    return check === parseInt(padded[13], 10);
+}
+
+function _bcFormats() {
+    if (typeof Html5QrcodeSupportedFormats === 'undefined') return undefined;
+    return [
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+    ];
+}
+
+// Inject manual-entry input + scanning hint into the modal once
+function _bcEnsureManualEntryUi() {
+    const modalBody = document.querySelector('#barcodeScannerModal .panel-body');
+    if (!modalBody) return;
+    if (document.getElementById('manualBarcodeInput')) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'manualBarcodeWrap';
+    wrap.className = 'mt-3';
+    wrap.innerHTML = `
+        <p class="text-xs mb-2 text-center" style="color: var(--deft-txt-3);">Hold the camera 4-8 inches from the barcode — it scans automatically. No need to tap a capture button.</p>
+        <div class="flex gap-2 items-center">
+            <input id="manualBarcodeInput" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="14" placeholder="Or type UPC digits manually..." class="form-input flex-1" style="font-size: 0.85rem;" onkeydown="if(event.key==='Enter'){event.preventDefault();submitManualBarcode();}" aria-label="Manually enter barcode digits">
+            <button class="btn btn-primary text-xs" onclick="submitManualBarcode()">Look Up</button>
+        </div>`;
+    modalBody.appendChild(wrap);
+}
+
+async function submitManualBarcode() {
+    const input = document.getElementById('manualBarcodeInput');
+    if (!input) return;
+    const value = (input.value || '').trim();
+    if (!value) { toast('Enter the barcode digits first', 'warning'); input.focus(); return; }
+    if (!_bcIsValidGtin(value)) {
+        toast('Not a valid UPC/EAN — must be 8, 12, 13, or 14 digits with a valid checksum', 'warning');
+        input.focus();
+        return;
+    }
+    input.value = '';
+    if (html5QrCode) { try { await html5QrCode.stop(); } catch(e) {} html5QrCode = null; }
+    await processBarcodeText(value);
 }
 
 async function processBarcodeText(decodedText) {
     const context = currentBarcodeContext;
     const resultDiv = document.getElementById('barcodeResult');
     resultDiv.style.display = '';
+
+    if (!_bcIsValidGtin(decodedText)) {
+        resultDiv.innerHTML = `
+            <p class="text-xs" style="color:var(--deft-warning);">Invalid barcode read (got "${_bcEscapeHtml(decodedText)}"). Try moving the camera back or using a clearer photo. Or type the digits in the box below.</p>
+            <div class="flex gap-2 mt-2">
+                <button class="btn btn-ghost text-xs" onclick="document.getElementById('barcodePhotoInput').click()">Try a photo</button>
+                <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner();setTimeout(()=>openBarcodeScanner('${context||''}'),300);">Retry camera</button>
+            </div>`;
+        return;
+    }
+
     resultDiv.innerHTML = '<p class="text-xs" style="color: var(--deft-txt-2);">Looking up product...</p>';
 
     let result;
@@ -2620,9 +2709,18 @@ async function processBarcodeText(decodedText) {
     if (result && result.success !== false) {
         const food = result.data || result.food || result;
         if (context === 'addShoppingItem') {
-            populateShoppingItemFromScan(food);
-            closeBarcodeScanner();
-            toast(`Filled from barcode: ${food.name || decodedText}`, 'success');
+            // UBR-0102: auto-add the item to the shopping list — don't just fill the form
+            const ok = await addShoppingItemFromBarcode(food, decodedText);
+            if (ok) {
+                closeBarcodeScanner();
+                toast(`Added "${food.name || decodedText}" to shopping list`, 'success');
+                return;
+            }
+            resultDiv.innerHTML = `
+                <p class="text-xs" style="color:var(--deft-warning);">Could not add to the shopping list. Make sure a list is selected.</p>
+                <div class="flex gap-2 mt-2">
+                    <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Close</button>
+                </div>`;
             return;
         }
         // Generic fallback: display product info
@@ -2650,18 +2748,28 @@ function openBarcodeScanner(context) {
     const reader = document.getElementById('barcode-reader');
     resultDiv.style.display = 'none';
     if (reader) reader.style.display = '';
+    _bcEnsureManualEntryUi();
 
     if (typeof Html5Qrcode === 'undefined') {
         if (reader) reader.style.display = 'none';
         resultDiv.style.display = '';
-        resultDiv.innerHTML = '<p class="text-xs" style="color:var(--deft-warning);">Barcode scanner library failed to load. Check your connection and refresh.</p>';
+        resultDiv.innerHTML = '<p class="text-xs" style="color:var(--deft-warning);">Barcode scanner library failed to load. Check your connection and refresh, or type the barcode digits manually below.</p>';
         return;
     }
 
-    html5QrCode = new Html5Qrcode("barcode-reader");
+    const formatsToSupport = _bcFormats();
+    const videoConstraints = {
+        facingMode: { ideal: "environment" },
+        advanced: [
+            { focusMode: "continuous" },
+            { focusDistance: { ideal: 0.10 } },
+            { zoom: 1.5 }
+        ]
+    };
+    html5QrCode = new Html5Qrcode("barcode-reader", { formatsToSupport, verbose: false });
     html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 100 } },
+        videoConstraints,
+        { fps: 10, qrbox: { width: 280, height: 120 }, formatsToSupport, aspectRatio: 1.0 },
         async (decodedText) => {
             try { await html5QrCode.stop(); } catch(e) {}
             html5QrCode = null;
@@ -2669,9 +2777,24 @@ function openBarcodeScanner(context) {
         },
         () => {}
     ).catch(() => {
-        if (reader) reader.style.display = 'none';
-        resultDiv.style.display = '';
-        resultDiv.innerHTML = '<p class="text-xs" style="color:var(--deft-warning);">Camera not available. Use the Upload Photo button below to scan a barcode from an image.</p>';
+        // Some devices reject the advanced constraints — retry with simpler config
+        const fallback = new Html5Qrcode("barcode-reader", { formatsToSupport, verbose: false });
+        html5QrCode = fallback;
+        fallback.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 280, height: 120 }, formatsToSupport },
+            async (decodedText) => {
+                try { await fallback.stop(); } catch(e) {}
+                html5QrCode = null;
+                await processBarcodeText(decodedText);
+            },
+            () => {}
+        ).catch(() => {
+            html5QrCode = null;
+            if (reader) reader.style.display = 'none';
+            resultDiv.style.display = '';
+            resultDiv.innerHTML = '<p class="text-xs" style="color:var(--deft-warning);">Camera not available. Use the Upload Photo button or type the barcode digits manually below.</p>';
+        });
     });
 }
 
@@ -2692,12 +2815,12 @@ async function scanBarcodePhoto(input) {
     resultDiv.innerHTML = '<p class="text-xs" style="color:var(--deft-txt-2);">Reading barcode from photo...</p>';
 
     try {
-        const tempScanner = new Html5Qrcode("barcode-reader");
+        const tempScanner = new Html5Qrcode("barcode-reader", { formatsToSupport: _bcFormats(), verbose: false });
         const decodedText = await tempScanner.scanFile(file, false);
         await processBarcodeText(decodedText);
     } catch (err) {
         resultDiv.innerHTML = `
-            <p class="text-xs" style="color:var(--deft-warning);">Could not read a barcode from this photo. Try a clearer image with the barcode in focus and no glare.</p>
+            <p class="text-xs" style="color:var(--deft-warning);">Could not read a UPC/EAN barcode from this photo. Try a clearer image with the barcode in focus and no glare, or type the digits manually below.</p>
             <div class="flex gap-2 mt-2">
                 <button class="btn btn-ghost text-xs" onclick="document.getElementById('barcodePhotoInput').click()">Try another photo</button>
                 <button class="btn btn-ghost text-xs" onclick="closeBarcodeScanner()">Cancel</button>
