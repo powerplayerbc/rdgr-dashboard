@@ -708,6 +708,7 @@ async function handleManualCreate(e) {
 // ═══════════════════════════════════════
 
 function buildSheetSyncPanel() {
+    const savedUrl = (typeof localStorage !== 'undefined' && localStorage.getItem('schoolSyncSheetUrl')) || '';
     return `
         <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:24px 0;">
             <div style="width:56px;height:56px;border-radius:14px;
@@ -724,8 +725,18 @@ function buildSheetSyncPanel() {
                     Sync from Google Sheet
                 </p>
                 <p style="margin:6px 0 0;font-size:12px;color:var(--deft-txt-3);max-width:360px;">
-                    Pull lessons from the connected Google Sheet. New and updated lessons will be imported.
+                    Paste a Google Sheet URL with lesson rows. Rows that already have a Score will be skipped.
                 </p>
+            </div>
+            <div style="width:100%;max-width:480px;">
+                <label for="sheetSyncUrl" style="display:block;font-size:12px;font-weight:600;color:var(--deft-txt-2);
+                              margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;
+                              font-family:var(--deft-heading-font),sans-serif;">Google Sheet URL</label>
+                <input type="text" id="sheetSyncUrl" class="form-input"
+                       placeholder="https://docs.google.com/spreadsheets/d/..."
+                       value="${savedUrl}"
+                       autocomplete="off"
+                       aria-label="Google Sheet URL">
             </div>
             <button class="btn btn-primary" onclick="handleSheetSync(this)" id="sheetSyncBtn">
                 <span style="display:flex;align-items:center;gap:6px;">
@@ -742,13 +753,27 @@ function buildSheetSyncPanel() {
 }
 
 async function handleSheetSync(btn) {
-    btn.disabled = true;
-    btn.innerHTML = `<span style="display:flex;align-items:center;gap:6px;">${buildSpinner(14)} Syncing...</span>`;
-
+    const urlInput = document.getElementById('sheetSyncUrl');
+    const url = (urlInput?.value || '').trim();
     const resultEl = document.getElementById('sheetSyncResult');
     resultEl.innerHTML = '';
 
-    const result = await schoolApi('sync_from_sheet', {}, { timeout: 60000 });
+    if (!url || !/\/spreadsheets\/d\/[a-zA-Z0-9_-]+/.test(url)) {
+        resultEl.innerHTML = `
+            <div style="padding:12px 16px;border-radius:8px;background:var(--deft-danger-dim);
+                        border:1px solid rgba(232,93,93,0.3);font-size:13px;color:var(--deft-danger);">
+                Please paste a valid Google Sheet URL (https://docs.google.com/spreadsheets/d/...).
+            </div>
+        `;
+        return;
+    }
+
+    try { localStorage.setItem('schoolSyncSheetUrl', url); } catch (e) { /* ignore */ }
+
+    btn.disabled = true;
+    btn.innerHTML = `<span style="display:flex;align-items:center;gap:6px;">${buildSpinner(14)} Syncing...</span>`;
+
+    const result = await schoolApi('sync_from_sheet', { sheet_url: url }, { timeout: 60000 });
 
     btn.disabled = false;
     btn.innerHTML = `<span style="display:flex;align-items:center;gap:6px;">
@@ -757,7 +782,10 @@ async function handleSheetSync(btn) {
     </span>`;
 
     if (result) {
-        const count = result.synced_count || result.data?.synced_count || result.count || 0;
+        const data = result.data || result;
+        const synced = data.synced_count ?? result.count ?? 0;
+        const skipped = data.skipped_count ?? 0;
+        const skippedSuffix = skipped ? ` (${skipped} skipped — already scored)` : '';
         resultEl.innerHTML = `
             <div style="padding:12px 16px;border-radius:8px;background:var(--deft-success-dim);
                         border:1px solid rgba(107,203,119,0.3);
@@ -766,7 +794,7 @@ async function handleSheetSync(btn) {
                     <path d="M4 8l3 3 5-5" stroke="var(--deft-success)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 <span style="font-size:13px;color:var(--deft-success);font-weight:600;">
-                    Synced ${count} lesson${count !== 1 ? 's' : ''}
+                    Synced ${synced} lesson${synced !== 1 ? 's' : ''}${skippedSuffix}
                 </span>
             </div>
         `;

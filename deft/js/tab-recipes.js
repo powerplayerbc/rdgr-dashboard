@@ -152,6 +152,14 @@ function selectFoodForIngredient(index, btn) {
         ing.quantity = ing.baseServingParsed.quantity;
         ing.unit = ing.baseServingParsed.unit;
     }
+    // Cal/g sanity check — flag entries where nutrition appears stored per-100g
+    // under a smaller serving (e.g. openfoodfacts imports). Real foods top out
+    // around 9 cal/g (pure fat); >12 indicates a likely per-100g/per-serving mismatch.
+    const baseG = ing.baseServingParsed && ing.baseServingParsed.g;
+    const baseCal = ing.baseNutrition && ing.baseNutrition.calories;
+    if (baseG && baseCal && (baseCal / baseG) > 12) {
+        toast(`Heads up: "${ing.name}" reads ${(baseCal/baseG).toFixed(1)} cal/g — values may be stored per-100g. Verify before saving.`, 'error');
+    }
     hideIngredientSuggestions(index);
     renderIngredientRows();
 }
