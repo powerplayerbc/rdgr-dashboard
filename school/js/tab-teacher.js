@@ -724,8 +724,10 @@ function buildSheetSyncPanel() {
                           font-family:var(--deft-heading-font),sans-serif;">
                     Sync from Google Sheet
                 </p>
-                <p style="margin:6px 0 0;font-size:12px;color:var(--deft-txt-3);max-width:360px;">
-                    Paste a Google Sheet URL with lesson rows. Rows that already have a Score will be skipped.
+                <p style="margin:6px 0 0;font-size:12px;color:var(--deft-txt-3);max-width:420px;">
+                    Open your lesson library tab in Google Sheets and copy the URL from the browser address bar
+                    (it should include <code style="background:rgba(255,255,255,0.06);padding:1px 4px;border-radius:3px;">#gid=NUMBER</code>).
+                    Lessons that already have a Score will be skipped automatically.
                 </p>
             </div>
             <div style="width:100%;max-width:480px;">
@@ -733,7 +735,7 @@ function buildSheetSyncPanel() {
                               margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;
                               font-family:var(--deft-heading-font),sans-serif;">Google Sheet URL</label>
                 <input type="text" id="sheetSyncUrl" class="form-input"
-                       placeholder="https://docs.google.com/spreadsheets/d/..."
+                       placeholder="https://docs.google.com/spreadsheets/d/.../edit#gid=..."
                        value="${savedUrl}"
                        autocomplete="off"
                        aria-label="Google Sheet URL">
@@ -758,13 +760,22 @@ async function handleSheetSync(btn) {
     const resultEl = document.getElementById('sheetSyncResult');
     resultEl.innerHTML = '';
 
-    if (!url || !/\/spreadsheets\/d\/[a-zA-Z0-9_-]+/.test(url)) {
+    const renderError = (msg) => {
         resultEl.innerHTML = `
             <div style="padding:12px 16px;border-radius:8px;background:var(--deft-danger-dim);
-                        border:1px solid rgba(232,93,93,0.3);font-size:13px;color:var(--deft-danger);">
-                Please paste a valid Google Sheet URL (https://docs.google.com/spreadsheets/d/...).
+                        border:1px solid rgba(232,93,93,0.3);font-size:13px;color:var(--deft-danger);
+                        max-width:480px;line-height:1.5;">
+                ${msg}
             </div>
         `;
+    };
+
+    if (!url || !/\/spreadsheets\/d\/[a-zA-Z0-9_-]+/.test(url)) {
+        renderError('Please paste a valid Google Sheet URL (https://docs.google.com/spreadsheets/d/...).');
+        return;
+    }
+    if (!activeProfileId) {
+        renderError('Please select a profile first.');
         return;
     }
 
@@ -773,7 +784,20 @@ async function handleSheetSync(btn) {
     btn.disabled = true;
     btn.innerHTML = `<span style="display:flex;align-items:center;gap:6px;">${buildSpinner(14)} Syncing...</span>`;
 
-    const result = await schoolApi('sync_from_sheet', { sheet_url: url }, { timeout: 60000 });
+    // Call the webhook directly so we can surface backend error messages in the
+    // result panel (schoolApi swallows {success:false} responses into a 4s toast).
+    let result = null;
+    try {
+        const res = await fetch(SCHOOL_BRIDGE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ operation: 'sync_from_sheet', user_id: activeProfileId, data: { sheet_url: url } })
+        });
+        const text = await res.text();
+        try { result = JSON.parse(text); } catch (e) { result = { success: false, error: 'Server returned an invalid response.' }; }
+    } catch (e) {
+        result = { success: false, error: 'Connection error: ' + (e.message || e) };
+    }
 
     btn.disabled = false;
     btn.innerHTML = `<span style="display:flex;align-items:center;gap:6px;">
@@ -781,31 +805,26 @@ async function handleSheetSync(btn) {
         Sync from Google Sheet
     </span>`;
 
-    if (result) {
-        const data = result.data || result;
-        const synced = data.synced_count ?? result.count ?? 0;
-        const skipped = data.skipped_count ?? 0;
+    if (result && result.success) {
+        const synced = result.synced_count ?? 0;
+        const skipped = result.skipped_count ?? 0;
+        const total = result.total_data_rows ?? (synced + skipped);
         const skippedSuffix = skipped ? ` (${skipped} skipped — already scored)` : '';
         resultEl.innerHTML = `
             <div style="padding:12px 16px;border-radius:8px;background:var(--deft-success-dim);
                         border:1px solid rgba(107,203,119,0.3);
                         display:flex;align-items:center;gap:8px;">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;">
                     <path d="M4 8l3 3 5-5" stroke="var(--deft-success)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 <span style="font-size:13px;color:var(--deft-success);font-weight:600;">
-                    Synced ${synced} lesson${synced !== 1 ? 's' : ''}${skippedSuffix}
+                    Synced ${synced} lesson${synced !== 1 ? 's' : ''}${skippedSuffix} — total ${total} rows in sheet
                 </span>
             </div>
         `;
         await loadTeacherLessons();
     } else {
-        resultEl.innerHTML = `
-            <div style="padding:12px 16px;border-radius:8px;background:var(--deft-danger-dim);
-                        border:1px solid rgba(232,93,93,0.3);font-size:13px;color:var(--deft-danger);">
-                Sync failed. Please try again.
-            </div>
-        `;
+        renderError((result && result.error) ? result.error : 'Sync failed. Please try again.');
     }
 }
 
