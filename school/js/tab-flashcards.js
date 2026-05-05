@@ -795,16 +795,35 @@ function fcBuildMulCard() {
     // Problem display
     let cardContent = '';
     if (!revealed) {
-        const showTimer = fcState.mulTimerStarted;
-        cardContent = `
-        <div class="fc-mul-problem">
-            <span class="fc-mul-a">${cur.a}</span>
-            <span class="fc-mul-op">&times;</span>
-            <span class="fc-mul-b">${cur.b}</span>
-            <span class="fc-mul-eq">=</span>
-            <span class="fc-mul-q">?</span>
-        </div>
-        ${showTimer ? timerHtml : ''}`;
+        if (!fcState.mulTimerStarted) {
+            // UBR-0119: while waiting for the student to press Start, show an
+            // encouraging message instead of the multiplication problem.
+            // Pick deterministically by mulIndex to avoid jitter on re-render.
+            const messages = [
+                "You're a math wiz!",
+                "You've got this!",
+                "Ready, set, multiply!",
+                "Math champion!",
+                "Focus mode: ON",
+                "Believe in yourself!",
+                "Brain power activated!"
+            ];
+            const msg = messages[(fcState.mulIndex || 0) % messages.length];
+            cardContent = `
+            <div class="fc-mul-pep">
+                <span class="fc-mul-pep-text">${escapeHtml(msg)}</span>
+            </div>`;
+        } else {
+            cardContent = `
+            <div class="fc-mul-problem">
+                <span class="fc-mul-a">${cur.a}</span>
+                <span class="fc-mul-op">&times;</span>
+                <span class="fc-mul-b">${cur.b}</span>
+                <span class="fc-mul-eq">=</span>
+                <span class="fc-mul-q">?</span>
+            </div>
+            ${timerHtml}`;
+        }
     } else {
         if (correct) {
             const elapsed = fcState.mulElapsed;
@@ -880,15 +899,10 @@ function fcBuildMulCard() {
             </div>`;
         }
     } else {
+        // UBR-0124: removed the non-functional Try Again button. Next is
+        // sufficient for continuous play.
         inputArea = `
         <div class="fc-input-area fc-input-row">
-            ${!correct ? `<button class="fc-retry-btn" onclick="fcRetryMultiplication()">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M2 7a5 5 0 019.2-2.6M12 7a5 5 0 01-9.2 2.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                    <path d="M11 2v2.5h-2.5M3 12V9.5h2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Try Again
-            </button>` : ''}
             <button class="fc-next-btn" onclick="fcNextMultiplication()">
                 Next
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -1038,6 +1052,18 @@ async function fcCheckMultiplication() {
         fcState.mulSessionStreak = 0;
     }
 
+    // Mark today's flashcards as done after the first answer (UBR-0114
+    // follow-up). Threshold is 1 — even a single attempt counts as "did it."
+    if (activeProfileId) {
+        try {
+            const t = new Date();
+            const todayKey = t.getFullYear() + '-' +
+                String(t.getMonth() + 1).padStart(2, '0') + '-' +
+                String(t.getDate()).padStart(2, '0');
+            localStorage.setItem('school-flashcards-done-' + activeProfileId + '-' + todayKey, '1');
+        } catch (e) { /* ignore localStorage errors */ }
+    }
+
     // Update progress
     if (activeProfileId) {
         const existing = fcState.mulProgress[cur.key];
@@ -1095,13 +1121,6 @@ async function fcCheckMultiplication() {
     fcRender();
 }
 
-function fcRetryMultiplication() {
-    fcState.mulRevealed = false;
-    fcState.mulCorrect = null;
-    fcState.mulInput = '';
-    fcState.mulTimerStarted = false;
-    fcRender();
-}
 
 function fcNextMultiplication() {
     fcStopMulTimer();
@@ -1886,6 +1905,23 @@ function injectFlashcardStyles() {
     align-items: center;
     gap: 12px;
     font-family: var(--deft-heading-font), sans-serif;
+}
+/* UBR-0119: pre-Start encouraging message replaces the multiplication
+   preview while the student decides when to start the timer. */
+.fc-mul-pep {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 88px;
+    padding: 16px 24px;
+}
+.fc-mul-pep-text {
+    font-family: var(--deft-heading-font), sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--deft-accent);
+    text-align: center;
+    letter-spacing: 0.01em;
 }
 .fc-mul-a, .fc-mul-b {
     font-size: 48px;

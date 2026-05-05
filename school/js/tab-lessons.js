@@ -60,6 +60,12 @@ async function refreshLessons() {
             html += '<div style="text-align:center;padding:1.5rem;color:var(--deft-txt-3);font-size:0.875rem;">No lessons for today \u2014 all caught up!</div>';
         }
 
+        // Daily Activities section (UBR-0114, reordered per UBR-0116) - shown
+        // before Get Ahead so today's work is visually prioritized.
+        if (isStudent()) {
+            html += buildDailyActivitiesSection(today);
+        }
+
         // Build upcoming section
         if (upcomingAssignments.length > 0) {
             html += '<div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--deft-border);">';
@@ -87,12 +93,6 @@ async function refreshLessons() {
             html += '</div>';
         }
 
-        // Daily Activities section (UBR-0114) - links to history/typing/vocab.
-        // Only shown to students; teachers see lesson management on this tab.
-        if (isStudent()) {
-            html += buildDailyActivitiesSection(today);
-        }
-
         listEl.innerHTML = html;
 
     } catch (err) {
@@ -116,6 +116,17 @@ function _todayTabIsHistoryFactRead(factId) {
     if (!factId) return false;
     const profileId = (typeof activeProfileId !== 'undefined' && activeProfileId) || 'anon';
     try { return localStorage.getItem('hist-read-' + profileId + '-' + factId) === '1'; }
+    catch (e) { return false; }
+}
+
+// Per-day "done" flag for typing/vocab/flashcards. Each tab writes its own
+// key on a meaningful completion event; this helper reads them back so the
+// Today tab's Daily Activities cards show a green checkmark instead of the
+// dotted circle once the activity is done for the day.
+function _todayTabIsActivityDone(activity) {
+    const profileId = (typeof activeProfileId !== 'undefined' && activeProfileId) || 'anon';
+    const today = todayStr();
+    try { return localStorage.getItem('school-' + activity + '-done-' + profileId + '-' + today) === '1'; }
     catch (e) { return false; }
 }
 
@@ -156,9 +167,9 @@ function renderDailyActivities(data, today) {
             done: !!factRead,
             disabled: !fact
         },
-        { href: '/school/typing',     label: 'Typing Practice',  sub: 'Build accuracy and speed', done: false },
-        { href: '/school/vocabulary', label: 'Vocabulary Study', sub: 'Review today’s words', done: false },
-        { href: '/school/flashcards', label: 'Flashcards',       sub: 'Quick review',             done: false }
+        { href: '/school/typing',     label: 'Typing Practice',  sub: 'Build accuracy and speed', done: _todayTabIsActivityDone('typing') },
+        { href: '/school/vocabulary', label: 'Vocabulary Study', sub: 'Review today’s words',     done: _todayTabIsActivityDone('vocab') },
+        { href: '/school/flashcards', label: 'Flashcards',       sub: 'Quick review',             done: _todayTabIsActivityDone('flashcards') }
     ];
     return items.map(function(it) {
         const checkSvg = it.done
@@ -324,7 +335,7 @@ function buildLessonCard(assignment, lesson) {
                     transition:background 0.15s,border-color 0.15s;
                     ${cursorStyle}
                     font-family:var(--deft-body-font),sans-serif;"
-             onclick="handleLessonClick('${escapeHtml(assignment.id)}','${escapeHtml(assignment.lesson_id)}','${title.replace(/'/g, "\\'")}')"
+             onclick="handleLessonClick('${escapeHtml(assignment.assignment_id)}','${escapeHtml(assignment.lesson_id)}','${title.replace(/'/g, "\\'")}')"
              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"
              onmouseenter="this.style.background='${hoverBg}';this.style.borderColor='var(--deft-txt-3)';"
              onmouseleave="this.style.background='var(--deft-surface-el)';this.style.borderColor='var(--deft-border)';">

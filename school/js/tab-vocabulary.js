@@ -906,6 +906,19 @@ async function vocabSubmitQuiz() {
     const quiz = vocabState.activeQuiz;
     const questions = quiz.questions;
 
+    // Mark today's vocab as done (UBR-0114 follow-up). Submitting a quiz is
+    // the canonical "I did vocab today" event; reading the story alone is
+    // not enough since the user could just open the page and leave.
+    if (activeProfileId) {
+        try {
+            const t = new Date();
+            const todayKey = t.getFullYear() + '-' +
+                String(t.getMonth() + 1).padStart(2, '0') + '-' +
+                String(t.getDate()).padStart(2, '0');
+            localStorage.setItem('school-vocab-done-' + activeProfileId + '-' + todayKey, '1');
+        } catch (e) { /* ignore localStorage errors */ }
+    }
+
     // Merge student answers into the questions
     questions.forEach((q, idx) => {
         q.student_answer = (vocabState.quizAnswers[idx] || '').trim();

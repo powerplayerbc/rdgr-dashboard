@@ -260,7 +260,7 @@ function handleCalDayClick(dateStr) {
             if (dayAssignments.length === 1) {
                 const a = dayAssignments[0];
                 const lesson = a.school_lessons || {};
-                openLesson(a.id, lesson.lesson_id, lesson.title || 'Untitled');
+                openLesson(a.assignment_id, lesson.lesson_id, lesson.title || 'Untitled');
             } else {
                 // Multiple: go to lessons view (it will show all)
                 switchView('lessons');

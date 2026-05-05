@@ -158,6 +158,7 @@ let typingState = {
     bestWpm: 0,
     avgAccuracy: 0,
     todayCount: 0,
+    todaySeconds: 0,
     streak: 0
 };
 
@@ -194,9 +195,12 @@ async function loadTypingStats() {
         ? Math.round(last10.reduce((s, r) => s + (r.accuracy || 0), 0) / last10.length)
         : 0;
 
-    // Today count
+    // Today count + total practice seconds today (UBR-0122 — surfaces time
+    // across all modes: paragraph, word_flash, and sentence)
     const todayISO = new Date().toISOString().split('T')[0];
-    typingState.todayCount = rows.filter(r => (r.created_at || '').startsWith(todayISO)).length;
+    const todayRows = rows.filter(r => (r.created_at || '').startsWith(todayISO));
+    typingState.todayCount = todayRows.length;
+    typingState.todaySeconds = todayRows.reduce((s, r) => s + (r.duration_secs || 0), 0);
 
     // Streak
     typingState.streak = computeStreak(rows);
@@ -293,6 +297,11 @@ function renderStatsBar() {
             <div class="tp-stat-lbl">Today</div>
         </div>
         <div class="tp-stat-chip">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#A78BFA" stroke-width="1.2"/><path d="M7 3.5V7l2.5 1.5" stroke="#A78BFA" stroke-width="1.2" stroke-linecap="round"/></svg>
+            <div class="tp-stat-val">${formatDuration(typingState.todaySeconds)}</div>
+            <div class="tp-stat-lbl">Time Today</div>
+        </div>
+        <div class="tp-stat-chip">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2l1.5 3 3.5.5-2.5 2.5.5 3.5L7 10l-3 1.5.5-3.5L2 5.5 5.5 5z" stroke="#FBBF24" stroke-width="1.1" fill="#FBBF2440"/></svg>
             <div class="tp-stat-val">${typingState.bestWpm}</div>
             <div class="tp-stat-lbl">Best WPM</div>
@@ -305,7 +314,7 @@ function renderStatsBar() {
         <div class="tp-stat-chip">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.8 2.8l1.4 1.4M9.8 9.8l1.4 1.4M11.2 2.8l-1.4 1.4M4.2 9.8l-1.4 1.4" stroke="#F97316" stroke-width="1.2" stroke-linecap="round"/></svg>
             <div class="tp-stat-val">${typingState.streak}</div>
-            <div class="tp-stat-lbl">Day Streak</div>
+            <div class="tp-stat-lbl">Streak</div>
         </div>
     `;
 }
@@ -613,6 +622,7 @@ function renderWordFlashMode(area) {
 
             <div class="tp-para-actions">
                 <button class="tp-btn tp-btn-primary" id="tp-wf-start" onclick="startWordFlash()">Start Round</button>
+                <button class="tp-btn tp-btn-secondary" id="tp-wf-stop" onclick="stopWordFlash()" style="display:none;">Stop</button>
             </div>
         </div>
     `;
@@ -629,6 +639,8 @@ function startWordFlash() {
 
     const startBtn = document.getElementById('tp-wf-start');
     if (startBtn) startBtn.style.display = 'none';
+    const stopBtn = document.getElementById('tp-wf-stop');
+    if (stopBtn) stopBtn.style.display = '';
 
     const input = document.getElementById('tp-wf-input');
     if (input) {
@@ -730,9 +742,28 @@ function flashWordResult(correct) {
     }, 600);
 }
 
+// User-initiated quit (UBR-0120). If they typed any words, save the partial
+// session so the time doesn't disappear; otherwise just reset the UI without
+// polluting history with an empty row.
+function stopWordFlash() {
+    if (!typingState.isRunning) return;
+    if (typingState.wordIndex > 0 || typingState.wordResults.length > 0) {
+        finishWordFlash();
+    } else {
+        typingState.isRunning = false;
+        clearInterval(typingState.wordTimer);
+        clearInterval(typingState.wordBarTimer);
+        renderGameArea();
+    }
+}
+
 function finishWordFlash() {
     typingState.isRunning = false;
     clearInterval(typingState.wordTimer);
+    clearInterval(typingState.wordBarTimer);
+
+    const stopBtn = document.getElementById('tp-wf-stop');
+    if (stopBtn) stopBtn.style.display = 'none';
 
     const input = document.getElementById('tp-wf-input');
     if (input) {
@@ -740,20 +771,20 @@ function finishWordFlash() {
         input.removeEventListener('keydown', handleWordFlashKey);
     }
 
+    const totalAttempted = typingState.wordResults.length;
     const correctCount = typingState.wordResults.filter(r => r.correct).length;
-    const totalChars = typingState.wordResults.reduce((s, r) => s + r.word.length, 0);
     const correctChars = typingState.wordResults.filter(r => r.correct).reduce((s, r) => s + r.word.length, 0);
-    const elapsedSec = (Date.now() - typingState.startTime) / 1000;
+    const elapsedSec = typingState.startTime ? (Date.now() - typingState.startTime) / 1000 : 0;
     const wpm = elapsedSec > 0 ? Math.round((correctChars / 5) / (elapsedSec / 60)) : 0;
-    const acc = Math.round((correctCount / 20) * 100);
+    const acc = totalAttempted > 0 ? Math.round((correctCount / totalAttempted) * 100) : 0;
     const rating = getSessionRating(wpm, acc);
 
     showResults({
         mode: 'wordflash',
         wpm, accuracy: acc,
         correct: correctCount,
-        incorrect: 20 - correctCount,
-        total: 20,
+        incorrect: totalAttempted - correctCount,
+        total: totalAttempted,
         duration: Math.round(elapsedSec),
         rating,
         title: 'Word Flash',
@@ -792,6 +823,7 @@ function renderSentenceMode(area) {
                 <button class="tp-btn tp-btn-primary" id="tp-sb-start" onclick="startSentenceBuilder()">Start Round</button>
                 <button class="tp-btn tp-btn-primary" id="tp-sb-submit" onclick="submitSentence()" style="display:none;">Submit</button>
                 <button class="tp-btn tp-btn-secondary" id="tp-sb-next" onclick="nextSentence()" style="display:none;">Next</button>
+                <button class="tp-btn tp-btn-secondary" id="tp-sb-stop" onclick="stopSentenceBuilder()" style="display:none;">Stop</button>
             </div>
         </div>
     `;
@@ -808,8 +840,23 @@ function startSentenceBuilder() {
 
     const startBtn = document.getElementById('tp-sb-start');
     if (startBtn) startBtn.style.display = 'none';
+    const stopBtn = document.getElementById('tp-sb-stop');
+    if (stopBtn) stopBtn.style.display = '';
 
     showSentenceRead();
+}
+
+// User-initiated quit (UBR-0120 parity). If they completed any sentence,
+// save what they did; otherwise reset.
+function stopSentenceBuilder() {
+    if (!typingState.isRunning) return;
+    if (typingState.sentenceResults.length > 0) {
+        finishSentenceBuilder();
+    } else {
+        typingState.isRunning = false;
+        typingState.sentencePhase = 'idle';
+        renderGameArea();
+    }
 }
 
 function showSentenceRead() {
@@ -931,9 +978,11 @@ function nextSentence() {
 
 function finishSentenceBuilder() {
     typingState.isRunning = false;
+    const stopBtn = document.getElementById('tp-sb-stop');
+    if (stopBtn) stopBtn.style.display = 'none';
     const totalWords = typingState.sentenceResults.reduce((s, r) => s + r.totalWords, 0);
     const correctWords = typingState.sentenceResults.reduce((s, r) => s + r.correctWords, 0);
-    const elapsedSec = (Date.now() - typingState.startTime) / 1000;
+    const elapsedSec = typingState.startTime ? (Date.now() - typingState.startTime) / 1000 : 0;
     const totalChars = typingState.sentenceResults.reduce((s, r) => s + r.typed.length, 0);
     const wpm = elapsedSec > 0 ? Math.round((totalChars / 5) / (elapsedSec / 60)) : 0;
     const acc = totalWords > 0 ? Math.round((correctWords / totalWords) * 100) : 0;
@@ -1071,11 +1120,23 @@ async function saveTypingSession(data) {
     const result = await supabaseWrite('school_typing_sessions', 'POST', body);
     if (result) {
         toast('Session saved!', 'success');
+        // Mark today's typing as done so the Today tab shows the green check.
+        try {
+            const today = new Date();
+            const todayKey = today.getFullYear() + '-' +
+                String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                String(today.getDate()).padStart(2, '0');
+            localStorage.setItem('school-typing-done-' + activeProfileId + '-' + todayKey, '1');
+        } catch (e) { /* ignore localStorage errors */ }
         await loadTypingStats();
         renderStatsBar();
         renderHistory();
     } else {
-        toast('Could not save session', 'error');
+        // Surface the silent failure path that masked UBR-0121/0122 — every
+        // failed save now logs a console error (captured by the bug-report
+        // console hook) so the next bug report includes the actual cause.
+        console.error('saveTypingSession failed for body', body);
+        toast('Could not save session — open a bug report if this keeps happening', 'error');
     }
 }
 
@@ -1142,7 +1203,7 @@ function injectTypingStyles() {
 /* ── Stats Bar ── */
 .tp-stats-bar {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 0.5rem;
 }
 
