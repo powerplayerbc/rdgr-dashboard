@@ -1108,10 +1108,18 @@ function openAssignModal(lessonId, lessonTitle) {
             <p style="margin:0 0 12px;font-size:13px;color:var(--deft-txt-2);">
                 ${escapeHtml(lessonTitle)}
             </p>
+            <div style="margin-bottom:12px;">
+                <label style="display:block;font-size:12px;font-weight:600;color:var(--deft-txt-2);
+                              margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;
+                              font-family:var(--deft-heading-font),sans-serif;" for="assignStudentSelect">Student</label>
+                <select class="form-input" id="assignStudentSelect" aria-label="Student">
+                    <option value="">Loading students...</option>
+                </select>
+            </div>
             <div style="margin-bottom:16px;">
                 <label style="display:block;font-size:12px;font-weight:600;color:var(--deft-txt-2);
                               margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em;
-                              font-family:var(--deft-heading-font),sans-serif;">Assign Date</label>
+                              font-family:var(--deft-heading-font),sans-serif;" for="assignDateInput">Assign Date</label>
                 <input type="date" class="form-input" id="assignDateInput" value="${today}"
                        aria-label="Assignment date">
             </div>
@@ -1130,13 +1138,42 @@ function openAssignModal(lessonId, lessonTitle) {
         if (e.target === overlay) overlay.remove();
     });
     document.body.appendChild(overlay);
+    populateAssignStudents();
+}
+
+// Load student profiles into the assign modal's student select.
+// Falls back to all profiles if no rows have role='student' (some setups use admin only).
+async function populateAssignStudents() {
+    const sel = document.getElementById('assignStudentSelect');
+    if (!sel) return;
+    let profiles = await supabaseSelect('deft_user_profiles',
+        'select=user_id,display_name,role&role=eq.student&order=display_name');
+    if (!profiles || profiles.length === 0) {
+        profiles = await supabaseSelect('deft_user_profiles',
+            'select=user_id,display_name,role&order=display_name');
+    }
+    if (!profiles || profiles.length === 0) {
+        sel.innerHTML = '<option value="">No profiles found</option>';
+        return;
+    }
+    sel.innerHTML = profiles.map(p =>
+        `<option value="${p.user_id}">${escapeHtml(p.display_name || 'Profile')}${p.role && p.role !== 'student' ? ' (' + p.role + ')' : ''}</option>`
+    ).join('');
+    // Auto-select if only one student
+    if (profiles.length === 1) sel.value = profiles[0].user_id;
 }
 
 async function confirmAssign(lessonId) {
+    const studentSelect = document.getElementById('assignStudentSelect');
     const dateInput = document.getElementById('assignDateInput');
     const btn = document.getElementById('confirmAssignBtn');
+    const studentId = studentSelect?.value;
     const date = dateInput?.value;
 
+    if (!studentId) {
+        toast('Select a student', 'error');
+        return;
+    }
     if (!date) {
         toast('Select a date', 'error');
         return;
@@ -1147,6 +1184,7 @@ async function confirmAssign(lessonId) {
 
     const result = await schoolApi('assign_lesson', {
         lesson_id: lessonId,
+        student_id: studentId,
         assigned_date: date
     });
 
