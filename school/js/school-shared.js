@@ -203,7 +203,12 @@ function formatDate(dateStr) {
 }
 
 function todayStr() {
-    return new Date().toISOString().split('T')[0];
+    // Local-calendar today (YYYY-MM-DD). UTC-based toISOString() produced
+    // off-by-one bugs for negative-UTC users after their afternoon (UBR-0115).
+    const d = new Date();
+    return d.getFullYear() + '-' +
+           String(d.getMonth() + 1).padStart(2, '0') + '-' +
+           String(d.getDate()).padStart(2, '0');
 }
 
 // Keyboard: close modals on Escape

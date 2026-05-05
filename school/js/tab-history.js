@@ -31,6 +31,35 @@ function getEraStyle(era) {
     return ERA_COLORS[era] || { bg: '#64748B20', text: '#94A3B8', border: '#64748B' };
 }
 
+// Read-tracking helpers (UBR-0115). Sidebar checkmark previously appeared on
+// every past day's fact regardless of whether the student had read it. Now we
+// persist a per-profile per-fact read flag in localStorage and only show the
+// check when the user explicitly marks a fact as read.
+function historyReadKey(factId) {
+    const profileId = (typeof activeProfileId !== 'undefined' && activeProfileId) || 'anon';
+    return 'hist-read-' + profileId + '-' + factId;
+}
+
+function isHistoryFactRead(factId) {
+    if (!factId) return false;
+    try { return localStorage.getItem(historyReadKey(factId)) === '1'; }
+    catch (e) { return false; }
+}
+
+function markHistoryFactRead(factId) {
+    if (!factId) return;
+    try { localStorage.setItem(historyReadKey(factId), '1'); } catch (e) {}
+    // Re-render the page so the sidebar tile picks up the checkmark and the
+    // fact card swaps the "Mark as read" button for a "Read" indicator.
+    refreshHistory();
+}
+
+function unmarkHistoryFactRead(factId) {
+    if (!factId) return;
+    try { localStorage.removeItem(historyReadKey(factId)); } catch (e) {}
+    refreshHistory();
+}
+
 // ═══════════════════════════════════════
 // MAIN ENTRY -- called when History tab loads
 // ═══════════════════════════════════════
@@ -72,7 +101,12 @@ async function refreshHistory() {
             });
         }
         historyWeekFacts = weekFacts || [];
-        const progressCount = allPastFacts ? allPastFacts.length : 0;
+        // Progress = facts the student has marked as read (UBR-0115).
+        // Was previously the count of published facts <= today, which made
+        // the bar advance even when nothing had been read.
+        const progressCount = (allPastFacts || []).filter(function(f) {
+            return isHistoryFactRead(f.fact_id);
+        }).length;
 
         container.innerHTML = buildHistoryLayout(historyCurrentFact, historyWeekFacts, progressCount, weekInfo);
 
@@ -142,8 +176,11 @@ function buildHistoryLayout(fact, weekFacts, progressCount, weekInfo) {
     // Progress bar
     html += buildHistoryProgress(progressCount);
 
-    // Main content area: fact card + sidebar
-    html += '<div style="display:flex;gap:24px;margin-top:20px;align-items:flex-start;">';
+    // Main content area: fact card + sidebar.
+    // The hist-layout class is the hook for the @media stack-on-mobile rule -
+    // without flex-direction:column on narrow viewports the sidebar's
+    // width:100% squeezes the main card to 0 width (UBR-0115).
+    html += '<div class="hist-layout" style="display:flex;gap:24px;margin-top:20px;align-items:flex-start;">';
 
     // Main fact card (left, grows)
     html += '<div style="flex:1;min-width:0;">';
@@ -412,6 +449,29 @@ function buildFactCard(fact) {
         html += buildTopicTags(fact.topic_tags);
     }
 
+    // Mark-as-read footer (UBR-0115). Lets the student tell the system they
+    // actually read the fact; this drives the sidebar checkmark + progress.
+    const isRead = isHistoryFactRead(fact.fact_id);
+    html += '<div style="border-top:1px solid var(--deft-border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">';
+    if (isRead) {
+        html += '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--deft-success);font-weight:600;font-family:var(--deft-body-font),sans-serif;">' +
+                '  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="var(--deft-success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+                '  Marked as read' +
+                '</div>';
+        html += '<button onclick="unmarkHistoryFactRead(\'' + escapeHtml(fact.fact_id) + '\')" ' +
+                ' class="btn btn-ghost" style="font-size:12px;padding:6px 12px;">Undo</button>';
+    } else {
+        html += '<div style="font-size:12px;color:var(--deft-txt-3);font-family:var(--deft-body-font),sans-serif;">' +
+                'Click below when you have finished reading this fact.' +
+                '</div>';
+        html += '<button onclick="markHistoryFactRead(\'' + escapeHtml(fact.fact_id) + '\')" ' +
+                ' class="btn btn-primary" style="font-size:13px;padding:8px 16px;">' +
+                '  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="margin-right:6px;vertical-align:-2px;"><path d="M3 7l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+                '  Mark as read' +
+                '</button>';
+    }
+    html += '</div>';
+
     html += '</div>'; // end card
 
     return html;
@@ -637,6 +697,14 @@ function buildWeekTimeline(weekFacts, weekInfo) {
         if (isCurrent) {
             borderColor = 'var(--deft-accent)';
             bg = 'var(--deft-accent-dim)';
+            // Current tile is also clickable - useful when navigated away
+            // from today and the user wants to come back, OR on mobile to
+            // scroll the fact card into view (UBR-0115).
+            if (fact) {
+                cursor = 'pointer';
+                onClick = ' onclick="historyViewDay(\'' + dayDate + '\')" tabindex="0" role="button"' +
+                          ' onkeydown="if(event.key===\'Enter\')this.click()"';
+            }
         } else if (isPast && fact) {
             cursor = 'pointer';
             onClick = ' onclick="historyViewDay(\'' + dayDate + '\')" tabindex="0" role="button"' +
@@ -645,10 +713,13 @@ function buildWeekTimeline(weekFacts, weekInfo) {
             opacity = '0.4';
         }
 
+        // Sidebar checkmark only appears when the student has explicitly
+        // marked the fact as read (UBR-0115). Future days still show the lock.
+        const readForReal = fact && isHistoryFactRead(fact.fact_id);
         const statusIcon = isFuture
             ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--deft-txt-3)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>'
-            : (isPast && fact)
-                ? '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;"><path d="M3 7l3 3 5-5" stroke="var(--deft-success)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+            : (readForReal)
+                ? '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;" aria-label="read"><path d="M3 7l3 3 5-5" stroke="var(--deft-success)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
                 : '';
 
         const titleText = fact
@@ -1178,8 +1249,11 @@ function buildHistorySkeletons() {
             50% { opacity: 0.5; }
         }
 
-        /* Timeline goes horizontal on mobile */
+        /* Timeline goes horizontal on mobile and stacks above the fact card */
         @media (max-width: 768px) {
+            .hist-layout {
+                flex-direction: column !important;
+            }
             .hist-timeline {
                 width: 100% !important;
                 order: -1;

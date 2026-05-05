@@ -87,12 +87,102 @@ async function refreshLessons() {
             html += '</div>';
         }
 
+        // Daily Activities section (UBR-0114) - links to history/typing/vocab.
+        // Only shown to students; teachers see lesson management on this tab.
+        if (isStudent()) {
+            html += buildDailyActivitiesSection(today);
+        }
+
         listEl.innerHTML = html;
 
     } catch (err) {
         console.error('refreshLessons error:', err);
         listEl.innerHTML = emptyState('Something went wrong loading lessons.', 'error');
     }
+}
+
+// ═══════════════════════════════════════
+// DAILY ACTIVITIES (UBR-0114)
+// Lists the non-lesson school activities (history, typing, vocabulary) so
+// the student can see their full day in one place. History uses the same
+// hist-read-<profile>-<factId> localStorage key set on the History page; the
+// other two link out without completion tracking until those tabs add it.
+// ═══════════════════════════════════════
+
+// Local copy of the history read-state check (the History tab uses the same
+// localStorage key) so tab-history.js doesn't need to be loaded on the Today
+// page just for one lookup.
+function _todayTabIsHistoryFactRead(factId) {
+    if (!factId) return false;
+    const profileId = (typeof activeProfileId !== 'undefined' && activeProfileId) || 'anon';
+    try { return localStorage.getItem('hist-read-' + profileId + '-' + factId) === '1'; }
+    catch (e) { return false; }
+}
+
+async function buildDailyActivitiesSectionData(today) {
+    // Fetch today's history fact id (if any) so we can check the read flag.
+    const factRows = await supabaseSelect('school_history_facts',
+        `scheduled_date=eq.${today}&select=fact_id,title&limit=1`);
+    const fact = (factRows && factRows[0]) || null;
+    return { fact };
+}
+
+function buildDailyActivitiesSection(today) {
+    // Render placeholder synchronously, then populate async (the lessons list
+    // needs to render immediately; the fact lookup can be slow).
+    setTimeout(function() {
+        buildDailyActivitiesSectionData(today).then(function(data) {
+            const target = document.getElementById('daily-activities-list');
+            if (target) target.innerHTML = renderDailyActivities(data, today);
+        });
+    }, 0);
+
+    return '<div style="margin-top:1.75rem;padding-top:1rem;border-top:1px solid var(--deft-border);">' +
+        '<h3 style="margin:0 0 0.75rem;font-size:0.8125rem;font-weight:600;color:var(--deft-txt-2);' +
+        'font-family:var(--deft-heading-font),sans-serif;text-transform:uppercase;letter-spacing:0.05em;">' +
+        'Daily Activities</h3>' +
+        '<div id="daily-activities-list" style="display:flex;flex-direction:column;gap:8px;"></div>' +
+        '</div>';
+}
+
+function renderDailyActivities(data, today) {
+    const fact = data.fact;
+    const factRead = fact && _todayTabIsHistoryFactRead(fact.fact_id);
+    const items = [
+        {
+            href: '/school/history',
+            label: 'Today’s History Fact',
+            sub: fact ? fact.title : 'No fact scheduled for today',
+            done: !!factRead,
+            disabled: !fact
+        },
+        { href: '/school/typing',     label: 'Typing Practice',  sub: 'Build accuracy and speed', done: false },
+        { href: '/school/vocabulary', label: 'Vocabulary Study', sub: 'Review today’s words', done: false },
+        { href: '/school/flashcards', label: 'Flashcards',       sub: 'Quick review',             done: false }
+    ];
+    return items.map(function(it) {
+        const checkSvg = it.done
+            ? '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><circle cx="8" cy="8" r="7" stroke="var(--deft-success)" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="var(--deft-success)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+            : '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><circle cx="8" cy="8" r="7" stroke="var(--deft-txt-3)" stroke-width="1.5" stroke-dasharray="2 2"/></svg>';
+        const titleColor = it.disabled ? 'var(--deft-txt-3)' : 'var(--deft-txt)';
+        const subColor   = it.disabled ? 'var(--deft-txt-3)' : 'var(--deft-txt-2)';
+        const opacity    = it.disabled ? '0.6' : '1';
+        const tag = it.disabled ? 'div' : 'a';
+        const hrefAttr = it.disabled ? '' : ' href="' + it.href + '"';
+        return '<' + tag + hrefAttr + ' style="display:flex;align-items:center;gap:12px;' +
+               'padding:12px 14px;border-radius:10px;background:var(--deft-surface-el);' +
+               'border:1px solid var(--deft-border);opacity:' + opacity + ';' +
+               'text-decoration:none;transition:border-color 0.15s,background 0.15s;"' +
+               (it.disabled ? '' : ' onmouseenter="this.style.borderColor=\'var(--deft-accent)\'" onmouseleave="this.style.borderColor=\'var(--deft-border)\'"') +
+               '>' +
+                 checkSvg +
+                 '<div style="flex:1;min-width:0;">' +
+                   '<div style="font-size:13px;font-weight:600;color:' + titleColor + ';font-family:var(--deft-heading-font),sans-serif;">' + escapeHtml(it.label) + '</div>' +
+                   '<div style="font-size:12px;color:' + subColor + ';margin-top:2px;font-family:var(--deft-body-font),sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(it.sub || '') + '</div>' +
+                 '</div>' +
+                 (it.disabled ? '' : '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;color:var(--deft-txt-3);"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>') +
+               '</' + tag + '>';
+    }).join('');
 }
 
 // ═══════════════════════════════════════
