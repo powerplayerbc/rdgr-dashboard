@@ -117,19 +117,17 @@ function renderQuestionsHeader() {
         ? `<span style="font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 99px; background: ${subjectStyle.bg}; color: ${subjectStyle.text}; letter-spacing: 0.03em; text-transform: uppercase;">${escapeHtml(subjectStyle.label)}</span>`
         : '';
 
-    // UBR-0125 stopgap: until the backend parses the linked Google Doc into
-    // school_questions rows, expose a Worksheet button so the student can open
-    // the actual question doc in a new tab.
-    const worksheetUrl = _lessonDetail && _lessonDetail.metadata && _lessonDetail.metadata.worksheet_link;
-    const worksheetBtn = worksheetUrl
-        ? `<a href="${escapeHtml(worksheetUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open worksheet"
-                style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--deft-border); background: var(--deft-surface-el); color: var(--deft-txt-2); cursor: pointer; font-size: 0.775rem; font-weight: 500; transition: all 0.15s ease; white-space: nowrap; text-decoration: none;"
-                onmouseenter="this.style.background='var(--deft-surface-hi)';this.style.color='var(--deft-txt)';this.style.borderColor='var(--deft-accent)'"
-                onmouseleave="this.style.background='var(--deft-surface-el)';this.style.color='var(--deft-txt-2)';this.style.borderColor='var(--deft-border)'">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                Worksheet
-            </a>`
-        : '';
+    // UBR-0128: lesson title is now a clickable button that scrolls to and
+    // pulses the Lesson Material block so the user can find the lesson text.
+    const titleButton = `
+        <button type="button" onclick="scrollToLessonMaterial()" aria-label="Read lesson material"
+            style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 0; padding: 0; background: transparent; border: none; cursor: pointer; text-align: left; flex-wrap: wrap;">
+            <h2 style="margin: 0; font-size: 1.125rem; font-weight: 700; color: var(--deft-txt); font-family: var(--deft-heading-font, 'Nunito'), system-ui, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 24rem; transition: color 0.15s ease;"
+                onmouseover="this.style.color='var(--deft-accent)'" onmouseout="this.style.color='var(--deft-txt)'">
+                ${title}
+            </h2>
+            ${subjectBadge}
+        </button>`;
 
     return `
         <div style="display: flex; align-items: center; gap: 0.5rem; padding: 1.5rem 1.5rem 0 1.5rem; flex-wrap: wrap;">
@@ -139,15 +137,14 @@ function renderQuestionsHeader() {
                 onmouseleave="this.style.background='var(--deft-surface-el)';this.style.color='var(--deft-txt-2)'">
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 3L5 7l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
-            <div style="flex: 1; min-width: 0;">
-                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                    <h2 style="margin: 0; font-size: 1.125rem; font-weight: 700; color: var(--deft-txt); font-family: var(--deft-heading-font, 'Nunito'), system-ui, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 24rem;">
-                        ${title}
-                    </h2>
-                    ${subjectBadge}
-                </div>
-            </div>
-            ${worksheetBtn}
+            ${titleButton}
+            <button onclick="scrollToLessonMaterial()" aria-label="Read lesson"
+                style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--deft-border); background: var(--deft-surface-el); color: var(--deft-txt-2); cursor: pointer; font-size: 0.775rem; font-weight: 500; transition: all 0.15s ease; white-space: nowrap;"
+                onmouseenter="this.style.background='var(--deft-surface-hi)';this.style.color='var(--deft-txt)';this.style.borderColor='var(--deft-accent)'"
+                onmouseleave="this.style.background='var(--deft-surface-el)';this.style.color='var(--deft-txt-2)';this.style.borderColor='var(--deft-border)'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Read Lesson
+            </button>
             <button onclick="openVideoSearchModal()" aria-label="Find Videos"
                 style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--deft-border); background: var(--deft-surface-el); color: var(--deft-txt-2); cursor: pointer; font-size: 0.775rem; font-weight: 500; transition: all 0.15s ease; white-space: nowrap;"
                 onmouseenter="this.style.background='var(--deft-surface-hi)';this.style.color='var(--deft-txt)';this.style.borderColor='var(--deft-accent)'"
@@ -157,6 +154,21 @@ function renderQuestionsHeader() {
             </button>
         </div>
     `;
+}
+
+// UBR-0128: scroll the lesson material block into view and pulse it so the
+// student can locate the lesson text. Used by the clickable lesson title and
+// the Read Lesson button in the header.
+function scrollToLessonMaterial() {
+    const el = document.getElementById('lesson-material-block');
+    if (!el) {
+        if (typeof toast === 'function') toast('No lesson text available for this lesson', 'info');
+        return;
+    }
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    el.classList.remove('lesson-material-pulse');
+    void el.offsetWidth;
+    el.classList.add('lesson-material-pulse');
 }
 
 // ═══════════════════════════════════════
@@ -188,7 +200,7 @@ function renderProgressBar(answered, total) {
 // ═══════════════════════════════════════
 function renderLessonContent(content) {
     return `
-        <div style="margin: 1rem 1.5rem 0.5rem 1.5rem; padding: 1rem 1.25rem; background: var(--deft-surface-el); border: 1px solid var(--deft-border); border-radius: var(--deft-radius, 0.875rem); border-left: 3px solid var(--deft-accent);">
+        <div id="lesson-material-block" style="margin: 1rem 1.5rem 0.5rem 1.5rem; padding: 1rem 1.25rem; background: var(--deft-surface-el); border: 1px solid var(--deft-border); border-radius: var(--deft-radius, 0.875rem); border-left: 3px solid var(--deft-accent); transition: box-shadow 0.3s ease, border-color 0.3s ease;">
             <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: var(--deft-accent); flex-shrink: 0;"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <span style="font-size: 0.75rem; font-weight: 600; color: var(--deft-accent); text-transform: uppercase; letter-spacing: 0.04em;">Lesson Material</span>
@@ -457,7 +469,9 @@ function bindQuestionEvents() {
     if (!document.getElementById('q-spin-style')) {
         const style = document.createElement('style');
         style.id = 'q-spin-style';
-        style.textContent = '@keyframes qSpin{to{transform:rotate(360deg)}}';
+        style.textContent = '@keyframes qSpin{to{transform:rotate(360deg)}}'
+            + '@keyframes lessonMaterialPulse{0%{box-shadow:0 0 0 0 rgba(6,214,160,.55);border-color:var(--deft-accent);}70%{box-shadow:0 0 0 14px rgba(6,214,160,0);border-color:var(--deft-accent);}100%{box-shadow:0 0 0 0 rgba(6,214,160,0);border-color:var(--deft-border);}}'
+            + '.lesson-material-pulse{animation:lessonMaterialPulse 1.4s ease-out 1;}';
         document.head.appendChild(style);
     }
 }
@@ -833,11 +847,14 @@ async function searchVideos() {
     _motivationStats.videos_searched = (_motivationStats.videos_searched || 0) + 1;
     refreshMotivationRow();
 
-    const result = await schoolApi('search_videos', { query }, { timeout: 15000 });
+    // UBR-0127: backend operation is search_youtube; response shape is
+    // {success, videos:[{id,title,channel,thumbnail}], count}.
+    const result = await schoolApi('search_youtube', { query }, { timeout: 15000 });
+    const videos = result && Array.isArray(result.videos) ? result.videos : null;
 
-    if (result && result.data && Array.isArray(result.data) && result.data.length > 0) {
-        resultsEl.innerHTML = result.data.map(v => {
-            const videoId = v.video_id || v.id || '';
+    if (videos && videos.length > 0) {
+        resultsEl.innerHTML = videos.map(v => {
+            const videoId = v.id || v.video_id || '';
             const thumbnail = v.thumbnail || `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
             const videoTitle = v.title || 'Untitled Video';
             const channel = v.channel || '';
@@ -856,7 +873,7 @@ async function searchVideos() {
                     </div>
                 </a>`;
         }).join('');
-    } else if (result && result.data && Array.isArray(result.data) && result.data.length === 0) {
+    } else if (videos && videos.length === 0) {
         resultsEl.innerHTML = `<p style="text-align: center; color: var(--deft-txt-3); font-size: 0.8rem; padding: 2rem 0;">No videos found. Try a different search.</p>`;
     } else {
         // Fallback: open YouTube search in new tab
