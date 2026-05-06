@@ -60,19 +60,19 @@ async function refreshLessons() {
             html += '<div style="text-align:center;padding:1.5rem;color:var(--deft-txt-3);font-size:0.875rem;">No lessons for today \u2014 all caught up!</div>';
         }
 
-        // Daily Activities section (UBR-0114, reordered per UBR-0116) - shown
-        // before Get Ahead so today's work is visually prioritized.
-        if (isStudent()) {
-            html += buildDailyActivitiesSection(today);
-        }
+        // Daily Activities section (UBR-0114, reordered per UBR-0116, ungated per
+        // UBR-0126) - shown to every role so teachers/admins see the same daily
+        // structure students see (history fact, typing, vocab, flashcards links).
+        html += buildDailyActivitiesSection(today);
 
-        // Build upcoming section
+        // Build upcoming section. Always render the header (UBR-0126) so the user
+        // can see where future assignments go even when none are scheduled yet.
+        html += '<div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--deft-border);">';
+        html += '<h3 style="margin:0 0 0.75rem;font-size:0.8125rem;font-weight:600;color:var(--deft-txt-2);font-family:var(--deft-heading-font),sans-serif;text-transform:uppercase;letter-spacing:0.05em;">';
+        html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="inline mr-1" style="vertical-align:-2px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
+        html += 'Get Ahead \u2014 Upcoming Lessons</h3>';
+
         if (upcomingAssignments.length > 0) {
-            html += '<div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--deft-border);">';
-            html += '<h3 style="margin:0 0 0.75rem;font-size:0.8125rem;font-weight:600;color:var(--deft-txt-2);font-family:var(--deft-heading-font),sans-serif;text-transform:uppercase;letter-spacing:0.05em;">';
-            html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="inline mr-1" style="vertical-align:-2px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
-            html += 'Get Ahead \u2014 Upcoming Lessons</h3>';
-
             // Group by date
             var dateGroups = {};
             upcomingAssignments.forEach(function(a) {
@@ -82,16 +82,17 @@ async function refreshLessons() {
 
             Object.keys(dateGroups).sort().forEach(function(date) {
                 var dayLabel = formatDate(date);
-                var isWeekend = (function() { var d = new Date(date + 'T00:00:00'); return d.getDay() === 0 || d.getDay() === 6; })();
                 html += '<div style="margin-bottom:0.5rem;font-size:0.75rem;font-weight:600;color:var(--deft-txt-3);">' + escapeHtml(dayLabel) + '</div>';
                 dateGroups[date].forEach(function(a) {
                     var lesson = lessonsMap[a.lesson_id] || {};
                     html += buildLessonCard(a, lesson);
                 });
             });
-
-            html += '</div>';
+        } else {
+            html += '<div style="padding:1rem 1.25rem;border-radius:10px;background:var(--deft-surface-el);border:1px dashed var(--deft-border);font-size:0.8125rem;color:var(--deft-txt-3);">No upcoming lessons assigned yet.</div>';
         }
+
+        html += '</div>';
 
         listEl.innerHTML = html;
 

@@ -117,8 +117,22 @@ function renderQuestionsHeader() {
         ? `<span style="font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 99px; background: ${subjectStyle.bg}; color: ${subjectStyle.text}; letter-spacing: 0.03em; text-transform: uppercase;">${escapeHtml(subjectStyle.label)}</span>`
         : '';
 
+    // UBR-0125 stopgap: until the backend parses the linked Google Doc into
+    // school_questions rows, expose a Worksheet button so the student can open
+    // the actual question doc in a new tab.
+    const worksheetUrl = _lessonDetail && _lessonDetail.metadata && _lessonDetail.metadata.worksheet_link;
+    const worksheetBtn = worksheetUrl
+        ? `<a href="${escapeHtml(worksheetUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open worksheet"
+                style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--deft-border); background: var(--deft-surface-el); color: var(--deft-txt-2); cursor: pointer; font-size: 0.775rem; font-weight: 500; transition: all 0.15s ease; white-space: nowrap; text-decoration: none;"
+                onmouseenter="this.style.background='var(--deft-surface-hi)';this.style.color='var(--deft-txt)';this.style.borderColor='var(--deft-accent)'"
+                onmouseleave="this.style.background='var(--deft-surface-el)';this.style.color='var(--deft-txt-2)';this.style.borderColor='var(--deft-border)'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2v6h6M8 13h8M8 17h8M8 9h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Worksheet
+            </a>`
+        : '';
+
     return `
-        <div style="display: flex; align-items: center; gap: 0.75rem; padding: 1.5rem 1.5rem 0 1.5rem; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; padding: 1.5rem 1.5rem 0 1.5rem; flex-wrap: wrap;">
             <button onclick="switchView('lessons')" aria-label="Back to lessons"
                 style="display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 0.5rem; border: 1px solid var(--deft-border); background: var(--deft-surface-el); color: var(--deft-txt-2); cursor: pointer; transition: all 0.15s ease; flex-shrink: 0;"
                 onmouseenter="this.style.background='var(--deft-surface-hi)';this.style.color='var(--deft-txt)'"
@@ -133,6 +147,7 @@ function renderQuestionsHeader() {
                     ${subjectBadge}
                 </div>
             </div>
+            ${worksheetBtn}
             <button onclick="openVideoSearchModal()" aria-label="Find Videos"
                 style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--deft-border); background: var(--deft-surface-el); color: var(--deft-txt-2); cursor: pointer; font-size: 0.775rem; font-weight: 500; transition: all 0.15s ease; white-space: nowrap;"
                 onmouseenter="this.style.background='var(--deft-surface-hi)';this.style.color='var(--deft-txt)';this.style.borderColor='var(--deft-accent)'"
