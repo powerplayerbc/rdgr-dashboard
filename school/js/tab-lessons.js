@@ -23,10 +23,16 @@ async function refreshLessons() {
     listEl.innerHTML = buildSkeletons(3);
 
     try {
-        // Fetch today's AND upcoming assignments (not excused), ordered by date
-        const allAssignments = await fetchCurrentAndUpcoming(today);
+        // Fetch overdue + today + upcoming in parallel (UBR-0130)
+        const [allAssignments, overdueAssignments] = await Promise.all([
+            fetchCurrentAndUpcoming(today),
+            fetchOverdueAssignments(today)
+        ]);
 
-        if (!allAssignments || allAssignments.length === 0) {
+        const hasAnyToday = allAssignments && allAssignments.length > 0;
+        const hasAnyOverdue = overdueAssignments && overdueAssignments.length > 0;
+
+        if (!hasAnyToday && !hasAnyOverdue) {
             listEl.innerHTML = emptyState(
                 isTeacher()
                     ? 'No lessons assigned. Use the button above to assign one.'
@@ -38,11 +44,12 @@ async function refreshLessons() {
         }
 
         // Split into today vs upcoming
-        const todayAssignments = allAssignments.filter(a => a.assigned_date === today);
-        const upcomingAssignments = allAssignments.filter(a => a.assigned_date > today);
+        const todayAssignments = (allAssignments || []).filter(a => a.assigned_date === today);
+        const upcomingAssignments = (allAssignments || []).filter(a => a.assigned_date > today);
 
-        // Collect unique lesson IDs and fetch lesson details
-        const lessonIds = [...new Set(allAssignments.map(a => a.lesson_id).filter(Boolean))];
+        // Collect unique lesson IDs and fetch lesson details (overdue + today + upcoming)
+        const allRows = (allAssignments || []).concat(overdueAssignments || []);
+        const lessonIds = [...new Set(allRows.map(a => a.lesson_id).filter(Boolean))];
         const lessonsMap = await fetchLessonsMap(lessonIds);
 
         // Build today section
@@ -51,12 +58,35 @@ async function refreshLessons() {
 
         var html = '';
 
+        // UBR-0130: Overdue section (rolled forward from prior days). Renders at
+        // the top so unfinished work is visually prioritized over today/upcoming.
+        if (hasAnyOverdue) {
+            html += '<div style="margin-bottom:1.25rem;padding:0.75rem 1rem;border-radius:10px;background:rgba(232,93,93,0.08);border:1px solid rgba(232,93,93,0.25);">';
+            html += '<h3 style="margin:0 0 0.6rem;font-size:0.8125rem;font-weight:700;color:var(--deft-danger);font-family:var(--deft-heading-font),sans-serif;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;">';
+            html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>';
+            html += 'Overdue \u2014 ' + overdueAssignments.length + ' from prior day' + (overdueAssignments.length === 1 ? '' : 's') + '</h3>';
+            // Group by date desc so most recent overdue appears first
+            var overdueGroups = {};
+            overdueAssignments.forEach(function(a) {
+                if (!overdueGroups[a.assigned_date]) overdueGroups[a.assigned_date] = [];
+                overdueGroups[a.assigned_date].push(a);
+            });
+            Object.keys(overdueGroups).sort().reverse().forEach(function(date) {
+                html += '<div style="margin:0.5rem 0 0.35rem;font-size:0.7rem;font-weight:600;color:var(--deft-txt-3);text-transform:uppercase;letter-spacing:0.05em;">From ' + escapeHtml(formatDate(date)) + '</div>';
+                overdueGroups[date].forEach(function(a) {
+                    var lesson = lessonsMap[a.lesson_id] || {};
+                    html += buildLessonCard(a, lesson);
+                });
+            });
+            html += '</div>';
+        }
+
         if (todayAssignments.length > 0) {
             html += todayAssignments.map(a => {
                 const lesson = lessonsMap[a.lesson_id] || {};
                 return buildLessonCard(a, lesson);
             }).join('');
-        } else {
+        } else if (!hasAnyOverdue) {
             html += '<div style="text-align:center;padding:1.5rem;color:var(--deft-txt-3);font-size:0.875rem;">No lessons for today \u2014 all caught up!</div>';
         }
 
@@ -215,6 +245,32 @@ async function fetchCurrentAndUpcoming(today) {
         query += `&student_id=eq.${activeProfileId}`;
     }
 
+    return await supabaseSelect('school_assignments', query);
+}
+
+// UBR-0130: pull yesterday-and-back assignments that are not completed yet so
+// the Today tab can roll them forward into an Overdue section. We cap the
+// window at 30 days back to keep the query bounded; older never-finished work
+// can be cleaned up via the teacher tab.
+async function fetchOverdueAssignments(today) {
+    var earliest = (function() {
+        var d = new Date(today + 'T00:00:00');
+        d.setDate(d.getDate() - 30);
+        return d.toISOString().split('T')[0];
+    })();
+    var yesterday = (function() {
+        var d = new Date(today + 'T00:00:00');
+        d.setDate(d.getDate() - 1);
+        return d.toISOString().split('T')[0];
+    })();
+    let query = 'assigned_date=gte.' + earliest +
+        '&assigned_date=lte.' + yesterday +
+        '&status=neq.completed&status=neq.excused' +
+        '&select=assignment_id,lesson_id,student_id,status,assigned_date,completed_at' +
+        '&order=assigned_date.desc,created_at';
+    if (isStudent()) {
+        query += '&student_id=eq.' + activeProfileId;
+    }
     return await supabaseSelect('school_assignments', query);
 }
 

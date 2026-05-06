@@ -46,42 +46,129 @@ async function refreshQuestions() {
     renderQuestionsView(container);
 }
 
+// UBR-0132: prefer the full lesson text fetched from the lesson_sheet_link
+// Google Doc (parser writes it to metadata.full_lesson_text) over the short
+// summary in lesson_content. Fall back through metadata.full_lesson_text ->
+// lesson_content so older lessons still render something.
+function _getLessonBodyText() {
+    if (!_lessonDetail) return '';
+    var meta = _lessonDetail.metadata || {};
+    if (typeof meta.full_lesson_text === 'string' && meta.full_lesson_text.length > 50) {
+        return meta.full_lesson_text;
+    }
+    return _lessonDetail.lesson_content || '';
+}
+
+// UBR-0132: split-view preference. Persists per profile in localStorage.
+function _getSplitViewKey() {
+    var pid = (typeof activeProfileId !== 'undefined' && activeProfileId) || 'anon';
+    return 'school-questions-split-view-' + pid;
+}
+function _isSplitView() {
+    try { return localStorage.getItem(_getSplitViewKey()) === '1'; }
+    catch (e) { return false; }
+}
+function _setSplitView(on) {
+    try { localStorage.setItem(_getSplitViewKey(), on ? '1' : '0'); }
+    catch (e) {}
+}
+
 // ═══════════════════════════════════════
 // RENDER — Full View
 // ═══════════════════════════════════════
 function renderQuestionsView(container) {
     const answeredCount = Object.keys(_answersMap).length;
     const totalCount = _questionsData.length;
+    const lessonBody = _getLessonBodyText();
+    const splitView = _isSplitView() && lessonBody;
 
     let html = '';
 
-    // Header with back button and lesson title
-    html += renderQuestionsHeader();
+    // Header with back button, lesson title, view toggle, and action buttons
+    html += renderQuestionsHeader(splitView, !!lessonBody);
 
-    // Progress bar
-    html += renderProgressBar(answeredCount, totalCount);
-
-    // Motivation stat row (UBR-0084) — explanations + videos used to learn
-    html += renderMotivationRow(_motivationStats);
-
-    // Lesson content/description block
-    if (_lessonDetail && _lessonDetail.lesson_content) {
-        html += renderLessonContent(_lessonDetail.lesson_content);
-    }
-
-    // Question cards
-    if (_questionsData.length === 0) {
-        html += renderEmptyQuestions();
+    if (splitView) {
+        // SPLIT VIEW (UBR-0132): lesson left, questions right. Sticky lesson
+        // pane on desktop so the student can scroll questions without losing
+        // the lesson reference. Stacks vertically below 900px.
+        let questionsHtml = '';
+        questionsHtml += renderProgressBar(answeredCount, totalCount);
+        questionsHtml += renderMotivationRow(_motivationStats);
+        if (_questionsData.length === 0) {
+            questionsHtml += renderEmptyQuestions();
+        } else {
+            _questionsData.forEach(q => {
+                questionsHtml += renderQuestionCard(q, _answersMap[q.question_id]);
+            });
+        }
+        html += '<div class="split-view-grid" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:1rem;padding:1rem 1.5rem 0 1.5rem;align-items:start;">'
+              + '<aside class="split-view-lesson" style="position:sticky;top:1rem;max-height:calc(100vh - 8rem);overflow-y:auto;background:var(--deft-surface-el);border:1px solid var(--deft-border);border-left:3px solid var(--deft-accent);border-radius:var(--deft-radius,0.875rem);padding:1rem 1.25rem;">'
+              +   '<div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.6rem;position:sticky;top:0;background:var(--deft-surface-el);padding-bottom:0.4rem;border-bottom:1px solid var(--deft-border);">'
+              +     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color:var(--deft-accent);flex-shrink:0;"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+              +     '<span style="font-size:0.75rem;font-weight:600;color:var(--deft-accent);text-transform:uppercase;letter-spacing:0.04em;">Lesson Material</span>'
+              +   '</div>'
+              +   '<div style="font-size:0.875rem;color:var(--deft-txt-2);line-height:1.65;white-space:pre-line;">' + escapeHtml(lessonBody) + '</div>'
+              + '</aside>'
+              + '<div class="split-view-questions">' + questionsHtml + '</div>'
+              + '</div>';
     } else {
-        _questionsData.forEach(q => {
-            html += renderQuestionCard(q, _answersMap[q.question_id]);
-        });
+        // SINGLE-COLUMN VIEW (default).
+        html += renderProgressBar(answeredCount, totalCount);
+        html += renderMotivationRow(_motivationStats);
+        if (lessonBody) {
+            html += renderLessonContent(lessonBody);
+        }
+        if (_questionsData.length === 0) {
+            html += renderEmptyQuestions();
+        } else {
+            _questionsData.forEach(q => {
+                html += renderQuestionCard(q, _answersMap[q.question_id]);
+            });
+        }
     }
 
     container.innerHTML = html;
 
     // Bind event listeners after render
     bindQuestionEvents();
+}
+
+// UBR-0132: pop the lesson into a centered modal as a third reading mode.
+// Reuses the existing modal-backdrop / modal-content CSS classes from
+// school-core.css so it picks up the active dashboard theme.
+function openLessonModal() {
+    const body = _getLessonBodyText();
+    if (!body) {
+        if (typeof toast === 'function') toast('No full lesson text yet for this lesson', 'info');
+        return;
+    }
+    let m = document.getElementById('lessonReaderModal');
+    if (!m) {
+        m = document.createElement('div');
+        m.id = 'lessonReaderModal';
+        m.className = 'modal-backdrop';
+        m.onclick = function (e) { if (e.target === m) m.classList.remove('active'); };
+        document.body.appendChild(m);
+    }
+    const title = escapeHtml(currentLessonTitle || (_lessonDetail && _lessonDetail.title) || 'Lesson');
+    m.innerHTML = '<div class="modal-content" style="max-width:760px;max-height:86vh;display:flex;flex-direction:column;padding:0;">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--deft-border);">'
+        +   '<div style="display:flex;align-items:center;gap:0.5rem;min-width:0;">'
+        +     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="color:var(--deft-accent);flex-shrink:0;"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        +     '<h3 style="margin:0;font-size:1rem;font-weight:700;color:var(--deft-txt);font-family:var(--deft-heading-font),sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + title + '</h3>'
+        +   '</div>'
+        +   '<button onclick="document.getElementById(\'lessonReaderModal\').classList.remove(\'active\')" aria-label="Close" style="background:none;border:none;color:var(--deft-txt-3);cursor:pointer;padding:0.25rem;display:flex;"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>'
+        + '</div>'
+        + '<div style="padding:1.25rem;overflow-y:auto;flex:1;font-size:0.95rem;color:var(--deft-txt-2);line-height:1.7;white-space:pre-line;">' + escapeHtml(body) + '</div>'
+        + '</div>';
+    m.classList.add('active');
+}
+
+// UBR-0132: toggle split-view, persist preference, re-render.
+function toggleSplitView() {
+    _setSplitView(!_isSplitView());
+    const container = document.getElementById('questions-container');
+    if (container) renderQuestionsView(container);
 }
 
 // ═══════════════════════════════════════
@@ -109,7 +196,7 @@ function renderQuestionsLoading() {
 // ═══════════════════════════════════════
 // RENDER — Header
 // ═══════════════════════════════════════
-function renderQuestionsHeader() {
+function renderQuestionsHeader(splitView, hasLessonBody) {
     const title = escapeHtml(currentLessonTitle || (_lessonDetail && _lessonDetail.title) || 'Questions');
     const subject = _lessonDetail ? _lessonDetail.subject : null;
     const subjectStyle = subject ? getSubjectStyle(subject) : null;
@@ -117,10 +204,12 @@ function renderQuestionsHeader() {
         ? `<span style="font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 99px; background: ${subjectStyle.bg}; color: ${subjectStyle.text}; letter-spacing: 0.03em; text-transform: uppercase;">${escapeHtml(subjectStyle.label)}</span>`
         : '';
 
-    // UBR-0128: lesson title is now a clickable button that scrolls to and
-    // pulses the Lesson Material block so the user can find the lesson text.
+    // UBR-0128: lesson title is now a clickable button. In single-column view
+    // it scrolls to the Lesson Material block; in split view it opens the
+    // popup-style lesson modal so the student can read undistracted.
+    const titleClick = splitView ? 'openLessonModal()' : 'scrollToLessonMaterial()';
     const titleButton = `
-        <button type="button" onclick="scrollToLessonMaterial()" aria-label="Read lesson material"
+        <button type="button" onclick="${titleClick}" aria-label="Read lesson material"
             style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 0; padding: 0; background: transparent; border: none; cursor: pointer; text-align: left; flex-wrap: wrap;">
             <h2 style="margin: 0; font-size: 1.125rem; font-weight: 700; color: var(--deft-txt); font-family: var(--deft-heading-font, 'Nunito'), system-ui, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 24rem; transition: color 0.15s ease;"
                 onmouseover="this.style.color='var(--deft-accent)'" onmouseout="this.style.color='var(--deft-txt)'">
@@ -128,6 +217,28 @@ function renderQuestionsHeader() {
             </h2>
             ${subjectBadge}
         </button>`;
+
+    // UBR-0132: split-view toggle button. Hidden when there's no lesson body
+    // to show alongside.
+    const splitToggle = hasLessonBody ? `
+        <button onclick="toggleSplitView()" aria-label="Toggle split view" aria-pressed="${splitView ? 'true' : 'false'}"
+            title="${splitView ? 'Switch to single-column view' : 'Show lesson alongside questions'}"
+            style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid ${splitView ? 'var(--deft-accent)' : 'var(--deft-border)'}; background: ${splitView ? 'var(--deft-accent-dim)' : 'var(--deft-surface-el)'}; color: ${splitView ? 'var(--deft-accent)' : 'var(--deft-txt-2)'}; cursor: pointer; font-size: 0.775rem; font-weight: 500; transition: all 0.15s ease; white-space: nowrap;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="18" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="13" y="3" width="8" height="18" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+            ${splitView ? 'Single' : 'Split View'}
+        </button>` : '';
+
+    // UBR-0128/0132: Read Lesson button -- in split view it opens the modal,
+    // in single view it scrolls + pulses the inline block.
+    const readLessonClick = splitView ? 'openLessonModal()' : 'scrollToLessonMaterial()';
+    const readLessonBtn = hasLessonBody ? `
+        <button onclick="${readLessonClick}" aria-label="Read lesson"
+            style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--deft-border); background: var(--deft-surface-el); color: var(--deft-txt-2); cursor: pointer; font-size: 0.775rem; font-weight: 500; transition: all 0.15s ease; white-space: nowrap;"
+            onmouseenter="this.style.background='var(--deft-surface-hi)';this.style.color='var(--deft-txt)';this.style.borderColor='var(--deft-accent)'"
+            onmouseleave="this.style.background='var(--deft-surface-el)';this.style.color='var(--deft-txt-2)';this.style.borderColor='var(--deft-border)'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Read Lesson
+        </button>` : '';
 
     return `
         <div style="display: flex; align-items: center; gap: 0.5rem; padding: 1.5rem 1.5rem 0 1.5rem; flex-wrap: wrap;">
@@ -138,13 +249,8 @@ function renderQuestionsHeader() {
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 3L5 7l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
             ${titleButton}
-            <button onclick="scrollToLessonMaterial()" aria-label="Read lesson"
-                style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--deft-border); background: var(--deft-surface-el); color: var(--deft-txt-2); cursor: pointer; font-size: 0.775rem; font-weight: 500; transition: all 0.15s ease; white-space: nowrap;"
-                onmouseenter="this.style.background='var(--deft-surface-hi)';this.style.color='var(--deft-txt)';this.style.borderColor='var(--deft-accent)'"
-                onmouseleave="this.style.background='var(--deft-surface-el)';this.style.color='var(--deft-txt-2)';this.style.borderColor='var(--deft-border)'">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                Read Lesson
-            </button>
+            ${splitToggle}
+            ${readLessonBtn}
             <button onclick="openVideoSearchModal()" aria-label="Find Videos"
                 style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--deft-border); background: var(--deft-surface-el); color: var(--deft-txt-2); cursor: pointer; font-size: 0.775rem; font-weight: 500; transition: all 0.15s ease; white-space: nowrap;"
                 onmouseenter="this.style.background='var(--deft-surface-hi)';this.style.color='var(--deft-txt)';this.style.borderColor='var(--deft-accent)'"
@@ -162,8 +268,8 @@ function renderQuestionsHeader() {
 function scrollToLessonMaterial() {
     const el = document.getElementById('lesson-material-block');
     if (!el) {
-        if (typeof toast === 'function') toast('No lesson text available for this lesson', 'info');
-        return;
+        // No inline block (e.g. user is in split view). Fall back to the modal.
+        return openLessonModal();
     }
     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     el.classList.remove('lesson-material-pulse');
@@ -199,13 +305,35 @@ function renderProgressBar(answered, total) {
 // RENDER — Lesson Content Block
 // ═══════════════════════════════════════
 function renderLessonContent(content) {
+    // UBR-0132: lessons are now full 2-3 page bodies (~6500 chars) instead of a
+    // 1-sentence summary. Cap the inline block at 18rem with scroll so it does
+    // not push the question cards off-screen. Footer buttons let the student
+    // pop into the centered popup or split-view if they prefer.
     return `
         <div id="lesson-material-block" style="margin: 1rem 1.5rem 0.5rem 1.5rem; padding: 1rem 1.25rem; background: var(--deft-surface-el); border: 1px solid var(--deft-border); border-radius: var(--deft-radius, 0.875rem); border-left: 3px solid var(--deft-accent); transition: box-shadow 0.3s ease, border-color 0.3s ease;">
-            <div style="display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: var(--deft-accent); flex-shrink: 0;"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <span style="font-size: 0.75rem; font-weight: 600; color: var(--deft-accent); text-transform: uppercase; letter-spacing: 0.04em;">Lesson Material</span>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color: var(--deft-accent); flex-shrink: 0;"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span style="font-size: 0.75rem; font-weight: 600; color: var(--deft-accent); text-transform: uppercase; letter-spacing: 0.04em;">Lesson Material</span>
+                </div>
+                <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                    <button onclick="openLessonModal()" type="button" aria-label="Open lesson in popup"
+                        style="display:inline-flex;align-items:center;gap:0.3rem;padding:0.25rem 0.6rem;border-radius:0.375rem;border:1px solid var(--deft-border);background:transparent;color:var(--deft-txt-3);cursor:pointer;font-size:0.7rem;font-weight:500;"
+                        onmouseenter="this.style.borderColor='var(--deft-accent)';this.style.color='var(--deft-accent)'"
+                        onmouseleave="this.style.borderColor='var(--deft-border)';this.style.color='var(--deft-txt-3)'">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M15 3h6v6M21 3l-7 7M10 21H3v-7M3 21l7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Pop out
+                    </button>
+                    <button onclick="toggleSplitView()" type="button" aria-label="Switch to split view"
+                        style="display:inline-flex;align-items:center;gap:0.3rem;padding:0.25rem 0.6rem;border-radius:0.375rem;border:1px solid var(--deft-border);background:transparent;color:var(--deft-txt-3);cursor:pointer;font-size:0.7rem;font-weight:500;"
+                        onmouseenter="this.style.borderColor='var(--deft-accent)';this.style.color='var(--deft-accent)'"
+                        onmouseleave="this.style.borderColor='var(--deft-border)';this.style.color='var(--deft-txt-3)'">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="18" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="3" width="8" height="18" rx="1.5" stroke="currentColor" stroke-width="1.8"/></svg>
+                        Split view
+                    </button>
+                </div>
             </div>
-            <div style="font-size: 0.875rem; color: var(--deft-txt-2); line-height: 1.6; white-space: pre-line;">${escapeHtml(content)}</div>
+            <div style="font-size: 0.875rem; color: var(--deft-txt-2); line-height: 1.65; white-space: pre-line; max-height: 18rem; overflow-y: auto; padding-right: 0.25rem;">${escapeHtml(content)}</div>
         </div>
     `;
 }
@@ -587,12 +715,16 @@ async function handleSubmitAnswer(qId) {
     if (submitBtn) submitBtn.style.display = 'none';
     if (spinner) spinner.style.display = 'flex';
 
+    // UBR-0131: AI grading routinely takes 5-15s. Bump timeout to 60s so the
+    // request doesn't get aborted mid-call. The user previously saw the
+    // spinner reset with no toast because the default 30s window was firing
+    // mid-grade and schoolApi's silent return-null then hid the failure.
     const result = await schoolApi('submit_answer', {
         assignment_id: currentAssignmentId,
         question_id: qId,
         answer_text: answerText,
         answer_image_url: answerImageUrl || null
-    });
+    }, { timeout: 60000 });
 
     if (spinner) spinner.style.display = 'none';
 
@@ -637,6 +769,11 @@ async function handleSubmitAnswer(qId) {
 
         toast('Answer submitted!', 'success');
     } else {
+        // UBR-0131: explicit failure toast so the student is never left
+        // wondering whether their answer went through. schoolApi may already
+        // have toasted (timeout / connection / success:false), but this
+        // catches the empty-response branch where it returns null silently.
+        if (typeof toast === 'function') toast('Could not submit answer. Please try again.', 'error');
         // Restore submit button on failure
         if (submitBtn) submitBtn.style.display = 'inline-flex';
     }
