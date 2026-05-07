@@ -1414,14 +1414,15 @@ async function confirmReview(answerId, acceptAI) {
         return;
     }
 
-    // Use the canonical override_score backend route so school_grades + the
-    // assignment status PATCH all recalculate consistently.
-    const result = acceptAI
-        ? await supabaseWrite('school_answers', 'PATCH', {
-            check_status: 'verified',
-            checked_at: new Date().toISOString()
-        }, `answer_id=eq.${answerId}`)
-        : await schoolApi('override_score', { answer_id: answerId, score: scorePct, reason: 'Teacher review' });
+    // UBR-0155: Use the canonical override_score backend route for both
+    // accept and override paths so check_status='verified' is set in one place
+    // and the queue clears on refresh. Field names must match the SCHOOL-BRIDGE
+    // Override Score node contract: { answer_id, override_score, override_reason }.
+    const result = await schoolApi('override_score', {
+        answer_id: answerId,
+        override_score: scorePct,
+        override_reason: acceptAI ? 'Accepted AI score' : 'Teacher override'
+    });
 
     if (result) {
         toast('Review saved');

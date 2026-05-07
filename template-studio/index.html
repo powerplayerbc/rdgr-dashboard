@@ -632,16 +632,12 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 </div>
                 <div class="panel-body">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="text-xs text-txt-2 font-medium mb-1 block">Message Type</label>
-                            <select class="form-input" id="genMsgType">
-                                <option value="partner_pitch">Partner Pitch</option>
-                                <option value="jv_opportunity">JV Opportunity</option>
-                                <option value="speaking_engagement">Speaking Engagement</option>
-                                <option value="interview_request">Interview Request</option>
-                                <option value="friendly_outreach">Friendly Outreach</option>
-                            </select>
-                        </div>
+                        <!-- UBR-0154: "Message Type" field removed. The
+                             BRAND-TEMPLATE-GEN backend never used message_type
+                             in its generation prompt (only as a passthrough
+                             label), so it was dead UI weight. Channel + Tone +
+                             Categories below specify everything generation
+                             needs. -->
                         <div>
                             <label class="text-xs text-txt-2 font-medium mb-1 block">Channel</label>
                             <!-- UBR-0153: dropdown is hydrated from the canonical 22-channel
@@ -817,10 +813,12 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         btn.disabled = true; btn.textContent = 'Generating...';
         toast('Generating template pieces... this may take 15-30 seconds');
 
+        // UBR-0154: message_type removed from payload. BRAND-TEMPLATE-GEN's
+        // Parse Input defaults message_type to null if absent and the
+        // generation prompt does not reference it, so this is a safe drop.
         const result = await fetchJSON(WEBHOOK_URL, {
             operation: 'generate_pieces',
             brand_id: BRAND_ID,
-            message_type: document.getElementById('genMsgType').value,
             categories: cats,
             channel: document.getElementById('genChannel').value,
             count_per_category: parseInt(document.getElementById('genCount').value),

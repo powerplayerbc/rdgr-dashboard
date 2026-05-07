@@ -7,13 +7,30 @@
 // =======================================
 let gradesData = {
     assignments: [],
-    grades: {},
+    grades: {},        // assignment_id -> single school_grades row (per-assignment schema)
+    answers: {},       // assignment_id -> array of school_answers rows
     lessons: {},
+    questions: {},     // lesson_id -> array of school_questions rows
     expandedId: null
 };
 
-// Brianna's user_id for teacher viewing
-const STUDENT_USER_ID = '3f0a5120-44d8-4835-a57c-2a4ecb55f7a3';
+// UBR-0156: resolve the actual student profile id for teacher view (the
+// previous hardcoded UUID didn't match any real profile so the page was empty).
+let _gradesViewStudentId = null;
+async function resolveGradesViewStudentId() {
+    if (_gradesViewStudentId) return _gradesViewStudentId;
+    if (!isTeacher()) {
+        _gradesViewStudentId = activeProfileId;
+        return _gradesViewStudentId;
+    }
+    const rows = await supabaseSelect('deft_user_profiles', 'role=eq.student&select=user_id&limit=1');
+    if (rows && rows.length) {
+        _gradesViewStudentId = rows[0].user_id;
+    } else {
+        _gradesViewStudentId = activeProfileId;
+    }
+    return _gradesViewStudentId;
+}
 
 // =======================================
 // REFRESH GRADES (main entry point)
@@ -26,10 +43,17 @@ async function refreshGrades() {
 
     container.innerHTML = renderGradesLoading();
 
-    const viewUserId = isTeacher() ? STUDENT_USER_ID : activeProfileId;
+    const viewUserId = await resolveGradesViewStudentId();
+    if (!viewUserId) {
+        container.innerHTML = renderGradesEmpty('No student profile to view.');
+        return;
+    }
 
-    // Fetch all data in parallel
-    const [assignments, grades, lessons] = await Promise.all([
+    // UBR-0156: pull per-assignment grade summary from school_grades AND the
+    // per-question answer rows from school_answers (so the detail accordion
+    // can show each question's score without needing the broken
+    // get_assignment_detail flow).
+    const [assignments, grades, lessons, answers] = await Promise.all([
         supabaseSelect('school_assignments',
             `student_id=eq.${viewUserId}&status=neq.excused&order=assigned_date.desc&select=*`
         ),
@@ -38,21 +62,30 @@ async function refreshGrades() {
         ),
         supabaseSelect('school_lessons',
             'select=lesson_id,title,subject'
+        ),
+        supabaseSelect('school_answers',
+            `student_id=eq.${viewUserId}&select=*`
         )
     ]);
 
-    // Index grades by assignment_id
+    // Per-assignment school_grades (one row per assignment)
     gradesData.grades = {};
     if (grades && grades.length) {
         for (const g of grades) {
-            if (!gradesData.grades[g.assignment_id]) {
-                gradesData.grades[g.assignment_id] = [];
-            }
-            gradesData.grades[g.assignment_id].push(g);
+            gradesData.grades[g.assignment_id] = g;
         }
     }
 
-    // Index lessons by id
+    // Per-assignment answers
+    gradesData.answers = {};
+    if (answers && answers.length) {
+        for (const a of answers) {
+            if (!gradesData.answers[a.assignment_id]) gradesData.answers[a.assignment_id] = [];
+            gradesData.answers[a.assignment_id].push(a);
+        }
+    }
+
+    // Lessons by id
     gradesData.lessons = {};
     if (lessons && lessons.length) {
         for (const l of lessons) {
@@ -66,10 +99,22 @@ async function refreshGrades() {
     renderGrades();
 }
 
+function renderGradesEmpty(msg) {
+    return `
+        <div style="text-align: center; padding: 60px 20px; color: var(--deft-txt-3);">
+            <div style="font-size: 15px; font-weight: 600; color: var(--deft-txt-2); margin-bottom: 4px;">
+                ${escapeHtml(msg)}
+            </div>
+        </div>
+    `;
+}
+
 // =======================================
 // STAT CALCULATIONS
 // =======================================
 function calcGradeStats() {
+    // UBR-0156: school_grades is per-assignment (single row per assignment_id).
+    // Use total_points / earned_points / adjusted_percentage from each row.
     let totalEarned = 0;
     let totalPossible = 0;
     let totalAdjustedEarned = 0;
@@ -77,22 +122,20 @@ function calcGradeStats() {
     let assignmentCount = 0;
 
     for (const a of gradesData.assignments) {
-        const aGrades = gradesData.grades[a.assignment_id];
-        if (!aGrades || !aGrades.length) continue;
+        const g = gradesData.grades[a.assignment_id];
+        if (!g) continue;
 
         assignmentCount++;
-        for (const g of aGrades) {
-            const possible = g.points_possible || 100;
-            const earned = g.score != null ? g.score : 0;
-            totalEarned += earned;
-            totalPossible += possible;
+        const possible = Number(g.total_points) || 0;
+        const earned = Number(g.earned_points) || 0;
+        totalEarned += earned;
+        totalPossible += possible;
 
-            // Adjusted: skip struck questions, apply overrides
-            if (g.struck) continue;
-            const adjEarned = g.override_score != null ? g.override_score : earned;
-            totalAdjustedEarned += adjEarned;
-            totalAdjustedPossible += possible;
-        }
+        // Adjusted = same as raw for now (overrides already roll into earned_points
+        // via Recalc Fetch Answers reading override_score). Falls back to raw.
+        const adjPct = g.adjusted_percentage != null ? Number(g.adjusted_percentage) : (g.raw_percentage != null ? Number(g.raw_percentage) : 0);
+        totalAdjustedEarned += (adjPct / 100) * possible;
+        totalAdjustedPossible += possible;
     }
 
     const overallPct = totalPossible > 0 ? (totalEarned / totalPossible) * 100 : 0;
@@ -108,21 +151,19 @@ function calcGradeStats() {
 }
 
 function calcAssignmentStats(assignmentId) {
-    const aGrades = gradesData.grades[assignmentId];
-    if (!aGrades || !aGrades.length) return { pct: 0, earned: 0, possible: 0 };
-
-    let earned = 0;
-    let possible = 0;
-    for (const g of aGrades) {
-        const pts = g.points_possible || 100;
-        const sc = g.override_score != null ? g.override_score : (g.score != null ? g.score : 0);
-        if (!g.struck) {
-            earned += sc;
-            possible += pts;
-        }
-    }
-    const pct = possible > 0 ? (earned / possible) * 100 : 0;
-    return { pct, earned: Math.round(earned * 10) / 10, possible: Math.round(possible * 10) / 10 };
+    // UBR-0156: per-assignment summary row.
+    const g = gradesData.grades[assignmentId];
+    if (!g) return { pct: 0, earned: 0, possible: 0, hasGrade: false };
+    const pct = g.adjusted_percentage != null ? Number(g.adjusted_percentage) : Number(g.raw_percentage || 0);
+    const earned = Number(g.earned_points || 0);
+    const possible = Number(g.total_points || 0);
+    return {
+        pct,
+        earned: Math.round(earned * 10) / 10,
+        possible: Math.round(possible * 10) / 10,
+        hasGrade: true,
+        letterGrade: g.letter_grade
+    };
 }
 
 // =======================================
@@ -361,11 +402,7 @@ function toggleGradeAccordion(assignmentId) {
 // LAZY-LOAD DETAIL
 // =======================================
 async function loadGradeDetail(assignmentId) {
-    // Show loading state first
-    const detailEl = document.getElementById('grade-detail-' + assignmentId);
-    const headerBtn = detailEl ? detailEl.previousElementSibling : null;
-
-    // Update all accordion visuals
+    // UBR-0156: render the accordion list first so the expanded indicator updates.
     const list = document.getElementById('grades-assignment-list');
     if (list) {
         list.innerHTML = gradesData.assignments.map(a => renderAssignmentAccordion(a)).join('');
@@ -373,6 +410,14 @@ async function loadGradeDetail(assignmentId) {
 
     const panel = document.getElementById('grade-detail-' + assignmentId);
     if (!panel) return;
+
+    // Find the lesson_id for this assignment
+    const assignment = gradesData.assignments.find(a => a.assignment_id === assignmentId);
+    const lessonId = assignment ? assignment.lesson_id : null;
+    if (!lessonId) {
+        panel.innerHTML = renderGradesEmpty('Lesson not found for this assignment.');
+        return;
+    }
 
     panel.innerHTML = `
         <div style="padding: 20px; text-align: center; color: var(--deft-txt-3);">
@@ -390,16 +435,14 @@ async function loadGradeDetail(assignmentId) {
         </style>
     `;
 
-    // Fetch question-by-question data via schoolApi
-    const result = await schoolApi('get_assignment_detail', { assignment_id: assignmentId }, { silent: true });
-
-    if (result && result.data && result.data.questions) {
-        // Cache the fetched questions for rendering
-        if (!gradesData.questionCache) gradesData.questionCache = {};
-        gradesData.questionCache[assignmentId] = result.data.questions;
+    // UBR-0156: fetch the lesson's questions directly from Supabase rather than
+    // through the broken get_assignment_detail flow (which didn't pass lesson_id).
+    if (!gradesData.questions[lessonId]) {
+        const qs = await supabaseSelect('school_questions',
+            `lesson_id=eq.${lessonId}&order=question_number&select=*`);
+        gradesData.questions[lessonId] = qs || [];
     }
 
-    // Re-render the panel with the data
     panel.innerHTML = renderAssignmentDetail(assignmentId);
 }
 
@@ -407,27 +450,28 @@ async function loadGradeDetail(assignmentId) {
 // ASSIGNMENT DETAIL (question rows)
 // =======================================
 function renderAssignmentDetail(assignmentId) {
-    const aGrades = gradesData.grades[assignmentId] || [];
-    const cachedQuestions = (gradesData.questionCache && gradesData.questionCache[assignmentId]) || [];
+    const assignment = gradesData.assignments.find(a => a.assignment_id === assignmentId);
+    const lessonId = assignment ? assignment.lesson_id : null;
+    const lessonQuestions = (lessonId && gradesData.questions[lessonId]) || [];
+    const studentAnswers = gradesData.answers[assignmentId] || [];
 
-    if (!aGrades.length && !cachedQuestions.length) {
+    if (!lessonQuestions.length) {
         return `
             <div style="padding: 20px; text-align: center; color: var(--deft-txt-3); font-size: 13px;">
-                No grade data available for this assignment.
+                No questions found for this lesson.
             </div>
         `;
     }
 
-    // Merge grade entries with question data
-    const rows = aGrades.map((g, idx) => {
-        const q = cachedQuestions.find(cq => cq.id === g.question_id) || cachedQuestions[idx] || {};
-        return { grade: g, question: q, num: idx + 1 };
-    });
-
-    // If we have cached questions but no grades, show questions alone
-    if (!aGrades.length && cachedQuestions.length) {
-        return cachedQuestions.map((q, idx) => renderQuestionRowNoGrade(q, idx + 1)).join('');
-    }
+    // UBR-0156: build per-question rows by joining school_questions with the
+    // student's school_answers in memory.
+    const answerMap = {};
+    studentAnswers.forEach(a => { answerMap[a.question_id] = a; });
+    const rows = lessonQuestions.map((q, idx) => ({
+        grade: answerMap[q.question_id] || {},
+        question: q,
+        num: q.question_number || (idx + 1)
+    }));
 
     const teacherControls = isTeacher() ? `
         <div data-role-min="admin" style="
@@ -481,16 +525,20 @@ function renderAssignmentDetail(assignmentId) {
 // QUESTION ROW
 // =======================================
 function renderQuestionRow(row, assignmentId) {
-    const g = row.grade;
-    const q = row.question;
+    const g = row.grade;       // school_answers row (or {} if unanswered)
+    const q = row.question;    // school_questions row
     const num = row.num;
 
-    const isStruck = g.struck === true;
+    // UBR-0156: scores come from school_answers (ai_score 0-100, override_score 0-100).
+    // Possible points come from school_questions.points (canonical 10).
+    const isStruck = g.is_struck === true;
     const hasOverride = g.override_score != null;
-    const score = hasOverride ? g.override_score : (g.score != null ? g.score : null);
-    const possible = g.points_possible || 100;
-    const scorePct = possible > 0 && score != null ? (score / possible) * 100 : null;
-    const isPending = score == null && !isStruck;
+    const aiPct = g.ai_score != null ? Number(g.ai_score) : null;
+    const overridePct = hasOverride ? Number(g.override_score) : null;
+    const scorePct = overridePct != null ? overridePct : aiPct; // 0-100 percentage
+    const possible = Number(q.points) > 0 ? Number(q.points) : 10;
+    const score = scorePct != null ? Math.round((scorePct / 100) * possible * 10) / 10 : null;
+    const isPending = scorePct == null && !isStruck;
 
     // Status determination
     let statusLabel = 'Pending';
@@ -534,15 +582,16 @@ function renderQuestionRow(row, assignmentId) {
             : clean;
     };
 
-    const questionText = q.question_text || g.question_text || '';
-    const studentAnswer = q.student_answer || g.student_answer || '';
-    const correctAnswer = q.correct_answer || g.correct_answer || '';
+    // UBR-0156: per-question text from school_questions + student answer from school_answers
+    const questionText = q.question_text || '';
+    const studentAnswer = g.answer_text || '';
+    const correctAnswer = q.correct_answer || g.correct_answer_shown || '';
 
     const struckStyle = isStruck ? 'text-decoration: line-through; opacity: 0.5;' : '';
 
     const teacherActions = isTeacher() ? `
         <span style="display: flex; gap: 4px; justify-content: flex-end;">
-            <button onclick="openOverrideInline('${assignmentId}', '${g.answer_id}', ${score || 0}, ${possible})"
+            <button onclick="openOverrideInline('${assignmentId}', '${(g.answer_id || q.question_id)}', ${score || 0}, ${possible})"
                     title="Override score"
                     style="background: transparent; border: 1px solid var(--deft-border); color: var(--deft-txt-2);
                            border-radius: 6px; padding: 3px 8px; font-size: 11px; cursor: pointer;
@@ -551,7 +600,7 @@ function renderQuestionRow(row, assignmentId) {
                     onmouseleave="this.style.borderColor='var(--deft-border)';this.style.color='var(--deft-txt-2)'">
                 Edit
             </button>
-            <button onclick="toggleStrike('${assignmentId}', '${g.answer_id}', ${!isStruck})"
+            <button onclick="toggleStrike('${assignmentId}', '${(g.answer_id || q.question_id)}', ${!isStruck})"
                     title="${isStruck ? 'Unstrike' : 'Strike'} question"
                     style="background: transparent; border: 1px solid ${isStruck ? 'var(--deft-warning)' : 'var(--deft-border)'};
                            color: ${isStruck ? 'var(--deft-warning)' : 'var(--deft-txt-3)'};
@@ -565,7 +614,7 @@ function renderQuestionRow(row, assignmentId) {
     ` : '';
 
     return `
-        <div id="grade-row-${g.answer_id}" style="
+        <div id="grade-row-${(g.answer_id || q.question_id)}" style="
             display: grid;
             grid-template-columns: 36px 1.5fr 1fr 1fr 70px 60px ${isTeacher() ? '120px' : ''};
             gap: 4px; padding: 8px 18px; align-items: center;
@@ -610,7 +659,7 @@ function renderQuestionRow(row, assignmentId) {
         </div>
 
         <!-- Inline override input (hidden by default) -->
-        <div id="override-inline-${g.answer_id}" style="display: none;"></div>
+        <div id="override-inline-${(g.answer_id || q.question_id)}" style="display: none;"></div>
     `;
 }
 
@@ -729,36 +778,39 @@ function openOverrideInline(assignmentId, gradeId, currentScore, maxPoints) {
     if (inp) inp.focus();
 }
 
-async function submitOverride(assignmentId, gradeId, maxPoints) {
-    const scoreInput = document.getElementById('override-val-' + gradeId);
-    const reasonInput = document.getElementById('override-reason-' + gradeId);
+async function submitOverride(assignmentId, answerId, maxPoints) {
+    const scoreInput = document.getElementById('override-val-' + answerId);
+    const reasonInput = document.getElementById('override-reason-' + answerId);
     if (!scoreInput) return;
 
-    const newScore = parseFloat(scoreInput.value);
-    if (isNaN(newScore) || newScore < 0 || newScore > maxPoints) {
+    const newScorePoints = parseFloat(scoreInput.value);
+    if (isNaN(newScorePoints) || newScorePoints < 0 || newScorePoints > maxPoints) {
         toast('Score must be between 0 and ' + maxPoints, 'error');
         return;
     }
+    // UBR-0156: convert points back to 0-100 percentage for the backend.
+    const newScorePct = maxPoints > 0
+        ? Math.max(0, Math.min(100, Math.round((newScorePoints / maxPoints) * 100)))
+        : 0;
 
-    const reason = reasonInput ? reasonInput.value.trim() : '';
+    const reason = reasonInput ? reasonInput.value.trim() : 'Teacher override';
 
+    // UBR-0155 contract: { answer_id, override_score, override_reason }.
     const result = await schoolApi('override_score', {
-        grade_id: gradeId,
-        assignment_id: assignmentId,
-        new_score: newScore,
-        reason: reason
+        answer_id: answerId,
+        override_score: newScorePct,
+        override_reason: reason
     });
 
     if (result) {
         toast('Score overridden', 'success');
-        // Update local cache
-        const aGrades = gradesData.grades[assignmentId];
-        if (aGrades) {
-            const g = aGrades.find(gr => gr.answer_id === gradeId);
-            if (g) {
-                g.override_score = newScore;
-                g.override_reason = reason;
-            }
+        // Update local cache: school_answers row holds the override.
+        const answers = gradesData.answers[assignmentId] || [];
+        const a = answers.find(an => an.answer_id === answerId);
+        if (a) {
+            a.override_score = newScorePct;
+            a.override_reason = reason;
+            a.check_status = 'verified';
         }
         // Re-render everything (stats + detail)
         renderGrades();
@@ -774,21 +826,18 @@ async function submitOverride(assignmentId, gradeId, maxPoints) {
 }
 
 // --- Strike / Unstrike question ---
-async function toggleStrike(assignmentId, gradeId, shouldStrike) {
+async function toggleStrike(assignmentId, answerId, shouldStrike) {
     const result = await schoolApi('strike_question', {
-        grade_id: gradeId,
-        assignment_id: assignmentId,
-        struck: shouldStrike
+        answer_id: answerId,
+        is_struck: shouldStrike
     });
 
     if (result) {
         toast(shouldStrike ? 'Question struck' : 'Strike removed', 'success');
-        // Update local cache
-        const aGrades = gradesData.grades[assignmentId];
-        if (aGrades) {
-            const g = aGrades.find(gr => gr.answer_id === gradeId);
-            if (g) g.struck = shouldStrike;
-        }
+        // Update local cache (school_answers.is_struck)
+        const answers = gradesData.answers[assignmentId] || [];
+        const a = answers.find(an => an.answer_id === answerId);
+        if (a) a.is_struck = shouldStrike;
         // Re-render
         renderGrades();
         gradesData.expandedId = assignmentId;
