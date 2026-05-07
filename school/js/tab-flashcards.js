@@ -955,15 +955,40 @@ function fcStopMulTimer() {
 
 
 // ─── Multiplication Problem Selection ───────────────────────────────
+// UBR-0136: avoid showing the same fact twice (or three times) in a row.
+// Track the last 2 picks and re-roll up to 5 times to find a different one;
+// fall back to allowing repeats only when the candidate pool is too small to
+// avoid them.
+function _fcPickAvoidingRepeat(picker, lastKeys) {
+    let candidate = picker();
+    if (!candidate) return null;
+    for (let i = 0; i < 5; i++) {
+        if (!lastKeys.includes(candidate.key)) return candidate;
+        candidate = picker();
+        if (!candidate) return candidate;
+    }
+    return candidate;
+}
+
 function fcPickNextMultiplication() {
     const phase = fcState.mulPhase;
     const prog = fcState.mulProgress;
 
+    // Track the last two facts shown so we can avoid immediate repeats.
+    if (!Array.isArray(fcState.mulRecentKeys)) fcState.mulRecentKeys = [];
+
     // Phase 3: random 2-digit
     if (phase === 3) {
-        const a = Math.floor(Math.random() * 90) + 10;
-        const b = Math.floor(Math.random() * 90) + 10;
-        fcState.mulCurrent = { a, b, key: `${a}x${b}` };
+        let pick;
+        for (let i = 0; i < 5; i++) {
+            const a = Math.floor(Math.random() * 90) + 10;
+            const b = Math.floor(Math.random() * 90) + 10;
+            const key = a + 'x' + b;
+            if (!fcState.mulRecentKeys.includes(key)) { pick = { a, b, key }; break; }
+            if (i === 4) pick = { a, b, key };
+        }
+        fcState.mulCurrent = pick;
+        _fcRememberKey(pick && pick.key);
         return;
     }
 
@@ -995,27 +1020,47 @@ function fcPickNextMultiplication() {
     }
 
     const rand = Math.random();
-    let pool;
+    let pick = null;
 
     if (rand < 0.70 && unproficient.length > 0) {
         // 70%: pick unproficient, prioritize struggling
-        pool = unproficient.sort((a, b) => {
+        const sorted = unproficient.sort((a, b) => {
             const pa = prog[a.key];
             const pb = prog[b.key];
             const attA = pa ? pa.total_attempts : 0;
             const attB = pb ? pb.total_attempts : 0;
-            return attB - attA; // most attempts first
+            return attB - attA;
         });
-        // Pick from top struggling third
-        const topThird = Math.max(1, Math.ceil(pool.length / 3));
-        fcState.mulCurrent = pool[Math.floor(Math.random() * topThird)];
+        const topThird = Math.max(1, Math.ceil(sorted.length / 3));
+        pick = _fcPickAvoidingRepeat(
+            () => sorted[Math.floor(Math.random() * topThird)],
+            fcState.mulRecentKeys
+        );
     } else if (rand < 0.90 && recentlyProficient.length > 0) {
         // 20%: review recently proficient
-        fcState.mulCurrent = recentlyProficient[Math.floor(Math.random() * recentlyProficient.length)];
+        pick = _fcPickAvoidingRepeat(
+            () => recentlyProficient[Math.floor(Math.random() * recentlyProficient.length)],
+            fcState.mulRecentKeys
+        );
     } else {
         // 10%: any problem
-        fcState.mulCurrent = allProblems[Math.floor(Math.random() * allProblems.length)];
+        pick = _fcPickAvoidingRepeat(
+            () => allProblems[Math.floor(Math.random() * allProblems.length)],
+            fcState.mulRecentKeys
+        );
     }
+
+    fcState.mulCurrent = pick;
+    _fcRememberKey(pick && pick.key);
+}
+
+function _fcRememberKey(key) {
+    if (!key) return;
+    if (!Array.isArray(fcState.mulRecentKeys)) fcState.mulRecentKeys = [];
+    fcState.mulRecentKeys.push(key);
+    // Keep last 2 (so we avoid repeats of the immediate prior fact AND the one
+    // before that — the user reported 1×11 / 1×12 alternating).
+    if (fcState.mulRecentKeys.length > 2) fcState.mulRecentKeys.shift();
 }
 
 async function fcCheckMultiplication() {

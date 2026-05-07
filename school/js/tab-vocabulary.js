@@ -22,6 +22,23 @@ let vocabState = {
     activeTooltip: null
 };
 
+// UBR-0151: mark vocab as done for the day so the Today tab's Daily
+// Activities tile can show a green checkmark for the Vocabulary Study card.
+function vocabMarkDone() {
+    const profileId = (typeof activeProfileId !== 'undefined' && activeProfileId) || 'anon';
+    const today = (typeof todayStr === 'function') ? todayStr() : new Date().toISOString().slice(0, 10);
+    const storageKey = 'school-vocab-done-' + profileId + '-' + today;
+    try { localStorage.setItem(storageKey, '1'); } catch (e) {}
+    const btn = document.getElementById('vocab-mark-done-btn');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '✓ Marked Done';
+        btn.style.background = 'var(--deft-success)';
+        btn.setAttribute('aria-pressed', 'true');
+    }
+    if (typeof toast === 'function') toast('Vocabulary marked complete for today.');
+}
+
 // ─── Semester Week Calculation ───────────────────────────────────────
 function vocabGetCurrentWeek() {
     const today = new Date(todayStr() + 'T00:00:00');
@@ -280,6 +297,28 @@ function vocabBuildWordList() {
     };
 
     let html = '<div class="vc-wordlist">';
+
+    // UBR-0151: student-facing "Mark as Done" button so the Today tab's
+    // Vocabulary Study tile can flip to a green checkmark for the day.
+    if (typeof isTeacher === 'function' && !isTeacher()) {
+        const profileId = (typeof activeProfileId !== 'undefined' && activeProfileId) || 'anon';
+        const today = (typeof todayStr === 'function') ? todayStr() : new Date().toISOString().slice(0, 10);
+        const storageKey = 'school-vocab-done-' + profileId + '-' + today;
+        let doneToday = false;
+        try { doneToday = localStorage.getItem(storageKey) === '1'; } catch (e) {}
+        html += `
+            <div id="vocab-mark-done-bar" style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:12px;border-radius:10px;background:var(--deft-surface-el);border:1px solid var(--deft-border);">
+                <span style="font-size:12px;color:var(--deft-txt-2);flex:1;">
+                    Looked through today's words? Mark this activity complete.
+                </span>
+                <button id="vocab-mark-done-btn" class="vc-btn vc-btn-primary"
+                        style="font-size:12px;padding:6px 14px;${doneToday ? 'background:var(--deft-success);' : ''}"
+                        onclick="vocabMarkDone()" ${doneToday ? 'disabled aria-pressed="true"' : 'aria-pressed="false"'}>
+                    ${doneToday ? '✓ Marked Done' : 'Mark as Done'}
+                </button>
+            </div>
+        `;
+    }
 
     // Teacher: edit button
     if (isTeacher()) {

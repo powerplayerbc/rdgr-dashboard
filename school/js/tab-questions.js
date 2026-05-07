@@ -228,17 +228,8 @@ function renderQuestionsHeader(splitView, hasLessonBody) {
             ${splitView ? 'Single' : 'Split View'}
         </button>` : '';
 
-    // UBR-0128/0132: Read Lesson button -- in split view it opens the modal,
-    // in single view it scrolls + pulses the inline block.
-    const readLessonClick = splitView ? 'openLessonModal()' : 'scrollToLessonMaterial()';
-    const readLessonBtn = hasLessonBody ? `
-        <button onclick="${readLessonClick}" aria-label="Read lesson"
-            style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--deft-border); background: var(--deft-surface-el); color: var(--deft-txt-2); cursor: pointer; font-size: 0.775rem; font-weight: 500; transition: all 0.15s ease; white-space: nowrap;"
-            onmouseenter="this.style.background='var(--deft-surface-hi)';this.style.color='var(--deft-txt)';this.style.borderColor='var(--deft-accent)'"
-            onmouseleave="this.style.background='var(--deft-surface-el)';this.style.color='var(--deft-txt-2)';this.style.borderColor='var(--deft-border)'">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2zM22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Read Lesson
-        </button>` : '';
+    // UBR-0139: "Read Lesson" header button removed (redundant with the
+    // clickable lesson title and the inline lesson material block).
 
     return `
         <div style="display: flex; align-items: center; gap: 0.5rem; padding: 1.5rem 1.5rem 0 1.5rem; flex-wrap: wrap;">
@@ -250,7 +241,6 @@ function renderQuestionsHeader(splitView, hasLessonBody) {
             </button>
             ${titleButton}
             ${splitToggle}
-            ${readLessonBtn}
             <button onclick="openVideoSearchModal()" aria-label="Find Videos"
                 style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--deft-border); background: var(--deft-surface-el); color: var(--deft-txt-2); cursor: pointer; font-size: 0.775rem; font-weight: 500; transition: all 0.15s ease; white-space: nowrap;"
                 onmouseenter="this.style.background='var(--deft-surface-hi)';this.style.color='var(--deft-txt)';this.style.borderColor='var(--deft-accent)'"
@@ -405,36 +395,56 @@ function renderQuestionCard(question, existingAnswer) {
     const hasAnswer = !!existingAnswer;
     const isChecked = hasAnswer && existingAnswer.is_correct !== null && existingAnswer.is_correct !== undefined;
     const isCorrect = isChecked && existingAnswer.is_correct;
+    const partialCredit = isChecked && (existingAnswer.partial_credit === true);
+    // UBR-0149 three-state grading: 'correct' (90+) / 'partial' (70-89) / 'incorrect' (<70).
+    const gradeState = isChecked ? (isCorrect && partialCredit ? 'partial' : (isCorrect ? 'correct' : 'incorrect')) : null;
     const answerText = hasAnswer ? (existingAnswer.answer_text || '') : '';
     const answerImageUrl = hasAnswer ? (existingAnswer.answer_image_url || '') : '';
     const aiFeedback = hasAnswer ? (existingAnswer.ai_feedback || '') : '';
-    const score = hasAnswer ? existingAnswer.score : null;
+    // Prefer override_score (teacher) -> ai_score; tolerate legacy `score` field too.
+    const score = hasAnswer
+        ? (existingAnswer.override_score != null
+            ? existingAnswer.override_score
+            : (existingAnswer.ai_score != null ? existingAnswer.ai_score : (existingAnswer.score != null ? existingAnswer.score : null)))
+        : null;
+    // UBR-0137: answer key surfaced from grading flow so the student can compare
+    // their answer against the expected one without losing what they wrote.
+    const correctAnswerShown = hasAnswer ? (existingAnswer.correct_answer_shown || '') : '';
 
-    // Border style based on answer status
+    // Color tokens per state — partial credit uses warning/amber so it reads as
+    // "good attempt, almost there" rather than the previous harsh red.
+    const stateColors = {
+        correct:   { line: 'var(--deft-success)',  text: 'var(--deft-success)',  bgDim: 'var(--deft-success-dim, rgba(107,203,119,0.1))', bgBorder: 'rgba(107,203,119,0.2)' },
+        partial:   { line: 'var(--deft-warning, #f59e0b)', text: 'var(--deft-warning, #f59e0b)', bgDim: 'rgba(245,158,11,0.1)', bgBorder: 'rgba(245,158,11,0.25)' },
+        incorrect: { line: 'var(--deft-danger)',   text: 'var(--deft-danger)',   bgDim: 'var(--deft-danger-dim, rgba(232,93,93,0.1))', bgBorder: 'rgba(232,93,93,0.2)' }
+    };
+    const sc = gradeState ? stateColors[gradeState] : null;
+
+    // Border style based on grade state.
     let borderLeft = '1px solid var(--deft-border)';
-    if (isChecked && isCorrect) {
-        borderLeft = '3px solid var(--deft-success)';
-    } else if (isChecked && !isCorrect) {
-        borderLeft = '3px solid var(--deft-danger)';
-    }
+    if (sc) borderLeft = `3px solid ${sc.line}`;
 
-    // Score badge
+    // Score badge (uses state color so the chip matches the rest of the card).
     let scoreBadge = '';
     if (isChecked && score !== null && score !== undefined) {
-        const gradeInfo = getLetterGrade(score);
+        const badgeColor = sc ? sc.text : 'var(--deft-txt-2)';
         scoreBadge = `
-            <span style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.15rem 0.5rem; border-radius: 99px; font-size: 0.7rem; font-weight: 700; background: ${gradeInfo.color}18; color: ${gradeInfo.color};">
-                ${gradeInfo.grade} &middot; ${score}%
+            <span style="display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.15rem 0.5rem; border-radius: 99px; font-size: 0.7rem; font-weight: 700; background: ${sc ? sc.bgDim : 'transparent'}; color: ${badgeColor};">
+                ${score}%
             </span>`;
     }
 
-    // Status indicator
+    // Status indicator (Correct / Mostly Correct / Incorrect / Submitted).
     let statusIndicator = '';
-    if (isChecked && isCorrect) {
+    if (gradeState === 'correct') {
         statusIndicator = `<span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 600; color: var(--deft-success);">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Correct</span>`;
-    } else if (isChecked && !isCorrect) {
+    } else if (gradeState === 'partial') {
+        statusIndicator = `<span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 600; color: var(--deft-warning, #f59e0b);">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M6 1.5 A4.5 4.5 0 0 1 6 10.5 Z" fill="currentColor" stroke="none"/></svg>
+            Mostly Correct</span>`;
+    } else if (gradeState === 'incorrect') {
         statusIndicator = `<span style="display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 600; color: var(--deft-danger);">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             Incorrect</span>`;
@@ -444,9 +454,14 @@ function renderQuestionCard(question, existingAnswer) {
             Submitted</span>`;
     }
 
-    // Multiple choice options
+    // UBR-0137: once an answer is checked, freeze the input UI and show the
+    // student's verbatim answer plus the answer key in dedicated read-only
+    // blocks so the student can compare their work against what was expected.
+    // For unchecked questions we keep the editable MC radios + textarea.
+
+    // Multiple choice options (only while not yet checked).
     let mcHtml = '';
-    if (isMultipleChoice && options.length > 0) {
+    if (!isChecked && isMultipleChoice && options.length > 0) {
         mcHtml = `<div style="display: flex; flex-direction: column; gap: 0.5rem; margin: 0.75rem 0;" role="radiogroup" aria-label="Answer options for question ${qNum}">`;
         options.forEach((opt, idx) => {
             const optId = `q${qId}_opt${idx}`;
@@ -459,7 +474,6 @@ function renderQuestionCard(question, existingAnswer) {
                     onmouseleave="if(!this.querySelector('input').checked){this.style.background='${isSelected ? 'var(--deft-accent-dim)' : 'transparent'}'}">
                     <input type="radio" id="${optId}" name="mc_${qId}" value="${escapeHtml(opt)}"
                         ${isSelected ? 'checked' : ''}
-                        ${isChecked ? 'disabled' : ''}
                         style="accent-color: var(--deft-accent); margin: 0; width: 1rem; height: 1rem; cursor: pointer;"
                         onchange="handleMcSelect('${qId}', this.value, this.closest('div[role=radiogroup]'))">
                     <span style="font-size: 0.85rem; color: var(--deft-txt); line-height: 1.4;">${escapeHtml(opt)}</span>
@@ -468,15 +482,35 @@ function renderQuestionCard(question, existingAnswer) {
         mcHtml += '</div>';
     }
 
-    // Text area for typed answer
-    const textareaHtml = `
+    // Text area for typed answer (only while not yet checked).
+    const textareaHtml = !isChecked ? `
         <textarea id="answer_text_${qId}" rows="3"
             placeholder="${isMultipleChoice ? 'Add an explanation (optional)...' : 'Type your answer here...'}"
-            ${isChecked ? 'disabled' : ''}
-            style="width: 100%; padding: 0.65rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--deft-border); background: var(--deft-surface); color: var(--deft-txt); font-size: 0.85rem; font-family: inherit; resize: vertical; min-height: 4rem; line-height: 1.5; transition: border-color 0.15s ease; box-sizing: border-box;${isChecked ? ' opacity: 0.6;' : ''}"
+            style="width: 100%; padding: 0.65rem 0.75rem; border-radius: 0.5rem; border: 1px solid var(--deft-border); background: var(--deft-surface); color: var(--deft-txt); font-size: 0.85rem; font-family: inherit; resize: vertical; min-height: 4rem; line-height: 1.5; transition: border-color 0.15s ease; box-sizing: border-box;"
             onfocus="this.style.borderColor='var(--deft-accent)'"
             onblur="this.style.borderColor='var(--deft-border)'"
-        >${escapeHtml(answerText)}</textarea>`;
+        >${escapeHtml(answerText)}</textarea>` : '';
+
+    // UBR-0137: read-only "Your Answer" block shown after grading.
+    let yourAnswerHtml = '';
+    if (isChecked) {
+        const displayAnswer = answerText || '(no text answer submitted)';
+        yourAnswerHtml = `
+            <div style="margin-top: 0.5rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: var(--deft-surface); border: 1px solid var(--deft-border);">
+                <div style="font-size: 0.7rem; font-weight: 600; color: var(--deft-txt-3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.35rem;">Your Answer</div>
+                <p style="margin: 0; font-size: 0.875rem; color: var(--deft-txt); line-height: 1.55; white-space: pre-line;">${escapeHtml(displayAnswer)}</p>
+            </div>`;
+    }
+
+    // UBR-0137: side-by-side Answer Key when one is available so the student can compare.
+    let answerKeyHtml = '';
+    if (isChecked && correctAnswerShown) {
+        answerKeyHtml = `
+            <div style="margin-top: 0.5rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: rgba(107,203,119,0.06); border: 1px solid rgba(107,203,119,0.25);">
+                <div style="font-size: 0.7rem; font-weight: 600; color: var(--deft-success); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.35rem;">Answer Key</div>
+                <p style="margin: 0; font-size: 0.875rem; color: var(--deft-txt); line-height: 1.55; white-space: pre-line;">${escapeHtml(correctAnswerShown)}</p>
+            </div>`;
+    }
 
     // Uploaded image preview
     let imagePreviewHtml = '';
@@ -493,16 +527,19 @@ function renderQuestionCard(question, existingAnswer) {
         imagePreviewHtml = `<div id="img_preview_${qId}" style="margin-top: 0.5rem; display: none;"></div>`;
     }
 
-    // AI feedback section
+    // AI feedback section — colored to match the three-state grade (UBR-0149).
     let feedbackHtml = '';
     if (isChecked && aiFeedback) {
+        const fbBg = sc ? sc.bgDim : 'var(--deft-surface-el)';
+        const fbBorder = sc ? sc.bgBorder : 'var(--deft-border)';
+        const fbAccent = sc ? sc.text : 'var(--deft-txt-2)';
         feedbackHtml = `
-            <div style="margin-top: 0.75rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: ${isCorrect ? 'var(--deft-success-dim, rgba(107,203,119,0.1))' : 'var(--deft-danger-dim, rgba(232,93,93,0.1))'}; border: 1px solid ${isCorrect ? 'rgba(107,203,119,0.2)' : 'rgba(232,93,93,0.2)'};">
+            <div style="margin-top: 0.75rem; padding: 0.75rem 1rem; border-radius: 0.5rem; background: ${fbBg}; border: 1px solid ${fbBorder};">
                 <div style="display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.35rem;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="color: ${isCorrect ? 'var(--deft-success)' : 'var(--deft-danger)'}; flex-shrink: 0;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="color: ${fbAccent}; flex-shrink: 0;">
                         <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <span style="font-size: 0.7rem; font-weight: 600; color: ${isCorrect ? 'var(--deft-success)' : 'var(--deft-danger)'}; text-transform: uppercase; letter-spacing: 0.03em;">AI Feedback</span>
+                    <span style="font-size: 0.7rem; font-weight: 600; color: ${fbAccent}; text-transform: uppercase; letter-spacing: 0.03em;">AI Feedback</span>
                 </div>
                 <p style="margin: 0; font-size: 0.825rem; color: var(--deft-txt-2); line-height: 1.55;">${escapeHtml(aiFeedback)}</p>
             </div>`;
@@ -561,13 +598,17 @@ function renderQuestionCard(question, existingAnswer) {
                 </div>
             </div>
 
-            <!-- Multiple choice options -->
+            <!-- Multiple choice options (only while not yet checked) -->
             ${mcHtml}
 
-            <!-- Text answer -->
-            <div style="margin-top: 0.5rem;">
-                ${textareaHtml}
-            </div>
+            <!-- Text answer textarea (only while not yet checked) -->
+            ${textareaHtml ? `<div style="margin-top: 0.5rem;">${textareaHtml}</div>` : ''}
+
+            <!-- UBR-0137: read-only "Your Answer" block after grading -->
+            ${yourAnswerHtml}
+
+            <!-- UBR-0137: Answer Key block after grading (when available) -->
+            ${answerKeyHtml}
 
             <!-- Image preview -->
             ${imagePreviewHtml}

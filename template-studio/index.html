@@ -644,12 +644,10 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         </div>
                         <div>
                             <label class="text-xs text-txt-2 font-medium mb-1 block">Channel</label>
-                            <select class="form-input" id="genChannel">
-                                <option value="cold_email">Cold Email</option>
-                                <option value="social_dm">Social DM</option>
-                                <option value="social_engagement">Social Engagement</option>
-                            </select>
-                            <p class="text-xs text-txt-3 mt-1">Generation supports email + social channels. The wider 22-channel taxonomy in <a href="/brand-voice/" class="underline hover:text-accent">Brand Voice</a> is for asset tagging.</p>
+                            <!-- UBR-0153: dropdown is hydrated from the canonical 22-channel
+                                 list defined in brand-voice/index.html (TS_CHANNELS below). -->
+                            <select class="form-input" id="genChannel"></select>
+                            <p class="text-xs text-txt-3 mt-1">Generation works for all 22 Brand Voice channels. Asset Library assets tagged with the chosen channel feed into generation for that channel.</p>
                         </div>
                         <div>
                             <label class="text-xs text-txt-2 font-medium mb-1 block">Tone</label>
@@ -1063,7 +1061,38 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         }
     }
 
-    function initPage() { loadCompositions(); }
+    // UBR-0153: canonical 22-channel list mirrored from brand-voice/index.html.
+    // Keep both copies in sync — these feed the channel dropdown for the
+    // "Generate Template Pieces" function so generation works for every
+    // Brand Voice channel (not just the legacy 3 email/social channels).
+    const TS_CHANNELS = [
+        'cold_email','email_sequence','newsletter',
+        'social_twitter','social_linkedin','social_instagram','social_facebook','social_tiktok',
+        'blog','podcast','video','webinar',
+        'sales_call','sales_deck','one_pager','proposal',
+        'website','landing_page',
+        'press','partnership',
+        'workshop','onboarding'
+    ];
+    const TS_CHANNEL_LABELS = {
+        cold_email: 'Cold Email', email_sequence: 'Email Sequence', newsletter: 'Newsletter',
+        social_twitter: 'Twitter', social_linkedin: 'LinkedIn', social_instagram: 'Instagram',
+        social_facebook: 'Facebook', social_tiktok: 'TikTok',
+        blog: 'Blog', podcast: 'Podcast', video: 'Video', webinar: 'Webinar',
+        sales_call: 'Sales Call', sales_deck: 'Sales Deck', one_pager: 'One-Pager', proposal: 'Proposal',
+        website: 'Website', landing_page: 'Landing Page',
+        press: 'Press', partnership: 'Partnership',
+        workshop: 'Workshop', onboarding: 'Onboarding'
+    };
+    function populateChannelDropdown() {
+        const sel = document.getElementById('genChannel');
+        if (!sel) return;
+        sel.innerHTML = TS_CHANNELS.map(k =>
+            `<option value="${k}">${TS_CHANNEL_LABELS[k] || k}</option>`
+        ).join('');
+    }
+
+    function initPage() { populateChannelDropdown(); loadCompositions(); }
 
     // Auth gate (identical pattern)
     let gateSelectedProfile = null;

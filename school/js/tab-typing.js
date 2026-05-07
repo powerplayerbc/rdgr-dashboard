@@ -291,10 +291,10 @@ function renderStatsBar() {
     const bar = document.getElementById('tp-stats-bar');
     if (!bar) return;
     bar.innerHTML = `
-        <div class="tp-stat-chip">
+        <div class="tp-stat-chip" title="Number of typing sessions completed today">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="var(--deft-accent)" stroke-width="1.2"/><path d="M7 4v3l2 1" stroke="var(--deft-accent)" stroke-width="1.1" stroke-linecap="round"/></svg>
             <div class="tp-stat-val">${typingState.todayCount}</div>
-            <div class="tp-stat-lbl">Today</div>
+            <div class="tp-stat-lbl">Sessions Today</div>
         </div>
         <div class="tp-stat-chip">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#A78BFA" stroke-width="1.2"/><path d="M7 3.5V7l2.5 1.5" stroke="#A78BFA" stroke-width="1.2" stroke-linecap="round"/></svg>

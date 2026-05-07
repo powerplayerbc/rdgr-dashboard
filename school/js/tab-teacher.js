@@ -910,12 +910,19 @@ async function loadTeacherLessons() {
     const listEl = document.getElementById('lessonLibraryList');
     if (!listEl) return;
 
+    // UBR-0142/0147: embed question + assignment counts so the Library card
+    // can show real question totals AND mark lessons that have already been
+    // assigned (so the teacher does not accidentally re-assign).
     const lessons = await supabaseSelect(
         'school_lessons',
-        'select=lesson_id,title,subject,description,source_type,created_at&order=created_at.desc'
+        'select=lesson_id,title,subject,description,source_type,created_at,school_questions(count),school_assignments(count)&order=created_at.desc'
     );
 
-    teacherLessons = lessons || [];
+    teacherLessons = (lessons || []).map(l => ({
+        ...l,
+        question_count: Array.isArray(l.school_questions) && l.school_questions[0] ? (l.school_questions[0].count || 0) : 0,
+        assignment_count: Array.isArray(l.school_assignments) && l.school_assignments[0] ? (l.school_assignments[0].count || 0) : 0
+    }));
     renderTeacherLessons();
 }
 
@@ -953,7 +960,22 @@ function buildLibraryCard(lesson) {
     const style = getSubjectStyle(lesson.subject || 'other');
     const sourceLabel = getSourceLabel(lesson.source_type);
     const qCount = lesson.question_count || 0;
+    // UBR-0147: surface assignment status so a previously-assigned lesson is
+    // visibly flagged before the teacher re-assigns it.
+    const assignCount = lesson.assignment_count || 0;
+    const isAssigned = assignCount > 0;
     const created = lesson.created_at ? new Date(lesson.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+    const assignedPill = isAssigned ? `
+        <span style="font-size:10px;padding:2px 7px;border-radius:5px;
+                     background:rgba(107,203,119,0.18);color:#3FB44A;font-weight:700;
+                     text-transform:uppercase;letter-spacing:0.04em;"
+              title="Assigned ${assignCount} time${assignCount !== 1 ? 's' : ''}">
+            ✓ Assigned${assignCount > 1 ? ' ×' + assignCount : ''}
+        </span>` : '';
+    const assignBtnLabel = isAssigned ? 'Re-assign' : 'Assign';
+    const assignBtnConfirm = isAssigned
+        ? `if(!confirm('This lesson has already been assigned ${assignCount} time${assignCount !== 1 ? 's' : ''}. Re-assign anyway?'))return;`
+        : '';
 
     return `
         <div style="display:flex;align-items:center;gap:12px;padding:12px;
@@ -975,17 +997,19 @@ function buildLibraryCard(lesson) {
 
             <!-- Info -->
             <div style="flex:1;min-width:0;">
-                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap;">
                     <span style="font-size:13px;font-weight:600;color:var(--deft-txt);
-                                 white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;">
+                                 display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+                                 overflow:hidden;line-height:1.3;flex:1;min-width:160px;">
                         ${escapeHtml(lesson.title || 'Untitled')}
                     </span>
                     <span style="font-size:10px;padding:2px 7px;border-radius:5px;
                                  background:${style.bg};color:${style.text};font-weight:600;
-                                 text-transform:uppercase;letter-spacing:0.03em;">
+                                 text-transform:uppercase;letter-spacing:0.03em;flex-shrink:0;">
                         ${escapeHtml(style.label)}
                     </span>
                     ${sourceLabel}
+                    ${assignedPill}
                 </div>
                 <div style="display:flex;align-items:center;gap:10px;margin-top:3px;">
                     <span style="font-size:11px;color:var(--deft-txt-3);">
@@ -995,10 +1019,10 @@ function buildLibraryCard(lesson) {
                 </div>
             </div>
 
-            <!-- Assign button -->
-            <button class="btn btn-ghost" onclick="event.stopPropagation();openAssignModal('${escapeHtml(lesson.lesson_id)}','${escapeHtml((lesson.title || '').replace(/'/g, "\\'"))}')"
-                    style="padding:5px 12px;font-size:11px;flex-shrink:0;">
-                Assign
+            <!-- Assign / Re-assign button -->
+            <button class="btn btn-ghost" onclick="event.stopPropagation();${assignBtnConfirm}openAssignModal('${escapeHtml(lesson.lesson_id)}','${escapeHtml((lesson.title || '').replace(/'/g, "\\'"))}')"
+                    style="padding:5px 12px;font-size:11px;flex-shrink:0;${isAssigned ? 'border-color:rgba(107,203,119,0.4);color:#3FB44A;' : ''}">
+                ${assignBtnLabel}
             </button>
         </div>
 
@@ -1206,9 +1230,11 @@ async function loadPendingReviews() {
     const countEl = document.getElementById('reviewCount');
     if (!listEl) return;
 
+    // UBR-0148: pull lesson info via embedded resource so we can group reviews
+    // under the lesson they belong to.
     const answers = await supabaseSelect(
         'school_answers',
-        'check_status=eq.checked&order=checked_at.desc&limit=20&select=answer_id,question_id,student_id,answer_text,ai_score,ai_feedback,check_status,school_questions(question_text,correct_answer,points)'
+        'check_status=eq.checked&order=checked_at.desc&limit=40&select=answer_id,question_id,student_id,answer_text,ai_score,ai_feedback,check_status,partial_credit,correct_answer_shown,school_questions(question_text,correct_answer,points,lesson_id,school_lessons(title,subject))'
     );
 
     pendingReviews = answers || [];
@@ -1230,15 +1256,68 @@ async function loadPendingReviews() {
         return;
     }
 
-    listEl.innerHTML = pendingReviews.map(a => buildReviewCard(a)).join('');
+    // UBR-0148: group reviews by lesson, sorted by most-recent-pending-answer first.
+    const groups = {};
+    const order = [];
+    pendingReviews.forEach(a => {
+        const q = a.school_questions || {};
+        const lessonId = q.lesson_id || 'unknown';
+        if (!groups[lessonId]) {
+            const lesson = q.school_lessons || {};
+            groups[lessonId] = {
+                lesson_id: lessonId,
+                title: lesson.title || 'Unknown lesson',
+                subject: lesson.subject || '',
+                answers: []
+            };
+            order.push(lessonId);
+        }
+        groups[lessonId].answers.push(a);
+    });
+
+    listEl.innerHTML = order.map(id => {
+        const g = groups[id];
+        const subjectStyle = getSubjectStyle(g.subject || 'other');
+        const headerHtml = `
+            <div style="padding:10px 14px;background:var(--deft-surface-el);
+                        border-top:1px solid var(--deft-border);
+                        border-bottom:1px solid var(--deft-border);
+                        display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <span style="font-size:10px;font-weight:700;color:var(--deft-txt-3);
+                             text-transform:uppercase;letter-spacing:0.06em;">Lesson</span>
+                <span style="font-size:13px;font-weight:600;color:var(--deft-txt);">${escapeHtml(g.title)}</span>
+                <span style="font-size:10px;padding:2px 7px;border-radius:5px;
+                             background:${subjectStyle.bg};color:${subjectStyle.text};font-weight:600;
+                             text-transform:uppercase;letter-spacing:0.03em;">
+                    ${escapeHtml(subjectStyle.label)}
+                </span>
+                <span style="font-size:11px;color:var(--deft-txt-3);margin-left:auto;">
+                    ${g.answers.length} answer${g.answers.length !== 1 ? 's' : ''} pending
+                </span>
+            </div>`;
+        return headerHtml + g.answers.map(a => buildReviewCard(a)).join('');
+    }).join('');
 }
 
 function buildReviewCard(answer) {
     const q = answer.school_questions || {};
-    const aiScore = answer.ai_score != null ? answer.ai_score : '';
-    const maxPoints = q.points || 1;
-    const aiScorePct = aiScore !== '' ? Math.round((aiScore / maxPoints) * 100) : null;
-    const gradeInfo = aiScorePct != null ? getLetterGrade(aiScorePct) : null;
+    // UBR-0143: ai_score is a 0-100 percentage from the LLM. The teacher
+    // dashboard wants to show "earned points / max points" — convert before
+    // displaying. q.points migrated to 10 by the canonical migration.
+    const maxPoints = q.points && Number(q.points) > 0 ? Number(q.points) : 10;
+    const aiScorePct = answer.ai_score != null ? Number(answer.ai_score) : null;
+    const earnedPoints = aiScorePct != null
+        ? Math.round((aiScorePct / 100) * maxPoints * 10) / 10
+        : null;
+    // Use the canonical state colors so reviews match the student-facing UI.
+    const partial = answer.partial_credit === true;
+    const gradeState = aiScorePct == null
+        ? null
+        : (aiScorePct >= 90 ? 'correct' : (aiScorePct >= 70 ? 'partial' : 'incorrect'));
+    const gradeColor = gradeState === 'correct' ? 'var(--deft-success)'
+        : (gradeState === 'partial' ? 'var(--deft-warning, #f59e0b)' : 'var(--deft-danger)');
+    const stateLabel = gradeState === 'correct' ? 'Correct'
+        : (gradeState === 'partial' ? 'Mostly Correct' : (gradeState === 'incorrect' ? 'Incorrect' : ''));
 
     return `
         <div style="padding:14px;border-bottom:1px solid var(--deft-border);" data-answer-id="${escapeHtml(answer.answer_id)}">
@@ -1256,19 +1335,20 @@ function buildReviewCard(answer) {
                         background:var(--deft-surface-el);border:1px solid var(--deft-border);">
                 <span style="font-size:10px;font-weight:600;color:var(--deft-txt-3);text-transform:uppercase;
                              letter-spacing:0.04em;">Student Answer</span>
-                <p style="margin:4px 0 0;font-size:13px;color:var(--deft-txt);line-height:1.4;">
+                <p style="margin:4px 0 0;font-size:13px;color:var(--deft-txt);line-height:1.4;white-space:pre-line;">
                     ${escapeHtml(answer.answer_text || '(no answer)')}
                 </p>
             </div>
 
             <!-- AI assessment -->
             <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;flex-wrap:wrap;">
-                ${aiScore !== '' ? `
+                ${earnedPoints != null ? `
                     <div style="display:flex;align-items:center;gap:6px;">
                         <span style="font-size:11px;color:var(--deft-txt-3);">AI Score:</span>
-                        <span style="font-size:14px;font-weight:700;color:${gradeInfo ? gradeInfo.color : 'var(--deft-txt)'};">
-                            ${aiScore}/${maxPoints}
+                        <span style="font-size:14px;font-weight:700;color:${gradeColor};">
+                            ${earnedPoints}/${maxPoints}
                         </span>
+                        ${stateLabel ? `<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:${gradeColor};">${stateLabel}</span>` : ''}
                     </div>
                 ` : ''}
                 ${answer.ai_feedback ? `
@@ -1289,12 +1369,13 @@ function buildReviewCard(answer) {
                 </div>
             ` : ''}
 
-            <!-- Teacher override controls -->
+            <!-- Teacher override controls (entered as points out of maxPoints) -->
             <div style="display:flex;align-items:center;gap:8px;padding-top:8px;border-top:1px solid var(--deft-border);">
                 <label style="font-size:11px;color:var(--deft-txt-2);font-weight:600;white-space:nowrap;">Override Score:</label>
                 <input type="number" class="form-input" min="0" max="${maxPoints}" step="0.5"
-                       value="${aiScore}"
+                       value="${earnedPoints != null ? earnedPoints : ''}"
                        id="override-${escapeHtml(answer.answer_id)}"
+                       data-max-points="${maxPoints}"
                        style="width:70px;font-size:12px;padding:5px 8px;text-align:center;"
                        aria-label="Override score for this answer">
                 <span style="font-size:11px;color:var(--deft-txt-3);">/ ${maxPoints}</span>
@@ -1313,26 +1394,34 @@ function buildReviewCard(answer) {
 
 async function confirmReview(answerId, acceptAI) {
     const overrideInput = document.getElementById(`override-${answerId}`);
-    let score;
+    // UBR-0143: input is in points (0-maxPoints); convert back to percentage
+    // for ai_score / override_score storage.
+    let scorePct;
 
     if (acceptAI) {
-        // Use existing AI score
         const answer = pendingReviews.find(a => a.answer_id === answerId);
-        score = answer?.ai_score;
+        scorePct = answer?.ai_score;
     } else {
-        score = parseFloat(overrideInput?.value);
+        const points = parseFloat(overrideInput?.value);
+        const maxPoints = parseFloat(overrideInput?.dataset?.maxPoints) || 10;
+        if (!isNaN(points) && maxPoints > 0) {
+            scorePct = Math.max(0, Math.min(100, Math.round((points / maxPoints) * 100)));
+        }
     }
 
-    if (score == null || isNaN(score)) {
+    if (scorePct == null || isNaN(scorePct)) {
         toast('Enter a valid score', 'error');
         return;
     }
 
-    const result = await supabaseWrite('school_answers', 'PATCH', {
-        score: score,
-        check_status: 'teacher_reviewed',
-        teacher_override: !acceptAI
-    }, `id=eq.${answerId}`);
+    // Use the canonical override_score backend route so school_grades + the
+    // assignment status PATCH all recalculate consistently.
+    const result = acceptAI
+        ? await supabaseWrite('school_answers', 'PATCH', {
+            check_status: 'verified',
+            checked_at: new Date().toISOString()
+        }, `answer_id=eq.${answerId}`)
+        : await schoolApi('override_score', { answer_id: answerId, score: scorePct, reason: 'Teacher review' });
 
     if (result) {
         toast('Review saved');
