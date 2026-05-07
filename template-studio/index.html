@@ -606,14 +606,11 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                             <label class="text-xs text-txt-2 font-medium mb-1 block">System</label>
                             <select class="form-input" id="piecesFilterSys" onchange="loadPieces()" style="min-width:120px;">
                                 <option value="">All</option>
-                                <option value="cold_outreach">Cold Outreach</option>
                                 <option value="partner_pitch">Partner Pitch</option>
                                 <option value="jv_opportunity">JV Opportunity</option>
                                 <option value="speaking_engagement">Speaking Engagement</option>
                                 <option value="interview_request">Interview Request</option>
                                 <option value="friendly_outreach">Friendly Outreach</option>
-                                <option value="social_dm">Social DM</option>
-                                <option value="social_engagement">Social Engagement</option>
                             </select>
                         </div>
                         <div class="ml-auto mt-4">
@@ -638,14 +635,11 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         <div>
                             <label class="text-xs text-txt-2 font-medium mb-1 block">Message Type</label>
                             <select class="form-input" id="genMsgType">
-                                <option value="cold_outreach">Cold Outreach</option>
                                 <option value="partner_pitch">Partner Pitch</option>
                                 <option value="jv_opportunity">JV Opportunity</option>
                                 <option value="speaking_engagement">Speaking Engagement</option>
                                 <option value="interview_request">Interview Request</option>
                                 <option value="friendly_outreach">Friendly Outreach</option>
-                                <option value="social_dm">Social DM</option>
-                                <option value="social_engagement">Social Engagement</option>
                             </select>
                         </div>
                         <div>
@@ -655,6 +649,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                                 <option value="social_dm">Social DM</option>
                                 <option value="social_engagement">Social Engagement</option>
                             </select>
+                            <p class="text-xs text-txt-3 mt-1">Generation supports email + social channels. The wider 22-channel taxonomy in <a href="/brand-voice/" class="underline hover:text-accent">Brand Voice</a> is for asset tagging.</p>
                         </div>
                         <div>
                             <label class="text-xs text-txt-2 font-medium mb-1 block">Tone</label>
@@ -707,11 +702,11 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                             <label class="text-xs text-txt-2 font-medium mb-1 block">System</label>
                             <select class="form-input" id="auditSystem">
                                 <option value="all">All Systems</option>
-                                <option value="cold_outreach">Cold Outreach</option>
-                                <option value="crm_sequence">CRM Sequence</option>
-                                <option value="offer">Offer</option>
-                                <option value="social_dm">Social DM</option>
-                                <option value="social_engagement">Social Engagement</option>
+                                <option value="partner_pitch">Partner Pitch</option>
+                                <option value="jv_opportunity">JV Opportunity</option>
+                                <option value="speaking_engagement">Speaking Engagement</option>
+                                <option value="interview_request">Interview Request</option>
+                                <option value="friendly_outreach">Friendly Outreach</option>
                             </select>
                         </div>
                         <button onclick="runAudit()" class="btn btn-primary mt-4" id="auditBtn">
