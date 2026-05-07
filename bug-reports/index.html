@@ -841,7 +841,7 @@
                     bug.retest_items.forEach((item, ri) => {
                         const checked = item.checked ? 'checked' : '';
                         const labelClass = item.checked ? 'checked' : '';
-                        html += '<div class="retest-item"><input type="checkbox" ' + checked + ' onclick="event.stopPropagation()" onchange="toggleRetestInline(' + bug.id + ',' + ri + ',this.checked)"><label class="' + labelClass + '">' + esc(item.text) + '</label></div>';
+                        html += '<div class="retest-item"><input type="checkbox" ' + checked + ' onclick="event.stopPropagation()" onchange="toggleRetestInline(' + bug.id + ',' + ri + ',this.checked,this)"><label class="' + labelClass + '">' + esc(item.text) + '</label></div>';
                     });
                     html += '</div>';
                 }
@@ -1301,20 +1301,26 @@
         saveRetestItems();
     }
 
-    async function toggleRetestInline(bugId, index, checked) {
+    async function toggleRetestInline(bugId, index, checked, checkboxEl) {
         let bug = null;
         allGroups.forEach(g => g.bugs.forEach(b => { if (b.id === bugId) bug = b; }));
         if (!bug) return;
-        const items = [...bug.retest_items];
-        items[index].checked = checked;
+        const items = bug.retest_items.map((it, i) => i === index ? { ...it, checked } : it);
+        bug.retest_items = items;
+        const label = checkboxEl && checkboxEl.parentElement ? checkboxEl.parentElement.querySelector('label') : null;
+        if (label) label.className = checked ? 'checked' : '';
         try {
             await fetch(SUPABASE_URL + '/rest/v1/rpc/update_bug_retest_items', {
                 method: 'POST',
                 headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ p_bug_id: bugId, p_retest_items: items })
             });
-            loadDashboard();
-        } catch (e) { toast('Error: ' + e.message, 'error'); }
+        } catch (e) {
+            toast('Error: ' + e.message, 'error');
+            if (checkboxEl) checkboxEl.checked = !checked;
+            if (label) label.className = !checked ? 'checked' : '';
+            bug.retest_items[index].checked = !checked;
+        }
     }
 
     async function saveRetestItems() {
