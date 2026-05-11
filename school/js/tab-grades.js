@@ -49,11 +49,14 @@ async function refreshGrades() {
         return;
     }
 
-    // UBR-0156: pull per-assignment grade summary from school_grades AND the
-    // per-question answer rows from school_answers (so the detail accordion
-    // can show each question's score without needing the broken
-    // get_assignment_detail flow).
-    const [assignments, grades, lessons, answers] = await Promise.all([
+    // UBR-0156: per-assignment grade summary from school_grades + per-question
+    // answer rows from school_answers.
+    // UBR-0162/0163: also load school_questions eagerly so we can recompute
+    // earned_points on the fly (defensive — backend recalc fires on override
+    // but frontend should not trust stored totals if any writer leaves them
+    // stale).
+    // UBR-0164: also fetch the daily-task summary for the new stats cards.
+    const [assignments, grades, lessons, answers, dailySummary] = await Promise.all([
         supabaseSelect('school_assignments',
             `student_id=eq.${viewUserId}&status=neq.excused&order=assigned_date.desc&select=*`
         ),
@@ -65,7 +68,8 @@ async function refreshGrades() {
         ),
         supabaseSelect('school_answers',
             `student_id=eq.${viewUserId}&select=*`
-        )
+        ),
+        supabaseRpc('get_daily_task_summary', { p_student_id: viewUserId, p_days: 7 })
     ]);
 
     // Per-assignment school_grades (one row per assignment)
@@ -94,7 +98,56 @@ async function refreshGrades() {
     }
 
     gradesData.assignments = assignments || [];
+    gradesData.dailySummary = (dailySummary && dailySummary.summary) ? dailySummary.summary : null;
     gradesData.expandedId = null;
+
+    // UBR-0162/0163: fetch school_questions for the lessons in this view, then
+    // recompute per-assignment earned/total from school_answers + question
+    // points. This makes the page resilient to any stale school_grades row.
+    const lessonIds = Array.from(new Set((assignments || []).map(a => a.lesson_id).filter(Boolean)));
+    if (lessonIds.length) {
+        const lessonFilter = lessonIds.map(id => encodeURIComponent(id)).join(',');
+        const questions = await supabaseSelect('school_questions',
+            `lesson_id=in.(${lessonFilter})&select=question_id,lesson_id,points`);
+        gradesData.questionPoints = {};
+        if (questions && questions.length) {
+            for (const q of questions) {
+                gradesData.questionPoints[q.question_id] = Number(q.points) || 10;
+            }
+        }
+    } else {
+        gradesData.questionPoints = {};
+    }
+
+    // Recompute per-assignment totals from answers (overrides + strikes applied).
+    gradesData.recomputed = {};
+    for (const a of gradesData.assignments) {
+        const ansArr = gradesData.answers[a.assignment_id] || [];
+        let possible = 0, earned = 0, qCount = 0, correctCount = 0, struckCount = 0, pendingCount = 0;
+        for (const an of ansArr) {
+            const qPts = gradesData.questionPoints[an.question_id] || 10;
+            qCount++;
+            if (an.is_struck) { struckCount++; continue; }
+            possible += qPts;
+            const pct = (an.override_score != null) ? Number(an.override_score)
+                       : (an.ai_score != null) ? Number(an.ai_score) : 0;
+            earned += (pct / 100) * qPts;
+            if (pct >= 90) correctCount++;
+            if (an.check_status === 'checking' || an.check_status === 'pending') pendingCount++;
+        }
+        const pctOut = possible > 0 ? (earned / possible) * 100 : 0;
+        const letter = pctOut >= 90 ? 'A' : pctOut >= 80 ? 'B' : pctOut >= 70 ? 'C' : pctOut >= 60 ? 'D' : 'F';
+        gradesData.recomputed[a.assignment_id] = {
+            earned: Math.round(earned * 100) / 100,
+            possible: Math.round(possible * 100) / 100,
+            pct: Math.round(pctOut * 100) / 100,
+            letter,
+            qCount,
+            correctCount,
+            struckCount,
+            pendingCount
+        };
+    }
 
     renderGrades();
 }
@@ -113,45 +166,49 @@ function renderGradesEmpty(msg) {
 // STAT CALCULATIONS
 // =======================================
 function calcGradeStats() {
-    // UBR-0156: school_grades is per-assignment (single row per assignment_id).
-    // Use total_points / earned_points / adjusted_percentage from each row.
+    // UBR-0162/0163: prefer the on-the-fly recomputed totals (from school_answers
+    // + override_score + question points) over the cached school_grades row.
+    // Falls back to school_grades only when answers haven't loaded.
     let totalEarned = 0;
     let totalPossible = 0;
-    let totalAdjustedEarned = 0;
-    let totalAdjustedPossible = 0;
     let assignmentCount = 0;
 
     for (const a of gradesData.assignments) {
+        const r = gradesData.recomputed && gradesData.recomputed[a.assignment_id];
         const g = gradesData.grades[a.assignment_id];
-        if (!g) continue;
+        if (!r && !g) continue;
 
         assignmentCount++;
-        const possible = Number(g.total_points) || 0;
-        const earned = Number(g.earned_points) || 0;
+        const possible = r ? r.possible : (Number(g.total_points) || 0);
+        const earned = r ? r.earned : (Number(g.earned_points) || 0);
         totalEarned += earned;
         totalPossible += possible;
-
-        // Adjusted = same as raw for now (overrides already roll into earned_points
-        // via Recalc Fetch Answers reading override_score). Falls back to raw.
-        const adjPct = g.adjusted_percentage != null ? Number(g.adjusted_percentage) : (g.raw_percentage != null ? Number(g.raw_percentage) : 0);
-        totalAdjustedEarned += (adjPct / 100) * possible;
-        totalAdjustedPossible += possible;
     }
 
     const overallPct = totalPossible > 0 ? (totalEarned / totalPossible) * 100 : 0;
-    const adjustedPct = totalAdjustedPossible > 0 ? (totalAdjustedEarned / totalAdjustedPossible) * 100 : 0;
 
     return {
         totalEarned: Math.round(totalEarned * 10) / 10,
         totalPossible: Math.round(totalPossible * 10) / 10,
         overallPct,
-        adjustedPct,
+        adjustedPct: overallPct,
         assignmentCount
     };
 }
 
 function calcAssignmentStats(assignmentId) {
-    // UBR-0156: per-assignment summary row.
+    // UBR-0162/0163: use the recomputed totals from school_answers when present.
+    const r = gradesData.recomputed && gradesData.recomputed[assignmentId];
+    if (r && r.possible > 0) {
+        return {
+            pct: r.pct,
+            earned: r.earned,
+            possible: r.possible,
+            hasGrade: true,
+            letterGrade: r.letter
+        };
+    }
+    // Fallback to school_grades for the very first paint before answers load.
     const g = gradesData.grades[assignmentId];
     if (!g) return { pct: 0, earned: 0, possible: 0, hasGrade: false };
     const pct = g.adjusted_percentage != null ? Number(g.adjusted_percentage) : Number(g.raw_percentage || 0);
@@ -233,6 +290,101 @@ function renderGrades() {
         ${renderStatsRow(stats, letterOverall, letterAdjusted)}
         <div id="grades-assignment-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
             ${gradesData.assignments.map(a => renderAssignmentAccordion(a)).join('')}
+        </div>
+        ${renderDailyTaskStats()}
+    `;
+}
+
+// =======================================
+// DAILY TASK STATS (UBR-0164)
+// =======================================
+function renderDailyTaskStats() {
+    const s = gradesData.dailySummary;
+    if (!s) return '';
+
+    const cardBase = 'background: var(--deft-surface-el); border: 1px solid var(--deft-border); border-radius: 12px; padding: 16px 20px;';
+    const headerStyle = 'font-size: 13px; font-weight: 600; color: var(--deft-txt-2); margin-bottom: 12px; display:flex; align-items:center; gap:6px;';
+    const rowStyle = 'display:flex; justify-content:space-between; align-items:center; padding:4px 0; font-size:13px;';
+    const labelStyle = 'color: var(--deft-txt-3);';
+    const valueStyle = 'color: var(--deft-txt); font-weight:600;';
+
+    const vocab = s.vocab || {};
+    const typing = s.typing || {};
+    const history = s.history || {};
+    const grid = Array.isArray(s.daily_grid) ? s.daily_grid : [];
+
+    // Vocab trend mini bars
+    const trend = Array.isArray(vocab.trend) ? vocab.trend.slice().reverse() : [];
+    const trendBars = trend.map(p => {
+        const pct = Number(p) || 0;
+        const h = Math.max(6, Math.round((pct / 100) * 40));
+        const col = pct >= 90 ? 'var(--deft-success, #06D6A0)'
+                  : pct >= 70 ? 'var(--deft-warn, #FBBF24)'
+                  : 'var(--deft-danger, #F87171)';
+        return '<div style="width:8px; height:' + h + 'px; background:' + col + '; border-radius:2px;" title="' + pct + '%"></div>';
+    }).join('');
+
+    // Daily grid (rows: vocab, typing, history, assignments)
+    const gridRows = [
+        { key: 'vocab_done', label: 'Vocab' },
+        { key: 'typing_done', label: 'Typing' },
+        { key: 'history_done', label: 'History' },
+        { key: 'assignments_done', label: 'Assignments' }
+    ];
+    const cell = (done) => '<div style="width:22px;height:22px;border-radius:4px;background:' + (done ? 'var(--deft-success, #06D6A0)' : 'var(--deft-border)') + ';"></div>';
+    const dayLabel = (iso) => {
+        try {
+            const d = new Date(iso + 'T00:00:00');
+            return d.toLocaleDateString('en-US', { weekday: 'short' });
+        } catch (e) { return iso; }
+    };
+    // Show oldest -> newest left to right
+    const orderedDays = grid.slice().reverse();
+    const gridHtml = `
+        <div style="display:grid; grid-template-columns: 100px repeat(${orderedDays.length}, 1fr); gap:6px; align-items:center;">
+            <div></div>
+            ${orderedDays.map(d => '<div style="font-size:10px; color:var(--deft-txt-3); text-align:center;">' + dayLabel(d.date) + '</div>').join('')}
+            ${gridRows.map(r => `
+                <div style="font-size:12px; color:var(--deft-txt-2);">${r.label}</div>
+                ${orderedDays.map(d => '<div style="display:flex;justify-content:center;">' + cell(!!d[r.key]) + '</div>').join('')}
+            `).join('')}
+        </div>
+    `;
+
+    return `
+        <div style="margin-top: 32px;">
+            <h3 style="font-size:14px; font-weight:600; color:var(--deft-txt-2); margin-bottom:12px;">Daily Task Statistics</h3>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
+                <div style="${cardBase}">
+                    <div style="${headerStyle}">📚 Vocabulary Quizzes</div>
+                    <div style="${rowStyle}"><span style="${labelStyle}">Quizzes taken</span><span style="${valueStyle}">${vocab.total_quizzes || 0}</span></div>
+                    <div style="${rowStyle}"><span style="${labelStyle}">Average score</span><span style="${valueStyle}">${vocab.avg_score_pct || 0}%</span></div>
+                    <div style="${rowStyle}"><span style="${labelStyle}">Latest score</span><span style="${valueStyle}">${vocab.latest_score_pct || 0}% (${vocab.latest_letter || '-'})</span></div>
+                    ${trendBars ? '<div style="display:flex; align-items:flex-end; gap:4px; height:44px; margin-top:8px;">' + trendBars + '</div>' : ''}
+                </div>
+
+                <div style="${cardBase}">
+                    <div style="${headerStyle}">⌨️ Typing Practice (7d)</div>
+                    <div style="${rowStyle}"><span style="${labelStyle}">Sessions</span><span style="${valueStyle}">${typing.sessions_this_week || 0}</span></div>
+                    <div style="${rowStyle}"><span style="${labelStyle}">Average WPM</span><span style="${valueStyle}">${typing.avg_wpm || 0}</span></div>
+                    <div style="${rowStyle}"><span style="${labelStyle}">Best WPM</span><span style="${valueStyle}">${typing.best_wpm || 0}</span></div>
+                    <div style="${rowStyle}"><span style="${labelStyle}">Total practice</span><span style="${valueStyle}">${typing.total_minutes || 0} min</span></div>
+                    ${typing.avg_accuracy != null ? '<div style="' + rowStyle + '"><span style="' + labelStyle + '">Avg accuracy</span><span style="' + valueStyle + '">' + typing.avg_accuracy + '%</span></div>' : ''}
+                </div>
+
+                <div style="${cardBase}">
+                    <div style="${headerStyle}">📜 History Facts</div>
+                    <div style="${rowStyle}"><span style="${labelStyle}">Read this week</span><span style="${valueStyle}">${history.reads_this_week || 0}</span></div>
+                    <div style="${rowStyle}"><span style="${labelStyle}">Read this semester</span><span style="${valueStyle}">${history.reads_this_semester || 0}</span></div>
+                    <div style="${rowStyle}"><span style="${labelStyle}">Of available</span><span style="${valueStyle}">${history.total_available || 0} facts</span></div>
+                    <div style="${rowStyle}"><span style="${labelStyle}">% read</span><span style="${valueStyle}">${history.pct_read || 0}%</span></div>
+                </div>
+
+                <div style="${cardBase}">
+                    <div style="${headerStyle}">✅ Daily Completion (7d)</div>
+                    ${gridHtml}
+                </div>
+            </div>
         </div>
     `;
 }

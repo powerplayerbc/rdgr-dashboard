@@ -192,7 +192,7 @@ function loadGateProfiles() {
         if(saved)try{savedId=JSON.parse(saved).id;}catch(e){}
         var colors={'Bradford':'#06D6A0','Dianna':'#A855F7','Brianna':'#4CC9F0'};
         c.innerHTML=profiles.map(function(p){
-            var n=p.display_name||p.email||'?',i=n[0].toUpperCase(),col=colors[n]||'#8A95A9',role=p.role||'admin';
+            var n=p.display_name||p.email||'?',i=n[0].toUpperCase(),col=colors[n]||'#8A95A9',role=p.role||'student';
             var rl=role==='student'?'<span style="font-size:.625rem;color:#8A95A9;display:block;">Student</span>':'<span style="font-size:.625rem;color:#8A95A9;display:block;">Teacher</span>';
             return '<button type="button" onclick="selectGateProfile(\''+p.user_id+'\',\''+n.replace(/'/g,'&#39;')+'\',\''+role+'\',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,.02);border:2px solid transparent;cursor:pointer;min-width:80px;"><div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:'+col+'20;color:'+col+';border:2px solid transparent;">'+i+'</div><span class="text-xs" style="color:#8A95A9;">'+n+'</span>'+rl+'</button>';
         }).join('');
@@ -209,7 +209,7 @@ function handleGate(e) {
     e.preventDefault();
     if(document.getElementById('gateInput').value==='Advance1!'){
         localStorage.setItem('rdgr-session',JSON.stringify({authenticated:true,ts:Date.now()}));
-        if(gateSelectedProfile){localStorage.setItem('rdgr-active-profile',JSON.stringify(gateSelectedProfile));activeProfileId=gateSelectedProfile.id;userRole=gateSelectedProfile.role||'admin';}
+        if(gateSelectedProfile){localStorage.setItem('rdgr-active-profile',JSON.stringify(gateSelectedProfile));activeProfileId=gateSelectedProfile.id;userRole=gateSelectedProfile.role||'student';}
         document.getElementById('gate').classList.add('hidden');document.getElementById('schoolApp').style.opacity='1';
         initPage();return false;
     }
@@ -220,14 +220,16 @@ if(JSON.parse(localStorage.getItem('rdgr-session')||'{}').authenticated===true){
     document.getElementById('gate').classList.add('hidden');document.getElementById('schoolApp').style.opacity='1';initPage();
 } else { loadGateProfiles(); }
 
-function initPage() {
+async function initPage() {
     var saved=localStorage.getItem('rdgr-active-profile');
-    if(saved)try{var p=JSON.parse(saved);activeProfileId=p.id;activeProfileName=p.name;userRole=p.role||'admin';
+    if(saved)try{var p=JSON.parse(saved);activeProfileId=p.id;activeProfileName=p.name;userRole=p.role||'student';
         var ne=document.getElementById('profileName'),ae=document.getElementById('profileAvatar');
         if(ne)ne.textContent=p.name;if(ae)ae.textContent=p.name[0].toUpperCase();
     }catch(e){}
     applyRoleVisibility();
     loadProfiles();
+    // UBR-0158/0160: reconcile cached role with DB before render
+    await revalidateProfileFromDB();
     loadCurrentLesson(); if(currentAssignmentId) refreshQuestions(); else document.getElementById('questions-container').innerHTML='<div style="text-align:center;padding:3rem;color:var(--deft-txt-3);"><p>Select a lesson from the <a href="/school" style="color:var(--deft-accent);">Today</a> page first.</p></div>';
 }
 

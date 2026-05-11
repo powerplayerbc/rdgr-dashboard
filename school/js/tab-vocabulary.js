@@ -24,11 +24,22 @@ let vocabState = {
 
 // UBR-0151: mark vocab as done for the day so the Today tab's Daily
 // Activities tile can show a green checkmark for the Vocabulary Study card.
+// UBR-0164: also persist to school_daily_task_completions so the teacher's
+// Grades page can show cross-device completion stats.
 function vocabMarkDone() {
     const profileId = (typeof activeProfileId !== 'undefined' && activeProfileId) || 'anon';
     const today = (typeof todayStr === 'function') ? todayStr() : new Date().toISOString().slice(0, 10);
     const storageKey = 'school-vocab-done-' + profileId + '-' + today;
     try { localStorage.setItem(storageKey, '1'); } catch (e) {}
+    // Fire-and-forget backend write — localStorage stays as the instant-UI source-of-truth.
+    if (profileId !== 'anon' && typeof supabaseUpsert === 'function') {
+        supabaseUpsert('school_daily_task_completions', {
+            student_id: profileId,
+            task_date: today,
+            task_type: 'vocab',
+            completed_at: new Date().toISOString()
+        }).catch(function(){});
+    }
     const btn = document.getElementById('vocab-mark-done-btn');
     if (btn) {
         btn.disabled = true;
@@ -145,6 +156,11 @@ function vocabRender(container) {
 
     html += '</div>';
     container.innerHTML = html;
+
+    // UBR-0158: dynamic content may have injected new [data-role-min="admin"]
+    // elements (e.g. Answer Key). Re-run the visibility gate so students never
+    // see them, even if a cached profile briefly mis-set userRole.
+    if (typeof applyRoleVisibility === 'function') applyRoleVisibility();
 
     // Post-render: bind tooltip events for story view
     if (vocabState.subView === 'story') {
@@ -674,13 +690,16 @@ function vocabBuildQuizLanding() {
 // ─── Quiz Generation & Flow ──────────────────────────────────────────
 function vocabGenerateQuizQuestions() {
     const words = vocabState.weekData.words;
-    if (!words || words.length < 15) return [];
+    // UBR-0159: lowered minimum from 15 to 8 so quizzes work with reduced
+    // difficulty word lists (10 words after the student's difficulty drop).
+    if (!words || words.length < 8) return [];
 
     const questions = [];
     const shuffled = [...words].sort(() => Math.random() - 0.5);
 
-    // ~8 fill-in-the-blank questions
-    const fillCount = 8;
+    // UBR-0159: adapt fill-in-blank count to available words so we don't starve
+    // the definition pool when the list is shorter than 15.
+    const fillCount = Math.min(8, Math.max(2, Math.floor(words.length / 2)));
     for (let i = 0; i < fillCount && i < shuffled.length; i++) {
         const w = shuffled[i];
         // Create a fill-in-the-blank from the example sentence

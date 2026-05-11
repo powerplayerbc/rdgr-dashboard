@@ -49,6 +49,16 @@ function isHistoryFactRead(factId) {
 function markHistoryFactRead(factId) {
     if (!factId) return;
     try { localStorage.setItem(historyReadKey(factId), '1'); } catch (e) {}
+    // UBR-0164: also persist to school_history_reads so the teacher can see
+    // reading progress on the Grades page. Fire-and-forget; localStorage is
+    // the immediate-UI source-of-truth.
+    if (typeof activeProfileId !== 'undefined' && activeProfileId && typeof supabaseUpsert === 'function') {
+        supabaseUpsert('school_history_reads', {
+            student_id: activeProfileId,
+            fact_id: factId,
+            read_at: new Date().toISOString()
+        }).catch(function(){});
+    }
     // Re-render the page so the sidebar tile picks up the checkmark and the
     // fact card swaps the "Mark as read" button for a "Read" indicator.
     refreshHistory();
@@ -57,6 +67,12 @@ function markHistoryFactRead(factId) {
 function unmarkHistoryFactRead(factId) {
     if (!factId) return;
     try { localStorage.removeItem(historyReadKey(factId)); } catch (e) {}
+    // UBR-0164: keep school_history_reads in sync on unmark.
+    if (typeof activeProfileId !== 'undefined' && activeProfileId && typeof supabaseWrite === 'function') {
+        supabaseWrite('school_history_reads', 'DELETE', null,
+            'student_id=eq.' + activeProfileId + '&fact_id=eq.' + encodeURIComponent(factId)
+        ).catch(function(){});
+    }
     refreshHistory();
 }
 

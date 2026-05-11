@@ -5,7 +5,9 @@
 // Global state
 let activeProfileId = null;
 let activeProfileName = 'Bradford';
-let userRole = 'admin';
+// UBR-0158/0160: default to 'student' (least-privilege) until the DB confirms otherwise.
+// A stale localStorage entry without a role field would previously fall through to admin.
+let userRole = 'student';
 let currentView = 'lessons';
 let currentLessonId = null;
 let currentAssignmentId = null;
@@ -97,6 +99,37 @@ function applyRoleVisibility() {
             el.style.display = 'none';
         }
     });
+}
+
+// UBR-0158/0160: re-fetch the active profile's role from the DB and
+// reconcile with cached localStorage. Old caches saved before role tracking
+// existed would default userRole=admin, leaking teacher-only UI to students
+// (and hiding the student-only "Mark as Done" button from them). Calling
+// this before refreshXxx() forces userRole to match the canonical DB value.
+async function revalidateProfileFromDB() {
+    if (!activeProfileId) return;
+    try {
+        const rows = await supabaseSelect(
+            'deft_user_profiles',
+            `user_id=eq.${activeProfileId}&select=user_id,display_name,role&limit=1`
+        );
+        if (rows && rows.length > 0) {
+            const dbRole = rows[0].role || 'student';
+            if (dbRole !== userRole) {
+                userRole = dbRole;
+                try {
+                    const saved = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+                    saved.role = dbRole;
+                    saved.name = rows[0].display_name || saved.name;
+                    localStorage.setItem('rdgr-active-profile', JSON.stringify(saved));
+                } catch (e) {}
+                applyRoleVisibility();
+            }
+        }
+    } catch (e) {
+        // fire-and-forget: don't break page if revalidation fails
+        console.warn('revalidateProfileFromDB error', e);
+    }
 }
 
 // ═══════════════════════════════════════

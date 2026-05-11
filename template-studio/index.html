@@ -832,6 +832,13 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             toast(`${result.pieces_generated} pieces generated!`);
             resDiv.innerHTML = `<div class="p-3 rounded-lg" style="background:var(--deft-success-dim);border:1px solid color-mix(in srgb,var(--deft-success) 25%,transparent);">
                 <span class="text-sm" style="color:var(--deft-success);">Generated ${result.pieces_generated} pieces (${result.inserted} inserted)</span></div>`;
+            // UBR-0157: auto-switch to the Pieces tab and reload so the user sees
+            // the freshly generated pieces (with a NEW badge) without manual navigation.
+            try {
+                const piecesTabBtn = document.querySelector('[data-tab="pieces"], #tab-pieces-btn, button[onclick*="pieces"]');
+                if (piecesTabBtn) piecesTabBtn.click();
+            } catch (e) {}
+            setTimeout(() => { try { loadPieces(); } catch (e) {} }, 800);
         } else {
             toast('Generation failed: ' + (result?.error || 'Connection error'), 'error');
             resDiv.innerHTML = `<div class="p-3 rounded-lg" style="background:var(--deft-danger-dim);border:1px solid color-mix(in srgb,var(--deft-danger) 25%,transparent);">
@@ -844,7 +851,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     async function loadPieces() {
         const cat = document.getElementById('piecesFilterCat').value;
         const sys = document.getElementById('piecesFilterSys').value;
-        let query = `brand_id=eq.${BRAND_ID}&is_active=eq.true&select=id,category,system,channel,tone,template_text,variables,created_at&order=category,created_at.desc&limit=100`;
+        // UBR-0157: sort newest first so freshly-generated pieces surface at top.
+        let query = `brand_id=eq.${BRAND_ID}&is_active=eq.true&select=id,category,system,channel,tone,template_text,variables,created_at&order=created_at.desc&limit=100`;
         if (cat) query += `&category=eq.${cat}`;
         if (sys) query += `&system=eq.${sys}`;
 
@@ -861,10 +869,14 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
         container.innerHTML = rows.map((p, i) => {
             const preview = (p.template_text || '').substring(0, 80);
+            // UBR-0157: NEW badge on pieces created in the past 24h.
+            const ageMs = p.created_at ? (Date.now() - new Date(p.created_at).getTime()) : Infinity;
+            const isNew = ageMs >= 0 && ageMs < 86400000;
             return `
                 <div class="audit-row on-brand" style="cursor:pointer;" onclick="this.querySelector('.piece-full').style.display=this.querySelector('.piece-full').style.display==='none'?'':'none'">
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 flex-1 min-w-0">
+                            ${isNew ? '<span class="badge" style="background:var(--deft-success);color:#000;font-weight:700;letter-spacing:0.05em;">NEW</span>' : ''}
                             <span class="badge" style="background:rgba(255,255,255,0.06);color:var(--deft-txt-2);">${esc(p.category || '—')}</span>
                             <span class="badge" style="background:rgba(255,255,255,0.04);color:var(--deft-txt-3);">${esc(p.system || '—')}</span>
                             <span class="text-xs text-txt-2 truncate">${esc(preview)}${(p.template_text || '').length > 80 ? '...' : ''}</span>
