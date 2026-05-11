@@ -245,14 +245,14 @@ function calcAssignmentStats(assignmentId) {
 
     // UBR-0172: distinguish "not started" (no answers yet) and "pending review"
     // from "graded with 0%". Showing a literal "0% F" pill on an unstarted lesson
-    // is demoralizing — show a neutral pill instead.
-    const assignment = gradesData.assignments.find(a => a.assignment_id === assignmentId);
-    const status = assignment && assignment.status;
+    // is demoralizing — show a neutral pill instead. The primary signal is answer
+    // count, NOT whether a school_grades row exists (the backend can pre-create a
+    // row at assignment time with total_points based on lesson_questions).
     const answerCount = (gradesData.answers[assignmentId] || []).length;
     const g = gradesData.grades[assignmentId];
 
-    // No grade row and no answers => student hasn't started.
-    if (!g && answerCount === 0) {
+    // No answers from the student yet => not started, regardless of grade-row pre-population.
+    if (answerCount === 0) {
         return {
             pct: 0, earned: 0, possible: 0,
             hasGrade: false,
@@ -261,19 +261,8 @@ function calcAssignmentStats(assignmentId) {
         };
     }
 
-    // Grade row exists but earned 0 with no answers => still effectively not started.
-    if (g && answerCount === 0 && Number(g.earned_points || 0) === 0 && Number(g.total_points || 0) === 0) {
-        return {
-            pct: 0, earned: 0, possible: 0,
-            hasGrade: false,
-            notStarted: true,
-            pendingReview: false
-        };
-    }
-
-    // Student has worked the lesson but it's in 'assigned' / 'in_progress' / 'completed'
-    // and teacher hasn't reviewed yet (no graded status).
-    if (g && (status === 'assigned' || status === 'in_progress' || status === 'completed') && !g.letter_grade) {
+    // Has answers but no graded result (no letter_grade or no grade row) => awaiting review.
+    if (!g || !g.letter_grade) {
         return {
             pct: 0, earned: 0, possible: 0,
             hasGrade: false,
@@ -281,8 +270,6 @@ function calcAssignmentStats(assignmentId) {
             pendingReview: true
         };
     }
-
-    if (!g) return { pct: 0, earned: 0, possible: 0, hasGrade: false, notStarted: false, pendingReview: false };
 
     const pct = g.adjusted_percentage != null ? Number(g.adjusted_percentage) : Number(g.raw_percentage || 0);
     const earned = Number(g.earned_points || 0);

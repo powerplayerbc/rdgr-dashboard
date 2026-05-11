@@ -22,7 +22,9 @@ async function refreshQuestions() {
     container.innerHTML = renderQuestionsLoading();
 
     // Fetch lesson, questions, answers, and motivation summary in parallel
-    const [lessonRows, questions, answers, motivation] = await Promise.all([
+    // UBR-0169: get_motivation_summary RPC only returns explanations_used + videos_searched;
+    // count hint_used events directly so the inline pill row stays in sync after a reload.
+    const [lessonRows, questions, answers, motivation, hintEvents] = await Promise.all([
         supabaseSelect('school_lessons', `lesson_id=eq.${currentLessonId}&select=*`),
         supabaseSelect('school_questions', `lesson_id=eq.${currentLessonId}&select=*&order=question_number`),
         supabaseSelect('school_answers', `assignment_id=eq.${currentAssignmentId}&select=*`),
@@ -30,7 +32,10 @@ async function refreshQuestions() {
             p_student_id: activeProfileId,
             p_assignment_id: currentAssignmentId,
             p_lesson_id: currentLessonId
-        })
+        }),
+        supabaseSelect('school_motivation_events',
+            `student_id=eq.${activeProfileId}&assignment_id=eq.${currentAssignmentId}&lesson_id=eq.${currentLessonId}&event_type=eq.hint_used&select=id&limit=500`
+        )
     ]);
 
     _lessonDetail = (lessonRows && lessonRows.length > 0) ? lessonRows[0] : null;
@@ -38,6 +43,7 @@ async function refreshQuestions() {
     _answersMap = {};
     _hintCache = {};
     _motivationStats = (motivation && motivation[0]) || { explanations_used: 0, videos_searched: 0 };
+    _motivationStats.hints_used = (hintEvents || []).length;
 
     if (answers && answers.length > 0) {
         answers.forEach(a => { _answersMap[a.question_id] = a; });
@@ -334,10 +340,11 @@ function renderLessonContent(content) {
 function renderMotivationRow(stats) {
     const explanations = (stats && stats.explanations_used) || 0;
     const videos = (stats && stats.videos_searched) || 0;
-    const total = explanations + videos;
+    const hints = (stats && stats.hints_used) || 0;
+    const total = explanations + videos + hints;
     const accentColor = total >= 5 ? 'var(--deft-success)' : (total >= 1 ? 'var(--deft-accent)' : 'var(--deft-txt-3)');
     const tooltip = total === 0
-        ? 'Add explanations to your answers and look up videos to lift this score.'
+        ? 'Add explanations to your answers, look up videos, or get hints to lift this score.'
         : `${total} learn-more action${total === 1 ? '' : 's'} on this lesson.`;
 
     const pill = (num, label) => `
@@ -352,6 +359,7 @@ function renderMotivationRow(stats) {
                 <span style="font-size: 0.7rem; color: var(--deft-txt-3); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Motivation</span>
                 ${pill(explanations, 'Explanations')}
                 ${pill(videos, 'Videos')}
+                ${pill(hints, 'Hints')}
             </div>
         </div>
     `;
