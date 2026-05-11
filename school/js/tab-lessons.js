@@ -239,7 +239,7 @@ async function fetchCurrentAndUpcoming(today) {
         return d.toISOString().split('T')[0];
     })();
 
-    let query = `assigned_date=gte.${today}&assigned_date=lte.${futureDate}&status=neq.excused&select=assignment_id,lesson_id,student_id,status,assigned_date,completed_at&order=assigned_date,created_at`;
+    let query = `assigned_date=gte.${today}&assigned_date=lte.${futureDate}&select=assignment_id,lesson_id,student_id,status,assigned_date,completed_at&order=assigned_date,created_at`;
 
     if (isStudent()) {
         query += `&student_id=eq.${activeProfileId}`;
@@ -265,7 +265,7 @@ async function fetchOverdueAssignments(today) {
     })();
     let query = 'assigned_date=gte.' + earliest +
         '&assigned_date=lte.' + yesterday +
-        '&status=neq.completed&status=neq.excused' +
+        '&status=neq.completed' +
         '&select=assignment_id,lesson_id,student_id,status,assigned_date,completed_at' +
         '&order=assigned_date.desc,created_at';
     if (isStudent()) {

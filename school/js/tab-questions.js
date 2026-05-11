@@ -871,6 +871,9 @@ async function handleGetHint(qId) {
         const hintText = (result.data && result.data.hint) || result.hint || result.data || 'No hint available.';
         _hintCache[qId] = typeof hintText === 'string' ? hintText : JSON.stringify(hintText);
         renderHint(qId, _hintCache[qId]);
+        // UBR-0169: track hint usage so the teacher Grades tab can show motivation.
+        logMotivationEvent('hint_used', { question_id: qId });
+        _motivationStats.hints_used = (_motivationStats.hints_used || 0) + 1;
     } else {
         hintEl.innerHTML = `
             <div style="padding: 0.6rem 0.75rem; border-radius: 0.5rem; background: var(--deft-danger-dim, rgba(232,93,93,0.1)); border: 1px solid rgba(232,93,93,0.15);">

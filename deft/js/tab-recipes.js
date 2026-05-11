@@ -62,6 +62,10 @@ function getConversionRatio(baseParsed, newQty, newUnit) {
     const newG = WEIGHT_G[newUnit] ? newQty * WEIGHT_G[newUnit] : null;
     if (baseMl && newMl) return newMl / baseMl;
     if (baseG && newG) return newG / baseG;
+    // UBR-0166: cross-domain weight <-> volume conversion (approx. 1g = 1ml fallback);
+    // _approxConversion is set by the caller so the UI shows the "(approx.)" hint.
+    if (baseG && newMl) return newMl / baseG;
+    if (baseMl && newG) return newG / baseMl;
     return newQty / baseParsed.quantity;
 }
 

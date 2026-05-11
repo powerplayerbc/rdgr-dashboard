@@ -56,9 +56,10 @@ async function refreshGrades() {
     // but frontend should not trust stored totals if any writer leaves them
     // stale).
     // UBR-0164: also fetch the daily-task summary for the new stats cards.
-    const [assignments, grades, lessons, answers, dailySummary] = await Promise.all([
+    // UBR-0169: also pull motivation events so the teacher can see engagement.
+    const [assignments, grades, lessons, answers, dailySummary, motivationEvents] = await Promise.all([
         supabaseSelect('school_assignments',
-            `student_id=eq.${viewUserId}&status=neq.excused&order=assigned_date.desc&select=*`
+            `student_id=eq.${viewUserId}&order=assigned_date.desc&select=*`
         ),
         supabaseSelect('school_grades',
             `student_id=eq.${viewUserId}&select=*`
@@ -69,7 +70,10 @@ async function refreshGrades() {
         supabaseSelect('school_answers',
             `student_id=eq.${viewUserId}&select=*`
         ),
-        supabaseRpc('get_daily_task_summary', { p_student_id: viewUserId, p_days: 7 })
+        supabaseRpc('get_daily_task_summary', { p_student_id: viewUserId, p_days: 7 }),
+        supabaseSelect('school_motivation_events',
+            `student_id=eq.${viewUserId}&select=event_type,assignment_id,lesson_id,created_at&order=created_at.desc&limit=1000`
+        )
     ]);
 
     // Per-assignment school_grades (one row per assignment)
@@ -100,6 +104,29 @@ async function refreshGrades() {
     gradesData.assignments = assignments || [];
     gradesData.dailySummary = (dailySummary && dailySummary.summary) ? dailySummary.summary : null;
     gradesData.expandedId = null;
+
+    // UBR-0169: aggregate motivation events globally and per-assignment so the
+    // teacher Grades tab can show engagement at the top stat row AND on each
+    // assignment's detail panel.
+    gradesData.motivation = { total: { explanations_used: 0, videos_searched: 0, hints_used: 0 }, byAssignment: {} };
+    if (motivationEvents && motivationEvents.length) {
+        for (const ev of motivationEvents) {
+            const t = gradesData.motivation.total;
+            const aid = ev.assignment_id;
+            if (aid) {
+                if (!gradesData.motivation.byAssignment[aid]) {
+                    gradesData.motivation.byAssignment[aid] = { explanations_used: 0, videos_searched: 0, hints_used: 0 };
+                }
+            }
+            const inc = (key) => {
+                t[key] = (t[key] || 0) + 1;
+                if (aid) gradesData.motivation.byAssignment[aid][key] = (gradesData.motivation.byAssignment[aid][key] || 0) + 1;
+            };
+            if (ev.event_type === 'explanation_added') inc('explanations_used');
+            else if (ev.event_type === 'video_search') inc('videos_searched');
+            else if (ev.event_type === 'hint_used') inc('hints_used');
+        }
+    }
 
     // UBR-0162/0163: fetch school_questions for the lessons in this view, then
     // recompute per-assignment earned/total from school_answers + question
@@ -178,6 +205,11 @@ function calcGradeStats() {
         const g = gradesData.grades[a.assignment_id];
         if (!r && !g) continue;
 
+        // UBR-0172: skip not-started / pending-review lessons so they don't
+        // drag the running average toward 0%.
+        const aStats = calcAssignmentStats(a.assignment_id);
+        if (!aStats.hasGrade) continue;
+
         assignmentCount++;
         const possible = r ? r.possible : (Number(g.total_points) || 0);
         const earned = r ? r.earned : (Number(g.earned_points) || 0);
@@ -205,12 +237,53 @@ function calcAssignmentStats(assignmentId) {
             earned: r.earned,
             possible: r.possible,
             hasGrade: true,
-            letterGrade: r.letter
+            letterGrade: r.letter,
+            notStarted: false,
+            pendingReview: false
         };
     }
-    // Fallback to school_grades for the very first paint before answers load.
+
+    // UBR-0172: distinguish "not started" (no answers yet) and "pending review"
+    // from "graded with 0%". Showing a literal "0% F" pill on an unstarted lesson
+    // is demoralizing — show a neutral pill instead.
+    const assignment = gradesData.assignments.find(a => a.assignment_id === assignmentId);
+    const status = assignment && assignment.status;
+    const answerCount = (gradesData.answers[assignmentId] || []).length;
     const g = gradesData.grades[assignmentId];
-    if (!g) return { pct: 0, earned: 0, possible: 0, hasGrade: false };
+
+    // No grade row and no answers => student hasn't started.
+    if (!g && answerCount === 0) {
+        return {
+            pct: 0, earned: 0, possible: 0,
+            hasGrade: false,
+            notStarted: true,
+            pendingReview: false
+        };
+    }
+
+    // Grade row exists but earned 0 with no answers => still effectively not started.
+    if (g && answerCount === 0 && Number(g.earned_points || 0) === 0 && Number(g.total_points || 0) === 0) {
+        return {
+            pct: 0, earned: 0, possible: 0,
+            hasGrade: false,
+            notStarted: true,
+            pendingReview: false
+        };
+    }
+
+    // Student has worked the lesson but it's in 'assigned' / 'in_progress' / 'completed'
+    // and teacher hasn't reviewed yet (no graded status).
+    if (g && (status === 'assigned' || status === 'in_progress' || status === 'completed') && !g.letter_grade) {
+        return {
+            pct: 0, earned: 0, possible: 0,
+            hasGrade: false,
+            notStarted: false,
+            pendingReview: true
+        };
+    }
+
+    if (!g) return { pct: 0, earned: 0, possible: 0, hasGrade: false, notStarted: false, pendingReview: false };
+
     const pct = g.adjusted_percentage != null ? Number(g.adjusted_percentage) : Number(g.raw_percentage || 0);
     const earned = Number(g.earned_points || 0);
     const possible = Number(g.total_points || 0);
@@ -219,7 +292,9 @@ function calcAssignmentStats(assignmentId) {
         earned: Math.round(earned * 10) / 10,
         possible: Math.round(possible * 10) / 10,
         hasGrade: true,
-        letterGrade: g.letter_grade
+        letterGrade: g.letter_grade,
+        notStarted: false,
+        pendingReview: false
     };
 }
 
@@ -288,10 +363,110 @@ function renderGrades() {
 
     container.innerHTML = `
         ${renderStatsRow(stats, letterOverall, letterAdjusted)}
+        ${renderMotivationSummaryCard()}
         <div id="grades-assignment-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
             ${gradesData.assignments.map(a => renderAssignmentAccordion(a)).join('')}
         </div>
         ${renderDailyTaskStats()}
+    `;
+}
+
+// =======================================
+// MOTIVATION SUMMARY (UBR-0169)
+// =======================================
+function renderMotivationSummaryCard() {
+    if (!isTeacher()) return ''; // student-side already has its own pill row in the questions tab
+    const m = gradesData.motivation && gradesData.motivation.total;
+    if (!m) return '';
+
+    const total = (m.explanations_used || 0) + (m.videos_searched || 0) + (m.hints_used || 0);
+    const assignmentCount = gradesData.assignments.length || 1;
+    const eventsPerAssignment = total / assignmentCount;
+
+    // Engagement banding: low / medium / high
+    let engagement = { label: 'Low', color: 'var(--deft-txt-3)', fill: 0.25 };
+    if (eventsPerAssignment >= 3) engagement = { label: 'High', color: 'var(--deft-success, #06D6A0)', fill: 1 };
+    else if (eventsPerAssignment >= 1) engagement = { label: 'Medium', color: 'var(--deft-warning, #FBBF24)', fill: 0.6 };
+
+    const pill = (count, label, color) => `
+        <div style="
+            display: flex; flex-direction: column; align-items: center;
+            padding: 12px 18px; border-radius: 12px;
+            background: var(--deft-surface-hi, rgba(255,255,255,0.03));
+            border: 1px solid var(--deft-border); min-width: 100px;
+        ">
+            <span style="font-size: 22px; font-weight: 700; color: ${color}; font-variant-numeric: tabular-nums;">${count}</span>
+            <span style="font-size: 11px; color: var(--deft-txt-3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em;">${label}</span>
+        </div>
+    `;
+
+    return `
+        <div style="
+            margin-top: 16px; padding: 16px 20px;
+            background: var(--deft-surface-el); border: 1px solid var(--deft-border);
+            border-radius: 12px;
+        ">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--deft-txt); margin-bottom: 2px;">
+                        Learning Motivation
+                    </div>
+                    <div style="font-size: 11px; color: var(--deft-txt-3);">
+                        How often Brianna reaches for the "learn more" tools.
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 11px; color: var(--deft-txt-3); text-transform: uppercase; letter-spacing: 0.04em;">Engagement</span>
+                    <span style="
+                        font-size: 12px; font-weight: 700; padding: 3px 12px; border-radius: 999px;
+                        background: ${engagement.color}1F; color: ${engagement.color};
+                        border: 1px solid ${engagement.color}40;
+                    ">${engagement.label}</span>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                ${pill(m.explanations_used || 0, 'Explanations', 'var(--deft-accent, #06D6A0)')}
+                ${pill(m.videos_searched || 0, 'Video Searches', 'var(--deft-accent-warm, #FBBF24)')}
+                ${pill(m.hints_used || 0, 'Hints', 'var(--deft-warning, #F0A830)')}
+                ${pill(total, 'Total Uses', 'var(--deft-txt-2)')}
+            </div>
+            <div style="margin-top: 10px; height: 6px; border-radius: 3px; background: var(--deft-border); overflow: hidden;">
+                <div style="height: 100%; width: ${Math.round(engagement.fill * 100)}%; background: ${engagement.color}; transition: width 0.3s ease;"></div>
+            </div>
+        </div>
+    `;
+}
+
+// Per-assignment mini motivation row, rendered inside the accordion detail.
+function renderAssignmentMotivationRow(assignmentId) {
+    if (!isTeacher()) return '';
+    const m = gradesData.motivation && gradesData.motivation.byAssignment && gradesData.motivation.byAssignment[assignmentId];
+    if (!m) return '';
+
+    const total = (m.explanations_used || 0) + (m.videos_searched || 0) + (m.hints_used || 0);
+    if (total === 0) return '';
+
+    const inlinePill = (n, label) => `
+        <span style="
+            display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px;
+            background: var(--deft-surface-hi, rgba(255,255,255,0.04)); border: 1px solid var(--deft-border);
+            font-size: 11px; color: var(--deft-txt-2);
+        ">
+            <span style="font-weight: 700; color: var(--deft-txt);">${n}</span>
+            <span style="color: var(--deft-txt-3);">${label}</span>
+        </span>
+    `;
+
+    return `
+        <div style="padding: 10px 18px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+                    border-top: 1px solid var(--deft-border); background: rgba(255,255,255,0.015);">
+            <span style="font-size: 10px; color: var(--deft-txt-3); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;">
+                Motivation in this lesson
+            </span>
+            ${m.explanations_used ? inlinePill(m.explanations_used, 'explanations') : ''}
+            ${m.videos_searched ? inlinePill(m.videos_searched, 'video searches') : ''}
+            ${m.hints_used ? inlinePill(m.hints_used, 'hints') : ''}
+        </div>
     `;
 }
 
@@ -459,6 +634,40 @@ function renderAssignmentAccordion(assignment) {
     const dateStr = formatDate(assignment.assigned_date || assignment.created_at);
     const isExpanded = gradesData.expandedId === assignment.assignment_id;
 
+    // UBR-0172: render a neutral pill for not-started / pending-review lessons
+    // instead of "0 / 0  F  0%", which reads as a failing grade.
+    let scorePillHtml;
+    if (!aStats.hasGrade && aStats.notStarted) {
+        scorePillHtml = `
+            <span style="
+                font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+                background: var(--deft-surface-hi, rgba(255,255,255,0.04));
+                color: var(--deft-txt-3); border: 1px solid var(--deft-border);
+            ">Not started</span>
+        `;
+    } else if (!aStats.hasGrade && aStats.pendingReview) {
+        scorePillHtml = `
+            <span style="
+                font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+                background: var(--deft-surface-hi, rgba(255,255,255,0.04));
+                color: var(--deft-txt-2); border: 1px solid var(--deft-border);
+            ">Pending review</span>
+        `;
+    } else {
+        scorePillHtml = `
+            <span style="font-size: 13px; color: var(--deft-txt-2); font-variant-numeric: tabular-nums;">
+                ${aStats.earned} / ${aStats.possible}
+            </span>
+            <span style="
+                font-size: 13px; font-weight: 700; color: ${letterGrade.color};
+                min-width: 28px; text-align: center;
+            ">${letterGrade.grade}</span>
+            <span style="font-size: 13px; color: ${letterGrade.color}; font-weight: 600; font-variant-numeric: tabular-nums;">
+                ${aStats.pct.toFixed(0)}%
+            </span>
+        `;
+    }
+
     return `
         <div class="grades-accordion-card" style="
             background: var(--deft-surface-el);
@@ -498,18 +707,9 @@ function renderAssignmentAccordion(assignment) {
                     </div>
                 </div>
 
-                <!-- Score + letter grade -->
+                <!-- Score + letter grade (or neutral pill for not-started / pending review) -->
                 <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                    <span style="font-size: 13px; color: var(--deft-txt-2); font-variant-numeric: tabular-nums;">
-                        ${aStats.earned} / ${aStats.possible}
-                    </span>
-                    <span style="
-                        font-size: 13px; font-weight: 700; color: ${letterGrade.color};
-                        min-width: 28px; text-align: center;
-                    ">${letterGrade.grade}</span>
-                    <span style="font-size: 13px; color: ${letterGrade.color}; font-weight: 600; font-variant-numeric: tabular-nums;">
-                        ${aStats.pct.toFixed(0)}%
-                    </span>
+                    ${scorePillHtml}
 
                     <!-- Chevron -->
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
@@ -625,24 +825,14 @@ function renderAssignmentDetail(assignmentId) {
         num: q.question_number || (idx + 1)
     }));
 
-    const teacherControls = isTeacher() ? `
-        <div data-role-min="admin" style="
-            padding: 8px 18px 12px; display: flex; gap: 8px; justify-content: flex-end;
-            border-top: 1px solid var(--deft-border);
-        ">
-            <button onclick="excuseAssignment('${assignmentId}')" style="
-                background: transparent; border: 1px solid var(--deft-warning);
-                color: var(--deft-warning); border-radius: 8px; padding: 6px 14px;
-                font-size: 12px; font-weight: 600; cursor: pointer;
-                transition: background 0.15s ease;
-            " onmouseenter="this.style.background='rgba(251,191,36,0.1)'"
-               onmouseleave="this.style.background='transparent'">
-                Excuse Assignment
-            </button>
-        </div>
-    ` : '';
+    // UBR-0171: Excuse Assignment teacher control removed.
+    const teacherControls = '';
+
+    // UBR-0169: per-assignment motivation row (teacher view only).
+    const motivationRow = renderAssignmentMotivationRow(assignmentId);
 
     return `
+        ${motivationRow}
         <!-- Question table header -->
         <div style="
             display: grid;
@@ -1002,20 +1192,4 @@ async function toggleStrike(assignmentId, answerId, shouldStrike) {
     }
 }
 
-// --- Excuse entire assignment ---
-async function excuseAssignment(assignmentId) {
-    if (!confirm('Excuse this entire assignment? It will be excluded from grade calculations.')) return;
-
-    const result = await schoolApi('excuse_assignment', {
-        assignment_id: assignmentId
-    });
-
-    if (result) {
-        toast('Assignment excused', 'success');
-        // Remove from local data and re-render
-        gradesData.assignments = gradesData.assignments.filter(a => a.assignment_id !== assignmentId);
-        delete gradesData.grades[assignmentId];
-        gradesData.expandedId = null;
-        renderGrades();
-    }
-}
+// UBR-0171: excuseAssignment() removed.

@@ -34,8 +34,7 @@ async function refreshTeacher() {
     // Load data in parallel
     await Promise.all([
         loadTeacherLessons(),
-        loadPendingReviews(),
-        loadExcuseManager()
+        loadPendingReviews()
     ]);
 }
 
@@ -111,23 +110,6 @@ function buildTeacherPanel() {
                                                    font-family:var(--deft-body-font),sans-serif;"></span>
                 </div>
                 <div class="panel-body" id="pendingReviewsList" style="max-height:480px;overflow-y:auto;">
-                    ${buildSkeletons(2)}
-                </div>
-            </div>
-
-            <!-- Section D: Excuse Manager -->
-            <div class="panel" id="excuseManagerPanel">
-                <div class="panel-header">
-                    <h3 style="margin:0;font-size:15px;font-weight:700;color:var(--deft-txt);
-                               font-family:var(--deft-heading-font),sans-serif;display:flex;align-items:center;gap:8px;">
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                            <circle cx="9" cy="9" r="7" stroke="var(--deft-accent-warm)" stroke-width="1.3"/>
-                            <path d="M9 5.5v4M9 12v.5" stroke="var(--deft-accent-warm)" stroke-width="1.5" stroke-linecap="round"/>
-                        </svg>
-                        Excuse Manager
-                    </h3>
-                </div>
-                <div class="panel-body" id="excuseManagerList">
                     ${buildSkeletons(2)}
                 </div>
             </div>
@@ -1447,153 +1429,8 @@ async function confirmReview(answerId, acceptAI) {
     }
 }
 
-// ═══════════════════════════════════════
-// D: EXCUSE MANAGER
-// ═══════════════════════════════════════
-
-async function loadExcuseManager() {
-    const listEl = document.getElementById('excuseManagerList');
-    if (!listEl) return;
-
-    // Fetch this week's assignments
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-
-    const mondayStr = monday.toISOString().split('T')[0];
-    const sundayStr = sunday.toISOString().split('T')[0];
-
-    const assignments = await supabaseSelect(
-        'school_assignments',
-        `assigned_date=gte.${mondayStr}&assigned_date=lte.${sundayStr}&status=neq.excused&select=assignment_id,lesson_id,student_id,status,assigned_date,school_lessons(title,subject)&order=assigned_date.desc`
-    );
-
-    if (!assignments || assignments.length === 0) {
-        listEl.innerHTML = `
-            <div style="padding:24px;text-align:center;color:var(--deft-txt-3);font-size:13px;">
-                No active assignments this week.
-            </div>
-        `;
-        return;
-    }
-
-    listEl.innerHTML = `
-        <div style="margin-bottom:10px;font-size:12px;color:var(--deft-txt-3);
-                    font-family:var(--deft-heading-font),sans-serif;">
-            This week: ${formatDate(mondayStr)} - ${formatDate(sundayStr)}
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-            ${assignments.map(a => buildExcuseRow(a)).join('')}
-        </div>
-    `;
-}
-
-function buildExcuseRow(assignment) {
-    const lesson = assignment.school_lessons || {};
-    const style = getSubjectStyle(lesson.subject || 'other');
-    const statusColor = assignment.status === 'completed' ? 'var(--deft-success)' : 'var(--deft-txt-3)';
-    const dateLabel = assignment.assigned_date ? formatDate(assignment.assigned_date) : '';
-
-    return `
-        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;
-                    background:var(--deft-surface-el);border:1px solid var(--deft-border);"
-             data-excuse-id="${escapeHtml(assignment.id)}">
-            <div style="width:8px;height:8px;border-radius:50%;background:${statusColor};flex-shrink:0;"
-                 aria-hidden="true"></div>
-            <div style="flex:1;min-width:0;">
-                <div style="display:flex;align-items:center;gap:6px;">
-                    <span style="font-size:13px;font-weight:600;color:var(--deft-txt);
-                                 white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">
-                        ${escapeHtml(lesson.title || 'Untitled')}
-                    </span>
-                    <span style="font-size:9px;padding:2px 6px;border-radius:4px;
-                                 background:${style.bg};color:${style.text};font-weight:600;
-                                 text-transform:uppercase;letter-spacing:0.03em;">
-                        ${escapeHtml(style.label)}
-                    </span>
-                </div>
-                <span style="font-size:11px;color:var(--deft-txt-3);">${dateLabel}</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;" id="excuse-controls-${escapeHtml(assignment.id)}">
-                <button class="btn btn-warm" onclick="showExcuseInput('${escapeHtml(assignment.id)}')"
-                        style="padding:5px 12px;font-size:11px;">
-                    Excuse
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-function showExcuseInput(assignmentId) {
-    const controlsEl = document.getElementById(`excuse-controls-${assignmentId}`);
-    if (!controlsEl) return;
-
-    controlsEl.innerHTML = `
-        <input type="text" class="form-input" id="excuse-reason-${assignmentId}"
-               placeholder="Reason..."
-               style="width:140px;font-size:11px;padding:5px 8px;"
-               aria-label="Excuse reason"
-               onkeydown="if(event.key==='Enter'){event.preventDefault();submitExcuse('${assignmentId}');}">
-        <button class="btn btn-warm" onclick="submitExcuse('${assignmentId}')"
-                style="padding:5px 10px;font-size:11px;" id="excuse-submit-${assignmentId}">
-            OK
-        </button>
-        <button class="btn btn-ghost" onclick="cancelExcuseInput('${assignmentId}')"
-                style="padding:5px 8px;font-size:11px;">
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-            </svg>
-        </button>
-    `;
-
-    document.getElementById(`excuse-reason-${assignmentId}`)?.focus();
-}
-
-function cancelExcuseInput(assignmentId) {
-    const controlsEl = document.getElementById(`excuse-controls-${assignmentId}`);
-    if (!controlsEl) return;
-    controlsEl.innerHTML = `
-        <button class="btn btn-warm" onclick="showExcuseInput('${assignmentId}')"
-                style="padding:5px 12px;font-size:11px;">
-            Excuse
-        </button>
-    `;
-}
-
-async function submitExcuse(assignmentId) {
-    const reasonInput = document.getElementById(`excuse-reason-${assignmentId}`);
-    const btn = document.getElementById(`excuse-submit-${assignmentId}`);
-    const reason = reasonInput?.value.trim() || 'Excused by teacher';
-
-    if (btn) {
-        btn.disabled = true;
-        btn.textContent = '...';
-    }
-
-    const result = await schoolApi('excuse_assignment', {
-        assignment_id: assignmentId,
-        reason
-    });
-
-    if (result) {
-        toast('Assignment excused');
-        // Remove the row with animation
-        const row = document.querySelector(`[data-excuse-id="${assignmentId}"]`);
-        if (row) {
-            row.style.transition = 'opacity 0.3s, max-height 0.3s';
-            row.style.opacity = '0';
-            setTimeout(() => row.remove(), 300);
-        }
-    } else {
-        if (btn) {
-            btn.disabled = false;
-            btn.textContent = 'OK';
-        }
-    }
-}
+// UBR-0171: Excuse Manager removed. Delete/edit/move via the calendar is
+// sufficient; the parent didn't need a separate excuse workflow.
 
 // ═══════════════════════════════════════
 // SHARED UI HELPERS

@@ -278,15 +278,44 @@ function vocabBuildSubTabs() {
 // =====================================================================
 //   WORD LIST VIEW
 // =====================================================================
+// UBR-0168: Mark-as-Done bar must render even when the current week has no
+// words (empty-state path) AND for the teacher role (so previews and tests
+// from the parent profile aren't blocked). The button itself still writes
+// the per-profile localStorage flag, so a teacher click only affects their
+// own day-flag — the student's tile still flips correctly when the student
+// clicks under their own profile.
+function vocabBuildMarkDoneBar() {
+    const profileId = (typeof activeProfileId !== 'undefined' && activeProfileId) || 'anon';
+    const today = (typeof todayStr === 'function') ? todayStr() : new Date().toISOString().slice(0, 10);
+    const storageKey = 'school-vocab-done-' + profileId + '-' + today;
+    let doneToday = false;
+    try { doneToday = localStorage.getItem(storageKey) === '1'; } catch (e) {}
+    return `
+        <div id="vocab-mark-done-bar" style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:12px;border-radius:10px;background:var(--deft-surface-el);border:1px solid var(--deft-border);">
+            <span style="font-size:12px;color:var(--deft-txt-2);flex:1;">
+                Looked through today's words? Mark this activity complete.
+            </span>
+            <button id="vocab-mark-done-btn" class="vc-btn vc-btn-primary"
+                    style="font-size:12px;padding:6px 14px;${doneToday ? 'background:var(--deft-success);' : ''}"
+                    onclick="vocabMarkDone()" ${doneToday ? 'disabled aria-pressed="true"' : 'aria-pressed="false"'}>
+                ${doneToday ? '✓ Marked Done' : 'Mark as Done'}
+            </button>
+        </div>
+    `;
+}
+
 function vocabBuildWordList() {
     const weekData = vocabState.weekData;
     if (!weekData || !weekData.words || weekData.words.length === 0) {
-        return vocabEmptyState(
-            isTeacher()
-                ? 'No words for this week yet. Click "Generate All Weeks" to create vocabulary content.'
-                : 'No vocabulary words for this week yet. Check back soon!',
-            'empty'
-        );
+        return '<div class="vc-wordlist">'
+            + vocabBuildMarkDoneBar()
+            + vocabEmptyState(
+                isTeacher()
+                    ? 'No words for this week yet. Click "Generate All Weeks" to create vocabulary content.'
+                    : 'No vocabulary words for this week yet. Check back soon!',
+                'empty'
+            )
+            + '</div>';
     }
 
     const words = weekData.words;
@@ -314,27 +343,8 @@ function vocabBuildWordList() {
 
     let html = '<div class="vc-wordlist">';
 
-    // UBR-0151: student-facing "Mark as Done" button so the Today tab's
-    // Vocabulary Study tile can flip to a green checkmark for the day.
-    if (typeof isTeacher === 'function' && !isTeacher()) {
-        const profileId = (typeof activeProfileId !== 'undefined' && activeProfileId) || 'anon';
-        const today = (typeof todayStr === 'function') ? todayStr() : new Date().toISOString().slice(0, 10);
-        const storageKey = 'school-vocab-done-' + profileId + '-' + today;
-        let doneToday = false;
-        try { doneToday = localStorage.getItem(storageKey) === '1'; } catch (e) {}
-        html += `
-            <div id="vocab-mark-done-bar" style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:12px;border-radius:10px;background:var(--deft-surface-el);border:1px solid var(--deft-border);">
-                <span style="font-size:12px;color:var(--deft-txt-2);flex:1;">
-                    Looked through today's words? Mark this activity complete.
-                </span>
-                <button id="vocab-mark-done-btn" class="vc-btn vc-btn-primary"
-                        style="font-size:12px;padding:6px 14px;${doneToday ? 'background:var(--deft-success);' : ''}"
-                        onclick="vocabMarkDone()" ${doneToday ? 'disabled aria-pressed="true"' : 'aria-pressed="false"'}>
-                    ${doneToday ? '✓ Marked Done' : 'Mark as Done'}
-                </button>
-            </div>
-        `;
-    }
+    // UBR-0151 / UBR-0168: Mark-as-Done bar (now always rendered via helper).
+    html += vocabBuildMarkDoneBar();
 
     // Teacher: edit button
     if (isTeacher()) {

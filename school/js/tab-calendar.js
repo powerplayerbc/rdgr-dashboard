@@ -214,6 +214,11 @@ function renderCalendarList() {
         if (isTeacher()) {
             actionsHtml = `
                 <div class="cal-list-actions">
+                    <button class="cal-list-action" onclick="event.stopPropagation();openEditAssignmentModal('${a.assignment_id}')" title="Edit assignment" aria-label="Edit assignment">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M9.5 2.5l2 2L5 11H3v-2l6.5-6.5z" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
                     <button class="cal-list-action" onclick="event.stopPropagation();deleteCalAssignment('${a.assignment_id}')" title="Delete assignment" aria-label="Delete assignment">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                             <path d="M2 4h10M5 4V3a1 1 0 011-1h2a1 1 0 011 1v1M9 6.5v4M5 6.5v4M3.5 4l.5 8a1 1 0 001 1h4a1 1 0 001-1l.5-8" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
@@ -393,12 +398,127 @@ async function submitAssignment() {
 // ═══════════════════════════════════════
 async function deleteCalAssignment(assignmentId) {
     if (!confirm('Remove this assignment?')) return;
-    const result = await supabaseWrite('school_assignments', 'DELETE', null, `id=eq.${assignmentId}`);
+    const result = await supabaseWrite('school_assignments', 'DELETE', null, `assignment_id=eq.${assignmentId}`);
     if (result !== null) {
         toast('Assignment removed');
         await refreshCalendar();
     } else {
         toast('Failed to remove assignment', 'error');
+    }
+}
+
+// ═══════════════════════════════════════
+// EDIT ASSIGNMENT (Teacher only) — UBR-0165
+// ═══════════════════════════════════════
+async function openEditAssignmentModal(assignmentId) {
+    const assignment = calAssignments.find(a => a.assignment_id === assignmentId);
+    if (!assignment) { toast('Assignment not found', 'error'); return; }
+
+    let modal = document.getElementById('modal-edit-assignment');
+    if (!modal) {
+        modal = buildEditAssignmentModal();
+        document.body.appendChild(modal);
+    }
+
+    document.getElementById('edit-assignment-id').value = assignmentId;
+    const dateInput = document.getElementById('edit-assign-date');
+    if (dateInput) dateInput.value = assignment.assigned_date || todayStr();
+
+    const lessonSelect = document.getElementById('edit-assign-lesson-select');
+    if (lessonSelect) {
+        lessonSelect.innerHTML = '<option value="">Loading lessons...</option>';
+        const lessons = await loadAllLessons();
+        lessonSelect.innerHTML = '<option value="">-- Select a lesson --</option>';
+        const currentLessonId = (assignment.school_lessons && assignment.school_lessons.lesson_id) || assignment.lesson_id;
+        lessons.forEach(l => {
+            const style = getSubjectStyle(l.subject || 'other');
+            const selected = l.lesson_id === currentLessonId ? 'selected' : '';
+            lessonSelect.innerHTML += `<option value="${l.lesson_id}" ${selected}>${escapeHtml(l.title)} (${style.label})</option>`;
+        });
+    }
+
+    const studentSelect = document.getElementById('edit-assign-student-select');
+    if (studentSelect) {
+        const profiles = await supabaseSelect('deft_user_profiles', 'select=user_id,display_name,role&role=eq.student&order=display_name');
+        studentSelect.innerHTML = '';
+        const list = (profiles && profiles.length) ? profiles
+            : (await supabaseSelect('deft_user_profiles', 'select=user_id,display_name&order=display_name')) || [];
+        list.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.user_id;
+            opt.textContent = p.display_name || 'Student';
+            if (p.user_id === assignment.student_id) opt.selected = true;
+            studentSelect.appendChild(opt);
+        });
+    }
+
+    openModal('modal-edit-assignment');
+}
+
+function buildEditAssignmentModal() {
+    const backdrop = document.createElement('div');
+    backdrop.id = 'modal-edit-assignment';
+    backdrop.className = 'modal-backdrop';
+    backdrop.onclick = function(e) { if (e.target === backdrop) closeModal('modal-edit-assignment'); };
+
+    backdrop.innerHTML = `
+        <div class="modal-content cal-modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Assignment</h3>
+                <button onclick="closeModal('modal-edit-assignment')" class="modal-close" aria-label="Close">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="edit-assignment-id" />
+
+                <label class="cal-field-label">Date</label>
+                <input type="date" id="edit-assign-date" class="cal-field-input" />
+
+                <label class="cal-field-label">Lesson</label>
+                <select id="edit-assign-lesson-select" class="cal-field-input">
+                    <option value="">-- Select a lesson --</option>
+                </select>
+
+                <label class="cal-field-label">Student</label>
+                <select id="edit-assign-student-select" class="cal-field-input"></select>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal('modal-edit-assignment')" class="cal-btn cal-btn--ghost">Cancel</button>
+                <button onclick="submitEditAssignment()" class="cal-btn cal-btn--primary">Save Changes</button>
+            </div>
+        </div>
+    `;
+
+    return backdrop;
+}
+
+async function submitEditAssignment() {
+    const assignmentId = document.getElementById('edit-assignment-id')?.value;
+    const lessonId = document.getElementById('edit-assign-lesson-select')?.value;
+    const studentId = document.getElementById('edit-assign-student-select')?.value;
+    const assignedDate = document.getElementById('edit-assign-date')?.value;
+
+    if (!assignmentId) { toast('Missing assignment id', 'error'); return; }
+    if (!lessonId) { toast('Please select a lesson', 'error'); return; }
+    if (!studentId) { toast('Please select a student', 'error'); return; }
+    if (!assignedDate) { toast('Please select a date', 'error'); return; }
+
+    const result = await supabaseWrite(
+        'school_assignments',
+        'PATCH',
+        { lesson_id: lessonId, student_id: studentId, assigned_date: assignedDate },
+        `assignment_id=eq.${assignmentId}`
+    );
+
+    if (result !== null) {
+        toast('Assignment updated');
+        closeModal('modal-edit-assignment');
+        await refreshCalendar();
+    } else {
+        toast('Failed to update assignment', 'error');
     }
 }
 
