@@ -33,7 +33,10 @@ async function supabaseWrite(table, method, body, matchQuery = '') {
 }
 
 async function supabaseUpsert(table, body, onConflict = '') {
-    const url = `${SUPABASE_URL}/rest/v1/${table}`;
+    // UBR-0164: on_conflict must be appended to the URL for PostgREST's
+    // resolution=merge-duplicates to know which constraint to merge against,
+    // otherwise PostgREST does a plain INSERT and unique-violations surface.
+    const url = `${SUPABASE_URL}/rest/v1/${table}` + (onConflict ? `?on_conflict=${encodeURIComponent(onConflict)}` : '');
     try {
         const res = await fetch(url, {
             method: 'POST',

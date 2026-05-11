@@ -57,7 +57,7 @@ function markHistoryFactRead(factId) {
             student_id: activeProfileId,
             fact_id: factId,
             read_at: new Date().toISOString()
-        }).catch(function(){});
+        }, 'student_id,fact_id').catch(function(){});
     }
     // Re-render the page so the sidebar tile picks up the checkmark and the
     // fact card swaps the "Mark as read" button for a "Read" indicator.

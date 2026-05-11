@@ -38,7 +38,7 @@ function vocabMarkDone() {
             task_date: today,
             task_type: 'vocab',
             completed_at: new Date().toISOString()
-        }).catch(function(){});
+        }, 'student_id,task_date,task_type').catch(function(){});
     }
     const btn = document.getElementById('vocab-mark-done-btn');
     if (btn) {
