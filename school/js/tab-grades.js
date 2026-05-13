@@ -219,11 +219,14 @@ function calcGradeStats() {
 
     const overallPct = totalPossible > 0 ? (totalEarned / totalPossible) * 100 : 0;
 
+    // UBR-0176: a single percentage. Per-answer logic (line 159) already
+    // prefers override_score over ai_score, so overallPct is the
+    // override-adjusted score. The previous "raw vs adjusted" split was
+    // misleading because both fields held the same number.
     return {
         totalEarned: Math.round(totalEarned * 10) / 10,
         totalPossible: Math.round(totalPossible * 10) / 10,
         overallPct,
-        adjustedPct: overallPct,
         assignmentCount
     };
 }
@@ -326,7 +329,6 @@ function renderGrades() {
 
     const stats = calcGradeStats();
     const letterOverall = getLetterGrade(stats.overallPct);
-    const letterAdjusted = getLetterGrade(stats.adjustedPct);
 
     // Empty state
     if (!gradesData.assignments.length) {
@@ -349,7 +351,7 @@ function renderGrades() {
     }
 
     container.innerHTML = `
-        ${renderStatsRow(stats, letterOverall, letterAdjusted)}
+        ${renderStatsRow(stats, letterOverall)}
         ${renderMotivationSummaryCard()}
         <div id="grades-assignment-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
             ${gradesData.assignments.map(a => renderAssignmentAccordion(a)).join('')}
@@ -554,7 +556,7 @@ function renderDailyTaskStats() {
 // =======================================
 // STATS ROW (4 cards)
 // =======================================
-function renderStatsRow(stats, letterOverall, letterAdjusted) {
+function renderStatsRow(stats, letterOverall) {
     const cardBase = `
         background: var(--deft-surface-el);
         border: 1px solid var(--deft-border);
@@ -587,22 +589,13 @@ function renderStatsRow(stats, letterOverall, letterAdjusted) {
                 <span style="font-size: 12px; color: var(--deft-txt-2);">${stats.assignmentCount} assignment${stats.assignmentCount !== 1 ? 's' : ''}</span>
             </div>
 
-            <!-- Average Score -->
-            <div style="${cardBase}" role="group" aria-label="Average score">
-                <span style="${labelStyle}">Average Score</span>
+            <!-- Percentage Score (UBR-0176: single card; includes teacher overrides) -->
+            <div style="${cardBase}" role="group" aria-label="Percentage score">
+                <span style="${labelStyle}">Percentage Score</span>
                 <span style="${valueStyle} color: ${letterOverall.color};">
                     ${stats.overallPct.toFixed(1)}%
                 </span>
-                <span style="font-size: 12px; color: var(--deft-txt-2);">raw average</span>
-            </div>
-
-            <!-- Adjusted Score -->
-            <div style="${cardBase}" role="group" aria-label="Adjusted score">
-                <span style="${labelStyle}">Adjusted Score</span>
-                <span style="${valueStyle} color: ${letterAdjusted.color};">
-                    ${stats.adjustedPct.toFixed(1)}%
-                </span>
-                <span style="font-size: 12px; color: var(--deft-txt-2);">after overrides</span>
+                <span style="font-size: 12px; color: var(--deft-txt-2);">includes overrides</span>
             </div>
         </div>
     `;

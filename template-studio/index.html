@@ -606,11 +606,6 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                             <label class="text-xs text-txt-2 font-medium mb-1 block">System</label>
                             <select class="form-input" id="piecesFilterSys" onchange="loadPieces()" style="min-width:120px;">
                                 <option value="">All</option>
-                                <option value="partner_pitch">Partner Pitch</option>
-                                <option value="jv_opportunity">JV Opportunity</option>
-                                <option value="speaking_engagement">Speaking Engagement</option>
-                                <option value="interview_request">Interview Request</option>
-                                <option value="friendly_outreach">Friendly Outreach</option>
                             </select>
                         </div>
                         <div class="ml-auto mt-4">
@@ -696,11 +691,6 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                             <label class="text-xs text-txt-2 font-medium mb-1 block">System</label>
                             <select class="form-input" id="auditSystem">
                                 <option value="all">All Systems</option>
-                                <option value="partner_pitch">Partner Pitch</option>
-                                <option value="jv_opportunity">JV Opportunity</option>
-                                <option value="speaking_engagement">Speaking Engagement</option>
-                                <option value="interview_request">Interview Request</option>
-                                <option value="friendly_outreach">Friendly Outreach</option>
                             </select>
                         </div>
                         <button onclick="runAudit()" class="btn btn-primary mt-4" id="auditBtn">
@@ -1102,7 +1092,33 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         ).join('');
     }
 
-    function initPage() { populateChannelDropdown(); loadCompositions(); }
+    // UBR-0175: populate the System filter dropdowns from actual distinct values
+    // in outreach_email_templates. The previous hardcoded list (partner_pitch,
+    // jv_opportunity, speaking_engagement, interview_request, friendly_outreach)
+    // was missing newer values like cold_outreach_email, one_pager_sales,
+    // blog_longform, sales_deck_sales, landing_page_web_pr, social_linkedin_social.
+    async function populateSystemDropdowns() {
+        const rows = await supabaseSelect('outreach_email_templates',
+            `brand_id=eq.${BRAND_ID}&is_active=eq.true&select=system`);
+        if (!rows) return;
+        const systems = Array.from(new Set(rows.map(r => r.system).filter(Boolean))).sort();
+        const optsHtml = systems.map(s => {
+            const label = s.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            return `<option value="${esc(s)}">${esc(label)}</option>`;
+        }).join('');
+        const piecesSel = document.getElementById('piecesFilterSys');
+        const auditSel = document.getElementById('auditSystem');
+        if (piecesSel && !piecesSel.dataset.hydrated) {
+            piecesSel.insertAdjacentHTML('beforeend', optsHtml);
+            piecesSel.dataset.hydrated = '1';
+        }
+        if (auditSel && !auditSel.dataset.hydrated) {
+            auditSel.insertAdjacentHTML('beforeend', optsHtml);
+            auditSel.dataset.hydrated = '1';
+        }
+    }
+
+    function initPage() { populateChannelDropdown(); populateSystemDropdowns(); loadCompositions(); }
 
     // Auth gate (identical pattern)
     let gateSelectedProfile = null;

@@ -227,14 +227,14 @@ function renderMacroComparison() {
     selectedFoodIds.forEach(foodId => {
         const food = selectedFoodCache.get(foodId) || allFoods.find(f => f.food_id === foodId);
         if (food) {
-            items.push({ type: 'food', id: food.food_id, name: food.name, brand: food.brand, nutrition: food.nutrition_per_serving || {} });
+            items.push({ type: 'food', id: food.food_id, name: food.name, brand: food.brand, serving_size: food.serving_size, nutrition: food.nutrition_per_serving || {} });
         }
     });
 
     compareRecipeIds.forEach(recipeId => {
         const recipe = (typeof allRecipes !== 'undefined' ? allRecipes : []).find(r => r.recipe_id === recipeId);
         if (recipe) {
-            items.push({ type: 'recipe', id: recipe.recipe_id, name: recipe.name, nutrition: recipe.nutrition_per_serving || {} });
+            items.push({ type: 'recipe', id: recipe.recipe_id, name: recipe.name, serving_size: recipe.servings ? `1 of ${recipe.servings}` : null, nutrition: recipe.nutrition_per_serving || {} });
         }
     });
 
@@ -252,12 +252,17 @@ function renderMacroComparison() {
         const servingsInputId = `compare-servings-${item.type}-${item.id}`;
         const existingInput = document.getElementById(servingsInputId);
         const currentServings = existingInput ? existingInput.value : '1';
+        // UBR-0174: surface the size of "1 serving" so users know what they're
+        // multiplying. Foods carry serving_size (e.g. "4 oz"); recipes get a
+        // synthesized "1 of N" label from their servings count.
+        const servingLabel = item.serving_size ? `1 srv = ${item.serving_size}` : '';
         return `<div class="compare-item">
             <div class="flex-1 min-w-0 mr-3">
                 <div class="text-sm font-medium truncate" style="color: var(--deft-txt);">${item.name}</div>
                 <div class="text-xs font-mono mt-0.5" style="color: var(--deft-txt-3);">
                     ${Math.round(n.calories || 0)} cal &middot; ${(n.total_fat_g || 0).toFixed(1)}g F &middot; ${(n.protein_g || 0).toFixed(1)}g P &middot; ${(n.net_carbs_g || 0).toFixed(1)}g NC
                     ${item.brand ? `<span class="ml-1" style="color:var(--deft-txt-3);">(${item.brand})</span>` : ''}
+                    ${servingLabel ? `<span class="ml-1" style="color:var(--deft-txt-3);">&middot; ${servingLabel}</span>` : ''}
                 </div>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
