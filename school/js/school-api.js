@@ -130,7 +130,7 @@ async function schoolApi(operation, data = {}, { silent = false, timeout = 30000
         if (err.name === 'AbortError') {
             if (!silent) toast('Request timed out', 'error');
         } else {
-            console.warn(`schoolApi(${operation}) error:`, err.message);
+            console.warn(`schoolApi(${operation}) error:`, err.name, err.message, err.stack);
             if (!silent) toast('Connection error', 'error');
         }
         return null;
