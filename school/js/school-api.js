@@ -54,6 +54,31 @@ async function supabaseUpsert(table, body, onConflict = '') {
     } catch (err) { console.error('Supabase upsert error:', err); return null; }
 }
 
+// UBR-0177: daily activity completion (vocab/typing/flashcards) was tracked in
+// localStorage only, so a second device never saw what was marked done on the
+// first. school_daily_task_completions is the cross-device source of truth.
+// This seeds the per-device localStorage cache from the server for today, so the
+// existing synchronous `school-<type>-done-<profile>-<today>` reads reflect what
+// was completed on ANY device. Returns a Set of completed task_type strings.
+async function syncDailyCompletionsFromServer() {
+    const profileId = (typeof activeProfileId !== 'undefined' && activeProfileId) || 'anon';
+    if (profileId === 'anon') return new Set();
+    const today = (typeof todayStr === 'function') ? todayStr() : new Date().toISOString().slice(0, 10);
+    const rows = await supabaseSelect(
+        'school_daily_task_completions',
+        `student_id=eq.${profileId}&task_date=eq.${today}&select=task_type`
+    );
+    const done = new Set();
+    if (Array.isArray(rows)) {
+        rows.forEach(function (r) {
+            if (!r || !r.task_type) return;
+            done.add(r.task_type);
+            try { localStorage.setItem('school-' + r.task_type + '-done-' + profileId + '-' + today, '1'); } catch (e) {}
+        });
+    }
+    return done;
+}
+
 async function supabaseRpc(fn, body) {
     try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {

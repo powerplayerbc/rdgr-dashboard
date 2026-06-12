@@ -1041,21 +1041,66 @@ async function toggleLibraryExpand(cardEl, lessonId) {
     }
 
     detailEl.style.display = '';
+    detailEl.innerHTML = `<div style="padding:10px 0;font-size:12px;color:var(--deft-txt-3);">Loading...</div>`;
 
-    // Fetch questions for this lesson
-    const questions = await supabaseSelect(
-        'school_questions',
-        `lesson_id=eq.${lessonId}&select=question_id,question_number,question_text,question_type,correct_answer,points&order=question_number`
-    );
+    // Fetch questions, assignments (UBR-0182), and student names in parallel.
+    const [questions, assignments, profiles] = await Promise.all([
+        supabaseSelect(
+            'school_questions',
+            `lesson_id=eq.${lessonId}&select=question_id,question_number,question_text,question_type,correct_answer,points&order=question_number`
+        ),
+        supabaseSelect(
+            'school_assignments',
+            `lesson_id=eq.${lessonId}&select=assignment_id,student_id,assigned_date,status&order=assigned_date`
+        ),
+        supabaseSelect('deft_user_profiles', 'select=user_id,display_name')
+    ]);
+
+    const nameById = {};
+    (profiles || []).forEach(p => { nameById[p.user_id] = p.display_name || 'Student'; });
+
+    // UBR-0182: list current assignments with a Remove control so a lesson
+    // accidentally assigned twice to the same day can be un-assigned.
+    let assignmentsHtml = '';
+    if (assignments && assignments.length > 0) {
+        assignmentsHtml = `
+            <div style="padding:8px 0 4px;">
+                <div style="font-size:10px;font-weight:700;color:var(--deft-txt-3);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px;">
+                    Assignments (${assignments.length})
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                    ${assignments.map(a => {
+                        const dt = a.assigned_date
+                            ? new Date(a.assigned_date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+                            : 'No date';
+                        const who = escapeHtml(nameById[a.student_id] || 'Student');
+                        const st = escapeHtml(a.status || 'assigned');
+                        return `
+                        <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;
+                                    background:var(--deft-surface);border:1px solid var(--deft-border);font-size:12px;">
+                            <span style="flex:1;min-width:0;color:var(--deft-txt);">
+                                ${who} &middot; <span style="color:var(--deft-txt-2);">${escapeHtml(dt)}</span>
+                                <span style="font-size:10px;color:var(--deft-txt-3);text-transform:uppercase;margin-left:6px;">${st}</span>
+                            </span>
+                            <button class="btn btn-ghost" onclick="event.stopPropagation();removeAssignment('${escapeHtml(a.assignment_id)}','${escapeHtml(lessonId)}')"
+                                    style="padding:3px 10px;font-size:11px;flex-shrink:0;border-color:rgba(229,115,115,0.4);color:#E57373;">
+                                Remove
+                            </button>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
 
     if (!questions || questions.length === 0) {
-        detailEl.innerHTML = `
+        detailEl.innerHTML = assignmentsHtml + `
             <div style="padding:10px 0;font-size:12px;color:var(--deft-txt-3);">No questions found for this lesson.</div>
         `;
         return;
     }
 
-    detailEl.innerHTML = `
+    detailEl.innerHTML = assignmentsHtml + `
         <div style="display:flex;flex-direction:column;gap:6px;padding:8px 0;">
             ${questions.map(q => `
                 <div style="display:flex;align-items:flex-start;gap:8px;padding:6px 8px;
@@ -1200,6 +1245,27 @@ async function confirmAssign(lessonId) {
     } else {
         btn.disabled = false;
         btn.textContent = 'Assign';
+    }
+}
+
+// UBR-0182: remove a single lesson assignment. Cleans dependent answer/grade
+// rows first so no orphans (or FK errors) remain, then deletes the assignment
+// and refreshes the lesson library so the assignment count updates.
+async function removeAssignment(assignmentId, lessonId) {
+    if (!assignmentId) return;
+    if (!confirm('Remove this assignment? Any saved answers for it will also be deleted. This cannot be undone.')) return;
+
+    // Best-effort dependent cleanup (ignore failures — many assignments have none).
+    await supabaseWrite('school_answers', 'DELETE', null, `assignment_id=eq.${assignmentId}`);
+    await supabaseWrite('school_grades', 'DELETE', null, `assignment_id=eq.${assignmentId}`);
+
+    const res = await supabaseWrite('school_assignments', 'DELETE', null, `assignment_id=eq.${assignmentId}`);
+    if (res !== null) {
+        toast('Assignment removed');
+        await loadTeacherLessons();
+        renderTeacherLessons();
+    } else {
+        toast('Could not remove assignment', 'error');
     }
 }
 

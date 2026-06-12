@@ -1133,6 +1133,16 @@ async function fcCheckMultiplication() {
                 String(t.getMonth() + 1).padStart(2, '0') + '-' +
                 String(t.getDate()).padStart(2, '0');
             localStorage.setItem('school-flashcards-done-' + activeProfileId + '-' + todayKey, '1');
+            // UBR-0177: persist to the cross-device completion table so the
+            // Today tab reflects flashcards completion on any device.
+            if (typeof supabaseUpsert === 'function') {
+                supabaseUpsert('school_daily_task_completions', {
+                    student_id: activeProfileId,
+                    task_date: todayKey,
+                    task_type: 'flashcards',
+                    completed_at: new Date().toISOString()
+                }, 'student_id,task_date,task_type').catch(function(){});
+            }
         } catch (e) { /* ignore localStorage errors */ }
     }
 

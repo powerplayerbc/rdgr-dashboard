@@ -850,6 +850,9 @@ function startSentenceBuilder() {
 // save what they did; otherwise reset.
 function stopSentenceBuilder() {
     if (!typingState.isRunning) return;
+    // UBR-0185: guard against accidental taps (esp. on tablets, where Stop sat
+    // next to Submit). Require explicit confirmation before ending the round.
+    if (!confirm('End this round? Your progress so far will be saved.')) return;
     if (typingState.sentenceResults.length > 0) {
         finishSentenceBuilder();
     } else {
@@ -896,11 +899,14 @@ function showSentenceType() {
     const instrEl = document.getElementById('tp-sb-instruction');
     const input = document.getElementById('tp-sb-input');
     const submitBtn = document.getElementById('tp-sb-submit');
+    const stopBtn = document.getElementById('tp-sb-stop');
 
     if (sentEl) sentEl.textContent = '';
     if (instrEl) instrEl.textContent = 'Now type it from memory!';
     if (input) { input.disabled = false; input.focus(); }
     if (submitBtn) submitBtn.style.display = '';
+    // UBR-0185: hide Stop while actively typing so it can't be mis-tapped for Submit.
+    if (stopBtn) stopBtn.style.display = 'none';
 
     typingState.sentencePhase = 'type';
 
@@ -930,6 +936,9 @@ function submitSentence() {
     if (input) { input.disabled = true; input.onkeydown = null; }
     if (submitBtn) submitBtn.style.display = 'none';
     if (nextBtn) nextBtn.style.display = '';
+    // UBR-0185: Stop is safe to show again once typing is done (compare phase).
+    const stopBtn = document.getElementById('tp-sb-stop');
+    if (stopBtn) stopBtn.style.display = '';
 
     // Word-level diff
     const origWords = original.split(/\s+/);
@@ -1127,6 +1136,16 @@ async function saveTypingSession(data) {
                 String(today.getMonth() + 1).padStart(2, '0') + '-' +
                 String(today.getDate()).padStart(2, '0');
             localStorage.setItem('school-typing-done-' + activeProfileId + '-' + todayKey, '1');
+            // UBR-0177: also persist to the cross-device completion table so
+            // the Today tab on another device shows typing as done too.
+            if (activeProfileId && typeof supabaseUpsert === 'function') {
+                supabaseUpsert('school_daily_task_completions', {
+                    student_id: activeProfileId,
+                    task_date: todayKey,
+                    task_type: 'typing',
+                    completed_at: new Date().toISOString()
+                }, 'student_id,task_date,task_type').catch(function(){});
+            }
         } catch (e) { /* ignore localStorage errors */ }
         await loadTypingStats();
         renderStatsBar();

@@ -598,7 +598,7 @@ function renderQuestionCard(question, existingAnswer) {
             <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.6rem;">
                 <div style="display: flex; align-items: baseline; gap: 0.5rem; flex: 1; min-width: 0;">
                     <span style="display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--deft-accent-dim); color: var(--deft-accent); font-size: 0.7rem; font-weight: 700; flex-shrink: 0;">${qNum}</span>
-                    <p style="margin: 0; font-size: 0.925rem; font-weight: 600; color: var(--deft-txt); line-height: 1.45;">${escapeHtml(qText)}</p>
+                    <p style="margin: 0; font-size: 0.925rem; font-weight: 600; color: var(--deft-txt); line-height: 1.45; white-space: pre-line;">${escapeHtml(qText)}</p>
                 </div>
                 <div style="display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0;">
                     ${scoreBadge}

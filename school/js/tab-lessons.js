@@ -162,9 +162,16 @@ function _todayTabIsActivityDone(activity) {
 }
 
 async function buildDailyActivitiesSectionData(today) {
-    // Fetch today's history fact id (if any) so we can check the read flag.
-    const factRows = await supabaseSelect('school_history_facts',
-        `scheduled_date=eq.${today}&select=fact_id,title&limit=1`);
+    // UBR-0177: pull cross-device completion state from the server and seed the
+    // local cache BEFORE rendering, so activities marked done on another device
+    // show as done here too.
+    const [factRows] = await Promise.all([
+        supabaseSelect('school_history_facts',
+            `scheduled_date=eq.${today}&select=fact_id,title&limit=1`),
+        (typeof syncDailyCompletionsFromServer === 'function')
+            ? syncDailyCompletionsFromServer()
+            : Promise.resolve(new Set())
+    ]);
     const fact = (factRows && factRows[0]) || null;
     return { fact };
 }

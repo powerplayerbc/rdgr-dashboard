@@ -110,7 +110,12 @@ async function vocabLoadWeekData(weekNum) {
                 'school_vocab_quizzes',
                 `student_id=eq.${activeProfileId}&select=*&order=created_at.desc`
             )
-            : Promise.resolve(null)
+            : Promise.resolve(null),
+        // UBR-0177: seed the local completion cache from the server so the
+        // Mark-as-Done bar reflects completion from any device.
+        (typeof syncDailyCompletionsFromServer === 'function')
+            ? syncDailyCompletionsFromServer()
+            : Promise.resolve(new Set())
     ]);
 
     vocabState.weekData = (weekRows && weekRows.length > 0) ? weekRows[0] : null;
@@ -787,7 +792,9 @@ async function vocabStartQuiz() {
         student_id: activeProfileId,
         answers: questions,
         score: null,
-        total_possible: 15,
+        // UBR-0180: the generator returns a variable number of questions (fewer
+        // than 15 for short word lists). Score out of what was actually asked.
+        total_possible: questions.length,
         percentage: null,
         letter_grade: null,
         status: 'in_progress'
@@ -851,15 +858,18 @@ function vocabBuildActiveQuiz() {
                         <path d="M8 1.5L5.5 4 8 6.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M5.5 4h4a3 3 0 010 6h-1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
                     </svg>
-                    Answer Key
+                    Word List (this week)
                     <svg class="vc-chevron-icon" width="12" height="12" viewBox="0 0 12 12" fill="none">
                         <path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </summary>
                 <div class="vc-answer-key-list">
-                    ${vocabState.weekData.words.map((w, i) => `
+                    <p class="vc-ak-note" style="font-size:0.78rem;opacity:0.7;margin:0 0 6px;">
+                        Each student's quiz is shuffled and may use a different subset, so these are NOT
+                        in question order. To review a specific quiz, use Grades &rarr; Vocab Quizzes.
+                    </p>
+                    ${vocabState.weekData.words.map((w) => `
                         <div class="vc-ak-row">
-                            <span class="vc-ak-num">${i + 1}.</span>
                             <span class="vc-ak-word">${escapeHtml(w.word)}</span>
                         </div>
                     `).join('')}
@@ -1027,7 +1037,8 @@ async function vocabSubmitQuiz() {
 
         quiz.status = 'graded';
         quiz.score = gradeResult.score || questions.filter(q => q.is_correct).length;
-        quiz.total_possible = gradeResult.total_possible || 15;
+        // UBR-0180: fall back to the actual question count, never a hardcoded 15.
+        quiz.total_possible = gradeResult.total_possible || questions.length;
         quiz.percentage = gradeResult.percentage || Math.round((quiz.score / quiz.total_possible) * 100);
         quiz.letter_grade = gradeResult.letter_grade || getLetterGrade(quiz.percentage).grade;
 
@@ -1044,11 +1055,12 @@ async function vocabSubmitQuiz() {
 
         quiz.status = 'graded';
         quiz.score = score;
-        quiz.total_possible = 15;
-        quiz.percentage = Math.round((score / 15) * 100);
+        // UBR-0180: score out of the number of questions actually asked.
+        quiz.total_possible = questions.length;
+        quiz.percentage = Math.round((score / questions.length) * 100);
         quiz.letter_grade = getLetterGrade(quiz.percentage).grade;
 
-        toast(`Quiz graded locally: ${score}/15 (${quiz.percentage}%)`, 'success');
+        toast(`Quiz graded locally: ${score}/${questions.length} (${quiz.percentage}%)`, 'success');
     }
 
     // Save final graded results

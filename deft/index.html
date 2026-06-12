@@ -1806,6 +1806,21 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 </button>
             </div>
 
+            <!-- Photo (UBR-0184) -->
+            <div class="border-b" style="border-color: var(--deft-border);">
+                <div id="detailPhotoWrap" style="display:none;">
+                    <img id="detailPhoto" alt="Recipe photo" style="width:100%; max-height:280px; object-fit:cover; display:block;">
+                </div>
+                <div class="px-5 py-3 flex items-center gap-2 flex-wrap">
+                    <input type="file" id="recipePhotoInput" accept="image/*" style="display:none;" onchange="uploadRecipePhoto(this)">
+                    <button class="btn btn-ghost text-xs" onclick="document.getElementById('recipePhotoInput').click()">
+                        <span id="detailPhotoBtnLabel">Add Photo</span>
+                    </button>
+                    <button id="detailPhotoRemoveBtn" class="btn btn-ghost text-xs" style="display:none;" onclick="removeRecipePhoto()">Remove Photo</button>
+                    <span id="detailPhotoStatus" class="text-xs" style="color: var(--deft-txt-3);"></span>
+                </div>
+            </div>
+
             <!-- Nutrition Facts -->
             <div class="p-5 border-b" style="border-color: var(--deft-border);">
                 <h3 class="font-heading font-bold text-xs uppercase tracking-wide mb-3" style="color: var(--deft-txt-2);">Nutrition per Serving</h3>
@@ -1857,6 +1872,22 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 <h3 class="font-heading font-bold text-xs uppercase tracking-wide mb-3" style="color: var(--deft-txt-2);">Ingredients</h3>
                 <div id="detailIngredients">
                     <p class="text-sm" style="color: var(--deft-txt-3);">No ingredients listed</p>
+                </div>
+            </div>
+
+            <!-- Instructions (UBR-0184) -->
+            <div class="p-5 border-b" style="border-color: var(--deft-border);">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-heading font-bold text-xs uppercase tracking-wide" style="color: var(--deft-txt-2);">Instructions</h3>
+                    <button id="detailInstrEditBtn" class="btn btn-ghost text-xs" onclick="startEditInstructions()">Edit</button>
+                </div>
+                <div id="detailInstructionsView" class="text-sm" style="color: var(--deft-txt); white-space: pre-line;">No instructions yet.</div>
+                <div id="detailInstructionsEdit" style="display:none;">
+                    <textarea id="detailInstructionsInput" class="form-input text-sm" rows="6" placeholder="1. Preheat the oven...&#10;2. Mix the dry ingredients..."></textarea>
+                    <div class="flex justify-end gap-2 mt-2">
+                        <button class="btn btn-ghost text-xs" onclick="cancelEditInstructions()">Cancel</button>
+                        <button class="btn btn-primary text-xs" onclick="saveInstructions()">Save</button>
+                    </div>
                 </div>
             </div>
 

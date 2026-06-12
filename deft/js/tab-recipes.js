@@ -177,7 +177,7 @@ async function loadRecipes() {
     if (!activeProfileId) return;
 
     const data = await supabaseSelect('deft_recipes',
-        `user_id=eq.${activeProfileId}&status=eq.active&select=recipe_id,name,servings,nutrition_per_serving,keto_analysis,tags,is_favorite&order=name`
+        `user_id=eq.${activeProfileId}&status=eq.active&select=recipe_id,name,servings,nutrition_per_serving,keto_analysis,tags,is_favorite,photo_url&order=name`
     );
     allRecipes = data || [];
     renderRecipes();
@@ -211,6 +211,7 @@ function renderRecipes() {
         const tier = getKetoTier(n.net_carbs_g || 0);
         return `
         <div class="recipe-card" onclick="openRecipeDetail('${r.recipe_id}')">
+            ${r.photo_url ? `<img src="${r.photo_url}" alt="" loading="lazy" style="width:100%;height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px;">` : ''}
             <div class="flex items-start justify-between mb-2">
                 <h3 class="font-heading font-bold text-sm" style="color: var(--deft-txt);">${r.name}</h3>
                 <button onclick="event.stopPropagation();toggleFavorite('${r.recipe_id}', ${!r.is_favorite})"
@@ -299,10 +300,139 @@ async function openRecipeDetail(recipeId) {
     document.getElementById('detailKetoFriendly').style.color = ka.is_keto_friendly ? 'var(--deft-success)' : 'var(--deft-danger)';
     document.getElementById('detailFatPct').textContent = (ka.fat_calories_pct || 0).toFixed(0) + '%';
 
+    // UBR-0184: photo + instructions
+    currentDetailRecipe = recipe;
+    renderRecipePhoto(recipe.photo_url);
+    renderRecipeInstructions(recipe.instructions);
+
     // Store for archive
     panel.dataset.recipeId = recipeId;
 
     overlay.classList.add('active');
+}
+
+// ── UBR-0184: recipe photo + instructions (edited in the detail view) ──
+let currentDetailRecipe = null;
+
+function renderRecipePhoto(photoUrl) {
+    const wrap = document.getElementById('detailPhotoWrap');
+    const img = document.getElementById('detailPhoto');
+    const label = document.getElementById('detailPhotoBtnLabel');
+    const removeBtn = document.getElementById('detailPhotoRemoveBtn');
+    const status = document.getElementById('detailPhotoStatus');
+    if (status) status.textContent = '';
+    if (photoUrl) {
+        if (img) img.src = photoUrl;
+        if (wrap) wrap.style.display = '';
+        if (label) label.textContent = 'Change Photo';
+        if (removeBtn) removeBtn.style.display = '';
+    } else {
+        if (wrap) wrap.style.display = 'none';
+        if (img) img.removeAttribute('src');
+        if (label) label.textContent = 'Add Photo';
+        if (removeBtn) removeBtn.style.display = 'none';
+    }
+}
+
+function renderRecipeInstructions(instructions) {
+    const view = document.getElementById('detailInstructionsView');
+    const edit = document.getElementById('detailInstructionsEdit');
+    const editBtn = document.getElementById('detailInstrEditBtn');
+    if (edit) edit.style.display = 'none';
+    if (view) {
+        view.style.display = '';
+        view.textContent = (instructions && instructions.trim()) ? instructions : 'No instructions yet.';
+        view.style.color = (instructions && instructions.trim()) ? 'var(--deft-txt)' : 'var(--deft-txt-3)';
+    }
+    if (editBtn) editBtn.textContent = 'Edit';
+}
+
+function startEditInstructions() {
+    const view = document.getElementById('detailInstructionsView');
+    const edit = document.getElementById('detailInstructionsEdit');
+    const input = document.getElementById('detailInstructionsInput');
+    if (input) input.value = (currentDetailRecipe && currentDetailRecipe.instructions) || '';
+    if (view) view.style.display = 'none';
+    if (edit) edit.style.display = '';
+    if (input) input.focus();
+}
+
+function cancelEditInstructions() {
+    renderRecipeInstructions(currentDetailRecipe ? currentDetailRecipe.instructions : '');
+}
+
+async function saveInstructions() {
+    if (!currentDetailRecipe) return;
+    const input = document.getElementById('detailInstructionsInput');
+    const text = input ? input.value : '';
+    const res = await supabaseWrite('deft_recipes', 'PATCH', { instructions: text }, `recipe_id=eq.${currentDetailRecipe.recipe_id}`);
+    if (res === null) { toast('Could not save instructions', 'error'); return; }
+    currentDetailRecipe.instructions = text;
+    renderRecipeInstructions(text);
+    toast('Instructions saved', 'success');
+}
+
+// Upload a photo to the public recipe-photos bucket and store its URL.
+async function uploadRecipePhoto(inputEl) {
+    if (!currentDetailRecipe || !inputEl || !inputEl.files || !inputEl.files[0]) return;
+    const file = inputEl.files[0];
+    const status = document.getElementById('detailPhotoStatus');
+    if (file.size > 10 * 1024 * 1024) { toast('Image is too large (max 10 MB)', 'error'); inputEl.value = ''; return; }
+
+    if (status) status.textContent = 'Uploading...';
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    const path = `${currentDetailRecipe.recipe_id}/${Date.now()}.${ext}`;
+    const url = `${SUPABASE_URL}/storage/v1/object/recipe-photos/${path}`;
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': file.type || 'application/octet-stream',
+                'x-upsert': 'true'
+            },
+            body: file
+        });
+        if (!res.ok) {
+            console.error('Photo upload failed:', res.status, await res.text());
+            if (status) status.textContent = '';
+            toast('Photo upload failed', 'error');
+            inputEl.value = '';
+            return;
+        }
+        const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/recipe-photos/${path}`;
+        const patch = await supabaseWrite('deft_recipes', 'PATCH', { photo_url: publicUrl }, `recipe_id=eq.${currentDetailRecipe.recipe_id}`);
+        if (patch === null) { toast('Saved photo but could not link it', 'error'); if (status) status.textContent = ''; inputEl.value = ''; return; }
+        currentDetailRecipe.photo_url = publicUrl;
+        renderRecipePhoto(publicUrl);
+        toast('Photo added', 'success');
+    } catch (err) {
+        console.error('uploadRecipePhoto error:', err);
+        if (status) status.textContent = '';
+        toast('Photo upload error', 'error');
+    }
+    inputEl.value = '';
+}
+
+async function removeRecipePhoto() {
+    if (!currentDetailRecipe || !currentDetailRecipe.photo_url) return;
+    if (!confirm('Remove this photo?')) return;
+    // Best-effort delete of the stored object (path is everything after the bucket).
+    const marker = '/recipe-photos/';
+    const idx = currentDetailRecipe.photo_url.indexOf(marker);
+    if (idx !== -1) {
+        const objPath = currentDetailRecipe.photo_url.substring(idx + marker.length);
+        fetch(`${SUPABASE_URL}/storage/v1/object/recipe-photos/${objPath}`, {
+            method: 'DELETE',
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+        }).catch(function () {});
+    }
+    const res = await supabaseWrite('deft_recipes', 'PATCH', { photo_url: null }, `recipe_id=eq.${currentDetailRecipe.recipe_id}`);
+    if (res === null) { toast('Could not remove photo', 'error'); return; }
+    currentDetailRecipe.photo_url = null;
+    renderRecipePhoto(null);
+    toast('Photo removed', 'success');
 }
 
 function closeRecipeDetail() {

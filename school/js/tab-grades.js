@@ -57,7 +57,7 @@ async function refreshGrades() {
     // stale).
     // UBR-0164: also fetch the daily-task summary for the new stats cards.
     // UBR-0169: also pull motivation events so the teacher can see engagement.
-    const [assignments, grades, lessons, answers, dailySummary, motivationEvents] = await Promise.all([
+    const [assignments, grades, lessons, answers, dailySummary, motivationEvents, vocabQuizzes] = await Promise.all([
         supabaseSelect('school_assignments',
             `student_id=eq.${viewUserId}&order=assigned_date.desc&select=*`
         ),
@@ -73,8 +73,13 @@ async function refreshGrades() {
         supabaseRpc('get_daily_task_summary', { p_student_id: viewUserId, p_days: 7 }),
         supabaseSelect('school_motivation_events',
             `student_id=eq.${viewUserId}&select=event_type,assignment_id,lesson_id,created_at&order=created_at.desc&limit=1000`
+        ),
+        // UBR-0180/0178: vocab quiz attempts for the teacher review + grade-adjust tool.
+        supabaseSelect('school_vocab_quizzes',
+            `student_id=eq.${viewUserId}&select=*&order=created_at.desc`
         )
     ]);
+    gradesData.vocabQuizzes = vocabQuizzes || [];
 
     // Per-assignment school_grades (one row per assignment)
     gradesData.grades = {};
@@ -357,7 +362,134 @@ function renderGrades() {
             ${gradesData.assignments.map(a => renderAssignmentAccordion(a)).join('')}
         </div>
         ${renderDailyTaskStats()}
+        ${renderVocabQuizReview()}
     `;
+}
+
+// =======================================
+// VOCAB QUIZ REVIEW + GRADE ADJUSTMENT (UBR-0180 / UBR-0178)
+// Teacher-only. Lists each vocab quiz attempt with its ACTUAL questions (the
+// student's quiz is shuffled, so this is the only accurate per-quiz answer key),
+// and lets the teacher flip any question's correctness to adjust the grade.
+// =======================================
+function vocabQuizScoreFromAnswers(quiz) {
+    const ans = Array.isArray(quiz.answers) ? quiz.answers : [];
+    const total = quiz.total_possible || ans.length || 0;
+    const correct = ans.filter(q => q && q.is_correct === true).length;
+    const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+    return { correct, total, pct };
+}
+
+function renderVocabQuizReview() {
+    if (!isTeacher()) return '';
+    const quizzes = (gradesData.vocabQuizzes || []).filter(q => Array.isArray(q.answers) && q.answers.length);
+    if (!quizzes.length) return '';
+
+    const rows = quizzes.map(quiz => {
+        const s = vocabQuizScoreFromAnswers(quiz);
+        const lg = getLetterGrade(s.pct);
+        const dateStr = quiz.created_at
+            ? new Date(quiz.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            : '';
+        const isOpen = gradesData.vocabExpandedId === quiz.quiz_id;
+        const statusPill = quiz.status === 'graded'
+            ? `<span style="font-size:10px;color:${lg.color};font-weight:700;">${s.correct}/${s.total} &middot; ${s.pct}% (${lg.grade})</span>`
+            : `<span style="font-size:10px;color:var(--deft-txt-3);text-transform:uppercase;">${escapeHtml(quiz.status || 'in progress')}</span>`;
+
+        const detail = !isOpen ? '' : `
+            <div style="padding:8px 12px 12px;display:flex;flex-direction:column;gap:6px;">
+                ${quiz.answers.map((q, i) => {
+                    const correct = q.is_correct === true;
+                    const sa = (q.student_answer == null || q.student_answer === '') ? '(no answer)' : q.student_answer;
+                    return `
+                    <div style="display:flex;align-items:flex-start;gap:8px;padding:8px;border-radius:6px;
+                                background:var(--deft-surface);border:1px solid var(--deft-border);font-size:12px;">
+                        <span style="min-width:16px;font-weight:700;color:var(--deft-txt-3);">${q.question_number || (i + 1)}.</span>
+                        <div style="flex:1;min-width:0;">
+                            <div style="color:var(--deft-txt);">${escapeHtml(q.prompt || '')}</div>
+                            <div style="margin-top:3px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                                <span style="font-size:11px;color:var(--deft-txt-2);">Student: <strong>${escapeHtml(sa)}</strong></span>
+                                <span style="font-size:11px;color:var(--deft-success);">Correct: ${escapeHtml(q.correct_answer || '')}</span>
+                            </div>
+                        </div>
+                        <span style="font-size:11px;font-weight:700;flex-shrink:0;color:${correct ? 'var(--deft-success)' : '#E57373'};">
+                            ${correct ? '✓' : '✗'}
+                        </span>
+                        <button class="btn btn-ghost" onclick="event.stopPropagation();adjustVocabAnswer('${escapeHtml(quiz.quiz_id)}', ${q.question_number || (i + 1)})"
+                                style="padding:3px 8px;font-size:10px;flex-shrink:0;">
+                            Mark ${correct ? 'wrong' : 'correct'}
+                        </button>
+                    </div>`;
+                }).join('')}
+            </div>`;
+
+        return `
+            <div style="border:1px solid var(--deft-border);border-radius:10px;overflow:hidden;background:var(--deft-surface-el);">
+                <div onclick="toggleVocabQuiz('${escapeHtml(quiz.quiz_id)}')" role="button" tabindex="0"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"
+                     style="display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;">
+                    <span style="flex:1;min-width:0;font-size:12px;color:var(--deft-txt);font-weight:600;">
+                        Quiz &middot; <span style="color:var(--deft-txt-2);font-weight:400;">${escapeHtml(dateStr)}</span>
+                    </span>
+                    ${statusPill}
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0;transform:rotate(${isOpen ? 180 : 0}deg);transition:transform 0.15s;">
+                        <path d="M3 4.5l3 3 3-3" stroke="var(--deft-txt-3)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                ${detail}
+            </div>`;
+    }).join('');
+
+    return `
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--deft-border);" data-role-min="admin">
+            <h3 style="margin:0 0 10px;font-size:0.8125rem;font-weight:600;color:var(--deft-txt-2);
+                       text-transform:uppercase;letter-spacing:0.05em;">Vocab Quizzes &mdash; Review &amp; Adjust</h3>
+            <div style="display:flex;flex-direction:column;gap:8px;">${rows}</div>
+        </div>
+    `;
+}
+
+function toggleVocabQuiz(quizId) {
+    gradesData.vocabExpandedId = (gradesData.vocabExpandedId === quizId) ? null : quizId;
+    renderGrades();
+}
+
+async function adjustVocabAnswer(quizId, questionNumber) {
+    const quiz = (gradesData.vocabQuizzes || []).find(q => q.quiz_id === quizId);
+    if (!quiz || !Array.isArray(quiz.answers)) return;
+    const q = quiz.answers.find(a => (a.question_number || 0) === questionNumber);
+    if (!q) return;
+
+    // Flip correctness and recompute the score from the answers array.
+    q.is_correct = !(q.is_correct === true);
+    q.adjusted_by_teacher = true;
+    const s = vocabQuizScoreFromAnswers(quiz);
+    const lg = getLetterGrade(s.pct);
+    quiz.score = s.correct;
+    quiz.total_possible = s.total;
+    quiz.percentage = s.pct;
+    quiz.letter_grade = lg.grade;
+    if (quiz.status !== 'graded') quiz.status = 'graded';
+
+    gradesData.vocabExpandedId = quizId; // keep this quiz open after re-render
+    renderGrades();
+
+    const res = await supabaseWrite('school_vocab_quizzes', 'PATCH', {
+        answers: quiz.answers,
+        score: quiz.score,
+        total_possible: quiz.total_possible,
+        percentage: quiz.percentage,
+        letter_grade: quiz.letter_grade,
+        status: 'graded',
+        graded_by: 'teacher',
+        graded_at: new Date().toISOString()
+    }, `quiz_id=eq.${quizId}`);
+
+    if (res === null) {
+        toast('Could not save the adjustment', 'error');
+    } else {
+        toast(`Adjusted: ${quiz.score}/${quiz.total_possible} (${quiz.percentage}%)`);
+    }
 }
 
 // =======================================
