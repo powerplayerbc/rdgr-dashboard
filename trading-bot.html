@@ -879,11 +879,16 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     <p class="text-sm text-txt-2 mt-1">Polymarket 5m BTC Up/Down bot &mdash; live wallet, P&amp;L, EV, trades &amp; windows</p>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
+                    <select id="modeSelect" onchange="onScopeChange()" title="Which trades to count: real-money LIVE, data-collection DRY-RUN, or all" class="form-input text-xs py-1.5 px-2.5 rounded-md" style="background:rgba(255,255,255,0.04);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt-2,#8A95A9);">
+                        <option value="live" selected>Live only</option>
+                        <option value="dry">Dry-run only</option>
+                        <option value="all">All trades</option>
+                    </select>
                     <select id="scopeSelect" onchange="onScopeChange()" class="form-input text-xs py-1.5 px-2.5 rounded-md" style="background:rgba(255,255,255,0.04);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt-2,#8A95A9);">
                         <option value="today">Today (UTC)</option>
-                        <option value="24h" selected>Last 24h</option>
+                        <option value="24h">Last 24h</option>
                         <option value="7d">Last 7d</option>
-                        <option value="all">All time</option>
+                        <option value="all" selected>All time</option>
                     </select>
                     <label class="flex items-center gap-1.5 text-xs text-txt-3 select-none cursor-pointer" title="Restrict EV / win-rate / tables to the currently-running mechanic version">
                         <input type="checkbox" id="curVerOnly" onchange="onScopeChange()" style="accent-color:var(--deft-accent,#06D6A0);"> current version
@@ -1059,10 +1064,10 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         <span class="text-xs text-txt-3 font-mono" id="chartLastUpdated"></span>
                     </div>
                     <div class="chart-timeframe-btns">
-                        <button onclick="setChartTimeframe('24h')" class="active" id="tf24h">24H</button>
+                        <button onclick="setChartTimeframe('24h')" id="tf24h">24H</button>
                         <button onclick="setChartTimeframe('7d')" id="tf7d">7D</button>
                         <button onclick="setChartTimeframe('30d')" id="tf30d">30D</button>
-                        <button onclick="setChartTimeframe('all')" id="tfAll">ALL</button>
+                        <button onclick="setChartTimeframe('all')" class="active" id="tfAll">ALL</button>
                     </div>
                 </div>
                 <div class="panel-body p-0">
@@ -1198,8 +1203,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     let lastFireAt = null;     // newest inserted_at among fires
     let equityData = [];       // [{equity, recorded_at}] fed to canvas chart
     let equitySource = 'pnl';  // 'wallet' | 'pnl'
-    let chartTimeframe = '24h';
-    let scope = '24h';         // today | 24h | 7d | all  (EV / win-rate / tables)
+    let chartTimeframe = 'all';
+    let scope = 'all';         // today | 24h | 7d | all  (EV / win-rate / tables)
+    let tradeMode = 'live';    // live | dry | all  (performance = real-money LIVE by default)
     let currentVersionOnly = false;
     let pollTimer = null;
     let botStatus = null;      // polymarket_bot_status row (is_running, config)
@@ -1363,11 +1369,15 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         if (head && head.length) { currentVersion = head[0].mechanic_version; lastFireAt = head[0].inserted_at; currentMode = head[0].run_mode || head[0].mode || null; }
 
         const verClause = (currentVersionOnly && currentVersion) ? `&mechanic_version=eq.${encodeURIComponent(currentVersion)}` : '';
+        // Trade-mode filter: real-money LIVE by default (exclude LIVE_DRY_RUN data-collection)
+        const modeClause = tradeMode === 'live' ? '&run_mode=eq.LIVE'
+                         : tradeMode === 'dry'  ? '&run_mode=eq.LIVE_DRY_RUN' : '';
+        const fc = verClause + modeClause;
 
         const [settled, recent, inflight, balLatest, balSeries, status, cmd] = await Promise.all([
-            supabaseSelectAll(T_DECISIONS, `order_status=eq.FILLED&settled=eq.true&select=window_ts,settled_pnl,final_side,shares,fill_price_actual,resolution,inserted_at,mechanic_version&order=window_ts.asc${verClause}`, MAX_FIRES_FETCH),
-            supabaseSelect(T_DECISIONS, `order_status=eq.FILLED&select=window_ts,settled_pnl,final_side,shares,fill_price_actual,resolution,settled,inserted_at,regime,policy_reason,k3_score,mechanic_version&order=window_ts.desc,inserted_at.desc&limit=120${verClause}`),
-            supabaseSelect(T_DECISIONS, `order_status=eq.FILLED&settled=eq.false&select=shares,fill_price_actual${verClause}`),
+            supabaseSelectAll(T_DECISIONS, `order_status=eq.FILLED&settled=eq.true&select=window_ts,settled_pnl,final_side,shares,fill_price_actual,resolution,inserted_at,mechanic_version&order=window_ts.asc${fc}`, MAX_FIRES_FETCH),
+            supabaseSelect(T_DECISIONS, `order_status=eq.FILLED&select=window_ts,settled_pnl,final_side,shares,fill_price_actual,resolution,settled,inserted_at,regime,policy_reason,k3_score,mechanic_version&order=window_ts.desc,inserted_at.desc&limit=120${fc}`),
+            supabaseSelect(T_DECISIONS, `order_status=eq.FILLED&settled=eq.false&select=shares,fill_price_actual${fc}`),
             supabaseSelect(T_BALANCE, 'select=*&order=ts.desc&limit=1'),
             supabaseSelectAll(T_BALANCE, 'select=ts,free_usdc,in_flight_usdc,effective_usdc,hwm_usdc&order=ts.asc', 6000),
             supabaseSelect(T_STATUS, `bot_id=eq.${BOT_ID}&select=*&limit=1`),
@@ -1832,6 +1842,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
     function onScopeChange() {
         scope = document.getElementById('scopeSelect').value;
+        tradeMode = document.getElementById('modeSelect').value;
         currentVersionOnly = document.getElementById('curVerOnly').checked;
         chartTimeframe = (scope === 'today' || scope === '24h') ? '24h' : (scope === '7d' ? '7d' : 'all');
         document.querySelectorAll('.chart-timeframe-btns button').forEach(b => b.classList.remove('active'));
