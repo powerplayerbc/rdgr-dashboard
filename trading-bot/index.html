@@ -650,6 +650,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .trade-new td { animation: trade-slide-in 0.3s ease forwards; }
+
+        @keyframes spin360 { to { transform: rotate(360deg); } }
+        #refreshIcon.spinning { animation: spin360 0.7s linear infinite; transform-origin: 50% 50%; }
+        #refreshBtn:disabled { opacity: 0.6; cursor: progress; }
+        #lastUpdated.flash { color: var(--deft-accent, #06D6A0); transition: color 0.2s; }
     </style>
 </head>
 <body>
@@ -893,8 +898,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     <label class="flex items-center gap-1.5 text-xs text-txt-3 select-none cursor-pointer" title="Restrict EV / win-rate / tables to the currently-running mechanic version">
                         <input type="checkbox" id="curVerOnly" onchange="onScopeChange()" style="accent-color:var(--deft-accent,#06D6A0);"> current version
                     </label>
-                    <button onclick="refreshAll()" class="btn btn-ghost text-xs py-1.5 px-2.5">
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span id="lastUpdated" class="text-xs text-txt-3 font-mono"></span>
+                    <button id="refreshBtn" onclick="refreshAll()" class="btn btn-ghost text-xs py-1.5 px-2.5">
+                        <svg id="refreshIcon" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         Refresh
                     </button>
                 </div>
@@ -1397,6 +1403,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         renderTables();
         renderBotConfig();
         loadEquityChart();
+
+        const lu = document.getElementById('lastUpdated');
+        if (lu) lu.textContent = 'Updated ' + new Date().toLocaleTimeString('en-US', { hour12: false });
     }
 
     // ═══════════════════════════════════════
@@ -1832,7 +1841,27 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     // ═══════════════════════════════════════
     // REFRESH / POLLING / SCOPE
     // ═══════════════════════════════════════
-    async function refreshAll() { await loadAll(); }
+    let _refreshing = false;
+    async function refreshAll() {
+        if (_refreshing) return;
+        _refreshing = true;
+        const btn = document.getElementById('refreshBtn');
+        const icon = document.getElementById('refreshIcon');
+        if (btn) btn.disabled = true;
+        if (icon) icon.classList.add('spinning');
+        try {
+            await loadAll();
+            const lu = document.getElementById('lastUpdated');
+            if (lu) { lu.classList.add('flash'); setTimeout(() => lu.classList.remove('flash'), 600); }
+            toast('Dashboard updated', 'success');
+        } catch (e) {
+            toast('Refresh failed: ' + (e.message || e), 'error');
+        } finally {
+            _refreshing = false;
+            if (btn) btn.disabled = false;
+            if (icon) icon.classList.remove('spinning');
+        }
+    }
 
     function startPolling() {
         loadAll();
