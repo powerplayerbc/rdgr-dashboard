@@ -1031,14 +1031,18 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button class="btn btn-danger" onclick="confirmCommand('kill')">
-                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-                                Kill Bot
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button class="btn" style="background:rgba(255,217,61,0.14);color:#FFD93D;border:1px solid rgba(255,217,61,0.3);" onclick="confirmCommand('dry_run')" title="Stop placing live orders; keep collecting data">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M4 2.5v7M8 2.5v7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                                Pause &rarr; Dry-Run
                             </button>
-                            <button class="btn btn-primary" onclick="confirmCommand('restart')">
+                            <button class="btn btn-primary" onclick="confirmCommand('go_live')" title="Resume live trading">
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 2.5l6 3.5-6 3.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+                                Resume Live
+                            </button>
+                            <button class="btn btn-ghost" onclick="confirmCommand('restart')" title="Full restart (expensive: ~10m warmup)">
                                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                Restart Bot
+                                Restart
                             </button>
                         </div>
                     </div>
@@ -1190,6 +1194,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     let latestBalance = null;  // newest polymarket_balance_snapshots row
     let balanceSeries = [];    // balance snapshots asc by ts (chart, when present)
     let currentVersion = null; // latest mechanic_version
+    let currentMode = null;    // latest run_mode (LIVE / LIVE_DRY_RUN)
     let lastFireAt = null;     // newest inserted_at among fires
     let equityData = [];       // [{equity, recorded_at}] fed to canvas chart
     let equitySource = 'pnl';  // 'wallet' | 'pnl'
@@ -1353,9 +1358,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     // ═══════════════════════════════════════
     async function loadAll() {
         const verFilter = '';
-        // 1) heartbeat + current version (any latest row, incl SKIPPED)
-        const head = await supabaseSelect(T_DECISIONS, 'select=mechanic_version,inserted_at&order=inserted_at.desc&limit=1');
-        if (head && head.length) { currentVersion = head[0].mechanic_version; lastFireAt = head[0].inserted_at; }
+        // 1) heartbeat + current version + run mode (any latest row, incl SKIPPED)
+        const head = await supabaseSelect(T_DECISIONS, 'select=mechanic_version,inserted_at,run_mode,mode&order=inserted_at.desc&limit=1');
+        if (head && head.length) { currentVersion = head[0].mechanic_version; lastFireAt = head[0].inserted_at; currentMode = head[0].run_mode || head[0].mode || null; }
 
         const verClause = (currentVersionOnly && currentVersion) ? `&mechanic_version=eq.${encodeURIComponent(currentVersion)}` : '';
 
@@ -1403,9 +1408,11 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         else if (lastFireAt) { dot.className = 'status-dot down'; text.textContent = 'No recent activity'; text.style.color = 'var(--deft-danger)'; }
         else { dot.className = 'status-dot offline'; text.textContent = 'Connecting...'; text.style.color = 'var(--deft-txt-3)'; }
 
+        // Mode badge reflects real run_mode (LIVE vs DRY-RUN)
         modeBadge.style.display = '';
-        modeBadge.className = 'badge badge-live-mode';
-        modeBadge.textContent = 'LIVE';
+        const dry = currentMode && /DRY/i.test(currentMode);
+        if (dry) { modeBadge.className = 'badge'; modeBadge.style.cssText = 'background:rgba(255,217,61,0.15);color:#FFD93D;'; modeBadge.textContent = 'DRY-RUN'; }
+        else { modeBadge.className = 'badge badge-live-mode'; modeBadge.style.cssText = ''; modeBadge.textContent = 'LIVE'; }
 
         if (currentVersion) { versionChip.style.display = ''; versionChip.textContent = currentVersion; }
 
@@ -1890,20 +1897,31 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         if (lastCommand) {
             note.textContent = `Last command: ${lastCommand.command.toUpperCase()} (${lastCommand.status}) ${fmtAgo(lastCommand.created_at)}${lastCommand.requested_by ? ' by ' + lastCommand.requested_by : ''}`;
         } else {
-            note.textContent = 'Controls insert a command for the VPS executor to action (kill = touch /tmp/rodger_v15_kill).';
+            note.textContent = 'Controls queue a command in polymarket_bot_commands for the poly-vps poller to action (dry-run keeps data collection, no live orders).';
         }
     }
 
+    const CMD_META = {
+        dry_run: { word: 'DRYRUN', title: 'Pause live trading (switch to Dry-Run)?', btn: 'Pause to Dry-Run', cls: 'btn',
+                   style: 'background:rgba(255,217,61,0.18);color:#FFD93D;border:1px solid rgba(255,217,61,0.35);',
+                   msg: 'Switches the bot to <strong>LIVE_DRY_RUN</strong>: it keeps running and collecting data but places <strong>no live orders</strong>. Reversible via Resume Live.' },
+        go_live: { word: 'GOLIVE', title: 'Resume LIVE trading?', btn: 'Resume Live', cls: 'btn btn-primary', style: '',
+                   msg: 'Switches the bot back to <strong>LIVE</strong> mode and resumes placing real orders.' },
+        restart: { word: 'RESTART', title: 'Restart the bot?', btn: 'Restart', cls: 'btn btn-danger', style: '',
+                   msg: 'Full restart. <strong>Expensive</strong>: can trip a Cloudflare 429 and triggers a ~10-minute warmup with fires suppressed. Use sparingly.' },
+    };
+
     function confirmCommand(cmd) {
         pendingCommand = cmd;
-        const word = cmd.toUpperCase();
-        document.getElementById('cmdModalTitle').textContent = (cmd === 'kill' ? 'Kill' : 'Restart') + ' the live bot?';
-        document.getElementById('cmdModalMsg').innerHTML = `This issues a <strong>${word}</strong> command to the LIVE Rodger bot. Type <span class="font-mono text-accent">${word}</span> to confirm.`;
+        const m = CMD_META[cmd] || { word: cmd.toUpperCase(), title: cmd, btn: 'Confirm', cls: 'btn btn-danger', style: '', msg: '' };
+        document.getElementById('cmdModalTitle').textContent = m.title;
+        document.getElementById('cmdModalMsg').innerHTML = `${m.msg} Type <span class="font-mono text-accent">${m.word}</span> to confirm.`;
         const goBtn = document.getElementById('cmdModalGo');
-        goBtn.className = 'btn ' + (cmd === 'kill' ? 'btn-danger' : 'btn-primary');
-        goBtn.textContent = (cmd === 'kill' ? 'Kill Bot' : 'Restart Bot');
+        goBtn.className = m.cls;
+        goBtn.style.cssText = m.style;
+        goBtn.textContent = m.btn;
         const input = document.getElementById('cmdConfirmInput');
-        input.value = ''; input.placeholder = 'type ' + word;
+        input.value = ''; input.placeholder = 'type ' + m.word;
         document.getElementById('cmdConfirmErr').classList.remove('show');
         document.getElementById('cmdModal').style.display = 'flex';
         setTimeout(() => input.focus(), 50);
@@ -1916,7 +1934,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
     async function submitCommand() {
         if (!pendingCommand) return;
-        const word = pendingCommand.toUpperCase();
+        const word = (CMD_META[pendingCommand] || {}).word || pendingCommand.toUpperCase();
         const input = document.getElementById('cmdConfirmInput');
         if ((input.value || '').trim().toUpperCase() !== word) {
             document.getElementById('cmdConfirmErr').classList.add('show');
