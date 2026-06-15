@@ -1424,9 +1424,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         const cols = 'window_ts,settled_pnl,final_side,shares,fill_price_actual,placed_entry,bid_price,resolution,inserted_at,mechanic_version';
 
         const [settled, recent, inflight, statusAll, balR, balC, cmd] = await Promise.all([
-            supabaseSelectAll(T_DECISIONS, `order_status=eq.FILLED&settled=eq.true&select=${cols}&order=window_ts.asc${fc}`, MAX_FIRES_FETCH),
-            supabaseSelect(T_DECISIONS, `order_status=eq.FILLED&select=${cols},settled,regime,policy_reason,k3_score&order=window_ts.desc,inserted_at.desc&limit=120${fc}`),
-            supabaseSelect(T_DECISIONS, `order_status=eq.FILLED&settled=eq.false&select=shares,fill_price_actual,placed_entry,bid_price${fc}`),
+            supabaseSelectAll(T_DECISIONS, `order_status=in.(FILLED,POSTED)&settled=eq.true&select=${cols}&order=window_ts.asc${fc}`, MAX_FIRES_FETCH),  // POSTED = dry-run fill; shown only when Mode!=Live
+            supabaseSelect(T_DECISIONS, `order_status=in.(FILLED,POSTED)&select=${cols},settled,regime,policy_reason,k3_score&order=window_ts.desc,inserted_at.desc&limit=120${fc}`),
+            supabaseSelect(T_DECISIONS, `order_status=in.(FILLED,POSTED)&settled=eq.false&select=shares,fill_price_actual,placed_entry,bid_price${fc}`),
             supabaseSelect(T_STATUS, 'select=*'),
             supabaseSelectAll(T_BALANCE, 'select=ts,free_usdc,effective_usdc,hwm_usdc&source=eq.dual_settler_rodger&order=ts.asc', 6000),
             supabaseSelectAll(T_BALANCE, 'select=ts,free_usdc,effective_usdc,hwm_usdc&source=eq.dual_settler_cosmo&order=ts.asc', 6000),
