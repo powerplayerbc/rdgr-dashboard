@@ -879,11 +879,15 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 <div>
                     <h2 class="font-heading font-bold text-xl tracking-wide flex items-center gap-2">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 15l4-5 3 3 4-6 5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18" cy="9" r="1.5" fill="currentColor" opacity="0.4"/></svg>
-                        Rodger Live
+                        Rodger &amp; Cosmo &mdash; Live Models
                     </h2>
-                    <p class="text-sm text-txt-2 mt-1">Polymarket 5m BTC Up/Down bot &mdash; live wallet, P&amp;L, EV, trades &amp; windows</p>
+                    <p class="text-sm text-txt-2 mt-1">Polymarket 5m BTC Up/Down dual-engine bot &mdash; per-model equity, P&amp;L, drawdown, EV &amp; trades</p>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap">
+                    <select id="modelSelect" onchange="onModelChange()" title="Which model's detailed view to show below" class="form-input text-xs py-1.5 px-2.5 rounded-md font-semibold" style="background:var(--deft-accent-dim,rgba(6,214,160,0.12));border:1px solid color-mix(in srgb,var(--deft-accent,#06D6A0) 30%,transparent);color:var(--deft-accent,#06D6A0);">
+                        <option value="rodger_v15" selected>Rodger</option>
+                        <option value="cosmo_v1">Cosmo</option>
+                    </select>
                     <select id="modeSelect" onchange="onScopeChange()" title="Which trades to count: real-money LIVE, data-collection DRY-RUN, or all" class="form-input text-xs py-1.5 px-2.5 rounded-md" style="background:rgba(255,255,255,0.04);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt-2,#8A95A9);">
                         <option value="live" selected>Live only</option>
                         <option value="dry">Dry-run only</option>
@@ -904,6 +908,18 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         Refresh
                     </button>
                 </div>
+            </div>
+
+            <!-- Models comparison strip (both engines, always visible) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5" id="modelsStrip">
+                <div class="panel" style="padding:0.5rem;"><div class="text-center text-xs text-txt-3 py-6">Loading models...</div></div>
+            </div>
+
+            <!-- Detail view header -->
+            <div class="flex items-center gap-2 mb-3">
+                <span class="text-xs uppercase tracking-wider text-txt-3 font-semibold">Detailed view</span>
+                <span class="badge badge-healthy" id="detailModelChip">Rodger</span>
+                <span class="text-xs text-txt-3" id="detailModelHint"></span>
             </div>
 
             <!-- Status Bar -->
@@ -940,8 +956,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 </div>
                 <div class="stat-chip">
                     <div class="w-full">
-                        <div class="stat-value" style="color: var(--deft-accent-warm, #4CC9F0);" id="metricInflight">--</div>
-                        <div class="stat-label">In-Flight</div>
+                        <div class="stat-value" id="metricInflight">--</div>
+                        <div class="stat-label">Cumulative P&L</div>
                     </div>
                 </div>
                 <div class="stat-chip">
@@ -993,7 +1009,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 <div class="stat-chip">
                     <div class="w-full">
                         <div class="stat-value" id="metricTotalPnl">--</div>
-                        <div class="stat-label">Total Net P&L</div>
+                        <div class="stat-label">In-Flight</div>
                     </div>
                 </div>
                 <div class="stat-chip">
@@ -1218,10 +1234,24 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     let tradeMode = 'live';    // live | dry | all  (performance = real-money LIVE by default)
     let currentVersionOnly = false;
     let pollTimer = null;
-    let botStatus = null;      // polymarket_bot_status row (is_running, config)
+    let botStatus = null;      // selected model's polymarket_bot_status row (+ _note parsed)
     let lastCommand = null;    // most recent polymarket_bot_commands row
     let pendingCommand = null; // command awaiting type-to-confirm
-    const BOT_ID = 'rodger_v15';
+
+    // ── Dual-model config ──
+    const MODELS = [
+        { id: 'rodger_v15', name: 'Rodger', prefix: 'rodger_', source: 'dual_settler_rodger' },
+        { id: 'cosmo_v1',   name: 'Cosmo',  prefix: 'cosmo_',  source: 'dual_settler_cosmo' },
+    ];
+    let selectedModel = 'rodger_v15';
+    let botStatusByModel = {};  // { bot_id: {...row, _note:{...}} }
+    let balByModel = {};        // { modelId: { latest, series:[] } }
+    let modeByModel = {};       // { modelId: 'LIVE' | 'LIVE_DRY_RUN' | null } (real run_mode)
+    function curModel() { return MODELS.find(m => m.id === selectedModel) || MODELS[0]; }
+    function modelOf(mechVer) { return (mechVer || '').indexOf('cosmo_') === 0 ? 'cosmo_v1' : 'rodger_v15'; }
+    // Cosmo dry rows have no fill_price_actual -> coalesce to placed_entry / bid_price
+    function fillPx(f) { const v = f.fill_price_actual ?? f.placed_entry ?? f.bid_price; return v == null ? null : Number(v); }
+    const BOT_ID = 'rodger_v15'; // retained for back-compat; controls use selectedModel
 
     let activeProfileId = null;
     let gateSelectedProfile = null;
@@ -1361,7 +1391,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             if (!w) { w = { window_ts: f.window_ts, fires: [], shares: 0, cost: 0, pnl: 0, side: f.final_side, resolution: f.resolution, settled: true }; map.set(f.window_ts, w); }
             w.fires.push(f);
             w.shares += Number(f.shares) || 0;
-            w.cost += (Number(f.shares) || 0) * (Number(f.fill_price_actual) || 0);
+            w.cost += (Number(f.shares) || 0) * (fillPx(f) || 0);
             if (f.settled === false) w.settled = false;
             if (f.settled_pnl != null) w.pnl += Number(f.settled_pnl);
             if (f.resolution != null) w.resolution = f.resolution;
@@ -1373,35 +1403,56 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     // MASTER LOADER
     // ═══════════════════════════════════════
     async function loadAll() {
-        const verFilter = '';
-        // 1) heartbeat + current version + run mode (any latest row, incl SKIPPED)
-        const head = await supabaseSelect(T_DECISIONS, 'select=mechanic_version,inserted_at,run_mode,mode&order=inserted_at.desc&limit=1');
-        if (head && head.length) { currentVersion = head[0].mechanic_version; lastFireAt = head[0].inserted_at; currentMode = head[0].run_mode || head[0].mode || null; }
+        const m = curModel();
+        const pfx = `&mechanic_version=like.${m.prefix}*`;   // model split by mechanic_version prefix
+        // 1) per-model latest decision (real run_mode + heartbeat + version) for BOTH models
+        const heads = await Promise.all(MODELS.map(mm =>
+            supabaseSelect(T_DECISIONS, `select=mechanic_version,inserted_at,run_mode,mode&mechanic_version=like.${mm.prefix}*&order=inserted_at.desc&limit=1`)
+        ));
+        modeByModel = {};
+        currentVersion = null; lastFireAt = null; currentMode = null;
+        MODELS.forEach((mm, i) => {
+            const h = (heads[i] && heads[i].length) ? heads[i][0] : null;
+            modeByModel[mm.id] = h ? (h.run_mode || h.mode || null) : null;
+            if (mm.id === selectedModel && h) { currentVersion = h.mechanic_version; lastFireAt = h.inserted_at; currentMode = h.run_mode || h.mode || null; }
+        });
 
         const verClause = (currentVersionOnly && currentVersion) ? `&mechanic_version=eq.${encodeURIComponent(currentVersion)}` : '';
-        // Trade-mode filter: real-money LIVE by default (exclude LIVE_DRY_RUN data-collection)
         const modeClause = tradeMode === 'live' ? '&run_mode=eq.LIVE'
                          : tradeMode === 'dry'  ? '&run_mode=eq.LIVE_DRY_RUN' : '';
-        const fc = verClause + modeClause;
+        const fc = pfx + verClause + modeClause;
+        const cols = 'window_ts,settled_pnl,final_side,shares,fill_price_actual,placed_entry,bid_price,resolution,inserted_at,mechanic_version';
 
-        const [settled, recent, inflight, balLatest, balSeries, status, cmd] = await Promise.all([
-            supabaseSelectAll(T_DECISIONS, `order_status=eq.FILLED&settled=eq.true&select=window_ts,settled_pnl,final_side,shares,fill_price_actual,resolution,inserted_at,mechanic_version&order=window_ts.asc${fc}`, MAX_FIRES_FETCH),
-            supabaseSelect(T_DECISIONS, `order_status=eq.FILLED&select=window_ts,settled_pnl,final_side,shares,fill_price_actual,resolution,settled,inserted_at,regime,policy_reason,k3_score,mechanic_version&order=window_ts.desc,inserted_at.desc&limit=120${fc}`),
-            supabaseSelect(T_DECISIONS, `order_status=eq.FILLED&settled=eq.false&select=shares,fill_price_actual${fc}`),
-            supabaseSelect(T_BALANCE, 'select=*&order=ts.desc&limit=1'),
-            supabaseSelectAll(T_BALANCE, 'select=ts,free_usdc,in_flight_usdc,effective_usdc,hwm_usdc&order=ts.asc', 6000),
-            supabaseSelect(T_STATUS, `bot_id=eq.${BOT_ID}&select=*&limit=1`),
-            supabaseSelect(T_COMMANDS, `bot_id=eq.${BOT_ID}&select=*&order=created_at.desc&limit=1`),
+        const [settled, recent, inflight, statusAll, balR, balC, cmd] = await Promise.all([
+            supabaseSelectAll(T_DECISIONS, `order_status=eq.FILLED&settled=eq.true&select=${cols}&order=window_ts.asc${fc}`, MAX_FIRES_FETCH),
+            supabaseSelect(T_DECISIONS, `order_status=eq.FILLED&select=${cols},settled,regime,policy_reason,k3_score&order=window_ts.desc,inserted_at.desc&limit=120${fc}`),
+            supabaseSelect(T_DECISIONS, `order_status=eq.FILLED&settled=eq.false&select=shares,fill_price_actual,placed_entry,bid_price${fc}`),
+            supabaseSelect(T_STATUS, 'select=*'),
+            supabaseSelectAll(T_BALANCE, 'select=ts,free_usdc,effective_usdc,hwm_usdc&source=eq.dual_settler_rodger&order=ts.asc', 6000),
+            supabaseSelectAll(T_BALANCE, 'select=ts,free_usdc,effective_usdc,hwm_usdc&source=eq.dual_settler_cosmo&order=ts.asc', 6000),
+            supabaseSelect(T_COMMANDS, `bot_id=eq.${m.id}&select=*&order=created_at.desc&limit=1`),
         ]);
 
         settledFires = settled || [];
         recentFires = recent || [];
         inflightFires = inflight || [];
-        latestBalance = (balLatest && balLatest.length) ? balLatest[0] : null;
-        balanceSeries = balSeries || [];
-        botStatus = (status && status.length) ? status[0] : null;
         lastCommand = (cmd && cmd.length) ? cmd[0] : null;
 
+        botStatusByModel = {};
+        for (const r of (statusAll || [])) {
+            let note = {}; try { note = JSON.parse(r.note || '{}'); } catch (e) {}
+            botStatusByModel[r.bot_id] = Object.assign({}, r, { _note: note });
+        }
+        botStatus = botStatusByModel[m.id] || null;
+
+        balByModel = {
+            rodger_v15: { series: balR || [], latest: (balR && balR.length) ? balR[balR.length - 1] : null },
+            cosmo_v1:   { series: balC || [], latest: (balC && balC.length) ? balC[balC.length - 1] : null },
+        };
+        balanceSeries = (balByModel[m.id] || {}).series || [];
+        latestBalance = (balByModel[m.id] || {}).latest || null;
+
+        renderModelsStrip();
         renderStatus();
         computeAndRenderMetrics();
         renderTables();
@@ -1493,53 +1544,108 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         const dailyPnl = settledFires.filter(f => f.window_ts >= todayMidnight).reduce((s, f) => s + (Number(f.settled_pnl) || 0), 0);
         const hourlyPnl = settledFires.filter(f => f.window_ts >= nowSec - 3600).reduce((s, f) => s + (Number(f.settled_pnl) || 0), 0);
 
+        const hasFires = settledFires.length > 0;
         setTile('metricEvFire', evFire == null ? '--' : fmtSignedUSD(evFire), pnlClass(evFire));
         setTile('metricEvWindow', evWindow == null ? '--' : fmtSignedUSD(evWindow), pnlClass(evWindow));
-        const wrEl = document.getElementById('metricWinRate');
-        wrEl.textContent = winRate == null ? '--' : (winRate * 100).toFixed(1) + '%';
-        setTile('metricTotalPnl', fmtSignedUSD(totalPnl), pnlClass(totalPnl));
+        document.getElementById('metricWinRate').textContent = winRate == null ? '--' : (winRate * 100).toFixed(1) + '%';
         document.getElementById('metricFires').textContent = scoped.length.toLocaleString();
         document.getElementById('metricWindows').textContent = scopedWindows.length.toLocaleString();
-        setTile('metricDailyPnl', fmtSignedUSD(dailyPnl), pnlClass(dailyPnl));
-        setTile('metricHourlyPnl', fmtSignedUSD(hourlyPnl), pnlClass(hourlyPnl));
+        setTile('metricDailyPnl', hasFires ? fmtSignedUSD(dailyPnl) : '--', pnlClass(dailyPnl));
+        setTile('metricHourlyPnl', hasFires ? fmtSignedUSD(hourlyPnl) : '--', pnlClass(hourlyPnl));
+        // In-flight (reclaimed tile, per-model)
+        const infl = derivedInflight();
+        setTile('metricTotalPnl', formatUSD(infl));
+        document.getElementById('metricTotalPnl').style.color = 'var(--deft-accent-warm, #4CC9F0)';
 
-        // ── Wallet / HWM / Drawdown / In-flight ──
-        const balLabel = document.getElementById('metricBalanceLabel');
-        const hwmLabel = document.getElementById('metricHwmLabel');
+        // ── Per-model financials from bot_status.note (authoritative sub-fund accounting) ──
+        const note = (botStatus && botStatus._note) || {};
+        const eq  = note.equity != null ? Number(note.equity) : (latestBalance && latestBalance.effective_usdc != null ? Number(latestBalance.effective_usdc) : null);
+        const cum = note.cumulative_pnl != null ? Number(note.cumulative_pnl) : (latestBalance && latestBalance.free_usdc != null ? Number(latestBalance.free_usdc) : null);
+        const hwm = note.hwm != null ? Number(note.hwm) : (latestBalance && latestBalance.hwm_usdc != null ? Number(latestBalance.hwm_usdc) : null);
+        const ddAmt = note.drawdown != null ? Number(note.drawdown) : (eq != null && hwm != null ? Math.max(0, hwm - eq) : null);
+        const ddLim = note.breaker_limit != null ? Number(note.breaker_limit) : (botStatus && botStatus.drawdown_limit_usdc != null ? Number(botStatus.drawdown_limit_usdc) : null);
 
-        if (latestBalance && latestBalance.effective_usdc != null) {
-            // True wallet basis
-            setTile('metricBalance', latestBalance.free_usdc != null ? formatUSD(latestBalance.free_usdc) : '--');
-            balLabel.textContent = 'Wallet Balance';
-            const hwm = latestBalance.hwm_usdc != null ? Number(latestBalance.hwm_usdc)
-                      : Math.max(...balanceSeries.map(b => Number(b.effective_usdc)).filter(v => !isNaN(v)), Number(latestBalance.effective_usdc));
-            const dd = Number(latestBalance.effective_usdc) - hwm;
-            const ddPct = hwm ? (dd / hwm) * 100 : 0;
-            setTile('metricHwm', formatUSD(hwm));
-            hwmLabel.textContent = 'High Water Mark';
-            setTile('metricDrawdown', dd >= 0 ? '$0.00' : (fmtSignedUSD(dd) + ' (' + ddPct.toFixed(1) + '%)'), dd < 0 ? 'pnl-negative' : '');
-            const infl = latestBalance.in_flight_usdc != null ? Number(latestBalance.in_flight_usdc) : derivedInflight();
-            setTile('metricInflight', formatUSD(infl));
-            document.getElementById('metricInflight').style.color = 'var(--deft-accent-warm, #4CC9F0)';
-        } else {
-            // P&L-curve basis (bot not yet logging balance)
-            setPending('metricBalance');
-            balLabel.textContent = 'Wallet Balance';
-            // HWM/drawdown on cumulative P&L equity curve
-            let cum = 0, peak = 0, ddNow = 0;
-            for (const f of settledFires) { cum += Number(f.settled_pnl) || 0; if (cum > peak) peak = cum; }
-            ddNow = cum - peak;
-            setTile('metricHwm', fmtSignedUSD(peak));
-            hwmLabel.textContent = 'HWM (P&L basis)';
-            setTile('metricDrawdown', ddNow >= 0 ? '$0.00' : fmtSignedUSD(ddNow), ddNow < 0 ? 'pnl-negative' : '');
-            const infl = derivedInflight();
-            setTile('metricInflight', formatUSD(infl));
-            document.getElementById('metricInflight').style.color = 'var(--deft-accent-warm, #4CC9F0)';
+        document.getElementById('metricBalanceLabel').textContent = 'Equity';
+        setTile('metricBalance', eq != null ? formatUSD(eq) : '--');
+        setTile('metricInflight', cum != null ? fmtSignedUSD(cum) : '--', pnlClass(cum));
+        document.getElementById('metricHwmLabel').textContent = 'High Water Mark';
+        setTile('metricHwm', hwm != null ? formatUSD(hwm) : '--');
+        const ddEl = document.getElementById('metricDrawdown');
+        if (ddAmt == null) { ddEl.textContent = '--'; ddEl.className = 'stat-value'; ddEl.style.color = ''; }
+        else {
+            const ddPct = (ddLim && ddLim > 0) ? (ddAmt / ddLim * 100) : null;
+            ddEl.textContent = (ddAmt <= 0 ? '$0.00' : '-$' + ddAmt.toFixed(2)) + (ddLim != null ? ' / $' + ddLim.toFixed(2) : '') + (ddPct != null ? ' (' + ddPct.toFixed(0) + '%)' : '');
+            ddEl.className = 'stat-value';
+            ddEl.style.color = (ddPct != null && ddPct >= 100) ? 'var(--deft-danger, #FF6B6B)' : (ddPct != null && ddPct >= 70 ? 'var(--deft-warning, #FFD93D)' : '');
         }
     }
 
     function derivedInflight() {
-        return inflightFires.reduce((s, f) => s + (Number(f.shares) || 0) * (Number(f.fill_price_actual) || 0), 0);
+        return inflightFires.reduce((s, f) => s + (Number(f.shares) || 0) * (fillPx(f) || 0), 0);
+    }
+
+    // ═══════════════════════════════════════
+    // MODELS COMPARISON STRIP + SWITCHER
+    // ═══════════════════════════════════════
+    function renderModelsStrip() {
+        const el = document.getElementById('modelsStrip');
+        if (!el) return;
+        el.innerHTML = MODELS.map(m => {
+            const s = botStatusByModel[m.id];
+            const n = (s && s._note) || {};
+            const eq = n.equity != null ? Number(n.equity) : null;
+            const cum = n.cumulative_pnl != null ? Number(n.cumulative_pnl) : null;
+            const ddAmt = n.drawdown != null ? Number(n.drawdown) : null;
+            const ddLim = n.breaker_limit != null ? Number(n.breaker_limit) : (s && s.drawdown_limit_usdc != null ? Number(s.drawdown_limit_usdc) : null);
+            const ddPct = (ddLim && ddLim > 0 && ddAmt != null) ? (ddAmt / ddLim * 100) : null;
+            const tripped = n.breaker_tripped === true;
+            const running = s ? s.is_running !== false : false;
+            const dryV = /DRY/i.test(modeByModel[m.id] || '');
+            const sel = m.id === selectedModel;
+            const stateBadge = !s ? '<span class="badge badge-paper">no data</span>'
+                : tripped ? '<span class="badge badge-down">BREAKER TRIPPED</span>'
+                : !running ? '<span class="badge badge-down">STOPPED</span>'
+                : dryV ? '<span class="badge" style="background:rgba(255,217,61,0.15);color:#FFD93D;">DRY-RUN</span>'
+                : '<span class="badge badge-live-mode">LIVE</span>';
+            const ddColor = ddPct == null ? '' : (ddPct >= 100 ? 'var(--deft-danger,#FF6B6B)' : ddPct >= 70 ? 'var(--deft-warning,#FFD93D)' : 'var(--deft-txt,#E8ECF1)');
+            return `<div class="panel" style="cursor:pointer;${sel ? 'border-color:var(--deft-accent,#06D6A0);box-shadow:0 0 0 1px var(--deft-accent,#06D6A0) inset;' : ''}" onclick="selectModel('${m.id}')">
+              <div class="panel-header">
+                <div class="flex items-center gap-2">
+                  <span class="font-heading font-bold text-sm">${m.name}</span>
+                  ${stateBadge}
+                  ${sel ? '<span class="text-xs text-accent">▸ viewing</span>' : ''}
+                </div>
+                <span class="text-xs text-txt-3 font-mono">${s ? fmtAgo(s.updated_at) : ''}</span>
+              </div>
+              <div class="panel-body">
+                <div class="grid grid-cols-4 gap-2 text-center">
+                  <div><div class="font-heading font-bold text-base">${eq != null ? formatUSD(eq) : '--'}</div><div class="stat-label">Equity</div></div>
+                  <div><div class="font-heading font-bold text-base ${pnlClass(cum)}">${cum != null ? fmtSignedUSD(cum) : '--'}</div><div class="stat-label">Cum P&L</div></div>
+                  <div><div class="font-heading font-bold text-base" style="color:${ddColor};">${ddAmt != null ? '-$' + ddAmt.toFixed(2) : '--'}</div><div class="stat-label">Drawdown${ddPct != null ? ' ' + ddPct.toFixed(0) + '%' : ''}</div></div>
+                  <div><div class="font-heading font-bold text-base">${ddLim != null ? '$' + ddLim.toFixed(0) : '--'}</div><div class="stat-label">DD Limit</div></div>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+        const chip = document.getElementById('detailModelChip'); if (chip) chip.textContent = curModel().name;
+        const hint = document.getElementById('detailModelHint'); if (hint) hint.textContent = currentMode ? ('run mode: ' + currentMode) : '';
+    }
+
+    function selectModel(id) {
+        if (id === selectedModel) return;
+        selectedModel = id;
+        const sel = document.getElementById('modelSelect'); if (sel) sel.value = id;
+        afterModelChange();
+    }
+    function onModelChange() {
+        selectedModel = document.getElementById('modelSelect').value;
+        afterModelChange();
+    }
+    function afterModelChange() {
+        const m = curModel();
+        const chip = document.getElementById('detailModelChip');
+        if (chip) chip.textContent = m.name;
+        loadAll();
     }
 
     // ═══════════════════════════════════════
@@ -1579,7 +1685,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 <td class="font-mono text-xs">${fmtClock(f.window_ts)}</td>
                 <td>${sideBadge(f.final_side)}</td>
                 <td class="font-mono">${Number(f.shares) || 0}</td>
-                <td class="font-mono">$${f.fill_price_actual != null ? Number(f.fill_price_actual).toFixed(2) : '--'}</td>
+                <td class="font-mono">$${fillPx(f) != null ? fillPx(f).toFixed(2) : '--'}</td>
                 <td>${resultBadge(f.final_side, f.resolution, f.settled, pnl)}</td>
                 <td class="font-mono font-medium ${f.settled === false ? '' : pnlClass(pnl)}">${pnlStr}</td>
             </tr>
@@ -1966,8 +2072,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     function confirmCommand(cmd) {
         pendingCommand = cmd;
         const m = CMD_META[cmd] || { word: cmd.toUpperCase(), title: cmd, btn: 'Confirm', cls: 'btn btn-danger', style: '', msg: '' };
-        document.getElementById('cmdModalTitle').textContent = m.title;
-        document.getElementById('cmdModalMsg').innerHTML = `${m.msg} Type <span class="font-mono text-accent">${m.word}</span> to confirm.`;
+        document.getElementById('cmdModalTitle').textContent = curModel().name + ' — ' + m.title;
+        document.getElementById('cmdModalMsg').innerHTML = `Target model: <strong>${curModel().name}</strong> (${curModel().id}).<br>${m.msg} Type <span class="font-mono text-accent">${m.word}</span> to confirm.`;
         const goBtn = document.getElementById('cmdModalGo');
         goBtn.className = m.cls;
         goBtn.style.cssText = m.style;
@@ -1996,7 +2102,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         let who = 'dashboard';
         try { who = (JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}').name) || 'dashboard'; } catch(e) {}
         const eta = { dry_run: 'applies at next window (~5 min)', go_live: 'applies at next window (~5 min)', stop: 'halts in ~10-17s', restart: '~10-min warmup' }[pendingCommand] || '';
-        const res = await supabaseWrite(T_COMMANDS, 'POST', { bot_id: BOT_ID, command: pendingCommand, status: 'pending', requested_by: who });
+        const res = await supabaseWrite(T_COMMANDS, 'POST', { bot_id: curModel().id, command: pendingCommand, status: 'pending', requested_by: who });
         if (res) {
             toast(`${word} queued — poller acts within ~7s; ${eta}.`, 'success');
             closeCmdModal();
