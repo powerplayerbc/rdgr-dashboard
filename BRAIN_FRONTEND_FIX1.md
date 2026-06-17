@@ -68,7 +68,7 @@ WRITES (use webhook only when server-side logic is needed):
 
 
 ```javascript
-const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co'
+const SUPABASE_URL = 'https://carltondb.72.60.67.2.sslip.io'
 const SUPABASE_ANON_KEY = '<your anon key>'  // public, safe for frontend
 
 

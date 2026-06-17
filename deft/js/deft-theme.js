@@ -16,8 +16,8 @@ function loadTheme() {
     }
     // Async fallback: fetch from Supabase if localStorage is empty
     if (activeProfileId && activeProfileId !== 'default') {
-        fetch('https://yrwrswyjawmgtxrgbnim.supabase.co/rest/v1/deft_user_profiles?user_id=eq.' + activeProfileId + '&select=preferences', {
-            headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8' }
+        fetch('https://carltondb.72.60.67.2.sslip.io/rest/v1/deft_user_profiles?user_id=eq.' + activeProfileId + '&select=preferences', {
+            headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc' }
         }).then(r => r.json()).then(d => {
             if (d && d[0] && d[0].preferences && d[0].preferences.theme) {
                 localStorage.setItem(getThemeKey(), JSON.stringify(d[0].preferences.theme));

@@ -2,7 +2,7 @@
 
 This document describes the backend data model, API contracts, table structures, RPCs, and workflow behaviors for the social media outreach system. It covers all 5 platforms (LinkedIn, Twitter/X, Instagram, Facebook, Reddit) and is intended for a frontend developer building the UI.
 
-**Supabase instance:** `https://yrwrswyjawmgtxrgbnim.supabase.co`
+**Supabase instance:** `https://carltondb.72.60.67.2.sslip.io`
 
 ---
 

@@ -8,7 +8,7 @@ The human task system allows Bradford (or any human operator) to review, approve
 
 ## 1. Data Source
 
-**Table:** `directive_tasks` in Supabase (`https://yrwrswyjawmgtxrgbnim.supabase.co`)
+**Table:** `directive_tasks` in Supabase (`https://carltondb.72.60.67.2.sslip.io`)
 
 ### Query for Pending Tasks
 

@@ -42,7 +42,7 @@ Frontend (Browser)                          Backend (n8n)
 
 ## Supabase Tables
 
-**Instance:** `https://yrwrswyjawmgtxrgbnim.supabase.co`
+**Instance:** `https://carltondb.72.60.67.2.sslip.io`
 
 ### `command_threads`
 

@@ -32,7 +32,7 @@ All pages share: auth gate (`Advance1!`), dark theme, Tailwind CDN, Supabase ano
 - No persistent login — cleared on browser close
 
 ### Supabase
-- **Instance:** `https://yrwrswyjawmgtxrgbnim.supabase.co`
+- **Instance:** `https://carltondb.72.60.67.2.sslip.io`
 - **Anon key:** embedded in each HTML file
 - **Access:** PostgREST (REST API) — no Supabase JS client library
 - **Pattern:** Reads via GET, writes via POST/PATCH/DELETE with `Prefer: return=representation`

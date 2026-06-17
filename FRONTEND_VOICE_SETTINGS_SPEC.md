@@ -13,7 +13,7 @@ A standalone Settings page for controlling how outreach email copy is written. T
 ## 1. Supabase Connection
 
 ```
-SUPABASE_URL = https://yrwrswyjawmgtxrgbnim.supabase.co
+SUPABASE_URL = https://carltondb.72.60.67.2.sslip.io
 SUPABASE_ANON_KEY = (same key used in crm.html)
 ```
 

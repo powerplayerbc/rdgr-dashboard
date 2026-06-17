@@ -11,8 +11,8 @@ if (!localStorage.getItem('rdgr-active-profile') && localStorage.getItem('rdgr-a
 // ═══════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════
-const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+const SUPABASE_URL = 'https://carltondb.72.60.67.2.sslip.io';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';
 const DEFT_BRIDGE_URL = 'https://n8n.carltonaiservices.com/webhook/deft-bridge';
 
 // ═══════════════════════════════════════

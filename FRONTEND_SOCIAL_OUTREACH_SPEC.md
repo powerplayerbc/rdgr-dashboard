@@ -12,7 +12,7 @@ A page within the Carlton AI Hub approval-portal for managing social media outre
 ## 1. Supabase Connection
 
 ```
-SUPABASE_URL = https://yrwrswyjawmgtxrgbnim.supabase.co
+SUPABASE_URL = https://carltondb.72.60.67.2.sslip.io
 SUPABASE_ANON_KEY = (same key used in portal)
 ```
 

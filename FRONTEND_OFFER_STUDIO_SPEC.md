@@ -26,7 +26,7 @@ The Offer Studio is a new section in the RDGR approval portal (`/offer-studio`) 
 ## 2. Supabase Connection
 
 Same Supabase instance as the rest of the portal:
-- **URL:** `https://yrwrswyjawmgtxrgbnim.supabase.co`
+- **URL:** `https://carltondb.72.60.67.2.sslip.io`
 - **Auth:** Use the existing Supabase client (anon key + JWT from auth)
 - **Time display:** Convert UTC to Pacific Time (`America/Los_Angeles`)
 

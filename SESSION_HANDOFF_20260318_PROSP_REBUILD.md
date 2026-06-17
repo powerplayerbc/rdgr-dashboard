@@ -224,5 +224,5 @@ A **production prospecting pipeline** that runs daily (7AM Pacific, Mon-Fri) and
 | Google Maps API key | In PROSP-GMAPS workflow | httpQueryAuth |
 
 ## Supabase Instance
-- URL: `https://yrwrswyjawmgtxrgbnim.supabase.co`
+- URL: `https://carltondb.72.60.67.2.sslip.io`
 - Supabase Query Utility: workflow `IWfIRcWfFHDD8PV6` (webhook: `supabase-query`)

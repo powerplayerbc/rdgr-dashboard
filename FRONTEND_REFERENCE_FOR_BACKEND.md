@@ -163,7 +163,7 @@ Health check: pings `/brain-bridge/` on page load. If unavailable, falls back to
 
 ## 6. Supabase Tables (by page)
 
-Instance: `https://yrwrswyjawmgtxrgbnim.supabase.co`
+Instance: `https://carltondb.72.60.67.2.sslip.io`
 All queries use the anon key via PostgREST REST API (`/rest/v1/<table>`).
 
 ### BRAIN module

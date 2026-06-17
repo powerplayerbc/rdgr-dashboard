@@ -15,7 +15,7 @@ A complete CRM system that unifies all contact data across 7+ acquisition channe
 Frontend (React/Next.js/etc.)
     |
     |--- READ operations ---> Supabase PostgREST (direct, fast)
-    |                          https://yrwrswyjawmgtxrgbnim.supabase.co/rest/v1/
+    |                          https://carltondb.72.60.67.2.sslip.io/rest/v1/
     |
     |--- WRITE operations --> CRM-BRIDGE webhook (validates, deduplicates, logs)
                               POST https://n8n.carltonaiservices.com/webhook/rdgr-crm
@@ -29,7 +29,7 @@ Frontend (React/Next.js/etc.)
 
 ### Supabase (for reads)
 ```javascript
-const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
+const SUPABASE_URL = 'https://carltondb.72.60.67.2.sslip.io';
 const SUPABASE_ANON_KEY = '<anon-key-from-supabase-dashboard>';
 
 const headers = {
@@ -566,7 +566,7 @@ When clicked, the system:
 | Attribution report | POST | `{N8N}/webhook/rdgr-crm` | None |
 
 Where:
-- `{SUPABASE}` = `https://yrwrswyjawmgtxrgbnim.supabase.co`
+- `{SUPABASE}` = `https://carltondb.72.60.67.2.sslip.io`
 - `{N8N}` = `https://n8n.carltonaiservices.com`
 
 ---

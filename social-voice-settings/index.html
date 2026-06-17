@@ -9,9 +9,9 @@
     <meta http-equiv="Expires" content="0">
     <title>Social Voice Settings | Carlton AI</title>
 
-    <link rel="preconnect" href="https://yrwrswyjawmgtxrgbnim.supabase.co" crossorigin>
+    <link rel="preconnect" href="https://carltondb.72.60.67.2.sslip.io" crossorigin>
     <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
-    <link rel="dns-prefetch" href="https://yrwrswyjawmgtxrgbnim.supabase.co">
+    <link rel="dns-prefetch" href="https://carltondb.72.60.67.2.sslip.io">
     <script>
         // Instant auth check + theme application — runs before body renders
         try {
@@ -1015,8 +1015,8 @@ if (!localStorage.getItem('rdgr-active-profile') && localStorage.getItem('rdgr-a
 }
 
 // ═══ CONFIG ═══
-const SUPABASE_URL = 'https://yrwrswyjawmgtxrgbnim.supabase.co';
-const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+const SUPABASE_URL = 'https://carltondb.72.60.67.2.sslip.io';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';
 const headers = { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}`, 'Content-Type': 'application/json' };
 
 const PLAT_ORDER = ['linkedin', 'instagram', 'facebook', 'twitter', 'reddit'];
@@ -1049,8 +1049,8 @@ function getCachedProfiles(callback) {
             return;
         }
     } catch(e) {}
-    var _SB_URL = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://yrwrswyjawmgtxrgbnim.supabase.co';
-    var _SB_KEY = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+    var _SB_URL = (typeof SUPABASE_URL !== 'undefined') ? SUPABASE_URL : 'https://carltondb.72.60.67.2.sslip.io';
+    var _SB_KEY = (typeof SUPABASE_ANON_KEY !== 'undefined') ? SUPABASE_ANON_KEY : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';
     fetch(`${_SB_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, {
         headers: { 'apikey': _SB_KEY, 'Authorization': `Bearer ${_SB_KEY}` }
     }).then(r => r.json()).then(profiles => {
@@ -1665,8 +1665,8 @@ window._submitBugReport=async function(){
 var desc=document.getElementById('bugDescription').value.trim();
 if(!desc){if(typeof toast==='function')toast('Please describe the issue','error');return;}
 var btn=document.getElementById('bugSubmitBtn');if(btn){btn.disabled=true;btn.textContent='Submitting...';}
-var SB='https://yrwrswyjawmgtxrgbnim.supabase.co';
-var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlyd3Jzd3lqYXdtZ3R4cmdibmltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzYzODY2MzMsImV4cCI6MjA1MTk2MjYzM30.CjKVHdkFnxFDyZSN4_5nTeX6K7SEu-DjvBH2lzfVrX8';
+var SB='https://carltondb.72.60.67.2.sslip.io';
+var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';
 try{
 var r=await fetch(SB+'/rest/v1/user_bug_reports',{method:'POST',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({page_url:location.pathname,page_title:document.title,user_description:desc,console_errors:_ce,console_warnings:_cw,browser_info:{userAgent:navigator.userAgent,viewport:window.innerWidth+'x'+window.innerHeight,timestamp:new Date().toISOString()},priority:document.getElementById('bugPriority').value,status:'open'})});
 if(r.ok){var d=await r.json();if(typeof toast==='function')toast('Bug report '+d[0].report_id+' submitted!','success');document.getElementById('bugDescription').value='';document.getElementById('bugReportModal').classList.remove('active');_ce.length=0;_cw.length=0;_ub();}

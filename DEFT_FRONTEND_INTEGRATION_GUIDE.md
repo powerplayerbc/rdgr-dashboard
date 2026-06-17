@@ -29,7 +29,7 @@ Frontend App (React/Next.js/etc.)
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
-  'https://yrwrswyjawmgtxrgbnim.supabase.co',
+  'https://carltondb.72.60.67.2.sslip.io',
   'YOUR_ANON_KEY'  // Supabase anon/public key (NOT service role key)
 )
 
@@ -602,6 +602,6 @@ Common errors:
 
 | Setting | Value |
 |---------|-------|
-| Project URL | `https://yrwrswyjawmgtxrgbnim.supabase.co` |
+| Project URL | `https://carltondb.72.60.67.2.sslip.io` |
 | Anon Key | (get from Supabase dashboard → Settings → API) |
 | DEFT-BRIDGE URL | `https://n8n.carltonaiservices.com/webhook/deft-bridge` |

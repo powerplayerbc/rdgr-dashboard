@@ -11,7 +11,7 @@
 Frontend App (React/Next.js)
   |
   +-- Supabase Client (direct reads, real-time subscriptions)
-  |   |  URL: https://yrwrswyjawmgtxrgbnim.supabase.co
+  |   |  URL: https://carltondb.72.60.67.2.sslip.io
   |   |  Key: ANON_KEY (public, safe for frontend)
   |   |
   |   +-- platform_users          (read: display_name, avatar, timezone)
