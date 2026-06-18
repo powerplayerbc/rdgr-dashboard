@@ -864,19 +864,30 @@ async function handleGetHint(qId) {
             <span style="font-size: 0.8rem; color: var(--deft-warning);">Thinking of a hint...</span>
         </div>`;
 
-    const result = await schoolApi('get_hint', {
-        question_id: qId,
-        question_text: question.question_text,
-        correct_answer: question.correct_answer || ''
-    });
+    // Cache-first: hints are pre-generated and stored on school_questions.hint. A DB read is instant,
+    // which avoids the live-Ollama-generation timeout that made the hint button work only intermittently
+    // (Ollama runs on shared CPU and can exceed the 120s request timeout under load).
+    let hintText = null;
+    const cachedRows = await supabaseSelect('school_questions', `question_id=eq.${encodeURIComponent(qId)}&select=hint`);
+    if (cachedRows && cachedRows[0] && cachedRows[0].hint) {
+        hintText = cachedRows[0].hint;
+    } else {
+        // Cache miss (e.g. a brand-new question) -> generate live via the bridge. The bridge writes the
+        // hint back to school_questions, so even if this request times out, the next click is instant.
+        const result = await schoolApi('get_hint', {
+            question_id: qId,
+            question_text: question.question_text,
+            correct_answer: question.correct_answer || ''
+        });
+        if (result) hintText = (result.data && result.data.hint) || result.hint || (typeof result.data === 'string' ? result.data : null);
+    }
 
     if (hintBtn) {
         hintBtn.disabled = false;
         hintBtn.style.opacity = '1';
     }
 
-    if (result) {
-        const hintText = (result.data && result.data.hint) || result.hint || result.data || 'No hint available.';
+    if (hintText) {
         _hintCache[qId] = typeof hintText === 'string' ? hintText : JSON.stringify(hintText);
         renderHint(qId, _hintCache[qId]);
         // UBR-0169: track hint usage so the teacher Grades tab can show motivation.
