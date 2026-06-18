@@ -123,7 +123,7 @@ function logMotivationEvent(eventType, payload = {}) {
 // ═══════════════════════════════════════
 // SCHOOL-BRIDGE API
 // ═══════════════════════════════════════
-async function schoolApi(operation, data = {}, { silent = false, timeout = 30000 } = {}) {
+async function schoolApi(operation, data = {}, { silent = false, timeout = 120000 } = {}) {
     if (!activeProfileId) {
         if (!silent) toast('Please select a profile first', 'error');
         return null;
