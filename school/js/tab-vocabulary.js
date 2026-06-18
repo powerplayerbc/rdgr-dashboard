@@ -1023,7 +1023,7 @@ async function vocabSubmitQuiz() {
         quiz_id: quiz.quiz_id,
         week_id: vocabState.weekData.week_id,
         answers: questions
-    }, { timeout: 45000 });
+    }, { timeout: 120000 });
 
     if (gradeResult && gradeResult.graded_answers) {
         // Apply grading results

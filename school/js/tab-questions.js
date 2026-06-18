@@ -773,7 +773,7 @@ async function handleSubmitAnswer(qId) {
         question_id: qId,
         answer_text: answerText,
         answer_image_url: answerImageUrl || null
-    }, { timeout: 60000 });
+    }, { timeout: 120000 });
 
     if (spinner) spinner.style.display = 'none';
 
