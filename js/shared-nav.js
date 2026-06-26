@@ -15,6 +15,11 @@
             { label: 'Rodger', href: '/chat' },
             { label: 'Council', href: '/council' },
         ]},
+        { label: 'DiannaX', href: '/diannax', items: [
+            { label: 'DiannaX', href: '/diannax' },
+            { label: 'Feelings', href: '/diannax-feelings' },
+            { label: 'Settings', href: '/diannax-settings' },
+        ]},
         { label: 'Outreach', href: '/crm', role: 'admin', items: [
             { label: 'CRM', href: '/crm' },
             { label: 'Email', href: '/email-outreach' },
