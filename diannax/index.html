@@ -1701,10 +1701,9 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             const mid = esc(msg.message_id);
             actionsHTML = `
                 <div class="dx-actions">
-                    <button class="dx-action-btn" onclick="dxExport('${mid}','google_doc',this)">&rarr; Google Doc</button>
+                    <button class="dx-action-btn" onclick="dxExport('${mid}','google_doc',this)">&rarr; Google Drive</button>
                     <button class="dx-action-btn" onclick="dxExport('${mid}','email',this)">&rarr; Email</button>
                     <button class="dx-action-btn" onclick="dxExport('${mid}','brain_task',this)">&rarr; BRAIN task</button>
-                    <button class="dx-action-btn" onclick="dxExport('${mid}','video',this)">&rarr; Video</button>
                 </div>`;
         }
 
@@ -1746,11 +1745,6 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             const to = prompt('Send to email address (optional):', '');
             if (to && to.trim()) params.to = to.trim();
         }
-        if (target === 'video') {
-            const driveUrl = prompt('Drive URL for source media (optional):', '');
-            if (driveUrl && driveUrl.trim()) params.drive_url = driveUrl.trim();
-        }
-
         const origLabel = btnEl ? btnEl.textContent : '';
         if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Working...'; }
 
@@ -1769,7 +1763,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     const c = document.getElementById('toasts');
                     const el = document.createElement('div');
                     el.className = 'toast toast-success';
-                    el.innerHTML = `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;word-break:break-all;">Open ${esc(target.replace('_',' '))} &rarr;</a>`;
+                    const linkLabel = (target === 'google_doc') ? 'Open in Google Drive' : ('Open ' + target.replace('_',' '));
+                    el.innerHTML = `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;word-break:break-all;">${esc(linkLabel)} &rarr;</a>`;
                     c.appendChild(el);
                     setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 10000);
                 }
@@ -1885,6 +1880,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         }));
 
         const sessionDuration = chatSessionStart ? Math.floor((Date.now() - chatSessionStart) / 1000) : 0;
+        const sentDeliverable = dxDeliverableType; // capture: scripts are auto-saved to Drive (never made into a video)
 
         try {
             const controller = new AbortController();
@@ -1945,6 +1941,12 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     chatMessages.push(aiMsg);
                     renderMessages();
                     if (thread) renderThreadList();
+
+                    // Scripts are presented as Google Drive links (never made into a video):
+                    // auto-save a script deliverable to Drive and surface the link.
+                    if (sentDeliverable === 'script' && aiMsg.message_id) {
+                        dxExport(aiMsg.message_id, 'google_doc', null);
+                    }
 
                     // Auto-title
                     if (thread && thread.title === 'New Chat' && chatMessages.length <= 3) {
