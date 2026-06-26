@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Video Inventory | Carlton AI</title>
+
+    <link rel="preconnect" href="https://carltondb.72.60.67.2.sslip.io" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://carltondb.72.60.67.2.sslip.io">
+    <script>
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch(e) {}
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _presets = {
+                forest:     { accent:'#A8D65B',accentWarm:'#F0A830',base:'#0F1008',surface:'#191C10',surfaceEl:'#232718',surfaceHi:'#2D3220',border:'#3A3F2C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                sunrise:    { accent:'#F0A830',accentWarm:'#E85D5D',base:'#100D08',surface:'#1C1810',surfaceEl:'#272118',surfaceHi:'#322B20',border:'#3F382C',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#EAE8E0',txt2:'#A09B8C',txt3:'#6B6758',headingFont:'Nunito',bodyFont:'DM Sans' },
+                ocean:      { accent:'#38BDF8',accentWarm:'#06D6A0',base:'#080D10',surface:'#10161C',surfaceEl:'#182027',surfaceHi:'#202A32',border:'#2C363F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E0E8EA',txt2:'#8C9BA0',txt3:'#586B6B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                berry:      { accent:'#C084FC',accentWarm:'#FB7185',base:'#0D0810',surface:'#16101C',surfaceEl:'#201827',surfaceHi:'#2A2032',border:'#3A2C3F',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E0EA',txt2:'#A08CA0',txt3:'#6B586B',headingFont:'Nunito',bodyFont:'DM Sans' },
+                rdgr:       { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' },
+                monochrome: { accent:'#E8E8E8',accentWarm:'#A0A0A0',base:'#000000',surface:'#0A0A0A',surfaceEl:'#141414',surfaceHi:'#1E1E1E',border:'#2A2A2A',success:'#6BCB77',warning:'#F0A830',danger:'#E85D5D',txt:'#E8E8E8',txt2:'#A0A0A0',txt3:'#666666',headingFont:'Nunito',bodyFont:'DM Sans' },
+            };
+            var _t = (_tc.preset === 'custom' && _tc.custom) ? _tc.custom : (_presets[_tc.preset] || _presets.rdgr);
+            if (_tc.statusOverrides) {
+                if (_tc.statusOverrides.success) _t.success = _tc.statusOverrides.success;
+                if (_tc.statusOverrides.warning) _t.warning = _tc.statusOverrides.warning;
+                if (_tc.statusOverrides.danger) _t.danger = _tc.statusOverrides.danger;
+            }
+            var _r = document.documentElement;
+            _r.style.setProperty('--deft-accent', _t.accent);
+            _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+            _r.style.setProperty('--deft-accent-warm', _t.accentWarm || _t.accent);
+            _r.style.setProperty('--deft-base', _t.base);
+            _r.style.setProperty('--deft-surface', _t.surface);
+            _r.style.setProperty('--deft-surface-el', _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-surface-hi', _t.surfaceHi || _t.surfaceEl || _t.surface);
+            _r.style.setProperty('--deft-border', _t.border);
+            _r.style.setProperty('--deft-success', _t.success || '#6BCB77');
+            _r.style.setProperty('--deft-success-dim', (_t.success || '#6BCB77') + '26');
+            _r.style.setProperty('--deft-warning', _t.warning || '#F0A830');
+            _r.style.setProperty('--deft-warning-dim', (_t.warning || '#F0A830') + '26');
+            _r.style.setProperty('--deft-danger', _t.danger || '#E85D5D');
+            _r.style.setProperty('--deft-danger-dim', (_t.danger || '#E85D5D') + '26');
+            _r.style.setProperty('--deft-txt', _t.txt);
+            _r.style.setProperty('--deft-txt-2', _t.txt2 || '#8A95A9');
+            _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
+            _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
+            _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+            var _fs = _tc.fontScale || 1;
+            _r.style.setProperty('--deft-font-scale', _fs);
+        } catch(e) {}
+    </script>
+    <style>
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #mainContent { opacity: 1 !important; }
+        body {
+            background: var(--deft-base, #08090D) !important;
+            color: var(--deft-txt, #E8ECF1) !important;
+            font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important;
+        }
+        .font-heading, h1, h2, h3 { font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important; }
+        nav { background: color-mix(in srgb, var(--deft-base, #08090D) 92%, transparent) !important; border-color: var(--deft-border, #2A2E3D) !important; }
+        .text-accent { color: var(--deft-accent, #06D6A0) !important; }
+        .bg-accent { background-color: var(--deft-accent, #06D6A0) !important; }
+        .btn-primary { background: var(--deft-accent-dim, rgba(6,214,160,0.15)) !important; color: var(--deft-accent, #06D6A0) !important; border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 30%, transparent) !important; }
+        .btn-primary:hover { background: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent) !important; }
+        .btn-ghost { border-color: var(--deft-border, #2A2E3D) !important; }
+        .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+        .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+        .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+        ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D) !important; }
+        .pulse-dot { background: var(--deft-accent, #06D6A0) !important; }
+        .gate-input:focus { border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--deft-accent, #06D6A0) 8%, transparent) !important; }
+        body { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; }
+        .text-xs { font-size: calc(0.75rem * var(--deft-font-scale, 1)) !important; }
+        .text-sm { font-size: calc(0.875rem * var(--deft-font-scale, 1)) !important; }
+        .text-base { font-size: calc(1rem * var(--deft-font-scale, 1)) !important; color: inherit !important; }
+        .text-lg { font-size: calc(1.125rem * var(--deft-font-scale, 1)) !important; }
+        .text-xl { font-size: calc(1.25rem * var(--deft-font-scale, 1)) !important; }
+        .text-2xl { font-size: calc(1.5rem * var(--deft-font-scale, 1)) !important; }
+
+        /* ── Nav Dropdown System ── */
+        .nav-group { position: relative; }
+        .nav-group-btn { display: flex; align-items: center; gap: 0.25rem; padding: 0.3rem 0.75rem; font-size: 0.7rem; font-weight: 500; color: #8A95A9; border-radius: 0.375rem; text-decoration: none; cursor: pointer; transition: background 0.15s, color 0.15s; white-space: nowrap; border: none; background: transparent; }
+        .nav-group-btn:hover { color: #E8ECF1; }
+        .nav-group-btn.active { background: var(--deft-accent-dim, rgba(6,214,160,0.12)) !important; color: var(--deft-accent, #06D6A0) !important; }
+        .nav-group-btn .chevron { transition: transform 0.2s; opacity: 0.5; }
+        .nav-group:hover .nav-group-btn .chevron { transform: rotate(180deg); opacity: 0.8; }
+        .nav-dropdown { position: absolute; top: calc(100% + 4px); left: 0; min-width: 150px; padding: 0.375rem; border-radius: 0.5rem; border: 1px solid var(--deft-border, #2A2E3D); background: var(--deft-surface-el, #1A1D28); box-shadow: 0 8px 24px rgba(0,0,0,0.4); opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, visibility 0.15s, transform 0.15s; z-index: 70; }
+        .nav-group:hover .nav-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+        .nav-dropdown a { display: block; padding: 0.4rem 0.625rem; font-size: 0.7rem; font-weight: 500; color: var(--deft-txt-2, #8A95A9); text-decoration: none; border-radius: 0.25rem; transition: background 0.12s, color 0.12s; white-space: nowrap; }
+        .nav-dropdown a:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        .nav-dropdown a.active { background: var(--deft-accent-dim, rgba(6,214,160,0.12)); color: var(--deft-accent, #06D6A0); }
+        /* ── Mobile Nav System ── */
+        .mobile-menu-btn { display: none; align-items: center; justify-content: center; width: 32px; height: 32px; border: 1px solid var(--deft-border, #2A2E3D); border-radius: 0.375rem; background: transparent; color: var(--deft-txt-2, #8A95A9); cursor: pointer; transition: background 0.15s, color 0.15s; flex-shrink: 0; }
+        .mobile-menu-btn:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        @media (max-width: 639px) { .mobile-menu-btn { display: flex; } }
+        #mobileNavOverlay { position: fixed; inset: 0; z-index: 200; display: none; opacity: 0; transition: opacity 0.2s ease; }
+        #mobileNavOverlay.open { display: flex; opacity: 1; }
+        .mobile-nav-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
+        .mobile-nav-sidebar { position: relative; z-index: 1; width: 280px; max-width: 85vw; height: 100vh; background: var(--deft-base, #11131A); border-right: 1px solid var(--deft-border, #2A2E3D); overflow-y: auto; transform: translateX(-100%); transition: transform 0.25s ease; padding: 0.75rem 0; }
+        #mobileNavOverlay.open .mobile-nav-sidebar { transform: translateX(0); }
+        .mobile-nav-close { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: none; background: transparent; color: var(--deft-txt-3, #525E73); cursor: pointer; font-size: 1.1rem; border-radius: 0.25rem; transition: background 0.12s, color 0.12s; }
+        .mobile-nav-close:hover { background: rgba(255,255,255,0.06); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link { display: block; padding: 0.5rem 1.25rem; font-size: 0.75rem; font-weight: 500; color: var(--deft-txt-2, #8A95A9); text-decoration: none; transition: background 0.12s, color 0.12s; }
+        .mobile-nav-link:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-link.active { background: var(--deft-accent-dim, rgba(6,214,160,0.12)); color: var(--deft-accent, #06D6A0); }
+        .mobile-nav-group-btn { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0.5rem 1.25rem; font-size: 0.75rem; font-weight: 500; color: var(--deft-txt-2, #8A95A9); background: transparent; border: none; cursor: pointer; transition: background 0.12s, color 0.12s; text-align: left; }
+        .mobile-nav-group-btn:hover { background: rgba(255,255,255,0.04); color: var(--deft-txt, #E8ECF1); }
+        .mobile-nav-group-btn.active { color: var(--deft-accent, #06D6A0); }
+        .mobile-nav-group-btn .mn-chevron { transition: transform 0.2s; opacity: 0.5; }
+        .mobile-nav-group-btn.expanded .mn-chevron { transform: rotate(180deg); opacity: 0.8; }
+        .mobile-nav-children { display: none; padding-left: 1rem; }
+        .mobile-nav-children.open { display: block; }
+        .mobile-nav-divider { height: 1px; background: var(--deft-border, #2A2E3D); margin: 0.375rem 1rem; }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                colors: {
+                    'deft-base': '#08090D', surface: '#11131A', 'surface-el': '#1A1D28', 'surface-hi': '#242836',
+                    border: '#2A2E3D', accent: '#06D6A0', 'accent-dim': 'rgba(6,214,160,0.15)',
+                    alert: '#FF6B6B', 'alert-dim': 'rgba(255,107,107,0.15)',
+                    warn: '#FFD93D', 'warn-dim': 'rgba(255,217,61,0.15)',
+                    info: '#4CC9F0', 'info-dim': 'rgba(76,201,240,0.15)',
+                    txt: '#E8ECF1', 'txt-2': '#8A95A9', 'txt-3': '#525E73',
+                },
+                fontFamily: {
+                    heading: ['"Chakra Petch"', 'system-ui', 'sans-serif'],
+                    body: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+                    mono: ['"JetBrains Mono"', 'monospace'],
+                },
+            } }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'IBM Plex Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; background: #08090D; color: #E8ECF1; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2A2E3D; border-radius: 3px; }
+        .gate-overlay { position: fixed; inset: 0; z-index: 9999; background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%); display: flex; align-items: center; justify-content: center; }
+        .gate-overlay.hidden { display: none; }
+        .gate-input { width: 100%; padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); border: 1px solid #2A2E3D; border-radius: 0.5rem; color: #E8ECF1; font-size: 0.875rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+        .gate-error { color: #FF6B6B; font-size: 0.75rem; margin-top: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gate-error.show { opacity: 1; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; font-size: 0.75rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 0.375rem; border: 1px solid transparent; cursor: pointer; transition: background 0.15s, opacity 0.15s, transform 0.1s; }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: rgba(6,214,160,0.15); color: #06D6A0; border-color: rgba(6,214,160,0.3); }
+        .btn-primary:hover { background: rgba(6,214,160,0.25); }
+        .btn-ghost { background: transparent; color: #8A95A9; border-color: #2A2E3D; }
+        .btn-ghost:hover { background: rgba(255,255,255,0.03); color: #E8ECF1; }
+        .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: #06D6A0; box-shadow: 0 0 6px rgba(6,214,160,0.4); animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        /* ── Video gallery ── */
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.875rem; }
+        .video-card { background: var(--deft-surface, #11131A); border: 1px solid var(--deft-border, #2A2E3D); border-radius: 0.625rem; overflow: hidden; transition: border-color 0.2s, transform 0.15s; cursor: pointer; }
+        .video-card:hover { border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 35%, var(--deft-border, #2A2E3D)); transform: translateY(-2px); }
+        .video-thumb { position: relative; width: 100%; aspect-ratio: 16/9; background: var(--deft-surface-el, #1A1D28); overflow: hidden; }
+        .video-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .video-thumb .play-ico { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.35)); color: #fff; opacity: 0.85; transition: opacity 0.15s; }
+        .video-card:hover .play-ico { opacity: 1; }
+        .video-thumb .dur-badge { position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.72); color: #fff; font-size: 0.6rem; font-weight: 600; padding: 0.1rem 0.35rem; border-radius: 0.25rem; font-family: 'JetBrains Mono', monospace; }
+        .video-card-info { padding: 0.7rem 0.75rem 0.8rem; }
+
+        .filter-tab { padding: 0.375rem 0.75rem; font-size: 0.7rem; font-weight: 500; color: #8A95A9; background: transparent; border: 1px solid transparent; border-radius: 9999px; cursor: pointer; transition: all 0.15s; }
+        .filter-tab:hover { color: #E8ECF1; background: rgba(255,255,255,0.03); }
+        .filter-tab.active { background: var(--deft-accent-dim, rgba(6,214,160,0.12)); color: var(--deft-accent, #06D6A0); border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 25%, transparent); }
+        .type-badge { display: inline-flex; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+        .modal-backdrop { position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; }
+        .modal-backdrop.active { display: flex; }
+        .modal-box { background: var(--deft-surface-el, #1A1D28); border: 1px solid var(--deft-border, #2A2E3D); border-radius: 0.75rem; width: 95%; max-width: 540px; max-height: 88vh; overflow-y: auto; padding: 1.5rem; }
+        .field { width: 100%; padding: 0.55rem 0.75rem; border-radius: 0.5rem; background: var(--deft-surface-hi, #242836); border: 1px solid var(--deft-border, #2A2E3D); color: var(--deft-txt, #E8ECF1); font-size: 0.8rem; outline: none; }
+        .field:focus { border-color: color-mix(in srgb, var(--deft-accent, #06D6A0) 40%, transparent); }
+        .flabel { display:block; font-size: 0.68rem; font-weight: 600; color: var(--deft-txt-2, #8A95A9); margin-bottom: 0.35rem; text-transform: uppercase; letter-spacing: 0.03em; }
+
+        /* ── Detail drawer (player + transcript) ── */
+        .drawer { position: fixed; inset: 0; z-index: 9500; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 1rem; }
+        .drawer.active { display: flex; }
+        .drawer-box { background: var(--deft-surface-el, #1A1D28); border: 1px solid var(--deft-border, #2A2E3D); border-radius: 0.75rem; width: 100%; max-width: 960px; max-height: 90vh; overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
+        .drawer-body { display: grid; grid-template-columns: 1.4fr 1fr; gap: 0; overflow: hidden; }
+        @media (max-width: 760px) { .drawer-body { grid-template-columns: 1fr; } }
+        .drawer-player { background: #000; aspect-ratio: 16/9; width: 100%; }
+        .drawer-player iframe { width: 100%; height: 100%; border: 0; }
+        .drawer-side { padding: 1rem 1.1rem; overflow-y: auto; max-height: 70vh; border-left: 1px solid var(--deft-border, #2A2E3D); }
+        .transcript-box { white-space: pre-wrap; font-size: 0.74rem; line-height: 1.55; color: var(--deft-txt-2, #8A95A9); background: rgba(0,0,0,0.25); border: 1px solid var(--deft-border, #2A2E3D); border-radius: 0.5rem; padding: 0.6rem 0.7rem; max-height: 240px; overflow-y: auto; }
+
+        .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 10000; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast { padding: 0.625rem 1rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,0.4); transition: opacity 0.3s; }
+        .toast-success { background: rgba(107,203,119,0.15); color: #6BCB77; border: 1px solid rgba(107,203,119,0.25); }
+        .toast-error { background: rgba(255,107,107,0.15); color: #FF6B6B; border: 1px solid rgba(255,107,107,0.25); }
+        .toast-info { background: rgba(76,201,240,0.15); color: #4CC9F0; border: 1px solid rgba(76,201,240,0.25); }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .skeleton { background: linear-gradient(90deg, #1A1D28 25%, #242836 50%, #1A1D28 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 0.5rem; }
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--deft-txt-3, #525E73); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { width: 18px; height: 18px; border: 2px solid var(--deft-border, #2A2E3D); border-top-color: var(--deft-accent, #06D6A0); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .proc-chip { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.6rem; border-radius: 0.5rem; font-size: 0.68rem; background: var(--deft-surface, #11131A); border: 1px solid var(--deft-border, #2A2E3D); color: var(--deft-txt-2, #8A95A9); }
+
+        /* Bug Report FAB */
+        .bug-report-fab { position: fixed; bottom: 1.5rem; left: 1.5rem; z-index: 190; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--deft-border, #2A2E3D); background: var(--deft-surface-el, #1A1D28); color: var(--deft-txt-3, #525E73); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.3); padding: 0; }
+        .bug-report-fab:hover { background: rgba(255,107,107,0.12); color: #FF6B6B; border-color: rgba(255,107,107,0.3); }
+        .bug-report-fab .bug-badge { position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px; border-radius: 8px; background: #FF6B6B; color: #fff; font-size: 0.55rem; font-weight: 700; display: none; align-items: center; justify-content: center; padding: 0 3px; }
+        .bug-report-modal { z-index: 195 !important; }
+        .bug-report-modal .modal-content { max-width: 500px; width: 92vw; background: var(--deft-surface-el, #1A1D28); border: 1px solid var(--deft-border, #2A2E3D); border-radius: 0.75rem; }
+        .bug-form-label { display: block; font-size: 0.65rem; font-weight: 600; color: var(--deft-txt-2, #8A95A9); margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.03em; }
+        .bug-console-log { max-height: 100px; overflow-y: auto; padding: 0.4rem; border-radius: 0.375rem; background: rgba(0,0,0,0.3); border: 1px solid var(--deft-border, #2A2E3D); font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; line-height: 1.4; }
+        .bug-ce { color: #FF6B6B; } .bug-cw { color: #FFD93D; } .bug-cn { color: var(--deft-txt-3, #525E73); font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ PASSWORD GATE ═══ -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <div class="w-2 h-2 rounded-full bg-accent opacity-60"></div>
+                    <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+                </div>
+                <h1 class="font-heading text-3xl font-bold tracking-tight mb-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+            </div>
+            <div id="gateProfiles" class="flex justify-center gap-3 mb-6"><div class="text-center text-xs text-txt-3">Loading profiles...</div></div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full py-3 mt-4" id="gateSubmitBtn" disabled style="opacity:0.4;">Select a profile first</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div id="mainContent" style="opacity: 0;">
+
+        <!-- ── Top Nav (populated by /js/shared-nav.js) ── -->
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,0.92); backdrop-filter: blur(20px);">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="pulse-dot"></div>
+                    <h1 class="font-heading font-bold text-base sm:text-lg tracking-wide">RDGR <span class="text-txt-3 font-normal">Command Center</span></h1>
+                    <button class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Open menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+                    <div class="flex gap-1 p-0.5 rounded-lg ml-2 hidden sm:flex" style="background: rgba(255,255,255,0.04);">
+                        <!-- shared-nav.js injects nav groups here -->
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <div class="relative" id="profileSwitcher">
+                        <button onclick="toggleProfileDD()" class="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs" style="background: rgba(255,255,255,0.04); color: #8A95A9;" id="profileBtn">
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background: rgba(6,214,160,0.15); color: #06D6A0;" id="profileAvatar">B</div>
+                            <span class="hidden sm:inline" id="profileName">Bradford</span>
+                            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2.5 4L5 6.5L7.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                        </button>
+                        <div class="absolute right-0 top-full mt-1 py-1 rounded-lg border hidden" style="background: #1A1D28; border-color: #2A2E3D; min-width: 160px; z-index: 60;" id="profileDropdown"></div>
+                    </div>
+                    <a href="/settings" class="text-txt-3 hover:text-accent transition-colors p-2" title="Settings"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.86 1.33h2.28l.35 1.76.12.05a5.2 5.2 0 011.32.76l.1.08 1.66-.7.96 1.66-1.31 1.07.02.13a5.3 5.3 0 010 1.12l-.02.13 1.31 1.07-.96 1.66-1.66-.7-.1.08a5.2 5.2 0 01-1.32.76l-.12.05-.35 1.76H6.86l-.35-1.76-.12-.05a5.2 5.2 0 01-1.32-.76l-.1-.08-1.66.7-.96-1.66 1.31-1.07-.02-.13a5.3 5.3 0 010-1.12l.02-.13-1.31-1.07.96-1.66 1.66.7.1-.08a5.2 5.2 0 011.32-.76l.12-.05.35-1.76zM8 5.67a2.33 2.33 0 100 4.66 2.33 2.33 0 000-4.66z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+                    <span class="text-xs text-txt-3 font-mono hidden sm:block" id="lastRefresh">—</span>
+                    <button onclick="refreshAll()" class="btn btn-ghost text-xs py-2 px-3 flex items-center gap-1.5" id="refreshBtn"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6a4.5 4.5 0 018.18-2.6M10.5 6a4.5 4.5 0 01-8.18 2.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M9.5 1v2.5H7M2.5 11V8.5H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Refresh</button>
+                </div>
+            </div>
+            <!-- Mobile Nav Overlay -->
+            <div id="mobileNavOverlay">
+                <div class="mobile-nav-backdrop"></div>
+                <div class="mobile-nav-sidebar">
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 1rem 0.75rem;">
+                        <span style="font-size:0.8rem;font-weight:700;color:var(--deft-txt,#E8ECF1);">Menu</span>
+                        <button class="mobile-nav-close" onclick="toggleMobileNav()">&times;</button>
+                    </div>
+                    <div class="mobile-nav-divider"></div>
+                    <!-- shared-nav.js injects mobile nav here -->
+                </div>
+            </div>
+        </nav>
+        <script>
+        function toggleMobileNav(){var o=document.getElementById('mobileNavOverlay');if(o.classList.contains('open')){o.style.opacity='0';o.querySelector('.mobile-nav-sidebar').style.transform='translateX(-100%)';setTimeout(function(){o.classList.remove('open');o.style.display='none';},250);}else{o.style.display='flex';requestAnimationFrame(function(){o.classList.add('open');o.style.opacity='1';o.querySelector('.mobile-nav-sidebar').style.transform='translateX(0)';});}}
+        function toggleMobileAccordion(btn){btn.classList.toggle('expanded');var ch=btn.nextElementSibling;ch.classList.toggle('open');}
+        document.getElementById('mobileNavOverlay')?.querySelector('.mobile-nav-backdrop')?.addEventListener('click',function(){toggleMobileNav();});
+        </script>
+
+        <!-- ── Page Header ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between py-5 flex-wrap gap-3">
+                <div>
+                    <h2 class="font-heading text-xl font-bold tracking-tight">Video Inventory</h2>
+                    <p class="text-txt-3 text-xs mt-1">Clips, b-roll &amp; finished videos — tagged, transcribed, and ready to reuse</p>
+                </div>
+                <div class="flex gap-2 flex-wrap">
+                    <button class="btn btn-primary" onclick="openModal('longformModal')">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2zM5 4.5l2.5 1.5L5 7.5z" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>
+                        Long-form
+                    </button>
+                    <button class="btn btn-ghost" onclick="openModal('brollModal')">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3.5h9v5h-9zM3.5 1.5l1 2M6 1.5l1 2" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>
+                        B-roll
+                    </button>
+                    <button class="btn btn-ghost" onclick="openModal('submagicModal')">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1.5l1.3 2.9 3.2.3-2.4 2.1.7 3.1L6 8.4 3.2 10l.7-3.1L1.5 4.8l3.2-.3z" stroke="currentColor" stroke-width="0.9" stroke-linejoin="round"/></svg>
+                        Submagic
+                    </button>
+                </div>
+            </div>
+
+            <!-- In-progress strip -->
+            <div id="processingStrip" class="flex gap-2 flex-wrap mb-4" style="display:none;"></div>
+
+            <!-- Filters -->
+            <div class="flex gap-1.5 flex-wrap mb-5">
+                <button class="filter-tab active" onclick="filterType('all')" data-type="all">All</button>
+                <button class="filter-tab" onclick="filterType('long')" data-type="long">Long</button>
+                <button class="filter-tab" onclick="filterType('medium')" data-type="medium">Medium</button>
+                <button class="filter-tab" onclick="filterType('short')" data-type="short">Short</button>
+                <button class="filter-tab" onclick="filterType('broll')" data-type="broll">B-roll</button>
+                <button class="filter-tab" onclick="filterType('finished')" data-type="finished">Finished</button>
+            </div>
+        </div>
+
+        <!-- ── Gallery ── -->
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 pb-10">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs text-txt-3 font-mono" id="clipCount">—</span>
+            </div>
+            <div id="videoGrid" class="video-grid">
+                <div class="skeleton" style="aspect-ratio:16/9;"></div>
+                <div class="skeleton" style="aspect-ratio:16/9;"></div>
+                <div class="skeleton" style="aspect-ratio:16/9;"></div>
+                <div class="skeleton" style="aspect-ratio:16/9;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toasts" class="toast-container"></div>
+
+    <!-- ═══ INTAKE MODALS ═══ -->
+    <div id="longformModal" class="modal-backdrop">
+        <div class="modal-box">
+            <div class="flex items-center justify-between mb-1"><h3 class="font-heading font-semibold text-base">Submit Long-form Video</h3><button onclick="closeModal('longformModal')" class="text-txt-3 hover:text-txt p-1">&times;</button></div>
+            <p class="text-xs text-txt-3 mb-4">Paste a Google Drive link. The VPS will transcribe it and propose long / medium / short clips automatically.</p>
+            <div class="space-y-3">
+                <div><label class="flabel">Drive link or file ID</label><input id="lfUrl" class="field" placeholder="https://drive.google.com/file/d/.../view"></div>
+                <div><label class="flabel">Title (optional)</label><input id="lfTitle" class="field" placeholder="Defaults to the Drive filename"></div>
+                <button class="btn btn-primary w-full py-3" onclick="submitIntake('longform')" id="lfBtn">Queue for clipping</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="brollModal" class="modal-backdrop">
+        <div class="modal-box">
+            <div class="flex items-center justify-between mb-1"><h3 class="font-heading font-semibold text-base">Add B-roll Clip</h3><button onclick="closeModal('brollModal')" class="text-txt-3 hover:text-txt p-1">&times;</button></div>
+            <p class="text-xs text-txt-3 mb-4">Register an existing (silent) clip by its Drive link. It is cataloged as-is — no transcription.</p>
+            <div class="space-y-3">
+                <div><label class="flabel">Drive link or file ID</label><input id="brUrl" class="field" placeholder="https://drive.google.com/file/d/.../view"></div>
+                <div><label class="flabel">Title</label><input id="brTitle" class="field" placeholder="e.g. City skyline timelapse"></div>
+                <div><label class="flabel">Tags (comma-separated)</label><input id="brTags" class="field" placeholder="urban, sunset, drone"></div>
+                <button class="btn btn-primary w-full py-3" onclick="submitIntake('broll')" id="brBtn">Add to inventory</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="submagicModal" class="modal-backdrop">
+        <div class="modal-box">
+            <div class="flex items-center justify-between mb-1"><h3 class="font-heading font-semibold text-base">Submagic Finished Video</h3><button onclick="closeModal('submagicModal')" class="text-txt-3 hover:text-txt p-1">&times;</button></div>
+            <p class="text-xs text-txt-3 mb-4">Send a single-shot Drive video + its script to Submagic. The finished render is pulled back into Drive by the VPS.</p>
+            <div class="space-y-3">
+                <div><label class="flabel">Drive link or file ID</label><input id="smUrl" class="field" placeholder="https://drive.google.com/file/d/.../view"></div>
+                <div><label class="flabel">Title (optional)</label><input id="smTitle" class="field" placeholder="Defaults to the Drive filename"></div>
+                <div><label class="flabel">Script</label><textarea id="smScript" rows="4" class="field" style="resize:vertical;" placeholder="The script for this video..."></textarea></div>
+                <button class="btn btn-primary w-full py-3" onclick="submitIntake('submagic')" id="smBtn">Send to Submagic</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ DETAIL DRAWER ═══ -->
+    <div id="drawer" class="drawer" onclick="if(event.target===this)closeDrawer()">
+        <div class="drawer-box">
+            <div class="flex items-center justify-between px-4 py-2.5 border-b border-border">
+                <div class="flex items-center gap-2 min-w-0">
+                    <span id="dwBadge" class="type-badge">clip</span>
+                    <h3 id="dwTitle" class="font-heading font-semibold text-sm truncate">—</h3>
+                </div>
+                <button onclick="closeDrawer()" class="text-txt-3 hover:text-txt p-1">&times;</button>
+            </div>
+            <div class="drawer-body">
+                <div>
+                    <div class="drawer-player" id="dwPlayer"></div>
+                </div>
+                <div class="drawer-side">
+                    <div class="flex items-center gap-2 flex-wrap mb-3">
+                        <a id="dwDriveLink" href="#" target="_blank" class="btn btn-ghost text-xs">Open in Drive ↗</a>
+                        <button class="btn btn-ghost text-xs" onclick="copyDrawerLink()">Copy link</button>
+                        <button class="btn btn-primary text-xs" onclick="markUsedFromDrawer()" id="dwUsedBtn">Mark used</button>
+                    </div>
+                    <div id="dwMeta" class="text-xs text-txt-3 mb-3 space-y-1"></div>
+                    <div id="dwIdeaWrap" class="mb-3" style="display:none;">
+                        <label class="flabel">Idea</label>
+                        <p id="dwIdea" class="text-xs text-txt-2"></p>
+                    </div>
+                    <label class="flabel">Transcript / Script</label>
+                    <div id="dwTranscript" class="transcript-box">—</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bug Report FAB -->
+    <button class="bug-report-fab" id="bugReportBtn" onclick="_openBugReport()" title="Report a bug">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2l1.88 1.88"/><path d="M14.12 3.88L16 2"/><path d="M9 7.13v-1a3.003 3.003 0 116 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 014-4h4a4 4 0 014 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>
+        <span class="bug-badge" id="bugBadge">0</span>
+    </button>
+    <div class="modal-backdrop bug-report-modal" id="bugReportModal">
+        <div class="modal-content" style="padding:1.25rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;"><h3 style="font-size:0.95rem;font-weight:700;color:var(--deft-txt,#E8ECF1);margin:0;font-family:var(--deft-heading-font,'Chakra Petch'),sans-serif;">Report Bug / Request Update</h3><button onclick="document.getElementById('bugReportModal').classList.remove('active')" style="background:none;border:none;color:var(--deft-txt-3,#525E73);cursor:pointer;font-size:1.2rem;padding:0.25rem;">&times;</button></div>
+            <div style="margin-bottom:0.75rem;"><label class="bug-form-label">Page</label><div id="bugPageUrl" style="font-size:0.75rem;color:var(--deft-accent,#06D6A0);font-family:'JetBrains Mono',monospace;padding:0.3rem 0.5rem;background:rgba(0,0,0,0.2);border-radius:0.25rem;border:1px solid var(--deft-border,#2A2E3D);"></div></div>
+            <div style="margin-bottom:0.75rem;"><label class="bug-form-label">What's wrong? / What needs updating?</label><textarea id="bugDescription" rows="4" placeholder="Describe the issue or update needed..." style="width:100%;resize:vertical;padding:0.5rem;border-radius:0.375rem;background:var(--deft-surface,#11131A);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);font-size:0.8rem;font-family:var(--deft-body-font,'IBM Plex Sans'),sans-serif;"></textarea></div>
+            <div style="margin-bottom:0.75rem;"><label class="bug-form-label">Console Errors / Warnings</label><div class="bug-console-log" id="bugConsoleLog"><span class="bug-cn">No console errors captured</span></div></div>
+            <div style="display:flex;gap:0.75rem;align-items:flex-end;margin-bottom:1rem;"><div style="flex:1;"><label class="bug-form-label">Priority</label><select id="bugPriority" style="width:100%;padding:0.35rem 0.5rem;border-radius:0.375rem;background:var(--deft-surface,#11131A);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);font-size:0.75rem;"><option value="low">Low</option><option value="normal" selected>Normal</option><option value="high">High</option><option value="critical">Critical</option></select></div></div>
+            <div style="display:flex;gap:0.5rem;justify-content:flex-end;"><button onclick="document.getElementById('bugReportModal').classList.remove('active')" style="padding:0.4rem 1rem;border-radius:0.375rem;border:1px solid var(--deft-border,#2A2E3D);background:transparent;color:var(--deft-txt-2,#8A95A9);font-size:0.75rem;cursor:pointer;">Cancel</button><button onclick="_submitBugReport()" id="bugSubmitBtn" style="padding:0.4rem 1rem;border-radius:0.375rem;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.12);color:#FF6B6B;font-size:0.75rem;font-weight:600;cursor:pointer;">Submit Bug Report</button></div>
+        </div>
+    </div>
+
+    <!-- ═══ SCRIPTS ═══ -->
+    <script>
+    const SUPABASE_URL = 'https://carltondb.72.60.67.2.sslip.io';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';
+    const SB_HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+    const WEBHOOK_BASE = 'https://n8n.carltonaiservices.com/webhook';
+    const BRAND_ID = 'carlton';
+
+    let activeProfileId = null;
+    let clips = [];
+    let sources = [];
+    let sourceById = {};
+    let currentFilter = 'all';
+    let drawerClip = null;
+
+    function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+    function toPTShort(s){ if(!s) return '—'; return new Date(s).toLocaleString('en-US',{ timeZone:'America/Los_Angeles', month:'short', day:'numeric' }); }
+    function fmtDur(sec){ sec=Number(sec); if(!sec||isNaN(sec)) return ''; const m=Math.floor(sec/60), s=Math.round(sec%60); return m+':'+String(s).padStart(2,'0'); }
+    function toast(msg,type='success'){ const c=document.getElementById('toasts'),e=document.createElement('div'); e.className=`toast toast-${type}`; e.textContent=msg; c.appendChild(e); setTimeout(()=>{e.style.opacity='0';setTimeout(()=>e.remove(),300);},4000); }
+    function openModal(id){ document.getElementById(id).classList.add('active'); }
+    function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+
+    const TYPE_COLORS = {
+        long:     { bg:'rgba(6,214,160,0.12)',  color:'#06D6A0', label:'long' },
+        medium:   { bg:'rgba(76,201,240,0.12)',  color:'#4CC9F0', label:'medium' },
+        short:    { bg:'rgba(240,168,48,0.12)',  color:'#F0A830', label:'short' },
+        broll:    { bg:'rgba(168,132,252,0.12)', color:'#A884FC', label:'b-roll' },
+        finished: { bg:'rgba(251,113,133,0.12)', color:'#FB7185', label:'finished' },
+    };
+
+    async function sbSelect(table, query=''){
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, { headers: SB_HEADERS });
+        if(!r.ok) throw new Error(`carltondb: ${r.status}`);
+        return r.json();
+    }
+
+    // ── Load ──
+    async function loadAll(){
+        try {
+            const [cl, sr] = await Promise.all([
+                sbSelect('video_clips', `brand_id=eq.${BRAND_ID}&order=created_at.desc&limit=300`),
+                sbSelect('video_sources', `brand_id=eq.${BRAND_ID}&order=created_at.desc&limit=100`),
+            ]);
+            clips = (cl||[]).filter(c => c.status !== 'error');
+            sources = sr || [];
+            sourceById = {}; sources.forEach(s => sourceById[s.id] = s);
+            renderProcessing();
+            renderGallery();
+        } catch(e){
+            console.error('Video inventory load error:', e);
+            document.getElementById('videoGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;">Failed to load — check console.</div>';
+        }
+    }
+
+    function renderProcessing(){
+        const strip = document.getElementById('processingStrip');
+        const active = sources.filter(s => s.status !== 'complete' && s.status !== 'error');
+        if(!active.length){ strip.style.display='none'; strip.innerHTML=''; return; }
+        strip.style.display='flex';
+        strip.innerHTML = active.map(s => `<span class="proc-chip"><span class="spinner" style="width:12px;height:12px;"></span>${esc(s.title || s.kind)} · ${esc((s.status||'').replace(/_/g,' '))}</span>`).join('');
+    }
+
+    function filterType(type){
+        currentFilter = type;
+        document.querySelectorAll('.filter-tab').forEach(el => el.classList.toggle('active', el.dataset.type === type));
+        renderGallery();
+    }
+
+    function getFiltered(){ return currentFilter==='all' ? clips : clips.filter(c => c.clip_type === currentFilter); }
+
+    function renderGallery(){
+        const filtered = getFiltered();
+        document.getElementById('clipCount').textContent = `${filtered.length} clip${filtered.length!==1?'s':''}`;
+        if(!filtered.length){
+            document.getElementById('videoGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M10 9l5 3-5 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                <p class="text-sm mt-2">No videos yet</p>
+                <p class="text-xs text-txt-3 mt-1">Submit a long-form video, add b-roll, or send a Submagic job above</p>
+            </div>`;
+            return;
+        }
+        document.getElementById('videoGrid').innerHTML = filtered.map((c, idx) => {
+            const tc = TYPE_COLORS[c.clip_type] || { bg:'rgba(138,149,169,0.12)', color:'#8A95A9', label:c.clip_type };
+            const title = esc(c.title || c.idea || 'Untitled');
+            const dur = fmtDur(c.duration_sec);
+            const processing = c.status === 'pending_cut';
+            const thumb = c.thumbnail_url
+                ? `<img src="${esc(c.thumbnail_url)}" alt="" loading="lazy" onerror="this.remove();">`
+                : '';
+            const tags = (c.tags||[]).slice(0,3).map(t => `<span class="text-[0.6rem] text-txt-3">#${esc(t)}</span>`).join(' ');
+            return `<div class="video-card" onclick="openDrawer('${c.id}')">
+                <div class="video-thumb">
+                    ${thumb}
+                    <div class="play-ico">${processing
+                        ? '<span class="spinner"></span>'
+                        : '<svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="11" fill="rgba(0,0,0,0.35)"/><path d="M10 8.5v7l5.5-3.5z" fill="#fff"/></svg>'}</div>
+                    ${dur ? `<span class="dur-badge">${dur}</span>` : ''}
+                </div>
+                <div class="video-card-info">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="type-badge" style="background:${tc.bg};color:${tc.color};">${tc.label}</span>
+                        <span class="text-[0.6rem] text-txt-3 ml-auto">${toPTShort(c.created_at)}</span>
+                    </div>
+                    <p class="text-xs text-txt truncate" title="${title}">${title}</p>
+                    <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                        ${tags}
+                        ${c.usage_count ? `<span class="text-[0.6rem] text-txt-3 ml-auto">used ${c.usage_count}×</span>` : ''}
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── Detail drawer ──
+    function openDrawer(id){
+        const c = clips.find(x => x.id === id);
+        if(!c) return;
+        drawerClip = c;
+        const tc = TYPE_COLORS[c.clip_type] || { bg:'rgba(138,149,169,0.12)', color:'#8A95A9', label:c.clip_type };
+        const badge = document.getElementById('dwBadge'); badge.textContent = tc.label; badge.style.background = tc.bg; badge.style.color = tc.color;
+        document.getElementById('dwTitle').textContent = c.title || c.idea || 'Untitled';
+        // player
+        const player = document.getElementById('dwPlayer');
+        player.innerHTML = c.drive_file_id
+            ? `<iframe src="https://drive.google.com/file/d/${esc(c.drive_file_id)}/preview" allow="autoplay" allowfullscreen></iframe>`
+            : `<div class="empty-state">Not yet available${c.status==='pending_cut'?' — still processing':''}</div>`;
+        // drive link
+        const dl = document.getElementById('dwDriveLink');
+        if(c.drive_url){ dl.href = c.drive_url; dl.style.display=''; } else { dl.style.display='none'; }
+        // meta
+        const src = c.source_id ? sourceById[c.source_id] : null;
+        const meta = [];
+        if(c.duration_sec) meta.push(`Duration: ${fmtDur(c.duration_sec)}`);
+        if(c.start_sec!=null && c.end_sec!=null) meta.push(`Source range: ${fmtDur(c.start_sec)}–${fmtDur(c.end_sec)}`);
+        if(src) meta.push(`From: ${esc(src.title || src.kind)}`);
+        meta.push(`Used ${c.usage_count||0}×${c.last_used_at ? ' · last '+toPTShort(c.last_used_at) : ''}`);
+        document.getElementById('dwMeta').innerHTML = meta.map(m=>`<div>${m}</div>`).join('');
+        // idea
+        const ideaWrap = document.getElementById('dwIdeaWrap');
+        if(c.idea){ ideaWrap.style.display=''; document.getElementById('dwIdea').textContent = c.idea; } else ideaWrap.style.display='none';
+        // transcript: clip-level if present, else source script
+        const transcript = c.transcript || (src && src.script) || '';
+        document.getElementById('dwTranscript').textContent = transcript || 'No transcript available.';
+        document.getElementById('dwUsedBtn').textContent = 'Mark used';
+        document.getElementById('drawer').classList.add('active');
+    }
+    function closeDrawer(){ document.getElementById('drawer').classList.remove('active'); document.getElementById('dwPlayer').innerHTML=''; drawerClip=null; }
+    function copyDrawerLink(){ if(drawerClip && drawerClip.drive_url){ navigator.clipboard.writeText(drawerClip.drive_url).then(()=>toast('Link copied')).catch(()=>toast('Copy failed','error')); } else toast('No link yet','error'); }
+
+    async function markUsedFromDrawer(){
+        if(!drawerClip) return;
+        const btn = document.getElementById('dwUsedBtn'); btn.disabled=true; btn.textContent='...';
+        try {
+            const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/increment_video_usage`, {
+                method:'POST', headers:{...SB_HEADERS,'Content-Type':'application/json'},
+                body: JSON.stringify({ p_table:'video_clips', p_id: drawerClip.id })
+            });
+            if(!r.ok) throw new Error(await r.text());
+            const d = await r.json();
+            const row = Array.isArray(d) ? d[0] : d;
+            drawerClip.usage_count = row.usage_count; drawerClip.last_used_at = row.last_used_at;
+            const local = clips.find(x => x.id === drawerClip.id); if(local){ local.usage_count=row.usage_count; local.last_used_at=row.last_used_at; }
+            toast(`Marked used (${row.usage_count}×)`);
+            openDrawer(drawerClip.id); renderGallery();
+        } catch(e){ console.error(e); toast('Failed to mark used','error'); }
+        finally { btn.disabled=false; btn.textContent='Mark used'; }
+    }
+
+    // ── Intake ──
+    async function submitIntake(kind){
+        let body = { brand_id: BRAND_ID, kind, submitted_by:'dashboard', profile_id: activeProfileId };
+        let btnId, url = `${WEBHOOK_BASE}/rdgr-video-submit`;
+        if(kind==='longform'){
+            btnId='lfBtn'; body.drive_url = document.getElementById('lfUrl').value.trim(); body.title = document.getElementById('lfTitle').value.trim();
+            if(!body.drive_url){ toast('Paste a Drive link','error'); return; }
+        } else if(kind==='broll'){
+            btnId='brBtn'; body.drive_url = document.getElementById('brUrl').value.trim(); body.title = document.getElementById('brTitle').value.trim();
+            body.tags = document.getElementById('brTags').value.split(',').map(t=>t.trim()).filter(Boolean);
+            if(!body.drive_url){ toast('Paste a Drive link','error'); return; }
+        } else if(kind==='submagic'){
+            btnId='smBtn'; url = `${WEBHOOK_BASE}/rdgr-video-submagic`;
+            body.drive_url = document.getElementById('smUrl').value.trim(); body.title = document.getElementById('smTitle').value.trim(); body.script = document.getElementById('smScript').value.trim();
+            if(!body.drive_url){ toast('Paste a Drive link','error'); return; }
+        }
+        const btn = document.getElementById(btnId); const orig = btn.textContent; btn.disabled=true; btn.textContent='Submitting...';
+        try {
+            const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+            if(!r.ok) throw new Error(`${r.status}`);
+            toast('Submitted — processing will begin shortly','success');
+            closeModal(kind==='longform'?'longformModal':kind==='broll'?'brollModal':'submagicModal');
+            ['lfUrl','lfTitle','brUrl','brTitle','brTags','smUrl','smTitle','smScript'].forEach(i=>{const el=document.getElementById(i); if(el) el.value='';});
+            setTimeout(loadAll, 1500);
+        } catch(e){ console.error('Intake error:', e); toast('Submit failed — the workflow may not be live yet','error'); }
+        finally { btn.disabled=false; btn.textContent=orig; }
+    }
+
+    // ── Auth gate (shared pattern) ──
+    let gateSelectedProfile = null;
+    function getCachedProfiles(callback){
+        var CACHE_KEY='rdgr-profiles-cache', CACHE_TTL=300000;
+        try { var c=JSON.parse(localStorage.getItem(CACHE_KEY)||'{}'); if(c.profiles&&c.ts&&(Date.now()-c.ts)<CACHE_TTL){ callback(c.profiles); return; } } catch(e){}
+        fetch(`${SUPABASE_URL}/rest/v1/deft_user_profiles?select=user_id,display_name,email&order=display_name`, { headers: SB_HEADERS })
+            .then(r=>r.json()).then(p=>{ if(p&&Array.isArray(p)&&p.length>0) localStorage.setItem(CACHE_KEY,JSON.stringify({profiles:p,ts:Date.now()})); callback(p); }).catch(()=>callback([]));
+    }
+    function loadGateProfiles(){
+        getCachedProfiles(function(profiles){
+            const container=document.getElementById('gateProfiles');
+            if(!container||!profiles||!profiles.length) return;
+            const saved=localStorage.getItem('rdgr-active-profile'); let savedId=null;
+            if(saved){ try{ savedId=JSON.parse(saved).id; }catch(e){} }
+            container.innerHTML = profiles.map(p=>{
+                const name=p.display_name||p.email||'?', initial=name[0].toUpperCase();
+                const colors={'Bradford':'#06D6A0','Dianna':'#A855F7','Brianna':'#4CC9F0'}; const color=colors[name]||'#8A95A9';
+                return `<button type="button" onclick="selectGateProfile('${p.user_id}','${name.replace(/'/g,'&#39;')}',this)" class="gate-profile-btn flex flex-col items-center gap-1.5 p-3 rounded-lg transition-all" style="background:rgba(255,255,255,0.02);border:2px solid transparent;cursor:pointer;min-width:80px;">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style="background:${color}20;color:${color};border:2px solid transparent;">${initial}</div>
+                    <span class="text-xs" style="color:#8A95A9;">${name}</span>
+                </button>`;
+            }).join('');
+            if(savedId){ container.querySelectorAll('.gate-profile-btn').forEach(btn=>{ if(btn.getAttribute('onclick').includes(savedId)) btn.click(); }); }
+        });
+    }
+    function selectGateProfile(userId,name,el){
+        gateSelectedProfile={id:userId,name:name};
+        document.querySelectorAll('.gate-profile-btn').forEach(btn=>{ btn.classList.remove('selected'); btn.style.background='rgba(255,255,255,0.02)'; btn.style.borderColor='transparent'; btn.querySelector('.w-10').style.borderColor='transparent'; });
+        el.classList.add('selected'); el.style.background='rgba(255,255,255,0.06)'; el.style.borderColor='rgba(6,214,160,0.4)'; el.querySelector('.w-10').style.borderColor=el.querySelector('.w-10').style.color;
+        const btn=document.getElementById('gateSubmitBtn'); btn.disabled=false; btn.style.opacity='1'; btn.textContent='Sign In as '+name;
+        document.getElementById('gateInput').focus();
+    }
+    function handleGate(e){
+        e.preventDefault();
+        if(document.getElementById('gateInput').value==='Advance1!'){
+            localStorage.setItem('rdgr-session', JSON.stringify({authenticated:true,ts:Date.now()}));
+            if(gateSelectedProfile){ localStorage.setItem('rdgr-active-profile', JSON.stringify(gateSelectedProfile)); activeProfileId=gateSelectedProfile.id; }
+            document.getElementById('gate').classList.add('hidden');
+            document.getElementById('mainContent').style.opacity='1';
+            initDashboard(); return false;
+        }
+        document.getElementById('gateError').classList.add('show');
+        document.getElementById('gateInput').value=''; document.getElementById('gateInput').focus();
+        setTimeout(()=>document.getElementById('gateError').classList.remove('show'),2000);
+        return false;
+    }
+
+    async function initDashboard(){
+        const saved=localStorage.getItem('rdgr-active-profile');
+        if(saved){ try{ activeProfileId=JSON.parse(saved).id; }catch(e){} }
+        await refreshAll();
+    }
+    async function refreshAll(){
+        document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString('en-US',{ timeZone:'America/Los_Angeles', hour:'numeric', minute:'2-digit', hour12:true });
+        await loadAll();
+    }
+
+    if(JSON.parse(localStorage.getItem('rdgr-session')||'{}').authenticated===true){
+        document.getElementById('gate').classList.add('hidden');
+        document.getElementById('mainContent').style.opacity='1';
+        initDashboard();
+    }
+    if(!JSON.parse(localStorage.getItem('rdgr-session')||'{}').authenticated){ loadGateProfiles(); }
+
+    document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ closeDrawer(); document.querySelectorAll('.modal-backdrop.active').forEach(m=>m.classList.remove('active')); } });
+
+    // ── Profile switcher ──
+    (function initProfileSwitcher(){
+        const saved=localStorage.getItem('rdgr-active-profile');
+        if(saved){ try{ const p=JSON.parse(saved); activeProfileId=p.id; const n=document.getElementById('profileName'),a=document.getElementById('profileAvatar'); if(n)n.textContent=p.name; if(a)a.textContent=(p.name||'B')[0].toUpperCase(); }catch(e){} }
+        getCachedProfiles(function(profiles){
+            const dd=document.getElementById('profileDropdown');
+            if(!dd||!profiles||profiles.length===0) return;
+            const activeId=saved?JSON.parse(saved).id:null;
+            dd.innerHTML = profiles.map(p=>{
+                const name=p.display_name||p.email||'?', initial=name[0].toUpperCase(), isActive=p.user_id===activeId;
+                return `<button onclick="selectProfileGlobal('${p.user_id}','${name.replace(/'/g,'&#39;')}')" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#E8ECF1;background:transparent;" onmouseenter="this.style.background='rgba(255,255,255,0.04)'" onmouseleave="this.style.background='transparent'">
+                    <div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.6rem] font-bold" style="background:${isActive?'rgba(6,214,160,0.15)':'rgba(255,255,255,0.06)'};color:${isActive?'#06D6A0':'#8A95A9'};">${initial}</div>
+                    <span>${name}</span></button>`;
+            }).join('');
+            dd.innerHTML += '<div style="border-top:1px solid #2A2E3D;margin-top:0.25rem;padding-top:0.25rem;"><button onclick="signOut()" class="w-full text-left px-3 py-2 text-xs flex items-center gap-2" style="color:#FF6B6B;background:transparent;"><span>Sign Out</span></button></div>';
+        });
+    })();
+    function signOut(){ localStorage.removeItem('rdgr-session'); localStorage.removeItem('rdgr-active-profile'); location.reload(); }
+    function toggleProfileDD(){ const dd=document.getElementById('profileDropdown'); dd.classList.toggle('hidden'); if(!dd.classList.contains('hidden')){ setTimeout(()=>document.addEventListener('click',function c(e){ if(!document.getElementById('profileSwitcher').contains(e.target)) dd.classList.add('hidden'); document.removeEventListener('click',c); }),0); } }
+    function selectProfileGlobal(userId,name){ localStorage.setItem('rdgr-active-profile', JSON.stringify({id:userId,name:name})); location.reload(); }
+    </script>
+
+    <script>
+    (function(){
+    var _ce=[],_cw=[]; var _oe=console.error,_ow=console.warn;
+    function _s(a){return Array.from(a).map(function(x){try{return typeof x==='object'?JSON.stringify(x):String(x)}catch(e){return String(x)}}).join(' ');}
+    console.error=function(){_ce.push({m:_s(arguments),t:new Date().toISOString()});if(_ce.length>50)_ce.shift();_ub();_oe.apply(console,arguments);};
+    console.warn=function(){_cw.push({m:_s(arguments),t:new Date().toISOString()});if(_cw.length>50)_cw.shift();_ow.apply(console,arguments);};
+    window.addEventListener('error',function(e){_ce.push({m:e.message+(e.filename?' at '+e.filename+':'+e.lineno:''),t:new Date().toISOString()});_ub();});
+    window.addEventListener('unhandledrejection',function(e){_ce.push({m:'Unhandled Promise: '+(e.reason&&e.reason.message||e.reason||'Unknown'),t:new Date().toISOString()});_ub();});
+    function _ub(){var b=document.getElementById('bugBadge');if(b){b.textContent=_ce.length;b.style.display=_ce.length>0?'flex':'none';}}
+    function _esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+    window._openBugReport=function(){var m=document.getElementById('bugReportModal');if(!m)return;document.getElementById('bugPageUrl').textContent=location.pathname;var log=document.getElementById('bugConsoleLog'),items=[];_ce.forEach(function(e){items.push('<div class="bug-ce">[ERROR] '+_esc(e.m)+'</div>');});_cw.forEach(function(w){items.push('<div class="bug-cw">[WARN] '+_esc(w.m)+'</div>');});log.innerHTML=items.length?items.join(''):'<span class="bug-cn">No console errors captured</span>';m.classList.add('active');var ta=document.getElementById('bugDescription');if(ta)ta.focus();};
+    window._submitBugReport=async function(){var desc=document.getElementById('bugDescription').value.trim();if(!desc){if(typeof toast==='function')toast('Please describe the issue','error');return;}var btn=document.getElementById('bugSubmitBtn');if(btn){btn.disabled=true;btn.textContent='Submitting...';}var SB='https://carltondb.72.60.67.2.sslip.io';var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';try{var r=await fetch(SB+'/rest/v1/user_bug_reports',{method:'POST',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({page_url:location.pathname,page_title:document.title,user_description:desc,console_errors:_ce,console_warnings:_cw,browser_info:{userAgent:navigator.userAgent,viewport:window.innerWidth+'x'+window.innerHeight,timestamp:new Date().toISOString()},priority:document.getElementById('bugPriority').value,status:'open'})});if(r.ok){var d=await r.json();if(typeof toast==='function')toast('Bug report '+d[0].report_id+' submitted!','success');document.getElementById('bugDescription').value='';document.getElementById('bugReportModal').classList.remove('active');_ce.length=0;_cw.length=0;_ub();}else{var e=await r.text();if(typeof toast==='function')toast('Failed: '+e,'error');}}catch(ex){if(typeof toast==='function')toast('Error: '+ex.message,'error');}finally{if(btn){btn.disabled=false;btn.textContent='Submit Bug Report';}}};
+    })();
+    </script>
+    <script src="/js/shared-nav.js"></script>
+</body>
+</html>

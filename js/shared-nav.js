@@ -40,6 +40,7 @@
         { label: 'Content', href: '/content', items: [
             { label: 'Publishing', href: '/content' },
             { label: 'Media', href: '/media' },
+            { label: 'Videos', href: '/video-inventory' },
         ]},
         { label: 'Partnerships', href: '/partnerships' },
         { label: 'BRAIN', href: '/brain', items: [
