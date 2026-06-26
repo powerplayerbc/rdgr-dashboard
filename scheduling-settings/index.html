@@ -74,8 +74,9 @@
     <div class="card p-4 space-y-3">
       <h2>Habit Timing</h2>
       <div class="text-xs" style="color:#8A95A9">Set when each habit should happen and how long it takes — the scheduler places it in that part of the day. Changes save instantly.</div>
+      <div class="text-xs" style="color:#8A95A9">Use the ↑↓ arrows to rank habits within the same time-of-day — the scheduler fills slots in that order, and anything that doesn't fit the window gets the next open time.</div>
       <div class="grid grid-cols-12 gap-2 text-xs font-semibold" style="color:#8A95A9">
-        <div class="col-span-5">Habit</div><div class="col-span-3">Time of day</div><div class="col-span-2">Mins</div><div class="col-span-2">At (opt)</div>
+        <div class="col-span-1">Order</div><div class="col-span-4">Habit</div><div class="col-span-3">Time of day</div><div class="col-span-2">Mins</div><div class="col-span-2">At (opt)</div>
       </div>
       <div id="habits" class="space-y-2"></div>
     </div>
@@ -120,16 +121,29 @@ async function load(){
 }
 
 const WINDOWS=['morning','afternoon','evening','any'];
+const WINRANK={morning:0,afternoon:1,evening:2,any:3};
+let HABITS=[];
 async function loadHabits(){
   const p=activeProfile();
-  const r=await fetch(`${SB}/rest/v1/brain_habits?user_id=eq.${p.id}&is_active=eq.true&order=preferred_window,sort_order&select=habit_id,name,preferred_window,duration_min,preferred_time`,{headers:hdr()});
+  const r=await fetch(`${SB}/rest/v1/brain_habits?user_id=eq.${p.id}&is_active=eq.true&select=habit_id,name,preferred_window,duration_min,preferred_time,sort_order`,{headers:hdr()});
   const habits=await r.json();
   if(!Array.isArray(habits)){document.getElementById('habits').innerHTML='<div class="text-xs" style="color:#EF476F">Could not load habits.</div>';return;}
-  document.getElementById('habits').innerHTML=habits.map(h=>{
+  HABITS=sortHabits(habits);
+  renderHabits();
+}
+function sortHabits(arr){
+  return arr.slice().sort((a,b)=> (WINRANK[a.preferred_window]-WINRANK[b.preferred_window]) || ((a.sort_order||0)-(b.sort_order||0)) || (a.name||'').localeCompare(b.name||''));
+}
+function renderHabits(){
+  document.getElementById('habits').innerHTML=HABITS.map((h,i)=>{
     const t=(h.preferred_time||'').slice(0,5);
     return `<div class="grid grid-cols-12 gap-2 items-center">
-      <div class="col-span-5 text-sm truncate" title="${(h.name||'').replace(/"/g,'&quot;')}">${(h.name||'').replace(/</g,'&lt;')}</div>
-      <select class="col-span-3" onchange="saveHabit('${h.habit_id}',{preferred_window:this.value})">
+      <div class="col-span-1 flex flex-col leading-none">
+        <button class="btn-sk" style="font-size:.6rem;padding:0 .3rem;border-radius:.3rem;background:rgba(255,255,255,.06);color:#8A95A9;cursor:pointer;border:none" onclick="moveHabit('${h.habit_id}',-1)">▲</button>
+        <button class="btn-sk" style="font-size:.6rem;padding:0 .3rem;border-radius:.3rem;background:rgba(255,255,255,.06);color:#8A95A9;cursor:pointer;border:none;margin-top:2px" onclick="moveHabit('${h.habit_id}',1)">▼</button>
+      </div>
+      <div class="col-span-4 text-sm truncate" title="${(h.name||'').replace(/"/g,'&quot;')}">${(h.name||'').replace(/</g,'&lt;')}</div>
+      <select class="col-span-3" onchange="saveHabit('${h.habit_id}',{preferred_window:this.value});HABITS.find(x=>x.habit_id==='${h.habit_id}').preferred_window=this.value;HABITS=sortHabits(HABITS);renderHabits();">
         ${WINDOWS.map(w=>`<option value="${w}" ${h.preferred_window===w?'selected':''}>${w}</option>`).join('')}
       </select>
       <input class="col-span-2" type="number" min="5" max="240" value="${h.duration_min||30}" onchange="saveHabit('${h.habit_id}',{duration_min:+this.value})">
@@ -137,8 +151,17 @@ async function loadHabits(){
     </div>`;
   }).join('') || '<div class="text-xs" style="color:#8A95A9">No active habits for this profile.</div>';
 }
-async function saveHabit(habit_id, patch){
+function moveHabit(id,dir){
+  const i=HABITS.findIndex(h=>h.habit_id===id); if(i<0) return;
+  const j=i+dir;                                   // adjacent row; only swap within same window
+  if(j<0||j>=HABITS.length||HABITS[j].preferred_window!==HABITS[i].preferred_window) return;
+  const tmp=HABITS[i]; HABITS[i]=HABITS[j]; HABITS[j]=tmp;
+  HABITS.forEach((h,idx)=>{ if(h.sort_order!==idx){ h.sort_order=idx; saveHabit(h.habit_id,{sort_order:idx},true); } });
+  renderHabits();
+}
+async function saveHabit(habit_id, patch, quiet){
   const r=await fetch(`${SB}/rest/v1/brain_habits?habit_id=eq.${habit_id}`,{method:'PATCH',headers:Object.assign(hdr(),{'Prefer':'return=minimal'}),body:JSON.stringify(patch)});
+  if(quiet) return;
   const s=document.getElementById('status'); s.textContent=r.ok?'Habit timing saved ✓':'Error '+r.status;
   setTimeout(()=>s.textContent='',1800);
 }
