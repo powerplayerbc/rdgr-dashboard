@@ -50,11 +50,13 @@
         { label: 'Partnerships', href: '/partnerships' },
         { label: 'BRAIN', href: '/brain', items: [
             { label: 'BRAIN', href: '/brain' },
+            { label: 'Today', href: '/today' },
             { label: 'DEFT', href: '/deft' },
             { label: 'Journal', href: '/journal' },
             { label: 'Pantry', href: '/pantry' },
             { label: 'Shopping', href: '/shopping' },
             { label: 'Meal Plan', href: '/meal-plan' },
+            { label: 'Schedule Settings', href: '/scheduling-settings' },
             { label: 'School', href: '/school' },
         ]},
         { label: 'Trading', href: '/trading-desk', role: 'admin', items: [

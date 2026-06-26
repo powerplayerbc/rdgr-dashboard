@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Today | RDGR Command Center</title>
+<link rel="preconnect" href="https://carltondb.72.60.67.2.sslip.io" crossorigin>
+<link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+<script>
+  try { if (JSON.parse(localStorage.getItem('rdgr-session')||'{}').authenticated) document.documentElement.classList.add('rdgr-authed'); } catch(e){}
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body{background:#0B0E14;color:#E8ECF1;font-family:'Outfit',system-ui,sans-serif;}
+  html.rdgr-authed .gate-overlay{display:none!important;}
+  .gate-overlay{position:fixed;inset:0;background:#0B0E14;z-index:9999;display:flex;align-items:center;justify-content:center;}
+  .blk{border:1px solid rgba(255,255,255,.08);border-radius:.6rem;background:rgba(255,255,255,.02);transition:.15s;}
+  .blk:hover{background:rgba(255,255,255,.04);}
+  .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;}
+  .btn{font-size:.7rem;font-weight:600;padding:.3rem .6rem;border-radius:.4rem;cursor:pointer;border:none;transition:.15s;}
+  .btn-ok{background:#06D6A0;color:#04231b;} .btn-ok:hover{filter:brightness(1.1);}
+  .btn-sk{background:rgba(255,255,255,.06);color:#8A95A9;} .btn-sk:hover{color:#fff;}
+  .btn-rm{background:rgba(239,71,111,.14);color:#EF476F;} .btn-rm:hover{background:rgba(239,71,111,.25);}
+  .pill{font-size:.6rem;font-weight:700;padding:.12rem .45rem;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;}
+  .confirmed{opacity:.55;}
+  .confirmed .blk-title{text-decoration:line-through;}
+  input,select{background:#10151f;border:1px solid rgba(255,255,255,.1);color:#E8ECF1;border-radius:.4rem;}
+</style>
+</head>
+<body class="min-h-screen">
+
+<div class="gate-overlay">
+  <div class="text-center">
+    <div class="text-2xl font-bold mb-4" style="color:#06D6A0">RDGR</div>
+    <input id="gatePw" type="password" placeholder="Password" class="px-3 py-2 rounded mb-2 block" onkeydown="if(event.key==='Enter')gate()">
+    <button onclick="gate()" class="btn btn-ok">Enter</button>
+    <div id="gateErr" class="text-xs mt-2" style="color:#EF476F"></div>
+  </div>
+</div>
+
+<div id="nav-root"></div>
+
+<main class="max-w-3xl mx-auto px-4 py-6">
+  <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
+    <div>
+      <h1 class="text-xl font-bold">Today's Plan</h1>
+      <div class="text-xs" style="color:#8A95A9" id="profileLabel">—</div>
+    </div>
+    <div class="flex items-center gap-2">
+      <input type="date" id="datePicker" class="px-2 py-1.5 text-sm">
+      <button class="btn btn-sk" onclick="regenerate()" id="regenBtn">↻ Regenerate</button>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-4 mb-4 text-sm">
+    <div class="flex items-center gap-1.5"><span style="color:#8A95A9">Points today:</span><span id="ptsToday" class="font-bold" style="color:#06D6A0">0</span></div>
+    <div class="flex items-center gap-1.5"><span style="color:#8A95A9">Done:</span><span id="doneCount" class="font-bold">0/0</span></div>
+  </div>
+
+  <div class="flex gap-2 mb-5">
+    <input id="cmdBox" placeholder='Tell the scheduler… e.g. "move my afternoon work earlier"' class="flex-1 px-3 py-2 text-sm">
+    <button class="btn btn-ok" onclick="sendCommand()">Send</button>
+  </div>
+
+  <div id="timeline" class="space-y-2"></div>
+  <div id="empty" class="hidden text-center py-12" style="color:#8A95A9">
+    No plan for this day yet. <button class="btn btn-ok ml-2" onclick="regenerate()">Generate it</button>
+  </div>
+  <div id="loading" class="text-center py-12" style="color:#8A95A9">Loading…</div>
+</main>
+
+<script src="/js/shared-nav.js"></script>
+<script>
+const SB='https://carltondb.72.60.67.2.sslip.io';
+const ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';
+const SCHED='https://n8n.carltonaiservices.com/webhook/brain-schedule';
+const COLORS={habit:'#118AB2',exercise:'#06D6A0',task:'#FFD166',goal:'#9B5DE5',meal:'#F4A261',client_call:'#EF476F',meeting:'#8A95A9',fixed:'#8A95A9',buffer:'#444',break:'#444'};
+const MOVABLE=new Set(['habit','exercise','task','goal']);
+
+function gate(){
+  const pw=document.getElementById('gatePw').value;
+  if(pw==='Advance1!'){ localStorage.setItem('rdgr-session',JSON.stringify({authenticated:true})); document.documentElement.classList.add('rdgr-authed'); init(); }
+  else document.getElementById('gateErr').textContent='Wrong password';
+}
+
+function activeProfile(){
+  try{ const p=JSON.parse(localStorage.getItem('rdgr-active-profile')||'{}'); if(p.id) return p; }catch(e){}
+  return {id:'00000000-0000-0000-0000-000000000001', name:'Bradford'};
+}
+function todayPT(){ return new Date().toLocaleDateString('en-CA',{timeZone:'America/Los_Angeles'}); }
+function fmtTime(iso){ return new Date(iso).toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour:'numeric',minute:'2-digit'}); }
+
+async function sched(operation, extra){
+  const r=await fetch(SCHED,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({operation},extra))});
+  return r.json();
+}
+
+let curBlocks=[];
+async function load(){
+  const p=activeProfile();
+  document.getElementById('profileLabel').textContent=p.name+' · '+document.getElementById('datePicker').value;
+  document.getElementById('loading').classList.remove('hidden');
+  document.getElementById('timeline').innerHTML='';
+  document.getElementById('empty').classList.add('hidden');
+  const d=await sched('get_day',{user_id:p.id,date:document.getElementById('datePicker').value});
+  document.getElementById('loading').classList.add('hidden');
+  curBlocks=(d&&d.blocks)||[];
+  render();
+}
+
+function render(){
+  const tl=document.getElementById('timeline'); tl.innerHTML='';
+  if(!curBlocks.length){ document.getElementById('empty').classList.remove('hidden'); document.getElementById('ptsToday').textContent='0'; document.getElementById('doneCount').textContent='0/0'; return; }
+  let pts=0, done=0, confirmable=0;
+  for(const b of curBlocks){
+    const col=COLORS[b.block_type]||'#8A95A9';
+    const isConfirmed=b.status==='confirmed';
+    const canConfirm=MOVABLE.has(b.block_type)||b.block_type==='meal';
+    if(canConfirm) confirmable++;
+    if(isConfirmed){ done++; pts+=Number(b.points_value||0); }
+    const div=document.createElement('div');
+    div.className='blk p-3 flex items-center gap-3 '+(isConfirmed?'confirmed':'');
+    div.innerHTML=`
+      <div class="dot" style="background:${col}"></div>
+      <div class="text-xs tabular-nums" style="color:#8A95A9;min-width:118px">${fmtTime(b.start_ts)} – ${fmtTime(b.end_ts)}</div>
+      <div class="flex-1 min-w-0">
+        <div class="blk-title text-sm font-medium truncate">${b.title.replace(/</g,'&lt;')}</div>
+        <div class="flex items-center gap-2 mt-0.5">
+          <span class="pill" style="background:${col}22;color:${col}">${b.block_type.replace('_',' ')}</span>
+          ${b.pinned?'<span class="pill" style="background:rgba(255,255,255,.06);color:#8A95A9">pinned</span>':''}
+          ${b.points_value?`<span class="text-xs" style="color:#06D6A0">+${b.points_value}</span>`:''}
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5">${actions(b,isConfirmed,canConfirm)}</div>`;
+    tl.appendChild(div);
+  }
+  document.getElementById('ptsToday').textContent=pts;
+  document.getElementById('doneCount').textContent=done+'/'+confirmable;
+}
+function actions(b,isConfirmed,canConfirm){
+  if(isConfirmed) return '<span class="text-xs" style="color:#06D6A0">✓ done</span>';
+  let h='';
+  if(canConfirm) h+=`<button class="btn btn-ok" onclick="confirmBlk('${b.block_id}')">Done</button>`;
+  if(!b.pinned) h+=`<button class="btn btn-rm" onclick="removeBlk('${b.block_id}')" title="Remove">✕</button>`;
+  return h||'<span class="text-xs" style="color:#8A95A9">—</span>';
+}
+
+async function confirmBlk(id){
+  const el=event.target; el.textContent='…'; el.disabled=true;
+  const r=await sched('confirm_block',{block_id:id});
+  if(r&&r.success){ const b=curBlocks.find(x=>x.block_id===id); if(b)b.status='confirmed'; render(); }
+  else { el.textContent='Done'; el.disabled=false; alert('Could not confirm'); }
+}
+async function removeBlk(id){
+  if(!confirm('Remove this block and reflow the day?')) return;
+  await sched('remove_block',{block_id:id});
+  await regenerate();
+}
+async function regenerate(){
+  const p=activeProfile(); const btn=document.getElementById('regenBtn'); const o=btn.textContent; btn.textContent='Planning…'; btn.disabled=true;
+  await sched('generate_day',{user_id:p.id,date:document.getElementById('datePicker').value});
+  btn.textContent=o; btn.disabled=false;
+  load();
+}
+async function sendCommand(){
+  const box=document.getElementById('cmdBox'); const text=box.value.trim(); if(!text) return;
+  box.disabled=true;
+  const p=activeProfile();
+  const r=await sched('parse_command',{user_id:p.id,date:document.getElementById('datePicker').value,text});
+  box.disabled=false; box.value='';
+  if(r&&r.message) alert(r.message);
+  load();
+}
+
+function init(){
+  document.getElementById('datePicker').value=todayPT();
+  document.getElementById('datePicker').addEventListener('change',load);
+  load();
+}
+if(JSON.parse(localStorage.getItem('rdgr-session')||'{}').authenticated) init();
+</script>
+</body>
+</html>

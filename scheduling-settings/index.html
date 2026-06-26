@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Scheduling Settings | RDGR</title>
+<link rel="preconnect" href="https://carltondb.72.60.67.2.sslip.io" crossorigin>
+<script>try{if(JSON.parse(localStorage.getItem('rdgr-session')||'{}').authenticated)document.documentElement.classList.add('rdgr-authed');}catch(e){}</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body{background:#0B0E14;color:#E8ECF1;font-family:'Outfit',system-ui,sans-serif;}
+  html.rdgr-authed .gate-overlay{display:none!important;}
+  .gate-overlay{position:fixed;inset:0;background:#0B0E14;z-index:9999;display:flex;align-items:center;justify-content:center;}
+  .card{border:1px solid rgba(255,255,255,.08);border-radius:.7rem;background:rgba(255,255,255,.02);}
+  label{font-size:.72rem;color:#8A95A9;display:block;margin-bottom:.2rem;}
+  input,select{background:#10151f;border:1px solid rgba(255,255,255,.1);color:#E8ECF1;border-radius:.4rem;padding:.4rem .6rem;font-size:.85rem;width:100%;}
+  .btn{font-weight:600;padding:.45rem .9rem;border-radius:.45rem;cursor:pointer;border:none;}
+  .btn-ok{background:#06D6A0;color:#04231b;} h2{font-size:.8rem;font-weight:700;color:#06D6A0;text-transform:uppercase;letter-spacing:.05em;}
+</style>
+</head>
+<body class="min-h-screen">
+<div class="gate-overlay"><div class="text-center">
+  <div class="text-2xl font-bold mb-4" style="color:#06D6A0">RDGR</div>
+  <input id="gatePw" type="password" placeholder="Password" class="mb-2" style="width:200px" onkeydown="if(event.key==='Enter')gate()">
+  <div><button onclick="gate()" class="btn btn-ok">Enter</button></div>
+  <div id="gateErr" class="text-xs mt-2" style="color:#EF476F"></div>
+</div></div>
+<div id="nav-root"></div>
+
+<main class="max-w-2xl mx-auto px-4 py-6">
+  <div class="flex items-center justify-between mb-5">
+    <h1 class="text-xl font-bold">Scheduling Settings</h1>
+    <div class="text-xs" id="who" style="color:#8A95A9">—</div>
+  </div>
+
+  <div class="space-y-5" id="form">
+    <div class="card p-4 space-y-3">
+      <h2>Work Day</h2>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label>Wake</label><input type="time" id="wake_time"></div>
+        <div><label>Sleep</label><input type="time" id="sleep_time"></div>
+        <div><label>Work start</label><input type="time" id="work_start"></div>
+        <div><label>Work end</label><input type="time" id="work_end"></div>
+        <div><label>Buffer between blocks (min)</label><input type="number" id="buffer" min="0" max="60"></div>
+        <div><label>Auto-schedule each night</label><select id="auto"><option value="true">On</option><option value="false">Off</option></select></div>
+      </div>
+    </div>
+
+    <div class="card p-4 space-y-3">
+      <h2>Fixed Meal Anchors</h2>
+      <div id="anchors" class="space-y-2"></div>
+      <div class="text-xs" style="color:#8A95A9">Meals stay at these times; the scheduler slides other work around them (and around real commitments).</div>
+    </div>
+
+    <div class="card p-4 space-y-3">
+      <h2>Public Booking (Calendly)</h2>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label>Meeting name</label><input id="mt_name"></div>
+        <div><label>Duration (min)</label><input type="number" id="mt_dur"></div>
+        <div><label>Hours start (24h)</label><input type="number" id="mt_hstart" min="0" max="23"></div>
+        <div><label>Hours end (24h)</label><input type="number" id="mt_hend" min="0" max="23"></div>
+        <div><label>Buffer before (min)</label><input type="number" id="mt_bb"></div>
+        <div><label>Buffer after (min)</label><input type="number" id="mt_ba"></div>
+        <div><label>Max bookings / day</label><input type="number" id="mt_max"></div>
+        <div><label>Min notice (hours)</label><input type="number" id="min_notice"></div>
+        <div><label>Booking horizon (days)</label><input type="number" id="horizon"></div>
+      </div>
+      <div><label>Available weekdays</label>
+        <div class="flex gap-2 flex-wrap" id="days"></div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button class="btn btn-ok" onclick="save()" id="saveBtn">Save Settings</button>
+      <span id="status" class="text-sm" style="color:#06D6A0"></span>
+    </div>
+  </div>
+</main>
+
+<script src="/js/shared-nav.js"></script>
+<script>
+const SB='https://carltondb.72.60.67.2.sslip.io';
+const ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';
+const DAYNAMES=[['1','Mon'],['2','Tue'],['3','Wed'],['4','Thu'],['5','Fri'],['6','Sat'],['7','Sun']];
+let row=null, anchors=[];
+
+function gate(){const pw=document.getElementById('gatePw').value;if(pw==='Advance1!'){localStorage.setItem('rdgr-session',JSON.stringify({authenticated:true}));document.documentElement.classList.add('rdgr-authed');load();}else document.getElementById('gateErr').textContent='Wrong password';}
+function activeProfile(){try{const p=JSON.parse(localStorage.getItem('rdgr-active-profile')||'{}');if(p.id)return p;}catch(e){}return {id:'00000000-0000-0000-0000-000000000001',name:'Bradford'};}
+function hdr(){return {'apikey':ANON,'Authorization':'Bearer '+ANON,'Content-Type':'application/json'};}
+
+async function load(){
+  const p=activeProfile(); document.getElementById('who').textContent=p.name;
+  const r=await fetch(`${SB}/rest/v1/scheduling_settings?user_id=eq.${p.id}`,{headers:hdr()});
+  const rows=await r.json(); row=rows[0];
+  if(!row){ document.getElementById('status').textContent='No settings row for this profile.'; return; }
+  set('wake_time',(row.wake_time||'06:00').slice(0,5)); set('sleep_time',(row.sleep_time||'22:00').slice(0,5));
+  set('work_start',(row.work_start||'09:00').slice(0,5)); set('work_end',(row.work_end||'17:00').slice(0,5));
+  set('buffer',(row.buffers&&row.buffers.default_min)??10);
+  document.getElementById('auto').value=String(row.auto_schedule_enabled!==false);
+  anchors=Array.isArray(row.fixed_anchors)?row.fixed_anchors:[];
+  renderAnchors();
+  const b=row.booking||{}; const mt=(b.meeting_types||[])[0]||{};
+  set('mt_name',mt.name||'Discovery Call'); set('mt_dur',mt.duration||30);
+  set('mt_hstart',(mt.hours&&mt.hours.start)??10); set('mt_hend',(mt.hours&&mt.hours.end)??16);
+  set('mt_bb',mt.buffer_before??10); set('mt_ba',mt.buffer_after??10); set('mt_max',mt.max_per_day??4);
+  set('min_notice',b.min_notice_hours??12); set('horizon',b.horizon_days??21);
+  const sel=new Set((mt.days||[1,2,3,4,5]).map(String));
+  document.getElementById('days').innerHTML=DAYNAMES.map(([v,n])=>`<label class="flex items-center gap-1 text-xs" style="color:#E8ECF1"><input type="checkbox" value="${v}" ${sel.has(v)?'checked':''} style="width:auto"> ${n}</label>`).join('');
+}
+function set(id,v){document.getElementById(id).value=v;}
+function get(id){return document.getElementById(id).value;}
+function renderAnchors(){
+  document.getElementById('anchors').innerHTML=anchors.map((a,i)=>`
+    <div class="grid grid-cols-3 gap-2 items-center">
+      <input value="${(a.title||'').replace(/"/g,'&quot;')}" onchange="anchors[${i}].title=this.value" placeholder="Meal">
+      <input type="time" value="${a.time||'12:00'}" onchange="anchors[${i}].time=this.value">
+      <input type="number" value="${a.duration_min||30}" onchange="anchors[${i}].duration_min=+this.value" placeholder="min">
+    </div>`).join('');
+}
+
+async function save(){
+  const days=[...document.querySelectorAll('#days input:checked')].map(c=>+c.value);
+  const patch={
+    wake_time:get('wake_time'), sleep_time:get('sleep_time'),
+    work_start:get('work_start'), work_end:get('work_end'),
+    auto_schedule_enabled:get('auto')==='true',
+    buffers:Object.assign({},row.buffers||{},{default_min:+get('buffer')}),
+    fixed_anchors:anchors,
+    booking:{
+      meeting_types:[{slug:((row.booking||{}).meeting_types||[{}])[0].slug||'discovery-call', name:get('mt_name'),
+        duration:+get('mt_dur'), buffer_before:+get('mt_bb'), buffer_after:+get('mt_ba'),
+        days:days.length?days:[1,2,3,4,5], hours:{start:+get('mt_hstart'),end:+get('mt_hend')}, max_per_day:+get('mt_max')}],
+      min_notice_hours:+get('min_notice'), horizon_days:+get('horizon')
+    },
+    updated_by:'scheduling-settings-ui'
+  };
+  const p=activeProfile();
+  document.getElementById('saveBtn').disabled=true; document.getElementById('status').textContent='Saving…';
+  const r=await fetch(`${SB}/rest/v1/scheduling_settings?user_id=eq.${p.id}`,{method:'PATCH',headers:Object.assign(hdr(),{'Prefer':'return=minimal'}),body:JSON.stringify(patch)});
+  document.getElementById('saveBtn').disabled=false;
+  document.getElementById('status').textContent=r.ok?'Saved ✓':'Error '+r.status;
+  setTimeout(()=>document.getElementById('status').textContent='',2500);
+}
+if(JSON.parse(localStorage.getItem('rdgr-session')||'{}').authenticated) load();
+</script>
+</body>
+</html>
