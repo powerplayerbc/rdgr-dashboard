@@ -71,6 +71,15 @@
       </div>
     </div>
 
+    <div class="card p-4 space-y-3">
+      <h2>Habit Timing</h2>
+      <div class="text-xs" style="color:#8A95A9">Set when each habit should happen and how long it takes — the scheduler places it in that part of the day. Changes save instantly.</div>
+      <div class="grid grid-cols-12 gap-2 text-xs font-semibold" style="color:#8A95A9">
+        <div class="col-span-5">Habit</div><div class="col-span-3">Time of day</div><div class="col-span-2">Mins</div><div class="col-span-2">At (opt)</div>
+      </div>
+      <div id="habits" class="space-y-2"></div>
+    </div>
+
     <div class="flex items-center gap-3">
       <button class="btn btn-ok" onclick="save()" id="saveBtn">Save Settings</button>
       <span id="status" class="text-sm" style="color:#06D6A0"></span>
@@ -107,6 +116,31 @@ async function load(){
   set('min_notice',b.min_notice_hours??12); set('horizon',b.horizon_days??21);
   const sel=new Set((mt.days||[1,2,3,4,5]).map(String));
   document.getElementById('days').innerHTML=DAYNAMES.map(([v,n])=>`<label class="flex items-center gap-1 text-xs" style="color:#E8ECF1"><input type="checkbox" value="${v}" ${sel.has(v)?'checked':''} style="width:auto"> ${n}</label>`).join('');
+  loadHabits();
+}
+
+const WINDOWS=['morning','afternoon','evening','any'];
+async function loadHabits(){
+  const p=activeProfile();
+  const r=await fetch(`${SB}/rest/v1/brain_habits?user_id=eq.${p.id}&is_active=eq.true&order=preferred_window,sort_order&select=habit_id,name,preferred_window,duration_min,preferred_time`,{headers:hdr()});
+  const habits=await r.json();
+  if(!Array.isArray(habits)){document.getElementById('habits').innerHTML='<div class="text-xs" style="color:#EF476F">Could not load habits.</div>';return;}
+  document.getElementById('habits').innerHTML=habits.map(h=>{
+    const t=(h.preferred_time||'').slice(0,5);
+    return `<div class="grid grid-cols-12 gap-2 items-center">
+      <div class="col-span-5 text-sm truncate" title="${(h.name||'').replace(/"/g,'&quot;')}">${(h.name||'').replace(/</g,'&lt;')}</div>
+      <select class="col-span-3" onchange="saveHabit('${h.habit_id}',{preferred_window:this.value})">
+        ${WINDOWS.map(w=>`<option value="${w}" ${h.preferred_window===w?'selected':''}>${w}</option>`).join('')}
+      </select>
+      <input class="col-span-2" type="number" min="5" max="240" value="${h.duration_min||30}" onchange="saveHabit('${h.habit_id}',{duration_min:+this.value})">
+      <input class="col-span-2" type="time" value="${t}" onchange="saveHabit('${h.habit_id}',{preferred_time:this.value||null})">
+    </div>`;
+  }).join('') || '<div class="text-xs" style="color:#8A95A9">No active habits for this profile.</div>';
+}
+async function saveHabit(habit_id, patch){
+  const r=await fetch(`${SB}/rest/v1/brain_habits?habit_id=eq.${habit_id}`,{method:'PATCH',headers:Object.assign(hdr(),{'Prefer':'return=minimal'}),body:JSON.stringify(patch)});
+  const s=document.getElementById('status'); s.textContent=r.ok?'Habit timing saved ✓':'Error '+r.status;
+  setTimeout(()=>s.textContent='',1800);
 }
 function set(id,v){document.getElementById(id).value=v;}
 function get(id){return document.getElementById(id).value;}
