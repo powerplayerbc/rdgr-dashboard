@@ -516,7 +516,7 @@
             const tc = TYPE_COLORS[c.clip_type] || { bg:'rgba(138,149,169,0.12)', color:'#8A95A9', label:c.clip_type };
             const title = esc(c.title || c.idea || 'Untitled');
             const dur = fmtDur(c.duration_sec);
-            const processing = c.status === 'pending_cut';
+            const processing = c.status === 'pending_cut' || c.status === 'cutting';
             const thumb = c.thumbnail_url
                 ? `<img src="${esc(c.thumbnail_url)}" alt="" loading="lazy" onerror="this.remove();">`
                 : '';
