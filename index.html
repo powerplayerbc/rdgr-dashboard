@@ -2078,7 +2078,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     // ═══════════════════════════════════════
     // DATA FETCHING
     // ═══════════════════════════════════════
-    async function fetchJSON(url, body, { retries = 0, backoff = 2000 } = {}) {
+    async function fetchJSON(url, body, { retries = 0, backoff = 2000, silent = false } = {}) {
         try {
             const res = await fetch(url, {
                 method: 'POST',
@@ -2087,15 +2087,18 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             });
             if (res.status >= 500 && retries < 2) {
                 await new Promise(r => setTimeout(r, backoff));
-                return fetchJSON(url, body, { retries: retries + 1, backoff: backoff * 2 });
+                return fetchJSON(url, body, { retries: retries + 1, backoff: backoff * 2, silent });
             }
             return await res.json();
         } catch (err) {
             if (retries < 1) {
                 await new Promise(r => setTimeout(r, 2000));
-                return fetchJSON(url, body, { retries: retries + 1, backoff });
+                return fetchJSON(url, body, { retries: retries + 1, backoff, silent });
             }
-            console.error('Fetch error:', url, err);
+            // `silent` callers have a working fallback path, so a failed fetch here is
+            // expected and not an actionable bug — log at debug level so it never
+            // surfaces in the bug-report widget (which captures error/warn only).
+            (silent ? console.debug : console.error)('Fetch error:', url, err);
             return null;
         }
     }
@@ -2207,18 +2210,16 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     }
 
     async function fetchRevenue() {
-        // Suppress console.error during revenue fetch — the Supabase fallback
-        // handles failures gracefully, so webhook errors are not actionable bugs.
-        const _origError = console.error;
-        console.error = console.warn;
-        const webhook = await fetchJSON(API.revenue, { brand_id: 'carlton' });
-        console.error = _origError;
+        // The carltondb fallback below handles webhook failures gracefully, so a
+        // failed revenue-webhook fetch is not an actionable bug — fetch it silently
+        // (errors logged at debug level, never captured by the bug-report widget).
+        const webhook = await fetchJSON(API.revenue, { brand_id: 'carlton' }, { silent: true });
 
         if (webhook && webhook.success && webhook.metrics) {
             renderRevenue(webhook, 'webhook');
             return;
         }
-        // Fallback: direct Supabase read (original behavior)
+        // Fallback: direct carltondb read (original behavior)
         const result = await supabaseSelect('autonomous_financial_snapshots', 'order=snapshot_date.desc&limit=1');
         renderRevenue((Array.isArray(result) && result[0]) ? result[0] : null, 'supabase');
     }
@@ -4028,6 +4029,6 @@ finally{if(btn){btn.disabled=false;btn.textContent='Submit Bug Report';}}
 };
 })();
 </script>
-<script src="/js/shared-nav.js"></script>
+<script src="/js/shared-nav.js?v=2026-06-27"></script>
 </body>
 </html>

@@ -659,7 +659,11 @@ function fcBuildMulPhaseHeader() {
 
     const p2Unlocked = p1Done >= p1Total;
     const p2Total = fcCountPhaseTotal(2);
-    const p2Done = p2Unlocked ? fcCountPhaseProficient(2) : 0;
+    // Count actual mastered 13-20 facts regardless of unlock status so the
+    // percentage matches the mastery grid below (UBR-0206). The `unlocked` flag
+    // still gates whether the student can practice Phase 2, but progress shown
+    // must reflect facts they've genuinely mastered.
+    const p2Done = fcCountPhaseProficient(2);
     const p2Pct = p2Total > 0 ? Math.round((p2Done / p2Total) * 100) : 0;
 
     const p3Unlocked = p2Unlocked && p2Done >= p2Total;

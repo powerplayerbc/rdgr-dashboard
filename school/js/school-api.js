@@ -1,6 +1,16 @@
 // ═══════════════════════════════════════
-// School API Layer — Supabase & Bridge Helpers
+// School API Layer — carltondb (PostgREST) & Bridge Helpers
 // ═══════════════════════════════════════
+
+// Error objects serialize to "{}" via JSON.stringify (no enumerable props), which
+// made the bug-report widget show useless "write error: {}" messages. Render a
+// readable string instead so connectivity failures (e.g. "TypeError: Failed to
+// fetch" from antivirus HTTPS scanning / network blocks) are diagnosable (UBR-0198).
+function _errStr(err) {
+    if (!err) return 'unknown error';
+    if (err.name || err.message) return (err.name || 'Error') + ': ' + (err.message || '');
+    try { return String(err); } catch (e) { return 'unserializable error'; }
+}
 
 async function supabaseSelect(table, query = '') {
     const url = `${SUPABASE_URL}/rest/v1/${table}?${query}`;
@@ -8,9 +18,9 @@ async function supabaseSelect(table, query = '') {
         const res = await fetch(url, {
             headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
         });
-        if (!res.ok) { console.error('Supabase error:', res.status, await res.text()); return null; }
+        if (!res.ok) { console.error('carltondb read error:', table, res.status, await res.text()); return null; }
         return await res.json();
-    } catch (err) { console.error('Supabase fetch error:', table, err); return null; }
+    } catch (err) { console.error('carltondb read error (network):', table, _errStr(err)); return null; }
 }
 
 async function supabaseWrite(table, method, body, matchQuery = '') {
@@ -26,10 +36,10 @@ async function supabaseWrite(table, method, body, matchQuery = '') {
             },
             body: method === 'DELETE' ? undefined : JSON.stringify(body)
         });
-        if (!res.ok) { console.error('Supabase write error:', res.status, await res.text()); return null; }
+        if (!res.ok) { console.error('carltondb write error:', table, res.status, await res.text()); return null; }
         const text = await res.text();
         return text ? JSON.parse(text) : true;
-    } catch (err) { console.error('Supabase write error:', err); return null; }
+    } catch (err) { console.error('carltondb write error (network):', table, _errStr(err)); return null; }
 }
 
 async function supabaseUpsert(table, body, onConflict = '') {
@@ -48,10 +58,10 @@ async function supabaseUpsert(table, body, onConflict = '') {
             },
             body: JSON.stringify(body)
         });
-        if (!res.ok) { console.error('Supabase upsert error:', res.status, await res.text()); return null; }
+        if (!res.ok) { console.error('carltondb upsert error:', table, res.status, await res.text()); return null; }
         const text = await res.text();
         return text ? JSON.parse(text) : true;
-    } catch (err) { console.error('Supabase upsert error:', err); return null; }
+    } catch (err) { console.error('carltondb upsert error (network):', table, _errStr(err)); return null; }
 }
 
 // UBR-0177: daily activity completion (vocab/typing/flashcards) was tracked in

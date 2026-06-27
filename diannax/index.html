@@ -1740,10 +1740,16 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             content: text,
             source_message_id: messageId,
         };
-        // Optional fields
+        // Email requires an explicit, valid recipient. Previously this was
+        // "optional" and an empty value flowed through as a missing recipient,
+        // which the email backend turned into a placeholder address (UBR-0192).
         if (target === 'email') {
-            const to = prompt('Send to email address (optional):', '');
-            if (to && to.trim()) params.to = to.trim();
+            const to = (prompt('Send to email address:', 'dianna@diannacarlton.com') || '').trim();
+            if (!to || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) {
+                toast('Enter a valid email address to send to.', 'error');
+                return;
+            }
+            params.to = to;
         }
         const origLabel = btnEl ? btnEl.textContent : '';
         if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Working...'; }
@@ -1759,12 +1765,22 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             if (result && result.success) {
                 toast(result.message || 'Done.', 'success');
                 const url = result.document_url || (result.result && result.result.document_url);
+                // Follow-up toast: for handoffs that land somewhere the user needs to
+                // navigate to, give an explicit link so they can confirm it arrived
+                // (UBR-0197: BRAIN tasks were created but the user couldn't find them).
+                let followUrl = url, followLabel = null;
                 if (url) {
+                    followLabel = (target === 'google_doc') ? 'Open in Google Drive' : ('Open ' + target.replace('_', ' '));
+                } else if (target === 'brain_task') {
+                    followUrl = '/brain';
+                    followLabel = 'View it in BRAIN (today’s tasks) →';
+                }
+                if (followUrl && followLabel) {
                     const c = document.getElementById('toasts');
                     const el = document.createElement('div');
                     el.className = 'toast toast-success';
-                    const linkLabel = (target === 'google_doc') ? 'Open in Google Drive' : ('Open ' + target.replace('_',' '));
-                    el.innerHTML = `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;word-break:break-all;">${esc(linkLabel)} &rarr;</a>`;
+                    const external = /^https?:/.test(followUrl);
+                    el.innerHTML = `<a href="${esc(followUrl)}"${external ? ' target="_blank" rel="noopener noreferrer"' : ''} style="color:inherit;text-decoration:underline;word-break:break-all;">${esc(followLabel)}</a>`;
                     c.appendChild(el);
                     setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 10000);
                 }
@@ -2212,6 +2228,6 @@ finally{if(btn){btn.disabled=false;btn.textContent='Submit Bug Report';}}
 };
 })();
 </script>
-<script src="/js/shared-nav.js"></script>
+<script src="/js/shared-nav.js?v=2026-06-27"></script>
 </body>
 </html>

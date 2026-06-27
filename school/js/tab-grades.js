@@ -57,7 +57,10 @@ async function refreshGrades() {
     // stale).
     // UBR-0164: also fetch the daily-task summary for the new stats cards.
     // UBR-0169: also pull motivation events so the teacher can see engagement.
-    const [assignments, grades, lessons, answers, dailySummary, motivationEvents, vocabQuizzes] = await Promise.all([
+    // UBR-0202: typing data is shown over the whole quarter (the old 7-day window
+    // hid practice that was >1 week old). Compute a quarter-start date.
+    const _qStart = gradesQuarterStart();
+    const [assignments, grades, lessons, answers, dailySummary, motivationEvents, vocabQuizzes, typingSessions, projects, weightRows] = await Promise.all([
         supabaseSelect('school_assignments',
             `student_id=eq.${viewUserId}&order=assigned_date.desc&select=*`
         ),
@@ -77,9 +80,27 @@ async function refreshGrades() {
         // UBR-0180/0178: vocab quiz attempts for the teacher review + grade-adjust tool.
         supabaseSelect('school_vocab_quizzes',
             `student_id=eq.${viewUserId}&select=*&order=created_at.desc`
+        ),
+        // UBR-0202: all typing sessions this quarter (for the quarter card + WPM/accuracy chart).
+        supabaseSelect('school_typing_sessions',
+            `student_id=eq.${viewUserId}&created_at=gte.${_qStart}&select=wpm,accuracy,duration_secs,created_at&order=created_at`
+        ),
+        // UBR-0199: external projects + grade-category weights for the weighted overall grade.
+        supabaseSelect('school_projects',
+            `student_id=eq.${viewUserId}&select=*&order=assigned_date.desc`
+        ),
+        supabaseSelect('school_grade_weights',
+            `or=(student_id.eq.${viewUserId},student_id.eq.*)&select=student_id,category,weight`
         )
     ]);
     gradesData.vocabQuizzes = vocabQuizzes || [];
+    gradesData.typingSessions = typingSessions || [];
+    gradesData.projects = projects || [];
+    // Per-student weights override the global '*' defaults.
+    const _w = { lessons: 50, spelling: 20, typing: 10, history: 10, projects: 10 };
+    (weightRows || []).filter(r => r.student_id === '*').forEach(r => { _w[r.category] = Number(r.weight); });
+    (weightRows || []).filter(r => r.student_id === viewUserId).forEach(r => { _w[r.category] = Number(r.weight); });
+    gradesData.gradeWeights = _w;
 
     // Per-assignment school_grades (one row per assignment)
     gradesData.grades = {};
@@ -167,17 +188,23 @@ async function refreshGrades() {
             if (pct >= 90) correctCount++;
             if (an.check_status === 'checking' || an.check_status === 'pending') pendingCount++;
         }
-        const pctOut = possible > 0 ? (earned / possible) * 100 : 0;
+        // UBR-0204: early-submission bonus. If the assignment is flagged early
+        // (auto-detected from due_date vs completed_at, or set by the teacher),
+        // add the bonus % to the earned points, capped at the possible total.
+        const bonusPct = isAssignmentEarly(a) ? (Number(a.early_bonus_pct) || 0) : 0;
+        const earnedWithBonus = possible > 0 ? Math.min(possible, earned + (bonusPct / 100) * possible) : earned;
+        const pctOut = possible > 0 ? (earnedWithBonus / possible) * 100 : 0;
         const letter = pctOut >= 90 ? 'A' : pctOut >= 80 ? 'B' : pctOut >= 70 ? 'C' : pctOut >= 60 ? 'D' : 'F';
         gradesData.recomputed[a.assignment_id] = {
-            earned: Math.round(earned * 100) / 100,
+            earned: Math.round(earnedWithBonus * 100) / 100,
             possible: Math.round(possible * 100) / 100,
             pct: Math.round(pctOut * 100) / 100,
             letter,
             qCount,
             correctCount,
             struckCount,
-            pendingCount
+            pendingCount,
+            earlyBonus: bonusPct
         };
     }
 
@@ -192,6 +219,99 @@ function renderGradesEmpty(msg) {
             </div>
         </div>
     `;
+}
+
+// =======================================
+// QUARTER + WEIGHTED-CATEGORY GRADING (UBR-0199 / UBR-0202)
+// =======================================
+// Quarter start used for typing aggregates/chart. Aligns with the school
+// semester window used elsewhere; falls back to a rolling 90-day window.
+const GRADES_QUARTER_START = '2026-05-04';
+function gradesQuarterStart() {
+    try {
+        const rolling = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);
+        // Use the later of the fixed semester start and the rolling window so we
+        // never pull an unbounded history, but always cover the current quarter.
+        return GRADES_QUARTER_START > rolling ? rolling : GRADES_QUARTER_START;
+    } catch (e) { return GRADES_QUARTER_START; }
+}
+
+// UBR-0204: an assignment counts as "early" if the teacher explicitly flagged it,
+// or it was completed on/before its due date.
+function isAssignmentEarly(a) {
+    if (!a) return false;
+    if (a.is_early === true) return true;
+    if (a.due_date && a.completed_at) {
+        try { return (a.completed_at.slice(0, 10) <= a.due_date); } catch (e) { return false; }
+    }
+    return false;
+}
+
+// UBR-0204: teacher sets/adjusts the early-submission bonus on an assignment.
+async function setEarlyBonus(assignmentId) {
+    if (!isTeacher()) return;
+    const a = (gradesData.assignments || []).find(x => x.assignment_id === assignmentId);
+    if (!a) return;
+    const cur = Number(a.early_bonus_pct) || 0;
+    const inp = prompt('Early-submission bonus for this assignment (% added to the score, 0 to clear):', String(cur || 5));
+    if (inp == null) return;
+    const pct = Number(inp);
+    if (!(pct >= 0) || pct > 50) { toast('Enter a bonus between 0 and 50', 'error'); return; }
+    a.early_bonus_pct = pct;
+    a.is_early = pct > 0 ? true : isAssignmentEarly(a);
+    const res = await supabaseWrite('school_assignments', 'PATCH',
+        { early_bonus_pct: pct, is_early: a.is_early }, `assignment_id=eq.${encodeURIComponent(assignmentId)}`);
+    if (res === null) { toast('Could not save bonus', 'error'); return; }
+    toast(pct > 0 ? `Early bonus set to +${pct}%` : 'Early bonus cleared', 'success');
+    refreshGrades();
+}
+
+// Derive a single typing "grade" from accuracy + speed-vs-target. Accuracy is
+// weighted higher (kids should value correctness); speed is measured against a
+// gentle 40 WPM target and capped at 100%.
+function typingGradeFromSessions(sessions) {
+    if (!sessions || !sessions.length) return null;
+    const avgAcc = sessions.reduce((s, t) => s + (Number(t.accuracy) || 0), 0) / sessions.length;
+    const avgWpm = sessions.reduce((s, t) => s + (Number(t.wpm) || 0), 0) / sessions.length;
+    return Math.round(0.7 * avgAcc + 0.3 * Math.min(100, (avgWpm / 40) * 100));
+}
+
+// Compute each grade category's percentage and the weighted overall. Categories
+// with no data are excluded so an empty category (e.g. no projects yet) doesn't
+// drag the grade down — the remaining weights re-normalize.
+function calcCategoryGrades() {
+    const lessons = calcGradeStats();
+    const lessonsPct = lessons.assignmentCount > 0 ? lessons.overallPct : null;
+
+    const vq = (gradesData.vocabQuizzes || []).filter(q => q.percentage != null);
+    const spellingPct = vq.length ? (vq.reduce((s, q) => s + Number(q.percentage), 0) / vq.length) : null;
+
+    const typingPct = typingGradeFromSessions(gradesData.typingSessions);
+
+    const hist = (gradesData.dailySummary && gradesData.dailySummary.history) || null;
+    let historyPct = null;
+    if (hist) {
+        if (hist.total_available) historyPct = Math.round((Number(hist.reads_this_semester || 0) / Number(hist.total_available)) * 100);
+        else if (hist.pct_read != null) historyPct = Number(hist.pct_read);
+    }
+
+    const pr = (gradesData.projects || []).filter(p => p.status === 'graded' && Number(p.total_points) > 0 && p.earned_points != null);
+    const projectsPct = pr.length
+        ? Math.round(pr.reduce((s, p) => s + (Number(p.earned_points) / Number(p.total_points)) * 100, 0) / pr.length)
+        : null;
+
+    const cats = { lessons: lessonsPct, spelling: spellingPct, typing: typingPct, history: historyPct, projects: projectsPct };
+    const weights = gradesData.gradeWeights || { lessons: 50, spelling: 20, typing: 10, history: 10, projects: 10 };
+
+    let wSum = 0, acc = 0;
+    Object.keys(cats).forEach(k => {
+        if (cats[k] == null) return;
+        const w = Number(weights[k] || 0);
+        if (w <= 0) return;
+        wSum += w; acc += cats[k] * w;
+    });
+    const overallPct = wSum > 0 ? (acc / wSum) : (lessonsPct || 0);
+    return { cats, weights, overallPct: Math.round(overallPct * 10) / 10, lessons };
 }
 
 // =======================================
@@ -332,11 +452,18 @@ function renderGrades() {
     const container = document.getElementById('grades-container');
     if (!container) return;
 
-    const stats = calcGradeStats();
-    const letterOverall = getLetterGrade(stats.overallPct);
+    // UBR-0199: overall grade is now a weighted blend of categories (lessons,
+    // spelling, typing, history, projects), not lessons alone.
+    const cat = calcCategoryGrades();
+    const stats = Object.assign({}, cat.lessons, { overallPct: cat.overallPct });
+    const letterOverall = getLetterGrade(cat.overallPct);
 
-    // Empty state
-    if (!gradesData.assignments.length) {
+    // Empty state — only when there is genuinely nothing across ALL categories.
+    const hasAnyData = gradesData.assignments.length
+        || (gradesData.vocabQuizzes || []).length
+        || (gradesData.typingSessions || []).length
+        || (gradesData.projects || []).length;
+    if (!hasAnyData) {
         container.innerHTML = `
             <div style="text-align: center; padding: 60px 20px; color: var(--deft-txt-3);">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -357,12 +484,46 @@ function renderGrades() {
 
     container.innerHTML = `
         ${renderStatsRow(stats, letterOverall)}
+        ${renderCategoryBreakdown(cat)}
         ${renderMotivationSummaryCard()}
         <div id="grades-assignment-list" style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
             ${gradesData.assignments.map(a => renderAssignmentAccordion(a)).join('')}
         </div>
         ${renderDailyTaskStats()}
         ${renderVocabQuizReview()}
+    `;
+}
+
+// UBR-0199: category breakdown showing how the weighted overall grade is built.
+function renderCategoryBreakdown(cat) {
+    const LABELS = { lessons: '📘 Lessons', spelling: '📚 Spelling', typing: '⌨️ Typing', history: '📜 History', projects: '🎒 Projects' };
+    const order = ['lessons', 'spelling', 'typing', 'history', 'projects'];
+    const rows = order.map(k => {
+        const pct = cat.cats[k];
+        const w = Number(cat.weights[k] || 0);
+        const has = pct != null;
+        const lg = has ? getLetterGrade(pct) : null;
+        const valTxt = has ? (Math.round(pct) + '% ' + lg.grade) : 'No data yet';
+        const valColor = has ? lg.color : 'var(--deft-txt-3)';
+        const barPct = has ? Math.max(2, Math.min(100, pct)) : 0;
+        return `
+            <div style="display:flex;align-items:center;gap:10px;padding:6px 0;">
+                <div style="width:96px;font-size:12px;color:var(--deft-txt-2);">${LABELS[k]}</div>
+                <div style="width:54px;font-size:10px;color:var(--deft-txt-3);">w: ${w}%</div>
+                <div style="flex:1;height:8px;border-radius:4px;background:var(--deft-border);overflow:hidden;">
+                    <div style="height:100%;width:${barPct}%;background:${valColor};border-radius:4px;"></div>
+                </div>
+                <div style="width:84px;text-align:right;font-size:12px;font-weight:600;color:${valColor};">${valTxt}</div>
+            </div>`;
+    }).join('');
+    return `
+        <div style="margin-top:16px;background:var(--deft-surface-el);border:1px solid var(--deft-border);border-radius:12px;padding:16px 20px;">
+            <div style="font-size:13px;font-weight:600;color:var(--deft-txt-2);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+                <span>Grade Breakdown (weighted)</span>
+                <span style="font-size:11px;color:var(--deft-txt-3);font-weight:500;">Empty categories are excluded</span>
+            </div>
+            ${rows}
+        </div>
     `;
 }
 
@@ -398,6 +559,10 @@ function renderVocabQuizReview() {
 
         const detail = !isOpen ? '' : `
             <div style="padding:8px 12px 12px;display:flex;flex-direction:column;gap:6px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;border-radius:6px;background:rgba(255,255,255,0.02);border:1px solid var(--deft-border);">
+                    <span style="font-size:11px;color:var(--deft-txt-3);">Score override (for grading mistakes)</span>
+                    <button class="btn btn-ghost" onclick="event.stopPropagation();overrideVocabQuizTotals('${escapeHtml(quiz.quiz_id)}')" style="padding:3px 10px;font-size:10px;flex-shrink:0;">Override score / total</button>
+                </div>
                 ${quiz.answers.map((q, i) => {
                     const correct = q.is_correct === true;
                     const sa = (q.student_answer == null || q.student_answer === '') ? '(no answer)' : q.student_answer;
@@ -490,6 +655,36 @@ async function adjustVocabAnswer(quizId, questionNumber) {
     } else {
         toast(`Adjusted: ${quiz.score}/${quiz.total_possible} (${quiz.percentage}%)`);
     }
+}
+
+// UBR-0200: direct teacher override of a quiz's correct count and total questions
+// (for cases where the system graded out of the wrong number of questions).
+async function overrideVocabQuizTotals(quizId) {
+    const quiz = (gradesData.vocabQuizzes || []).find(q => q.quiz_id === quizId);
+    if (!quiz) return;
+    const ansLen = Array.isArray(quiz.answers) ? quiz.answers.length : 0;
+    const totIn = prompt('Total number of questions on this quiz:', String(quiz.total_possible || ansLen || 12));
+    if (totIn == null) return;
+    const total = parseInt(totIn, 10);
+    if (!(total > 0)) { toast('Total must be a positive number', 'error'); return; }
+    const corrIn = prompt('Number the student got correct (0–' + total + '):', String(quiz.score != null ? quiz.score : ''));
+    if (corrIn == null) return;
+    const correct = parseInt(corrIn, 10);
+    if (!(correct >= 0) || correct > total) { toast('Correct count must be between 0 and ' + total, 'error'); return; }
+
+    const pct = Math.round((correct / total) * 100);
+    const lg = getLetterGrade(pct);
+    quiz.score = correct; quiz.total_possible = total; quiz.percentage = pct; quiz.letter_grade = lg.grade;
+    if (quiz.status !== 'graded') quiz.status = 'graded';
+    gradesData.vocabExpandedId = quizId;
+    renderGrades();
+
+    const res = await supabaseWrite('school_vocab_quizzes', 'PATCH', {
+        score: correct, total_possible: total, percentage: pct, letter_grade: lg.grade,
+        status: 'graded', graded_by: 'teacher', graded_at: new Date().toISOString()
+    }, `quiz_id=eq.${quizId}`);
+    if (res === null) toast('Could not save the override', 'error');
+    else toast(`Override saved: ${correct}/${total} (${pct}% ${lg.grade})`);
 }
 
 // =======================================
@@ -591,12 +786,67 @@ function renderAssignmentMotivationRow(assignmentId) {
     `;
 }
 
+// UBR-0202: Typing card over the whole quarter + a WPM/accuracy progression
+// line chart (the old card used a 7-day window and showed nothing once practice
+// was more than a week old).
+function buildTypingLineChart(sessions) {
+    if (!sessions || sessions.length < 2) {
+        return '<div style="font-size:11px;color:var(--deft-txt-3);margin-top:8px;">Complete a few sessions to see your progression chart.</div>';
+    }
+    const W = 248, H = 76, padL = 6, padR = 6, padT = 8, padB = 12;
+    const n = sessions.length;
+    const wpms = sessions.map(t => Number(t.wpm) || 0);
+    const accs = sessions.map(t => Number(t.accuracy) || 0);
+    const maxWpm = Math.max(40, ...wpms);
+    const x = i => padL + (i * (W - padL - padR)) / (n - 1);
+    const yW = v => padT + (1 - v / maxWpm) * (H - padT - padB);
+    const yA = v => padT + (1 - v / 100) * (H - padT - padB);
+    const line = (arr, yf) => arr.map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + yf(v).toFixed(1)).join(' ');
+    const wpmPath = line(wpms, yW);
+    const accPath = line(accs, yA);
+    return `
+        <div style="margin-top:10px;">
+            <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" role="img" aria-label="WPM and accuracy over the quarter">
+                <path d="${accPath}" fill="none" stroke="var(--deft-accent, #06D6A0)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"/>
+                <path d="${wpmPath}" fill="none" stroke="#FBBF24" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+            </svg>
+            <div style="display:flex;gap:14px;margin-top:2px;font-size:10px;color:var(--deft-txt-3);">
+                <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:2px;background:#FBBF24;display:inline-block;"></span>WPM</span>
+                <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:2px;background:var(--deft-accent,#06D6A0);display:inline-block;"></span>Accuracy %</span>
+                <span style="margin-left:auto;">${n} sessions this quarter</span>
+            </div>
+        </div>`;
+}
+
+function renderTypingQuarterCard(cardBase, headerStyle, rowStyle, labelStyle, valueStyle) {
+    const ts = gradesData.typingSessions || [];
+    const n = ts.length;
+    const avgWpm = n ? Math.round(ts.reduce((s, t) => s + (Number(t.wpm) || 0), 0) / n) : 0;
+    const bestWpm = n ? Math.max(...ts.map(t => Number(t.wpm) || 0)) : 0;
+    const avgAcc = n ? Math.round(ts.reduce((s, t) => s + (Number(t.accuracy) || 0), 0) / n) : 0;
+    const totalMin = n ? Math.round(ts.reduce((s, t) => s + (Number(t.duration_secs) || 0), 0) / 60) : 0;
+    const emptyNote = n ? '' : '<div style="font-size:11px;color:var(--deft-txt-3);margin-top:4px;">No typing practice recorded this quarter yet.</div>';
+    return `
+        <div style="${cardBase}">
+            <div style="${headerStyle}">⌨️ Typing Practice (quarter)</div>
+            <div style="${rowStyle}"><span style="${labelStyle}">Sessions</span><span style="${valueStyle}">${n}</span></div>
+            <div style="${rowStyle}"><span style="${labelStyle}">Average WPM</span><span style="${valueStyle}">${avgWpm}</span></div>
+            <div style="${rowStyle}"><span style="${labelStyle}">Best WPM</span><span style="${valueStyle}">${bestWpm}</span></div>
+            <div style="${rowStyle}"><span style="${labelStyle}">Avg accuracy</span><span style="${valueStyle}">${avgAcc}%</span></div>
+            <div style="${rowStyle}"><span style="${labelStyle}">Total practice</span><span style="${valueStyle}">${totalMin} min</span></div>
+            ${emptyNote}
+            ${buildTypingLineChart(ts)}
+        </div>`;
+}
+
 // =======================================
 // DAILY TASK STATS (UBR-0164)
 // =======================================
 function renderDailyTaskStats() {
-    const s = gradesData.dailySummary;
-    if (!s) return '';
+    // UBR-0202: don't early-return when the 7-day summary is empty — the typing
+    // card now uses the full-quarter sessions, which may exist even when the last
+    // 7 days are quiet.
+    const s = gradesData.dailySummary || {};
 
     const cardBase = 'background: var(--deft-surface-el); border: 1px solid var(--deft-border); border-radius: 12px; padding: 16px 20px;';
     const headerStyle = 'font-size: 13px; font-weight: 600; color: var(--deft-txt-2); margin-bottom: 12px; display:flex; align-items:center; gap:6px;';
@@ -627,23 +877,27 @@ function renderDailyTaskStats() {
         { key: 'history_done', label: 'History' },
         { key: 'assignments_done', label: 'Assignments' }
     ];
-    const cell = (done) => '<div style="width:22px;height:22px;border-radius:4px;background:' + (done ? 'var(--deft-success, #06D6A0)' : 'var(--deft-border)') + ';"></div>';
+    const cell = (done) => '<div style="width:20px;height:20px;border-radius:4px;background:' + (done ? 'var(--deft-success, #06D6A0)' : 'var(--deft-border)') + ';"></div>';
     const dayLabel = (iso) => {
         try {
             const d = new Date(iso + 'T00:00:00');
             return d.toLocaleDateString('en-US', { weekday: 'short' });
         } catch (e) { return iso; }
     };
-    // Show oldest -> newest left to right
+    // Show oldest -> newest left to right.
+    // Wrap the grid in an overflow-x container with min-width:max-content so the
+    // fixed-size cells never spill outside the padded card (UBR-0201).
     const orderedDays = grid.slice().reverse();
     const gridHtml = `
-        <div style="display:grid; grid-template-columns: 100px repeat(${orderedDays.length}, 1fr); gap:6px; align-items:center;">
-            <div></div>
-            ${orderedDays.map(d => '<div style="font-size:10px; color:var(--deft-txt-3); text-align:center;">' + dayLabel(d.date) + '</div>').join('')}
-            ${gridRows.map(r => `
-                <div style="font-size:12px; color:var(--deft-txt-2);">${r.label}</div>
-                ${orderedDays.map(d => '<div style="display:flex;justify-content:center;">' + cell(!!d[r.key]) + '</div>').join('')}
-            `).join('')}
+        <div style="overflow-x:auto; max-width:100%;">
+            <div style="display:grid; grid-template-columns: 68px repeat(${orderedDays.length}, minmax(20px, 1fr)); gap:6px; align-items:center; min-width:max-content;">
+                <div></div>
+                ${orderedDays.map(d => '<div style="font-size:10px; color:var(--deft-txt-3); text-align:center;">' + dayLabel(d.date) + '</div>').join('')}
+                ${gridRows.map(r => `
+                    <div style="font-size:12px; color:var(--deft-txt-2);">${r.label}</div>
+                    ${orderedDays.map(d => '<div style="display:flex;justify-content:center;">' + cell(!!d[r.key]) + '</div>').join('')}
+                `).join('')}
+            </div>
         </div>
     `;
 
@@ -659,14 +913,7 @@ function renderDailyTaskStats() {
                     ${trendBars ? '<div style="display:flex; align-items:flex-end; gap:4px; height:44px; margin-top:8px;">' + trendBars + '</div>' : ''}
                 </div>
 
-                <div style="${cardBase}">
-                    <div style="${headerStyle}">⌨️ Typing Practice (7d)</div>
-                    <div style="${rowStyle}"><span style="${labelStyle}">Sessions</span><span style="${valueStyle}">${typing.sessions_this_week || 0}</span></div>
-                    <div style="${rowStyle}"><span style="${labelStyle}">Average WPM</span><span style="${valueStyle}">${typing.avg_wpm || 0}</span></div>
-                    <div style="${rowStyle}"><span style="${labelStyle}">Best WPM</span><span style="${valueStyle}">${typing.best_wpm || 0}</span></div>
-                    <div style="${rowStyle}"><span style="${labelStyle}">Total practice</span><span style="${valueStyle}">${typing.total_minutes || 0} min</span></div>
-                    ${typing.avg_accuracy != null ? '<div style="' + rowStyle + '"><span style="' + labelStyle + '">Avg accuracy</span><span style="' + valueStyle + '">' + typing.avg_accuracy + '%</span></div>' : ''}
-                </div>
+                ${renderTypingQuarterCard(cardBase, headerStyle, rowStyle, labelStyle, valueStyle)}
 
                 <div style="${cardBase}">
                     <div style="${headerStyle}">📜 History Facts</div>
@@ -746,6 +993,19 @@ function renderAssignmentAccordion(assignment) {
     const dateStr = formatDate(assignment.assigned_date || assignment.created_at);
     const isExpanded = gradesData.expandedId === assignment.assignment_id;
 
+    // UBR-0204: early-submission badge + teacher bonus control.
+    const early = isAssignmentEarly(assignment);
+    const bonusPct = Number(assignment.early_bonus_pct) || 0;
+    const earlyBadge = early
+        ? `<span title="Submitted early" style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--deft-accent-dim,rgba(6,214,160,0.15));color:var(--deft-accent,#06D6A0);">⭐ Early${bonusPct ? ' +' + bonusPct + '%' : ''}</span>`
+        : '';
+    const bonusCtrl = isTeacher()
+        ? `<span role="button" tabindex="0" title="Set early-submission bonus"
+                 onclick="event.stopPropagation();setEarlyBonus('${assignment.assignment_id}')"
+                 onkeydown="if(event.key==='Enter'){event.stopPropagation();setEarlyBonus('${assignment.assignment_id}');}"
+                 style="font-size:10px;padding:2px 7px;border-radius:6px;border:1px solid var(--deft-border);color:var(--deft-txt-3);cursor:pointer;flex-shrink:0;">⭐ bonus</span>`
+        : '';
+
     // UBR-0172: render a neutral pill for not-started / pending-review lessons
     // instead of "0 / 0  F  0%", which reads as a failing grade.
     let scorePillHtml;
@@ -814,13 +1074,15 @@ function renderAssignmentAccordion(assignment) {
                     <div style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         ${escapeHtml(title)}
                     </div>
-                    <div style="font-size: 11px; color: var(--deft-txt-3); margin-top: 2px;">
-                        ${dateStr}
+                    <div style="font-size: 11px; color: var(--deft-txt-3); margin-top: 2px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <span>${dateStr}</span>
+                        ${earlyBadge}
                     </div>
                 </div>
 
                 <!-- Score + letter grade (or neutral pill for not-started / pending review) -->
                 <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                    ${bonusCtrl}
                     ${scorePillHtml}
 
                     <!-- Chevron -->

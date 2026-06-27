@@ -40,8 +40,15 @@ function historyReadKey(factId) {
     return 'hist-read-' + profileId + '-' + factId;
 }
 
+// DB-backed read set (school_history_reads), loaded per profile in refreshHistory.
+// localStorage is the fast per-device cache; the DB set is the cross-device source
+// of truth so progress is correct on any device, even after a localStorage clear
+// (UBR-0205).
+let historyReadsSet = new Set();
+
 function isHistoryFactRead(factId) {
     if (!factId) return false;
+    if (historyReadsSet.has(factId)) return true;
     try { return localStorage.getItem(historyReadKey(factId)) === '1'; }
     catch (e) { return false; }
 }
@@ -95,7 +102,8 @@ async function refreshHistory() {
         // Fetch today's scheduled fact, current week facts, and progress count in parallel
         const weekInfo = getWeekAndDay(historyViewDate);
 
-        const [todayFacts, weekFacts, allPastFacts] = await Promise.all([
+        const studentId = (typeof activeProfileId !== 'undefined' && activeProfileId) || null;
+        const [todayFacts, weekFacts, allPastFacts, readRows] = await Promise.all([
             supabaseSelect('school_history_facts',
                 `scheduled_date=eq.${historyViewDate}&select=*&limit=1`
             ),
@@ -104,8 +112,16 @@ async function refreshHistory() {
                     `week_number=eq.${weekInfo.week}&select=fact_id,title,scheduled_date,status,era,week_number,day_number&order=day_number`)
                 : Promise.resolve([]),
             supabaseSelect('school_history_facts',
-                `scheduled_date=lte.${todayStr()}&status=eq.published&select=fact_id&order=scheduled_date`)
+                `scheduled_date=lte.${todayStr()}&status=eq.published&select=fact_id&order=scheduled_date`),
+            studentId
+                ? supabaseSelect('school_history_reads',
+                    `student_id=eq.${studentId}&select=fact_id`)
+                : Promise.resolve([])
         ]);
+
+        // Rebuild the cross-device read set from school_history_reads so the
+        // progress bar reflects all reads, not just those cached on this device.
+        historyReadsSet = new Set((readRows || []).map(function(r) { return r.fact_id; }));
 
         historyCurrentFact = (todayFacts && todayFacts.length > 0) ? todayFacts[0] : null;
         // Parse any double-encoded JSONB fields

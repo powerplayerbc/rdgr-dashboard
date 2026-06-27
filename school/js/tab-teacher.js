@@ -34,8 +34,157 @@ async function refreshTeacher() {
     // Load data in parallel
     await Promise.all([
         loadTeacherLessons(),
-        loadPendingReviews()
+        loadPendingReviews(),
+        loadGradeWeights(),
+        loadProjects()
     ]);
+}
+
+// ═══════════════════════════════════════
+// GRADE WEIGHTS + PROJECTS (UBR-0199)
+// ═══════════════════════════════════════
+let _teacherStudentId = null;
+const GRADE_CATEGORIES = [
+    { key: 'lessons', label: 'Lessons', icon: '📘' },
+    { key: 'spelling', label: 'Spelling', icon: '📚' },
+    { key: 'typing', label: 'Typing', icon: '⌨️' },
+    { key: 'history', label: 'History', icon: '📜' },
+    { key: 'projects', label: 'Projects', icon: '🎒' }
+];
+let teacherWeights = { lessons: 50, spelling: 20, typing: 10, history: 10, projects: 10 };
+let teacherProjects = [];
+
+// Resolve the student profile the teacher is managing (first student).
+async function teacherStudentId() {
+    if (_teacherStudentId) return _teacherStudentId;
+    const rows = await supabaseSelect('deft_user_profiles', 'role=eq.student&select=user_id&order=display_name&limit=1');
+    _teacherStudentId = (rows && rows.length) ? rows[0].user_id : activeProfileId;
+    return _teacherStudentId;
+}
+
+async function loadGradeWeights() {
+    const sid = await teacherStudentId();
+    const rows = await supabaseSelect('school_grade_weights', `or=(student_id.eq.${sid},student_id.eq.*)&select=student_id,category,weight`);
+    const w = { lessons: 50, spelling: 20, typing: 10, history: 10, projects: 10 };
+    (rows || []).filter(r => r.student_id === '*').forEach(r => { w[r.category] = Number(r.weight); });
+    (rows || []).filter(r => r.student_id === sid).forEach(r => { w[r.category] = Number(r.weight); });
+    teacherWeights = w;
+    renderGradeWeights();
+}
+
+function renderGradeWeights() {
+    const el = document.getElementById('gradeWeightsBody');
+    if (!el) return;
+    const total = GRADE_CATEGORIES.reduce((s, c) => s + (Number(teacherWeights[c.key]) || 0), 0);
+    el.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            ${GRADE_CATEGORIES.map(c => `
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <label style="flex:1;font-size:13px;color:var(--deft-txt-2);">${c.icon} ${c.label}</label>
+                    <input type="number" min="0" max="100" id="gw_${c.key}" value="${Number(teacherWeights[c.key]) || 0}"
+                           oninput="updateWeightTotal()" class="form-input" style="width:90px;text-align:right;font-size:13px;">
+                    <span style="font-size:12px;color:var(--deft-txt-3);width:14px;">%</span>
+                </div>`).join('')}
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding-top:8px;border-top:1px solid var(--deft-border);">
+                <span style="font-size:12px;color:var(--deft-txt-3);">Total: <strong id="gwTotal" style="color:${total === 100 ? 'var(--deft-success)' : 'var(--deft-warning)'};">${total}%</strong> <span style="color:var(--deft-txt-3);">(need not be 100 — weights are normalized)</span></span>
+                <button class="btn btn-primary" onclick="saveGradeWeights()" style="font-size:12px;padding:5px 14px;">Save Weights</button>
+            </div>
+        </div>`;
+}
+
+function updateWeightTotal() {
+    let total = 0;
+    GRADE_CATEGORIES.forEach(c => { const v = Number((document.getElementById('gw_' + c.key) || {}).value) || 0; total += v; });
+    const el = document.getElementById('gwTotal');
+    if (el) { el.textContent = total + '%'; el.style.color = total === 100 ? 'var(--deft-success)' : 'var(--deft-warning)'; }
+}
+
+async function saveGradeWeights() {
+    const sid = await teacherStudentId();
+    const now = new Date().toISOString();
+    const rows = GRADE_CATEGORIES.map(c => ({
+        student_id: sid, category: c.key,
+        weight: Number((document.getElementById('gw_' + c.key) || {}).value) || 0,
+        updated_by: 'teacher', updated_at: now
+    }));
+    // Upsert on (student_id, category)
+    const res = await supabaseUpsert('school_grade_weights', rows, 'student_id,category');
+    if (res === null) { toast('Could not save weights', 'error'); return; }
+    rows.forEach(r => { teacherWeights[r.category] = r.weight; });
+    toast('Grade weights saved', 'success');
+    renderGradeWeights();
+}
+
+async function loadProjects() {
+    const sid = await teacherStudentId();
+    teacherProjects = await supabaseSelect('school_projects', `student_id=eq.${sid}&select=*&order=assigned_date.desc`) || [];
+    renderProjects();
+}
+
+function renderProjects() {
+    const el = document.getElementById('projectsBody');
+    if (!el) return;
+    if (!teacherProjects.length) {
+        el.innerHTML = '<div style="font-size:13px;color:var(--deft-txt-3);padding:8px 0;">No projects yet. Use “+ Add Project” to track an external assignment (e.g. a book report) and grade it.</div>';
+        return;
+    }
+    el.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px;">${teacherProjects.map(p => {
+        const graded = p.status === 'graded' && p.total_points;
+        const pct = graded ? Math.round((Number(p.earned_points) / Number(p.total_points)) * 100) : null;
+        const lg = pct != null ? getLetterGrade(pct) : null;
+        const badge = graded
+            ? `<span style="font-size:11px;font-weight:700;color:${lg.color};">${p.earned_points}/${p.total_points} · ${pct}% (${lg.grade})</span>`
+            : `<span style="font-size:11px;color:var(--deft-txt-3);text-transform:uppercase;">${escapeHtml(p.status || 'assigned')}</span>`;
+        return `
+            <div style="border:1px solid var(--deft-border);border-radius:10px;padding:10px 12px;background:var(--deft-surface-el);display:flex;align-items:center;gap:10px;">
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:600;color:var(--deft-txt);">${escapeHtml(p.title)}</div>
+                    <div style="font-size:11px;color:var(--deft-txt-3);">${escapeHtml(p.subject || 'project')}${p.due_date ? ' · due ' + p.due_date : ''}</div>
+                </div>
+                ${badge}
+                <button class="btn btn-ghost" onclick="gradeProject('${escapeHtml(p.project_id)}')" style="font-size:10px;padding:3px 8px;">Grade</button>
+                <button class="btn btn-ghost" onclick="deleteProject('${escapeHtml(p.project_id)}')" style="font-size:10px;padding:3px 8px;color:#E57373;">Delete</button>
+            </div>`;
+    }).join('')}</div>`;
+}
+
+async function openProjectModal() {
+    const title = prompt('Project / assignment title (e.g. "Book report: Charlotte\'s Web"):', '');
+    if (!title || !title.trim()) return;
+    const subject = (prompt('Subject (reading, writing, science, social_studies, other):', 'reading') || 'other').trim();
+    const totalIn = prompt('Total points possible:', '100');
+    const total = parseInt(totalIn, 10); if (!(total > 0)) { toast('Total points must be positive', 'error'); return; }
+    const due = (prompt('Due date (YYYY-MM-DD, optional):', '') || '').trim();
+    const sid = await teacherStudentId();
+    const body = { student_id: sid, title: title.trim(), subject: subject, total_points: total, status: 'assigned' };
+    if (/^\d{4}-\d{2}-\d{2}$/.test(due)) body.due_date = due;
+    const res = await supabaseWrite('school_projects', 'POST', body);
+    if (res === null) { toast('Could not add project', 'error'); return; }
+    toast('Project added', 'success');
+    loadProjects();
+}
+
+async function gradeProject(projectId) {
+    const p = teacherProjects.find(x => x.project_id === projectId);
+    if (!p) return;
+    const earnedIn = prompt('Points earned (out of ' + (p.total_points || 100) + '):', p.earned_points != null ? String(p.earned_points) : '');
+    if (earnedIn == null) return;
+    const earned = Number(earnedIn);
+    if (!(earned >= 0) || earned > Number(p.total_points || 100)) { toast('Enter a value between 0 and ' + (p.total_points || 100), 'error'); return; }
+    const res = await supabaseWrite('school_projects', 'PATCH',
+        { earned_points: earned, status: 'graded', graded_at: new Date().toISOString(), graded_by: 'teacher' },
+        `project_id=eq.${encodeURIComponent(projectId)}`);
+    if (res === null) { toast('Could not save grade', 'error'); return; }
+    toast('Project graded', 'success');
+    loadProjects();
+}
+
+async function deleteProject(projectId) {
+    if (!confirm('Delete this project? This cannot be undone.')) return;
+    const res = await supabaseWrite('school_projects', 'DELETE', null, `project_id=eq.${encodeURIComponent(projectId)}`);
+    if (res === null) { toast('Could not delete project', 'error'); return; }
+    toast('Project deleted', 'success');
+    loadProjects();
 }
 
 // ═══════════════════════════════════════
@@ -93,6 +242,32 @@ function buildTeacherPanel() {
                 <div class="panel-body" id="lessonLibraryList" style="max-height:420px;overflow-y:auto;">
                     ${buildSkeletons(3)}
                 </div>
+            </div>
+
+            <!-- Section B2: Grade Weights (UBR-0199) -->
+            <div class="panel" id="gradeWeightsPanel">
+                <div class="panel-header">
+                    <h3 style="margin:0;font-size:15px;font-weight:700;color:var(--deft-txt);
+                               font-family:var(--deft-heading-font),sans-serif;display:flex;align-items:center;gap:8px;">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 15h12M6 11l3-6 3 6" stroke="var(--deft-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Grade Weights
+                    </h3>
+                    <span style="font-size:12px;color:var(--deft-txt-3);">How categories combine into the overall grade</span>
+                </div>
+                <div class="panel-body" id="gradeWeightsBody">${buildSkeletons(1)}</div>
+            </div>
+
+            <!-- Section B3: Projects & External Assignments (UBR-0199) -->
+            <div class="panel" id="projectsPanel">
+                <div class="panel-header">
+                    <h3 style="margin:0;font-size:15px;font-weight:700;color:var(--deft-txt);
+                               font-family:var(--deft-heading-font),sans-serif;display:flex;align-items:center;gap:8px;">
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="2.5" y="4" width="13" height="11" rx="1.5" stroke="var(--deft-accent)" stroke-width="1.3"/><path d="M6 4V3a1.5 1.5 0 011.5-1.5h3A1.5 1.5 0 0112 3v1" stroke="var(--deft-accent)" stroke-width="1.3"/></svg>
+                        Projects &amp; External Assignments
+                    </h3>
+                    <button class="btn btn-primary" onclick="openProjectModal()" style="font-size:12px;padding:5px 12px;">+ Add Project</button>
+                </div>
+                <div class="panel-body" id="projectsBody">${buildSkeletons(1)}</div>
             </div>
 
             <!-- Section C: Pending Reviews -->

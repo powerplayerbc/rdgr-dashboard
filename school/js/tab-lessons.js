@@ -432,6 +432,14 @@ function buildLessonCard(assignment, lesson) {
             <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
                 ${scoreHTML}
                 ${buildStatusIndicator(statusUI)}
+                ${isTeacher() ? `<button title="Unassign from this day (keeps the lesson in the library)"
+                    onclick="event.stopPropagation(); unassignLesson('${escapeHtml(assignment.assignment_id)}','${title.replace(/'/g, "\\'")}','${assignment.assigned_date || ''}')"
+                    style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;border:1px solid var(--deft-border);background:transparent;color:var(--deft-txt-3);cursor:pointer;flex-shrink:0;"
+                    onmouseenter="this.style.background='rgba(255,107,107,0.12)';this.style.color='#FF6B6B';this.style.borderColor='rgba(255,107,107,0.3)';"
+                    onmouseleave="this.style.background='transparent';this.style.color='var(--deft-txt-3)';this.style.borderColor='var(--deft-border)';"
+                    aria-label="Unassign lesson">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>` : ''}
             </div>
         </div>
     `;
@@ -439,6 +447,23 @@ function buildLessonCard(assignment, lesson) {
 
 function handleLessonClick(assignmentId, lessonId, title) {
     openLesson(assignmentId, lessonId, title);
+}
+
+// UBR-0188: Teacher unassign — removes the school_assignments row for a given day
+// WITHOUT deleting the underlying lesson from school_lessons (the lesson stays in
+// the library and can be re-assigned). anon has full RLS access to school_assignments.
+async function unassignLesson(assignmentId, title, assignedDate) {
+    if (!isTeacher()) { toast('Only a teacher can unassign lessons', 'error'); return; }
+    const when = assignedDate ? (' from ' + assignedDate) : '';
+    if (!confirm('Unassign "' + title + '"' + when + '?\n\nThis removes it from the day but keeps the lesson in your library so you can re-assign it later.')) return;
+    const ok = await supabaseWrite('school_assignments', 'DELETE', null, `assignment_id=eq.${encodeURIComponent(assignmentId)}`);
+    if (ok) {
+        toast('Lesson unassigned', 'success');
+        if (typeof refreshLessons === 'function') refreshLessons();
+        else if (typeof initPage === 'function') initPage();
+    } else {
+        toast('Could not unassign — please try again', 'error');
+    }
 }
 
 // ═══════════════════════════════════════
@@ -618,6 +643,9 @@ async function openLessonAssignModal() {
                     <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--deft-txt-2);margin-bottom:0.375rem;margin-top:0.75rem;text-transform:uppercase;letter-spacing:0.04em;">Student</label>
                     <select id="assign-today-student" style="width:100%;padding:0.5rem 0.625rem;font-size:0.8rem;color:var(--deft-txt);background:var(--deft-surface);border:1px solid var(--deft-border);border-radius:0.375rem;outline:none;">
                     </select>
+
+                    <label style="display:block;font-size:0.7rem;font-weight:600;color:var(--deft-txt-2);margin-bottom:0.375rem;margin-top:0.75rem;text-transform:uppercase;letter-spacing:0.04em;">Due date <span style="font-weight:400;text-transform:none;color:var(--deft-txt-3);">(optional — enables early-submission bonus)</span></label>
+                    <input type="date" id="assign-today-due" style="width:100%;padding:0.5rem 0.625rem;font-size:0.8rem;color:var(--deft-txt);background:var(--deft-surface);border:1px solid var(--deft-border);border-radius:0.375rem;outline:none;" />
                 </div>
                 <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:1.25rem;">
                     <button onclick="closeModal('modal-assign-lesson-today')" style="padding:0.5rem 1rem;font-size:0.75rem;font-weight:600;border-radius:0.375rem;background:transparent;color:var(--deft-txt-2);border:1px solid var(--deft-border);cursor:pointer;">Cancel</button>
@@ -679,6 +707,8 @@ async function submitLessonAssignment() {
     if (!studentId) { toast('Please select a student', 'error'); return; }
     if (!assignedDate) { toast('Please select a date', 'error'); return; }
 
+    const dueDate = document.getElementById('assign-today-due')?.value;
+
     const result = await schoolApi('assign_lesson', {
         lesson_id: lessonId,
         student_id: studentId,
@@ -686,6 +716,13 @@ async function submitLessonAssignment() {
     });
 
     if (result) {
+        // UBR-0204: persist the optional due date so early submissions can earn a
+        // bonus. assign_lesson creates the row server-side, so patch due_date onto
+        // the matching assignment afterward.
+        if (dueDate) {
+            await supabaseWrite('school_assignments', 'PATCH', { due_date: dueDate },
+                `student_id=eq.${encodeURIComponent(studentId)}&lesson_id=eq.${encodeURIComponent(lessonId)}&assigned_date=eq.${assignedDate}`);
+        }
         toast('Lesson assigned');
         closeModal('modal-assign-lesson-today');
         refreshLessons();
