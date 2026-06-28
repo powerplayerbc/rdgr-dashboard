@@ -423,6 +423,15 @@ function renderDetail(m, versions){
 
   const bc = m.broadcast_status || 'none';
 
+  // status-aware controls: the button matching the CURRENT status shows as active (current), others are actions
+  const statusBtns = [['approved','Mark approved'],['review','Send to review'],['draft','Back to draft']].map(function(pair){
+    const s=pair[0], label=pair[1];
+    if(m.status===s){
+      return `<button class="btn" disabled style="opacity:1;cursor:default;border:1.5px solid #06D6A0;background:rgba(6,214,160,0.14);color:#06D6A0;">✓ ${esc(s)} (current)</button>`;
+    }
+    return `<button class="btn btn-ghost" onclick="setStatus('${s}')">${label}</button>`;
+  }).join('');
+
   document.getElementById('detailBody').innerHTML = `
     <div class="flex items-start justify-between flex-wrap gap-3 mb-4">
       <div>
@@ -467,9 +476,8 @@ function renderDetail(m, versions){
           </div>
           <div class="panel-body">
             <div class="flex flex-wrap gap-2 mb-2">
-              <button class="btn btn-approve" onclick="setStatus('approved')">Mark approved</button>
-              <button class="btn btn-ghost" onclick="setStatus('review')">Send to review</button>
-              <button class="btn btn-ghost" onclick="setStatus('draft')">Back to draft</button>
+              ${statusBtns}
+              ${(m.status==='generating'||m.status==='published')?`<span class="badge st-${esc(m.status)}" style="align-self:center;">${esc(m.status)}</span>`:''}
             </div>
             <p class="text-xs text-txt-3">Publishing &amp; broadcast (sending to subscribers) is done from Claude Code after approval.</p>
           </div>
