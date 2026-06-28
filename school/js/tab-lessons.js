@@ -698,6 +698,35 @@ async function openLessonAssignModal() {
     openModal('modal-assign-lesson-today');
 }
 
+// Ensure a lesson has question rows; if not, generate them via SCHOOL-PARSE-QUESTIONS
+// (OpenAI). Returns true if questions exist (or were generated). Safe to call before
+// assigning so the student never receives an empty lesson.
+async function ensureLessonHasQuestions(lessonId) {
+    try {
+        const existing = await supabaseSelect('school_questions', `lesson_id=eq.${encodeURIComponent(lessonId)}&select=question_id&limit=1`);
+        if (existing && existing.length > 0) return true;
+        toast('Preparing lesson questions…', 'info');
+        const parseUrl = (typeof SCHOOL_BRIDGE_URL === 'string')
+            ? SCHOOL_BRIDGE_URL.replace(/school-bridge.*$/, 'school-parse-questions')
+            : 'https://n8n.carltonaiservices.com/webhook/school-parse-questions';
+        const r = await fetch(parseUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lesson_id: lessonId })
+        });
+        let d = null; try { d = await r.json(); } catch (e) {}
+        if (d && d.success && d.count > 0) { return true; }
+        // Re-check the DB in case the response shape differed.
+        const after = await supabaseSelect('school_questions', `lesson_id=eq.${encodeURIComponent(lessonId)}&select=question_id&limit=1`);
+        if (after && after.length > 0) return true;
+        toast('Could not auto-generate questions for this lesson — assigning anyway; generate them from the Teacher tab.', 'warning');
+        return false;
+    } catch (e) {
+        console.warn('ensureLessonHasQuestions failed:', e && e.message);
+        return false;
+    }
+}
+
 async function submitLessonAssignment() {
     const lessonId = document.getElementById('assign-today-lesson')?.value;
     const studentId = document.getElementById('assign-today-student')?.value;
@@ -708,6 +737,12 @@ async function submitLessonAssignment() {
     if (!assignedDate) { toast('Please select a date', 'error'); return; }
 
     const dueDate = document.getElementById('assign-today-due')?.value;
+
+    // Guarantee the lesson has questions before the student gets it. Some
+    // sheet-synced lessons never had questions parsed (the Ollama-era gap), which
+    // left assignments unusable. If none exist, generate them now via OpenAI
+    // (SCHOOL-PARSE-QUESTIONS) and wait so the assignment is ready on first open.
+    await ensureLessonHasQuestions(lessonId);
 
     const result = await schoolApi('assign_lesson', {
         lesson_id: lessonId,

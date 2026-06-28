@@ -1085,6 +1085,25 @@ async function handleDriveImport() {
 // B: LESSON LIBRARY
 // ═══════════════════════════════════════
 
+// Teacher: generate questions for a lesson that has none (SCHOOL-PARSE-QUESTIONS,
+// OpenAI). Used by the Lesson Library "Generate questions" button.
+async function generateLessonQuestions(lessonId, btn) {
+    if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
+    try {
+        const parseUrl = (typeof SCHOOL_BRIDGE_URL === 'string')
+            ? SCHOOL_BRIDGE_URL.replace(/school-bridge.*$/, 'school-parse-questions')
+            : 'https://n8n.carltonaiservices.com/webhook/school-parse-questions';
+        const r = await fetch(parseUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lesson_id: lessonId }) });
+        let d = null; try { d = await r.json(); } catch (e) {}
+        if (d && d.count > 0) toast(`Generated ${d.count} questions`, 'success');
+        else toast('No questions could be generated (check the lesson has a worksheet link)', 'error');
+    } catch (e) {
+        toast('Error generating questions: ' + (e && e.message), 'error');
+    } finally {
+        loadTeacherLessons();
+    }
+}
+
 async function loadTeacherLessons() {
     const listEl = document.getElementById('lessonLibraryList');
     if (!listEl) return;
@@ -1190,10 +1209,11 @@ function buildLibraryCard(lesson) {
                     ${sourceLabel}
                     ${assignedPill}
                 </div>
-                <div style="display:flex;align-items:center;gap:10px;margin-top:3px;">
-                    <span style="font-size:11px;color:var(--deft-txt-3);">
-                        ${qCount} question${qCount !== 1 ? 's' : ''}
-                    </span>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:3px;flex-wrap:wrap;">
+                    ${qCount > 0
+                        ? `<span style="font-size:11px;color:var(--deft-txt-3);">${qCount} question${qCount !== 1 ? 's' : ''}</span>`
+                        : `<span style="font-size:11px;font-weight:700;color:#E57373;">⚠ No questions</span>
+                           <button class="btn btn-ghost" onclick="event.stopPropagation();generateLessonQuestions('${escapeHtml(lesson.lesson_id)}', this)" style="padding:2px 8px;font-size:10px;">Generate questions</button>`}
                     ${created ? `<span style="font-size:11px;color:var(--deft-txt-3);">${created}</span>` : ''}
                 </div>
             </div>
