@@ -191,7 +191,10 @@ async function refreshGrades() {
         // UBR-0204: early-submission bonus. If the assignment is flagged early
         // (auto-detected from due_date vs completed_at, or set by the teacher),
         // add the bonus % to the earned points, capped at the possible total.
-        const bonusPct = isAssignmentEarly(a) ? (Number(a.early_bonus_pct) || 0) : 0;
+        // The bonus comes from the single global setting (school_grade_weights
+        // early_bonus, editable in the Teacher area); a per-assignment value > 0
+        // overrides it for that one assignment.
+        const bonusPct = isAssignmentEarly(a) ? effectiveEarlyBonus(a) : 0;
         const earnedWithBonus = possible > 0 ? Math.min(possible, earned + (bonusPct / 100) * possible) : earned;
         const pctOut = possible > 0 ? (earnedWithBonus / possible) * 100 : 0;
         const letter = pctOut >= 90 ? 'A' : pctOut >= 80 ? 'B' : pctOut >= 70 ? 'C' : pctOut >= 60 ? 'D' : 'F';
@@ -247,15 +250,24 @@ function isAssignmentEarly(a) {
     return false;
 }
 
+// Effective early bonus % for an assignment: a per-assignment override (>0) wins,
+// otherwise the single global setting (school_grade_weights early_bonus).
+function effectiveEarlyBonus(a) {
+    const per = Number(a && a.early_bonus_pct);
+    if (per && per > 0) return per;
+    return Number((gradesData.gradeWeights || {}).early_bonus) || 0;
+}
+
 // UBR-0204: teacher sets/adjusts the early-submission bonus on an assignment.
 async function setEarlyBonus(assignmentId) {
     if (!isTeacher()) return;
     const a = (gradesData.assignments || []).find(x => x.assignment_id === assignmentId);
     if (!a) return;
+    const glob = Number((gradesData.gradeWeights || {}).early_bonus) || 0;
     const cur = Number(a.early_bonus_pct) || 0;
-    const inp = prompt('Early-submission bonus for this assignment (% added to the score, 0 to clear):', String(cur || 5));
+    const inp = prompt('Per-assignment early-bonus OVERRIDE (%). Enter 0 to use the global ' + glob + '% set in the Teacher area:', String(cur || ''));
     if (inp == null) return;
-    const pct = Number(inp);
+    const pct = Number(inp || 0);
     if (!(pct >= 0) || pct > 50) { toast('Enter a bonus between 0 and 50', 'error'); return; }
     a.early_bonus_pct = pct;
     a.is_early = pct > 0 ? true : isAssignmentEarly(a);
@@ -266,14 +278,18 @@ async function setEarlyBonus(assignmentId) {
     refreshGrades();
 }
 
-// Derive a single typing "grade" from accuracy + speed-vs-target. Accuracy is
-// weighted higher (kids should value correctness); speed is measured against a
-// gentle 40 WPM target and capped at 100%.
+// Typing grade is PARTICIPATION-based: full credit for keeping up with practice
+// (a configurable sessions/week target), rather than penalizing a young typist for
+// raw speed. WPM and accuracy are still shown as stats + the progression chart, but
+// they don't lower the grade. Target lives in school_grade_weights (typing_target,
+// default 3/week) and is editable in the Teacher area.
 function typingGradeFromSessions(sessions) {
     if (!sessions || !sessions.length) return null;
-    const avgAcc = sessions.reduce((s, t) => s + (Number(t.accuracy) || 0), 0) / sessions.length;
-    const avgWpm = sessions.reduce((s, t) => s + (Number(t.wpm) || 0), 0) / sessions.length;
-    return Math.round(0.7 * avgAcc + 0.3 * Math.min(100, (avgWpm / 40) * 100));
+    const target = Number((gradesData.gradeWeights || {}).typing_target) || 3; // sessions per week
+    const start = new Date(GRADES_QUARTER_START + 'T00:00:00');
+    const weeks = Math.max(1, (Date.now() - start.getTime()) / (7 * 86400000));
+    const expected = target * weeks;
+    return expected > 0 ? Math.min(100, Math.round((sessions.length / expected) * 100)) : 100;
 }
 
 // Compute each grade category's percentage and the weighted overall. Categories
@@ -995,7 +1011,7 @@ function renderAssignmentAccordion(assignment) {
 
     // UBR-0204: early-submission badge + teacher bonus control.
     const early = isAssignmentEarly(assignment);
-    const bonusPct = Number(assignment.early_bonus_pct) || 0;
+    const bonusPct = early ? effectiveEarlyBonus(assignment) : 0;
     const earlyBadge = early
         ? `<span title="Submitted early" style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--deft-accent-dim,rgba(6,214,160,0.15));color:var(--deft-accent,#06D6A0);">⭐ Early${bonusPct ? ' +' + bonusPct + '%' : ''}</span>`
         : '';

@@ -85,9 +85,26 @@ function renderGradeWeights() {
                            oninput="updateWeightTotal()" class="form-input" style="width:90px;text-align:right;font-size:13px;">
                     <span style="font-size:12px;color:var(--deft-txt-3);width:14px;">%</span>
                 </div>`).join('')}
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;padding-top:8px;border-top:1px solid var(--deft-border);">
-                <span style="font-size:12px;color:var(--deft-txt-3);">Total: <strong id="gwTotal" style="color:${total === 100 ? 'var(--deft-success)' : 'var(--deft-warning)'};">${total}%</strong> <span style="color:var(--deft-txt-3);">(need not be 100 — weights are normalized)</span></span>
-                <button class="btn btn-primary" onclick="saveGradeWeights()" style="font-size:12px;padding:5px 14px;">Save Weights</button>
+            <div style="font-size:12px;color:var(--deft-txt-3);margin-top:6px;padding-top:8px;border-top:1px solid var(--deft-border);">Total: <strong id="gwTotal" style="color:${total === 100 ? 'var(--deft-success)' : 'var(--deft-warning)'};">${total}%</strong> (need not be 100 — weights are normalized)</div>
+
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--deft-border);">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--deft-txt-3);margin-bottom:8px;">Grading rules (apply to all assignments)</div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                    <label style="flex:1;font-size:13px;color:var(--deft-txt-2);">⭐ Early-submission bonus</label>
+                    <input type="number" min="0" max="50" id="gw_early_bonus" value="${Number(teacherWeights.early_bonus) || 0}" class="form-input" style="width:90px;text-align:right;font-size:13px;">
+                    <span style="font-size:12px;color:var(--deft-txt-3);width:14px;">%</span>
+                </div>
+                <div style="font-size:11px;color:var(--deft-txt-3);margin:-4px 0 10px;">Added to the score of any assignment turned in on/before its due date. Set once here — applies everywhere (a per-assignment override is still available on the Grades page).</div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <label style="flex:1;font-size:13px;color:var(--deft-txt-2);">⌨️ Typing target</label>
+                    <input type="number" min="1" max="14" id="gw_typing_target" value="${Number(teacherWeights.typing_target) || 3}" class="form-input" style="width:90px;text-align:right;font-size:13px;">
+                    <span style="font-size:12px;color:var(--deft-txt-3);width:64px;">/ week</span>
+                </div>
+                <div style="font-size:11px;color:var(--deft-txt-3);margin-top:4px;">Typing is graded on participation: keeping up with this many sessions/week = 100%.</div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+                <button class="btn btn-primary" onclick="saveGradeWeights()" style="font-size:12px;padding:5px 14px;">Save Settings</button>
             </div>
         </div>`;
 }
@@ -107,11 +124,16 @@ async function saveGradeWeights() {
         weight: Number((document.getElementById('gw_' + c.key) || {}).value) || 0,
         updated_by: 'teacher', updated_at: now
     }));
-    // Upsert on (student_id, category)
+    // Global grading rules (single place): early-submission bonus + typing target.
+    const earlyBonus = Math.max(0, Math.min(50, Number((document.getElementById('gw_early_bonus') || {}).value) || 0));
+    const typingTarget = Math.max(1, Math.min(14, Number((document.getElementById('gw_typing_target') || {}).value) || 3));
+    rows.push({ student_id: '*', category: 'early_bonus', weight: earlyBonus, updated_by: 'teacher', updated_at: now });
+    rows.push({ student_id: '*', category: 'typing_target', weight: typingTarget, updated_by: 'teacher', updated_at: now });
+
     const res = await supabaseUpsert('school_grade_weights', rows, 'student_id,category');
-    if (res === null) { toast('Could not save weights', 'error'); return; }
+    if (res === null) { toast('Could not save settings', 'error'); return; }
     rows.forEach(r => { teacherWeights[r.category] = r.weight; });
-    toast('Grade weights saved', 'success');
+    toast('Grading settings saved', 'success');
     renderGradeWeights();
 }
 
