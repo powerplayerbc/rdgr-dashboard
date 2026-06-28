@@ -75,6 +75,11 @@
             { label: 'Media', href: '/media' },
             { label: 'Videos', href: '/video-inventory' },
         ]},
+        { label: 'Lead Magnets', href: '/lead-magnets', items: [
+            { label: 'Library', href: '/lead-magnets' },
+            { label: 'Style Kit', href: '/lead-magnets/style-kit' },
+            { label: 'Image Bank', href: '/lead-magnets/images' },
+        ]},
         { label: 'Partnerships', href: '/partnerships' },
         { label: 'BRAIN', href: '/brain', items: [
             { label: 'BRAIN', href: '/brain' },

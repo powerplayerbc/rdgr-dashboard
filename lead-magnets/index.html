@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Lead Magnets | RDGR Command Center</title>
+<link rel="preconnect" href="https://carltondb.72.60.67.2.sslip.io" crossorigin>
+<link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+<script>
+  // Instant auth check + theme application — runs before body renders
+  try { if (JSON.parse(localStorage.getItem('rdgr-session')||'{}').authenticated) document.documentElement.classList.add('rdgr-authed'); } catch(e){}
+  try {
+    var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+    var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+    var _presets = {
+      rdgr: { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' }
+    };
+    var _t = (_tc.preset === 'custom' && _tc.custom) ? _tc.custom : (_presets[_tc.preset] || _presets.rdgr);
+    var _r = document.documentElement;
+    _r.style.setProperty('--deft-accent', _t.accent);
+    _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+    _r.style.setProperty('--deft-accent-warm', _t.accentWarm || _t.accent);
+    _r.style.setProperty('--deft-base', _t.base);
+    _r.style.setProperty('--deft-surface', _t.surface);
+    _r.style.setProperty('--deft-surface-el', _t.surfaceEl || _t.surface);
+    _r.style.setProperty('--deft-surface-hi', _t.surfaceHi || _t.surfaceEl || _t.surface);
+    _r.style.setProperty('--deft-border', _t.border);
+    _r.style.setProperty('--deft-success', _t.success || '#06D6A0');
+    _r.style.setProperty('--deft-success-dim', (_t.success || '#06D6A0') + '26');
+    _r.style.setProperty('--deft-warning', _t.warning || '#FFD93D');
+    _r.style.setProperty('--deft-warning-dim', (_t.warning || '#FFD93D') + '26');
+    _r.style.setProperty('--deft-danger', _t.danger || '#FF6B6B');
+    _r.style.setProperty('--deft-danger-dim', (_t.danger || '#FF6B6B') + '26');
+    _r.style.setProperty('--deft-txt', _t.txt);
+    _r.style.setProperty('--deft-txt-2', _t.txt2 || '#8A95A9');
+    _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
+    _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
+    _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+  } catch(e) {}
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: {
+      'deft-base':'#08090D', surface:'#11131A', 'surface-el':'#1A1D28', 'surface-hi':'#242836',
+      border:'#2A2E3D', accent:'#06D6A0', 'accent-dim':'rgba(6,214,160,0.15)',
+      alert:'#FF6B6B', warn:'#FFD93D', info:'#4CC9F0',
+      txt:'#E8ECF1', 'txt-2':'#8A95A9', 'txt-3':'#525E73',
+    },
+    fontFamily: { heading:['"Chakra Petch"','system-ui','sans-serif'], body:['"IBM Plex Sans"','system-ui','sans-serif'], mono:['"JetBrains Mono"','monospace'] },
+  }}}
+</script>
+<style>
+  html.rdgr-authed .gate-overlay { display:none !important; }
+  html.rdgr-authed #mainContent { opacity:1 !important; }
+  body {
+    background: var(--deft-base, #08090D) !important;
+    color: var(--deft-txt, #E8ECF1) !important;
+    font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3,.font-heading { font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important; }
+  .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+  .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+  .text-accent { color: var(--deft-accent, #06D6A0) !important; }
+  .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D); border-radius:3px; }
+
+  .gate-overlay { position:fixed; inset:0; z-index:9999; background: radial-gradient(ellipse at center, #0D0F16 0%, #08090D 70%); display:flex; align-items:center; justify-content:center; }
+  .gate-input { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:0.5rem; padding:0.875rem 1rem; color:#E8ECF1; font-family:'JetBrains Mono',monospace; font-size:0.9rem; outline:none; width:100%; }
+  .gate-input:focus { border-color:rgba(6,214,160,0.4); box-shadow:0 0 0 3px rgba(6,214,160,0.08); }
+
+  .panel { background: var(--deft-surface, #11131A); border:1px solid var(--deft-border, #2A2E3D); border-radius:0.75rem; overflow:hidden; }
+  .panel-header { padding:0.875rem 1.25rem; border-bottom:1px solid var(--deft-border, #2A2E3D); display:flex; align-items:center; justify-content:space-between; }
+  .panel-body { padding:1rem 1.25rem; }
+
+  .badge { font-family:'JetBrains Mono',monospace; font-size:0.6rem; font-weight:500; letter-spacing:0.05em; text-transform:uppercase; padding:0.2rem 0.5rem; border-radius:0.25rem; line-height:1; white-space:nowrap; display:inline-block; }
+  .st-draft { background:rgba(138,149,169,0.15); color:#8A95A9; }
+  .st-generating { background:rgba(76,201,240,0.15); color:#4CC9F0; }
+  .st-review { background:rgba(255,217,61,0.15); color:#FFD93D; }
+  .st-approved { background:rgba(6,214,160,0.15); color:#06D6A0; }
+  .st-published { background:rgba(168,85,247,0.15); color:#A855F7; }
+  .bc-none { background:rgba(82,94,115,0.15); color:#525E73; }
+  .bc-drafted { background:rgba(255,217,61,0.15); color:#FFD93D; }
+  .bc-approved { background:rgba(6,214,160,0.15); color:#06D6A0; }
+  .bc-sent { background:rgba(76,201,240,0.15); color:#4CC9F0; }
+
+  .chip { display:inline-flex; align-items:center; gap:2px; padding:1px 8px; border-radius:999px; font-size:0.62rem; font-weight:500; background:rgba(76,201,240,0.1); color:#4CC9F0; border:1px solid rgba(76,201,240,0.15); white-space:nowrap; }
+  .chip-sel { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:999px; font-size:0.7rem; font-weight:500; cursor:pointer; border:1px solid var(--deft-border,#2A2E3D); color:#8A95A9; background:transparent; transition:all .15s; }
+  .chip-sel.on { background:rgba(6,214,160,0.12); color:#06D6A0; border-color:rgba(6,214,160,0.3); }
+
+  .btn { font-family:'Chakra Petch',system-ui; font-weight:600; font-size:0.78rem; letter-spacing:0.03em; padding:0.5rem 1rem; border-radius:0.375rem; cursor:pointer; transition:all 0.2s; border:none; text-transform:uppercase; }
+  .btn-primary { background:rgba(6,214,160,0.15); color:#06D6A0; border:1px solid rgba(6,214,160,0.3); }
+  .btn-primary:hover { background:rgba(6,214,160,0.25); }
+  .btn-ghost { background:transparent; color:#8A95A9; border:1px solid var(--deft-border,#2A2E3D); }
+  .btn-ghost:hover { background:rgba(255,255,255,0.03); color:#E8ECF1; }
+  .btn-approve { background:rgba(6,214,160,0.15); color:#06D6A0; border:1px solid rgba(6,214,160,0.25); }
+  .btn-approve:hover { background:rgba(6,214,160,0.25); }
+  .btn-warn { background:rgba(76,201,240,0.15); color:#4CC9F0; border:1px solid rgba(76,201,240,0.25); }
+  .btn-warn:hover { background:rgba(76,201,240,0.25); }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+  .form-input { background:rgba(255,255,255,0.03); border:1px solid var(--deft-border,#2A2E3D); border-radius:0.375rem; padding:0.625rem 0.75rem; color:#E8ECF1; font-family:'IBM Plex Sans',system-ui; font-size:0.875rem; width:100%; outline:none; transition:border-color 0.2s, box-shadow 0.2s; }
+  .form-input:focus { border-color:rgba(6,214,160,0.4); box-shadow:0 0 0 2px rgba(6,214,160,0.08); }
+  .form-input::placeholder { color:#525E73; }
+  select.form-input { cursor:pointer; }
+  select.form-input option { background:var(--deft-surface-el,#1A1D28); color:#E8ECF1; }
+  textarea.form-input { resize:vertical; min-height:80px; }
+  .form-label { display:block; font-size:0.65rem; font-weight:600; color:var(--deft-txt-2,#8A95A9); margin-bottom:0.3rem; text-transform:uppercase; letter-spacing:0.04em; }
+
+  .lm-card { position:relative; background:var(--deft-surface,#11131A); border:1px solid var(--deft-border,#2A2E3D); border-radius:0.6rem; overflow:hidden; cursor:pointer; transition:border-color 0.2s, transform 0.15s, box-shadow 0.2s; }
+  .lm-card:hover { border-color:rgba(6,214,160,0.4); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.3); }
+  .lm-cover { width:100%; aspect-ratio:1.4/1; object-fit:cover; background:var(--deft-surface-el,#1A1D28); display:block; }
+  .lm-cover-ph { width:100%; aspect-ratio:1.4/1; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(6,214,160,0.06), rgba(76,201,240,0.06)); color:#525E73; font-size:0.75rem; }
+
+  .modal-backdrop { position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; opacity:0; visibility:hidden; transition:opacity 0.25s, visibility 0.25s; padding:1rem; }
+  .modal-backdrop.active { opacity:1; visibility:visible; }
+  .modal-content { background:var(--deft-surface,#11131A); border:1px solid var(--deft-border,#2A2E3D); border-radius:0.75rem; width:90%; max-width:560px; max-height:90vh; overflow-y:auto; transform:translateY(20px); transition:transform 0.25s; }
+  .modal-backdrop.active .modal-content { transform:translateY(0); }
+
+  .toast-container { position:fixed; bottom:1.5rem; right:1.5rem; z-index:200; display:flex; flex-direction:column; gap:0.5rem; }
+  .toast { padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.8rem; animation:toast-in 0.3s ease forwards; max-width:380px; }
+  .toast-success { background:rgba(6,214,160,0.15); border:1px solid rgba(6,214,160,0.3); color:#06D6A0; }
+  .toast-error { background:rgba(255,107,107,0.15); border:1px solid rgba(255,107,107,0.3); color:#FF6B6B; }
+  @keyframes toast-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+  .empty-state { text-align:center; padding:3rem 1rem; color:#525E73; font-size:0.85rem; }
+  .skeleton { background:linear-gradient(90deg,#1A1D28 25%,#242836 50%,#1A1D28 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:0.5rem; }
+  @keyframes shimmer { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
+
+  .ver-row { padding:0.75rem 1rem; border:1px solid var(--deft-border,#2A2E3D); border-radius:0.5rem; background:rgba(255,255,255,0.015); margin-bottom:0.5rem; }
+  .spin { display:inline-block; width:12px; height:12px; border:2px solid rgba(255,255,255,0.15); border-top-color:#4CC9F0; border-radius:50%; animation:sp 0.6s linear infinite; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ═══ PASSWORD GATE ═══ -->
+<div class="gate-overlay">
+  <div class="max-w-sm w-full px-6 text-center">
+    <div class="inline-flex items-center gap-2 mb-4">
+      <div class="w-2 h-2 rounded-full" style="background:#06D6A0;opacity:0.6;"></div>
+      <span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span>
+    </div>
+    <h1 class="font-heading text-2xl font-bold mb-5">Lead Magnets</h1>
+    <input id="gatePw" type="password" placeholder="Access code" class="gate-input mb-3" onkeydown="if(event.key==='Enter')gate()" autocomplete="off">
+    <button onclick="gate()" class="btn btn-primary w-full py-3">Enter</button>
+    <div id="gateErr" class="text-xs mt-2" style="color:#FF6B6B;"></div>
+  </div>
+</div>
+
+<div id="mainContent" style="opacity:0;">
+  <div id="nav-root"></div>
+
+  <main class="max-w-[1400px] mx-auto px-4 sm:px-6 py-6">
+
+    <!-- ═══ LIBRARY VIEW ═══ -->
+    <section id="libraryView">
+      <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
+        <div>
+          <h1 class="text-xl font-bold">Lead Magnet Library</h1>
+          <p class="text-xs text-txt-2 mt-0.5">Dianna Carlton · downloadable lead magnets &amp; versions</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/lead-magnets/style-kit" class="btn btn-ghost" style="text-decoration:none;display:inline-flex;align-items:center;">Style Kit</a>
+          <a href="/lead-magnets/images" class="btn btn-ghost" style="text-decoration:none;display:inline-flex;align-items:center;">Image Bank</a>
+          <button class="btn btn-primary" onclick="openModal('newModal')">+ New Idea</button>
+        </div>
+      </div>
+
+      <div id="libGrid" class="grid gap-4" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));"></div>
+    </section>
+
+    <!-- ═══ DETAIL VIEW ═══ -->
+    <section id="detailView" class="hidden">
+      <button class="btn btn-ghost mb-4" onclick="showLibrary()">&larr; Back to library</button>
+      <div id="detailBody"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ═══ NEW IDEA MODAL ═══ -->
+<div class="modal-backdrop" id="newModal">
+  <div class="modal-content">
+    <div class="panel-header">
+      <h3 class="font-heading font-bold text-base">New Lead Magnet Idea</h3>
+      <button class="text-txt-3" onclick="closeModal('newModal')" style="background:none;border:none;font-size:1.3rem;cursor:pointer;line-height:1;">&times;</button>
+    </div>
+    <div class="panel-body space-y-3.5">
+      <div>
+        <label class="form-label">Title</label>
+        <input id="nmTitle" class="form-input" placeholder="e.g. The 5-Day Reset Guide">
+      </div>
+      <div>
+        <label class="form-label">Idea / Details</label>
+        <textarea id="nmIdea" class="form-input" placeholder="Describe the concept, what it should cover, the tone..."></textarea>
+      </div>
+      <div>
+        <label class="form-label">Themes</label>
+        <div id="nmThemes" class="flex flex-wrap gap-2 mb-2"></div>
+        <input id="nmThemeAdd" class="form-input" placeholder="Add a custom theme + Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTheme(this);}">
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="form-label">Audience</label>
+          <input id="nmAudience" class="form-input" placeholder="e.g. busy homeschool moms">
+        </div>
+        <div>
+          <label class="form-label">Goal / CTA</label>
+          <input id="nmGoal" class="form-input" placeholder="e.g. book a discovery call">
+        </div>
+      </div>
+      <div>
+        <label class="form-label">Desired Length</label>
+        <select id="nmLength" class="form-input">
+          <option value="1-pager">1-pager</option>
+          <option value="short 3-5pg" selected>Short (3-5 pages)</option>
+          <option value="standard 6-10pg">Standard (6-10 pages)</option>
+          <option value="deep 10+pg">Deep (10+ pages)</option>
+        </select>
+      </div>
+    </div>
+    <div class="panel-body flex justify-end gap-2" style="border-top:1px solid var(--deft-border,#2A2E3D);">
+      <button class="btn btn-ghost" onclick="closeModal('newModal')">Cancel</button>
+      <button class="btn btn-primary" id="nmSubmit" onclick="createIdea()">Create</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<script src="/js/shared-nav.js?v=2026-06-28"></script>
+<script>
+'use strict';
+const SUPABASE_URL = 'https://carltondb.72.60.67.2.sslip.io';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';
+const BRAND = 'dianna';
+const THEME_OPTS = ['fitness','homeschooling','ai','business','general'];
+
+// ── state ──
+let magnets = [];
+let selectedThemes = [];
+let activeMagnet = null;
+
+// ── utils ──
+function esc(str){ const d=document.createElement('div'); d.textContent = (str==null?'':str); return d.innerHTML; }
+function toast(message, type='success'){
+  const c=document.getElementById('toasts'); const el=document.createElement('div');
+  el.className='toast toast-'+type; el.textContent=message; c.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; setTimeout(()=>el.remove(),300); },4000);
+}
+function openModal(id){ document.getElementById(id).classList.add('active'); }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+function fmtDate(s){ if(!s) return '—'; return new Date(s).toLocaleString('en-US',{timeZone:'America/Los_Angeles',month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true}); }
+function activeProfileName(){ try{ const p=JSON.parse(localStorage.getItem('rdgr-active-profile')||'{}'); return p.name||'qa-agent'; }catch(e){ return 'qa-agent'; } }
+
+// ── gate ──
+function gate(){
+  const pw=document.getElementById('gatePw').value;
+  if(pw==='Advance1!'){ localStorage.setItem('rdgr-session',JSON.stringify({authenticated:true})); document.documentElement.classList.add('rdgr-authed'); init(); }
+  else document.getElementById('gateErr').textContent='Wrong password';
+}
+
+// ── PostgREST helpers ──
+async function sbSelect(table, query=''){
+  const url=`${SUPABASE_URL}/rest/v1/${table}?${query}`;
+  try {
+    const res=await fetch(url,{ headers:{ 'apikey':SUPABASE_ANON_KEY, 'Authorization':`Bearer ${SUPABASE_ANON_KEY}` }});
+    if(!res.ok){ console.error('Supabase select error:', res.status, await res.text()); return null; }
+    return await res.json();
+  } catch(err){ console.error('Supabase select fetch error:', table, err); return null; }
+}
+async function sbWrite(table, method, body, matchQuery=''){
+  const url=`${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`;
+  try {
+    const res=await fetch(url,{
+      method,
+      headers:{ 'apikey':SUPABASE_ANON_KEY, 'Authorization':`Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type':'application/json', 'Prefer':'return=representation' },
+      body: method==='DELETE' ? undefined : JSON.stringify(body)
+    });
+    if(!res.ok){ const t=await res.text(); console.error('Supabase write error:', res.status, t); return null; }
+    const text=await res.text(); return text ? JSON.parse(text) : true;
+  } catch(err){ console.error('Supabase write error:', err); return null; }
+}
+
+// ═══ LIBRARY ═══
+async function loadLibrary(){
+  const grid=document.getElementById('libGrid');
+  grid.innerHTML = Array.from({length:4}).map(()=>'<div class="skeleton" style="height:230px;"></div>').join('');
+  const rows=await sbSelect('lead_magnets', `brand_id=eq.${BRAND}&order=updated_at.desc&select=*`);
+  if(rows===null){ grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;color:#FF6B6B;">Failed to load lead magnets. Check connection and try again.</div>'; return; }
+  magnets = Array.isArray(rows) ? rows : [];
+  if(!magnets.length){ grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;">No lead magnets yet. Click <strong>+ New Idea</strong> to start one.</div>'; return; }
+  grid.innerHTML = magnets.map(libCard).join('');
+}
+function libCard(m){
+  const themes=(m.themes||[]).map(t=>`<span class="chip">${esc(t)}</span>`).join(' ');
+  const cover = m.cover_image_url
+    ? `<img class="lm-cover" src="${esc(m.cover_image_url)}" alt="" onerror="this.outerHTML='<div class=\\'lm-cover-ph\\'>cover unavailable</div>'">`
+    : `<div class="lm-cover-ph">no cover yet</div>`;
+  const bc = (m.broadcast_status && m.broadcast_status!=='none')
+    ? `<span class="badge bc-${esc(m.broadcast_status)}">${esc(m.broadcast_status)}</span>` : '';
+  const miss = (Array.isArray(m.missing_assets) && m.missing_assets.length)
+    ? `<span class="badge" title="${esc(m.missing_assets.length+' image(s) Claude flagged as needed but could not capture')}" style="background:#5a3a00;color:#ffd27a;">⚠ ${m.missing_assets.length} img</span>` : '';
+  return `<div class="lm-card" onclick="openDetail('${m.id}')">
+    ${cover}
+    ${miss?`<div style="position:absolute;top:8px;left:8px;">${miss}</div>`:''}
+    <div style="padding:0.75rem 0.875rem;">
+      <div class="flex items-start justify-between gap-2 mb-1.5">
+        <div class="font-heading font-semibold text-sm leading-tight">${esc(m.title||'Untitled')}</div>
+        <span class="badge st-${esc(m.status||'draft')}">${esc(m.status||'draft')}</span>
+      </div>
+      <div class="flex flex-wrap gap-1 mb-2">${themes||'<span class="text-txt-3 text-xs">no themes</span>'}</div>
+      <div class="flex items-center justify-between text-xs text-txt-3">
+        <span class="font-mono">v${m.current_version!=null?m.current_version:0}</span>
+        <span>${bc}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══ NEW IDEA MODAL ═══
+function renderThemeSelector(){
+  const wrap=document.getElementById('nmThemes');
+  const all = Array.from(new Set([...THEME_OPTS, ...selectedThemes]));
+  wrap.innerHTML = all.map(t=>`<span class="chip-sel ${selectedThemes.includes(t)?'on':''}" onclick="toggleTheme('${esc(t)}')">${esc(t)}</span>`).join('');
+}
+function toggleTheme(t){
+  const i=selectedThemes.indexOf(t);
+  if(i>-1) selectedThemes.splice(i,1); else selectedThemes.push(t);
+  renderThemeSelector();
+}
+function addCustomTheme(input){
+  const v=input.value.trim().toLowerCase();
+  if(v && !selectedThemes.includes(v)) selectedThemes.push(v);
+  input.value=''; renderThemeSelector();
+}
+async function createIdea(){
+  const title=document.getElementById('nmTitle').value.trim();
+  if(!title){ toast('Title is required','error'); return; }
+  const btn=document.getElementById('nmSubmit'); btn.disabled=true; btn.textContent='Creating…';
+  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80) || ('lm-'+Date.now());
+  const body={
+    brand_id: BRAND,
+    title,
+    slug,
+    status: 'draft',
+    idea_input: document.getElementById('nmIdea').value.trim() || null,
+    audience: document.getElementById('nmAudience').value.trim() || null,
+    goal_cta: document.getElementById('nmGoal').value.trim() || null,
+    desired_length: document.getElementById('nmLength').value,
+    themes: selectedThemes.slice(),
+    current_version: 0,
+    broadcast_status: 'none',
+    created_by: activeProfileName()
+  };
+  const res=await sbWrite('lead_magnets','POST',body);
+  btn.disabled=false; btn.textContent='Create';
+  if(res){
+    toast('Lead magnet idea created');
+    closeModal('newModal');
+    // reset form
+    document.getElementById('nmTitle').value=''; document.getElementById('nmIdea').value='';
+    document.getElementById('nmAudience').value=''; document.getElementById('nmGoal').value='';
+    selectedThemes=[]; renderThemeSelector();
+    await loadLibrary();
+  } else { toast('Failed to create idea','error'); }
+}
+
+// ═══ DETAIL ═══
+function showLibrary(){
+  document.getElementById('detailView').classList.add('hidden');
+  document.getElementById('libraryView').classList.remove('hidden');
+  if(history.pushState) history.pushState({}, '', '/lead-magnets');
+}
+async function openDetail(id){
+  if(history.pushState) history.pushState({}, '', '/lead-magnets?id='+id);
+  document.getElementById('libraryView').classList.add('hidden');
+  const dv=document.getElementById('detailView'); dv.classList.remove('hidden');
+  document.getElementById('detailBody').innerHTML='<div class="skeleton" style="height:300px;"></div>';
+  window.scrollTo(0,0);
+  const rows=await sbSelect('lead_magnets', `id=eq.${id}&select=*&limit=1`);
+  if(!rows || !rows.length){ document.getElementById('detailBody').innerHTML='<div class="empty-state" style="color:#FF6B6B;">Lead magnet not found.</div>'; return; }
+  activeMagnet = rows[0];
+  const versions = await sbSelect('lead_magnet_versions', `lead_magnet_id=eq.${id}&order=version.desc&select=*`) || [];
+  renderDetail(activeMagnet, versions);
+}
+function renderDetail(m, versions){
+  const themes=(m.themes||[]).map(t=>`<span class="chip">${esc(t)}</span>`).join(' ') || '<span class="text-txt-3 text-xs">no themes</span>';
+  const cover = m.cover_image_url
+    ? `<img src="${esc(m.cover_image_url)}" alt="" style="max-width:280px;width:100%;border-radius:0.5rem;border:1px solid var(--deft-border,#2A2E3D);" onerror="this.style.display='none'">`
+    : `<div class="lm-cover-ph" style="max-width:280px;border-radius:0.5rem;border:1px solid var(--deft-border,#2A2E3D);">no cover yet</div>`;
+
+  const pdfBtn = m.pdf_url ? `<a href="${esc(m.pdf_url)}" target="_blank" rel="noopener" class="btn btn-warn" style="text-decoration:none;display:inline-flex;align-items:center;">Open PDF &nearr;</a>` : '';
+  const iframe = m.drive_file_id ? `<div class="panel mt-4"><div class="panel-header"><h3 class="font-heading font-semibold text-sm">Document Preview</h3></div><iframe src="https://drive.google.com/file/d/${esc(m.drive_file_id)}/preview" style="width:100%;height:520px;border:0;display:block;" allow="autoplay"></iframe></div>` : '';
+
+  const verHtml = versions.length ? versions.map(v=>{
+    const pending = !v.pdf_url;
+    const links = [];
+    if(v.cover_image_url) links.push(`<a href="${esc(v.cover_image_url)}" target="_blank" rel="noopener" class="text-accent" style="text-decoration:underline;">cover</a>`);
+    if(v.pdf_url) links.push(`<a href="${esc(v.pdf_url)}" target="_blank" rel="noopener" class="text-accent" style="text-decoration:underline;">pdf</a>`);
+    return `<div class="ver-row">
+      <div class="flex items-center justify-between gap-2 mb-1">
+        <div class="flex items-center gap-2">
+          <span class="font-mono font-semibold text-sm">v${v.version}</span>
+          ${pending?'<span class="badge st-generating"><span class="spin" style="vertical-align:-1px;margin-right:4px;"></span>generating…</span>':''}
+        </div>
+        <span class="text-xs text-txt-3">${fmtDate(v.created_at)}</span>
+      </div>
+      ${v.change_request?`<div class="text-xs text-txt-2 mb-1"><span class="text-txt-3">change request:</span> ${esc(v.change_request)}</div>`:''}
+      ${v.notes?`<div class="text-xs text-txt-2 mb-1">${esc(v.notes)}</div>`:''}
+      ${links.length?`<div class="flex gap-3 text-xs mt-1">${links.join('')}</div>`:''}
+    </div>`;
+  }).join('') : '<div class="empty-state">No versions yet. Request changes below to queue generation.</div>';
+
+  const bc = m.broadcast_status || 'none';
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="flex items-start justify-between flex-wrap gap-3 mb-4">
+      <div>
+        <div class="flex items-center gap-2 flex-wrap mb-1">
+          <h1 class="text-2xl font-bold">${esc(m.title||'Untitled')}</h1>
+          <span class="badge st-${esc(m.status||'draft')}">${esc(m.status||'draft')}</span>
+          <span class="font-mono text-xs text-txt-3">v${m.current_version!=null?m.current_version:0}</span>
+        </div>
+        <div class="flex flex-wrap gap-1.5 mb-2">${themes}</div>
+        <div class="text-sm text-txt-2 space-y-0.5">
+          ${m.audience?`<div><span class="text-txt-3">Audience:</span> ${esc(m.audience)}</div>`:''}
+          ${m.goal_cta?`<div><span class="text-txt-3">Goal / CTA:</span> ${esc(m.goal_cta)}</div>`:''}
+          ${m.desired_length?`<div><span class="text-txt-3">Length:</span> ${esc(m.desired_length)}</div>`:''}
+        </div>
+      </div>
+    </div>
+
+    ${m.synopsis||m.value_hook?`<div class="panel mb-4"><div class="panel-body">
+      ${m.value_hook?`<div class="text-sm mb-2"><span class="text-txt-3 text-xs uppercase tracking-wide">Value Hook</span><br>${esc(m.value_hook)}</div>`:''}
+      ${m.synopsis?`<div class="text-sm text-txt-2"><span class="text-txt-3 text-xs uppercase tracking-wide">Synopsis</span><br>${esc(m.synopsis)}</div>`:''}
+    </div></div>`:''}
+
+    <div class="grid gap-4" style="grid-template-columns:280px 1fr;align-items:start;">
+      <div>
+        ${cover}
+        <div class="flex flex-wrap gap-2 mt-3">${pdfBtn}</div>
+      </div>
+      <div>
+        <div class="panel">
+          <div class="panel-header"><h3 class="font-heading font-semibold text-sm">Request Changes</h3></div>
+          <div class="panel-body">
+            <p class="text-xs text-txt-2 mb-2">Queue a new version. This sets status to <strong>generating</strong> and Claude Code will fill in the new draft.</p>
+            <textarea id="changeReq" class="form-input mb-2" placeholder="e.g. make the intro punchier, add a checklist on page 2, swap the cover photo..."></textarea>
+            <button class="btn btn-warn" id="changeBtn" onclick="requestChanges()">Submit change request</button>
+          </div>
+        </div>
+
+        <div class="panel mt-4">
+          <div class="panel-header">
+            <h3 class="font-heading font-semibold text-sm">Status Controls</h3>
+            <span class="text-xs text-txt-3">Broadcast: <span class="badge bc-${esc(bc)}">${esc(bc)}</span></span>
+          </div>
+          <div class="panel-body">
+            <div class="flex flex-wrap gap-2 mb-2">
+              <button class="btn btn-approve" onclick="setStatus('approved')">Mark approved</button>
+              <button class="btn btn-ghost" onclick="setStatus('review')">Send to review</button>
+              <button class="btn btn-ghost" onclick="setStatus('draft')">Back to draft</button>
+            </div>
+            <p class="text-xs text-txt-3">Publishing &amp; broadcast (sending to subscribers) is done from Claude Code after approval.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${iframe}
+
+    <div class="panel mt-4">
+      <div class="panel-header"><h3 class="font-heading font-semibold text-sm">Version History</h3></div>
+      <div class="panel-body">${verHtml}</div>
+    </div>
+  `;
+}
+
+async function requestChanges(){
+  if(!activeMagnet) return;
+  const txt=document.getElementById('changeReq').value.trim();
+  if(!txt){ toast('Describe the change you want','error'); return; }
+  const btn=document.getElementById('changeBtn'); btn.disabled=true; btn.textContent='Submitting…';
+  const nextVer = (activeMagnet.current_version!=null?activeMagnet.current_version:0) + 1;
+  // 1) placeholder version row (pdf null = "requested / generating")
+  const verRes=await sbWrite('lead_magnet_versions','POST',{
+    lead_magnet_id: activeMagnet.id,
+    version: nextVer,
+    change_request: txt,
+    created_by: activeProfileName()
+  });
+  // 2) flip the magnet to generating
+  const mRes=await sbWrite('lead_magnets','PATCH',{ status:'generating' }, `id=eq.${activeMagnet.id}`);
+  btn.disabled=false; btn.textContent='Submit change request';
+  if(verRes && mRes){
+    toast('Change request queued (v'+nextVer+')');
+    document.getElementById('changeReq').value='';
+    openDetail(activeMagnet.id);
+  } else { toast('Failed to submit change request','error'); }
+}
+
+async function setStatus(status){
+  if(!activeMagnet) return;
+  const res=await sbWrite('lead_magnets','PATCH',{ status }, `id=eq.${activeMagnet.id}`);
+  if(res){ toast('Status set to '+status); openDetail(activeMagnet.id); }
+  else { toast('Failed to update status','error'); }
+}
+
+// ── deep-link / nav ──
+function routeFromUrl(){
+  const id=new URLSearchParams(location.search).get('id');
+  if(id){ openDetail(id); } else { showLibraryInitial(); }
+}
+function showLibraryInitial(){
+  document.getElementById('detailView').classList.add('hidden');
+  document.getElementById('libraryView').classList.remove('hidden');
+}
+window.addEventListener('popstate', ()=>{ routeFromUrl(); });
+
+// ── init ──
+function init(){
+  renderThemeSelector();
+  loadLibrary();
+  routeFromUrl();
+}
+if(JSON.parse(localStorage.getItem('rdgr-session')||'{}').authenticated) init();
+</script>
+</body>
+</html>

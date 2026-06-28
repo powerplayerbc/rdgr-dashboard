@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Lead Magnet Style Kit | RDGR Command Center</title>
+<link rel="preconnect" href="https://carltondb.72.60.67.2.sslip.io" crossorigin>
+<link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+<script>
+  try { if (JSON.parse(localStorage.getItem('rdgr-session')||'{}').authenticated) document.documentElement.classList.add('rdgr-authed'); } catch(e){}
+  try {
+    var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+    var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+    var _presets = { rdgr: { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' } };
+    var _t = (_tc.preset === 'custom' && _tc.custom) ? _tc.custom : (_presets[_tc.preset] || _presets.rdgr);
+    var _r = document.documentElement;
+    _r.style.setProperty('--deft-accent', _t.accent);
+    _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+    _r.style.setProperty('--deft-base', _t.base);
+    _r.style.setProperty('--deft-surface', _t.surface);
+    _r.style.setProperty('--deft-surface-el', _t.surfaceEl || _t.surface);
+    _r.style.setProperty('--deft-surface-hi', _t.surfaceHi || _t.surfaceEl || _t.surface);
+    _r.style.setProperty('--deft-border', _t.border);
+    _r.style.setProperty('--deft-txt', _t.txt);
+    _r.style.setProperty('--deft-txt-2', _t.txt2 || '#8A95A9');
+    _r.style.setProperty('--deft-txt-3', _t.txt3 || '#525E73');
+    _r.style.setProperty('--deft-heading-font', _t.headingFont || 'Chakra Petch');
+    _r.style.setProperty('--deft-body-font', _t.bodyFont || 'IBM Plex Sans');
+  } catch(e) {}
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Google Fonts loader for rendering style-kit font samples is injected at runtime -->
+<script>
+  tailwind.config = { theme: { extend: { colors: {
+    'deft-base':'#08090D', surface:'#11131A', 'surface-el':'#1A1D28', border:'#2A2E3D', accent:'#06D6A0',
+    txt:'#E8ECF1', 'txt-2':'#8A95A9', 'txt-3':'#525E73',
+  }, fontFamily: { heading:['"Chakra Petch"','system-ui','sans-serif'], body:['"IBM Plex Sans"','system-ui','sans-serif'], mono:['"JetBrains Mono"','monospace'] } }}}
+</script>
+<style>
+  html.rdgr-authed .gate-overlay { display:none !important; }
+  html.rdgr-authed #mainContent { opacity:1 !important; }
+  body { background: var(--deft-base, #08090D) !important; color: var(--deft-txt, #E8ECF1) !important; font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif !important; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,.font-heading { font-family: var(--deft-heading-font, 'Chakra Petch'), system-ui, sans-serif !important; }
+  .text-txt-2 { color: var(--deft-txt-2, #8A95A9) !important; }
+  .text-txt-3 { color: var(--deft-txt-3, #525E73) !important; }
+  .text-accent { color: var(--deft-accent, #06D6A0) !important; }
+  .border-border { border-color: var(--deft-border, #2A2E3D) !important; }
+  ::-webkit-scrollbar { width:6px; height:6px; } ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--deft-border, #2A2E3D); border-radius:3px; }
+  .gate-overlay { position:fixed; inset:0; z-index:9999; background:radial-gradient(ellipse at center,#0D0F16 0%,#08090D 70%); display:flex; align-items:center; justify-content:center; }
+  .gate-input { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:0.5rem; padding:0.875rem 1rem; color:#E8ECF1; font-family:'JetBrains Mono',monospace; font-size:0.9rem; outline:none; width:100%; }
+  .gate-input:focus { border-color:rgba(6,214,160,0.4); box-shadow:0 0 0 3px rgba(6,214,160,0.08); }
+  .panel { background:var(--deft-surface,#11131A); border:1px solid var(--deft-border,#2A2E3D); border-radius:0.75rem; overflow:hidden; }
+  .panel-header { padding:0.875rem 1.25rem; border-bottom:1px solid var(--deft-border,#2A2E3D); display:flex; align-items:center; justify-content:space-between; }
+  .panel-body { padding:1rem 1.25rem; }
+  .btn { font-family:'Chakra Petch',system-ui; font-weight:600; font-size:0.78rem; letter-spacing:0.03em; padding:0.5rem 1rem; border-radius:0.375rem; cursor:pointer; transition:all 0.2s; border:none; text-transform:uppercase; }
+  .btn-primary { background:rgba(6,214,160,0.15); color:#06D6A0; border:1px solid rgba(6,214,160,0.3); }
+  .btn-primary:hover { background:rgba(6,214,160,0.25); }
+  .btn-ghost { background:transparent; color:#8A95A9; border:1px solid var(--deft-border,#2A2E3D); }
+  .btn-ghost:hover { background:rgba(255,255,255,0.03); color:#E8ECF1; }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .form-input { background:rgba(255,255,255,0.03); border:1px solid var(--deft-border,#2A2E3D); border-radius:0.375rem; padding:0.625rem 0.75rem; color:#E8ECF1; font-family:'IBM Plex Sans',system-ui; font-size:0.875rem; width:100%; outline:none; }
+  .form-input:focus { border-color:rgba(6,214,160,0.4); box-shadow:0 0 0 2px rgba(6,214,160,0.08); }
+  textarea.form-input { resize:vertical; min-height:80px; }
+  .swatch { width:34px; height:34px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); flex:0 0 auto; }
+  .opt-card { background:var(--deft-surface,#11131A); border:1px solid var(--deft-border,#2A2E3D); border-radius:0.6rem; padding:1rem; cursor:pointer; transition:border-color 0.2s, transform 0.15s; }
+  .opt-card:hover { border-color:rgba(6,214,160,0.4); transform:translateY(-2px); }
+  .opt-card.chosen { border-color:#06D6A0; box-shadow:0 0 0 1px #06D6A0 inset; }
+  .empty-state { text-align:center; padding:3rem 1rem; color:#525E73; font-size:0.85rem; }
+  .skeleton { background:linear-gradient(90deg,#1A1D28 25%,#242836 50%,#1A1D28 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:0.5rem; }
+  @keyframes shimmer { 0% { background-position:-200% 0; } 100% { background-position:200% 0; } }
+  .toast-container { position:fixed; bottom:1.5rem; right:1.5rem; z-index:200; display:flex; flex-direction:column; gap:0.5rem; }
+  .toast { padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.8rem; animation:toast-in 0.3s ease forwards; max-width:380px; }
+  .toast-success { background:rgba(6,214,160,0.15); border:1px solid rgba(6,214,160,0.3); color:#06D6A0; }
+  .toast-error { background:rgba(255,107,107,0.15); border:1px solid rgba(255,107,107,0.3); color:#FF6B6B; }
+  @keyframes toast-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+</style>
+</head>
+<body class="min-h-screen">
+
+<div class="gate-overlay">
+  <div class="max-w-sm w-full px-6 text-center">
+    <div class="inline-flex items-center gap-2 mb-4"><div class="w-2 h-2 rounded-full" style="background:#06D6A0;opacity:0.6;"></div><span class="font-mono text-xs text-accent tracking-widest uppercase">System Access</span></div>
+    <h1 class="font-heading text-2xl font-bold mb-5">Style Kit</h1>
+    <input id="gatePw" type="password" placeholder="Access code" class="gate-input mb-3" onkeydown="if(event.key==='Enter')gate()" autocomplete="off">
+    <button onclick="gate()" class="btn btn-primary w-full py-3">Enter</button>
+    <div id="gateErr" class="text-xs mt-2" style="color:#FF6B6B;"></div>
+  </div>
+</div>
+
+<div id="mainContent" style="opacity:0;">
+  <div id="nav-root"></div>
+  <main class="max-w-[1100px] mx-auto px-4 sm:px-6 py-6">
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
+      <div>
+        <h1 class="text-xl font-bold">Brand Style Kit</h1>
+        <p class="text-xs text-txt-2 mt-0.5">Dianna Carlton · fonts &amp; colors used to design lead magnets</p>
+      </div>
+      <a href="/lead-magnets" class="btn btn-ghost" style="text-decoration:none;display:inline-flex;align-items:center;">&larr; Library</a>
+    </div>
+    <div id="kitBody"><div class="skeleton" style="height:240px;"></div></div>
+  </main>
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<script src="/js/shared-nav.js?v=2026-06-28"></script>
+<script>
+'use strict';
+const SUPABASE_URL = 'https://carltondb.72.60.67.2.sslip.io';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';
+const BRAND = 'dianna';
+let activeKit = null;
+
+function esc(str){ const d=document.createElement('div'); d.textContent=(str==null?'':str); return d.innerHTML; }
+function toast(message, type='success'){ const c=document.getElementById('toasts'); const el=document.createElement('div'); el.className='toast toast-'+type; el.textContent=message; c.appendChild(el); setTimeout(()=>{ el.style.opacity='0'; setTimeout(()=>el.remove(),300); },4000); }
+function gate(){ const pw=document.getElementById('gatePw').value; if(pw==='Advance1!'){ localStorage.setItem('rdgr-session',JSON.stringify({authenticated:true})); document.documentElement.classList.add('rdgr-authed'); init(); } else document.getElementById('gateErr').textContent='Wrong password'; }
+
+async function sbSelect(table, query=''){ const url=`${SUPABASE_URL}/rest/v1/${table}?${query}`; try { const res=await fetch(url,{ headers:{ 'apikey':SUPABASE_ANON_KEY, 'Authorization':`Bearer ${SUPABASE_ANON_KEY}` }}); if(!res.ok){ console.error('select err', res.status, await res.text()); return null; } return await res.json(); } catch(e){ console.error('select fetch err', table, e); return null; } }
+async function sbWrite(table, method, body, matchQuery=''){ const url=`${SUPABASE_URL}/rest/v1/${table}?${matchQuery}`; try { const res=await fetch(url,{ method, headers:{ 'apikey':SUPABASE_ANON_KEY, 'Authorization':`Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type':'application/json', 'Prefer':'return=representation' }, body: method==='DELETE'?undefined:JSON.stringify(body) }); if(!res.ok){ console.error('write err', res.status, await res.text()); return null; } const t=await res.text(); return t?JSON.parse(t):true; } catch(e){ console.error('write err', e); return null; } }
+
+// Load a Google Font family at runtime so we can render it as a sample.
+const _loadedFonts = new Set();
+function ensureGoogleFont(family){
+  if(!family) return;
+  const key=family.trim();
+  if(_loadedFonts.has(key)) return;
+  _loadedFonts.add(key);
+  const link=document.createElement('link'); link.rel='stylesheet';
+  link.href='https://fonts.googleapis.com/css2?family='+encodeURIComponent(key).replace(/%20/g,'+')+':wght@400;500;600;700&display=swap';
+  document.head.appendChild(link);
+}
+function colorSwatches(colors){
+  if(!colors) return '<span class="text-txt-3 text-xs">no colors</span>';
+  let entries=[];
+  if(Array.isArray(colors)) entries=colors.map((c,i)=>[String(i+1), c]);
+  else if(typeof colors==='object') entries=Object.entries(colors);
+  return entries.map(([k,v])=>`<div class="flex flex-col items-center gap-1"><div class="swatch" style="background:${esc(String(v))}"></div><span class="text-[0.55rem] text-txt-3 font-mono">${esc(k)}</span></div>`).join('');
+}
+
+async function loadKit(){
+  const body=document.getElementById('kitBody');
+  const rows=await sbSelect('brand_style_kit', `brand_id=eq.${BRAND}&order=created_at.desc&select=*`);
+  if(rows===null){ body.innerHTML='<div class="empty-state" style="color:#FF6B6B;">Failed to load style kit. Check connection and try again.</div>'; return; }
+  if(!rows.length){ body.innerHTML='<div class="empty-state">No style kit yet for Dianna. Ask Claude to run style initialization to generate font &amp; color options.</div>'; return; }
+  // active kit preferred, else most recent
+  activeKit = rows.find(k=>k.is_active) || rows[0];
+  renderKit(activeKit);
+}
+
+function renderKit(k){
+  const fonts=k.fonts||{};
+  ensureGoogleFont(fonts.heading); ensureGoogleFont(fonts.body);
+  const headingFont = fonts.heading ? `'${fonts.heading}', system-ui, sans-serif` : 'inherit';
+  const bodyFont = fonts.body ? `'${fonts.body}', system-ui, sans-serif` : 'inherit';
+
+  const opts = Array.isArray(k.sample_options) ? k.sample_options : [];
+  const optionsHtml = opts.length ? `
+    <div class="panel mt-4">
+      <div class="panel-header"><h3 class="font-heading font-semibold text-sm">Style Options</h3><span class="text-xs text-txt-3">Select one to set the chosen style</span></div>
+      <div class="panel-body grid gap-3" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
+        ${opts.map(o=>renderOption(o, k.chosen_option)).join('')}
+      </div>
+    </div>` : `
+    <div class="panel mt-4"><div class="panel-body empty-state">No style options generated yet — ask Claude to run style initialization.</div></div>`;
+
+  document.getElementById('kitBody').innerHTML = `
+    <div class="panel">
+      <div class="panel-header">
+        <h3 class="font-heading font-semibold text-sm">${esc(k.name||'Active Kit')} ${k.is_active?'<span class="text-accent text-xs">· active</span>':''}</h3>
+      </div>
+      <div class="panel-body">
+        <div class="grid gap-5" style="grid-template-columns:1fr 1fr;">
+          <div>
+            <div class="text-xs uppercase tracking-wide text-txt-3 mb-2">Fonts</div>
+            <div class="mb-3">
+              <div class="text-[0.6rem] text-txt-3 mb-0.5">Heading${fonts.heading?' · '+esc(fonts.heading):''}</div>
+              <div style="font-family:${headingFont};font-size:1.6rem;font-weight:700;line-height:1.1;">Aa Bb Cc</div>
+            </div>
+            <div>
+              <div class="text-[0.6rem] text-txt-3 mb-0.5">Body${fonts.body?' · '+esc(fonts.body):''}</div>
+              <div style="font-family:${bodyFont};font-size:1rem;line-height:1.5;">The quick brown fox jumps over the lazy dog. 1234567890</div>
+            </div>
+          </div>
+          <div>
+            <div class="text-xs uppercase tracking-wide text-txt-3 mb-2">Colors</div>
+            <div class="flex flex-wrap gap-3">${colorSwatches(k.colors)}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${optionsHtml}
+
+    <div class="panel mt-4">
+      <div class="panel-header"><h3 class="font-heading font-semibold text-sm">Style Notes</h3></div>
+      <div class="panel-body">
+        <textarea id="styleNotes" class="form-input mb-2" placeholder="Notes on tone, do's and don'ts, imagery direction...">${esc(k.style_notes||'')}</textarea>
+        <button class="btn btn-primary" id="notesBtn" onclick="saveNotes()">Save notes</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderOption(o, chosenKey){
+  const fonts=o.fonts||{};
+  ensureGoogleFont(fonts.heading); ensureGoogleFont(fonts.body);
+  const headingFont = fonts.heading ? `'${fonts.heading}', system-ui, sans-serif` : 'inherit';
+  const isChosen = chosenKey && o.key===chosenKey;
+  const preview = o.preview_url ? `<img src="${esc(o.preview_url)}" alt="" style="width:100%;border-radius:0.4rem;border:1px solid var(--deft-border,#2A2E3D);margin-bottom:0.6rem;" onerror="this.style.display='none'">` : '';
+  return `<div class="opt-card ${isChosen?'chosen':''}" onclick="chooseOption('${esc(o.key)}')">
+    <div class="flex items-center justify-between mb-2">
+      <span class="font-heading font-semibold text-sm">${esc(o.label||o.key||'Option')}</span>
+      ${isChosen?'<span class="text-accent text-xs">✓ chosen</span>':''}
+    </div>
+    ${preview}
+    <div style="font-family:${headingFont};font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;">Aa Bb Cc</div>
+    <div class="text-[0.6rem] text-txt-3 mb-2">${esc(fonts.heading||'')}${fonts.body?' / '+esc(fonts.body):''}</div>
+    <div class="flex flex-wrap gap-2">${colorSwatches(o.colors)}</div>
+  </div>`;
+}
+
+async function chooseOption(key){
+  if(!activeKit) return;
+  const res=await sbWrite('brand_style_kit','PATCH',{ chosen_option:key }, `id=eq.${activeKit.id}`);
+  if(res){ activeKit.chosen_option=key; toast('Chosen style set to "'+key+'"'); renderKit(activeKit); }
+  else { toast('Failed to set chosen style','error'); }
+}
+async function saveNotes(){
+  if(!activeKit) return;
+  const v=document.getElementById('styleNotes').value;
+  const btn=document.getElementById('notesBtn'); btn.disabled=true; btn.textContent='Saving…';
+  const res=await sbWrite('brand_style_kit','PATCH',{ style_notes:v }, `id=eq.${activeKit.id}`);
+  btn.disabled=false; btn.textContent='Save notes';
+  if(res){ activeKit.style_notes=v; toast('Style notes saved'); }
+  else { toast('Failed to save notes','error'); }
+}
+
+function init(){ loadKit(); }
+if(JSON.parse(localStorage.getItem('rdgr-session')||'{}').authenticated) init();
+</script>
+</body>
+</html>
