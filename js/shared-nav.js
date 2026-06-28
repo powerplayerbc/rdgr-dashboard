@@ -53,6 +53,7 @@
             { label: 'Social', href: '/social-dashboard' },
             { label: 'Social Content', href: '/social-content' },
             { label: 'Offers', href: '/offer-studio' },
+            { label: 'Subscribers', href: '/subscribers' },
             { label: 'Client Projects', href: '/client-projects' },
         ]},
         { label: 'Finance', href: '/finance', role: 'admin', items: [
@@ -103,7 +104,9 @@
             { label: 'Workflows', href: '/our-workflows' },
             { label: 'Org Map', href: '/org-chart' },
             { label: 'HUB', href: '/hub' },
+            { label: 'Knowledge', href: '/knowledge-manager' },
             { label: 'Bug Reports', href: '/bug-reports' },
+            { label: 'Settings', href: '/settings' },
         ]},
     ];
 

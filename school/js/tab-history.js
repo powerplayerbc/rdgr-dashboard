@@ -111,8 +111,11 @@ async function refreshHistory() {
                 ? supabaseSelect('school_history_facts',
                     `week_number=eq.${weekInfo.week}&select=fact_id,title,scheduled_date,status,era,week_number,day_number&order=day_number`)
                 : Promise.resolve([]),
+            // Facts available so far this quarter. History facts use status
+            // 'scheduled' (not 'published'), so filtering on published returned
+            // zero and the bar never advanced. Count all past-dated facts.
             supabaseSelect('school_history_facts',
-                `scheduled_date=lte.${todayStr()}&status=eq.published&select=fact_id&order=scheduled_date`),
+                `scheduled_date=lte.${todayStr()}&select=fact_id&order=scheduled_date`),
             studentId
                 ? supabaseSelect('school_history_reads',
                     `student_id=eq.${studentId}&select=fact_id`)
@@ -136,11 +139,12 @@ async function refreshHistory() {
         // Progress = facts the student has marked as read (UBR-0115).
         // Was previously the count of published facts <= today, which made
         // the bar advance even when nothing had been read.
+        const availableCount = (allPastFacts || []).length;
         const progressCount = (allPastFacts || []).filter(function(f) {
             return isHistoryFactRead(f.fact_id);
         }).length;
 
-        container.innerHTML = buildHistoryLayout(historyCurrentFact, historyWeekFacts, progressCount, weekInfo);
+        container.innerHTML = buildHistoryLayout(historyCurrentFact, historyWeekFacts, progressCount, weekInfo, availableCount);
 
     } catch (err) {
         console.error('refreshHistory error:', err);
@@ -198,7 +202,7 @@ function isDateToday(dateStr) {
 // LAYOUT BUILDER
 // ═══════════════════════════════════════
 
-function buildHistoryLayout(fact, weekFacts, progressCount, weekInfo) {
+function buildHistoryLayout(fact, weekFacts, progressCount, weekInfo, availableCount) {
     const today = todayStr();
     const isFuture = historyViewDate > today;
 
@@ -206,7 +210,7 @@ function buildHistoryLayout(fact, weekFacts, progressCount, weekInfo) {
     let html = buildHistoryHeader(fact, weekInfo);
 
     // Progress bar
-    html += buildHistoryProgress(progressCount);
+    html += buildHistoryProgress(progressCount, availableCount);
 
     // Main content area: fact card + sidebar.
     // The hist-layout class is the hook for the @media stack-on-mobile rule -
@@ -359,8 +363,13 @@ function historyViewDay(dateStr) {
 // PROGRESS BAR
 // ═══════════════════════════════════════
 
-function buildHistoryProgress(count) {
-    const pct = Math.min(100, Math.round((count / HISTORY_TOTAL_FACTS) * 100));
+function buildHistoryProgress(count, availableCount) {
+    // Denominator is the number of facts available so far this quarter, so a
+    // student who has read everything released to date reads as 100% (rather than
+    // being capped below 100 by facts that haven't been scheduled yet). Falls back
+    // to the full-quarter total if the available count wasn't provided.
+    const total = (availableCount && availableCount > 0) ? availableCount : HISTORY_TOTAL_FACTS;
+    const pct = Math.min(100, Math.round((count / total) * 100));
     const weekInfo = getWeekAndDay(todayStr());
     const currentWeekLabel = weekInfo ? 'Currently in Week ' + weekInfo.week : '';
 
@@ -370,7 +379,7 @@ function buildHistoryProgress(count) {
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
                 <span style="font-size:13px;font-weight:600;color:var(--deft-txt);
                              font-family:var(--deft-body-font),sans-serif;">
-                    ${count} of ${HISTORY_TOTAL_FACTS} facts explored
+                    ${count} of ${total} facts explored
                 </span>
                 <span style="font-size:11px;color:var(--deft-txt-3);
                              font-family:var(--deft-body-font),sans-serif;">
