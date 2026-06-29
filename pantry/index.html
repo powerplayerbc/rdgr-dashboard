@@ -1040,13 +1040,15 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         <!-- Header row -->
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4 deft-reveal deft-reveal-1">
             <div class="flex items-center gap-3">
-                <h2 class="font-heading font-bold text-lg" style="color: var(--deft-txt);">My Pantry</h2>
+                <h2 class="font-heading font-bold text-lg" style="color: var(--deft-txt);">Household Pantry</h2>
                 <span id="pantryCount" class="badge" style="background: var(--deft-accent-dim); color: var(--deft-accent);">0 items</span>
+                <span class="text-xs hidden sm:inline" style="color: var(--deft-txt-3);" title="One shared pantry for the whole family. Anyone's logging depletes it.">Shared by the family</span>
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <input type="text" id="pantrySearch" class="form-input" style="max-width: 200px; padding: 0.4rem 0.75rem; font-size: 0.8rem;" placeholder="Search pantry..." oninput="searchPantry(this.value)">
                 <button class="btn btn-primary text-xs" onclick="addPantryItem()">Add Item</button>
                 <button class="btn btn-ghost text-xs" onclick="openBarcodeScanner()">Scan Barcode</button>
+                <button class="btn btn-ghost text-xs" onclick="openReconcile()">Reconcile</button>
                 <button class="btn btn-warm text-xs" onclick="whatCanIMake()">What Can I Make?</button>
             </div>
         </div>
@@ -1414,6 +1416,24 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     </div>
 
     <!-- Create Profile Modal (for profile switcher) -->
+    <!-- Reconcile Pantry Modal (UBR-0208) -->
+    <div id="reconcileModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('reconcileModal')">
+        <div class="modal-content" style="max-width: 520px;">
+            <div class="panel-header">
+                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Reconcile Pantry</span>
+                <button class="btn btn-ghost text-xs" onclick="closeModal('reconcileModal')">Close</button>
+            </div>
+            <div class="panel-body">
+                <p class="text-xs mb-2" style="color: var(--deft-txt-3);">Confirm the real amount on hand for each item (e.g. after the family ate some or things expired). Decreases are recorded in the depletion history.</p>
+                <div id="reconcileList" style="max-height: 50vh; overflow-y: auto;"></div>
+                <div class="flex gap-2 justify-end mt-4">
+                    <button class="btn btn-ghost text-xs" onclick="closeModal('reconcileModal')">Cancel</button>
+                    <button id="saveReconcileBtn" class="btn btn-primary text-xs" onclick="saveReconcile()">Save counts</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="createProfileModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('createProfileModal')">
         <div class="modal-content" style="max-width: 420px;">
             <div class="panel-header">
@@ -1459,6 +1479,11 @@ if (!localStorage.getItem('rdgr-active-profile') && localStorage.getItem('rdgr-a
 const SUPABASE_URL = 'https://carltondb.72.60.67.2.sslip.io';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';
 const DEFT_BRIDGE_URL = 'https://n8n.carltonaiservices.com/webhook/deft-bridge';
+
+// UBR-0208: the pantry is ONE shared household inventory (owned by Bradford).
+// Inventory reads + all depletion target the household; each person's eating is
+// still logged under their own profile (activeProfileId) by the backend.
+const HOUSEHOLD_ID = '00000000-0000-0000-0000-000000000001';
 
 // ═══════════════════════════════════════
 // THEME ENGINE
@@ -1986,8 +2011,9 @@ async function initPantry() {
 async function loadPantry() {
     if (!activeProfileId) return;
     const items = await supabaseSelect('deft_pantry_items',
-        `user_id=eq.${activeProfileId}&select=*&order=expiry_date.asc.nullslast`);
-    pantryItems = items || [];
+        `user_id=eq.${HOUSEHOLD_ID}&select=*&order=expiry_date.asc.nullslast`);
+    // Hide fully used-up items (status is NULL-unsafe in PostgREST <>, so filter here).
+    pantryItems = (items || []).filter(i => i.status !== 'used_up');
     renderPantry();
 }
 
@@ -2062,6 +2088,10 @@ function renderPantry() {
                 ${item.category ? `<span class="text-xs px-1.5 py-0.5 rounded" style="background: rgba(255,255,255,0.04); color: var(--deft-txt-3);">${escapeHtml(item.category)}</span>` : ''}
                 ${storageBadge}
                 ${priceBadge}
+            </div>
+            <div class="flex gap-2 mt-3">
+                <button class="btn btn-primary text-xs flex-1" onclick="event.stopPropagation(); usePantryItem('${itemId}', 1)">Used 1${item.unit ? ' ' + escapeHtml(item.unit) : ''}</button>
+                <button class="btn btn-ghost text-xs" onclick="event.stopPropagation(); usePantryItemPrompt('${itemId}')">Used…</button>
             </div>
         </div>`;
     }).join('');
@@ -2467,7 +2497,7 @@ function selectFoodItem(food_id) {
 async function loadPreparedMeals() {
     if (!activeProfileId) return;
     const meals = await supabaseSelect('deft_prepared_meals',
-        `user_id=eq.${activeProfileId}&select=*&order=prepared_date.desc`);
+        `user_id=eq.${HOUSEHOLD_ID}&select=*&order=prepared_date.desc`);
     preparedMeals = (meals || []).map(m => ({ ...m, id: m.prepared_id || m.id }));
     renderPreparedMeals();
 }
@@ -2485,9 +2515,12 @@ function renderPreparedMeals() {
     }
 
     grid.innerHTML = preparedMeals.map(meal => {
-        const servingsUsed = meal.servings_consumed || 0;
         const totalServings = meal.total_servings || 1;
-        const remaining = Math.max(totalServings - servingsUsed, 0);
+        // UBR-0208: the DB tracks servings_remaining directly (decremented on consume);
+        // the old servings_consumed field doesn't exist, so the bar always showed full.
+        const remaining = (meal.servings_remaining != null)
+            ? Math.max(Number(meal.servings_remaining), 0)
+            : Math.max(totalServings - (meal.servings_consumed || 0), 0);
         const pct = Math.round((remaining / totalServings) * 100);
         const nutrition = meal.nutrition_per_serving || {};
         const locStr = meal.location ? meal.location.charAt(0).toUpperCase() + meal.location.slice(1) : '';
@@ -2679,11 +2712,101 @@ async function savePreparedMeal() {
 }
 
 async function consumePrepared(id) {
+    const meal = preparedMeals.find(m => m.id === id);
     const result = await deftApi('consume_prepared', { prepared_id: id, servings: 1 });
     if (result) {
-        toast('Serving consumed! Logged to today\'s meals.', 'success');
+        // UBR-0208: depletes the shared household meal; logs to the eater's day (backend).
+        await logDepletion({ prepared_id: id, item_name: meal ? meal.name : null, kind: 'prepared_meal', qty: 1, unit: 'serving', reason: 'eaten' });
+        toast('Serving eaten — logged to your day.', 'success');
         await loadPreparedMeals();
     }
+}
+
+// ═══════════════════════════════════════
+// HOUSEHOLD DEPLETION (UBR-0208): one-tap "used/ate it" + reconcile + audit
+// ═══════════════════════════════════════
+async function logDepletion(d) {
+    let prof = {};
+    try { prof = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}'); } catch (e) {}
+    return supabaseWrite('deft_pantry_depletions', 'POST', {
+        household_id: HOUSEHOLD_ID,
+        item_id: d.item_id || null,
+        prepared_id: d.prepared_id || null,
+        item_name: d.item_name || null,
+        kind: d.kind,
+        qty: (d.qty != null ? d.qty : null),
+        unit: d.unit || null,
+        reason: d.reason,
+        consumed_by_user_id: activeProfileId || null,
+        consumed_by_name: prof.name || null,
+        note: d.note || null
+    });
+}
+
+async function usePantryItem(itemId, amount) {
+    const item = pantryItems.find(i => (i.item_id || i.id) === itemId);
+    if (!item) return;
+    const cur = Number(item.quantity) || 0;
+    const newQty = Math.max(0, cur - amount);
+    const patch = { quantity: newQty, updated_at: new Date().toISOString() };
+    if (newQty <= 0) patch.status = 'used_up';
+    const res = await supabaseWrite('deft_pantry_items', 'PATCH', patch, `item_id=eq.${itemId}`);
+    if (!res) { toast('Could not update item', 'error'); return; }
+    await logDepletion({ item_id: itemId, item_name: item.name, kind: 'pantry_item', qty: amount, unit: item.unit, reason: 'eaten' });
+    toast(`${escapeHtml(item.name || 'Item')} −${amount}${item.unit ? ' ' + item.unit : ''}${newQty <= 0 ? ' (used up)' : ''}`, 'success');
+    await loadPantry();
+}
+
+function usePantryItemPrompt(itemId) {
+    const item = pantryItems.find(i => (i.item_id || i.id) === itemId);
+    if (!item) return;
+    const v = prompt(`How much "${item.name}" was used? (you have ${item.quantity} ${item.unit || ''})`, '1');
+    if (v == null) return;
+    const amt = parseFloat(v);
+    if (!(amt > 0)) { toast('Enter a positive amount', 'error'); return; }
+    usePantryItem(itemId, amt);
+}
+
+function openReconcile() {
+    const body = document.getElementById('reconcileList');
+    if (!body) return;
+    if (!pantryItems.length) { toast('No pantry items to reconcile', 'info'); return; }
+    body.innerHTML = pantryItems.map(it => {
+        const id = it.item_id || it.id;
+        return `<div class="flex items-center gap-2 py-2" style="border-bottom:1px solid var(--deft-border);">
+            <div class="flex-1 min-w-0">
+                <div class="text-sm truncate" style="color:var(--deft-txt);">${escapeHtml(it.name || '')}</div>
+                <div class="text-xs" style="color:var(--deft-txt-3);">on hand: ${it.quantity} ${escapeHtml(it.unit || '')}</div>
+            </div>
+            <input type="number" step="any" min="0" value="${it.quantity}" data-item="${id}" class="form-input reconcile-qty" style="width:90px;padding:0.3rem 0.5rem;font-size:0.8rem;">
+            <span class="text-xs" style="color:var(--deft-txt-3);width:48px;">${escapeHtml(it.unit || '')}</span>
+        </div>`;
+    }).join('');
+    openModal('reconcileModal');
+}
+
+async function saveReconcile() {
+    const inputs = Array.from(document.querySelectorAll('.reconcile-qty'));
+    const btn = document.getElementById('saveReconcileBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+    let changed = 0;
+    for (const inp of inputs) {
+        const id = inp.getAttribute('data-item');
+        const item = pantryItems.find(i => (i.item_id || i.id) === id);
+        if (!item) continue;
+        const newQty = parseFloat(inp.value);
+        if (isNaN(newQty) || newQty === Number(item.quantity)) continue;
+        const patch = { quantity: newQty, updated_at: new Date().toISOString() };
+        if (newQty <= 0) patch.status = 'used_up';
+        await supabaseWrite('deft_pantry_items', 'PATCH', patch, `item_id=eq.${id}`);
+        const delta = Number(item.quantity) - newQty;
+        await logDepletion({ item_id: id, item_name: item.name, kind: 'pantry_item', qty: (delta > 0 ? delta : null), unit: item.unit, reason: 'reconcile', note: `${item.quantity} -> ${newQty}` });
+        changed++;
+    }
+    if (btn) { btn.disabled = false; btn.textContent = 'Save counts'; }
+    closeModal('reconcileModal');
+    toast(changed ? `Reconciled ${changed} item${changed !== 1 ? 's' : ''}` : 'No changes made', 'success');
+    await loadPantry();
 }
 
 async function discardPrepared(id) {

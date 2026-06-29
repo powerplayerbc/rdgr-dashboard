@@ -15,6 +15,10 @@ const SUPABASE_URL = 'https://carltondb.72.60.67.2.sslip.io';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';
 const DEFT_BRIDGE_URL = 'https://n8n.carltonaiservices.com/webhook/deft-bridge';
 
+// UBR-0208: shared household pantry/recipes/prepared-meals owner (Bradford).
+// Inventory is shared by the family; each person logs eating under their own profile.
+const HOUSEHOLD_ID = '00000000-0000-0000-0000-000000000001';
+
 // ═══════════════════════════════════════
 // THEME ENGINE
 // ═══════════════════════════════════════

@@ -20,7 +20,7 @@ async function searchRecipesForLog(query) {
     clearTimeout(recipeSearchTimeout);
     recipeSearchTimeout = setTimeout(async () => {
         const results = await supabaseSelect('deft_recipes',
-            `user_id=eq.${activeProfileId}&status=eq.active&name=ilike.*${encodeURIComponent(query)}*&select=recipe_id,name,servings,nutrition_per_serving,keto_analysis&limit=10&order=name`
+            `user_id=eq.${HOUSEHOLD_ID}&status=eq.active&name=ilike.*${encodeURIComponent(query)}*&select=recipe_id,name,servings,nutrition_per_serving,keto_analysis&limit=10&order=name`
         );
 
         const container = document.getElementById('recipeSearchResults');
@@ -190,7 +190,7 @@ function togglePreparedMealLog() {
 
 async function loadPreparedMealsForLog() {
     const data = await supabaseSelect('deft_prepared_meals',
-        `user_id=eq.${activeProfileId}&status=eq.available&servings_remaining=gt.0&select=*&order=name`
+        `user_id=eq.${HOUSEHOLD_ID}&status=eq.available&servings_remaining=gt.0&select=*&order=name`
     );
     preparedMealsForLog = data || [];
     document.getElementById('preparedMealLogCount').textContent = preparedMealsForLog.length;
