@@ -7,6 +7,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5v
 const BRAND_ID = 'dianna';
 // Large-file uploader (VPS). Leave '' until deployed; videos then fall back to Drive-link paste.
 const UPLOADER_URL = '';
+const UPLOAD_TOKEN = ''; // must match the content-uploader service UPLOAD_TOKEN
 // Interim small-file upload (images/music/scripts) via existing n8n Drive webhook.
 const ASSET_WEBHOOK = 'https://n8n.carltonaiservices.com/webhook/dianna-asset-upload';
 
@@ -297,7 +298,7 @@ const CC = {
     async _uploadViaVPS(id, f, kind) {
         toast('Uploading video…');
         const fd = new FormData(); fd.append('file', f); fd.append('post_id', id); fd.append('asset_kind', kind); fd.append('content_type', this._editing.post.content_type||'');
-        let resp; try { resp = await (await fetch(UPLOADER_URL.replace(/\/$/,'')+'/upload', { method:'POST', body: fd })).json(); } catch(e){ return toast('Upload failed','error'); }
+        let resp; try { resp = await (await fetch(UPLOADER_URL.replace(/\/$/,'')+'/upload', { method:'POST', headers: UPLOAD_TOKEN?{'x-upload-token':UPLOAD_TOKEN}:{}, body: fd })).json(); } catch(e){ return toast('Upload failed','error'); }
         if (!resp || !resp.drive_file_id) return toast('Upload failed','error');
         toast('Uploaded'); this.openEditor(id);
     },
