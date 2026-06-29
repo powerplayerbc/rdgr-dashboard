@@ -207,7 +207,7 @@ const CC = {
         + '<div class="mb-4"><label class="fld">Notes</label><textarea id="f_notes" class="input" rows="2">'+esc(p.notes||'')+'</textarea></div>'
         + '<div class="flex gap-2 mb-5"><button class="btn btn-primary" onclick="CC.savePost()">Save</button>'
         +   (p.id?'<button class="btn" onclick="CC.markPosted()">Mark posted</button><button class="btn" style="margin-left:auto;color:var(--deft-danger)" onclick="CC.deletePost()">Delete</button>':'')+'</div>'
-        + (p.id ? this.assetsHtml(assets) + this.metricsHtml(p, metrics) : '<div class="text-txt-3 text-sm">Save the post first to attach assets &amp; metrics.</div>');
+        + (p.id ? this.assetsHtml(assets) + this.videoProcHtml(p, assets) + this.metricsHtml(p, metrics) : '<div class="text-txt-3 text-sm">Save the post first to attach assets &amp; metrics.</div>');
     },
     refreshEditor() { // re-render to toggle script field on type change, preserving inputs
         const p = this._collect(); Object.assign(this._editing.post, p);
@@ -314,6 +314,65 @@ const CC = {
         toast('Linked'); this.openEditor(id);
     },
     async deleteAsset(aid) { await sbDelete('ig_post_assets','id=eq.'+aid); this.openEditor(document.getElementById('f_id').value); },
+
+    /* ---------- video processing (Submagic edit + auto-clip to inventory) ---------- */
+    rawAsset(assets) { return assets.find(a=>a.asset_kind==='raw_video' && a.drive_file_id) || assets.find(a=>a.asset_kind==='raw_video'); },
+    videoProcHtml(p, assets) {
+        const raw = this.rawAsset(assets);
+        let h = '<div class="panel p-4 mb-4"><h3 class="font-bold mb-1">Video processing</h3><div class="text-txt-3" style="font-size:.72rem;margin-bottom:.6rem">Works on the <b>raw</b> take (asset kind = raw_video). The edited reel comes back from Submagic; usable clips (outtakes removed) go to the Video Inventory.</div>';
+        if (!raw || !raw.drive_file_id) { h += '<div class="text-txt-3 text-sm">Upload/link a <b>raw_video</b> asset (with a Drive link) to enable this.</div></div>'; return h; }
+        // Submagic edit
+        h += '<div class="flex items-center gap-2 mb-2"><span style="flex:1"><b>Submagic edit</b> &rarr; finished reel</span>';
+        if (p.submagic_status==='ready') h += '<span class="pill" style="background:var(--deft-success)22;color:var(--deft-success)">✓ edited reel attached</span>';
+        else if (p.submagic_status==='submitted') h += '<span class="pill" style="background:var(--deft-warning)22;color:var(--deft-warning)">editing…</span><button class="btn btn-sm" onclick="CC.checkSubmagic()">Check</button>';
+        else h += '<button class="btn btn-sm" onclick="CC.sendToSubmagic()">Send to Submagic</button>';
+        h += '</div>';
+        // Auto-clip
+        h += '<div class="flex items-center gap-2"><span style="flex:1"><b>Auto-clip</b> &rarr; Video Inventory (no outtakes)</span>';
+        if (p.clip_status==='clipped' || p.clip_status==='ready') h += '<span class="pill" style="background:var(--deft-success)22;color:var(--deft-success)">✓ clips ready</span> <a class="btn btn-sm" href="/video-inventory" target="_blank">View</a>';
+        else if (p.clip_status==='submitted') h += '<span class="pill" style="background:var(--deft-warning)22;color:var(--deft-warning)">clipping…</span><button class="btn btn-sm" onclick="CC.checkClips()">Check</button>';
+        else h += '<button class="btn btn-sm" onclick="CC.sendToClips()">Send to clip library</button>';
+        h += '</div></div>';
+        return h;
+    },
+    _driveUrlFor(a) { return a.view_url || (a.drive_file_id ? 'https://drive.google.com/file/d/'+a.drive_file_id+'/view' : null); },
+    async sendToSubmagic() {
+        const id = document.getElementById('f_id').value; const raw = this.rawAsset(this._editing.assets);
+        if (!raw) return toast('No raw_video asset','error');
+        const p = this._editing.post;
+        toast('Sending to Submagic…');
+        let resp; try { resp = await (await fetch('https://n8n.carltonaiservices.com/webhook/rdgr-video-submagic', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ drive_url: this._driveUrlFor(raw), title: p.title||p.slot_label||'Dianna reel', script: p.script||'', brand_id: BRAND_ID, submitted_by: (JSON.parse(localStorage.getItem('rdgr-active-profile')||'{}').name)||'calendar' }) })).json(); } catch(e){ return toast('Submagic request failed','error'); }
+        if (!resp || !resp.success) return toast('Submagic: '+JSON.stringify(resp).slice(0,120),'error');
+        await sbPatch('ig_posts','id=eq.'+id, { submagic_source_id: resp.source_id, submagic_project_id: resp.project_id, submagic_status:'submitted' });
+        toast('Sent to Submagic'); this.openEditor(id); this.render();
+    },
+    async checkSubmagic() {
+        const id = document.getElementById('f_id').value; const sid = this._editing.post.submagic_source_id; if (!sid) return;
+        const clips = await sbGet('video_clips?source_id=eq.'+sid+'&clip_type=eq.finished&select=*&limit=1');
+        if (Array.isArray(clips) && clips[0]) {
+            const c = clips[0];
+            await sbPost('ig_post_assets', { post_id:id, brand_id:BRAND_ID, asset_kind:'edited_video', drive_file_id:c.drive_file_id, file_name:c.title||'Submagic edit', view_url:c.drive_url, download_url:(c.drive_file_id?'https://drive.google.com/uc?export=download&id='+c.drive_file_id:null), thumbnail_url:c.thumbnail_url, uploaded_by:'submagic' }, 'return=minimal');
+            await sbPatch('ig_posts','id=eq.'+id, { submagic_status:'ready', production_status:'edited' });
+            toast('Edited reel attached'); this.openEditor(id); this.render();
+        } else toast('Still editing — check back soon');
+    },
+    async sendToClips() {
+        const id = document.getElementById('f_id').value; const raw = this.rawAsset(this._editing.assets);
+        if (!raw) return toast('No raw_video asset','error');
+        const p = this._editing.post;
+        toast('Sending to clip library…');
+        let resp; try { resp = await (await fetch('https://n8n.carltonaiservices.com/webhook/rdgr-video-submit', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ drive_url: this._driveUrlFor(raw), title: p.title||p.slot_label||'Dianna raw', kind:'longform', brand_id: BRAND_ID, submitted_by:(JSON.parse(localStorage.getItem('rdgr-active-profile')||'{}').name)||'calendar' }) })).json(); } catch(e){ return toast('Clip request failed','error'); }
+        if (!resp || !resp.success) return toast('Clips: '+JSON.stringify(resp).slice(0,120),'error');
+        const src = resp.source || {}; const srcId = src.id || (Array.isArray(src)?src[0]&&src[0].id:null);
+        await sbPatch('ig_posts','id=eq.'+id, { clip_source_id: srcId, clip_status:'submitted' });
+        toast('Sent for clipping (outtakes auto-removed)'); this.openEditor(id); this.render();
+    },
+    async checkClips() {
+        const id = document.getElementById('f_id').value; const sid = this._editing.post.clip_source_id; if (!sid) return;
+        const clips = await sbGet('video_clips?source_id=eq.'+sid+'&select=id,status&limit=50');
+        if (Array.isArray(clips) && clips.length) { await sbPatch('ig_posts','id=eq.'+id, { clip_status:'clipped' }); toast(clips.length+' clip(s) in inventory'); this.openEditor(id); this.render(); }
+        else toast('No clips yet — still processing');
+    },
 
     /* ---------- metrics ---------- */
     metricsHtml(p, metrics) {
