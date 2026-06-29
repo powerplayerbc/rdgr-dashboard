@@ -1069,7 +1069,10 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     <!-- Input Area -->
                     <div id="chatInputArea" style="padding: 0.75rem 1.25rem; border-top: 1px solid #1E2130; background: #0B0D14;">
                         <!-- Content-Type Selector -->
-                        <div id="dxTypeRow" class="dx-type-row"></div>
+                        <div style="display:flex;align-items:center;gap:0.5rem;">
+                            <div id="dxTypeRow" class="dx-type-row" style="flex:1;min-width:0;"></div>
+                            <button type="button" onclick="openSocialVoiceModal()" class="dx-type-pill" title="Adjust the DiannaX voice used when drafting social comments &amp; replies" style="flex-shrink:0;">&#9998; Social voice</button>
+                        </div>
                         <!-- Attachment Previews -->
                         <div id="chatAttachmentPreview" style="display: none;" class="flex gap-2 mb-2 flex-wrap"></div>
                         <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
@@ -1130,6 +1133,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         { label: 'Slogans', value: 'slogan' },
         { label: 'Email', value: 'email' },
         { label: 'Instagram/Social', value: 'social_post' },
+        { label: 'Comment on a post', value: 'social_comment' },
+        { label: 'Reply to a comment', value: 'social_reply' },
     ];
 
     let chatThreads = [];
@@ -1815,6 +1820,58 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         renderTypePills();
     }
 
+    // ── Social Engagement Voice (UBR-0210) ──
+    // Shared voice applied to social comment/reply drafts. Stored on the DiannaX
+    // personality's metadata.social_voice and read by the DIANNAX-CHAT workflow.
+    let _socialVoiceLoaded = false;
+    async function openSocialVoiceModal() {
+        const modal = document.getElementById('socialVoiceModal');
+        const ta = document.getElementById('socialVoiceText');
+        const status = document.getElementById('socialVoiceStatus');
+        if (!modal || !ta) return;
+        modal.classList.add('active');
+        if (!_socialVoiceLoaded) {
+            ta.value = '';
+            ta.disabled = true;
+            if (status) status.textContent = 'Loading...';
+            const rows = await supabaseSelect('chat_personalities', `personality_id=eq.${PERSONALITY_ID}&select=metadata`);
+            const meta = (rows && rows[0] && rows[0].metadata) ? rows[0].metadata : {};
+            ta.value = meta.social_voice || '';
+            ta.disabled = false;
+            _socialVoiceLoaded = true;
+            if (status) status.textContent = '';
+        }
+        ta.focus();
+    }
+    function closeSocialVoiceModal() {
+        const modal = document.getElementById('socialVoiceModal');
+        if (modal) modal.classList.remove('active');
+    }
+    async function saveSocialVoice() {
+        const ta = document.getElementById('socialVoiceText');
+        const btn = document.getElementById('socialVoiceSaveBtn');
+        const status = document.getElementById('socialVoiceStatus');
+        if (!ta) return;
+        const voice = ta.value.trim();
+        if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+        // read-merge-patch the JSONB metadata so we don't clobber other keys
+        const rows = await supabaseSelect('chat_personalities', `personality_id=eq.${PERSONALITY_ID}&select=metadata`);
+        const meta = (rows && rows[0] && rows[0].metadata) ? rows[0].metadata : {};
+        meta.social_voice = voice;
+        const res = await supabaseWrite('chat_personalities', 'PATCH',
+            { metadata: meta, updated_at: new Date().toISOString() },
+            `personality_id=eq.${PERSONALITY_ID}`);
+        if (btn) { btn.disabled = false; btn.textContent = 'Save voice'; }
+        if (res) {
+            if (status) status.textContent = 'Saved';
+            toast('Social voice saved', 'success');
+            setTimeout(closeSocialVoiceModal, 500);
+        } else {
+            if (status) status.textContent = '';
+            toast('Could not save the social voice', 'error');
+        }
+    }
+
     // ── Sending messages ──
 
     async function sendChatMessage() {
@@ -2192,6 +2249,28 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             </div>
         </div>
     </div>
+    <!-- Social Engagement Voice Modal (UBR-0210) -->
+    <div class="modal-backdrop" id="socialVoiceModal">
+        <div class="modal-content" style="padding:1.25rem;max-width:560px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+                <h3 style="font-size:0.95rem;font-weight:700;color:var(--deft-txt,#E8ECF1);margin:0;font-family:var(--deft-heading-font,'Chakra Petch'),sans-serif;">Social Engagement Voice</h3>
+                <button onclick="closeSocialVoiceModal()" style="background:none;border:none;color:var(--deft-txt-3,#525E73);cursor:pointer;font-size:1.2rem;padding:0.25rem;">&times;</button>
+            </div>
+            <p style="font-size:0.75rem;color:var(--deft-txt-3,#8A95A9);margin:0 0 0.75rem;line-height:1.4;">
+                This voice is applied whenever DiannaX drafts <strong>comments on other creators' posts</strong> or <strong>replies to comments on your posts</strong> (the "Comment on a post" and "Reply to a comment" content types). It does not change your main DiannaX chat voice.
+            </p>
+            <div style="margin-bottom:0.75rem;">
+                <label class="bug-form-label" for="socialVoiceText">Voice &amp; tone instructions</label>
+                <textarea id="socialVoiceText" rows="11" placeholder="Describe how DiannaX should sound when commenting and replying on social media..." style="width:100%;resize:vertical;padding:0.5rem;border-radius:0.375rem;background:var(--deft-surface,#11131A);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);font-size:0.8rem;font-family:var(--deft-body-font,'IBM Plex Sans'),sans-serif;line-height:1.5;"></textarea>
+            </div>
+            <div style="display:flex;gap:0.5rem;justify-content:flex-end;align-items:center;">
+                <span id="socialVoiceStatus" style="font-size:0.7rem;color:var(--deft-txt-3,#525E73);margin-right:auto;"></span>
+                <button onclick="closeSocialVoiceModal()" style="padding:0.4rem 1rem;border-radius:0.375rem;border:1px solid var(--deft-border,#2A2E3D);background:transparent;color:var(--deft-txt-2,#8A95A9);font-size:0.75rem;cursor:pointer;">Cancel</button>
+                <button onclick="saveSocialVoice()" id="socialVoiceSaveBtn" style="padding:0.4rem 1rem;border-radius:0.375rem;border:1px solid rgba(168,85,247,0.35);background:rgba(168,85,247,0.14);color:#C084FC;font-size:0.75rem;font-weight:600;cursor:pointer;">Save voice</button>
+            </div>
+        </div>
+    </div>
+
 <script>
 (function(){
 var _ce=[],_cw=[];

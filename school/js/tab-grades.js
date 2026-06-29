@@ -33,6 +33,33 @@ async function resolveGradesViewStudentId() {
 }
 
 // =======================================
+// DEDUPE ANSWER ROWS (UBR-0211)
+// =======================================
+// A re-submitted question used to create multiple school_answers rows. The
+// points loop counts per-row, so duplicates inflated the total (an assignment
+// with 9 questions scored "out of 140" because it had 14 answer rows). Keep one
+// row per question_id: prefer a graded row over one still "checking"; among
+// graded rows prefer a teacher override, then the most recently updated.
+function answerGradeRank(an) {
+    if (an.check_status === 'verified' || an.override_score != null) return 3;
+    if (an.ai_score != null) return 2;
+    return 1; // checking / pending / ungraded
+}
+function dedupeAnswerRows(rows) {
+    const best = {};
+    for (const an of (rows || [])) {
+        const k = an.question_id;
+        const cur = best[k];
+        if (!cur) { best[k] = an; continue; }
+        const ra = answerGradeRank(an), rc = answerGradeRank(cur);
+        if (ra > rc || (ra === rc && (an.updated_at || '') > (cur.updated_at || ''))) {
+            best[k] = an;
+        }
+    }
+    return Object.values(best);
+}
+
+// =======================================
 // REFRESH GRADES (main entry point)
 // =======================================
 async function refreshGrades() {
@@ -117,6 +144,11 @@ async function refreshGrades() {
             if (!gradesData.answers[a.assignment_id]) gradesData.answers[a.assignment_id] = [];
             gradesData.answers[a.assignment_id].push(a);
         }
+    }
+    // UBR-0211: collapse duplicate submissions to ONE row per question before any
+    // points math, so re-submissions can never again inflate the total ("/140").
+    for (const aid of Object.keys(gradesData.answers)) {
+        gradesData.answers[aid] = dedupeAnswerRows(gradesData.answers[aid]);
     }
 
     // Lessons by id
