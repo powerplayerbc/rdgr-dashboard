@@ -1048,6 +1048,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                 <input type="text" id="pantrySearch" class="form-input" style="max-width: 200px; padding: 0.4rem 0.75rem; font-size: 0.8rem;" placeholder="Search pantry..." oninput="searchPantry(this.value)">
                 <button class="btn btn-primary text-xs" onclick="addPantryItem()">Add Item</button>
                 <button class="btn btn-ghost text-xs" onclick="openBarcodeScanner()">Scan Barcode</button>
+                <button class="btn btn-ghost text-xs" onclick="openReceiptModal()">Upload Receipt</button>
                 <button class="btn btn-ghost text-xs" onclick="openReconcile()">Reconcile</button>
                 <button class="btn btn-warm text-xs" onclick="whatCanIMake()">What Can I Make?</button>
             </div>
@@ -1416,6 +1417,36 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     </div>
 
     <!-- Create Profile Modal (for profile switcher) -->
+    <!-- Upload Receipt Modal (UBR-0207) -->
+    <div id="receiptModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('receiptModal')">
+        <div class="modal-content" style="max-width: 640px;">
+            <div class="panel-header">
+                <span class="font-heading font-bold text-sm" style="color: var(--deft-txt);">Add Items from Receipt</span>
+                <button class="btn btn-ghost text-xs" onclick="closeModal('receiptModal')">Close</button>
+            </div>
+            <div class="panel-body">
+                <p class="text-xs mb-2" style="color: var(--deft-txt-3);">Photograph your grocery receipt (take several photos for a long one). We read the line items, learn each store's shorthand over time, and add them to the shared household pantry.</p>
+                <div class="flex flex-wrap items-end gap-2 mb-2">
+                    <div style="flex:1;min-width:140px;">
+                        <label class="form-label text-xs">Store (optional)</label>
+                        <input type="text" id="receiptStore" class="form-input text-xs" placeholder="e.g. Kroger" style="padding:0.4rem 0.6rem;">
+                    </div>
+                    <button class="btn btn-primary text-xs" onclick="document.getElementById('receiptFileInput').click()">Choose Photo(s)</button>
+                    <input type="file" id="receiptFileInput" accept="image/*" multiple style="display:none;" onchange="handleReceiptFiles(event)">
+                </div>
+                <div id="receiptStatus" class="text-xs mb-2" style="color: var(--deft-accent);"></div>
+                <div id="receiptReviewWrap" style="display:none;">
+                    <div class="text-xs mb-1" style="color: var(--deft-txt-3);">Review &amp; fix any shorthand, then add. (name / qty / size / category)</div>
+                    <div id="receiptReview" style="max-height: 44vh; overflow-y: auto;"></div>
+                    <div class="flex gap-2 justify-end mt-3">
+                        <button class="btn btn-ghost text-xs" onclick="closeModal('receiptModal')">Cancel</button>
+                        <button id="confirmReceiptBtn" class="btn btn-primary text-xs" onclick="confirmReceiptItems()">Add to pantry</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Reconcile Pantry Modal (UBR-0208) -->
     <div id="reconcileModal" class="modal-backdrop" onclick="if(event.target===this)closeModal('reconcileModal')">
         <div class="modal-content" style="max-width: 520px;">
@@ -2414,10 +2445,18 @@ async function whatCanIMake() {
 
     const result = await deftApi('what_can_i_make', {});
     if (result && result.data) {
-        const suggestions = result.data.suggestions || result.data;
+        let suggestions = result.data.suggestions || result.data;
         if (Array.isArray(suggestions) && suggestions.length > 0) {
+            // UBR-0209: guarantee ready-to-eat prepared meals lead, then recipe matches, then combos.
+            const typeRank = t => { const r = { prepared: 0, recipe_match: 1, recipe: 1, pantry_combo: 2 }; return (r[t] != null) ? r[t] : 1; };
+            suggestions = suggestions.slice().sort((a, b) => typeRank(a.type) - typeRank(b.type));
             content.innerHTML = suggestions.map(s => {
-                const matchPct = s.match_pct != null ? Math.round(s.match_pct * 100) : null;
+                // match_pct may arrive as 0-1 or 0-100; normalize.
+                const matchPct = s.match_pct != null ? Math.round(s.match_pct > 1 ? s.match_pct : s.match_pct * 100) : null;
+                const useSoon = s.expiring_soon || /use soon|expir/i.test(s.notes || s.description || '');
+                const typeBadge = s.type === 'prepared'
+                    ? `<span class="badge ml-2" style="background: var(--deft-success-dim); color: var(--deft-success); font-size: 0.65rem;">${useSoon ? 'Use soon' : 'Ready to eat'}</span>`
+                    : '';
                 const matchBadge = matchPct != null
                     ? `<span class="badge ml-2" style="background: ${matchPct >= 80 ? 'var(--deft-success-dim)' : matchPct >= 60 ? 'var(--deft-warning-dim)' : 'var(--deft-danger-dim)'}; color: ${matchPct >= 80 ? 'var(--deft-success)' : matchPct >= 60 ? 'var(--deft-warning)' : 'var(--deft-danger)'}; font-size: 0.65rem;">${matchPct}% match</span>`
                     : '';
@@ -2427,6 +2466,7 @@ async function whatCanIMake() {
                 return `<div class="mb-3 p-3 rounded-lg" style="background: rgba(168,130,214,0.05); border: 1px solid rgba(168,130,214,0.1);">
                     <div class="flex items-center">
                         <h4 class="font-heading font-bold text-sm" style="color: #A882D6;">${escapeHtml(s.name || s.title || 'Suggestion')}</h4>
+                        ${typeBadge}
                         ${matchBadge}
                     </div>
                     <p class="text-xs mb-1 mt-1" style="color: var(--deft-txt-2);">${escapeHtml(s.description || s.reason || '')}</p>
@@ -2809,6 +2849,121 @@ async function saveReconcile() {
     await loadPantry();
 }
 
+// ═══════════════════════════════════════
+// RECEIPT OCR (UBR-0207): upload photo(s) -> parse -> review -> bulk add + learn shorthand
+// ═══════════════════════════════════════
+let receiptItems = [];
+function _escAttr(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+function openReceiptModal() {
+    receiptItems = [];
+    document.getElementById('receiptStore').value = '';
+    document.getElementById('receiptFileInput').value = '';
+    document.getElementById('receiptReview').innerHTML = '';
+    document.getElementById('receiptReviewWrap').style.display = 'none';
+    document.getElementById('receiptStatus').textContent = '';
+    openModal('receiptModal');
+}
+function _readFileDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = e => resolve(e.target.result);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+    });
+}
+async function handleReceiptFiles(event) {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+    const store = document.getElementById('receiptStore').value.trim();
+    const status = document.getElementById('receiptStatus');
+    for (let i = 0; i < files.length; i++) {
+        status.textContent = `Scanning photo ${i + 1} of ${files.length}...`;
+        try {
+            const base64 = await _readFileDataURL(files[i]);
+            const result = await deftApi('scan_receipt', { image_base64: base64, store_name: store }, { silent: true });
+            const data = (result && result.data) || {};
+            if (!document.getElementById('receiptStore').value && data.store_name) document.getElementById('receiptStore').value = data.store_name;
+            (data.items || []).forEach(it => receiptItems.push(_normReceiptItem(it, store || data.store_name || '')));
+        } catch (e) { /* skip unreadable photo */ }
+    }
+    status.textContent = receiptItems.length ? `${receiptItems.length} item(s) found — review below.` : 'No items found. Try a clearer, well-lit photo.';
+    _renderReceiptReview();
+}
+function _normReceiptItem(it, store) {
+    return {
+        raw_text: it.raw_text || '',
+        name: it.resolved_name || it.guessed_name || it.raw_text || '',
+        brand: it.brand || '',
+        quantity: (it.quantity != null ? it.quantity : 1),
+        size: it.size || '',
+        unit: it.unit || 'each',
+        category: it.category || 'other',
+        price: (it.price != null ? it.price : ''),
+        store_name: store,
+        food_id: it.food_id || null,
+        learned: !!it.learned,
+        include: true
+    };
+}
+function _renderReceiptReview() {
+    const wrap = document.getElementById('receiptReviewWrap');
+    const body = document.getElementById('receiptReview');
+    if (!receiptItems.length) { wrap.style.display = 'none'; return; }
+    wrap.style.display = '';
+    body.innerHTML = receiptItems.map((it, i) => `
+        <div class="flex items-center gap-1.5 py-1.5" style="border-bottom:1px solid var(--deft-border);">
+            <input type="checkbox" ${it.include ? 'checked' : ''} onchange="receiptItems[${i}].include=this.checked" title="Include">
+            <input class="form-input" style="flex:2;min-width:0;padding:.3rem .4rem;font-size:.78rem;" value="${_escAttr(it.name)}" oninput="receiptItems[${i}].name=this.value" title="${_escAttr(it.raw_text)}${it.learned ? ' (learned)' : ''}">
+            <input type="number" step="any" min="0" class="form-input" style="width:50px;padding:.3rem;font-size:.78rem;text-align:center;" value="${it.quantity}" oninput="receiptItems[${i}].quantity=parseFloat(this.value)||0" title="Qty">
+            <input class="form-input" style="width:64px;padding:.3rem;font-size:.78rem;" value="${_escAttr(it.size)}" oninput="receiptItems[${i}].size=this.value" placeholder="size" title="Size (e.g. 16 oz)">
+            <input class="form-input" style="width:74px;padding:.3rem;font-size:.78rem;" value="${_escAttr(it.category)}" oninput="receiptItems[${i}].category=this.value" placeholder="cat" title="Category">
+        </div>`).join('');
+}
+async function confirmReceiptItems() {
+    const chosen = receiptItems.filter(it => it.include && it.name.trim());
+    if (!chosen.length) { toast('No items selected', 'error'); return; }
+    const btn = document.getElementById('confirmReceiptBtn');
+    btn.disabled = true; btn.textContent = 'Adding...';
+    let added = 0;
+    for (const it of chosen) {
+        // Keep the package size in the unit so quantities stay meaningful ("how many fat bombs from a 16 oz jar").
+        const unit = it.size ? it.size : (it.unit || 'each');
+        const data = {
+            name: it.name.trim(),
+            quantity: it.quantity || 1,
+            unit: unit,
+            category: it.category || 'other',
+            location: 'pantry',
+            brand: it.brand || null,
+            store_name: it.store_name || null,
+            price_paid: (it.price !== '' && it.price != null) ? it.price : null,
+            notes: it.raw_text ? ('Receipt: ' + it.raw_text + (it.size ? ' (' + it.size + ')' : '')) : null
+        };
+        const res = await deftApi('add_pantry_item', data, { silent: true });
+        if (res) { added++; _learnShorthand(it); }
+    }
+    btn.disabled = false; btn.textContent = 'Add to pantry';
+    closeModal('receiptModal');
+    toast(`Added ${added} item${added !== 1 ? 's' : ''} to the household pantry`, 'success');
+    await loadPantry();
+}
+// Reinforce the per-store shorthand dictionary so future receipts auto-resolve (find-or-bump).
+async function _learnShorthand(it) {
+    if (!it.raw_text) return;
+    const store = it.store_name || '';
+    try {
+        const existing = await supabaseSelect('deft_store_shorthand',
+            `household_id=eq.${HOUSEHOLD_ID}&store_name=eq.${encodeURIComponent(store)}&raw_text=ilike.${encodeURIComponent(it.raw_text)}&select=shorthand_id,times_seen&limit=1`);
+        const now = new Date().toISOString();
+        const payload = { resolved_name: it.name, brand: it.brand || null, size: it.size || null, unit: it.unit || null, category: it.category || null, food_id: it.food_id || null, last_seen: now };
+        if (existing && existing.length) {
+            await supabaseWrite('deft_store_shorthand', 'PATCH', Object.assign({ times_seen: (existing[0].times_seen || 1) + 1 }, payload), `shorthand_id=eq.${existing[0].shorthand_id}`);
+        } else {
+            await supabaseWrite('deft_store_shorthand', 'POST', Object.assign({ household_id: HOUSEHOLD_ID, store_name: store, raw_text: it.raw_text }, payload));
+        }
+    } catch (e) { /* best-effort learning */ }
+}
+
 async function discardPrepared(id) {
     if (!confirm('Discard this prepared meal? This cannot be undone.')) return;
     const result = await deftApi('discard_prepared', { prepared_id: id });
@@ -2834,7 +2989,7 @@ async function searchRecipesAndFoods(query) {
     recipeSearchTimeout = setTimeout(async () => {
         const [recipes, foods] = await Promise.all([
             supabaseSelect('deft_recipes',
-                `user_id=eq.${activeProfileId}&name=ilike.*${encodeURIComponent(query)}*&status=eq.active&select=recipe_id,name,servings,nutrition_per_serving&limit=6`),
+                `user_id=eq.${HOUSEHOLD_ID}&name=ilike.*${encodeURIComponent(query)}*&status=eq.active&select=recipe_id,name,servings,nutrition_per_serving&limit=6`),
             supabaseSelect('deft_food_database',
                 `name=ilike.*${encodeURIComponent(query)}*&select=food_id,name,brand,serving_size,nutrition_per_serving&limit=6&order=name`)
         ]);

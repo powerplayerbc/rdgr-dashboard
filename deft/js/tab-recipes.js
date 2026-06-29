@@ -177,7 +177,7 @@ async function loadRecipes() {
     if (!activeProfileId) return;
 
     const data = await supabaseSelect('deft_recipes',
-        `user_id=eq.${activeProfileId}&status=eq.active&select=recipe_id,name,servings,nutrition_per_serving,keto_analysis,tags,is_favorite,photo_url&order=name`
+        `user_id=eq.${HOUSEHOLD_ID}&status=eq.active&select=recipe_id,name,servings,nutrition_per_serving,keto_analysis,tags,is_favorite,photo_url&order=name`
     );
     allRecipes = data || [];
     renderRecipes();
