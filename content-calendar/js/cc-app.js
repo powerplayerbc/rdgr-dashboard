@@ -5,9 +5,9 @@
 const SUPABASE_URL = 'https://carltondb.72.60.67.2.sslip.io';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';
 const BRAND_ID = 'dianna';
-// Large-file uploader (VPS). Leave '' until deployed; videos then fall back to Drive-link paste.
-const UPLOADER_URL = '';
-const UPLOAD_TOKEN = ''; // must match the content-uploader service UPLOAD_TOKEN
+// Large-file uploader (VPS, rclone -> Drive). Handles all asset types incl. large video.
+const UPLOADER_URL = 'https://uploader.72.60.67.2.sslip.io';
+const UPLOAD_TOKEN = 'c41b24ea400dc78e7691a261555c998b77f6cc214143fc8f'; // matches content-uploader service
 // Interim small-file upload (images/music/scripts) via existing n8n Drive webhook.
 const ASSET_WEBHOOK = 'https://n8n.carltonaiservices.com/webhook/dianna-asset-upload';
 
@@ -262,10 +262,10 @@ const CC = {
         let h = '<div class="panel p-4 mb-4"><div class="flex items-center justify-between mb-3"><h3 class="font-bold">Assets</h3></div>';
         h += '<div id="assetList">' + (assets.length ? assets.map(a=>this.assetRow(a)).join('') : '<div class="text-txt-3 text-sm">No assets yet.</div>') + '</div>';
         h += '<div class="grid grid-cols-2 gap-2 mt-3">'
-          +  '<div><label class="fld">Upload image / music / script</label><input type="file" id="f_file" class="input" accept="image/*,audio/*,.pdf,.txt,.docx"></div>'
+          +  '<div><label class="fld">Upload file (video / image / music / script)</label><input type="file" id="f_file" class="input" accept="video/*,image/*,audio/*,.pdf,.txt,.docx"></div>'
           +  '<div><label class="fld">Kind</label><select id="f_assetkind" class="input"><option value="image">image</option><option value="music">music</option><option value="thumbnail">thumbnail</option><option value="script_doc">script_doc</option><option value="raw_video">raw_video (link)</option><option value="edited_video">edited_video (link)</option></select></div>';
         h += '</div><div class="flex gap-2 mt-2"><button class="btn btn-sm" onclick="CC.uploadFile()">Upload file</button><button class="btn btn-sm" onclick="CC.addDriveLink()">Add by Drive link</button></div>';
-        h += '<div class="text-txt-3" style="font-size:.7rem;margin-top:.4rem">Large videos: upload to Drive, then paste the share link here (auto-upload comes once the VPS uploader is live).</div>';
+        h += '<div class="text-txt-3" style="font-size:.7rem;margin-top:.4rem">Uploads stream straight to Dianna\'s Drive (Content folder) from any device. Each asset has View + ⬇ Download buttons. "Add by Drive link" also works for files already in Drive.</div>';
         h += '</div>';
         return h;
     },
@@ -282,10 +282,10 @@ const CC = {
         const id = document.getElementById('f_id').value; if (!id) return toast('Save the post first','error');
         const f = document.getElementById('f_file').files[0]; if (!f) return toast('Pick a file','error');
         const kind = document.getElementById('f_assetkind').value;
-        if (kind==='raw_video'||kind==='edited_video') {
-            if (UPLOADER_URL) return this._uploadViaVPS(id, f, kind);
-            return toast('Videos: use "Add by Drive link" for now','error');
-        }
+        // Primary path: stream everything (incl. large video) through the VPS uploader.
+        if (UPLOADER_URL) return this._uploadViaVPS(id, f, kind);
+        // Fallback (uploader offline): small files via webhook, video via Drive-link.
+        if (kind==='raw_video'||kind==='edited_video') return toast('Videos: use "Add by Drive link"','error');
         toast('Uploading…');
         const b64 = await new Promise(r=>{ const fr=new FileReader(); fr.onload=()=>r(String(fr.result).split(',')[1]); fr.readAsDataURL(f); });
         let resp;
