@@ -2534,6 +2534,22 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     <option value="6">Saturday</option>
                 </select>
             </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Preferred time <span style="color:var(--brain-txt-3);font-weight:400;">(optional)</span></label>
+                    <input type="time" class="form-input" id="addHabitPreferredTime">
+                </div>
+                <div>
+                    <label class="form-label">Preferred window</label>
+                    <select class="form-input" id="addHabitPreferredWindow">
+                        <option value="any">Any time</option>
+                        <option value="morning">Morning</option>
+                        <option value="afternoon">Afternoon</option>
+                        <option value="evening">Evening</option>
+                    </select>
+                </div>
+            </div>
+            <p class="text-xs" style="color:var(--brain-txt-3);margin-top:-0.25rem;">Auto-scheduling tries to place this habit on your calendar at the preferred time when the slot is free.</p>
         </div>
         <div class="modal-footer">
             <button class="btn btn-ghost" onclick="closeModal('addHabitModal')">Cancel</button>
@@ -2595,6 +2611,22 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     <option value="6">Saturday</option>
                 </select>
             </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="form-label">Preferred time <span style="color:var(--brain-txt-3);font-weight:400;">(optional)</span></label>
+                    <input type="time" class="form-input" id="editHabitPreferredTime">
+                </div>
+                <div>
+                    <label class="form-label">Preferred window</label>
+                    <select class="form-input" id="editHabitPreferredWindow">
+                        <option value="any">Any time</option>
+                        <option value="morning">Morning</option>
+                        <option value="afternoon">Afternoon</option>
+                        <option value="evening">Evening</option>
+                    </select>
+                </div>
+            </div>
+            <p class="text-xs" style="color:var(--brain-txt-3);margin-top:-0.25rem;">Auto-scheduling tries to place this habit on your calendar at the preferred time when the slot is free.</p>
         </div>
         <div class="modal-footer">
             <button class="btn btn-danger" onclick="deleteHabit()" style="margin-right: auto;">Delete</button>
@@ -2870,6 +2902,20 @@ const CAT_ICONS = {
     run: '\uD83C\uDFC3', yoga: '\uD83E\uDDD8', cook: '\uD83C\uDF73',
     code: '\uD83D\uDCBB', write: '\u270D\uFE0F', read: '\uD83D\uDCD6',
     pray: '\uD83D\uDE4F', sleep: '\uD83D\uDE34', walk: '\uD83D\uDEB6',
+    // UBR-0215: picker icons that were missing here (so they all fell back to a yellow star)
+    sparkle: '\u2728', target: '\uD83C\uDFAF', rocket: '\uD83D\uDE80', plant: '\uD83C\uDF3F',
+    coffee: '\u2615', phone: '\uD83D\uDCF1', memo: '\uD83D\uDCDD', trophy: '\uD83C\uDFC6', gem: '\uD83D\uDC8E',
+    // UBR-0215: requested new icons
+    videocam: '\uD83D\uDCF9', golf: '\u26F3', plate: '\uD83C\uDF7D\uFE0F', broom: '\uD83E\uDDF9',
+    // UBR-0215: a star in each of the 8 basic colors (emoji has no colored stars, so use a CSS-colored glyph)
+    star_red: '<span style="color:#e74c3c">\u2605</span>',
+    star_orange: '<span style="color:#e67e22">\u2605</span>',
+    star_yellow: '<span style="color:#f1c40f">\u2605</span>',
+    star_green: '<span style="color:#2ecc71">\u2605</span>',
+    star_blue: '<span style="color:#3498db">\u2605</span>',
+    star_purple: '<span style="color:#9b59b6">\u2605</span>',
+    star_pink: '<span style="color:#ff6fae">\u2605</span>',
+    star_white: '<span style="color:#ecf0f1">\u2605</span>',
 };
 
 function getCatIcon(cat) {
@@ -5141,22 +5187,30 @@ function renderWeeklyReport(result) {
 // ═══════════════════════════════════════
 // HABITS & TASKS — ICON GRID
 // ═══════════════════════════════════════
+// UBR-0215: curated, de-duplicated icon set. Leads with a star in 8 basic colors
+// and the requested new icons; dropped visual duplicates (dumbbell\u2248exercise, yoga\u2248meditation).
 const HABIT_ICON_OPTIONS = [
-    'meditation','exercise','book','heart','brain','star','fire','music',
-    'palette','run','yoga','cook','code','write','read','pray','walk',
-    'briefcase','home','clock','dumbbell','chat','sparkle','target',
-    'rocket','plant','coffee','phone','memo','trophy','gem'
+    'star_red','star_orange','star_yellow','star_green','star_blue','star_purple','star_pink','star_white',
+    'videocam','golf','plate','broom','read','family',
+    'meditation','exercise','run','walk','cook','heart','brain','fire','music',
+    'palette','code','write','pray','briefcase','home','clock','chat',
+    'sparkle','target','rocket','plant','coffee','phone','memo','trophy','gem'
 ];
 
 function buildIconGrid(containerId, hiddenInputId, selectedIcon) {
     const container = document.getElementById(containerId);
     if (!container) return;
+    // UBR-0215: keep the hidden input in sync with the highlighted icon. Previously the
+    // hidden input kept its hardcoded "star" on modal open, so saving without re-clicking
+    // an icon silently reset the habit's icon to a star.
+    const hidden = document.getElementById(hiddenInputId);
+    if (hidden) hidden.value = selectedIcon;
     container.innerHTML = HABIT_ICON_OPTIONS.map(icon => {
-        const emoji = CAT_ICONS[icon] || '\u2B50';
+        const glyph = CAT_ICONS[icon] || '\u2B50';
         const sel = icon === selectedIcon ? 'background: var(--brain-accent-dim); border-color: var(--brain-accent);' : '';
         return `<button type="button" class="flex items-center justify-center w-8 h-8 rounded-md text-base border cursor-pointer transition-all"
             style="border-color: var(--brain-border); ${sel}"
-            data-icon="${icon}" onclick="selectHabitIcon('${containerId}','${hiddenInputId}','${icon}')">${emoji}</button>`;
+            data-icon="${icon}" onclick="selectHabitIcon('${containerId}','${hiddenInputId}','${icon}')">${glyph}</button>`;
     }).join('');
 }
 
@@ -5777,6 +5831,8 @@ function openAddHabitModal() {
     document.getElementById('addHabitPoints').value = '15';
     document.getElementById('addHabitFrequency').value = 'daily';
     selectedHabitIcon = 'star';
+    document.getElementById('addHabitPreferredTime').value = '';
+    document.getElementById('addHabitPreferredWindow').value = 'any';
     populateHabitCategoryDropdown('addHabitCategory');
     buildIconGrid('addHabitIconGrid', 'addHabitIcon', 'star');
     openModal('addHabitModal');
@@ -5796,10 +5852,13 @@ async function submitAddHabit() {
     const icon = document.getElementById('addHabitIcon').value || 'star';
     const freq = document.getElementById('addHabitFrequency').value || 'daily';
 
+    const prefTime = document.getElementById('addHabitPreferredTime').value || null;
+    const prefWindow = document.getElementById('addHabitPreferredWindow').value || 'any';
     const body = {
         user_id: activeProfileId,
         name, category_id: catId, icon,
         points_value: points, frequency: freq,
+        preferred_time: prefTime, preferred_window: prefWindow,
         sort_order: habits.length, is_active: true
     };
     if (freq === 'weekly') {
@@ -5833,6 +5892,9 @@ function openEditHabitModal(habitId) {
         weeklyDayEl.style.display = 'none';
     }
     editSelectedHabitIcon = h.icon || 'star';
+    // UBR-0216: populate preferred time/window (DB time comes back as "HH:MM:SS")
+    document.getElementById('editHabitPreferredTime').value = h.preferred_time ? String(h.preferred_time).slice(0, 5) : '';
+    document.getElementById('editHabitPreferredWindow').value = h.preferred_window || 'any';
     populateHabitCategoryDropdown('editHabitCategory');
     document.getElementById('editHabitCategory').value = h.category_id || '';
     buildIconGrid('editHabitIconGrid', 'editHabitIcon', editSelectedHabitIcon);
@@ -5850,7 +5912,9 @@ async function submitEditHabit() {
         category_id: document.getElementById('editHabitCategory').value || null,
         icon: document.getElementById('editHabitIcon').value || 'star',
         points_value: parseFloat(document.getElementById('editHabitPoints').value) || 15,
-        frequency: freq
+        frequency: freq,
+        preferred_time: document.getElementById('editHabitPreferredTime').value || null,
+        preferred_window: document.getElementById('editHabitPreferredWindow').value || 'any'
     };
     if (freq === 'weekly') {
         body.weekly_day = parseInt(document.getElementById('editHabitDayOfWeek').value) || 0;
