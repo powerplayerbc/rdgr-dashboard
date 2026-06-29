@@ -23,8 +23,6 @@ const NAV_GROUPS = [
     { label: 'Outreach', href: '/crm', role: 'admin', items: [
         { label: 'CRM', href: '/crm' },
         { label: 'Email', href: '/email-outreach' },
-        { label: 'Social', href: '/social-dashboard' },
-        { label: 'Social Content', href: '/social-content' },
         { label: 'Offers', href: '/offer-studio' },
         { label: 'Client Projects', href: '/client-projects' },
     ]},
@@ -42,9 +40,10 @@ const NAV_GROUPS = [
         { label: 'Compliance', href: '/compliance' },
         { label: 'Documents', href: '/bsi-documents' },
     ]},
-    { label: 'Content', href: '/content', items: [
-        { label: 'Publishing', href: '/content' },
+    { label: 'Content', href: '/content-calendar', items: [
+        { label: 'Calendar', href: '/content-calendar' },
         { label: 'Media', href: '/media' },
+        { label: 'Videos', href: '/video-inventory' },
     ]},
     { label: 'Partnerships', href: '/partnerships' },
     { label: 'BRAIN', href: '/brain', items: [
@@ -91,6 +90,7 @@ const PAGE_URL_MAP = {
     'template-studio.html': '/template-studio',
     'brand-documents.html': '/brand-documents',
     'content.html': '/content',
+    'content-calendar/index.html': '/content-calendar',
     'media.html': '/media',
     'brain.html': '/brain',
     'deft.html': '/deft',

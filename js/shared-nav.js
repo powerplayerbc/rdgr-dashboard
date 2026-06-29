@@ -50,8 +50,6 @@
         { label: 'Outreach', href: '/crm', role: 'admin', items: [
             { label: 'CRM', href: '/crm' },
             { label: 'Email', href: '/email-outreach' },
-            { label: 'Social', href: '/social-dashboard' },
-            { label: 'Social Content', href: '/social-content' },
             { label: 'Offers', href: '/offer-studio' },
             { label: 'Subscribers', href: '/subscribers' },
             { label: 'Client Projects', href: '/client-projects' },
@@ -70,8 +68,8 @@
             { label: 'Compliance', href: '/compliance' },
             { label: 'Documents', href: '/bsi-documents' },
         ]},
-        { label: 'Content', href: '/content', items: [
-            { label: 'Publishing', href: '/content' },
+        { label: 'Content', href: '/content-calendar', items: [
+            { label: 'Calendar', href: '/content-calendar' },
             { label: 'Media', href: '/media' },
             { label: 'Videos', href: '/video-inventory' },
         ]},

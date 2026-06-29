@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Content Calendar | RDGR</title>
+    <link rel="preconnect" href="https://carltondb.72.60.67.2.sslip.io" crossorigin>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Instant auth check + theme application — runs before body renders
+        try {
+            if (JSON.parse(localStorage.getItem('rdgr-session') || '{}').authenticated) {
+                document.documentElement.classList.add('rdgr-authed');
+            }
+        } catch (e) {}
+        try {
+            var _p = JSON.parse(localStorage.getItem('rdgr-active-profile') || '{}');
+            var _tc = JSON.parse(localStorage.getItem('deft-theme-' + (_p.id || 'default')) || '{}');
+            var _presets = {
+                rdgr: { accent:'#06D6A0',accentWarm:'#4CC9F0',base:'#08090D',surface:'#11131A',surfaceEl:'#1A1D28',surfaceHi:'#242836',border:'#2A2E3D',success:'#06D6A0',warning:'#FFD93D',danger:'#FF6B6B',txt:'#E8ECF1',txt2:'#8A95A9',txt3:'#525E73',headingFont:'Chakra Petch',bodyFont:'IBM Plex Sans' }
+            };
+            var _t = _presets.rdgr;
+            var _r = document.documentElement;
+            _r.style.setProperty('--deft-accent', _t.accent);
+            _r.style.setProperty('--deft-accent-dim', _t.accent + '26');
+            _r.style.setProperty('--deft-base', _t.base);
+            _r.style.setProperty('--deft-surface', _t.surface);
+            _r.style.setProperty('--deft-surface-el', _t.surfaceEl);
+            _r.style.setProperty('--deft-surface-hi', _t.surfaceHi);
+            _r.style.setProperty('--deft-border', _t.border);
+            _r.style.setProperty('--deft-success', _t.success);
+            _r.style.setProperty('--deft-warning', _t.warning);
+            _r.style.setProperty('--deft-danger', _t.danger);
+            _r.style.setProperty('--deft-txt', _t.txt);
+            _r.style.setProperty('--deft-txt-2', _t.txt2);
+            _r.style.setProperty('--deft-txt-3', _t.txt3);
+            // Dianna brand purple accent for this section
+            _r.style.setProperty('--deft-accent', '#A855F7');
+            _r.style.setProperty('--deft-accent-dim', '#A855F726');
+            _r.style.setProperty('--deft-accent-warm', '#C084FC');
+        } catch (e) {}
+        tailwind.config = { theme: { extend: { colors: {
+            base:'var(--deft-base)', surface:'var(--deft-surface)', surfaceEl:'var(--deft-surface-el)',
+            surfaceHi:'var(--deft-surface-hi)', border:'var(--deft-border)', accent:'var(--deft-accent)',
+            txt:'var(--deft-txt)', 'txt-2':'var(--deft-txt-2)', 'txt-3':'var(--deft-txt-3)',
+            success:'var(--deft-success)', warning:'var(--deft-warning)', danger:'var(--deft-danger)'
+        }}}};
+    </script>
+    <style>
+        :root { color-scheme: dark; }
+        html.rdgr-authed .gate-overlay { display: none !important; }
+        html.rdgr-authed #ccApp { opacity: 1 !important; }
+        body { background: var(--deft-base); color: var(--deft-txt); font-family: var(--deft-body-font, 'IBM Plex Sans'), system-ui, sans-serif; margin: 0; }
+        h1, h2, h3, .font-heading { font-family: var(--deft-heading-font, 'Chakra Petch'), sans-serif; }
+        .gate-overlay { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background: var(--deft-base); }
+        .gate-overlay.hidden { display: none; }
+        .gate-input { width: 100%; padding: .75rem 1rem; background: var(--deft-surface-el); border: 1px solid var(--deft-border); border-radius: 10px; color: var(--deft-txt); }
+        .gate-error { color: var(--deft-danger); font-size: .8rem; text-align: center; margin-top: .5rem; display: none; }
+        .gate-error.show { display: block; }
+        .btn { border-radius: 10px; font-weight: 600; cursor: pointer; border: 1px solid var(--deft-border); background: var(--deft-surface-el); color: var(--deft-txt); padding: .5rem .9rem; transition: all .15s; }
+        .btn:hover { background: var(--deft-surface-hi); }
+        .btn-primary { background: var(--deft-accent); color: #0b0710; border-color: transparent; }
+        .btn-primary:hover { filter: brightness(1.08); }
+        .btn-sm { padding: .3rem .6rem; font-size: .8rem; }
+        .panel { background: var(--deft-surface); border: 1px solid var(--deft-border); border-radius: 14px; }
+        .input, select.input, textarea.input { width: 100%; padding: .55rem .7rem; background: var(--deft-surface-el); border: 1px solid var(--deft-border); border-radius: 9px; color: var(--deft-txt); font-size: .9rem; }
+        textarea.input { resize: vertical; min-height: 64px; }
+        label.fld { display:block; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--deft-txt-3); margin-bottom:.25rem; }
+        .pill { display:inline-flex; align-items:center; gap:.3rem; padding:.15rem .5rem; border-radius:999px; font-size:.7rem; font-weight:600; }
+        .daycol { background: var(--deft-surface); border: 1px solid var(--deft-border); border-radius: 12px; min-height: 120px; }
+        .pcard { background: var(--deft-surface-el); border:1px solid var(--deft-border); border-left-width:3px; border-radius:9px; padding:.5rem .6rem; cursor:pointer; transition: all .12s; }
+        .pcard:hover { background: var(--deft-surface-hi); transform: translateY(-1px); }
+        .drawer-bg { position: fixed; inset:0; background: rgba(0,0,0,.55); z-index: 60; opacity:0; pointer-events:none; transition:opacity .2s; }
+        .drawer-bg.open { opacity:1; pointer-events:auto; }
+        .drawer { position: fixed; top:0; right:0; height:100%; width: min(560px, 100%); background: var(--deft-surface); border-left:1px solid var(--deft-border); z-index:61; transform: translateX(100%); transition: transform .22s ease; overflow-y:auto; }
+        .drawer.open { transform: translateX(0); }
+        .seg { display:inline-flex; border:1px solid var(--deft-border); border-radius:10px; overflow:hidden; }
+        .seg button { padding:.4rem .8rem; font-size:.85rem; background:transparent; color:var(--deft-txt-2); border:none; cursor:pointer; }
+        .seg button.active { background: var(--deft-accent); color:#0b0710; font-weight:600; }
+        ::-webkit-scrollbar { width:10px; height:10px; } ::-webkit-scrollbar-thumb { background: var(--deft-border); border-radius:6px; }
+        .spark { display:flex; align-items:flex-end; gap:2px; height:34px; }
+        .spark span { width:6px; background: var(--deft-accent); border-radius:2px 2px 0 0; opacity:.8; }
+    </style>
+</head>
+<body>
+    <!-- ═══ AUTH GATE ═══ -->
+    <div id="gate" class="gate-overlay">
+        <div class="max-w-sm w-full px-6">
+            <div class="text-center mb-8">
+                <span class="font-mono text-xs tracking-widest uppercase" style="color:var(--deft-accent)">Content Calendar</span>
+                <h1 class="text-3xl font-bold tracking-tight mb-1 mt-2">RDGR Command Center</h1>
+                <p class="text-txt-2 text-sm">Select your profile and enter the access code</p>
+            </div>
+            <div id="gateProfiles" class="flex justify-center gap-3 mb-6 flex-wrap"><div class="text-center text-xs text-txt-3">Loading profiles...</div></div>
+            <form id="gateForm" onsubmit="return handleGate(event)">
+                <input type="password" id="gateInput" class="gate-input" placeholder="Access code" autocomplete="off">
+                <p id="gateError" class="gate-error">Incorrect code. Try again.</p>
+                <button type="submit" class="btn btn-primary w-full mt-4 py-3" id="gateSubmitBtn" disabled style="opacity:.4;">Select a profile first</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══ APP ═══ -->
+    <div id="ccApp" style="opacity:0;">
+        <nav class="sticky top-0 z-50 border-b border-border" style="background: rgba(8,9,13,.92); backdrop-filter: blur(20px);">
+            <div id="nav-root" class="max-w-[1600px] mx-auto px-4"></div>
+        </nav>
+
+        <main class="max-w-[1600px] mx-auto px-4 py-5">
+            <!-- Header -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="pill" style="background:#A855F726;color:#C084FC;">Dianna</span>
+                        <h1 class="text-2xl font-bold">Instagram Content Calendar</h1>
+                    </div>
+                    <p class="text-txt-2 text-sm mt-1">Plan, script, film-track &amp; measure every post.</p>
+                </div>
+                <div class="seg" id="viewToggle">
+                    <button data-view="calendar" class="active" onclick="CC.setView('calendar')">Calendar</button>
+                    <button data-view="board" onclick="CC.setView('board')">Production</button>
+                    <button data-view="leaderboard" onclick="CC.setView('leaderboard')">Leaderboard</button>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+                <button class="btn btn-sm" onclick="CC.shiftWeek(-1)">&larr; Prev</button>
+                <button class="btn btn-sm" onclick="CC.thisWeek()">Today</button>
+                <button class="btn btn-sm" onclick="CC.shiftWeek(1)">Next &rarr;</button>
+                <span id="weekLabel" class="text-sm text-txt-2 ml-1"></span>
+                <div class="flex-1"></div>
+                <button class="btn btn-sm" onclick="CC.openTemplate()">Weekly template</button>
+                <button class="btn btn-sm" onclick="CC.generateWeek()">Generate week</button>
+                <button class="btn btn-sm" onclick="CC.openMetaImport()">Import Meta CSV</button>
+                <button class="btn btn-primary btn-sm" onclick="CC.newPost()">+ New post</button>
+            </div>
+
+            <div id="calendarView"></div>
+            <div id="boardView" class="hidden"></div>
+            <div id="leaderboardView" class="hidden"></div>
+        </main>
+    </div>
+
+    <!-- ═══ EDITOR DRAWER ═══ -->
+    <div id="drawerBg" class="drawer-bg" onclick="CC.closeEditor()"></div>
+    <div id="drawer" class="drawer"><div id="drawerInner" class="p-5"></div></div>
+
+    <!-- ═══ MODAL (template / meta import) ═══ -->
+    <div id="modalBg" class="drawer-bg" onclick="CC.closeModal()"></div>
+    <div id="modal" class="drawer-bg" style="z-index:62; display:none; align-items:center; justify-content:center;">
+        <div class="panel p-5" style="width:min(640px,94vw); max-height:88vh; overflow-y:auto;"><div id="modalInner"></div></div>
+    </div>
+
+    <div id="toast" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:200;display:none;"></div>
+
+    <script src="/content-calendar/js/cc-app.js?v=2026-06-29a"></script>
+    <script src="/js/shared-nav.js?v=2026-06-29a"></script>
+</body>
+</html>
