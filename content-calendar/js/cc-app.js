@@ -10,6 +10,8 @@ const UPLOADER_URL = 'https://uploader.72.60.67.2.sslip.io';
 const UPLOAD_TOKEN = 'c41b24ea400dc78e7691a261555c998b77f6cc214143fc8f'; // matches content-uploader service
 // Interim small-file upload (images/music/scripts) via existing n8n Drive webhook.
 const ASSET_WEBHOOK = 'https://n8n.carltonaiservices.com/webhook/dianna-asset-upload';
+// Instagram Graph API publish (n8n IG-PUBLISH). Functions once the Meta token is configured.
+const IG_PUBLISH_WEBHOOK = 'https://n8n.carltonaiservices.com/webhook/rdgr-ig-publish';
 
 const SB_HEADERS = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Content-Type': 'application/json' };
 
@@ -209,7 +211,7 @@ const CC = {
         + '<div class="mb-4"><label class="fld">Notes</label><textarea id="f_notes" class="input" rows="2">'+esc(p.notes||'')+'</textarea></div>'
         + '<div class="flex gap-2 mb-5"><button class="btn btn-primary" onclick="CC.savePost()">Save</button>'
         +   (p.id?'<button class="btn" onclick="CC.markPosted()">Mark posted</button><button class="btn" style="margin-left:auto;color:var(--deft-danger)" onclick="CC.deletePost()">Delete</button>':'')+'</div>'
-        + (p.id ? this.assetsHtml(assets) + this.videoProcHtml(p, assets) + this.metricsHtml(p, metrics) : '<div class="text-txt-3 text-sm">Save the post first to attach assets &amp; metrics.</div>');
+        + (p.id ? this.assetsHtml(assets) + this.videoProcHtml(p, assets) + this.publishHtml(p) + this.metricsHtml(p, metrics) : '<div class="text-txt-3 text-sm">Save the post first to attach assets &amp; metrics.</div>');
     },
     refreshEditor() { // re-render to toggle script field on type change, preserving inputs
         const p = this._collect(); Object.assign(this._editing.post, p);
@@ -376,27 +378,63 @@ const CC = {
         else toast('No clips yet — still processing');
     },
 
+    /* ---------- publish to Instagram (Graph API) ---------- */
+    publishHtml(p) {
+        if (!p.id) return '';
+        let h = '<div class="panel p-4 mb-4"><h3 class="font-bold mb-1">Publish to Instagram</h3>';
+        h += '<div class="text-txt-3" style="font-size:.72rem;margin-bottom:.6rem">Auto-publishing uses the Meta Graph API. It activates once Dianna\'s token is configured; until then "Publish now" will report it\'s not connected yet.</div>';
+        if (p.ig_permalink) h += '<div class="mb-2" style="font-size:.85rem">✓ Published — <a class="btn btn-sm" href="'+esc(p.ig_permalink)+'" target="_blank">View on Instagram</a></div>';
+        if (p.publish_state && p.publish_state!=='published') h += '<div class="pill mb-2" style="background:var(--deft-warning)22;color:var(--deft-warning)">'+esc(p.publish_state)+'</div>';
+        if (p.publish_error) h += '<div class="mb-2" style="color:var(--deft-danger);font-size:.8rem">Error: '+esc(p.publish_error)+'</div>';
+        h += '<div class="flex items-center gap-2 mb-2"><input type="checkbox" id="f_approved" '+(p.approved?'checked':'')+' onchange="CC.toggleApproved()"><label for="f_approved" style="font-size:.85rem">Approved — auto-publish at scheduled time ('+(p.scheduled_date||'?')+' '+(p.scheduled_time?p.scheduled_time.slice(0,5):'')+')</label></div>';
+        if (!p.ig_permalink) h += '<button class="btn btn-primary btn-sm" onclick="CC.publishNow()">Publish now</button>';
+        h += '</div>';
+        return h;
+    },
+    async toggleApproved() {
+        const id = document.getElementById('f_id').value; if (!id) return;
+        const v = document.getElementById('f_approved').checked;
+        await sbPatch('ig_posts','id=eq.'+id, { approved: v });
+        if (this._editing && this._editing.post) this._editing.post.approved = v;
+        toast(v?'Approved for auto-publish':'Approval removed');
+    },
+    async publishNow() {
+        const id = document.getElementById('f_id').value; if (!id) return;
+        if (!confirm('Publish this post to Instagram now?')) return;
+        toast('Publishing…');
+        let resp; try { resp = await (await fetch(IG_PUBLISH_WEBHOOK, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ post_id:id, brand_id:BRAND_ID }) })).json(); }
+        catch(e){ return toast('Publish endpoint not reachable yet (token not set up?)','error'); }
+        if (resp && resp.success) { toast('Published!'); this.openEditor(id); this.render(); }
+        else toast('Publish failed: '+(resp&&resp.error?resp.error:'not connected yet'),'error');
+    },
+
     /* ---------- metrics ---------- */
     metricsHtml(p, metrics) {
-        const latest = metrics[metrics.length-1] || {};
-        const fields = ['reach','plays','likes','comments','saves','shares','follows','profile_visits','link_clicks','ad_spend','manychat_triggers','manychat_dms_sent','manychat_link_clicks','leads_captured'];
+        const org = metrics.filter(m=>m.channel!=='paid'); const paid = metrics.filter(m=>m.channel==='paid');
+        const lo = org[org.length-1]||{}; const lp = paid[paid.length-1]||{};
+        const cell=(label,v)=>'<div style="min-width:58px"><div style="font-size:.6rem;color:var(--deft-txt-3);text-transform:uppercase">'+label+'</div><div style="font-weight:700">'+(v!=null&&v!==''?v:'—')+'</div></div>';
+        const fields = ['reach','impressions','plays','likes','comments','saves','shares','follows','profile_visits','link_clicks','ad_spend','manychat_triggers','manychat_dms_sent','manychat_link_clicks','leads_captured'];
         let h = '<div class="panel p-4 mb-6"><div class="flex items-center justify-between mb-3"><h3 class="font-bold">Metrics</h3><span class="text-txt-3" style="font-size:.7rem">'+metrics.length+' snapshot(s)</span></div>';
-        // trend sparkline (reach or plays)
-        if (metrics.length>1) {
-            const key = (p.content_type||'').startsWith('reel') ? 'plays' : 'reach';
-            const vals = metrics.map(m=>Number(m[key]||0)); const mx = Math.max(1,...vals);
-            h += '<div class="text-txt-3" style="font-size:.7rem">'+key+' over time</div><div class="spark mb-3">'+vals.map(v=>'<span style="height:'+Math.max(3,(v/mx*34))+'px"></span>').join('')+'</div>';
-        }
-        h += '<div class="grid grid-cols-3 gap-2">' + fields.map(k=>'<div><label class="fld">'+k.replace(/_/g,' ')+'</label><input id="m_'+k+'" type="number" step="any" class="input" value="'+(latest[k]!=null?latest[k]:'')+'"></div>').join('') + '</div>';
-        h += '<div class="flex items-center gap-2 mt-3"><label class="fld" style="margin:0">Source</label><select id="m_source" class="input" style="width:auto"><option value="manual">manual</option><option value="manychat">manychat</option></select>';
-        h += '<button class="btn btn-primary btn-sm" onclick="CC.addSnapshot()">Add snapshot</button></div>';
-        h += '</div>';
+        // Organic vs Paid summaries (separate)
+        h += '<div class="mb-3"><div class="pill" style="background:var(--deft-accent)22;color:var(--deft-accent);margin-bottom:.4rem">Organic'+(lo.captured_at?' · '+lo.captured_at.slice(0,10):'')+'</div>'
+           + '<div class="flex flex-wrap gap-3">'+[['reach',lo.reach],['plays',lo.plays],['likes',lo.likes],['comments',lo.comments],['saves',lo.saves],['shares',lo.shares],['follows',lo.follows],['leads',lo.leads_captured]].map(x=>cell(x[0],x[1])).join('')+'</div></div>';
+        h += '<div class="mb-3"><div class="pill" style="background:var(--deft-warning)22;color:var(--deft-warning);margin-bottom:.4rem">Paid / Ads'+(lp.captured_at?' · '+lp.captured_at.slice(0,10):'')+'</div>'
+           + '<div class="flex flex-wrap gap-3">'+[['spend',lp.ad_spend],['reach',lp.reach],['impr',lp.impressions],['link clk',lp.link_clicks],['results',lp.leads_captured]].map(x=>cell(x[0],x[1])).join('')+'</div></div>';
+        // organic trend
+        if (org.length>1) { const key=(p.content_type||'').startsWith('reel')?'plays':'reach'; const vals=org.map(m=>Number(m[key]||0)); const mx=Math.max(1,...vals);
+            h += '<div class="text-txt-3" style="font-size:.7rem">organic '+key+' over time</div><div class="spark mb-3">'+vals.map(v=>'<span style="height:'+Math.max(3,(v/mx*34))+'px"></span>').join('')+'</div>'; }
+        // entry form (channel-aware)
+        h += '<div class="text-txt-3" style="font-size:.72rem;margin:.5rem 0 .3rem">Add a snapshot:</div>';
+        h += '<div class="flex items-center gap-2 mb-2"><select id="m_channel" class="input" style="width:auto"><option value="organic">organic</option><option value="paid">paid / ads</option></select>'
+           + '<select id="m_source" class="input" style="width:auto"><option value="manual">manual</option><option value="meta_csv">meta csv</option><option value="manychat">manychat</option></select></div>';
+        h += '<div class="grid grid-cols-3 gap-2">' + fields.map(k=>'<div><label class="fld">'+k.replace(/_/g,' ')+'</label><input id="m_'+k+'" type="number" step="any" class="input"></div>').join('') + '</div>';
+        h += '<button class="btn btn-primary btn-sm mt-3" onclick="CC.addSnapshot()">Add snapshot</button></div>';
         return h;
     },
     async addSnapshot() {
         const id = document.getElementById('f_id').value; if (!id) return;
-        const fields = ['reach','plays','likes','comments','saves','shares','follows','profile_visits','link_clicks','ad_spend','manychat_triggers','manychat_dms_sent','manychat_link_clicks','leads_captured'];
-        const body = { post_id:id, brand_id:BRAND_ID, source: document.getElementById('m_source').value, captured_at:new Date().toISOString(), created_by:(JSON.parse(localStorage.getItem('rdgr-active-profile')||'{}').name)||'qa' };
+        const fields = ['reach','impressions','plays','likes','comments','saves','shares','follows','profile_visits','link_clicks','ad_spend','manychat_triggers','manychat_dms_sent','manychat_link_clicks','leads_captured'];
+        const body = { post_id:id, brand_id:BRAND_ID, channel: document.getElementById('m_channel').value, source: document.getElementById('m_source').value, captured_at:new Date().toISOString(), created_by:(JSON.parse(localStorage.getItem('rdgr-active-profile')||'{}').name)||'qa' };
         let any=false; fields.forEach(k=>{ const v=num(document.getElementById('m_'+k).value); if (v!=null){ body[k]=v; any=true; } });
         if (!any) return toast('Enter at least one metric','error');
         await sbPost('ig_post_metrics', body, 'return=minimal');
@@ -461,11 +499,12 @@ const CC = {
         let byCode=0, byPerma=0, snaps=[];
         for (let i=1;i<rows.length;i++){ const row=rows[i]; if (!row.length || row.every(c=>!c)) continue;
             const hay = row.join('  ').toUpperCase();
+            let channel = 'paid';
             let post = posts.find(p => p.ad_code && hay.includes(p.ad_code.toUpperCase()));
             if (post) byCode++;
-            else { const key=(cPerma>=0?row[cPerma]:'')||''; post = key ? posts.find(p=> p.ig_permalink && (p.ig_permalink.includes(key)||key.includes(p.ig_permalink)|| (p.ig_media_id&&key.includes(p.ig_media_id)))) : null; if (post) byPerma++; }
+            else { const key=(cPerma>=0?row[cPerma]:'')||''; post = key ? posts.find(p=> p.ig_permalink && (p.ig_permalink.includes(key)||key.includes(p.ig_permalink)|| (p.ig_media_id&&key.includes(p.ig_media_id)))) : null; if (post) { byPerma++; channel = 'organic'; } }
             if (!post) continue;
-            const snap = { post_id:post.id, brand_id:BRAND_ID, source:'meta_csv', captured_at:new Date().toISOString() };
+            const snap = { post_id:post.id, brand_id:BRAND_ID, source:'meta_csv', channel:channel, captured_at:new Date().toISOString() };
             let any=false; Object.keys(map).forEach(k=>{ if (map[k]>=0){ const v=num2(row[map[k]]); if (v!=null){ snap[k]=v; any=true; } } });
             if (any) snaps.push(snap);
         }
