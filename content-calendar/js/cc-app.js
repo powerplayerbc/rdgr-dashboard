@@ -402,7 +402,7 @@ const CC = {
         const id = document.getElementById('f_id').value; if (!id) return;
         if (!confirm('Publish this post to Instagram now?')) return;
         toast('Publishing…');
-        let resp; try { resp = await (await fetch(IG_PUBLISH_WEBHOOK, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ post_id:id, brand_id:BRAND_ID }) })).json(); }
+        let resp; try { resp = await (await fetch(UPLOADER_URL.replace(/\/$/,'')+'/publish', { method:'POST', headers:{'Content-Type':'application/json','x-upload-token':UPLOAD_TOKEN}, body: JSON.stringify({ post_id:id, brand_id:BRAND_ID }) })).json(); }
         catch(e){ return toast('Publish endpoint not reachable yet (token not set up?)','error'); }
         if (resp && resp.success) { toast('Published!'); this.openEditor(id); this.render(); }
         else toast('Publish failed: '+(resp&&resp.error?resp.error:'not connected yet'),'error');
