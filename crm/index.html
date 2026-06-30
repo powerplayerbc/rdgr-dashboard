@@ -1379,7 +1379,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     <label class="block text-xs text-txt-2 mb-1.5 font-medium uppercase tracking-wider">Instagram Handle <span class="text-alert">*</span></label>
                     <div class="flex items-center gap-1">
                         <span class="text-txt-3 text-sm">@</span>
-                        <input type="text" id="acHandle" class="form-input" placeholder="username" oninput="this.value=this.value.replace(/[^A-Za-z0-9._]/g,'')">
+                        <input type="text" id="acHandle" class="form-input" placeholder="username or paste full instagram.com URL" onblur="this.value=parseIgHandle(this.value)">
                     </div>
                 </div>
                 <div>
@@ -1539,6 +1539,15 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
 
     // ═══════════════════════════════════════ UTILITIES ═══════════════════════════════════════
     function esc(str) { const d = document.createElement('div'); d.textContent = str == null ? '' : str; return d.innerHTML; }
+    // Accept a bare handle ("@name"/"name") or a full URL ("https://www.instagram.com/name/?hl=en") -> bare handle
+    function parseIgHandle(input) {
+        let s = (input || '').trim();
+        if (!s) return '';
+        const m = s.match(/instagram\.com\/([^/?#]+)/i);
+        if (m) s = m[1];
+        s = s.replace(/^@+/, '').replace(/[/?#].*$/, '').trim();
+        return s.replace(/[^A-Za-z0-9._]/g, '').toLowerCase();
+    }
     function timeAgo(dateStr) {
         if (!dateStr) return '—';
         const diff = Date.now() - new Date(dateStr).getTime();
@@ -1752,7 +1761,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         openModal('addContactModal'); setTimeout(() => document.getElementById('acHandle').focus(), 50);
     }
     async function submitAddContact() {
-        const handle = document.getElementById('acHandle').value.trim();
+        const handle = parseIgHandle(document.getElementById('acHandle').value);
         if (!handle) { toast('Instagram handle is required', 'error'); return; }
         const btn = document.getElementById('acSubmitBtn'); btn.disabled = true; btn.textContent = 'Adding...';
         const fuDate = document.getElementById('acFollowup').value;
