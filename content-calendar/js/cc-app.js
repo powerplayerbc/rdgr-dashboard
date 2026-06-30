@@ -82,6 +82,8 @@ const CC = {
     cache: [],
 
     async init() {
+        // keep ~3 weeks of standing-schedule placeholders on the calendar automatically
+        try { await rpc('ig_ensure_upcoming', { p_brand_id: BRAND_ID, p_days: 21 }); } catch(e) {}
         try { this.leadMagnets = await sbGet('lead_magnets?brand_id=eq.'+BRAND_ID+'&select=id,title,slug&order=title'); } catch(e) { this.leadMagnets = []; }
         if (!Array.isArray(this.leadMagnets)) this.leadMagnets = [];
         this.render();
