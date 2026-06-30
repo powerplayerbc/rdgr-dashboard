@@ -26,8 +26,8 @@ const STAGE_COLOR = { idea:'#525E73', scripted:'#8A95A9', filmed:'#4CC9F0', edit
 
 /* ---------- data helpers ---------- */
 async function sbGet(path) { const r = await fetch(SUPABASE_URL + '/rest/v1/' + path, { headers: SB_HEADERS }); return r.json(); }
-async function sbPost(table, body, prefer) { const r = await fetch(SUPABASE_URL + '/rest/v1/' + table, { method: 'POST', headers: { ...SB_HEADERS, 'Prefer': prefer || 'return=representation' }, body: JSON.stringify(body) }); return r.json(); }
-async function sbPatch(table, q, body) { const r = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + q, { method: 'PATCH', headers: { ...SB_HEADERS, 'Prefer': 'return=representation' }, body: JSON.stringify(body) }); return r.json(); }
+async function sbPost(table, body, prefer) { const r = await fetch(SUPABASE_URL + '/rest/v1/' + table, { method: 'POST', headers: { ...SB_HEADERS, 'Prefer': prefer || 'return=representation' }, body: JSON.stringify(body) }); const t = await r.text(); return t ? JSON.parse(t) : null; }
+async function sbPatch(table, q, body) { const r = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + q, { method: 'PATCH', headers: { ...SB_HEADERS, 'Prefer': 'return=representation' }, body: JSON.stringify(body) }); const t = await r.text(); return t ? JSON.parse(t) : null; }
 async function sbDelete(table, q) { return fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + q, { method: 'DELETE', headers: SB_HEADERS }); }
 async function rpc(fn, body) { const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, { method: 'POST', headers: SB_HEADERS, body: JSON.stringify(body || {}) }); return r.json(); }
 
