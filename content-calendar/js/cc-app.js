@@ -430,7 +430,7 @@ const CC = {
         const title=[date, ct, (headline||topic||'untitled')].filter(Boolean).join(' — ');
         const content='HOOK:\n'+hook+'\n\nVIDEO / SLIDE TEXT:\n'+script+'\n\nPOST CAPTION:\n'+caption+'\n\nTopic: '+topic;
         toast('Creating Google Doc…');
-        let r; try { r = await (await fetch('https://n8n.carltonaiservices.com/webhook/rdgr-tool-publish', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ title, content, content_type:'ig-script', brand_id:BRAND_ID, folder_path:'Content/Scripts' }) })).json(); }
+        let r; try { r = await (await fetch('https://n8n.carltonaiservices.com/webhook/rdgr-ig-doc', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ title, content }) })).json(); }
         catch(e) { return toast('Doc creation failed','error'); }
         if (!r || !r.success || !r.doc_url) return toast('Doc creation failed: '+JSON.stringify(r).slice(0,100),'error');
         await sbPost('ig_post_assets', { post_id:id, brand_id:BRAND_ID, asset_kind:'script_doc', file_name:title+' (Google Doc)', view_url:r.doc_url, drive_file_id:r.doc_id||null, uploaded_by:'script-export' }, 'return=minimal');
