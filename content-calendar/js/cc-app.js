@@ -183,6 +183,7 @@ const CC = {
         const typeOpts = Object.keys(TYPES).map(k=>'<option value="'+k+'"'+(p.content_type===k?' selected':'')+'>'+TYPES[k].label+'</option>').join('');
         const stageBtns = STAGES.map(s=>'<button type="button" class="btn btn-sm" data-stage="'+s+'" onclick="CC.pickStage(\''+s+'\')" style="'+(p.production_status===s?'background:'+STAGE_COLOR[s]+';color:#0b0710;border-color:transparent':'')+'">'+s+'</button>').join(' ');
         const isReel = (p.content_type||'').startsWith('reel');
+        const isVideo = isReel || p.content_type === 'story';
         return ''
         + '<div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold">'+(p.id?'Edit post':'New post')+'</h2><button class="btn btn-sm" onclick="CC.closeEditor()">✕</button></div>'
         + '<input type="hidden" id="f_id" value="'+(p.id||'')+'">'
@@ -192,10 +193,11 @@ const CC = {
         +   '<div><label class="fld">Type</label><select id="f_type" class="input" onchange="CC.refreshEditor()">'+typeOpts+'</select></div>'
         +   '<div><label class="fld">Slot label</label><input id="f_slot" class="input" value="'+esc(p.slot_label||'')+'"></div>'
         + '</div>'
-        + '<div class="mb-3"><label class="fld">Title</label><input id="f_title" class="input" value="'+esc(p.title||'')+'"></div>'
-        + '<div class="mb-3"><label class="fld">Hook</label><input id="f_hook" class="input" value="'+esc(p.hook||'')+'" placeholder="Opening line / scroll-stopper"></div>'
-        + (isReel ? '<div class="mb-3"><label class="fld">Script</label><textarea id="f_script" class="input" rows="5" placeholder="Full reel script — Dianna films from this">'+esc(p.script||'')+'</textarea></div>' : '<input type="hidden" id="f_script" value="'+esc(p.script||'')+'">')
-        + '<div class="mb-3"><label class="fld">Caption</label><textarea id="f_caption" class="input" rows="3">'+esc(p.caption||'')+'</textarea></div>'
+        + (p.id ? '<div class="mb-3 flex items-center gap-2" style="font-size:.78rem"><span class="fld" style="margin:0">Ad code</span><code style="background:var(--deft-surface-hi);padding:.15rem .45rem;border-radius:6px;color:var(--deft-accent)">'+esc(p.ad_code||'(saving…)')+'</code><span class="text-txt-3">&larr; put this in the Meta ad name so the Ads CSV matches this post</span></div>' : '')
+        + '<div class="mb-3"><label class="fld">Headline</label><input id="f_title" class="input" value="'+esc(p.title||'')+'" placeholder="The post headline"></div>'
+        + '<div class="mb-3"><label class="fld">Hook (optional)</label><input id="f_hook" class="input" value="'+esc(p.hook||'')+'" placeholder="Opening line / scroll-stopper"></div>'
+        + (isVideo ? '<div class="mb-3"><label class="fld">Video text (on-screen / spoken — what goes ON the raw video)</label><textarea id="f_script" class="input" rows="5" placeholder="The words to say / put on screen. Different from the post caption.">'+esc(p.script||'')+'</textarea></div>' : '<input type="hidden" id="f_script" value="'+esc(p.script||'')+'">')
+        + '<div class="mb-3"><label class="fld">Body text (post caption)</label><textarea id="f_caption" class="input" rows="3" placeholder="The caption that goes under the post">'+esc(p.caption||'')+'</textarea></div>'
         + '<div class="grid grid-cols-2 gap-3 mb-3">'
         +   '<div><label class="fld">CTA text</label><input id="f_cta" class="input" value="'+esc(p.cta_text||'')+'" placeholder="Comment WORD below..."></div>'
         +   '<div><label class="fld">ManyChat keyword</label><input id="f_keyword" class="input" value="'+esc(p.manychat_keyword||'')+'"></div>'
@@ -263,7 +265,7 @@ const CC = {
         h += '<div id="assetList">' + (assets.length ? assets.map(a=>this.assetRow(a)).join('') : '<div class="text-txt-3 text-sm">No assets yet.</div>') + '</div>';
         h += '<div class="grid grid-cols-2 gap-2 mt-3">'
           +  '<div><label class="fld">Upload file (video / image / music / script)</label><input type="file" id="f_file" class="input" accept="video/*,image/*,audio/*,.pdf,.txt,.docx"></div>'
-          +  '<div><label class="fld">Kind</label><select id="f_assetkind" class="input"><option value="image">image</option><option value="music">music</option><option value="thumbnail">thumbnail</option><option value="script_doc">script_doc</option><option value="raw_video">raw_video (link)</option><option value="edited_video">edited_video (link)</option></select></div>';
+          +  '<div><label class="fld">Kind</label><select id="f_assetkind" class="input"><option value="raw_video">video — raw</option><option value="edited_video">video — edited</option><option value="final_video">video — final</option><option value="image">image</option><option value="music">music</option><option value="thumbnail">thumbnail</option><option value="script_doc">script / pdf</option></select></div>';
         h += '</div><div class="flex gap-2 mt-2"><button class="btn btn-sm" onclick="CC.uploadFile()">Upload file</button><button class="btn btn-sm" onclick="CC.addDriveLink()">Add by Drive link</button></div>';
         h += '<div class="text-txt-3" style="font-size:.7rem;margin-top:.4rem">Uploads stream straight to Dianna\'s Drive (Content folder) from any device. Each asset has View + ⬇ Download buttons. "Add by Drive link" also works for files already in Drive.</div>';
         h += '</div>';
@@ -432,30 +434,43 @@ const CC = {
     /* ---------- Meta CSV import ---------- */
     openMetaImport() {
         let h = '<div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold">Import Meta CSV</h2><button class="btn btn-sm" onclick="CC.closeModal()">✕</button></div>';
-        h += '<div class="text-txt-2 text-sm mb-3">Meta Business Suite → Insights → Content → Export Data (CSV). Rows are matched to posts by Instagram permalink. Add the permalink to a post (Mark posted) so it can match.</div>';
+        h += '<div class="text-txt-2 text-sm mb-3">Works with <b>two</b> exports — auto-detected:</div>';
+        h += '<ul class="text-txt-2 text-sm mb-3" style="list-style:disc;padding-left:1.2rem">'
+          + '<li><b>Ads Manager</b> (paid): Ads Manager &rarr; export to CSV. Matched by <b>Ad code</b> — name the campaign/ad set/ad to include the post\'s <code>DIA-XXXXXX</code> code (shown on each post). Pulls spend, reach, impressions, link clicks, results.</li>'
+          + '<li><b>Business Suite</b> (organic): Insights &rarr; Content &rarr; Export Data. Matched by Instagram <b>permalink</b> (set it via "Mark posted"). Pulls reach, plays, likes, saves, shares, etc.</li></ul>';
         h += '<input type="file" id="csvFile" class="input mb-2" accept=".csv">';
         h += '<button class="btn btn-primary btn-sm" onclick="CC.runMetaImport()">Parse &amp; import</button><div id="csvResult" class="mt-3 text-sm"></div>';
         this._modal(h);
     },
     async runMetaImport() {
         const f = document.getElementById('csvFile').files[0]; if (!f) return toast('Pick a CSV','error');
-        const text = await f.text();
-        const rows = this._parseCsv(text); if (!rows.length) return toast('Empty CSV','error');
+        const rows = this._parseCsv(await f.text()); if (rows.length < 2) return toast('Empty CSV','error');
         const head = rows[0].map(h=>h.toLowerCase());
         const findCol = (...keys)=>{ for (let i=0;i<head.length;i++){ if (keys.some(k=>head[i].includes(k))) return i; } return -1; };
-        const cPerma = findCol('permalink','post id','link');
-        const map = { reach:findCol('reach'), impressions:findCol('impression'), plays:findCol('plays','video views','views'), likes:findCol('like'), comments:findCol('comment'), saves:findCol('save'), shares:findCol('share'), follows:findCol('follow'), profile_visits:findCol('profile visit'), link_clicks:findCol('link click') };
-        const posts = await sbGet('ig_posts?brand_id=eq.'+BRAND_ID+'&ig_permalink=not.is.null&select=id,ig_permalink,ig_media_id');
-        let matched=0, snaps=[];
-        for (let i=1;i<rows.length;i++){ const row=rows[i]; if (!row.length) continue; const key=(cPerma>=0?row[cPerma]:'')||'';
-            const post = posts.find(p=> p.ig_permalink && key && (p.ig_permalink.includes(key)||key.includes(p.ig_permalink)|| (p.ig_media_id&&key.includes(p.ig_media_id)) ));
-            if (!post) continue; matched++;
+        const cPerma = findCol('permalink','post id','link url');
+        const map = {
+            reach:findCol('reach'), impressions:findCol('impression'),
+            plays:findCol('thruplay','video plays','plays','video views','views'),
+            likes:findCol('like'), comments:findCol('comment'), saves:findCol('save'),
+            shares:findCol('share'), follows:findCol('follow'), profile_visits:findCol('profile visit'),
+            link_clicks:findCol('link click','clicks (link'), ad_spend:findCol('amount spent','spend'),
+            leads_captured:findCol('results','leads','messaging conversations','on-facebook leads')
+        };
+        const posts = await sbGet('ig_posts?brand_id=eq.'+BRAND_ID+'&select=id,ad_code,ig_permalink,ig_media_id');
+        const num2 = v => num((v||'').toString().replace(/[$,%\s]/g,''));
+        let byCode=0, byPerma=0, snaps=[];
+        for (let i=1;i<rows.length;i++){ const row=rows[i]; if (!row.length || row.every(c=>!c)) continue;
+            const hay = row.join('  ').toUpperCase();
+            let post = posts.find(p => p.ad_code && hay.includes(p.ad_code.toUpperCase()));
+            if (post) byCode++;
+            else { const key=(cPerma>=0?row[cPerma]:'')||''; post = key ? posts.find(p=> p.ig_permalink && (p.ig_permalink.includes(key)||key.includes(p.ig_permalink)|| (p.ig_media_id&&key.includes(p.ig_media_id)))) : null; if (post) byPerma++; }
+            if (!post) continue;
             const snap = { post_id:post.id, brand_id:BRAND_ID, source:'meta_csv', captured_at:new Date().toISOString() };
-            Object.keys(map).forEach(k=>{ if (map[k]>=0){ const v=num((row[map[k]]||'').replace(/[, ]/g,'')); if (v!=null) snap[k]=v; } });
-            snaps.push(snap);
+            let any=false; Object.keys(map).forEach(k=>{ if (map[k]>=0){ const v=num2(row[map[k]]); if (v!=null){ snap[k]=v; any=true; } } });
+            if (any) snaps.push(snap);
         }
         if (snaps.length) await sbPost('ig_post_metrics', snaps, 'return=minimal');
-        document.getElementById('csvResult').innerHTML = '<span style="color:var(--deft-accent)">Imported '+snaps.length+' snapshot(s)</span> from '+(rows.length-1)+' rows; '+matched+' matched a post by permalink.';
+        document.getElementById('csvResult').innerHTML = '<span style="color:var(--deft-accent)">Imported '+snaps.length+' snapshot(s)</span> from '+(rows.length-1)+' rows &middot; '+byCode+' matched by ad code, '+byPerma+' by permalink.'+(snaps.length?'':' <span style="color:var(--deft-warning)">No matches — check that ad names contain the DIA- code, or that posts have permalinks.</span>');
         this.render();
     },
     _parseCsv(text) {
