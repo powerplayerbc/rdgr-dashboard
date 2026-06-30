@@ -269,18 +269,26 @@ const CC = {
           +  '<div><label class="fld">Upload file (video / image / music / script)</label><input type="file" id="f_file" class="input" accept="video/*,image/*,audio/*,.pdf,.txt,.docx"></div>'
           +  '<div><label class="fld">Kind</label><select id="f_assetkind" class="input"><option value="raw_video">video — raw</option><option value="edited_video">video — edited</option><option value="final_video">video — final</option><option value="image">image</option><option value="music">music</option><option value="thumbnail">thumbnail</option><option value="script_doc">script / pdf</option></select></div>';
         h += '</div><div class="flex gap-2 mt-2"><button class="btn btn-sm" onclick="CC.uploadFile()">Upload file</button><button class="btn btn-sm" onclick="CC.addDriveLink()">Add by Drive link</button></div>';
-        h += '<div class="text-txt-3" style="font-size:.7rem;margin-top:.4rem">Uploads stream straight to Dianna\'s Drive (Content folder) from any device. Each asset has View + ⬇ Download buttons. "Add by Drive link" also works for files already in Drive.</div>';
+        h += '<div class="text-txt-3" style="font-size:.7rem;margin-top:.4rem">Hold as many drafts/files as you like. Tick <b>publish</b> on the exact file(s) to post — <b>only flagged files are published</b>; everything else stays a draft. Drive-linked files are downloaded only to publish, then removed from our server. Uploads/links both work; each asset has View + ⬇ Download.</div>';
         h += '</div>';
         return h;
     },
     assetRow(a) {
-        const icon = { image:'🖼️', thumbnail:'🖼️', music:'🎵', raw_video:'🎬', edited_video:'🎬', script_doc:'📄' }[a.asset_kind]||'📎';
-        return '<div class="flex items-center gap-2 mb-2" style="font-size:.82rem">'
+        const icon = { image:'🖼️', thumbnail:'🖼️', music:'🎵', raw_video:'🎬', edited_video:'🎬', final_video:'🎬', script_doc:'📄' }[a.asset_kind]||'📎';
+        const flagged = !!a.for_publishing;
+        return '<div class="flex items-center gap-2 mb-2" style="font-size:.82rem;'+(flagged?'border-left:3px solid var(--deft-accent);padding-left:.4rem':'padding-left:calc(.4rem + 3px)')+'">'
           + (a.thumbnail_url?'<img src="'+esc(a.thumbnail_url)+'" style="width:42px;height:42px;object-fit:cover;border-radius:6px">':'<span style="width:42px;text-align:center">'+icon+'</span>')
           + '<div style="flex:1;min-width:0"><div style="font-weight:600">'+esc(a.asset_kind)+'</div><div style="color:var(--deft-txt-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(a.file_name||a.drive_file_id||'')+'</div></div>'
+          + '<label title="Mark this exact file to be published" style="display:flex;align-items:center;gap:.25rem;font-size:.7rem;cursor:pointer;'+(flagged?'color:var(--deft-accent);font-weight:600':'color:var(--deft-txt-3)')+'"><input type="checkbox" '+(flagged?'checked':'')+' onchange="CC.toggleAssetPublish(\''+a.id+'\',this.checked)">publish</label>'
           + (a.view_url?'<a class="btn btn-sm" href="'+esc(a.view_url)+'" target="_blank">View</a>':'')
           + (a.download_url?'<a class="btn btn-sm" href="'+esc(a.download_url)+'" target="_blank">⬇</a>':'')
           + '<button class="btn btn-sm" style="color:var(--deft-danger)" onclick="CC.deleteAsset(\''+a.id+'\')">✕</button></div>';
+    },
+    async toggleAssetPublish(aid, checked) {
+        await sbPatch('ig_post_assets','id=eq.'+aid, { for_publishing: checked });
+        const a = (this._editing.assets||[]).find(x=>x.id===aid); if (a) a.for_publishing = checked;
+        document.getElementById('drawerInner').innerHTML = this.editorHtml(this._editing.post, this._editing.assets, this._editing.metrics);
+        toast(checked?'Marked for publishing':'Unmarked');
     },
     async uploadFile() {
         const id = document.getElementById('f_id').value; if (!id) return toast('Save the post first','error');
