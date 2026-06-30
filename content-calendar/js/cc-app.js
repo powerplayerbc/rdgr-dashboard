@@ -80,12 +80,14 @@ const CC = {
     view: 'calendar',
     leadMagnets: [],
     cache: [],
+    systemPrompt: '',
 
     async init() {
         // keep ~3 weeks of standing-schedule placeholders on the calendar automatically
         try { await rpc('ig_ensure_upcoming', { p_brand_id: BRAND_ID, p_days: 21 }); } catch(e) {}
         try { this.leadMagnets = await sbGet('lead_magnets?brand_id=eq.'+BRAND_ID+'&select=id,title,slug&order=title'); } catch(e) { this.leadMagnets = []; }
         if (!Array.isArray(this.leadMagnets)) this.leadMagnets = [];
+        try { const gc = await sbGet('ig_gen_config?brand_id=eq.'+BRAND_ID+'&select=system_prompt'); this.systemPrompt = (gc && gc[0] && gc[0].system_prompt) || ''; } catch(e) { this.systemPrompt = ''; }
         this.render();
     },
     setView(v) { this.view = v; document.querySelectorAll('#viewToggle button').forEach(b=>b.classList.toggle('active', b.dataset.view===v)); this.render(); },
@@ -200,7 +202,7 @@ const CC = {
         + (p.id ? '<div class="mb-3 flex items-center gap-2" style="font-size:.78rem"><span class="fld" style="margin:0">Ad code</span><code style="background:var(--deft-surface-hi);padding:.15rem .45rem;border-radius:6px;color:var(--deft-accent)">'+esc(p.ad_code||'(saving…)')+'</code><span class="text-txt-3">&larr; put this in the Meta ad name so the Ads CSV matches this post</span></div>' : '')
         + '<div class="mb-3"><label class="fld">Headline</label><input id="f_title" class="input" value="'+esc(p.title||'')+'" placeholder="The post headline"></div>'
         + '<div class="mb-3"><label class="fld">Hook (optional)</label><input id="f_hook" class="input" value="'+esc(p.hook||'')+'" placeholder="Opening line / scroll-stopper"></div>'
-        + (isVideo ? '<div class="mb-3"><label class="fld">Video text (on-screen / spoken — what goes ON the raw video)</label><textarea id="f_script" class="input" rows="5" placeholder="The words to say / put on screen. Different from the post caption.">'+esc(p.script||'')+'</textarea></div>' : '<input type="hidden" id="f_script" value="'+esc(p.script||'')+'">')
+        + '<div class="mb-3"><label class="fld">'+(isVideo ? 'Video text (on-screen / spoken — what goes ON the video)' : 'Slide / on-image text')+'</label><textarea id="f_script" class="input" rows="5" placeholder="What goes on the video/slides. Different from the post caption.">'+esc(p.script||'')+'</textarea></div>'
         + '<div class="mb-3"><label class="fld">Body text (post caption)</label><textarea id="f_caption" class="input" rows="3" placeholder="The caption that goes under the post">'+esc(p.caption||'')+'</textarea></div>'
         + '<div class="grid grid-cols-2 gap-3 mb-3">'
         +   '<div><label class="fld">CTA text</label><input id="f_cta" class="input" value="'+esc(p.cta_text||'')+'" placeholder="Comment WORD below..."></div>'
@@ -213,7 +215,7 @@ const CC = {
         + '<div class="mb-4"><label class="fld">Notes</label><textarea id="f_notes" class="input" rows="2">'+esc(p.notes||'')+'</textarea></div>'
         + '<div class="flex gap-2 mb-5"><button class="btn btn-primary" onclick="CC.savePost()">Save</button>'
         +   (p.id?'<button class="btn" onclick="CC.markPosted()">Mark posted</button><button class="btn" style="margin-left:auto;color:var(--deft-danger)" onclick="CC.deletePost()">Delete</button>':'')+'</div>'
-        + (p.id ? this.assetsHtml(assets) + this.videoProcHtml(p, assets) + this.publishHtml(p) + this.metricsHtml(p, metrics) : '<div class="text-txt-3 text-sm">Save the post first to attach assets &amp; metrics.</div>');
+        + (p.id ? this.genHtml(p) + this.assetsHtml(assets) + this.videoProcHtml(p, assets) + this.publishHtml(p) + this.metricsHtml(p, metrics) : '<div class="text-txt-3 text-sm">Save the post first to use AI assist, assets &amp; metrics.</div>');
     },
     refreshEditor() { // re-render to toggle script field on type change, preserving inputs
         const p = this._collect(); Object.assign(this._editing.post, p);
@@ -239,6 +241,7 @@ const CC = {
             production_status: document.getElementById('f_stage').value,
             is_boosted: document.getElementById('f_boost').checked,
             notes: document.getElementById('f_notes').value || null,
+            topic: (document.getElementById('f_topic') || {}).value || null,
             brand_id: BRAND_ID
         };
     },
@@ -386,6 +389,65 @@ const CC = {
         const clips = await sbGet('video_clips?source_id=eq.'+sid+'&select=id,status&limit=50');
         if (Array.isArray(clips) && clips.length) { await sbPatch('ig_posts','id=eq.'+id, { clip_status:'clipped' }); toast(clips.length+' clip(s) in inventory'); this.openEditor(id); this.render(); }
         else toast('No clips yet — still processing');
+    },
+
+    /* ---------- AI assist (generate / regenerate / export to Google Doc) ---------- */
+    genHtml(p) {
+        const scriptDoc = (this._editing.assets||[]).find(a=>a.asset_kind==='script_doc' && a.view_url);
+        return '<div class="panel p-4 mb-4" style="border-color:var(--deft-accent)">'
+          + '<h3 class="font-bold mb-1">✨ AI assist <button class="btn btn-sm" style="float:right;font-weight:400" onclick="CC.editPrompt()">✎ Edit prompt</button></h3>'
+          + '<div class="text-txt-3" style="font-size:.72rem;margin-bottom:.5rem">Enter the topic/concept and AI writes a strong hook, the video/slide text, and the post caption. Edit anything, or regenerate with notes. Export to a Google Doc only when you\'re happy with it.</div>'
+          + '<label class="fld">Topic / concept</label><textarea id="f_topic" class="input" rows="2" placeholder="e.g. using AI to meal-plan around a busy week">'+esc(p.topic||'')+'</textarea>'
+          + '<div class="flex flex-wrap gap-2 mt-2"><button class="btn btn-primary btn-sm" onclick="CC.generate(false)">Generate hook + script + caption</button></div>'
+          + '<div class="flex gap-2 mt-2"><input id="f_feedback" class="input" style="flex:1" placeholder="revision notes (e.g. punchier hook, shorter, more playful)"><button class="btn btn-sm" onclick="CC.generate(true)">Regenerate</button></div>'
+          + '<div class="mt-3 flex items-center gap-2"><button class="btn btn-sm" onclick="CC.exportDoc()">📄 Export script to Google Doc</button>'
+          + (scriptDoc ? '<a class="btn btn-sm" href="'+esc(scriptDoc.view_url)+'" target="_blank">Open doc</a>' : '<span class="text-txt-3" style="font-size:.7rem">created only when you click export</span>')
+          + '</div></div>';
+    },
+    async generate(isRegen) {
+        const id = document.getElementById('f_id').value; if (!id) return;
+        const topic = (document.getElementById('f_topic').value||'').trim();
+        if (!topic && !isRegen) return toast('Enter a topic/concept first','error');
+        const ct = document.getElementById('f_type').value;
+        const lmSel = document.getElementById('f_lm'); const lmTitle = (lmSel && lmSel.selectedIndex>=0) ? lmSel.options[lmSel.selectedIndex].text : '';
+        const payload = { content_type: ct, topic, lead_magnet_title: (lmTitle && lmTitle.indexOf('none')<0) ? lmTitle : '', manychat_keyword: document.getElementById('f_keyword').value||'', system_prompt: this.systemPrompt||'' };
+        if (isRegen) { payload.feedback = document.getElementById('f_feedback').value||''; payload.prior = { hook:document.getElementById('f_hook').value, script:document.getElementById('f_script').value, caption:document.getElementById('f_caption').value }; }
+        toast('Generating…');
+        let r; try { r = await (await fetch('https://n8n.carltonaiservices.com/webhook/rdgr-ig-generate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })).json(); }
+        catch(e) { return toast('Generation failed (try again)','error'); }
+        if (!r || !r.success) return toast('Generation failed','error');
+        if (r.hook!=null) document.getElementById('f_hook').value = r.hook;
+        if (r.script!=null) document.getElementById('f_script').value = r.script;
+        if (r.caption!=null) document.getElementById('f_caption').value = r.caption;
+        toast('Drafted — review/edit, then Save');
+    },
+    async exportDoc() {
+        const id = document.getElementById('f_id').value; if (!id) return;
+        const hook=document.getElementById('f_hook').value.trim(), script=document.getElementById('f_script').value.trim(), caption=document.getElementById('f_caption').value.trim();
+        const headline=document.getElementById('f_title').value.trim(), topic=(document.getElementById('f_topic').value||'').trim();
+        if (!script && !caption) return toast('Nothing to export yet — generate or write the script first','error');
+        const date=document.getElementById('f_date').value||'', ct=document.getElementById('f_type').value;
+        const title=[date, ct, (headline||topic||'untitled')].filter(Boolean).join(' — ');
+        const content='HOOK:\n'+hook+'\n\nVIDEO / SLIDE TEXT:\n'+script+'\n\nPOST CAPTION:\n'+caption+'\n\nTopic: '+topic;
+        toast('Creating Google Doc…');
+        let r; try { r = await (await fetch('https://n8n.carltonaiservices.com/webhook/rdgr-tool-publish', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ title, content, content_type:'ig-script', brand_id:BRAND_ID, folder_path:'Content/Scripts' }) })).json(); }
+        catch(e) { return toast('Doc creation failed','error'); }
+        if (!r || !r.success || !r.doc_url) return toast('Doc creation failed: '+JSON.stringify(r).slice(0,100),'error');
+        await sbPost('ig_post_assets', { post_id:id, brand_id:BRAND_ID, asset_kind:'script_doc', file_name:title+' (Google Doc)', view_url:r.doc_url, drive_file_id:r.doc_id||null, uploaded_by:'script-export' }, 'return=minimal');
+        toast('Google Doc created'); this.openEditor(id);
+    },
+
+    editPrompt() {
+        let h = '<div class="flex items-center justify-between mb-3"><h2 class="text-xl font-bold">AI generation prompt</h2><button class="btn btn-sm" onclick="CC.closeModal()">✕</button></div>';
+        h += '<div class="text-txt-2 text-sm mb-2">This system prompt steers every Generate/Regenerate (voice, hook style, output rules). Edit and save — it applies to all future generations. Keep the line that says return STRICT JSON with hook/script/caption so the fields fill correctly.</div>';
+        h += '<textarea id="sysPromptEdit" class="input" rows="14">'+esc(this.systemPrompt||'')+'</textarea>';
+        h += '<div class="flex gap-2 mt-3"><button class="btn btn-primary btn-sm" onclick="CC.savePrompt()">Save prompt</button></div>';
+        this._modal(h);
+    },
+    async savePrompt() {
+        const v = document.getElementById('sysPromptEdit').value;
+        await sbPost('ig_gen_config', [{ brand_id:BRAND_ID, system_prompt:v, updated_at:new Date().toISOString() }], 'resolution=merge-duplicates,return=minimal');
+        this.systemPrompt = v; toast('Prompt saved'); this.closeModal();
     },
 
     /* ---------- publish to Instagram (Graph API) ---------- */
