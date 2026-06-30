@@ -1514,6 +1514,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     const SUPABASE_URL = 'https://carltondb.72.60.67.2.sslip.io';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';
 
+    const ENRICH_URL = 'https://n8n.carltonaiservices.com/webhook/ig-crm-enrich';
+
     const STAGES = [
         { id: 'new',             label: 'New',             color: '#8A95A9' },
         { id: 'engaged',         label: 'Engaged',         color: '#4CC9F0' },
@@ -1765,7 +1767,19 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         };
         const r = await rpc('ig_crm_upsert_contact', body);
         btn.disabled = false; btn.textContent = 'Add Contact';
-        if (r) { toast('Contact saved: @' + r.instagram_handle); closeModal('addContactModal'); await refreshAll(); open360(r.id); }
+        if (r) { toast('Contact saved: @' + r.instagram_handle); closeModal('addContactModal'); await refreshAll(); open360(r.id); enrichContact(r.id, r.instagram_handle, true); }
+    }
+
+    // Auto/manual enrichment via Google Custom Search (IG-CRM-ENRICH n8n webhook)
+    async function enrichContact(id, handle, silent) {
+        if (!silent) toast('Enriching @' + handle + '...');
+        try {
+            const res = await fetch(ENRICH_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contact_id: id, handle: handle, brand_id: BRAND }) });
+            if (!res.ok) { if (!silent) toast('Enrich failed', 'error'); return; }
+        } catch (e) { if (!silent) toast('Enrich error', 'error'); return; }
+        await refreshAll();
+        if (current360Id === id) open360(id);
+        toast('Enriched @' + handle);
     }
 
     // ═══════════════════════════════════════ LOG TOUCHPOINT ═══════════════════════════════════════
@@ -1835,7 +1849,8 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         if (c.call_scheduled_at) funnel.push(`<span class="badge" style="background:#A855F71A;color:#A855F7;">📞 Call ${toPT(c.call_scheduled_at).split(',')[0]}</span>`);
         if (c.sales_link_sent_at) funnel.push(`<span class="badge" style="background:#FFD93D1A;color:#FFD93D;">🔗 Sales link sent</span>`);
         if (c.purchased_at) funnel.push(`<span class="badge" style="background:#2DD4BF1A;color:#2DD4BF;">💰 Purchased${c.deal_value_cents ? ' $' + (c.deal_value_cents / 100).toFixed(0) : ''}</span>`);
-        document.getElementById('p360Header').innerHTML = stageSel + (c.display_name ? `<span class="text-sm text-txt-2">${esc(c.display_name)}</span>` : '') + (c.follower_count ? `<span class="text-xs text-txt-3">${c.follower_count} followers</span>` : '') + funnel.join(' ');
+        const enrichChips = (c.external_url ? `<a href="${esc(c.external_url)}" target="_blank" rel="noopener" class="text-xs" style="color:#4CC9F0;">${esc((c.external_url || '').replace(/^https?:\/\//, ''))}</a>` : '') + (c.enriched_at ? `<span class="text-xs text-txt-3">enriched ${timeAgo(c.enriched_at)}</span>` : '');
+        document.getElementById('p360Header').innerHTML = stageSel + (c.display_name ? `<span class="text-sm text-txt-2">${esc(c.display_name)}</span>` : '') + (c.follower_count ? `<span class="text-xs text-txt-3">${Number(c.follower_count).toLocaleString()} followers</span>` : '') + enrichChips + funnel.join(' ');
 
         const followLine = c.next_follow_up_at
             ? `<div style="display:flex;align-items:center;gap:0.5rem;"><span style="color:${new Date(c.next_follow_up_at) <= Date.now() ? '#FF6B6B' : '#FFD93D'};">⏰ Follow up ${timeAgo(c.next_follow_up_at)}</span><span class="text-xs text-txt-3">${esc(c.follow_up_reason || '')}</span><button class="btn btn-ghost text-xs py-0.5 px-2" onclick="completeFollowup('${c.id}')">Clear</button></div>`
@@ -1855,6 +1870,7 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             <div class="flex gap-2">
                 <button class="btn btn-primary text-xs py-1.5 px-3" onclick="openLogTouchpoint('${c.id}','${esc(c.instagram_handle)}')">+ Log Touchpoint</button>
                 <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="snoozeFollowup('${c.id}',7)">Follow up in 7d</button>
+                <button class="btn btn-ghost text-xs py-1.5 px-3" onclick="enrichContact('${c.id}','${esc(c.instagram_handle)}')">${c.enriched_at ? 'Re-enrich' : 'Enrich'}</button>
             </div>
             <div class="panel" style="margin:0;"><div class="panel-body">${followLine}</div></div>
             ${c.notes ? `<div class="panel" style="margin:0;"><div class="panel-header"><span class="text-xs uppercase tracking-wider text-txt-2">Notes</span></div><div class="panel-body text-xs text-txt-2" style="white-space:pre-wrap;">${esc(c.notes)}</div></div>` : ''}
