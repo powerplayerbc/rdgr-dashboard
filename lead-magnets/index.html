@@ -486,6 +486,17 @@ function renderDetail(m, versions){
     </div>
 
     <div class="panel mt-4">
+      <div class="panel-header"><h3 class="font-heading font-semibold text-sm">ManyChat Command Phrase</h3></div>
+      <div class="panel-body">
+        <p class="text-xs text-txt-2 mb-2">One word or phrase viewers comment to get this magnet via ManyChat. It auto-applies to any content-calendar post using this magnet, and the AI builds the caption CTA around it.</p>
+        <div class="flex flex-wrap gap-2" style="align-items:center;">
+          <input id="cmdPhrase" class="form-input" style="max-width:260px;" placeholder="e.g. WORDS" value="${esc(m.manychat_command_phrase||'')}">
+          <button class="btn btn-primary" id="cmdPhraseSaveBtn" onclick="saveCommandPhrase()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel mt-4">
       <div class="panel-header">
         <h3 class="font-heading font-semibold text-sm">Instagram Post Copy</h3>
         <span class="text-xs text-txt-3">Hook &middot; Story &middot; Offer &mdash; comment-to-DM</span>
@@ -548,6 +559,16 @@ async function savePostCopy(){
   btn.disabled=false; btn.textContent=old;
   if(res){ activeMagnet.post_copy=val; toast('Post copy saved'); }
   else { toast('Failed to save post copy','error'); }
+}
+
+async function saveCommandPhrase(){
+  if(!activeMagnet) return;
+  const val=document.getElementById('cmdPhrase').value.trim();
+  const btn=document.getElementById('cmdPhraseSaveBtn'); btn.disabled=true; const old=btn.textContent; btn.textContent='Saving…';
+  const res=await sbWrite('lead_magnets','PATCH',{ manychat_command_phrase: val||null }, `id=eq.${activeMagnet.id}`);
+  btn.disabled=false; btn.textContent=old;
+  if(res){ activeMagnet.manychat_command_phrase=val; toast('Command phrase saved'); }
+  else { toast('Failed to save command phrase','error'); }
 }
 
 function copyPostCopy(){

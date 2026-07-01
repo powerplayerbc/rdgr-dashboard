@@ -106,7 +106,7 @@ const CC = {
     async init() {
         // keep ~3 weeks of standing-schedule placeholders on the calendar automatically
         try { await rpc('ig_ensure_upcoming', { p_brand_id: BRAND_ID, p_days: 21 }); } catch(e) {}
-        try { this.leadMagnets = await sbGet('lead_magnets?brand_id=eq.'+BRAND_ID+'&select=id,title,slug&order=title'); } catch(e) { this.leadMagnets = []; }
+        try { this.leadMagnets = await sbGet('lead_magnets?brand_id=eq.'+BRAND_ID+'&select=id,title,slug,manychat_command_phrase&order=title'); } catch(e) { this.leadMagnets = []; }
         if (!Array.isArray(this.leadMagnets)) this.leadMagnets = [];
         try { const gc = await sbGet('ig_gen_config?brand_id=eq.'+BRAND_ID+'&select=system_prompt'); this.systemPrompt = (gc && gc[0] && gc[0].system_prompt) || ''; } catch(e) { this.systemPrompt = ''; }
         try { const rs = await sbGet('reel_settings?brand_id=eq.'+BRAND_ID+'&select=settings'); this.reelSettings = (rs && rs[0] && rs[0].settings) || {}; } catch(e) { this.reelSettings = {}; }
@@ -211,8 +211,15 @@ const CC = {
         const lm = '<option value="">— none —</option>' + this.leadMagnets.map(m=>'<option value="'+m.id+'"'+(p.lead_magnet_id===m.id?' selected':'')+'>'+esc(m.title)+'</option>').join('');
         const typeOpts = Object.keys(TYPES).map(k=>'<option value="'+k+'"'+(p.content_type===k?' selected':'')+'>'+TYPES[k].label+'</option>').join('');
         const stageBtns = STAGES.map(s=>'<button type="button" class="btn btn-sm" data-stage="'+s+'" onclick="CC.pickStage(\''+s+'\')" style="'+(p.production_status===s?'background:'+STAGE_COLOR[s]+';color:#0b0710;border-color:transparent':'')+'">'+s+'</button>').join(' ');
-        const isReel = (p.content_type||'').startsWith('reel');
-        const isVideo = isReel || p.content_type === 'story';
+        const ct = p.content_type || 'reel_journey';
+        const isInfographic = ct === 'infographic';
+        const scriptLabel = ct === 'reel_music' ? 'On-screen text (overlays, not spoken, not the lyrics)'
+            : ct === 'reel_journey' ? 'Script (spoken = on-screen captions)'
+            : ct === 'story' ? 'On-screen text / what to say'
+            : 'Slide / on-image text';
+        const hideStyle = isInfographic ? ' style="display:none"' : '';
+        const assignedMagnet = (this.leadMagnets||[]).find(m => m.id === p.lead_magnet_id);
+        const kwValue = p.manychat_keyword || (assignedMagnet && assignedMagnet.manychat_command_phrase) || '';
         return ''
         + '<div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold">'+(p.id?'Edit post':'New post')+'</h2><button class="btn btn-sm" onclick="CC.closeEditor()">✕</button></div>'
         + '<input type="hidden" id="f_id" value="'+(p.id||'')+'">'
@@ -224,13 +231,14 @@ const CC = {
         + '</div>'
         + (p.id ? '<div class="mb-3 flex items-center gap-2" style="font-size:.78rem"><span class="fld" style="margin:0">Ad code</span><code style="background:var(--deft-surface-hi);padding:.15rem .45rem;border-radius:6px;color:var(--deft-accent)">'+esc(p.ad_code||'(saving…)')+'</code><span class="text-txt-3">&larr; put this in the Meta ad name so the Ads CSV matches this post</span></div>' : '')
         + '<div class="mb-3"><label class="fld">Headline</label><input id="f_title" class="input" value="'+esc(p.title||'')+'" placeholder="The post headline"></div>'
-        + '<div class="mb-3"><label class="fld">Hook (optional)</label><input id="f_hook" class="input" value="'+esc(p.hook||'')+'" placeholder="Opening line / scroll-stopper"></div>'
-        + '<div class="mb-3"><label class="fld">'+(isVideo ? 'Video text (on-screen / spoken — what goes ON the video)' : 'Slide / on-image text')+'</label><textarea id="f_script" class="input" rows="5" placeholder="What goes on the video/slides. Different from the post caption.">'+esc(p.script||'')+'</textarea></div>'
+        + '<div class="mb-3"'+hideStyle+'><label class="fld">Hook (optional)</label><input id="f_hook" class="input" value="'+esc(p.hook||'')+'" placeholder="Opening line / scroll-stopper"></div>'
+        + '<div class="mb-3"'+hideStyle+'><label class="fld">'+scriptLabel+'</label><textarea id="f_script" class="input" rows="5" placeholder="What goes on the video/slides. Different from the post caption.">'+esc(p.script||'')+'</textarea></div>'
+        + (isInfographic ? '<div class="text-txt-3 mb-3" style="font-size:.72rem">Infographics need only the caption below. The AI writes caption only for this type; design the infographic image separately.</div>' : '')
         + '<div class="mb-3"><label class="fld">Body text (post caption)</label><textarea id="f_caption" class="input" rows="3" placeholder="The caption that goes under the post">'+esc(p.caption||'')+'</textarea></div>'
         + '<div class="grid grid-cols-2 gap-3 mb-3">'
         +   '<div><label class="fld">CTA text</label><input id="f_cta" class="input" value="'+esc(p.cta_text||'')+'" placeholder="Comment WORD below..."></div>'
-        +   '<div><label class="fld">ManyChat keyword</label><input id="f_keyword" class="input" value="'+esc(p.manychat_keyword||'')+'"></div>'
-        +   '<div><label class="fld">Lead magnet</label><select id="f_lm" class="input">'+lm+'</select></div>'
+        +   '<div><label class="fld">ManyChat keyword</label><input id="f_keyword" class="input" value="'+esc(kwValue)+'" placeholder="auto-fills from the lead magnet"></div>'
+        +   '<div><label class="fld">Lead magnet</label><select id="f_lm" class="input" onchange="CC.onLeadMagnetChange()">'+lm+'</select></div>'
         +   '<div><label class="fld">Hashtags (comma)</label><input id="f_tags" class="input" value="'+esc((p.hashtags||[]).join(', '))+'"></div>'
         + '</div>'
         + '<div class="mb-3"><label class="fld">Production stage</label><div class="flex flex-wrap gap-1" id="stageRow">'+stageBtns+'</div><input type="hidden" id="f_stage" value="'+(p.production_status||'idea')+'"></div>'
@@ -243,6 +251,12 @@ const CC = {
     refreshEditor() { // re-render to toggle script field on type change, preserving inputs
         const p = this._collect(); Object.assign(this._editing.post, p);
         document.getElementById('drawerInner').innerHTML = this.editorHtml(this._editing.post, this._editing.assets, this._editing.metrics);
+    },
+    onLeadMagnetChange() { // auto-fill the ManyChat keyword from the chosen magnet's command phrase (only if empty)
+        const sel = document.getElementById('f_lm'); const kw = document.getElementById('f_keyword');
+        if (!sel || !kw) return;
+        const m = (this.leadMagnets||[]).find(x => x.id === sel.value);
+        if (m && m.manychat_command_phrase && !kw.value.trim()) kw.value = m.manychat_command_phrase;
     },
     pickStage(s) { document.getElementById('f_stage').value = s; document.querySelectorAll('#stageRow [data-stage]').forEach(b=>{ const on=b.dataset.stage===s; b.style.background=on?STAGE_COLOR[s]:''; b.style.color=on?'#0b0710':''; b.style.borderColor=on?'transparent':''; }); },
 
@@ -542,7 +556,8 @@ const CC = {
         if (!topic && !isRegen) return toast('Enter a topic/concept first','error');
         const ct = document.getElementById('f_type').value;
         const lmSel = document.getElementById('f_lm'); const lmTitle = (lmSel && lmSel.selectedIndex>=0) ? lmSel.options[lmSel.selectedIndex].text : '';
-        const payload = { content_type: ct, topic, lead_magnet_title: (lmTitle && lmTitle.indexOf('none')<0) ? lmTitle : '', manychat_keyword: document.getElementById('f_keyword').value||'', system_prompt: this.systemPrompt||'' };
+        const lmId = (lmSel && lmSel.value) ? lmSel.value : '';
+        const payload = { content_type: ct, topic, lead_magnet_id: lmId, lead_magnet_title: (lmTitle && lmTitle.indexOf('none')<0) ? lmTitle : '', manychat_keyword: document.getElementById('f_keyword').value||'', system_prompt: this.systemPrompt||'' };
         if (isRegen) { payload.feedback = document.getElementById('f_feedback').value||''; payload.prior = { hook:document.getElementById('f_hook').value, script:document.getElementById('f_script').value, caption:document.getElementById('f_caption').value }; }
         toast('Generating…');
         let r; try { r = await (await fetch('https://n8n.carltonaiservices.com/webhook/rdgr-ig-generate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })).json(); }
@@ -571,7 +586,7 @@ const CC = {
 
     editPrompt() {
         let h = '<div class="flex items-center justify-between mb-3"><h2 class="text-xl font-bold">AI generation prompt</h2><button class="btn btn-sm" onclick="CC.closeModal()">✕</button></div>';
-        h += '<div class="text-txt-2 text-sm mb-2">This system prompt steers every Generate/Regenerate (voice, hook style, output rules). Edit and save — it applies to all future generations. Keep the line that says return STRICT JSON with hook/script/caption so the fields fill correctly.</div>';
+        h += '<div class="text-txt-2 text-sm mb-2">This is the base brand-voice prompt (who Dianna is, hook style, story rules). The per-type structure (Journey vs Music vs Infographic), the lead-magnet targeting, and the strict JSON output are applied automatically by the workflow, so you only edit the voice/framework here. Edit and save; it applies to all future generations.</div>';
         h += '<textarea id="sysPromptEdit" class="input" rows="14">'+esc(this.systemPrompt||'')+'</textarea>';
         h += '<div class="flex gap-2 mt-3"><button class="btn btn-primary btn-sm" onclick="CC.savePrompt()">Save prompt</button></div>';
         this._modal(h);
