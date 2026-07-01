@@ -496,22 +496,6 @@ function renderDetail(m, versions){
       </div>
     </div>
 
-    <div class="panel mt-4">
-      <div class="panel-header">
-        <h3 class="font-heading font-semibold text-sm">Instagram Post Copy</h3>
-        <span class="text-xs text-txt-3">Hook &middot; Story &middot; Offer &mdash; comment-to-DM</span>
-      </div>
-      <div class="panel-body">
-        <p class="text-xs text-txt-2 mb-2">First-person caption for Instagram (comment-to-DM via ManyChat). Edit it however you like, then copy it straight into your post.</p>
-        <textarea id="postCopy" class="form-input mb-2" style="min-height:360px;line-height:1.55;">${esc(m.post_copy||'')}</textarea>
-        <div class="flex flex-wrap gap-2">
-          <button class="btn btn-primary" id="postCopySaveBtn" onclick="savePostCopy()">Save</button>
-          <button class="btn btn-ghost" onclick="copyPostCopy()">Copy to clipboard</button>
-          ${m.post_copy?'':'<span class="text-xs text-txt-3" style="align-self:center;">No caption yet &mdash; ask Claude Code to write one, or draft your own.</span>'}
-        </div>
-      </div>
-    </div>
-
     ${iframe}
 
     <div class="panel mt-4">
@@ -551,16 +535,6 @@ async function setStatus(status){
   else { toast('Failed to update status','error'); }
 }
 
-async function savePostCopy(){
-  if(!activeMagnet) return;
-  const val=document.getElementById('postCopy').value;
-  const btn=document.getElementById('postCopySaveBtn'); btn.disabled=true; const old=btn.textContent; btn.textContent='Saving…';
-  const res=await sbWrite('lead_magnets','PATCH',{ post_copy: val }, `id=eq.${activeMagnet.id}`);
-  btn.disabled=false; btn.textContent=old;
-  if(res){ activeMagnet.post_copy=val; toast('Post copy saved'); }
-  else { toast('Failed to save post copy','error'); }
-}
-
 async function saveCommandPhrase(){
   if(!activeMagnet) return;
   const val=document.getElementById('cmdPhrase').value.trim();
@@ -569,12 +543,6 @@ async function saveCommandPhrase(){
   btn.disabled=false; btn.textContent=old;
   if(res){ activeMagnet.manychat_command_phrase=val; toast('Command phrase saved'); }
   else { toast('Failed to save command phrase','error'); }
-}
-
-function copyPostCopy(){
-  const val=document.getElementById('postCopy').value;
-  if(!val.trim()){ toast('Nothing to copy yet','error'); return; }
-  navigator.clipboard.writeText(val).then(()=>toast('Caption copied to clipboard')).catch(()=>toast('Failed to copy','error'));
 }
 
 // ── deep-link / nav ──
