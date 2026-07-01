@@ -206,8 +206,22 @@ const CC = {
         document.getElementById('drawerInner').innerHTML = this.editorHtml(post, assets, metrics);
         document.getElementById('drawerBg').classList.add('open');
         document.getElementById('drawer').classList.add('open');
+        this._maybeStartReelPoll(id, post.reel_status);
     },
-    closeEditor() { document.getElementById('drawerBg').classList.remove('open'); document.getElementById('drawer').classList.remove('open'); },
+    closeEditor() { this._stopReelPoll(); document.getElementById('drawerBg').classList.remove('open'); document.getElementById('drawer').classList.remove('open'); },
+    _stopReelPoll() { if (this._reelPollId) { clearInterval(this._reelPollId); this._reelPollId = null; } },
+    _maybeStartReelPoll(id, status) {
+        this._stopReelPoll();
+        if (!id || (status !== 'submitted' && status !== 'building')) return;
+        this._reelPollId = setInterval(async () => {
+            let s = null; try { const rows = await sbGet('ig_posts?id=eq.'+id+'&select=reel_status'); s = (rows && rows[0]) ? rows[0].reel_status : null; } catch(e) { return; }
+            if (s === 'ready' || s === 'error') {
+                this._stopReelPoll();
+                const open = document.getElementById('f_id'); if (open && String(open.value) === String(id)) { await this.openEditor(id); this.render(); }
+                toast(s === 'ready' ? 'Reel project ready — download it' : 'Reel build failed — try Retry', s === 'ready' ? 'success' : 'error');
+            }
+        }, 9000);
+    },
 
     editorHtml(p, assets, metrics) {
         const cnt = this.lmCounts || {};
@@ -450,7 +464,7 @@ const CC = {
         else {
             h += '<button class="btn btn-sm" onclick="CC.openReelSettings()" title="Text, colour, speed & style settings">⚙ Style</button> ';
             if (p.reel_status==='ready') h += '<a class="btn btn-sm" href="'+esc(p.reel_download_url||'#')+'" target="_blank">⬇ Download .zip</a> <button class="btn btn-sm" onclick="CC.buildReel()">Rebuild</button>';
-            else if (p.reel_status==='submitted' || p.reel_status==='building') h += '<span class="pill" style="background:var(--deft-warning)22;color:var(--deft-warning)">building…</span><button class="btn btn-sm" onclick="CC.checkReel()">Check</button>';
+            else if (p.reel_status==='submitted' || p.reel_status==='building') h += '<span class="pill" style="background:var(--deft-warning)22;color:var(--deft-warning)">building… (updates automatically)</span><button class="btn btn-sm" onclick="CC.checkReel()">Check now</button>';
             else if (p.reel_status==='error') h += '<span class="pill" style="background:#e5484d22;color:#e5484d">failed</span><button class="btn btn-sm" onclick="CC.buildReel()">Retry</button>';
             else h += '<button class="btn btn-sm btn-primary" onclick="CC.buildReel()">Build reel project</button>';
         }
