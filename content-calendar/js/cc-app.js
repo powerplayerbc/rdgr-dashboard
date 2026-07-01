@@ -213,40 +213,58 @@ const CC = {
         const stageBtns = STAGES.map(s=>'<button type="button" class="btn btn-sm" data-stage="'+s+'" onclick="CC.pickStage(\''+s+'\')" style="'+(p.production_status===s?'background:'+STAGE_COLOR[s]+';color:#0b0710;border-color:transparent':'')+'">'+s+'</button>').join(' ');
         const ct = p.content_type || 'reel_journey';
         const isInfographic = ct === 'infographic';
+        const isStory = ct === 'story';
         const scriptLabel = ct === 'reel_music' ? 'On-screen text (overlays, not spoken, not the lyrics)'
-            : ct === 'reel_journey' ? 'Script (spoken = on-screen captions)'
+            : ct === 'reel_journey' ? 'Spoken script to read on camera (also the on-screen captions)'
             : ct === 'story' ? 'On-screen text / what to say'
             : 'Slide / on-image text';
         const hideStyle = isInfographic ? ' style="display:none"' : '';
         const assignedMagnet = (this.leadMagnets||[]).find(m => m.id === p.lead_magnet_id);
         const kwValue = p.manychat_keyword || (assignedMagnet && assignedMagnet.manychat_command_phrase) || '';
+        const hasContent = !!(p.title || p.hook || p.script || p.caption || p.cta_text || (p.hashtags||[]).length);
+        const scriptDoc = (assets||[]).find(a=>a.asset_kind==='script_doc' && a.view_url);
         return ''
         + '<div class="drawer-hd flex items-center justify-between"><h2 class="text-xl font-bold">'+(p.id?'Edit post':'New post')+'</h2><button class="btn btn-sm" onclick="CC.closeEditor()">✕ Close</button></div>'
         + '<input type="hidden" id="f_id" value="'+(p.id||'')+'">'
-        + '<div class="grid grid-cols-2 gap-3 mb-3">'
-        +   '<div><label class="fld">Date</label><input id="f_date" type="date" class="input" value="'+(p.scheduled_date||'')+'"></div>'
-        +   '<div><label class="fld">Time</label><input id="f_time" type="time" class="input" value="'+(p.scheduled_time?p.scheduled_time.slice(0,5):'')+'"></div>'
-        +   '<div><label class="fld">Type</label><select id="f_type" class="input" onchange="CC.refreshEditor()">'+typeOpts+'</select></div>'
-        +   '<div><label class="fld">Slot label</label><input id="f_slot" class="input" value="'+esc(p.slot_label||'')+'"></div>'
+        // ── QUICK START: lead magnet + topic + type => AI writes everything ──
+        + '<div class="panel p-4 mb-4" style="border-color:var(--deft-accent)">'
+        +   '<div class="flex items-center justify-between mb-1"><h3 class="font-bold">✨ Quick start</h3><button class="btn btn-sm" style="font-weight:400" onclick="CC.editPrompt()">✎ Edit voice</button></div>'
+        +   '<div class="text-txt-3" style="font-size:.72rem;margin-bottom:.6rem">Pick the lead magnet and say what this post is about, then Generate. The AI writes the headline, hook, '+(ct==='reel_journey'?'the spoken script she reads on camera':'on-screen text')+', caption, CTA and hashtags below for you to edit.</div>'
+        +   '<label class="fld">Lead magnet'+(isStory?' (optional for stories)':'')+'</label><select id="f_lm" class="input" onchange="CC.onLeadMagnetChange()">'+lm+'</select>'
+        +   '<label class="fld" style="margin-top:.6rem">What is this post about?</label><textarea id="f_topic" class="input" rows="2" placeholder="e.g. using AI to meal-plan around a busy week">'+esc(p.topic||'')+'</textarea>'
+        +   '<div class="grid grid-cols-3 gap-2 mt-2">'
+        +     '<div><label class="fld">Type</label><select id="f_type" class="input" onchange="CC.refreshEditor()">'+typeOpts+'</select></div>'
+        +     '<div><label class="fld">Date</label><input id="f_date" type="date" class="input" value="'+(p.scheduled_date||'')+'"></div>'
+        +     '<div><label class="fld">Time</label><input id="f_time" type="time" class="input" value="'+(p.scheduled_time?p.scheduled_time.slice(0,5):'')+'"></div>'
+        +   '</div>'
+        +   '<div class="flex flex-wrap gap-2 mt-3"><button class="btn btn-primary" onclick="CC.generate(false)">✨ Generate draft</button>'
+        +     '<input id="f_feedback" class="input" style="flex:1;min-width:140px" placeholder="revision notes (e.g. punchier hook, shorter)"><button class="btn btn-sm" onclick="CC.generate(true)">Regenerate</button></div>'
+        +   (p.id ? '<div class="mt-2 flex items-center gap-2"><button class="btn btn-sm" onclick="CC.exportDoc()">📄 Export script to Google Doc</button>'+(scriptDoc?'<a class="btn btn-sm" href="'+esc(scriptDoc.view_url)+'" target="_blank">Open doc</a>':'')+'</div>' : '')
         + '</div>'
-        + (p.id ? '<div class="mb-3 flex items-center gap-2" style="font-size:.78rem"><span class="fld" style="margin:0">Ad code</span><code style="background:var(--deft-surface-hi);padding:.15rem .45rem;border-radius:6px;color:var(--deft-accent)">'+esc(p.ad_code||'(saving…)')+'</code><span class="text-txt-3">&larr; put this in the Meta ad name so the Ads CSV matches this post</span></div>' : '')
-        + '<div class="mb-3"><label class="fld">Headline</label><input id="f_title" class="input" value="'+esc(p.title||'')+'" placeholder="The post headline"></div>'
-        + '<div class="mb-3"'+hideStyle+'><label class="fld">Hook (optional)</label><input id="f_hook" class="input" value="'+esc(p.hook||'')+'" placeholder="Opening line / scroll-stopper"></div>'
-        + '<div class="mb-3"'+hideStyle+'><label class="fld">'+scriptLabel+'</label><textarea id="f_script" class="input" rows="5" placeholder="What goes on the video/slides. Different from the post caption.">'+esc(p.script||'')+'</textarea></div>'
-        + (isInfographic ? '<div class="text-txt-3 mb-3" style="font-size:.72rem">Infographics need only the caption below. The AI writes caption only for this type; design the infographic image separately.</div>' : '')
-        + '<div class="mb-3"><label class="fld">Body text (post caption)</label><textarea id="f_caption" class="input" rows="3" placeholder="The caption that goes under the post">'+esc(p.caption||'')+'</textarea></div>'
-        + '<div class="grid grid-cols-2 gap-3 mb-3">'
-        +   '<div><label class="fld">CTA text</label><input id="f_cta" class="input" value="'+esc(p.cta_text||'')+'" placeholder="Comment WORD below..."></div>'
-        +   '<div><label class="fld">ManyChat keyword</label><input id="f_keyword" class="input" value="'+esc(kwValue)+'" placeholder="auto-fills from the lead magnet"></div>'
-        +   '<div><label class="fld">Lead magnet</label><select id="f_lm" class="input" onchange="CC.onLeadMagnetChange()">'+lm+'</select></div>'
-        +   '<div><label class="fld">Hashtags (comma)</label><input id="f_tags" class="input" value="'+esc((p.hashtags||[]).join(', '))+'"></div>'
-        + '</div>'
-        + '<div class="mb-3"><label class="fld">Production stage</label><div class="flex flex-wrap gap-1" id="stageRow">'+stageBtns+'</div><input type="hidden" id="f_stage" value="'+(p.production_status||'idea')+'"></div>'
-        + '<div class="mb-3 flex items-center gap-2"><input type="checkbox" id="f_boost" '+(p.is_boosted?'checked':'')+'><label for="f_boost" style="font-size:.85rem">Running paid ads / boosted</label></div>'
-        + '<div class="mb-4"><label class="fld">Notes</label><textarea id="f_notes" class="input" rows="2">'+esc(p.notes||'')+'</textarea></div>'
+        // ── DETAILS: AI fills these, user edits ──
+        + '<details id="detailsBlock" class="mb-4"'+(hasContent?' open':'')+'>'
+        +   '<summary style="cursor:pointer;font-weight:600;padding:.35rem 0;color:var(--deft-txt-2)">Post details '+(hasContent?'':'<span class="text-txt-3" style="font-weight:400;font-size:.8rem">(the AI fills these in, or write your own)</span>')+'</summary>'
+        +   '<div class="mt-3">'
+        +     (p.id ? '<div class="mb-3 flex items-center gap-2" style="font-size:.78rem"><span class="fld" style="margin:0">Ad code</span><code style="background:var(--deft-surface-hi);padding:.15rem .45rem;border-radius:6px;color:var(--deft-accent)">'+esc(p.ad_code||'(saving…)')+'</code><span class="text-txt-3">&larr; put this in the Meta ad name so the Ads CSV matches this post</span></div>' : '')
+        +     '<div class="mb-3"><label class="fld">Headline</label><input id="f_title" class="input" value="'+esc(p.title||'')+'" placeholder="The post headline"></div>'
+        +     '<div class="mb-3"'+hideStyle+'><label class="fld">Hook (optional)</label><input id="f_hook" class="input" value="'+esc(p.hook||'')+'" placeholder="Opening line / scroll-stopper"></div>'
+        +     '<div class="mb-3"'+hideStyle+'><label class="fld">'+scriptLabel+'</label><textarea id="f_script" class="input" rows="'+(ct==='reel_journey'?'8':'5')+'" placeholder="What goes on the video/slides. Different from the post caption.">'+esc(p.script||'')+'</textarea></div>'
+        +     (isInfographic ? '<div class="text-txt-3 mb-3" style="font-size:.72rem">Infographics need only the caption below. The AI writes caption only for this type; design the infographic image separately.</div>' : '')
+        +     '<div class="mb-3"><label class="fld">Body text (post caption)</label><textarea id="f_caption" class="input" rows="4" placeholder="The caption that goes under the post">'+esc(p.caption||'')+'</textarea></div>'
+        +     '<div class="grid grid-cols-2 gap-3 mb-3">'
+        +       '<div><label class="fld">CTA text</label><input id="f_cta" class="input" value="'+esc(p.cta_text||'')+'" placeholder="Comment WORD below..."></div>'
+        +       '<div><label class="fld">ManyChat keyword</label><input id="f_keyword" class="input" value="'+esc(kwValue)+'" placeholder="auto-fills from the lead magnet"></div>'
+        +       '<div><label class="fld">Hashtags (comma)</label><input id="f_tags" class="input" value="'+esc((p.hashtags||[]).join(', '))+'"></div>'
+        +       '<div><label class="fld">Slot label</label><input id="f_slot" class="input" value="'+esc(p.slot_label||'')+'"></div>'
+        +     '</div>'
+        +     '<div class="mb-3"><label class="fld">Production stage</label><div class="flex flex-wrap gap-1" id="stageRow">'+stageBtns+'</div><input type="hidden" id="f_stage" value="'+(p.production_status||'idea')+'"></div>'
+        +     '<div class="mb-3 flex items-center gap-2"><input type="checkbox" id="f_boost" '+(p.is_boosted?'checked':'')+'><label for="f_boost" style="font-size:.85rem">Running paid ads / boosted</label></div>'
+        +     '<div class="mb-1"><label class="fld">Notes</label><textarea id="f_notes" class="input" rows="2">'+esc(p.notes||'')+'</textarea></div>'
+        +   '</div>'
+        + '</details>'
         + '<div class="flex gap-2 mb-5"><button class="btn btn-primary" onclick="CC.savePost()">Save</button>'
         +   (p.id?'<button class="btn" onclick="CC.markPosted()">Mark posted</button><button class="btn" style="margin-left:auto;color:var(--deft-danger)" onclick="CC.deletePost()">Delete</button>':'')+'</div>'
-        + (p.id ? this.genHtml(p) + this.assetsHtml(assets) + this.videoProcHtml(p, assets) + this.publishHtml(p) + this.metricsHtml(p, metrics) : '<div class="text-txt-3 text-sm">Save the post first to use AI assist, assets &amp; metrics.</div>');
+        + (p.id ? this.assetsHtml(assets) + this.videoProcHtml(p, assets) + this.publishHtml(p) + this.metricsHtml(p, metrics) : '<div class="text-txt-3 text-sm">Save the post to upload video/assets, publish, and track metrics.</div>');
     },
     refreshEditor() { // re-render to toggle script field on type change, preserving inputs
         const p = this._collect(); Object.assign(this._editing.post, p);
@@ -538,44 +556,33 @@ const CC = {
     },
 
     /* ---------- AI assist (generate / regenerate / export to Google Doc) ---------- */
-    genHtml(p) {
-        const scriptDoc = (this._editing.assets||[]).find(a=>a.asset_kind==='script_doc' && a.view_url);
-        return '<div class="panel p-4 mb-4" style="border-color:var(--deft-accent)">'
-          + '<h3 class="font-bold mb-1">✨ AI assist <button class="btn btn-sm" style="float:right;font-weight:400" onclick="CC.editPrompt()">✎ Edit prompt</button></h3>'
-          + '<div class="text-txt-3" style="font-size:.72rem;margin-bottom:.5rem">Enter the topic/concept and AI writes a strong hook, the video/slide text, and the post caption. Edit anything, or regenerate with notes. Export to a Google Doc only when you\'re happy with it.</div>'
-          + '<label class="fld">Topic / concept</label><textarea id="f_topic" class="input" rows="2" placeholder="e.g. using AI to meal-plan around a busy week">'+esc(p.topic||'')+'</textarea>'
-          + '<div class="flex flex-wrap gap-2 mt-2"><button class="btn btn-primary btn-sm" onclick="CC.generate(false)">Generate hook + script + caption</button></div>'
-          + '<div class="flex gap-2 mt-2"><input id="f_feedback" class="input" style="flex:1" placeholder="revision notes (e.g. punchier hook, shorter, more playful)"><button class="btn btn-sm" onclick="CC.generate(true)">Regenerate</button></div>'
-          + '<div class="mt-3 flex items-center gap-2"><button class="btn btn-sm" onclick="CC.exportDoc()">📄 Export script to Google Doc</button>'
-          + (scriptDoc ? '<a class="btn btn-sm" href="'+esc(scriptDoc.view_url)+'" target="_blank">Open doc</a>' : '<span class="text-txt-3" style="font-size:.7rem">created only when you click export</span>')
-          + '</div></div>';
-    },
     async generate(isRegen) {
-        const id = document.getElementById('f_id').value; if (!id) return;
+        const setVal = (id,v) => { const el = document.getElementById(id); if (el && v!=null) el.value = v; };
         const topic = (document.getElementById('f_topic').value||'').trim();
-        if (!topic && !isRegen) return toast('Enter a topic/concept first','error');
+        if (!topic && !isRegen) return toast('Say what this post is about first','error');
         const ct = document.getElementById('f_type').value;
         const lmSel = document.getElementById('f_lm'); const lmTitle = (lmSel && lmSel.selectedIndex>=0) ? lmSel.options[lmSel.selectedIndex].text : '';
         const lmId = (lmSel && lmSel.value) ? lmSel.value : '';
         const payload = { content_type: ct, topic, lead_magnet_id: lmId, lead_magnet_title: (lmTitle && lmTitle.indexOf('none')<0) ? lmTitle : '', manychat_keyword: document.getElementById('f_keyword').value||'', system_prompt: this.systemPrompt||'' };
-        if (isRegen) { payload.feedback = document.getElementById('f_feedback').value||''; payload.prior = { hook:document.getElementById('f_hook').value, script:document.getElementById('f_script').value, caption:document.getElementById('f_caption').value }; }
+        if (isRegen) { payload.feedback = document.getElementById('f_feedback').value||''; payload.prior = { title:document.getElementById('f_title').value, hook:document.getElementById('f_hook').value, script:document.getElementById('f_script').value, caption:document.getElementById('f_caption').value, cta:document.getElementById('f_cta').value }; }
         toast('Generating…');
         let r; try { r = await (await fetch('https://n8n.carltonaiservices.com/webhook/rdgr-ig-generate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })).json(); }
         catch(e) { return toast('Generation failed (try again)','error'); }
         if (!r || !r.success) return toast('Generation failed','error');
-        if (r.hook!=null) document.getElementById('f_hook').value = r.hook;
-        if (r.script!=null) document.getElementById('f_script').value = r.script;
-        if (r.caption!=null) document.getElementById('f_caption').value = r.caption;
-        toast('Drafted — review/edit, then Save');
+        setVal('f_title', r.title); setVal('f_hook', r.hook); setVal('f_script', r.script); setVal('f_caption', r.caption); setVal('f_cta', r.cta);
+        if (Array.isArray(r.hashtags) && r.hashtags.length) setVal('f_tags', r.hashtags.join(', '));
+        const db = document.getElementById('detailsBlock'); if (db) db.open = true;
+        toast('Draft written — review/edit, then Save');
     },
     async exportDoc() {
         const id = document.getElementById('f_id').value; if (!id) return;
         const hook=document.getElementById('f_hook').value.trim(), script=document.getElementById('f_script').value.trim(), caption=document.getElementById('f_caption').value.trim();
-        const headline=document.getElementById('f_title').value.trim(), topic=(document.getElementById('f_topic').value||'').trim();
+        const headline=document.getElementById('f_title').value.trim(), topic=(document.getElementById('f_topic').value||'').trim(), cta=document.getElementById('f_cta').value.trim();
         if (!script && !caption) return toast('Nothing to export yet — generate or write the script first','error');
         const date=document.getElementById('f_date').value||'', ct=document.getElementById('f_type').value;
+        const scriptHdr = ct==='reel_journey' ? 'SPOKEN SCRIPT (read on camera)' : ct==='reel_music' ? 'ON-SCREEN TEXT (overlays)' : ct==='infographic' ? 'INFOGRAPHIC (caption only)' : 'ON-SCREEN TEXT';
         const title=[date, ct, (headline||topic||'untitled')].filter(Boolean).join(' — ');
-        const content='HOOK:\n'+hook+'\n\nVIDEO / SLIDE TEXT:\n'+script+'\n\nPOST CAPTION:\n'+caption+'\n\nTopic: '+topic;
+        const content=(hook?'HOOK:\n'+hook+'\n\n':'')+(script?scriptHdr+':\n'+script+'\n\n':'')+'POST CAPTION:\n'+caption+(cta?'\n\nCTA:\n'+cta:'')+'\n\nTopic: '+topic;
         toast('Creating Google Doc…');
         let r; try { r = await (await fetch('https://n8n.carltonaiservices.com/webhook/rdgr-ig-doc', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ title, content }) })).json(); }
         catch(e) { return toast('Doc creation failed','error'); }
