@@ -1069,15 +1069,15 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     <!-- Input Area -->
                     <div id="chatInputArea" style="padding: 0.75rem 1.25rem; border-top: 1px solid #1E2130; background: #0B0D14;">
                         <!-- Content-Type Selector -->
-                        <div style="display:flex;align-items:center;gap:0.5rem;">
-                            <div id="dxTypeRow" class="dx-type-row" style="flex:1;min-width:0;"></div>
-                            <button type="button" onclick="openSocialVoiceModal()" class="dx-type-pill" title="Adjust the DiannaX voice used when drafting social comments &amp; replies" style="flex-shrink:0;">&#9998; Social voice</button>
-                        </div>
+                        <div id="dxTypeRow" class="dx-type-row"></div>
                         <!-- Attachment Previews -->
                         <div id="chatAttachmentPreview" style="display: none;" class="flex gap-2 mb-2 flex-wrap"></div>
                         <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
                             <button onclick="document.getElementById('chatFileInput').click()" class="btn btn-ghost text-xs py-2 px-2" title="Attach file" style="flex-shrink: 0;">
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 8.5l-5.5 5.5a4 4 0 01-5.66-5.66l5.5-5.5a2.5 2.5 0 013.54 3.54l-5.5 5.5a1 1 0 01-1.42-1.42L10 5.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                            </button>
+                            <button onclick="dxOpenHubPanel()" class="btn btn-ghost text-xs py-2 px-2" title="HUB files (Google Drive)" style="flex-shrink: 0;">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4.5a1 1 0 011-1h3l1.5 1.5H13a1 1 0 011 1v6a1 1 0 01-1 1H3a1 1 0 01-1-1v-7.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
                             </button>
                             <input type="file" id="chatFileInput" style="display: none;" multiple accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json,.md" onchange="handleChatFileSelect(this)">
                             <textarea id="chatInput" class="form-input" rows="1" placeholder="Type a message..." style="resize: none; min-height: 40px; max-height: 140px; flex: 1;" onkeydown="handleChatKeydown(event)" oninput="autoResizeChatInput()"></textarea>
@@ -1090,6 +1090,38 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ HUB FILES PANEL ═══ -->
+    <div id="dxHubOverlay" style="display:none; position:fixed; inset:0; z-index:9500; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+        <div style="background:#11131A; border:1px solid #2A2E3D; border-radius:0.75rem; width:95%; max-width:560px; max-height:82vh; display:flex; flex-direction:column; overflow:hidden;">
+            <div style="padding:1rem 1.25rem; border-bottom:1px solid #1E2130; display:flex; align-items:center; justify-content:space-between;">
+                <div>
+                    <div class="font-heading font-semibold text-sm">Dianna HUB Files</div>
+                    <div class="text-txt-3 text-xs mt-0.5">Google Drive files stored for Dianna</div>
+                </div>
+                <button onclick="dxCloseHubPanel()" class="btn btn-ghost text-xs py-1 px-2">&times;</button>
+            </div>
+            <!-- Import from Drive -->
+            <div style="padding:0.75rem 1.25rem; border-bottom:1px solid #1E2130;">
+                <div class="text-xs text-txt-3 mb-1.5">Import an existing Google Drive file into the HUB</div>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <input id="dxImportLink" class="form-input text-xs" placeholder="Paste a Google Drive link or file ID" style="flex:1; min-width:180px;">
+                    <select id="dxImportSource" class="form-input text-xs" style="width:auto;">
+                        <option value="dianna">From Dianna's Drive</option>
+                        <option value="bradford">From Bradford's Drive</option>
+                    </select>
+                    <button onclick="dxImportFromDrive()" class="btn btn-primary text-xs py-2 px-3" id="dxImportBtn">Import</button>
+                </div>
+            </div>
+            <div id="dxHubList" style="flex:1; overflow-y:auto; padding:0.75rem 1.25rem;">
+                <div class="text-txt-3 text-xs text-center py-6">Loading...</div>
+            </div>
+            <div style="padding:0.75rem 1.25rem; border-top:1px solid #1E2130; display:flex; justify-content:space-between; align-items:center;">
+                <a href="#" id="dxHubFolderLink" target="_blank" rel="noopener" class="text-accent text-xs hover:underline">Open HUB folder in Drive &rarr;</a>
+                <a href="/hub?brand=dianna" class="btn btn-ghost text-xs py-1.5 px-3">Open full HUB browser</a>
             </div>
         </div>
     </div>
@@ -1113,6 +1145,14 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
     const SUPABASE_URL = 'https://carltondb.72.60.67.2.sslip.io';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6ImNhcmx0b24iLCJpYXQiOjE3ODE2OTUzMDksImV4cCI6MjA5NzA1NTMwOX0.Tazw1TnCAXYY6Na6E7muccoLad3NrJltf9GUCPbNnSc';
 
+    // Dianna HUB (Google Drive) file storage. Ingest workflow: DIANNAX-HUB-FILE.
+    const HUB = {
+        ingest: 'https://n8n.carltonaiservices.com/webhook/diannax-hub-file',
+        client_id: 'C_260618154542',               // Dianna Carlton HUB client
+        folder_url: 'https://drive.google.com/drive/folders/1yNTgkiDPKuCPnBT8XGXksLrGGtOqIc9T',
+        browse_url: '/hub?brand=dianna',
+    };
+
     // ═══════════════════════════════════════════════════════════════
     // CHAT STATE
     // ═══════════════════════════════════════════════════════════════
@@ -1133,8 +1173,6 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         { label: 'Slogans', value: 'slogan' },
         { label: 'Email', value: 'email' },
         { label: 'Instagram/Social', value: 'social_post' },
-        { label: 'Comment on a post', value: 'social_comment' },
-        { label: 'Reply to a comment', value: 'social_reply' },
     ];
 
     let chatThreads = [];
@@ -1745,16 +1783,10 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             content: text,
             source_message_id: messageId,
         };
-        // Email requires an explicit, valid recipient. Previously this was
-        // "optional" and an empty value flowed through as a missing recipient,
-        // which the email backend turned into a placeholder address (UBR-0192).
+        // Optional fields
         if (target === 'email') {
-            const to = (prompt('Send to email address:', 'dianna@diannacarlton.com') || '').trim();
-            if (!to || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)) {
-                toast('Enter a valid email address to send to.', 'error');
-                return;
-            }
-            params.to = to;
+            const to = prompt('Send to email address (optional):', '');
+            if (to && to.trim()) params.to = to.trim();
         }
         const origLabel = btnEl ? btnEl.textContent : '';
         if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Working...'; }
@@ -1770,22 +1802,12 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             if (result && result.success) {
                 toast(result.message || 'Done.', 'success');
                 const url = result.document_url || (result.result && result.result.document_url);
-                // Follow-up toast: for handoffs that land somewhere the user needs to
-                // navigate to, give an explicit link so they can confirm it arrived
-                // (UBR-0197: BRAIN tasks were created but the user couldn't find them).
-                let followUrl = url, followLabel = null;
                 if (url) {
-                    followLabel = (target === 'google_doc') ? 'Open in Google Drive' : ('Open ' + target.replace('_', ' '));
-                } else if (target === 'brain_task') {
-                    followUrl = '/brain';
-                    followLabel = 'View it in BRAIN (today’s tasks) →';
-                }
-                if (followUrl && followLabel) {
                     const c = document.getElementById('toasts');
                     const el = document.createElement('div');
                     el.className = 'toast toast-success';
-                    const external = /^https?:/.test(followUrl);
-                    el.innerHTML = `<a href="${esc(followUrl)}"${external ? ' target="_blank" rel="noopener noreferrer"' : ''} style="color:inherit;text-decoration:underline;word-break:break-all;">${esc(followLabel)}</a>`;
+                    const linkLabel = (target === 'google_doc') ? 'Open in Google Drive' : ('Open ' + target.replace('_',' '));
+                    el.innerHTML = `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;word-break:break-all;">${esc(linkLabel)} &rarr;</a>`;
                     c.appendChild(el);
                     setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 10000);
                 }
@@ -1820,64 +1842,23 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
         renderTypePills();
     }
 
-    // ── Social Engagement Voice (UBR-0210) ──
-    // Shared voice applied to social comment/reply drafts. Stored on the DiannaX
-    // personality's metadata.social_voice and read by the DIANNAX-CHAT workflow.
-    let _socialVoiceLoaded = false;
-    async function openSocialVoiceModal() {
-        const modal = document.getElementById('socialVoiceModal');
-        const ta = document.getElementById('socialVoiceText');
-        const status = document.getElementById('socialVoiceStatus');
-        if (!modal || !ta) return;
-        modal.classList.add('active');
-        if (!_socialVoiceLoaded) {
-            ta.value = '';
-            ta.disabled = true;
-            if (status) status.textContent = 'Loading...';
-            const rows = await supabaseSelect('chat_personalities', `personality_id=eq.${PERSONALITY_ID}&select=metadata`);
-            const meta = (rows && rows[0] && rows[0].metadata) ? rows[0].metadata : {};
-            ta.value = meta.social_voice || '';
-            ta.disabled = false;
-            _socialVoiceLoaded = true;
-            if (status) status.textContent = '';
-        }
-        ta.focus();
-    }
-    function closeSocialVoiceModal() {
-        const modal = document.getElementById('socialVoiceModal');
-        if (modal) modal.classList.remove('active');
-    }
-    async function saveSocialVoice() {
-        const ta = document.getElementById('socialVoiceText');
-        const btn = document.getElementById('socialVoiceSaveBtn');
-        const status = document.getElementById('socialVoiceStatus');
-        if (!ta) return;
-        const voice = ta.value.trim();
-        if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
-        // read-merge-patch the JSONB metadata so we don't clobber other keys
-        const rows = await supabaseSelect('chat_personalities', `personality_id=eq.${PERSONALITY_ID}&select=metadata`);
-        const meta = (rows && rows[0] && rows[0].metadata) ? rows[0].metadata : {};
-        meta.social_voice = voice;
-        const res = await supabaseWrite('chat_personalities', 'PATCH',
-            { metadata: meta, updated_at: new Date().toISOString() },
-            `personality_id=eq.${PERSONALITY_ID}`);
-        if (btn) { btn.disabled = false; btn.textContent = 'Save voice'; }
-        if (res) {
-            if (status) status.textContent = 'Saved';
-            toast('Social voice saved', 'success');
-            setTimeout(closeSocialVoiceModal, 500);
-        } else {
-            if (status) status.textContent = '';
-            toast('Could not save the social voice', 'error');
-        }
-    }
-
     // ── Sending messages ──
 
     async function sendChatMessage() {
         const input = document.getElementById('chatInput');
         const content = input.value.trim();
         if (!content && !chatAttachments.length) return;
+
+        // Lightweight command intercept: a short "show my files / hub folder" phrase opens the HUB panel
+        if (content && !chatAttachments.length && content.length < 42 &&
+            /\b(hub|drive)\b/i.test(content) &&
+            /\b(files?|folder|documents?|uploads?)\b/i.test(content) &&
+            /\b(show|list|open|view|where|see|my|find|get)\b/i.test(content)) {
+            input.value = ''; autoResizeChatInput();
+            dxOpenHubPanel();
+            return;
+        }
+
         if (!chatActiveThreadId) {
             toast('Create or select a thread first', 'error');
             return;
@@ -2139,12 +2120,92 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
                     <span>${esc(a.filename.length > 20 ? a.filename.slice(0, 17) + '...' : a.filename)}</span>
                     <button class="chat-attach-remove" onclick="removeChatAttachment(${i})" title="Remove">&times;</button>
                 </div>`;
-        }).join('');
+        }).join('') + `<button onclick="dxSaveAttachmentsToHub()" class="btn btn-ghost text-xs py-1 px-2" id="dxSaveHubBtn" title="Save these files to the Dianna HUB (Google Drive)" style="align-self:center;">&#8681; Save ${chatAttachments.length} to HUB</button>`;
     }
 
     function removeChatAttachment(idx) {
         chatAttachments.splice(idx, 1);
         renderAttachmentPreviews();
+    }
+
+    // ── Dianna HUB (Google Drive) file storage ──
+
+    // Save currently-attached files to the HUB (multipart -> DIANNAX-HUB-FILE, source=upload)
+    async function dxSaveAttachmentsToHub() {
+        if (!chatAttachments.length) { toast('No files attached', 'error'); return; }
+        const btn = document.getElementById('dxSaveHubBtn');
+        if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+        let ok = 0, fail = 0, lastUrl = '';
+        for (const a of chatAttachments) {
+            try {
+                const fd = new FormData();
+                fd.append('source', 'upload');
+                fd.append('brand_id', DX_BRAND_ID);
+                fd.append('file_name', a.filename);
+                fd.append('created_by', 'human');
+                // send the raw File under 'data' so n8n receives it as binary
+                fd.append('data', a.file, a.filename);
+                const res = await fetch(HUB.ingest, { method: 'POST', body: fd });
+                const j = await res.json();
+                if (j && j.success) { ok++; lastUrl = j.drive_url || lastUrl; } else { fail++; }
+            } catch (e) { console.error('HUB save error', e); fail++; }
+        }
+        if (btn) { btn.disabled = false; }
+        if (ok) {
+            toast(`Saved ${ok} file${ok===1?'':'s'} to the Dianna HUB${fail?` (${fail} failed)`:''}`, fail ? 'error' : 'success');
+            chatAttachments = [];
+            renderAttachmentPreviews();
+        } else {
+            toast('Could not save to HUB', 'error');
+            renderAttachmentPreviews();
+        }
+    }
+
+    function dxOpenHubPanel() {
+        document.getElementById('dxHubFolderLink').href = HUB.folder_url;
+        document.getElementById('dxHubOverlay').style.display = 'flex';
+        dxLoadHubFiles();
+    }
+    function dxCloseHubPanel() { document.getElementById('dxHubOverlay').style.display = 'none'; }
+
+    async function dxLoadHubFiles() {
+        const list = document.getElementById('dxHubList');
+        list.innerHTML = '<div class="text-txt-3 text-xs text-center py-6">Loading...</div>';
+        try {
+            const r = await fetch(`${SUPABASE_URL}/rest/v1/hub_files?client_id=eq.${HUB.client_id}&status=neq.deleted&select=file_id,file_name,file_type,drive_url,drive_id,folder_path,status,created_at&order=created_at.desc&limit=100`, {
+                headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
+            });
+            const files = r.ok ? await r.json() : [];
+            if (!files.length) { list.innerHTML = '<div class="text-txt-3 text-xs text-center py-6">No files stored yet. Attach a file and choose "Save to HUB", or import one above.</div>'; return; }
+            list.innerHTML = files.map(f => {
+                const href = f.drive_url || (f.drive_id ? `https://drive.google.com/file/d/${f.drive_id}/view` : '#');
+                return `<div style="display:flex; align-items:center; justify-content:space-between; gap:0.75rem; padding:0.5rem 0; border-bottom:1px solid #1A1D28;">
+                    <div style="min-width:0;">
+                        <a href="${esc(href)}" target="_blank" rel="noopener" class="text-accent text-sm hover:underline" style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(f.file_name || 'Untitled')}</a>
+                        <span class="text-txt-3 text-[0.65rem] font-mono">${esc(f.folder_path || '')}</span>
+                    </div>
+                    <span class="text-txt-3 text-[0.65rem] font-mono" style="flex-shrink:0;">${esc(f.status || '')}</span>
+                </div>`;
+            }).join('');
+        } catch (e) { console.error('HUB list error', e); list.innerHTML = '<div class="text-txt-3 text-xs text-center py-6" style="color:#FF6B6B;">Could not load files.</div>'; }
+    }
+
+    async function dxImportFromDrive() {
+        const link = (document.getElementById('dxImportLink').value || '').trim();
+        const source = document.getElementById('dxImportSource').value;
+        if (!link) { toast('Paste a Drive link or file ID', 'error'); return; }
+        const btn = document.getElementById('dxImportBtn');
+        btn.disabled = true; btn.textContent = 'Importing...';
+        try {
+            const res = await fetch(HUB.ingest, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ source, brand_id: DX_BRAND_ID, drive_link: link, created_by: 'human' })
+            });
+            const j = await res.json();
+            if (j && j.success) { toast('Imported to HUB: ' + (j.file_name || 'file'), 'success'); document.getElementById('dxImportLink').value = ''; dxLoadHubFiles(); }
+            else { toast('Import failed: ' + ((j && j.error) || 'unknown'), 'error'); }
+        } catch (e) { console.error('HUB import error', e); toast('Import failed', 'error'); }
+        btn.disabled = false; btn.textContent = 'Import';
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -2249,28 +2310,6 @@ document.querySelectorAll('#mobileNavOverlay .mobile-nav-link').forEach(function
             </div>
         </div>
     </div>
-    <!-- Social Engagement Voice Modal (UBR-0210) -->
-    <div class="modal-backdrop" id="socialVoiceModal">
-        <div class="modal-content" style="padding:1.25rem;max-width:560px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
-                <h3 style="font-size:0.95rem;font-weight:700;color:var(--deft-txt,#E8ECF1);margin:0;font-family:var(--deft-heading-font,'Chakra Petch'),sans-serif;">Social Engagement Voice</h3>
-                <button onclick="closeSocialVoiceModal()" style="background:none;border:none;color:var(--deft-txt-3,#525E73);cursor:pointer;font-size:1.2rem;padding:0.25rem;">&times;</button>
-            </div>
-            <p style="font-size:0.75rem;color:var(--deft-txt-3,#8A95A9);margin:0 0 0.75rem;line-height:1.4;">
-                This voice is applied whenever DiannaX drafts <strong>comments on other creators' posts</strong> or <strong>replies to comments on your posts</strong> (the "Comment on a post" and "Reply to a comment" content types). It does not change your main DiannaX chat voice.
-            </p>
-            <div style="margin-bottom:0.75rem;">
-                <label class="bug-form-label" for="socialVoiceText">Voice &amp; tone instructions</label>
-                <textarea id="socialVoiceText" rows="11" placeholder="Describe how DiannaX should sound when commenting and replying on social media..." style="width:100%;resize:vertical;padding:0.5rem;border-radius:0.375rem;background:var(--deft-surface,#11131A);border:1px solid var(--deft-border,#2A2E3D);color:var(--deft-txt,#E8ECF1);font-size:0.8rem;font-family:var(--deft-body-font,'IBM Plex Sans'),sans-serif;line-height:1.5;"></textarea>
-            </div>
-            <div style="display:flex;gap:0.5rem;justify-content:flex-end;align-items:center;">
-                <span id="socialVoiceStatus" style="font-size:0.7rem;color:var(--deft-txt-3,#525E73);margin-right:auto;"></span>
-                <button onclick="closeSocialVoiceModal()" style="padding:0.4rem 1rem;border-radius:0.375rem;border:1px solid var(--deft-border,#2A2E3D);background:transparent;color:var(--deft-txt-2,#8A95A9);font-size:0.75rem;cursor:pointer;">Cancel</button>
-                <button onclick="saveSocialVoice()" id="socialVoiceSaveBtn" style="padding:0.4rem 1rem;border-radius:0.375rem;border:1px solid rgba(168,85,247,0.35);background:rgba(168,85,247,0.14);color:#C084FC;font-size:0.75rem;font-weight:600;cursor:pointer;">Save voice</button>
-            </div>
-        </div>
-    </div>
-
 <script>
 (function(){
 var _ce=[],_cw=[];
@@ -2307,6 +2346,6 @@ finally{if(btn){btn.disabled=false;btn.textContent='Submit Bug Report';}}
 };
 })();
 </script>
-<script src="/js/shared-nav.js?v=2026-06-27b"></script>
+<script src="/js/shared-nav.js"></script>
 </body>
 </html>
