@@ -132,7 +132,7 @@ const CC = {
     renderCalendar() {
         const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
         const today = fmtDate(new Date());
-        let html = '<div class="grid gap-2" style="grid-template-columns:repeat(7,minmax(0,1fr));">';
+        let html = '<div class="cal-grid">';
         for (let i=0;i<7;i++) {
             const d = new Date(this.week); d.setDate(d.getDate()+i); const ds = fmtDate(d);
             const posts = this.cache.filter(p => p.scheduled_date === ds);
@@ -165,7 +165,7 @@ const CC = {
     renderBoard() {
         const cols = ['idea','scripted','filmed','edited','ready','posted'];
         const label = { idea:'Idea', scripted:'Scripted', filmed:'Filmed', edited:'Edited', ready:'Ready', posted:'Posted' };
-        let html = '<div class="grid gap-2" style="grid-template-columns:repeat('+cols.length+',minmax(0,1fr));">';
+        let html = '<div class="board-grid">';
         cols.forEach(st => {
             const posts = this.cache.filter(p => p.production_status === st);
             html += '<div class="daycol p-2"><div class="flex items-center justify-between mb-2"><span class="pill" style="background:'+STAGE_COLOR[st]+'22;color:'+STAGE_COLOR[st]+'">'+label[st]+'</span><span style="font-size:.7rem;color:var(--deft-txt-3)">'+posts.length+'</span></div>';
@@ -221,7 +221,7 @@ const CC = {
         const assignedMagnet = (this.leadMagnets||[]).find(m => m.id === p.lead_magnet_id);
         const kwValue = p.manychat_keyword || (assignedMagnet && assignedMagnet.manychat_command_phrase) || '';
         return ''
-        + '<div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold">'+(p.id?'Edit post':'New post')+'</h2><button class="btn btn-sm" onclick="CC.closeEditor()">✕</button></div>'
+        + '<div class="drawer-hd flex items-center justify-between"><h2 class="text-xl font-bold">'+(p.id?'Edit post':'New post')+'</h2><button class="btn btn-sm" onclick="CC.closeEditor()">✕ Close</button></div>'
         + '<input type="hidden" id="f_id" value="'+(p.id||'')+'">'
         + '<div class="grid grid-cols-2 gap-3 mb-3">'
         +   '<div><label class="fld">Date</label><input id="f_date" type="date" class="input" value="'+(p.scheduled_date||'')+'"></div>'

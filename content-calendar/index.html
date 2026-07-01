@@ -82,6 +82,19 @@
         ::-webkit-scrollbar { width:10px; height:10px; } ::-webkit-scrollbar-thumb { background: var(--deft-border); border-radius:6px; }
         .spark { display:flex; align-items:flex-end; gap:2px; height:34px; }
         .spark span { width:6px; background: var(--deft-accent); border-radius:2px 2px 0 0; opacity:.8; }
+        /* responsive calendar / board grids — collapse the fixed columns on tablet/phone so days aren't smushed */
+        .cal-grid { display:grid; gap:.5rem; grid-template-columns: repeat(7, minmax(0,1fr)); }
+        .board-grid { display:grid; gap:.5rem; grid-template-columns: repeat(6, minmax(0,1fr)); }
+        @media (max-width: 1024px) {
+            .cal-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+            .board-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+        }
+        @media (max-width: 640px) {
+            .cal-grid, .board-grid { grid-template-columns: 1fr; }
+            .daycol { min-height: auto; }
+        }
+        /* sticky drawer header so the ✕ close is always reachable on mobile (full-screen drawer covers the tap-to-close overlay) */
+        .drawer-hd { position: sticky; top: 0; z-index: 5; background: var(--deft-surface); padding: .35rem 0 .6rem; margin-bottom: .5rem; border-bottom: 1px solid var(--deft-border); }
     </style>
 </head>
 <body>
@@ -155,7 +168,7 @@
 
     <div id="toast" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:200;display:none;"></div>
 
-    <script src="/content-calendar/js/cc-app.js?v=2026-07-01a"></script>
+    <script src="/content-calendar/js/cc-app.js?v=2026-07-01b"></script>
     <script src="/js/shared-nav.js?v=2026-06-29a"></script>
 </body>
 </html>
