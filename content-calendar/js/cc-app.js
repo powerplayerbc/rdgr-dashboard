@@ -274,7 +274,7 @@ const CC = {
           +  '<div><label class="fld">Upload file (video / image / music / script)</label><input type="file" id="f_file" class="input" accept="video/*,image/*,audio/*,.pdf,.txt,.docx"></div>'
           +  '<div><label class="fld">Kind</label><select id="f_assetkind" class="input"><option value="raw_video">video — raw</option><option value="edited_video">video — edited</option><option value="final_video">video — final</option><option value="image">image</option><option value="music">music</option><option value="thumbnail">thumbnail</option><option value="script_doc">script / pdf</option></select></div>';
         h += '</div><div class="flex gap-2 mt-2"><button class="btn btn-sm" onclick="CC.uploadFile()">Upload file</button><button class="btn btn-sm" onclick="CC.addDriveLink()">Add by Drive link</button></div>';
-        h += '<div class="text-txt-3" style="font-size:.7rem;margin-top:.4rem">Hold as many drafts/files as you like. Tick <b>publish</b> on the exact file(s) to post — <b>only flagged files are published</b>; everything else stays a draft. Drive-linked files are downloaded only to publish, then removed from our server. Uploads/links both work; each asset has View + ⬇ Download.</div>';
+        h += '<div class="text-txt-3" style="font-size:.7rem;margin-top:.4rem">Hold as many drafts/files as you like. Tick <b>publish</b> on the exact file(s) to post — <b>only flagged files are published</b>; everything else stays a draft. Uploads go in small chunks (works on phone data, shows %). <b>For very large / hour-long raw videos, upload with the Google Drive app then use "Add by Drive link"</b> — faster &amp; more reliable. Drive-linked files are downloaded only to publish, then removed from our server. Each asset has View + ⬇ Download.</div>';
         h += '</div>';
         return h;
     },
@@ -313,10 +313,24 @@ const CC = {
         toast('Uploaded'); this.openEditor(id);
     },
     async _uploadViaVPS(id, f, kind) {
-        toast('Uploading video…');
-        const fd = new FormData(); fd.append('file', f); fd.append('post_id', id); fd.append('asset_kind', kind); fd.append('content_type', this._editing.post.content_type||'');
-        let resp; try { resp = await (await fetch(UPLOADER_URL.replace(/\/$/,'')+'/upload', { method:'POST', headers: UPLOAD_TOKEN?{'x-upload-token':UPLOAD_TOKEN}:{}, body: fd })).json(); } catch(e){ return toast('Upload failed','error'); }
-        if (!resp || !resp.drive_file_id) return toast('Upload failed','error');
+        // chunked: each piece is small so it never trips the proxy's request read timeout
+        const base = UPLOADER_URL.replace(/\/$/,'');
+        const CHUNK = 5 * 1024 * 1024;
+        const uploadId = (Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
+        const total = Math.max(1, Math.ceil(f.size / CHUNK));
+        for (let i = 0; i < total; i++) {
+            toast('Uploading ' + Math.round(i / total * 100) + '%…');
+            const blob = f.slice(i * CHUNK, Math.min(f.size, (i + 1) * CHUNK));
+            let ok = false;
+            for (let attempt = 0; attempt < 3 && !ok; attempt++) {
+                try { const r = await fetch(base + '/upload-chunk?uploadId=' + uploadId + '&index=' + i, { method: 'POST', headers: { 'x-upload-token': UPLOAD_TOKEN, 'Content-Type': 'application/octet-stream' }, body: blob }); ok = r.ok; } catch (e) { ok = false; }
+            }
+            if (!ok) return toast('Upload stalled at ' + Math.round(i / total * 100) + '% — check connection and retry','error');
+        }
+        toast('Finalizing… (saving to Drive)');
+        let fin; try { fin = await (await fetch(base + '/upload-complete', { method: 'POST', headers: { 'x-upload-token': UPLOAD_TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify({ uploadId, file_name: f.name, mime_type: f.type, post_id: id, asset_kind: kind, content_type: this._editing.post.content_type || '' }) })).json(); }
+        catch(e) { return toast('Upload saved but finalize timed out — for very large videos use "Add by Drive link" instead','error'); }
+        if (!fin || !fin.ok || !fin.drive_file_id) return toast('Upload failed: ' + ((fin && fin.error) || 'finalize'),'error');
         toast('Uploaded'); this.openEditor(id);
     },
     async addDriveLink() {
