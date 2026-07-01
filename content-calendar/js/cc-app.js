@@ -464,7 +464,8 @@ const CC = {
         toast('Reel build queued — the VPS is assembling your Kdenlive project'); this.openEditor(id); this.render();
     },
     /* ---------- reel style settings (per-reel + saved defaults) ---------- */
-    openReelSettings() {
+    openReelSettings(mode) {
+        const defaultsOnly = (mode === 'defaults');
         const v = reelFormFromOverrides(this.reelSettings);
         const row = (label, ctrl) => '<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem"><label class="fld" style="flex:1;margin:0">'+label+'</label>'+ctrl+'</div>';
         const num = (id,val,step,min,max)=>'<input id="'+id+'" type="number" class="input" style="width:96px" step="'+step+'" min="'+min+'" max="'+max+'" value="'+val+'">';
@@ -472,7 +473,7 @@ const CC = {
         const chk = (id,on)=>'<input id="'+id+'" type="checkbox" style="width:20px;height:20px" '+(on?'checked':'')+'>';
         let h = '<div id="reelSettingsBg" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)CC.closeReelSettings()">';
         h += '<div class="panel p-4" style="max-width:440px;width:92%;max-height:88vh;overflow:auto">';
-        h += '<h3 class="font-bold mb-1">Reel style settings</h3><div class="text-txt-3" style="font-size:.72rem;margin-bottom:.8rem">Applies to the on-screen text (hook + captions) and the b-roll. Save as the standard for every reel, or use just for this one.</div>';
+        h += '<h3 class="font-bold mb-1">'+(defaultsOnly?'Reel defaults':'Reel style settings')+'</h3><div class="text-txt-3" style="font-size:.72rem;margin-bottom:.8rem">Applies to the on-screen text (hook + captions, from the <b>Video text</b> field) and the b-roll.'+(defaultsOnly?' These are the standard settings for <b>every</b> reel.':' Save as the standard for every reel, or use just for this one.')+'</div>';
         h += row('Background dim (1.0 = no dim)', num('rs_dim', v.dim, '0.05','0.3','1'));
         h += row('Caption speed (sec / word)', num('rs_spw', v.capSpeed, '0.02','0.15','1'));
         h += row('Caption text size (px)', num('rs_capsize', v.capSize, '2','24','160'));
@@ -484,8 +485,9 @@ const CC = {
         h += row('Background box behind text', chk('rs_bgon', v.bgOn));
         h += row('Box colour', col('rs_bgcolor', v.bgColor));
         h += row('Box opacity (0–255)', num('rs_bgalpha', v.bgOpacity, '5','0','255'));
-        h += '<div class="flex gap-2 mt-3 flex-wrap"><button class="btn btn-sm btn-primary" onclick="CC.buildWithSettings()">Build this reel</button>';
-        h += '<button class="btn btn-sm" onclick="CC.saveReelDefaults()">Save as defaults</button>';
+        h += '<div class="flex gap-2 mt-3 flex-wrap">';
+        if (!defaultsOnly) h += '<button class="btn btn-sm btn-primary" onclick="CC.buildWithSettings()">Build this reel</button>';
+        h += '<button class="btn btn-sm '+(defaultsOnly?'btn-primary':'')+'" onclick="CC.saveReelDefaults()">Save as defaults</button>';
         h += '<button class="btn btn-sm" onclick="CC.closeReelSettings()">Cancel</button></div>';
         h += '</div></div>';
         const wrap = document.createElement('div'); wrap.id='reelSettingsModal'; wrap.innerHTML=h; document.body.appendChild(wrap);
