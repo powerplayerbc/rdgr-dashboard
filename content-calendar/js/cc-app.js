@@ -533,8 +533,10 @@ const CC = {
         const col = (id,val)=>'<input id="'+id+'" type="color" class="input" style="width:56px;padding:2px;height:34px" value="'+val+'">';
         const chk = (id,on)=>'<input id="'+id+'" type="checkbox" style="width:20px;height:20px" '+(on?'checked':'')+'>';
         let h = '<div id="reelSettingsBg" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)CC.closeReelSettings()">';
-        h += '<div class="panel p-4" style="max-width:440px;width:92%;max-height:88vh;overflow:auto">';
+        h += '<div class="panel p-4" style="max-width:460px;width:92%;max-height:90vh;overflow:auto" oninput="CC._updateReelPreview()" onchange="CC._updateReelPreview()">';
         h += '<h3 class="font-bold mb-1">'+(defaultsOnly?'Reel defaults':'Reel style settings')+'</h3><div class="text-txt-3" style="font-size:.72rem;margin-bottom:.8rem">Applies to the on-screen text (hook + captions, from the <b>Video text</b> field) and the b-roll.'+(defaultsOnly?' These are the standard settings for <b>every</b> reel.':' Save as the standard for every reel, or use just for this one.')+'</div>';
+        h += '<div id="rs_preview" style="position:relative;width:200px;height:356px;margin:0 auto .25rem;border-radius:12px;overflow:hidden;border:1px solid var(--deft-border);background:#111"></div>';
+        h += '<div class="text-txt-3" style="font-size:.62rem;text-align:center;margin-bottom:.7rem">live preview (approximate) — updates as you adjust</div>';
         h += row('Background dim (1.0 = no dim)', num('rs_dim', v.dim, '0.05','0.3','1'));
         h += row('Caption speed (sec / word)', num('rs_spw', v.capSpeed, '0.02','0.15','1'));
         h += row('Caption text size (px)', num('rs_capsize', v.capSize, '2','24','160'));
@@ -552,8 +554,40 @@ const CC = {
         h += '<button class="btn btn-sm" onclick="CC.closeReelSettings()">Cancel</button></div>';
         h += '</div></div>';
         const wrap = document.createElement('div'); wrap.id='reelSettingsModal'; wrap.innerHTML=h; document.body.appendChild(wrap);
+        this._updateReelPreview();
     },
     closeReelSettings() { const m=document.getElementById('reelSettingsModal'); if(m) m.remove(); },
+    _updateReelPreview() {
+        const el = document.getElementById('rs_preview'); if (!el) return;
+        const g = id => document.getElementById(id); if (!g('rs_capsize')) return;
+        const H = el.clientHeight || 356, S = H / 1920;  // preview px per 1920-tall frame unit
+        const rgb = x => { x=(x||'#ffffff').replace('#',''); return parseInt(x.slice(0,2),16)+','+parseInt(x.slice(2,4),16)+','+parseInt(x.slice(4,6),16); };
+        const dim = +g('rs_dim').value;
+        const textc = 'rgb('+rgb(g('rs_text').value)+')';
+        const strokeW = (+g('rs_strokew').value) * S;
+        const strokec = 'rgb('+rgb(g('rs_stroke').value)+')';
+        const shadow = g('rs_shadow').checked ? ('0 '+(4*S).toFixed(2)+'px '+(8*S).toFixed(2)+'px rgba(0,0,0,.65)') : 'none';
+        const bgOn = g('rs_bgon').checked;
+        const bgc = 'rgba('+rgb(g('rs_bgcolor').value)+','+(((+g('rs_bgalpha').value)||0)/255).toFixed(2)+')';
+        const capSize = (+g('rs_capsize').value)*S, titleSize = (+g('rs_titlesize').value)*S;
+        const pad = 24*S;
+        const spanBase = "font-family:'DejaVu Sans',Arial,sans-serif;font-weight:800;line-height:1.15;color:"+textc+";text-shadow:"+shadow+";"
+            + (strokeW>0 ? ("-webkit-text-stroke:"+strokeW.toFixed(2)+"px "+strokec+";paint-order:stroke fill;") : "")
+            + (bgOn ? ("background:"+bgc+";padding:"+pad.toFixed(1)+"px "+(pad+3).toFixed(1)+"px;border-radius:"+(14*S).toFixed(1)+"px;-webkit-box-decoration-break:clone;box-decoration-break:clone;") : "");
+        const ed = this._editing || {};
+        const raw = (ed.assets && this.rawAsset(ed.assets)) || null;
+        const thumb = raw ? (raw.thumbnail_url || (raw.drive_file_id ? 'https://drive.google.com/thumbnail?id='+raw.drive_file_id+'&sz=w400' : null)) : null;
+        const hookText = esc((ed.post && ed.post.hook) || 'Your hook shows here');
+        let cap = (ed.post && ed.post.script) || 'This is how your captions will look on the video.';
+        cap = esc(cap.replace(/\s+/g,' ').trim().split(' ').slice(0,7).join(' '));
+        const titleTop = 240*S, capTop = 1120*S;
+        el.innerHTML =
+            '<div style="position:absolute;inset:0;background:linear-gradient(135deg,#4a4a55,#1b1b22)"></div>'
+          + (thumb ? '<img src="'+thumb+'" referrerpolicy="no-referrer" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'">' : '')
+          + (dim<1 ? '<div style="position:absolute;inset:0;background:rgba(0,0,0,'+(1-dim).toFixed(2)+')"></div>' : '')
+          + '<div style="position:absolute;left:8%;right:8%;top:'+titleTop.toFixed(0)+'px;text-align:center"><span style="'+spanBase+'font-size:'+titleSize.toFixed(1)+'px">'+hookText+'</span></div>'
+          + '<div style="position:absolute;left:8%;right:8%;top:'+capTop.toFixed(0)+'px;text-align:center"><span style="'+spanBase+'font-size:'+capSize.toFixed(1)+'px">'+cap+'</span></div>';
+    },
     _reelFormOverrides() {
         const val=id=>document.getElementById(id); const hex=id=>val(id).value;
         const rgb=h=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)].join(',');};
