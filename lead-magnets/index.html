@@ -299,7 +299,12 @@ async function loadLibrary(){
   if(rows===null){ grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;color:#FF6B6B;">Failed to load lead magnets. Check connection and try again.</div>'; return; }
   magnets = Array.isArray(rows) ? rows : [];
   if(!magnets.length){ grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;">No lead magnets yet. Click <strong>+ New Idea</strong> to start one.</div>'; return; }
-  grid.innerHTML = magnets.map(libCard).join('');
+  const lms = magnets.filter(m=>(m.kind||'lead_magnet')!=='course_product');
+  const cps = magnets.filter(m=>(m.kind||'lead_magnet')==='course_product');
+  const hdr = (t,n) => `<div style="grid-column:1/-1;margin:.25rem 0 -.25rem;"><h2 class="font-heading font-semibold text-sm" style="color:var(--txt-2,#8A95A9);text-transform:uppercase;letter-spacing:.06em;">${t} <span style="opacity:.6;">(${n})</span></h2></div>`;
+  let html = hdr('Lead Magnets', lms.length) + (lms.length ? lms.map(libCard).join('') : '<div class="empty-state" style="grid-column:1/-1;">No lead magnets yet.</div>');
+  if(cps.length) html += hdr('Course Products', cps.length) + cps.map(libCard).join('');
+  grid.innerHTML = html;
 }
 function libCard(m){
   const themes=(m.themes||[]).map(t=>`<span class="chip">${esc(t)}</span>`).join(' ');
@@ -486,6 +491,20 @@ function renderDetail(m, versions){
     </div>
 
     <div class="panel mt-4">
+      <div class="panel-header"><h3 class="font-heading font-semibold text-sm">Type</h3></div>
+      <div class="panel-body">
+        <p class="text-xs text-txt-2 mb-2">Is this a free lead magnet, or a product included in the group coaching course? Course products are grouped separately and kept out of the main lead-magnet flow.</p>
+        <div class="flex flex-wrap gap-2" style="align-items:center;">
+          <select id="lmKind" class="form-input" style="max-width:220px;">
+            <option value="lead_magnet"${(m.kind||'lead_magnet')!=='course_product'?' selected':''}>Lead magnet</option>
+            <option value="course_product"${(m.kind||'lead_magnet')==='course_product'?' selected':''}>Course product</option>
+          </select>
+          <button class="btn btn-primary" id="lmKindSaveBtn" onclick="saveKind()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel mt-4">
       <div class="panel-header"><h3 class="font-heading font-semibold text-sm">ManyChat Command Phrase</h3></div>
       <div class="panel-body">
         <p class="text-xs text-txt-2 mb-2">One word or phrase viewers comment to get this magnet via ManyChat. It auto-applies to any content-calendar post using this magnet, and the AI builds the caption CTA around it.</p>
@@ -533,6 +552,16 @@ async function setStatus(status){
   const res=await sbWrite('lead_magnets','PATCH',{ status }, `id=eq.${activeMagnet.id}`);
   if(res){ toast('Status set to '+status); openDetail(activeMagnet.id); }
   else { toast('Failed to update status','error'); }
+}
+
+async function saveKind(){
+  if(!activeMagnet) return;
+  const val=document.getElementById('lmKind').value;
+  const btn=document.getElementById('lmKindSaveBtn'); btn.disabled=true; const old=btn.textContent; btn.textContent='Saving…';
+  const res=await sbWrite('lead_magnets','PATCH',{ kind: val }, `id=eq.${activeMagnet.id}`);
+  btn.disabled=false; btn.textContent=old;
+  if(res){ activeMagnet.kind=val; const lm=magnets.find(x=>x.id===activeMagnet.id); if(lm) lm.kind=val; toast('Type saved'); }
+  else { toast('Failed to save type','error'); }
 }
 
 async function saveCommandPhrase(){

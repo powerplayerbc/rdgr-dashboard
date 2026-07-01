@@ -100,14 +100,16 @@ const CC = {
     week: weekStartOf(new Date()),
     view: 'calendar',
     leadMagnets: [],
+    lmCounts: {},
     cache: [],
     systemPrompt: '',
 
     async init() {
         // keep ~3 weeks of standing-schedule placeholders on the calendar automatically
         try { await rpc('ig_ensure_upcoming', { p_brand_id: BRAND_ID, p_days: 21 }); } catch(e) {}
-        try { this.leadMagnets = await sbGet('lead_magnets?brand_id=eq.'+BRAND_ID+'&select=id,title,slug,manychat_command_phrase&order=title'); } catch(e) { this.leadMagnets = []; }
+        try { this.leadMagnets = await sbGet('lead_magnets?brand_id=eq.'+BRAND_ID+'&select=id,title,slug,manychat_command_phrase,kind&order=title'); } catch(e) { this.leadMagnets = []; }
         if (!Array.isArray(this.leadMagnets)) this.leadMagnets = [];
+        await this.loadLmCounts();
         try { const gc = await sbGet('ig_gen_config?brand_id=eq.'+BRAND_ID+'&select=system_prompt'); this.systemPrompt = (gc && gc[0] && gc[0].system_prompt) || ''; } catch(e) { this.systemPrompt = ''; }
         try { const rs = await sbGet('reel_settings?brand_id=eq.'+BRAND_ID+'&select=settings'); this.reelSettings = (rs && rs[0] && rs[0].settings) || {}; } catch(e) { this.reelSettings = {}; }
         this.render();
@@ -208,7 +210,13 @@ const CC = {
     closeEditor() { document.getElementById('drawerBg').classList.remove('open'); document.getElementById('drawer').classList.remove('open'); },
 
     editorHtml(p, assets, metrics) {
-        const lm = '<option value="">— none —</option>' + this.leadMagnets.map(m=>'<option value="'+m.id+'"'+(p.lead_magnet_id===m.id?' selected':'')+'>'+esc(m.title)+'</option>').join('');
+        const cnt = this.lmCounts || {};
+        const lmOpt = m => '<option value="'+m.id+'"'+(p.lead_magnet_id===m.id?' selected':'')+'>'+esc(m.title)+' ('+(cnt[m.id]||0)+')</option>';
+        const lmMags = (this.leadMagnets||[]).filter(m => (m.kind||'lead_magnet') !== 'course_product');
+        const lmProds = (this.leadMagnets||[]).filter(m => (m.kind||'lead_magnet') === 'course_product');
+        const lm = '<option value="">— none —</option>'
+            + (lmMags.length ? '<optgroup label="Lead magnets">'+lmMags.map(lmOpt).join('')+'</optgroup>' : '')
+            + (lmProds.length ? '<optgroup label="Course products">'+lmProds.map(lmOpt).join('')+'</optgroup>' : '');
         const typeOpts = Object.keys(TYPES).map(k=>'<option value="'+k+'"'+(p.content_type===k?' selected':'')+'>'+TYPES[k].label+'</option>').join('');
         const stageBtns = STAGES.map(s=>'<button type="button" class="btn btn-sm" data-stage="'+s+'" onclick="CC.pickStage(\''+s+'\')" style="'+(p.production_status===s?'background:'+STAGE_COLOR[s]+';color:#0b0710;border-color:transparent':'')+'">'+s+'</button>').join(' ');
         const ct = p.content_type || 'reel_journey';
@@ -270,6 +278,13 @@ const CC = {
         const p = this._collect(); Object.assign(this._editing.post, p);
         document.getElementById('drawerInner').innerHTML = this.editorHtml(this._editing.post, this._editing.assets, this._editing.metrics);
     },
+    async loadLmCounts() { // how many posts each lead magnet is assigned to (shown in the dropdown)
+        try {
+            const rows = await sbGet('ig_posts?brand_id=eq.'+BRAND_ID+'&select=lead_magnet_id&lead_magnet_id=not.is.null');
+            const c = {}; (rows||[]).forEach(r => { if (r.lead_magnet_id) c[r.lead_magnet_id] = (c[r.lead_magnet_id]||0)+1; });
+            this.lmCounts = c;
+        } catch(e) { this.lmCounts = this.lmCounts || {}; }
+    },
     onLeadMagnetChange() { // auto-fill the ManyChat keyword from the chosen magnet's command phrase (only if empty)
         const sel = document.getElementById('f_lm'); const kw = document.getElementById('f_keyword');
         if (!sel || !kw) return;
@@ -306,7 +321,7 @@ const CC = {
         let res;
         if (id) res = await sbPatch('ig_posts', 'id=eq.'+id, body);
         else { body.created_by = (JSON.parse(localStorage.getItem('rdgr-active-profile')||'{}').name)||'qa'; res = await sbPost('ig_posts', body); }
-        if (Array.isArray(res) && res[0]) { toast('Saved'); if (!id) { this.openEditor(res[0].id); } else { this._editing.post = res[0]; } this.render(); }
+        if (Array.isArray(res) && res[0]) { toast('Saved'); await this.loadLmCounts(); if (!id) { this.openEditor(res[0].id); } else { this._editing.post = res[0]; } this.render(); }
         else toast('Save failed: '+JSON.stringify(res).slice(0,120), 'error');
     },
     async markPosted() {
