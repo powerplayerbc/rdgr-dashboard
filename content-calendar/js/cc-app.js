@@ -274,7 +274,7 @@ const CC = {
           +  '<div><label class="fld">Upload file (video / image / music / script)</label><input type="file" id="f_file" class="input" accept="video/*,image/*,audio/*,.pdf,.txt,.docx"></div>'
           +  '<div><label class="fld">Kind</label><select id="f_assetkind" class="input"><option value="raw_video">video — raw</option><option value="edited_video">video — edited</option><option value="final_video">video — final</option><option value="image">image</option><option value="music">music</option><option value="thumbnail">thumbnail</option><option value="script_doc">script / pdf</option></select></div>';
         h += '</div><div class="flex gap-2 mt-2"><button class="btn btn-sm" onclick="CC.uploadFile()">Upload file</button><button class="btn btn-sm" onclick="CC.addDriveLink()">Add by Drive link</button></div>';
-        h += '<div class="text-txt-3" style="font-size:.7rem;margin-top:.4rem">Hold as many drafts/files as you like. Tick <b>publish</b> on the exact file(s) to post — <b>only flagged files are published</b>; everything else stays a draft. Uploads go in small chunks (works on phone data, shows %). <b>For very large / hour-long raw videos, upload with the Google Drive app then use "Add by Drive link"</b> — faster &amp; more reliable. Drive-linked files are downloaded only to publish, then removed from our server. Each asset has View + ⬇ Download.</div>';
+        h += '<div class="text-txt-3" style="font-size:.7rem;margin-top:.4rem"><b>Upload file</b> = pick a file from this phone/computer; it goes into Dianna\'s Google Drive (any size — sent in chunks with a % bar; big videos keep saving in the background, even if you leave the page). <b>Add by Drive link</b> = the file is already in Google Drive; just paste its link. Tick <b>publish</b> on the exact file(s) to post — only flagged files are published; the rest stay drafts. Each asset has View + ⬇ Download.</div>';
         h += '</div>';
         return h;
     },
@@ -327,11 +327,19 @@ const CC = {
             }
             if (!ok) return toast('Upload stalled at ' + Math.round(i / total * 100) + '% — check connection and retry','error');
         }
-        toast('Finalizing… (saving to Drive)');
+        toast('Saving to Drive…');
+        const preIds = new Set((this._editing.assets || []).map(a => a.id));
         let fin; try { fin = await (await fetch(base + '/upload-complete', { method: 'POST', headers: { 'x-upload-token': UPLOAD_TOKEN, 'Content-Type': 'application/json' }, body: JSON.stringify({ uploadId, file_name: f.name, mime_type: f.type, post_id: id, asset_kind: kind, content_type: this._editing.post.content_type || '' }) })).json(); }
-        catch(e) { return toast('Upload saved but finalize timed out — for very large videos use "Add by Drive link" instead','error'); }
-        if (!fin || !fin.ok || !fin.drive_file_id) return toast('Upload failed: ' + ((fin && fin.error) || 'finalize'),'error');
-        toast('Uploaded'); this.openEditor(id);
+        catch(e) { fin = { ok: true, status: 'processing' }; }  // background job may still be running
+        if (!fin || !fin.ok) return toast('Upload failed: ' + ((fin && fin.error) || 'finalize'),'error');
+        // the save-to-Drive runs server-side; poll until the new asset row appears (resilient if you navigate away)
+        for (let t = 0; t < 240; t++) {   // up to ~20 min for very large files
+            await new Promise(r => setTimeout(r, 5000));
+            let rows = []; try { rows = await sbGet('ig_post_assets?post_id=eq.' + id + '&select=id&order=uploaded_at.desc'); } catch (e) {}
+            if (Array.isArray(rows) && rows.some(a => !preIds.has(a.id))) { toast('Uploaded'); return this.openEditor(id); }
+            if (t === 1) toast('Saving to Drive… (large videos take a bit — you can keep working)');
+        }
+        toast('Still saving to Drive — it will appear here shortly; refresh in a minute.','error');
     },
     async addDriveLink() {
         const id = document.getElementById('f_id').value; if (!id) return toast('Save the post first','error');
