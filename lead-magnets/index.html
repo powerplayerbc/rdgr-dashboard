@@ -398,13 +398,21 @@ async function openDetail(id){
   const versions = await sbSelect('lead_magnet_versions', `lead_magnet_id=eq.${id}&order=version.desc&select=*`) || [];
   renderDetail(activeMagnet, versions);
 }
+function copyDownloadLink(url, btn){
+  const orig = btn.innerHTML;
+  const done = ()=>{ btn.innerHTML='&#10003; Copied!'; setTimeout(()=>{ btn.innerHTML=orig; }, 1600); };
+  const fallback = ()=>{ const ta=document.createElement('textarea'); ta.value=url; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.top='-1000px'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); done(); };
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(done).catch(fallback); }
+  else fallback();
+}
 function renderDetail(m, versions){
   const themes=(m.themes||[]).map(t=>`<span class="chip">${esc(t)}</span>`).join(' ') || '<span class="text-txt-3 text-xs">no themes</span>';
   const cover = m.cover_image_url
     ? `<img src="${esc(m.cover_image_url)}" alt="" style="max-width:280px;width:100%;border-radius:0.5rem;border:1px solid var(--deft-border,#2A2E3D);" onerror="this.style.display='none'">`
     : `<div class="lm-cover-ph" style="max-width:280px;border-radius:0.5rem;border:1px solid var(--deft-border,#2A2E3D);">no cover yet</div>`;
 
-  const pdfBtn = m.pdf_url ? `<a href="${esc(m.pdf_url)}" target="_blank" rel="noopener" class="btn btn-warn" style="text-decoration:none;display:inline-flex;align-items:center;">Open PDF &nearr;</a>` : '';
+  const pdfBtn = m.pdf_url ? `<a href="${esc(m.pdf_url)}" target="_blank" rel="noopener" class="btn btn-warn" style="text-decoration:none;display:inline-flex;align-items:center;">Open PDF &nearr;</a>
+      <button type="button" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:5px;" title="Copy the download link (for ManyChat)" onclick="copyDownloadLink('${esc(m.pdf_url)}', this)">&#128203; Copy download link</button>` : '';
   const iframe = m.drive_file_id ? `<div class="panel mt-4"><div class="panel-header"><h3 class="font-heading font-semibold text-sm">Document Preview</h3></div><iframe src="https://drive.google.com/file/d/${esc(m.drive_file_id)}/preview" style="width:100%;height:520px;border:0;display:block;" allow="autoplay"></iframe></div>` : '';
 
   const verHtml = versions.length ? versions.map(v=>{
@@ -412,6 +420,7 @@ function renderDetail(m, versions){
     const links = [];
     if(v.cover_image_url) links.push(`<a href="${esc(v.cover_image_url)}" target="_blank" rel="noopener" class="text-accent" style="text-decoration:underline;">cover</a>`);
     if(v.pdf_url) links.push(`<a href="${esc(v.pdf_url)}" target="_blank" rel="noopener" class="text-accent" style="text-decoration:underline;">pdf</a>`);
+    if(v.pdf_url) links.push(`<button type="button" class="text-accent" style="background:none;border:none;padding:0;cursor:pointer;text-decoration:underline;font:inherit;" onclick="copyDownloadLink('${esc(v.pdf_url)}', this)">copy link</button>`);
     return `<div class="ver-row">
       <div class="flex items-center justify-between gap-2 mb-1">
         <div class="flex items-center gap-2">
