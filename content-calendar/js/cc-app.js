@@ -357,6 +357,7 @@ const CC = {
 
     /* ---------- video processing (Submagic edit + auto-clip to inventory) ---------- */
     rawAsset(assets) { return assets.find(a=>a.asset_kind==='raw_video' && a.drive_file_id) || assets.find(a=>a.asset_kind==='raw_video'); },
+    musicAsset(assets) { return assets.find(a=>a.asset_kind==='music' && a.drive_file_id); },
     videoProcHtml(p, assets) {
         const raw = this.rawAsset(assets);
         let h = '<div class="panel p-4 mb-4"><h3 class="font-bold mb-1">Video processing</h3><div class="text-txt-3" style="font-size:.72rem;margin-bottom:.6rem">Works on the <b>raw</b> take (asset kind = raw_video). The edited reel comes back from Submagic; usable clips (outtakes removed) go to the Video Inventory.</div>';
@@ -372,6 +373,15 @@ const CC = {
         if (p.clip_status==='clipped' || p.clip_status==='ready') h += '<span class="pill" style="background:var(--deft-success)22;color:var(--deft-success)">✓ clips ready</span> <a class="btn btn-sm" href="/video-inventory" target="_blank">View</a>';
         else if (p.clip_status==='submitted') h += '<span class="pill" style="background:var(--deft-warning)22;color:var(--deft-warning)">clipping…</span><button class="btn btn-sm" onclick="CC.checkClips()">Check</button>';
         else h += '<button class="btn btn-sm" onclick="CC.sendToClips()">Send to clip library</button>';
+        h += '</div>';
+        // Build reel project (Kdenlive) -- needs raw video + a music asset
+        const music = this.musicAsset(assets);
+        h += '<div class="flex items-center gap-2 mt-2" style="border-top:1px solid var(--deft-line);padding-top:.5rem"><span style="flex:1"><b>Build reel project</b> &rarr; editable Kdenlive .zip (text + music, no dim)</span>';
+        if (!music) h += '<span class="text-txt-3" style="font-size:.7rem">add a <b>music</b> asset to enable</span>';
+        else if (p.reel_status==='ready') h += '<a class="btn btn-sm" href="'+esc(p.reel_download_url||'#')+'" target="_blank">⬇ Download .zip</a> <button class="btn btn-sm" onclick="CC.buildReel()">Rebuild</button>';
+        else if (p.reel_status==='submitted' || p.reel_status==='building') h += '<span class="pill" style="background:var(--deft-warning)22;color:var(--deft-warning)">building…</span><button class="btn btn-sm" onclick="CC.checkReel()">Check</button>';
+        else if (p.reel_status==='error') h += '<span class="pill" style="background:#e5484d22;color:#e5484d">failed</span><button class="btn btn-sm" onclick="CC.buildReel()">Retry</button>';
+        else h += '<button class="btn btn-sm" onclick="CC.buildReel()">Build reel project</button>';
         h += '</div></div>';
         return h;
     },
@@ -412,6 +422,27 @@ const CC = {
         const clips = await sbGet('video_clips?source_id=eq.'+sid+'&select=id,status&limit=50');
         if (Array.isArray(clips) && clips.length) { await sbPatch('ig_posts','id=eq.'+id, { clip_status:'clipped' }); toast(clips.length+' clip(s) in inventory'); this.openEditor(id); this.render(); }
         else toast('No clips yet — still processing');
+    },
+    async buildReel() {
+        const id = document.getElementById('f_id').value;
+        const raw = this.rawAsset(this._editing.assets); const music = this.musicAsset(this._editing.assets);
+        if (!raw || !raw.drive_file_id) return toast('No raw_video asset','error');
+        if (!music || !music.drive_file_id) return toast('No music asset — upload one (kind = music)','error');
+        const p = this._editing.post;
+        toast('Queuing reel build…');
+        try {
+            await sbPost('reel_jobs', { brand_id: BRAND_ID, post_id: String(id), video_file_id: raw.drive_file_id, music_file_id: music.drive_file_id, script: p.script||'', hook: p.hook||'', status:'pending' }, 'return=minimal');
+            await sbPatch('ig_posts','id=eq.'+id, { reel_status:'submitted', reel_download_url:null });
+        } catch(e) { return toast('Could not queue reel build','error'); }
+        toast('Reel build queued — the VPS is assembling your Kdenlive project'); this.openEditor(id); this.render();
+    },
+    async checkReel() {
+        const id = document.getElementById('f_id').value;
+        const rows = await sbGet('ig_posts?id=eq.'+id+'&select=reel_status');
+        const st = (Array.isArray(rows) && rows[0]) ? rows[0].reel_status : null;
+        if (st==='ready') { toast('Reel project ready — download it'); this.openEditor(id); this.render(); }
+        else if (st==='error') { toast('Reel build failed — try Retry','error'); this.openEditor(id); }
+        else toast('Still building — check back in a moment');
     },
 
     /* ---------- AI assist (generate / regenerate / export to Google Doc) ---------- */
