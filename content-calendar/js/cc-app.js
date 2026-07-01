@@ -30,6 +30,27 @@ async function sbPost(table, body, prefer) { const r = await fetch(SUPABASE_URL 
 async function sbPatch(table, q, body) { const r = await fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + q, { method: 'PATCH', headers: { ...SB_HEADERS, 'Prefer': 'return=representation' }, body: JSON.stringify(body) }); const t = await r.text(); return t ? JSON.parse(t) : null; }
 async function sbDelete(table, q) { return fetch(SUPABASE_URL + '/rest/v1/' + table + '?' + q, { method: 'DELETE', headers: SB_HEADERS }); }
 async function rpc(fn, body) { const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + fn, { method: 'POST', headers: SB_HEADERS, body: JSON.stringify(body || {}) }); return r.json(); }
+// deep-merge overrides objects (b wins); returns a
+function mergeDeep(a, b) { for (const k in (b||{})) { if (b[k] && typeof b[k]==='object' && !Array.isArray(b[k]) && a[k] && typeof a[k]==='object') mergeDeep(a[k], b[k]); else a[k]=b[k]; } return a; }
+// map a stored reel-style overrides object back to flat form values (with recipe defaults)
+function reelFormFromOverrides(o) {
+    o=o||{}; const c=o.captions||{}, t=o.title||{}, bg=o.background||{};
+    const toHex=(rgba,def)=>{ const p=String(rgba||def).split(','); const h=n=>('0'+(parseInt(n,10)||0).toString(16)).slice(-2); return '#'+h(p[0])+h(p[1])+h(p[2]); };
+    const alpha=(rgba,def)=>{ const p=String(rgba||def).split(','); return p.length>3?(parseInt(p[3],10)||0):def; };
+    return {
+        dim: (bg.dim!=null?bg.dim:1.0),
+        capSpeed: (c.seconds_per_word!=null?c.seconds_per_word:0.42),
+        capSize: (c.font_pixel_size||72),
+        titleSize: (t.font_pixel_size||88),
+        textColor: toHex(c.rgba,'255,255,255,255'),
+        strokeW: (c.outline_width!=null?c.outline_width:5),
+        strokeColor: toHex(c.outline_rgba,'0,0,0,255'),
+        shadow: (c.shadow?!!c.shadow.enabled:true),
+        bgOn: (c.background?!!c.background.enabled:false),
+        bgColor: toHex((c.background&&c.background.rgba),'0,0,0,150'),
+        bgOpacity: alpha((c.background&&c.background.rgba),150)
+    };
+}
 
 /* ---------- util ---------- */
 function esc(s) { const d = document.createElement('div'); d.textContent = (s == null ? '' : String(s)); return d.innerHTML; }
@@ -88,6 +109,7 @@ const CC = {
         try { this.leadMagnets = await sbGet('lead_magnets?brand_id=eq.'+BRAND_ID+'&select=id,title,slug&order=title'); } catch(e) { this.leadMagnets = []; }
         if (!Array.isArray(this.leadMagnets)) this.leadMagnets = [];
         try { const gc = await sbGet('ig_gen_config?brand_id=eq.'+BRAND_ID+'&select=system_prompt'); this.systemPrompt = (gc && gc[0] && gc[0].system_prompt) || ''; } catch(e) { this.systemPrompt = ''; }
+        try { const rs = await sbGet('reel_settings?brand_id=eq.'+BRAND_ID+'&select=settings'); this.reelSettings = (rs && rs[0] && rs[0].settings) || {}; } catch(e) { this.reelSettings = {}; }
         this.render();
     },
     setView(v) { this.view = v; document.querySelectorAll('#viewToggle button').forEach(b=>b.classList.toggle('active', b.dataset.view===v)); this.render(); },
@@ -272,8 +294,8 @@ const CC = {
         let h = '<div class="panel p-4 mb-4"><div class="flex items-center justify-between mb-3"><h3 class="font-bold">Assets</h3></div>';
         h += '<div id="assetList">' + (assets.length ? assets.map(a=>this.assetRow(a)).join('') : '<div class="text-txt-3 text-sm">No assets yet.</div>') + '</div>';
         h += '<div class="grid grid-cols-2 gap-2 mt-3">'
-          +  '<div><label class="fld">Upload file (video / image / music / script)</label><input type="file" id="f_file" class="input" accept="video/*,image/*,audio/*,.pdf,.txt,.docx"></div>'
-          +  '<div><label class="fld">Kind</label><select id="f_assetkind" class="input"><option value="raw_video">video — raw</option><option value="edited_video">video — edited</option><option value="final_video">video — final</option><option value="image">image</option><option value="music">music</option><option value="thumbnail">thumbnail</option><option value="script_doc">script / pdf</option></select></div>';
+          +  '<div><label class="fld">Upload file (video / image / music / script)</label><input type="file" id="f_file" class="input" accept="video/*,image/*,audio/*,.pdf,.txt,.docx" onchange="CC.autoKind()"></div>'
+          +  '<div><label class="fld">Kind <span class="text-txt-3" style="font-size:.65rem">(auto-set from the file — override if needed)</span></label><select id="f_assetkind" class="input"><option value="raw_video">video — raw</option><option value="edited_video">video — edited</option><option value="final_video">video — final</option><option value="image">image</option><option value="music">music</option><option value="thumbnail">thumbnail</option><option value="script_doc">script / pdf</option></select></div>';
         h += '</div><div class="flex gap-2 mt-2"><button class="btn btn-sm" onclick="CC.uploadFile()">Upload file</button><button class="btn btn-sm" onclick="CC.addDriveLink()">Add by Drive link</button></div>';
         h += '<div class="text-txt-3" style="font-size:.7rem;margin-top:.4rem"><b>Upload file</b> = pick a file from this phone/computer; it goes into Dianna\'s Google Drive (any size — sent in chunks with a % bar; big videos keep saving in the background, even if you leave the page). <b>Add by Drive link</b> = the file is already in Google Drive; just paste its link. Tick <b>publish</b> on the exact file(s) to post — only flagged files are published; the rest stay drafts. Each asset has View + ⬇ Download.</div>';
         h += '</div>';
@@ -378,10 +400,13 @@ const CC = {
         const music = this.musicAsset(assets);
         h += '<div class="flex items-center gap-2 mt-2" style="border-top:1px solid var(--deft-line);padding-top:.5rem"><span style="flex:1"><b>Build reel project</b> &rarr; editable Kdenlive .zip (text + music, no dim)</span>';
         if (!music) h += '<span class="text-txt-3" style="font-size:.7rem">add a <b>music</b> asset to enable</span>';
-        else if (p.reel_status==='ready') h += '<a class="btn btn-sm" href="'+esc(p.reel_download_url||'#')+'" target="_blank">⬇ Download .zip</a> <button class="btn btn-sm" onclick="CC.buildReel()">Rebuild</button>';
-        else if (p.reel_status==='submitted' || p.reel_status==='building') h += '<span class="pill" style="background:var(--deft-warning)22;color:var(--deft-warning)">building…</span><button class="btn btn-sm" onclick="CC.checkReel()">Check</button>';
-        else if (p.reel_status==='error') h += '<span class="pill" style="background:#e5484d22;color:#e5484d">failed</span><button class="btn btn-sm" onclick="CC.buildReel()">Retry</button>';
-        else h += '<button class="btn btn-sm" onclick="CC.buildReel()">Build reel project</button>';
+        else {
+            h += '<button class="btn btn-sm" onclick="CC.openReelSettings()" title="Text, colour, speed & style settings">⚙ Style</button> ';
+            if (p.reel_status==='ready') h += '<a class="btn btn-sm" href="'+esc(p.reel_download_url||'#')+'" target="_blank">⬇ Download .zip</a> <button class="btn btn-sm" onclick="CC.buildReel()">Rebuild</button>';
+            else if (p.reel_status==='submitted' || p.reel_status==='building') h += '<span class="pill" style="background:var(--deft-warning)22;color:var(--deft-warning)">building…</span><button class="btn btn-sm" onclick="CC.checkReel()">Check</button>';
+            else if (p.reel_status==='error') h += '<span class="pill" style="background:#e5484d22;color:#e5484d">failed</span><button class="btn btn-sm" onclick="CC.buildReel()">Retry</button>';
+            else h += '<button class="btn btn-sm btn-primary" onclick="CC.buildReel()">Build reel project</button>';
+        }
         h += '</div></div>';
         return h;
     },
@@ -423,18 +448,69 @@ const CC = {
         if (Array.isArray(clips) && clips.length) { await sbPatch('ig_posts','id=eq.'+id, { clip_status:'clipped' }); toast(clips.length+' clip(s) in inventory'); this.openEditor(id); this.render(); }
         else toast('No clips yet — still processing');
     },
-    async buildReel() {
+    async buildReel(extra) {
         const id = document.getElementById('f_id').value;
         const raw = this.rawAsset(this._editing.assets); const music = this.musicAsset(this._editing.assets);
         if (!raw || !raw.drive_file_id) return toast('No raw_video asset','error');
         if (!music || !music.drive_file_id) return toast('No music asset — upload one (kind = music)','error');
         const p = this._editing.post;
+        // effective style = saved defaults, with any per-reel tweaks layered on top
+        const eff = mergeDeep(mergeDeep({}, this.reelSettings||{}), extra||{});
         toast('Queuing reel build…');
         try {
-            await sbPost('reel_jobs', { brand_id: BRAND_ID, post_id: String(id), video_file_id: raw.drive_file_id, music_file_id: music.drive_file_id, script: p.script||'', hook: p.hook||'', status:'pending' }, 'return=minimal');
+            await sbPost('reel_jobs', { brand_id: BRAND_ID, post_id: String(id), video_file_id: raw.drive_file_id, music_file_id: music.drive_file_id, script: p.script||'', hook: p.hook||'', style_overrides: (Object.keys(eff).length?eff:null), status:'pending' }, 'return=minimal');
             await sbPatch('ig_posts','id=eq.'+id, { reel_status:'submitted', reel_download_url:null });
         } catch(e) { return toast('Could not queue reel build','error'); }
         toast('Reel build queued — the VPS is assembling your Kdenlive project'); this.openEditor(id); this.render();
+    },
+    /* ---------- reel style settings (per-reel + saved defaults) ---------- */
+    openReelSettings() {
+        const v = reelFormFromOverrides(this.reelSettings);
+        const row = (label, ctrl) => '<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem"><label class="fld" style="flex:1;margin:0">'+label+'</label>'+ctrl+'</div>';
+        const num = (id,val,step,min,max)=>'<input id="'+id+'" type="number" class="input" style="width:96px" step="'+step+'" min="'+min+'" max="'+max+'" value="'+val+'">';
+        const col = (id,val)=>'<input id="'+id+'" type="color" class="input" style="width:56px;padding:2px;height:34px" value="'+val+'">';
+        const chk = (id,on)=>'<input id="'+id+'" type="checkbox" style="width:20px;height:20px" '+(on?'checked':'')+'>';
+        let h = '<div id="reelSettingsBg" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)CC.closeReelSettings()">';
+        h += '<div class="panel p-4" style="max-width:440px;width:92%;max-height:88vh;overflow:auto">';
+        h += '<h3 class="font-bold mb-1">Reel style settings</h3><div class="text-txt-3" style="font-size:.72rem;margin-bottom:.8rem">Applies to the on-screen text (hook + captions) and the b-roll. Save as the standard for every reel, or use just for this one.</div>';
+        h += row('Background dim (1.0 = no dim)', num('rs_dim', v.dim, '0.05','0.3','1'));
+        h += row('Caption speed (sec / word)', num('rs_spw', v.capSpeed, '0.02','0.15','1'));
+        h += row('Caption text size (px)', num('rs_capsize', v.capSize, '2','24','160'));
+        h += row('Hook/title size (px)', num('rs_titlesize', v.titleSize, '2','24','200'));
+        h += row('Text colour', col('rs_text', v.textColor));
+        h += row('Stroke width (px)', num('rs_strokew', v.strokeW, '1','0','20'));
+        h += row('Stroke colour', col('rs_stroke', v.strokeColor));
+        h += row('Drop shadow', chk('rs_shadow', v.shadow));
+        h += row('Background box behind text', chk('rs_bgon', v.bgOn));
+        h += row('Box colour', col('rs_bgcolor', v.bgColor));
+        h += row('Box opacity (0–255)', num('rs_bgalpha', v.bgOpacity, '5','0','255'));
+        h += '<div class="flex gap-2 mt-3 flex-wrap"><button class="btn btn-sm btn-primary" onclick="CC.buildWithSettings()">Build this reel</button>';
+        h += '<button class="btn btn-sm" onclick="CC.saveReelDefaults()">Save as defaults</button>';
+        h += '<button class="btn btn-sm" onclick="CC.closeReelSettings()">Cancel</button></div>';
+        h += '</div></div>';
+        const wrap = document.createElement('div'); wrap.id='reelSettingsModal'; wrap.innerHTML=h; document.body.appendChild(wrap);
+    },
+    closeReelSettings() { const m=document.getElementById('reelSettingsModal'); if(m) m.remove(); },
+    _reelFormOverrides() {
+        const val=id=>document.getElementById(id); const hex=id=>val(id).value;
+        const rgb=h=>{h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)].join(',');};
+        const text = rgb(hex('rs_text'))+',255', stroke = rgb(hex('rs_stroke'))+',255';
+        const common = { rgba:text, outline_width:+val('rs_strokew').value, outline_rgba:stroke,
+            shadow:{ enabled: val('rs_shadow').checked }, background:{ enabled: val('rs_bgon').checked, rgba: rgb(hex('rs_bgcolor'))+','+(+val('rs_bgalpha').value) } };
+        return {
+            background:{ dim:+val('rs_dim').value },
+            captions: Object.assign({ font_pixel_size:+val('rs_capsize').value, seconds_per_word:+val('rs_spw').value }, JSON.parse(JSON.stringify(common))),
+            title: Object.assign({ font_pixel_size:+val('rs_titlesize').value }, JSON.parse(JSON.stringify(common)))
+        };
+    },
+    buildWithSettings() { const ov=this._reelFormOverrides(); this.closeReelSettings(); this.buildReel(ov); },
+    async saveReelDefaults() {
+        const ov=this._reelFormOverrides();
+        try {
+            await sbPost('reel_settings?on_conflict=brand_id', { brand_id:BRAND_ID, settings:ov, updated_at:new Date().toISOString(), updated_by:(JSON.parse(localStorage.getItem('rdgr-active-profile')||'{}').name)||'calendar' }, 'resolution=merge-duplicates,return=minimal');
+            this.reelSettings = ov; toast('Saved as reel defaults');
+        } catch(e) { return toast('Could not save defaults','error'); }
+        this.closeReelSettings();
     },
     async checkReel() {
         const id = document.getElementById('f_id').value;
