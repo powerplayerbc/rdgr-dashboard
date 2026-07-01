@@ -126,14 +126,15 @@ const CC = {
     cardHtml(p) {
         const t = TYPES[p.content_type] || { short:p.content_type, color:'#888' };
         const m = p.latest_metric || {};
-        const thumb = p.primary_asset && p.primary_asset.thumbnail_url;
+        const pa = p.primary_asset || {};
+        const thumb = (pa.asset_kind === 'image' || pa.asset_kind === 'thumbnail') ? pa.thumbnail_url : null;
         const metric = (p.production_status==='posted' && (m.reach||m.plays)) ? '<div style="font-size:.65rem;color:var(--deft-txt-3);margin-top:.2rem">'+( (m.plays||m.reach)||0 )+' '+(m.plays?'plays':'reach')+(m.leads_captured?' · '+m.leads_captured+' leads':'')+'</div>' : '';
         return '<div class="pcard mb-2" style="border-left-color:'+t.color+'" onclick="CC.openEditor(\''+p.id+'\')">'
             + '<div class="flex items-center justify-between gap-1"><span class="pill" style="background:'+t.color+'22;color:'+t.color+'">'+t.short+'</span>'
             + '<span class="pill" style="background:'+STAGE_COLOR[p.production_status]+'22;color:'+STAGE_COLOR[p.production_status]+'">'+p.production_status+'</span></div>'
             + '<div style="font-size:.8rem;font-weight:600;margin-top:.3rem;line-height:1.2">'+esc(p.title||p.slot_label||'Untitled')+'</div>'
             + (p.scheduled_time?'<div style="font-size:.65rem;color:var(--deft-txt-3)">'+p.scheduled_time.slice(0,5)+'</div>':'')
-            + (thumb?'<img src="'+esc(thumb)+'" style="width:100%;height:64px;object-fit:cover;border-radius:6px;margin-top:.35rem" loading="lazy">':'')
+            + (thumb?'<img src="'+esc(thumb)+'" onerror="this.style.display=\'none\'" style="width:100%;height:64px;object-fit:cover;border-radius:6px;margin-top:.35rem" loading="lazy">':'')
             + (p.lead_magnet_id?'<div style="font-size:.62rem;color:var(--deft-accent);margin-top:.2rem">🎁 lead magnet'+(p.manychat_keyword?' · "'+esc(p.manychat_keyword)+'"':'')+'</div>':'')
             + (p.is_boosted?'<span class="pill" style="background:var(--deft-warning)22;color:var(--deft-warning);margin-top:.2rem">📈 boosted</span>':'')
             + metric + '</div>';
@@ -282,7 +283,7 @@ const CC = {
         const icon = { image:'🖼️', thumbnail:'🖼️', music:'🎵', raw_video:'🎬', edited_video:'🎬', final_video:'🎬', script_doc:'📄' }[a.asset_kind]||'📎';
         const flagged = !!a.for_publishing;
         return '<div class="flex items-center gap-2 mb-2" style="font-size:.82rem;'+(flagged?'border-left:3px solid var(--deft-accent);padding-left:.4rem':'padding-left:calc(.4rem + 3px)')+'">'
-          + (a.thumbnail_url?'<img src="'+esc(a.thumbnail_url)+'" style="width:42px;height:42px;object-fit:cover;border-radius:6px">':'<span style="width:42px;text-align:center">'+icon+'</span>')
+          + (((a.asset_kind==='image'||a.asset_kind==='thumbnail') && a.thumbnail_url) ? '<img src="'+esc(a.thumbnail_url)+'" onerror="this.style.display=\'none\'" style="width:42px;height:42px;object-fit:cover;border-radius:6px">' : '<span style="width:42px;text-align:center">'+icon+'</span>')
           + '<div style="flex:1;min-width:0"><div style="font-weight:600">'+esc(a.asset_kind)+'</div><div style="color:var(--deft-txt-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(a.file_name||a.drive_file_id||'')+'</div></div>'
           + '<label title="Mark this exact file to be published" style="display:flex;align-items:center;gap:.25rem;font-size:.7rem;cursor:pointer;'+(flagged?'color:var(--deft-accent);font-weight:600':'color:var(--deft-txt-3)')+'"><input type="checkbox" '+(flagged?'checked':'')+' onchange="CC.toggleAssetPublish(\''+a.id+'\',this.checked)">publish</label>'
           + (a.view_url?'<a class="btn btn-sm" href="'+esc(a.view_url)+'" target="_blank">View</a>':'')
