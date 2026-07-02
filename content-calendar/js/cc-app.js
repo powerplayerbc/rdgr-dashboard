@@ -680,15 +680,22 @@ const CC = {
         h += '</div>';
         return h;
     },
+    // assets actually postable to IG: flagged for publishing, on Drive, and an image/video (not music/script)
+    _publishableAssets() {
+        const media = ['image','raw_video','edited_video','final_video','thumbnail'];
+        return ((this._editing && this._editing.assets) || []).filter(a => a.for_publishing && a.drive_file_id && media.indexOf(a.asset_kind) >= 0);
+    },
     async toggleApproved() {
         const id = document.getElementById('f_id').value; if (!id) return;
-        const v = document.getElementById('f_approved').checked;
+        const cb = document.getElementById('f_approved'); const v = cb.checked;
+        if (v && !this._publishableAssets().length) { cb.checked = false; return toast('Cannot approve for auto-publish yet: tick "publish" on the image or video you want posted first.','error'); }
         await sbPatch('ig_posts','id=eq.'+id, { approved: v });
         if (this._editing && this._editing.post) this._editing.post.approved = v;
         toast(v?'Approved for auto-publish':'Approval removed');
     },
     async publishNow() {
         const id = document.getElementById('f_id').value; if (!id) return;
+        if (!this._publishableAssets().length) return toast('Nothing flagged to post: tick "publish" on the image or video you want posted first.','error');
         if (!confirm('Publish this post to Instagram now?')) return;
         toast('Publishing…');
         let resp; try { resp = await (await fetch(UPLOADER_URL.replace(/\/$/,'')+'/publish', { method:'POST', headers:{'Content-Type':'application/json','x-upload-token':UPLOAD_TOKEN}, body: JSON.stringify({ post_id:id, brand_id:BRAND_ID }) })).json(); }
